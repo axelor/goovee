@@ -350,6 +350,23 @@
     {
       "name": "isCompanyOrAddressRequired",
       "type": "Boolean"
+    },
+    {
+      "type": "String",
+      "name": "projectHeroTitle"
+    },
+    {
+      "type": "String",
+      "name": "projectHeroDescription"
+    },
+    {
+      "type": "String",
+      "name": "projectHeroOverlayColorSelect"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "projectHeroBgImage",
+      "target": "AOSMetaFile"
     }
   ]
 }

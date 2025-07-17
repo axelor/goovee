@@ -122,6 +122,12 @@ export interface PortalAppConfig extends Model {
   directoryHeroBgImage: {
     id: string;
   };
+  projectHeroTitle: string;
+  projectHeroDescription: string;
+  projectHeroOverlayColorSelect: OverlayColor;
+  projectHeroBgImage: {
+    id: string;
+  };
   ticketHeroTitle: string;
   ticketHeroDescription: string;
   ticketHeroOverlayColorSelect: OverlayColor;
