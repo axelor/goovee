@@ -128,6 +128,25 @@ export interface PortalAppConfig extends Model {
   projectHeroBgImage: {
     id: string;
   };
+  isAllowUserComment: boolean;
+  isAllowTicketUpdate: boolean;
+  isDisplayTaskList: boolean;
+  isDisplayPerTaskOrProject: boolean;
+  isDisplayTimeSpentComment: boolean;
+  isDisplayRelatedElements: boolean;
+  isDisplayTotalCompletedTasksReport: boolean;
+  isDisplayOpenTasksReport: boolean;
+  isDisplayTotalInvoicedReport: boolean;
+  isDisplayPercentageCompletionReport: boolean;
+  isDisplayProgressReport: boolean;
+  isDisplayCompletedTasksReport: boolean;
+  isDisplayCompletedTicketsReport: boolean;
+  isDisplayTotalTimespentReport: boolean;
+  isDisplayTotalInvoicesReport: boolean;
+  isDisplayTotalConsoliatedSales: boolean;
+  isDisplayEmployeeTimespent: boolean;
+  isResetValuesOnYearStart: boolean;
+  monthValueTypeSelect: number;
   ticketHeroTitle: string;
   ticketHeroDescription: string;
   ticketHeroOverlayColorSelect: OverlayColor;

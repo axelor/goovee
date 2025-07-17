@@ -367,6 +367,82 @@
       "type": "ManyToOne",
       "name": "projectHeroBgImage",
       "target": "AOSMetaFile"
+    },
+    {
+      "type": "Boolean",
+      "name": "isAllowUserComment"
+    },
+    {
+      "type": "Boolean",
+      "name": "isAllowTicketUpdate"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayTaskList"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayPerTaskOrProject"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayTimeSpentComment"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayRelatedElements"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayTotalCompletedTasksReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayOpenTasksReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayTotalInvoicedReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayPercentageCompletionReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayProgressReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayCompletedTasksReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayCompletedTicketsReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayTotalTimespentReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayTotalInvoicesReport"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayTotalConsoliatedSales"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayEmployeeTimespent"
+    },
+    {
+      "type": "Boolean",
+      "name": "isResetValuesOnYearStart"
+    },
+    {
+      "type": "Int",
+      "name": "monthValueTypeSelect"
     }
   ]
 }
