@@ -1,0 +1,5 @@
+{
+  "schema": {
+    "dirs": ["goovee/schema", "app/**/schema"]
+  }
+}
