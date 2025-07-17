@@ -11,11 +11,6 @@ export const sortKeyPathMap: Record<string, string> = {
   updatedOn: 'updatedOn',
 };
 
-export const TYPE_SELECT = {
-  TASK: 'task',
-  TICKET: 'ticket',
-} as const;
-
 export const ASSIGNMENT = {
   CUSTOMER: 1,
   PROVIDER: 2,

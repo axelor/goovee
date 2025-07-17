@@ -67,6 +67,7 @@ export enum SUBAPP_CODES {
   directory = 'directory',
   survey = 'survey',
   website = 'website',
+  projects = 'projects',
 }
 
 /**
@@ -237,3 +238,8 @@ export const INVOICE_ENTITY_TYPE = {
 
 export const NO_IMAGE_URL = '/images/no-image.png';
 export const DEFAULT_LOGO_URL = `/images/default-logo.png`;
+
+export const TASK_TYPE_SELECT = {
+  TASK: 'task',
+  TICKET: 'ticket',
+} as const;

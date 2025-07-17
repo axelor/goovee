@@ -1,9 +1,8 @@
-import {ROLE} from '@/constants';
+import {ROLE, TASK_TYPE_SELECT} from '@/constants';
 import type {AOSProject, AOSProjectTask} from '@/goovee/.generated/models';
-import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
-import {TYPE_SELECT} from '../constants';
-import {AuthProps} from '../utils/auth-helper';
 import {and} from '@/utils/orm';
+import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
+import {AuthProps} from '../utils/auth-helper';
 
 export type QueryProps<T extends Entity> = {
   where?: WhereOptions<T> | null;
@@ -28,7 +27,7 @@ export function getProjectAccessFilter(props: AuthProps) {
 
 export function getTicketAccessFilter() {
   const where = and<AOSProjectTask>([
-    {typeSelect: TYPE_SELECT.TICKET},
+    {typeSelect: TASK_TYPE_SELECT.TICKET},
     {OR: [{archived: false}, {archived: null}]},
     {OR: [{isPrivate: false}, {isPrivate: null}]},
     {OR: [{isInternal: false}, {isInternal: null}]},
