@@ -94,6 +94,14 @@
     {
       "type": "Boolean",
       "name": "archived"
+    },
+    {
+      "type": "Date",
+      "name": "fromDate"
+    },
+    {
+      "type": "Date",
+      "name": "toDate"
     }
   ]
 }
