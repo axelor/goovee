@@ -12,6 +12,7 @@ import {MdArrowDropDown, MdArrowDropUp} from 'react-icons/md';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Column} from './types';
+import {cn} from '@/utils/css';
 
 type TableRowsProps<T extends Record<string, any>> = {
   records: T[];
@@ -63,7 +64,12 @@ export function TableRows<T extends Record<string, any>>(
       <Fragment key={record.id}>
         <TableRow
           onClick={handleClick}
-          className="cursor-pointer [&:not(:has(.action:hover)):hover]:bg-slate-100 text-sm">
+          className={cn(
+            '[&:not(:has(.action:hover)):hover]:bg-slate-100 text-sm',
+            {
+              'cursor-pointer': !!onRowClick,
+            },
+          )}>
           {mainColumns.map(column => (
             <TableCell key={column.key} className="p-3">
               {column.content(record)}
@@ -112,8 +118,8 @@ type ItemProps = {
 function Item({label, children}: ItemProps) {
   return (
     <>
-      <p className="text-xs font-semibold mb-0">{label}</p>
-      <p className="flex justify-self-end items-center">{children}</p>
+      <div className="text-xs font-semibold mb-0">{label}</div>
+      <div className="flex justify-self-end items-center">{children}</div>
     </>
   );
 }
