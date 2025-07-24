@@ -812,7 +812,7 @@ export async function findTicket({
   const ticket = await client.aOSProjectTask.findOne({
     where: withTicketAccessFilter(auth)({
       id: ticketId,
-      project: {id: projectId},
+      project: {id: projectId, ...getProjectAccessFilter(auth)},
     }),
     select: {
       name: true,
