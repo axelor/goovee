@@ -19,13 +19,11 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
-import {
-  findMainPartnerContacts,
-  findProject,
-  findTicketCategories,
-  findTicketPriorities,
-  findTicketStatuses,
-} from '../../../../common/orm/projects';
+import {findProject} from '../../../../common/orm/projects';
+import {findTaskCategories} from '@/orm/project-task';
+import {findTaskPriorities} from '@/orm/project-task';
+import {findTaskStatuses} from '@/orm/project-task';
+import {findProjectMainPartnerContacts} from '@/orm/project-task';
 import {findTicketAccess} from '../../../../common/orm/tickets';
 import {ensureAuth} from '../../../../common/utils/auth-helper';
 import {EncodedFilter} from '../../../../common/utils/validators';
@@ -73,10 +71,14 @@ export default async function Page({
   const [project, statuses, categories, priorities, contacts] =
     await Promise.all([
       findProject(projectId, auth),
-      findTicketStatuses(projectId, tenant),
-      findTicketCategories(projectId, tenant).then(clone),
-      findTicketPriorities(projectId, tenant).then(clone),
-      findMainPartnerContacts(projectId, tenant).then(clone),
+      findTaskStatuses(projectId, tenant),
+      findTaskCategories(projectId, tenant).then(clone),
+      findTaskPriorities(projectId, tenant).then(clone),
+      findProjectMainPartnerContacts({
+        projectId,
+        tenantId: tenant,
+        appCode: SUBAPP_CODES.ticketing,
+      }).then(clone),
     ]);
 
   if (!project) notFound();

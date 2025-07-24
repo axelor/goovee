@@ -40,7 +40,8 @@ import {
   RESOLVED_TICKETS_TITLE,
   sortKeyPathMap,
 } from '../../common/constants';
-import {findProject, findTicketStatuses} from '../../common/orm/projects';
+import {findProject} from '../../common/orm/projects';
+import {findTaskStatuses} from '@/orm/project-task';
 import {
   findTickets,
   getAllTicketCount,
@@ -94,7 +95,7 @@ export default async function Page({
       where: {status: {isCompleted: false}},
       auth,
     }).then(clone),
-    findTicketStatuses(projectId, tenant),
+    findTaskStatuses(projectId, tenant),
   ]);
 
   if (!project) notFound();
@@ -178,7 +179,7 @@ export default async function Page({
         projectId={projectId}
         inputClassName="h-[39px] placeholder:!text-sm text-sm"
       />
-      <Swipe items={items} />
+      <Swipe items={items} className="!w-[220px] !h-[120px] cursor-pointer" />
       <div className="flex items-center justify-between !mt-0">
         <h2 className="font-semibold text-xl">{await t('Latest tickets')}</h2>
         <Button variant="success" className="flex items-center" asChild>

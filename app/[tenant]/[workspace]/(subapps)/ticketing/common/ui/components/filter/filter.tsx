@@ -1,6 +1,14 @@
 'use client';
 
 import {i18n} from '@/locale';
+import type {
+  MainPartnerContact,
+  ProjectClientPartner,
+  ProjectCompany,
+  TaskCategory,
+  TaskPriority,
+  TaskStatus,
+} from '@/orm/project-task';
 import type {PortalAppConfig} from '@/types';
 import type {Cloned} from '@/types/util';
 import {
@@ -26,32 +34,6 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
-import {useResponsive} from '@/ui/hooks';
-import {cn} from '@/utils/css';
-import {decodeFilter, encodeFilter} from '@/utils/url';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {X as RemoveIcon} from 'lucide-react';
-import {useRouter} from 'next/navigation';
-import {useEffect, useMemo, useRef, useState} from 'react';
-import {useForm, UseFormReturn} from 'react-hook-form';
-import {FaFilter} from 'react-icons/fa';
-import {z} from 'zod';
-
-import {ASSIGNMENT, COMPANY, FIELDS} from '../../../constants';
-import type {
-  Category,
-  ClientPartner,
-  Company,
-  ContactPartner,
-  Priority,
-  Status,
-} from '../../../types';
-import {SearchParams} from '../../../types/search-param';
-import {
-  EncodedFilter,
-  EncodedFilterSchema,
-  FilterSchema,
-} from '../../../utils/validators';
 import {
   MultiSelector,
   MultiSelectorContent,
@@ -59,18 +41,41 @@ import {
   MultiSelectorItem,
   MultiSelectorList,
   MultiSelectorTrigger,
-} from '../multi-select';
+} from '@/ui/components/multi-select';
+import {useResponsive} from '@/ui/hooks';
+import {cn} from '@/utils/css';
+import {decodeFilter, encodeFilter} from '@/utils/url';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {X as RemoveIcon} from 'lucide-react';
+import {useRouter} from 'next/navigation';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useForm, UseFormReturn} from 'react-hook-form';
+import {FaFilter} from 'react-icons/fa';
+import {z} from 'zod';
+
+import {ASSIGNMENT, COMPANY, FIELDS} from '../../../constants';
+import {SearchParams} from '../../../types/search-param';
+import {
+  EncodedFilter,
+  EncodedFilterSchema,
+  FilterSchema,
+} from '../../../utils/validators';
 
 type FilterProps = {
   url: string;
   searchParams: SearchParams;
-  contacts: Cloned<ContactPartner>[];
-  priorities: Cloned<Priority>[];
-  statuses: Cloned<Status>[];
-  categories: Cloned<Category>[];
-  company?: Cloned<Company>;
-  clientPartner?: Cloned<ClientPartner>;
+  contacts: Cloned<MainPartnerContact>[];
+  priorities: Cloned<TaskPriority>[];
+  statuses: Cloned<TaskStatus>[];
+  categories: Cloned<TaskCategory>[];
+  company?: Cloned<ProjectCompany>;
+  clientPartner?: Cloned<ProjectClientPartner>;
   fields: PortalAppConfig['ticketingFieldSet'];
+};
+
+type FilterFormProps = FilterProps & {
+  close: () => void;
+  filter: unknown;
 };
 
 const defaultValues = {
@@ -102,6 +107,7 @@ export function Filter(props: FilterProps) {
     fields,
     categories,
   } = props;
+
   const [open, setOpen] = useState(false);
   const filter = useMemo(
     () => searchParams.filter && decodeFilter(searchParams.filter),
@@ -112,48 +118,16 @@ export function Filter(props: FilterProps) {
     [filter],
   );
 
-  const allowedFields = useMemo(
-    () => new Set(fields?.map(f => f.name)),
-    [fields],
-  );
-
-  const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
   const res = useResponsive();
   const small = (['xs', 'sm', 'md'] as const).some(x => res[x]);
 
-  const form = useForm<z.infer<typeof FilterSchema>>({
-    resolver: zodResolver(FilterSchema),
-    defaultValues,
-  });
-
-  const onSubmit = (value: z.infer<typeof FilterSchema>) => {
-    const filter = EncodedFilterSchema.parse(value);
-    const params = new URLSearchParams(searchParams);
-    params.delete('page');
-    if (filter) {
-      params.set('filter', encodeFilter<EncodedFilter>(filter));
-    } else {
-      params.delete('filter');
-    }
-    params.delete('title');
-
-    const route = `${url}?${params.toString()}`;
-    router.replace(route);
-    setOpen(false);
-  };
-
-  useEffect(() => {
-    const {success, data} = EncodedFilterSchema.safeParse(filter);
-    if (!success || !data) {
-      form.reset(defaultValues);
-    } else {
-      form.reset({...defaultValues, ...data});
-    }
-  }, [filter, form]);
   const [Controller, Trigger, Content] = small
     ? ([Drawer, DrawerTrigger, DrawerContent] as const)
     : ([Popover, PopoverTrigger, PopoverContent] as const);
+
+  const close = useCallback(() => {
+    setOpen(false);
+  }, []);
 
   return (
     <div className={cn('relative', {'mt-5': small})}>
@@ -192,61 +166,129 @@ export function Filter(props: FilterProps) {
               <hr className="mb-2" />
             </>
           )}
-          <Form {...form}>
-            <form
-              ref={formRef}
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="relative overflow-x-hidden lg:h-fit lg:max-h-[--radix-popper-available-height] lg:overflow-y-auto p-4">
-              <div className="space-y-4">
-                {(allowedFields.has(FIELDS.CREATED_BY) ||
-                  allowedFields.has(FIELDS.MANAGED_BY)) && (
-                  <MyTicketsField form={form} />
-                )}
-                {!form.watch('myTickets') && (
-                  <>
-                    {allowedFields.has(FIELDS.CREATED_BY) && (
-                      <CreatedByField
-                        form={form}
-                        contacts={contacts}
-                        company={company}
-                      />
-                    )}
-                    {allowedFields.has(FIELDS.MANAGED_BY) && (
-                      <ManagedByField form={form} contacts={contacts} />
-                    )}
-                  </>
-                )}
-                {allowedFields.has(FIELDS.ASSIGNMENT) && (
-                  <AssignedToField
-                    form={form}
-                    company={company}
-                    clientPartner={clientPartner}
-                  />
-                )}
-                {allowedFields.has(FIELDS.UPDATED_ON) && (
-                  <DatesField form={form} />
-                )}
-                {allowedFields.has(FIELDS.PRIORITY) && (
-                  <PriorityField form={form} priorities={priorities} />
-                )}
-                {allowedFields.has(FIELDS.STATUS) && (
-                  <StatusField form={form} statuses={statuses} />
-                )}
-                {allowedFields.has(FIELDS.CATEGORY) && (
-                  <CategoryField form={form} categories={categories} />
-                )}
-                <Button
-                  variant="success"
-                  type="submit"
-                  className="w-full sticky bottom-0 text-xs">
-                  {i18n.t('Apply')}
-                </Button>
-              </div>
-            </form>
-          </Form>
+          <FilterForm
+            url={url}
+            searchParams={searchParams}
+            contacts={contacts}
+            priorities={priorities}
+            statuses={statuses}
+            categories={categories}
+            company={company}
+            clientPartner={clientPartner}
+            fields={fields}
+            filter={filter}
+            close={close}
+          />
         </Content>
       </Controller>
     </div>
+  );
+}
+
+function FilterForm(props: FilterFormProps) {
+  const {
+    contacts,
+    priorities,
+    statuses,
+    url,
+    searchParams,
+    company,
+    clientPartner,
+    fields,
+    categories,
+    close,
+    filter,
+  } = props;
+
+  const router = useRouter();
+  const allowedFields = useMemo(
+    () => new Set(fields?.map(f => f.name)),
+    [fields],
+  );
+
+  const onSubmit = (value: z.infer<typeof FilterSchema>) => {
+    const filter = EncodedFilterSchema.parse(value);
+    const params = new URLSearchParams(searchParams);
+    params.delete('page');
+    if (filter) {
+      params.set('filter', encodeFilter<EncodedFilter>(filter));
+    } else {
+      params.delete('filter');
+    }
+    params.delete('title');
+
+    const route = `${url}?${params.toString()}`;
+    router.replace(route);
+    close();
+  };
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const form = useForm<z.infer<typeof FilterSchema>>({
+    resolver: zodResolver(FilterSchema),
+    defaultValues,
+  });
+
+  useEffect(() => {
+    const {success, data} = EncodedFilterSchema.safeParse(filter);
+    if (!success || !data) {
+      form.reset(defaultValues);
+    } else {
+      form.reset({...defaultValues, ...data});
+    }
+  }, [filter, form]);
+
+  return (
+    <Form {...form}>
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="relative overflow-x-hidden lg:h-fit lg:max-h-[--radix-popper-available-height] lg:overflow-y-auto p-4">
+        <div className="space-y-4">
+          {(allowedFields.has(FIELDS.CREATED_BY) ||
+            allowedFields.has(FIELDS.MANAGED_BY)) && (
+            <MyTicketsField form={form} />
+          )}
+          {!form.watch('myTickets') && (
+            <>
+              {allowedFields.has(FIELDS.CREATED_BY) && (
+                <CreatedByField
+                  form={form}
+                  contacts={contacts}
+                  company={company}
+                />
+              )}
+              {allowedFields.has(FIELDS.MANAGED_BY) && (
+                <ManagedByField form={form} contacts={contacts} />
+              )}
+            </>
+          )}
+          {allowedFields.has(FIELDS.ASSIGNMENT) && (
+            <AssignedToField
+              form={form}
+              company={company}
+              clientPartner={clientPartner}
+            />
+          )}
+          {allowedFields.has(FIELDS.UPDATED_ON) && <DatesField form={form} />}
+          {allowedFields.has(FIELDS.PRIORITY) && (
+            <PriorityField form={form} priorities={priorities} />
+          )}
+          {allowedFields.has(FIELDS.STATUS) && (
+            <StatusField form={form} statuses={statuses} />
+          )}
+          {allowedFields.has(FIELDS.CATEGORY) && (
+            <CategoryField form={form} categories={categories} />
+          )}
+          <Button
+            variant="success"
+            type="submit"
+            className="w-full sticky bottom-0 text-xs">
+            {i18n.t('Apply')}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
 

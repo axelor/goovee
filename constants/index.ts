@@ -1,3 +1,5 @@
+import type {Variant} from '@/ui/components/tag';
+
 /**
  * CURRENCY
  */
@@ -243,3 +245,15 @@ export enum TASK_TYPE_SELECT {
   TASK = 'task',
   TICKET = 'ticket',
 }
+
+export const taskStatusMap = new Map<string, Variant>();
+taskStatusMap.set('New', 'default');
+taskStatusMap.set('In progress', 'yellow');
+taskStatusMap.set('Done', 'success');
+taskStatusMap.set('Canceled', 'destructive');
+
+export const taskPriorityMap = new Map<string, Variant>();
+taskPriorityMap.set('High', 'orange');
+taskPriorityMap.set('Low', 'success');
+taskPriorityMap.set('Normal', 'yellow');
+taskPriorityMap.set('Urgent', 'destructive');

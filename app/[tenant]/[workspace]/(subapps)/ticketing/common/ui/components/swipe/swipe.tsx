@@ -22,10 +22,7 @@ export function Swipe({items, className}: SwipeProps) {
       {items.map((item, i) => (
         <SwiperSlide
           key={i}
-          className={cn(
-            'bg-card rounded-lg shrink-0 !w-[220px] !h-[120px] cursor-pointer',
-            className,
-          )}>
+          className={cn('bg-card rounded-lg shrink-0', className)}>
           {item}
         </SwiperSlide>
       ))}

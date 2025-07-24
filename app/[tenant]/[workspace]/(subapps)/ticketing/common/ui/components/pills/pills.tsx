@@ -1,14 +1,8 @@
 import {forwardRef} from 'react';
 import {Maybe} from '@/types/util';
 import {Tag} from '@/ui/components';
-import type {Variant} from '@/ui/components/tag';
 import {cn} from '@/utils/css';
-
-const statusMap = new Map<string, Variant>();
-statusMap.set('New', 'default');
-statusMap.set('In progress', 'yellow');
-statusMap.set('Done', 'success');
-statusMap.set('Canceled', 'destructive');
+import {taskPriorityMap, taskStatusMap} from '@/constants';
 
 type PillProps = {
   name: Maybe<string>;
@@ -20,7 +14,7 @@ export const Status = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
 
   return (
     <Tag
-      variant={statusMap.get(name) ?? 'default'}
+      variant={taskStatusMap.get(name) ?? 'default'}
       className="text-[10px] py-1 w-max"
       outline>
       {name}
@@ -30,18 +24,12 @@ export const Status = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
 
 Status.displayName = 'Status';
 
-const priorityMap = new Map<string, Variant>();
-priorityMap.set('High', 'orange');
-priorityMap.set('Low', 'success');
-priorityMap.set('Normal', 'yellow');
-priorityMap.set('Urgent', 'destructive');
-
 export const Priority = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
   if (!name) return null;
 
   return (
     <Tag
-      variant={priorityMap.get(name) ?? 'default'}
+      variant={taskPriorityMap.get(name) ?? 'default'}
       className="text-[10px] py-1 w-max">
       {name}
     </Tag>

@@ -37,15 +37,13 @@ import {MdAdd} from 'react-icons/md';
 
 // ---- LOCAL IMPORTS ---- //
 import {DEFAULT_SORT, FIELDS, sortKeyPathMap} from '../../../common/constants';
-import {
-  findClientPartner,
-  findCompany,
-  findMainPartnerContacts,
-  findProject,
-  findTicketCategories,
-  findTicketPriorities,
-  findTicketStatuses,
-} from '../../../common/orm/projects';
+import {findProject} from '../../../common/orm/projects';
+import {findTaskCategories} from '@/orm/project-task';
+import {findProjectClientPartner} from '@/orm/project-task';
+import {findProjectCompany} from '@/orm/project-task';
+import {findTaskPriorities} from '@/orm/project-task';
+import {findTaskStatuses} from '@/orm/project-task';
+import {findProjectMainPartnerContacts} from '@/orm/project-task';
 import {findTickets} from '../../../common/orm/tickets';
 import type {SearchParams} from '../../../common/types/search-param';
 import {Filter} from '../../../common/ui/components/filter';
@@ -286,12 +284,16 @@ async function AsyncFilter({
 }) {
   const [contacts, statuses, priorities, company, clientPartner, categories] =
     await Promise.all([
-      findMainPartnerContacts(projectId, tenantId),
-      findTicketStatuses(projectId, tenantId),
-      findTicketPriorities(projectId, tenantId),
-      findCompany(projectId, tenantId),
-      findClientPartner(projectId, tenantId),
-      findTicketCategories(projectId, tenantId),
+      findProjectMainPartnerContacts({
+        projectId,
+        tenantId,
+        appCode: SUBAPP_CODES.ticketing,
+      }),
+      findTaskStatuses(projectId, tenantId),
+      findTaskPriorities(projectId, tenantId),
+      findProjectCompany(projectId, tenantId),
+      findProjectClientPartner(projectId, tenantId),
+      findTaskCategories(projectId, tenantId),
     ]).then(clone);
 
   return (

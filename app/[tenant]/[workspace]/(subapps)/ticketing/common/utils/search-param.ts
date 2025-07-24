@@ -1,10 +1,11 @@
 import {ORDER_BY} from '@/constants';
 import type {AOSProjectTask} from '@/goovee/.generated/models';
 import type {Maybe} from '@/types/util';
-import type {Entity, ID, IdFilter, WhereArg, WhereOptions} from '@goovee/orm';
+import type {ID, WhereOptions} from '@goovee/orm';
 import {set} from 'lodash';
 import {COMPANY} from '../constants';
 import {EncodedFilterSchema} from '../utils/validators';
+import type {Where} from '@/types/orm';
 
 export function getOrderBy(
   sort: Maybe<string>,
@@ -18,14 +19,6 @@ export function getOrderBy(
   const query = set({}, path, direction);
   return query;
 }
-
-type Where<T extends Entity> = {
-  -readonly [K in keyof T]?: K extends 'id' ? IdFilter : WhereArg<T[K]>;
-} & {
-  OR?: WhereOptions<T>[];
-  AND?: WhereOptions<T>[];
-  NOT?: WhereOptions<T>[];
-};
 
 export function getWhere(
   filter: unknown,

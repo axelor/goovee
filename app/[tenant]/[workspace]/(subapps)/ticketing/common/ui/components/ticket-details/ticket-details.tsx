@@ -33,11 +33,9 @@ import {Progress} from '@/ui/components/progress';
 import {cn} from '@/utils/css';
 import {useMemo} from 'react';
 import {FIELDS, INVOICING_TYPE, UPDATABLE_FIELDS} from '../../../constants';
-import type {
-  ContactPartner,
-  Category as TCategory,
-  Priority as TPriority,
-} from '../../../types';
+import type {TaskCategory as TCategory} from '@/orm/project-task';
+import type {TaskPriority as TPriority} from '@/orm/project-task';
+import type {MainPartnerContact} from '@/orm/project-task';
 import {isWithProvider} from '../../../utils';
 import {Category, Priority, Status} from '../pills';
 import {useTicketDetails} from './ticket-details-provider';
@@ -47,7 +45,7 @@ import '@/ui/components/rich-text-editor/rich-text-editor.css';
 type Props = {
   categories: TCategory[];
   priorities: TPriority[];
-  contacts: ContactPartner[];
+  contacts: MainPartnerContact[];
   formFields: PortalAppConfig['ticketingFormFieldSet'];
   showCancel?: boolean;
   showClose?: boolean;

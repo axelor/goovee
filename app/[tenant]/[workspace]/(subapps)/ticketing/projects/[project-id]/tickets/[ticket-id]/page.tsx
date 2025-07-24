@@ -27,12 +27,10 @@ import {workspacePathname} from '@/utils/workspace';
 import type {PortalAppConfig} from '@/types';
 import {createComment, fetchComments} from '../../../../common/actions';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
-import {
-  findMainPartnerContacts,
-  findTicketCategories,
-  findTicketPriorities,
-  findTicketStatuses,
-} from '../../../../common/orm/projects';
+import {findTaskCategories} from '@/orm/project-task';
+import {findTaskPriorities} from '@/orm/project-task';
+import {findTaskStatuses} from '@/orm/project-task';
+import {findProjectMainPartnerContacts} from '@/orm/project-task';
 import {
   findChildTicketIds,
   findChildTickets,
@@ -42,11 +40,9 @@ import {
   findTicket,
   findTicketLinkTypes,
 } from '../../../../common/orm/tickets';
-import type {
-  Category,
-  ContactPartner,
-  Priority,
-} from '../../../../common/types';
+import type {TaskCategory} from '@/orm/project-task';
+import type {TaskPriority} from '@/orm/project-task';
+import type {MainPartnerContact} from '@/orm/project-task';
 import {TicketDetails} from '../../../../common/ui/components/ticket-details';
 import {TicketDetailsProvider} from '../../../../common/ui/components/ticket-details/ticket-details-provider';
 import {
@@ -95,10 +91,14 @@ export default async function Page({
   const [ticket, statuses, categories, priorities, contacts] =
     await Promise.all([
       findTicket({ticketId, projectId, auth}),
-      findTicketStatuses(projectId, tenant),
-      findTicketCategories(projectId, tenant),
-      findTicketPriorities(projectId, tenant),
-      findMainPartnerContacts(projectId, tenant),
+      findTaskStatuses(projectId, tenant),
+      findTaskCategories(projectId, tenant),
+      findTaskPriorities(projectId, tenant),
+      findProjectMainPartnerContacts({
+        projectId,
+        tenantId: tenant,
+        appCode: SUBAPP_CODES.ticketing,
+      }),
     ]).then(clone);
 
   if (!ticket) notFound();
@@ -249,9 +249,9 @@ async function ChildTickets({
 }: {
   ticketId: ID;
   projectId?: ID;
-  categories: Category[];
-  priorities: Priority[];
-  contacts: ContactPartner[];
+  categories: TaskCategory[];
+  priorities: TaskPriority[];
+  contacts: MainPartnerContact[];
   userId: ID;
   tenantId: Tenant['id'];
   fields: PortalAppConfig['ticketingFieldSet'];
