@@ -221,6 +221,7 @@ export const ModelMap: Partial<Record<SUBAPP_CODES, string>> = {
   [SUBAPP_CODES.events]: 'com.axelor.apps.portal.db.PortalEvent',
   [SUBAPP_CODES.ticketing]: 'com.axelor.apps.project.db.ProjectTask',
   [SUBAPP_CODES.quotations]: 'com.axelor.apps.sale.db.SaleOrder',
+  [SUBAPP_CODES.projects]: 'com.axelor.apps.project.db.ProjectTask',
 };
 
 /**
@@ -246,14 +247,9 @@ export enum TASK_TYPE_SELECT {
   TICKET = 'ticket',
 }
 
-export const taskStatusMap = new Map<string, Variant>();
-taskStatusMap.set('New', 'default');
-taskStatusMap.set('In progress', 'yellow');
-taskStatusMap.set('Done', 'success');
-taskStatusMap.set('Canceled', 'destructive');
-
-export const taskPriorityMap = new Map<string, Variant>();
-taskPriorityMap.set('High', 'orange');
-taskPriorityMap.set('Low', 'success');
-taskPriorityMap.set('Normal', 'yellow');
-taskPriorityMap.set('Urgent', 'destructive');
+export const TASK_INVOICING_TYPE = {
+  TIME_SPENT: 1,
+  PACKAGE: 2,
+  NO_INVOICING: 3,
+  ON_PROGRESS: 4,
+} as const;

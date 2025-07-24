@@ -4,7 +4,13 @@ import axios from 'axios';
 // ---- CORE IMPORTS ---- //
 import {MAIL_MESSAGE_TYPE, type Track} from '@/comments';
 import {addComment} from '@/comments/orm';
-import {ModelMap, ORDER_BY, SUBAPP_CODES, TASK_TYPE_SELECT} from '@/constants';
+import {
+  ModelMap,
+  ORDER_BY,
+  SUBAPP_CODES,
+  TASK_INVOICING_TYPE,
+  TASK_TYPE_SELECT,
+} from '@/constants';
 import type {AOSProjectTask} from '@/goovee/.generated/models';
 import {t} from '@/locale/server';
 import {manager, type Tenant} from '@/tenant';
@@ -13,7 +19,6 @@ import {sql} from '@/utils/template-string';
 // ---- LOCAL IMPORTS ---- //
 import {
   ASSIGNMENT,
-  INVOICING_TYPE,
   VERSION_MISMATCH_CAUSE_CLASS,
   VERSION_MISMATCH_ERROR,
 } from '../constants';
@@ -141,7 +146,7 @@ export async function createTicket({
       taskDate: new Date(),
       assignment: ASSIGNMENT.CUSTOMER,
       typeSelect: TASK_TYPE_SELECT.TICKET,
-      invoicingType: INVOICING_TYPE.NO_INVOICING,
+      invoicingType: TASK_INVOICING_TYPE.NO_INVOICING,
       isPrivate: false,
       isInternal: false,
       progress: '0.00',

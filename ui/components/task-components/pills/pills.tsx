@@ -1,13 +1,19 @@
 import {forwardRef} from 'react';
 import {Maybe} from '@/types/util';
-import {Tag} from '@/ui/components';
 import {cn} from '@/utils/css';
-import {taskPriorityMap, taskStatusMap} from '@/constants';
+import {Tag} from '../../tag';
+import type {Variant} from '../../tag';
 
 type PillProps = {
   name: Maybe<string>;
   className?: string;
 };
+
+export const taskStatusMap = new Map<string, Variant>();
+taskStatusMap.set('New', 'default');
+taskStatusMap.set('In progress', 'yellow');
+taskStatusMap.set('Done', 'success');
+taskStatusMap.set('Canceled', 'destructive');
 
 export const Status = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
   if (!name) return null;
@@ -21,8 +27,13 @@ export const Status = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
     </Tag>
   );
 });
-
 Status.displayName = 'Status';
+
+export const taskPriorityMap = new Map<string, Variant>();
+taskPriorityMap.set('High', 'orange');
+taskPriorityMap.set('Low', 'success');
+taskPriorityMap.set('Normal', 'yellow');
+taskPriorityMap.set('Urgent', 'destructive');
 
 export const Priority = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
   if (!name) return null;
@@ -35,7 +46,6 @@ export const Priority = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
     </Tag>
   );
 });
-
 Priority.displayName = 'Priority';
 
 export const Category = forwardRef<HTMLDivElement, PillProps>(
@@ -50,5 +60,4 @@ export const Category = forwardRef<HTMLDivElement, PillProps>(
     );
   },
 );
-
 Category.displayName = 'Category';

@@ -16,13 +16,6 @@ export const ASSIGNMENT = {
   PROVIDER: 2,
 } as const;
 
-export const INVOICING_TYPE = {
-  TIME_SPENT: 1,
-  PACKAGE: 2,
-  NO_INVOICING: 3,
-  ON_PROGRESS: 4,
-} as const;
-
 export const VERSION_MISMATCH_ERROR = 'OptimisticLockVersionMismatchError';
 export const VERSION_MISMATCH_CAUSE_CLASS =
   'javax.persistence.OptimisticLockException';
