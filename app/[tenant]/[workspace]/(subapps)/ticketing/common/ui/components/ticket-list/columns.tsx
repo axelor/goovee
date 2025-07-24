@@ -1,5 +1,11 @@
 import {formatDate} from '@/locale/formatters';
 import type {Cloned} from '@/types/util';
+import {
+  Category,
+  Priority,
+  Status,
+} from '@/ui/components/task-components/pills';
+import type {Column} from '@/ui/components/task-components/table-elements';
 import {FIELDS} from '../../../constants';
 import type {
   ChildTicket,
@@ -8,8 +14,6 @@ import type {
   TicketListTicket,
 } from '../../../types';
 import {isWithProvider} from '../../../utils';
-import {Category, Priority, Status} from '../pills';
-import type {Column} from '../table-elements';
 
 export const ticketColumns: Column<Cloned<TicketListTicket>>[] = [
   {

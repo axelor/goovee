@@ -11,7 +11,11 @@ import type {
   TicketLink,
   TicketListTicket,
 } from '../../../types';
-import {type Column, TableHeads, TableRows} from '../table-elements';
+import {
+  type Column,
+  TableHeads,
+  TableRows,
+} from '@/ui/components/task-components/table-elements';
 import {
   childColumns,
   parentColumns,

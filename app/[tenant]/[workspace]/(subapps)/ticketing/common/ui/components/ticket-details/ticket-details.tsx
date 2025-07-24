@@ -37,7 +37,11 @@ import type {TaskCategory as TCategory} from '@/orm/project-task';
 import type {TaskPriority as TPriority} from '@/orm/project-task';
 import type {MainPartnerContact} from '@/orm/project-task';
 import {isWithProvider} from '../../../utils';
-import {Category, Priority, Status} from '../pills';
+import {
+  Category,
+  Priority,
+  Status,
+} from '@/ui/components/task-components/pills';
 import {useTicketDetails} from './ticket-details-provider';
 
 import '@/ui/components/rich-text-editor/rich-text-editor.css';

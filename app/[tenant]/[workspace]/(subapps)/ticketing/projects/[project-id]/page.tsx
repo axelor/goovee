@@ -1,19 +1,3 @@
-// ---- CORE IMPORTS ---- //
-import {SUBAPP_CODES} from '@/constants';
-import {t} from '@/locale/server';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  Button,
-} from '@/ui/components';
-import {Skeleton} from '@/ui/components/skeleton';
-import {clone} from '@/utils';
-import {encodeFilter, getLoginURL} from '@/utils/url';
-import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
@@ -28,9 +12,28 @@ import {
   MdPending,
 } from 'react-icons/md';
 
-// ---- LOCAL IMPORTS ---- //
+// ---- CORE IMPORTS ---- //
+import {SUBAPP_CODES} from '@/constants';
+import {t} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
+import {findTaskStatuses} from '@/orm/project-task';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  Button,
+} from '@/ui/components';
+import {Skeleton} from '@/ui/components/skeleton';
+import {Swipe} from '@/ui/components/task-components/swipe';
+import {clone} from '@/utils';
 import {cn} from '@/utils/css';
+import {encodeFilter, getLoginURL} from '@/utils/url';
+import {workspacePathname} from '@/utils/workspace';
+
+// ---- LOCAL IMPORTS ---- //
 import {
   ALL_TICKETS_TITLE,
   CREATED_TICKETS_TITLE,
@@ -41,7 +44,6 @@ import {
   sortKeyPathMap,
 } from '../../common/constants';
 import {findProject} from '../../common/orm/projects';
-import {findTaskStatuses} from '@/orm/project-task';
 import {
   findTickets,
   getAllTicketCount,
@@ -51,7 +53,6 @@ import {
   getResolvedTicketCount,
 } from '../../common/orm/tickets';
 import type {SearchParams} from '../../common/types/search-param';
-import {Swipe} from '../../common/ui/components/swipe';
 import {TicketList} from '../../common/ui/components/ticket-list';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {getOrderBy, getSkip} from '../../common/utils/search-param';

@@ -5,12 +5,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../form';
+} from '../../form';
 import {i18n} from '@/lib/core/locale';
-import {Input} from '../input';
+import {Input} from '../../input';
 import {Cloned} from '@/types/util';
 import {TaskCategory, TaskPriority, TaskStatus} from '@/orm/project-task';
-import {Checkbox} from '../checkbox';
+import {Checkbox} from '../../checkbox';
 import {
   MultiSelector,
   MultiSelectorContent,
@@ -18,7 +18,7 @@ import {
   MultiSelectorItem,
   MultiSelectorList,
   MultiSelectorTrigger,
-} from '../multi-select';
+} from '../../multi-select';
 
 export type DatesFieldProps = {
   form: UseFormReturn<{
