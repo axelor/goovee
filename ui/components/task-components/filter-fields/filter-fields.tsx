@@ -219,3 +219,27 @@ export function CategoryField(props: CategoryFieldProps) {
     />
   );
 }
+
+type InvoicedFieldProps = {
+  form: UseFormReturn<{invoiced?: boolean | undefined}>;
+};
+export function InvoicedField(props: InvoicedFieldProps) {
+  const {form} = props;
+  return (
+    <FormField
+      control={form.control}
+      name="invoiced"
+      render={({field}) => (
+        <FormItem className="flex items-center space-y-0">
+          <FormControl>
+            <Checkbox
+              checked={!!field.value}
+              onCheckedChange={field.onChange}
+            />
+          </FormControl>
+          <FormLabel className="ms-4 text-xs">{i18n.t('Invoiced')}</FormLabel>
+        </FormItem>
+      )}
+    />
+  );
+}
