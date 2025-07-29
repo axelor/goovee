@@ -36,7 +36,12 @@ import {FaChevronRight} from 'react-icons/fa';
 import {MdAdd} from 'react-icons/md';
 
 // ---- LOCAL IMPORTS ---- //
-import {DEFAULT_SORT, FIELDS, sortKeyPathMap} from '../../../common/constants';
+import {
+  DEFAULT_SORT,
+  FIELDS,
+  FILTER_FIELDS,
+  sortKeyPathMap,
+} from '../../../common/constants';
 import {findProject} from '../../../common/orm/projects';
 import {findTaskCategories} from '@/orm/project-task';
 import {findProjectClientPartner} from '@/orm/project-task';
@@ -108,14 +113,7 @@ export default async function Page({
     workspace.config.ticketingFieldSet?.map(f => f.name),
   );
 
-  const hasFilter = [
-    FIELDS.PRIORITY,
-    FIELDS.STATUS,
-    FIELDS.UPDATED_ON,
-    FIELDS.CREATED_BY,
-    FIELDS.MANAGED_BY,
-    FIELDS.ASSIGNMENT,
-  ].some(field => allowedFields.has(field));
+  const hasFilter = FILTER_FIELDS.some(field => allowedFields.has(field));
 
   const url = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
   const pages = getPages(tickets, limit);
