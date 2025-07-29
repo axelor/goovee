@@ -1,4 +1,4 @@
-import {UseFormReturn} from 'react-hook-form';
+import {FieldPath, FieldValues, Path, UseFormReturn} from 'react-hook-form';
 import {
   FormControl,
   FormField,
@@ -20,22 +20,29 @@ import {
   MultiSelectorTrigger,
 } from '../../multi-select';
 
-export type DatesFieldProps = {
-  form: UseFormReturn<{
-    updatedOn?: [string | undefined, string | undefined] | undefined;
-  }>;
+export type DatesFieldProps<T extends FieldValues, N extends FieldPath<T>> = {
+  form: UseFormReturn<T>;
+  name: N;
+  title?: string;
 };
 
-export function DatesField(props: DatesFieldProps) {
-  const {form} = props;
+export function DatesField<T extends FieldValues, N extends FieldPath<T>>(
+  props: DatesFieldProps<T, N>,
+) {
+  const {form, name, title} = props;
   return (
     <div>
-      <div className="md:flex gap-2 block">
+      <div className="md:flex gap-2 block items-end">
         <FormField
           control={form.control}
-          name="updatedOn.0"
+          name={`${name}.0` as Path<T>}
           render={({field}) => (
             <FormItem className="grow">
+              {title && (
+                <FormLabel className="text-xs block">
+                  {i18n.t(title)}:
+                </FormLabel>
+              )}
               <FormLabel className="text-xs">{i18n.t('From')} :</FormLabel>
               <FormControl>
                 <Input
@@ -51,7 +58,7 @@ export function DatesField(props: DatesFieldProps) {
         />
         <FormField
           control={form.control}
-          name="updatedOn.1"
+          name={`${name}.1` as Path<T>}
           render={({field}) => (
             <FormItem className="grow">
               <FormLabel className="text-xs">{i18n.t('To')} :</FormLabel>
@@ -68,11 +75,10 @@ export function DatesField(props: DatesFieldProps) {
           )}
         />
       </div>
-      {form.formState.errors.updatedOn?.root && (
-        <FormMessage>
-          {form.formState.errors.updatedOn.root.message}
-        </FormMessage>
-      )}
+      {form.formState.errors[name]?.root &&
+        'message' in form.formState.errors[name].root && (
+          <FormMessage>{form.formState.errors[name].root.message}</FormMessage>
+        )}
     </div>
   );
 }

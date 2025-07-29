@@ -33,7 +33,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/ui/components/form';
-import {Input} from '@/ui/components/input';
 import {
   MultiSelector,
   MultiSelectorContent,
@@ -42,6 +41,12 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from '@/ui/components/multi-select';
+import {
+  CategoryField,
+  DatesField,
+  PriorityField,
+  StatusField,
+} from '@/ui/components/task-components/filter-fields';
 import {useResponsive} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {decodeFilter, encodeFilter} from '@/utils/url';
@@ -270,7 +275,9 @@ function FilterForm(props: FilterFormProps) {
               clientPartner={clientPartner}
             />
           )}
-          {allowedFields.has(FIELDS.UPDATED_ON) && <DatesField form={form} />}
+          {allowedFields.has(FIELDS.UPDATED_ON) && (
+            <DatesField form={form} name="updatedOn" />
+          )}
           {allowedFields.has(FIELDS.PRIORITY) && (
             <PriorityField form={form} priorities={priorities} />
           )}
@@ -472,187 +479,7 @@ function AssignedToField(
     </div>
   );
 }
-function DatesField(props: FieldProps) {
-  const {form} = props;
-  return (
-    <div>
-      <div className="md:flex gap-2 block">
-        <FormField
-          control={form.control}
-          name="updatedOn.0"
-          render={({field}) => (
-            <FormItem className="grow">
-              <FormLabel className="text-xs">{i18n.t('From')} :</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  placeholder="DD/MM/YYYY"
-                  {...field}
-                  className="block text-xs"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="updatedOn.1"
-          render={({field}) => (
-            <FormItem className="grow">
-              <FormLabel className="text-xs">{i18n.t('To')} :</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  placeholder="DD/MM/YYYY"
-                  {...field}
-                  className="block text-xs"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      {form.formState.errors.updatedOn?.root && (
-        <FormMessage>
-          {form.formState.errors.updatedOn.root.message}
-        </FormMessage>
-      )}
-    </div>
-  );
-}
-
-function PriorityField(props: FieldProps & Pick<FilterProps, 'priorities'>) {
-  const {form, priorities} = props;
-  return (
-    <FormField
-      control={form.control}
-      name="priority"
-      render={({field}) => (
-        <FormItem>
-          <FormLabel className="text-xs">{i18n.t('Priority')} :</FormLabel>
-          {priorities.map(priority => (
-            <FormField
-              key={priority.id}
-              control={form.control}
-              name="priority"
-              render={({field}) => (
-                <FormItem className="flex items-center space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      name={priority.id}
-                      checked={field.value?.includes(priority.id)}
-                      onCheckedChange={checked =>
-                        checked
-                          ? field.onChange([
-                              ...(field.value ?? []),
-                              priority.id,
-                            ])
-                          : field.onChange(
-                              field.value?.filter(
-                                value => value !== priority.id,
-                              ),
-                            )
-                      }
-                    />
-                  </FormControl>
-                  <FormLabel className="ml-4 text-xs">
-                    {priority.name}
-                  </FormLabel>
-                </FormItem>
-              )}
-            />
-          ))}
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
 
 type FieldProps = {
   form: UseFormReturn<z.infer<typeof FilterSchema>>;
 };
-
-function StatusField(props: FieldProps & Pick<FilterProps, 'statuses'>) {
-  const {form, statuses} = props;
-  return (
-    <FormField
-      control={form.control}
-      name="status"
-      render={({field}) => (
-        <FormItem>
-          <FormLabel className="text-xs">{i18n.t('Status')} :</FormLabel>
-          <MultiSelector
-            onValuesChange={field.onChange}
-            className="space-y-0"
-            values={field.value ?? []}>
-            <MultiSelectorTrigger
-              renderLabel={value =>
-                statuses.find(status => status.id === value)?.name
-              }>
-              <MultiSelectorInput
-                placeholder={i18n.t('Select statuses')}
-                className="text-xs"
-              />
-            </MultiSelectorTrigger>
-            <MultiSelectorContent>
-              <MultiSelectorList>
-                {statuses.map(status => (
-                  <MultiSelectorItem key={status.id} value={status.id}>
-                    <div className="flex items-center space-x-2">
-                      <span>{status.name}</span>
-                    </div>
-                  </MultiSelectorItem>
-                ))}
-              </MultiSelectorList>
-            </MultiSelectorContent>
-          </MultiSelector>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
-
-function CategoryField(props: FieldProps & Pick<FilterProps, 'categories'>) {
-  const {form, categories} = props;
-  return (
-    <FormField
-      control={form.control}
-      name="category"
-      render={({field}) => (
-        <FormItem>
-          <FormLabel className="text-xs">{i18n.t('Category')} :</FormLabel>
-          <MultiSelector
-            onValuesChange={field.onChange}
-            className="space-y-0"
-            values={field.value ?? []}>
-            <MultiSelectorTrigger
-              renderLabel={value =>
-                categories.find(category => category.id === value)?.name
-              }>
-              <MultiSelectorInput
-                placeholder={i18n.t('Select categories')}
-                className="text-xs"
-              />
-            </MultiSelectorTrigger>
-            <MultiSelectorContent>
-              <MultiSelectorList>
-                {categories.map(category => (
-                  <MultiSelectorItem key={category.id} value={category.id}>
-                    <div className="flex items-center space-x-2">
-                      <span>{category.name}</span>
-                    </div>
-                  </MultiSelectorItem>
-                ))}
-              </MultiSelectorList>
-            </MultiSelectorContent>
-          </MultiSelector>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
