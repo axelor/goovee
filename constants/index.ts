@@ -1,4 +1,11 @@
 /**
+ * APP
+ */
+export const APP_TEMPLATE_TITLE = 'Goovee';
+export const DEFAULT_APP_TEMPLATE_TITLE = 'Portal | Goovee';
+export const APP_DESCRIPTION = 'Next generation portal by Axelor';
+
+/**
  * CURRENCY
  */
 export const DEFAULT_CURRENCY_SYMBOL = '€';

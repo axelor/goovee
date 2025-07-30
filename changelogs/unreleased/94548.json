@@ -1,0 +1,6 @@
+{
+  "title": "Add PWA support to the application",
+  "type": "feature",
+  "description": "Implemented Progressive Web App (PWA) support including service worker registration, manifest setup.",
+  "scope": ["core"]
+}
