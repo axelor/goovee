@@ -164,7 +164,7 @@ export function ProductView({
                 __html: product.description || '',
               }}></p>
             {Boolean(cartQuantity) && product.allowCustomNote && (
-              <div>
+              <div className="flex flex-col gap-2 mt-4">
                 <Label>{i18n.t('Note')}</Label>
                 <Textarea
                   className="border rounded-lg"
@@ -173,7 +173,8 @@ export function ProductView({
                 />
               </div>
             )}
-            <div className="mt-4">
+            <div className="flex flex-col mt-4">
+              <p className="mb-2 font-semibold">{i18n.t('Quantity')}</p>
               <Quantity
                 value={quantity}
                 onIncrement={increment}

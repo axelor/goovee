@@ -189,7 +189,7 @@ export function ProductList({
             onClick={handleBreadCrumbClick}
           />
         </div>
-        <div className="flex items-center gap-4 mb-2">
+        <div className="flex items-center gap-4 mb-4">
           <h4 className="text-xl font-medium grow">
             {category && category?.name}
           </h4>

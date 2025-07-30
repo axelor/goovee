@@ -24,5 +24,7 @@ export default async function Layout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="container flex flex-col gap-6 mx-auto">{children}</div>
+  );
 }

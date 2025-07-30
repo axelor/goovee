@@ -165,7 +165,7 @@ export function ProductListSkeleton() {
         <div className="my-10">
           <BreadcrumbsSkeleton />
         </div>
-        <div className="flex items-center gap-4 mb-2">
+        <div className="flex items-center gap-4 mb-4">
           <Skeleton className="h-6 w-40" />
           <Skeleton className="h-4 w-32 flex-grow-0! basis-[25%]" />
           <Skeleton className="h-4 w-4" />

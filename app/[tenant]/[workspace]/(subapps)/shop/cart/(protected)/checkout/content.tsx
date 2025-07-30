@@ -279,8 +279,8 @@ export default function Content({
   return (
     <>
       <h4 className="mb-6 text-xl font-medium">{i18n.t('Confirm Cart')}</h4>
-      <div className="grid lg:grid-cols-[1fr_25%] xl:grid-cols-[1fr_21%] grid-cols-1 gap-4">
-        <div>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+        <div className="col-span-12 xl:col-span-9">
           <div className="flex flex-col gap-6">
             <AddressSelection />
             <Shipping
@@ -289,7 +289,7 @@ export default function Content({
             />
           </div>
         </div>
-        <div>
+        <div className="col-span-12 xl:col-span-3">
           <div className="flex flex-col gap-6">
             <Summary cart={$cart} />
             <Total

@@ -114,8 +114,8 @@ function CartItem({item, disabled, handleRemove, displayPrices}: any) {
           tenant,
         )}
       />
-      <div className="flex-col md:flex-row flex items-start justify-between w-full h-full">
-        <div className="flex flex-col items-start justify-between py-2 h-full">
+      <div className="flex-col md:flex-row flex gap-4 items-start justify-between w-full h-full">
+        <div className="flex flex-col items-start justify-between py-2 w-full h-full flex-1">
           <Link
             className="no-underline text-inherit"
             href={`${workspaceURI}/shop/product/${encodeURIComponent(
@@ -129,7 +129,7 @@ function CartItem({item, disabled, handleRemove, displayPrices}: any) {
             </p>
           )}
           {product.allowCustomNote && (
-            <div>
+            <div className="w-full flex flex-col gap-2 my-4">
               <Label>{i18n.t('Note')}</Label>
               <Textarea
                 className="border rounded-lg"
@@ -221,7 +221,7 @@ function CartSummary({
   const authenticated = session?.user?.id;
 
   return (
-    <div className="p-4 bg-card text-card-foreground rounded-lg">
+    <div className="col-span-12 xl:col-span-3 p-4 bg-card text-card-foreground rounded-lg">
       {workspace?.config?.displayPrices && (
         <>
           <p className="text-xl font-semibold mb-6">{i18n.t('Total')}</p>
@@ -408,19 +408,21 @@ export default function Content({
   }
 
   return (
-    <>
+    <div className="container flex flex-col gap-6 mx-auto">
       <h4 className="mb-6 text-xl font-medium">{i18n.t('Cart')}</h4>
-      <div className="grid mb-[5rem] lg:mb-0 lg:grid-cols-[1fr_25%] xl:grid-cols-[1fr_21%] grid-cols-1 gap-4">
-        {cart?.items?.length ? (
-          <CartItems
-            cart={$cart}
-            onRemove={openProductConfirmation}
-            disabled={updating}
-            workspace={workspace}
-          />
-        ) : (
-          <p className="text-xl font-bold">{i18n.t('Your cart is empty.')}</p>
-        )}
+      <div className="grid mb-[5rem] lg:mb-0 grid-cols-1 xl:grid-cols-12 gap-4">
+        <div className="col-span-12 xl:col-span-9">
+          {cart?.items?.length ? (
+            <CartItems
+              cart={$cart}
+              onRemove={openProductConfirmation}
+              disabled={updating}
+              workspace={workspace}
+            />
+          ) : (
+            <p className="text-xl font-bold">{i18n.t('Your cart is empty.')}</p>
+          )}
+        </div>
         <CartSummary
           cart={$cart}
           onRequestQuotation={openQuotationConfirmation}
@@ -448,6 +450,6 @@ export default function Content({
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </>
+    </div>
   );
 }
