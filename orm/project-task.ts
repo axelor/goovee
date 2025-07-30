@@ -165,3 +165,26 @@ export async function findTaskCategories(
 
   return project?.projectTaskCategorySet ?? [];
 }
+
+export type ProjectMember = {
+  id: string;
+  version: number;
+  fullName?: string;
+};
+export async function findProjectMembers(
+  projectId: ID,
+  tenantId: Tenant['id'],
+): Promise<ProjectMember[]> {
+  const client = await manager.getClient(tenantId);
+
+  const project = await client.aOSProject.findOne({
+    where: {id: projectId},
+    select: {
+      membersUserSet: {
+        select: {id: true, fullName: true},
+      },
+    },
+  });
+
+  return project?.membersUserSet ?? [];
+}
