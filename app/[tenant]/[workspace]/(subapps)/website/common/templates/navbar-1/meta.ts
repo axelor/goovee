@@ -8,7 +8,7 @@ import {
 export const navbar1Schema = {
   title: 'Navbar 1',
   code: 'navbar1',
-  type: Template.block,
+  type: Template.topMenu,
   fields: [],
 } as const satisfies TemplateSchema;
 

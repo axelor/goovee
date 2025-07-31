@@ -1,6 +1,7 @@
 import {
   Data,
   Demo,
+  Template,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {metaFileModel} from '../meta-models';
@@ -10,7 +11,7 @@ import {startCase} from 'lodash-es';
 export const footer1Schema = {
   title: 'Footer 1',
   code: 'footer1',
-  type: 1,
+  type: Template.block,
   fields: [
     {
       name: 'logo',

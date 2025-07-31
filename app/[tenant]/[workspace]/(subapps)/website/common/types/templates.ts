@@ -266,9 +266,9 @@ export type MetaModel<T extends EntityName = any> = {
 };
 
 export enum Template {
-  block = 0,
-  topMenu = 1,
-  leftRightMenu = 2,
+  block = 1,
+  topMenu = 2,
+  leftRightMenu = 3,
 }
 
 export type TemplateSchema = {

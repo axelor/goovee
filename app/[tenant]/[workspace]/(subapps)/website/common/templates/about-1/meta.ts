@@ -1,10 +1,15 @@
-import type {Data, Demo, TemplateSchema} from '../../types/templates';
+import {
+  Template,
+  type Data,
+  type Demo,
+  type TemplateSchema,
+} from '../../types/templates';
 import {metaFileModel} from '../meta-models';
 
 export const about1Schema = {
   title: 'About 1',
   code: 'about1',
-  type: 1,
+  type: Template.block,
   fields: [
     {
       name: 'title',

@@ -1,6 +1,7 @@
 import {
   Data,
   Demo,
+  Template,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {metaFileModel} from '../meta-models';
@@ -8,7 +9,7 @@ import {metaFileModel} from '../meta-models';
 export const cta1Schema = {
   title: 'CTA 1',
   code: 'cta1',
-  type: 1,
+  type: Template.block,
   fields: [
     {
       name: 'title',
