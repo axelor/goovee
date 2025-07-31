@@ -31,7 +31,7 @@ import {
   ObjectField,
   RelationalField,
 } from '../types/templates';
-import {processBatch, Cache} from './helper';
+import {processBatch, Cache, formatCustomFieldName} from './helper';
 
 const CUSTOM_MODEL_PREFIX = 'GooveeTemplate';
 
@@ -46,11 +46,6 @@ export function formatCustomModelName(modelName: string) {
 
 export function formatComponentCode(name: string) {
   return camelCase(name);
-}
-
-export function formatCustomFieldName(name: string, prefix?: string) {
-  prefix = prefix || '';
-  return camelCase(`${prefix} ${name}`);
 }
 
 export function isRelationalField(field: Field): field is RelationalField {

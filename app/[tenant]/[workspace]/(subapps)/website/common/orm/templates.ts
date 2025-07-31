@@ -29,12 +29,11 @@ import type {
   Model,
 } from '../types/templates';
 import {
-  formatCustomFieldName,
   isArrayField,
   isJsonRelationalField,
   isRelationalField,
 } from '../utils/templates';
-import {Cache} from '../utils/helper';
+import {Cache, formatCustomFieldName} from '../utils/helper';
 
 const pump = promisify(pipeline);
 

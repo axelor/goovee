@@ -1,6 +1,7 @@
 import {SUBAPP_CODES} from '@/constants';
 import type {MountType} from '../types';
 import {MOUNT_TYPE} from '../constants';
+import {camelCase} from 'lodash-es';
 
 export function getMetaFileURL(props: {
   metaFile: {id: string | number} | undefined;
@@ -86,4 +87,9 @@ export class Cache<T = any> {
   entries(): [string, T][] {
     return Array.from(this.store.entries());
   }
+}
+
+export function formatCustomFieldName(name: string, prefix?: string) {
+  prefix = prefix || '';
+  return camelCase(`${prefix} ${name}`);
 }

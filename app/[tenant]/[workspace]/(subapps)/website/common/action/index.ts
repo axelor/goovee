@@ -4,11 +4,13 @@ import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/middleware';
-import {t} from '@/locale/server';
-import type {ID, PortalWorkspace, Website, WebsitePage} from '@/types';
-import {findSubappAccess} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
+import {t} from '@/locale/server';
+import {TENANT_HEADER} from '@/middleware';
+import {findSubappAccess} from '@/orm/workspace';
+import type {ID, PortalWorkspace, Website, WebsitePage} from '@/types';
+import {manager} from '@/tenant';
+import type {ActionResponse} from '@/types/action';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -16,8 +18,7 @@ import {
   findWebsiteBySlug,
   findWebsitePageBySlug,
 } from '../orm/website';
-import {manager} from '@/tenant';
-import {ActionResponse} from '@/types/action';
+import {getWiki1ContentFieldName} from '../templates/wiki-1';
 
 export async function getLocaleRedirectionURL({
   workspaceURL,
@@ -221,11 +222,12 @@ export async function updateWikiContent({
   const attributes = contentLine.content?.attrs;
 
   const client = await manager.getClient(tenantId);
+  const fieldName = getWiki1ContentFieldName();
   const newContent = await client.aOSPortalCmsContent.update({
     data: {
       id: String(contentId),
       version: contentVersion,
-      attrs: {...attributes, content} as any,
+      attrs: {...attributes, [fieldName]: content} as any,
     },
   });
   return {
