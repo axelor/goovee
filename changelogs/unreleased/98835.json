@@ -1,0 +1,5 @@
+{
+  "title": "Fix wiki content not being saved",
+  "type": "fix",
+  "scope": ["website"]
+}
