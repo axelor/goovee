@@ -106,18 +106,24 @@ export function withTicketAndTaskAccessFilter(props: AuthProps) {
   };
 }
 
-export function getTimespentFilter(auth: AuthProps) {
+export function getTimesheetLineAccessFilter({
+  auth,
+  typeSelect,
+}: {
+  auth: AuthProps;
+  typeSelect?: TASK_TYPE_SELECT;
+}) {
+  const withAccessFilter =
+    typeSelect === TASK_TYPE_SELECT.TICKET
+      ? withTicketAccessFilter
+      : typeSelect === TASK_TYPE_SELECT.TASK
+        ? withTaskAccessFilter
+        : withTicketAndTaskAccessFilter;
+
   const filter = {
-    timesheet: {statusSelect: TIMESHEET_STATUS.VALIDATED},
-    OR: [
-      {projectTask: {id: null}},
-      {
-        projectTask: withTaskAccessFilter(auth)({
-          typeSelect: TASK_TYPE_SELECT.TASK,
-        }),
-      },
-      {projectTask: withTicketAccessFilter(auth)()},
-    ],
+    // timesheet: {statusSelect: TIMESHEET_STATUS.VALIDATED},
+    OR: [{projectTask: {id: null}}, {projectTask: withAccessFilter(auth)()}],
+    customerDurationHours: {gt: 0},
   } satisfies WhereOptions<AOSHRTimesheetLine>;
   return filter;
 }
