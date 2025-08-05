@@ -36,7 +36,7 @@ export default async function Page({
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const {limit = 8, page = 1} = searchParams;
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -48,7 +48,7 @@ export default async function Page({
   }
   if (error) notFound();
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const projects = await findProjectsWithTaskCount({
     take: +limit,

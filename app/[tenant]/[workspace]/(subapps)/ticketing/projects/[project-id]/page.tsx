@@ -72,7 +72,7 @@ export default async function Page({
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -84,7 +84,7 @@ export default async function Page({
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const [project, tickets, statuses] = await Promise.all([
     findProject(projectId, auth),
@@ -125,14 +125,14 @@ export default async function Page({
       label: await t(MANAGED_TICKETS_TITLE),
       count: getManagedTicketCount({projectId, auth}),
       icon: MdListAlt,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status, managedBy: [auth.userId.toString()]})}&title=${encodeURIComponent(MANAGED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status, managedBy: [auth.user.id.toString()]})}&title=${encodeURIComponent(MANAGED_TICKETS_TITLE)}`,
       iconClassName: 'bg-palette-purple text-palette-purple-dark',
     },
     workspace.config.isShowCreatedTicket && {
       label: await t(CREATED_TICKETS_TITLE),
       count: getCreatedTicketCount({projectId, auth}),
       icon: MdPending,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status, createdBy: [auth.userId.toString()]})}&title=${encodeURIComponent(CREATED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status, createdBy: [auth.user.id.toString()]})}&title=${encodeURIComponent(CREATED_TICKETS_TITLE)}`,
       iconClassName: 'bg-palette-yellow text-palette-yellow-dark',
     },
     workspace.config.isShowResolvedTicket && {

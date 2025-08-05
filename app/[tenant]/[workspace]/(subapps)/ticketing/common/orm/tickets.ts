@@ -31,11 +31,14 @@ import type {
   TicketListTicket,
   TicketSearch,
 } from '../types';
-import type {AuthProps} from '../utils/auth-helper';
+import type {AuthProps} from '@/orm/project-task';
 import {sendTrackMail} from '../utils/mail';
 import type {CreateTicketInfo, UpdateTicketInfo} from '../utils/validators';
 import type {QueryProps} from './helpers';
-import {getProjectAccessFilter, withTicketAccessFilter} from './helpers';
+import {
+  getProjectAccessFilter,
+  withTicketAccessFilter,
+} from '@/orm/project-task';
 import {getMailRecipients} from './mail';
 
 export type TicketProps<T extends Entity> = QueryProps<T> & {
@@ -93,7 +96,7 @@ export async function createTicket({
     parentId,
   } = data;
   let {managedBy} = data;
-  managedBy = managedBy || String(auth.userId);
+  managedBy = managedBy || String(auth.user.id);
 
   if (!auth.tenantId) {
     throw new Error(await t('TenantId is required'));
@@ -150,7 +153,7 @@ export async function createTicket({
       isPrivate: false,
       isInternal: false,
       progress: '0.00',
-      createdByContact: {select: {id: auth.userId}},
+      createdByContact: {select: {id: auth.user.id}},
       project: {select: {id: projectId}},
       name: subject,
       description: description,
@@ -264,10 +267,10 @@ export async function createTicket({
     if (workspaceUserId) {
       addComment({
         modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: auth.userId,
+        userId: auth.user.id,
         workspaceUserId: workspaceUserId,
         recordId: newTicket.id,
-        subject: `Record Created by ${auth.simpleFullName}`,
+        subject: `Record Created by ${auth.user.simpleFullName}`,
         messageBody: {title: 'Record created', tracks: tracks, tags: []},
         messageType: MAIL_MESSAGE_TYPE.notification,
         tenantId: auth.tenantId,
@@ -281,7 +284,7 @@ export async function createTicket({
   }
 
   getMailRecipients({
-    userId: auth.userId,
+    userId: auth.user.id,
     contacts: new Set([
       newTicket.createdByContact?.id,
       newTicket.managedByContact?.id,
@@ -292,7 +295,7 @@ export async function createTicket({
     .then(reciepients => {
       if (reciepients.length) {
         return sendTrackMail({
-          author: auth.simpleFullName,
+          author: auth.user.simpleFullName,
           type: 'create',
           tracks,
           projectName: newTicket.project?.name!,
@@ -493,10 +496,10 @@ export async function updateTicket({
     if (workspaceUserId && !fromWS) {
       addComment({
         modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: auth.userId,
+        userId: auth.user.id,
         workspaceUserId: workspaceUserId,
         recordId: newTicket.id,
-        subject: `Record Updated by ${auth.simpleFullName}`,
+        subject: `Record Updated by ${auth.user.simpleFullName}`,
         messageBody: {title: 'Record updated', tracks: tracks, tags: []},
         messageType: MAIL_MESSAGE_TYPE.notification,
         tenantId: auth.tenantId,
@@ -510,7 +513,7 @@ export async function updateTicket({
   }
 
   getMailRecipients({
-    userId: auth.userId,
+    userId: auth.user.id,
     contacts: new Set([
       newTicket.createdByContact?.id,
       newTicket.managedByContact?.id,
@@ -522,7 +525,7 @@ export async function updateTicket({
     .then(reciepients => {
       if (reciepients.length) {
         return sendTrackMail({
-          author: auth.simpleFullName,
+          author: auth.user.simpleFullName,
           type: 'update',
           tracks,
           projectName: newTicket.project?.name!,
@@ -575,8 +578,8 @@ export async function getMyTicketCount(props: {
       project: {id: projectId},
       status: {isCompleted: false},
       OR: [
-        {managedByContact: {id: auth.userId}},
-        {createdByContact: {id: auth.userId}},
+        {managedByContact: {id: auth.user.id}},
+        {createdByContact: {id: auth.user.id}},
       ],
     }),
   });
@@ -597,7 +600,7 @@ export async function getManagedTicketCount(props: {
     where: withTicketAccessFilter(auth)({
       project: {id: projectId},
       status: {isCompleted: false},
-      managedByContact: {id: auth.userId},
+      managedByContact: {id: auth.user.id},
     }),
   });
 
@@ -618,7 +621,7 @@ export async function getCreatedTicketCount(props: {
     where: withTicketAccessFilter(auth)({
       project: {id: projectId},
       status: {isCompleted: false},
-      createdByContact: {id: auth.userId},
+      createdByContact: {id: auth.user.id},
     }),
   });
 

@@ -45,7 +45,7 @@ export default async function Page({
   const projectId = params['project-id'];
   const {parentId} = searchParams;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -57,7 +57,7 @@ export default async function Page({
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   if (parentId) {
     const parentTicket = await findTicketAccess({
@@ -137,7 +137,7 @@ export default async function Page({
         categories={categories}
         priorities={priorities}
         contacts={contacts}
-        userId={auth.userId}
+        userId={auth.user.id}
         parentId={parentId}
         workspaceURI={workspaceURI}
         formFields={clone(workspace.config.ticketingFormFieldSet)}

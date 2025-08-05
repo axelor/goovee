@@ -1,6 +1,126 @@
-import {ORDER_BY, SUBAPP_CODES} from '@/constants';
+import {TIMESHEET_STATUS} from '@/app/[tenant]/[workspace]/(subapps)/(enterprise)/projects/common/constants';
+import {PortalWorkspaceWithConfig} from '@/app/[tenant]/[workspace]/(subapps)/(enterprise)/projects/common/utils/auth-helper';
+import {ORDER_BY, ROLE, SUBAPP_CODES, TASK_TYPE_SELECT} from '@/constants';
+import type {
+  AOSHRTimesheetLine,
+  AOSProject,
+  AOSProjectTask,
+} from '@/goovee/.generated/models';
 import {type Tenant, manager} from '@/lib/core/tenant';
-import type {ID} from '@goovee/orm';
+import type {User, Subapp} from '@/types';
+import {and, or} from '@/utils/orm';
+import type {ID, WhereOptions} from '@goovee/orm';
+
+export type AuthProps = {
+  user: User;
+  subapp: Subapp;
+  workspace: PortalWorkspaceWithConfig;
+  workspaceURL: string;
+  tenantId: Tenant['id'];
+};
+
+export function getProjectAccessFilter(props: AuthProps) {
+  const {user, workspace} = props;
+  const where: WhereOptions<AOSProject> = {
+    OR: [{archived: false}, {archived: null}],
+    isBusinessProject: true,
+    projectStatus: {isCompleted: false},
+    portalWorkspace: {id: workspace.id},
+    ...(user.isContact
+      ? {clientPartner: {mainPartnerContacts: {id: user.id}}}
+      : {clientPartner: {id: user.id}}),
+  };
+  return where;
+}
+
+export function getTicketAccessFilter() {
+  const where = and<AOSProjectTask>([
+    {typeSelect: TASK_TYPE_SELECT.TICKET},
+    {OR: [{archived: false}, {archived: null}]},
+    {OR: [{isPrivate: false}, {isPrivate: null}]},
+    {OR: [{isInternal: false}, {isInternal: null}]},
+  ]);
+  return where;
+}
+
+export function getRestrictedTicketAccessFilter(props: AuthProps) {
+  const {user} = props;
+  const where: WhereOptions<AOSProjectTask> = {
+    OR: [{createdByContact: {id: user.id}}, {managedByContact: {id: user.id}}],
+  };
+  return where;
+}
+
+export function withTicketAccessFilter(props: AuthProps) {
+  const {user, subapp} = props;
+  const isRestricted =
+    user.isContact && !subapp.isContactAdmin && subapp.role != ROLE.TOTAL;
+  return function (where?: WhereOptions<AOSProjectTask>) {
+    if (isRestricted) {
+      return and<AOSProjectTask>([
+        where,
+        getTicketAccessFilter(),
+        getRestrictedTicketAccessFilter(props),
+      ]);
+    }
+    return and<AOSProjectTask>([where, getTicketAccessFilter()]);
+  };
+}
+
+export function getTaskAccessFilter() {
+  const where = and<AOSProjectTask>([
+    {typeSelect: TASK_TYPE_SELECT.TASK},
+    {OR: [{archived: false}, {archived: null}]},
+    {OR: [{isPrivate: false}, {isPrivate: null}]},
+    {OR: [{isInternal: false}, {isInternal: null}]},
+  ]);
+  return where;
+}
+
+export function getRestrictedTaskAccessFilter(props: AuthProps) {
+  return undefined;
+}
+
+export function withTaskAccessFilter(props: AuthProps) {
+  const {user, subapp} = props;
+  const isRestricted =
+    user.isContact && !subapp.isContactAdmin && subapp.role != ROLE.TOTAL;
+  return function (where?: WhereOptions<AOSProjectTask>) {
+    if (isRestricted) {
+      return and<AOSProjectTask>([
+        where,
+        getTaskAccessFilter(),
+        getRestrictedTaskAccessFilter(props),
+      ]);
+    }
+    return and<AOSProjectTask>([where, getTaskAccessFilter()]);
+  };
+}
+
+export function withTicketAndTaskAccessFilter(props: AuthProps) {
+  return function (where?: WhereOptions<AOSProjectTask>) {
+    return or<AOSProjectTask>([
+      withTaskAccessFilter(props)(where),
+      withTicketAccessFilter(props)(where),
+    ]);
+  };
+}
+
+export function getTimespentFilter(auth: AuthProps) {
+  const filter = {
+    timesheet: {statusSelect: TIMESHEET_STATUS.VALIDATED},
+    OR: [
+      {projectTask: {id: null}},
+      {
+        projectTask: withTaskAccessFilter(auth)({
+          typeSelect: TASK_TYPE_SELECT.TASK,
+        }),
+      },
+      {projectTask: withTicketAccessFilter(auth)()},
+    ],
+  } satisfies WhereOptions<AOSHRTimesheetLine>;
+  return filter;
+}
 
 export type MainPartnerContact = {
   id: string;

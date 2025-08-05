@@ -5,8 +5,8 @@ import type {AOSProject} from '@/goovee/.generated/models';
 import type {ID} from '@goovee/orm';
 
 import type {QueryProps} from './helpers';
-import type {AuthProps} from '../utils/auth-helper';
-import {getProjectAccessFilter} from './helpers';
+import type {AuthProps} from '@/orm/project-task';
+import {getProjectAccessFilter} from '@/orm/project-task';
 import {getAllTicketCount} from './tickets';
 import {and} from '@/utils/orm';
 

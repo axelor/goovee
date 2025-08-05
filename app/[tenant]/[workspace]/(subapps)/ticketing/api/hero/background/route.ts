@@ -9,12 +9,12 @@ export async function GET(
 ) {
   const {workspaceURL, tenant} = workspacePathname(params);
 
-  const {error, info} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth} = await ensureAuth(workspaceURL, tenant);
   if (error) {
     return new NextResponse('Unauthorized', {status: 401});
   }
 
-  const {workspace} = info;
+  const {workspace} = auth;
   const bgImageId = workspace.config.ticketHeroBgImage?.id;
 
   if (!bgImageId) {
