@@ -15,9 +15,9 @@ import {and} from '@/utils/orm';
 // ---- LOCAL IMPORTS ---- //
 import {
   CUSTOMERS_DELIVERY_STATUS,
-  INVOICE_STATUS,
   ORDER_STATUS,
 } from '@/subapps/orders/common/constants/orders';
+import {INVOICE_STATUS} from '@/constants';
 import type {Order} from '@/subapps/orders/common/types/orders';
 
 export const findOrders = async ({

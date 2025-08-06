@@ -1,10 +1,7 @@
 // ---- LOCAL IMPORTS ---- //
 
-import {
-  INVOICE,
-  INVOICE_CATEGORY,
-  INVOICE_STATUS,
-} from '@/subapps/invoices/common/constants/invoices';
+import {INVOICE} from '@/subapps/invoices/common/constants/invoices';
+import {INVOICE_CATEGORY, INVOICE_STATUS} from '@/constants';
 
 export function extractAmount(amount: string | number): number {
   const amountStr = String(amount);

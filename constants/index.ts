@@ -253,3 +253,20 @@ export const TASK_INVOICING_TYPE = {
   NO_INVOICING: 3,
   ON_PROGRESS: 4,
 } as const;
+
+export const TIMESHEET_STATUS = {
+  DRAFT: 1,
+  CONFIRMED: 2,
+  VALIDATED: 3,
+  REFUSED: 4,
+  CANCELLED: 5,
+};
+
+export const INVOICE_STATUS = {
+  VENTILATED: 3,
+  UNPAID: 0,
+};
+
+export const INVOICE_CATEGORY = {
+  SALE_INVOICE: 3,
+};
