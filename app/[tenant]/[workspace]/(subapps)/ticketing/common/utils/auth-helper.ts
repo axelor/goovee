@@ -1,15 +1,11 @@
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {AuthProps} from '@/orm/project-task';
+import {AuthProps, PortalWorkspaceWithConfig} from '@/orm/project-task';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {Tenant} from '@/tenant';
-import type {PortalWorkspace} from '@/types';
 import {Maybe} from '@/types/util';
 import {cache} from 'react';
-
-type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
-  Required<Pick<PortalWorkspace, 'config'>>;
 
 export const ensureAuth = cache(async function ensureAuth(
   workspaceURL: Maybe<string>,

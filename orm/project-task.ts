@@ -1,15 +1,31 @@
-import {TIMESHEET_STATUS} from '@/app/[tenant]/[workspace]/(subapps)/(enterprise)/projects/common/constants';
-import {PortalWorkspaceWithConfig} from '@/app/[tenant]/[workspace]/(subapps)/(enterprise)/projects/common/utils/auth-helper';
-import {ORDER_BY, ROLE, SUBAPP_CODES, TASK_TYPE_SELECT} from '@/constants';
+import {
+  INVOICE_CATEGORY,
+  INVOICE_STATUS,
+  ORDER_BY,
+  ROLE,
+  SUBAPP_CODES,
+  TASK_TYPE_SELECT,
+  TIMESHEET_STATUS,
+} from '@/constants';
 import type {
   AOSHRTimesheetLine,
+  AOSInvoice,
   AOSProject,
   AOSProjectTask,
 } from '@/goovee/.generated/models';
 import {type Tenant, manager} from '@/lib/core/tenant';
-import type {User, Subapp} from '@/types';
+import {
+  type User,
+  type Subapp,
+  PartnerKey,
+  type PortalWorkspace,
+} from '@/types';
+import {getWhereClauseForEntity} from '@/utils/filters';
 import {and, or} from '@/utils/orm';
 import type {ID, WhereOptions} from '@goovee/orm';
+
+export type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
+  Required<Pick<PortalWorkspace, 'config'>>;
 
 export type AuthProps = {
   user: User;
@@ -121,11 +137,30 @@ export function getTimesheetLineAccessFilter({
         : withTicketAndTaskAccessFilter;
 
   const filter = {
-    // timesheet: {statusSelect: TIMESHEET_STATUS.VALIDATED},
+    timesheet: {statusSelect: TIMESHEET_STATUS.VALIDATED},
     OR: [{projectTask: {id: null}}, {projectTask: withAccessFilter(auth)()}],
     customerDurationHours: {gt: 0},
   } satisfies WhereOptions<AOSHRTimesheetLine>;
   return filter;
+}
+
+export function getInvoiceAccessFilter(
+  auth: Pick<AuthProps, 'subapp' | 'user'>,
+) {
+  const {user, subapp} = auth;
+  return and<AOSInvoice>([
+    getWhereClauseForEntity({
+      user,
+      role: subapp.role,
+      isContactAdmin: subapp.isContactAdmin,
+      partnerKey: PartnerKey.PARTNER,
+    }),
+    {
+      OR: [{archived: false}, {archived: null}],
+      statusSelect: INVOICE_STATUS.VENTILATED,
+      operationTypeSelect: INVOICE_CATEGORY.SALE_INVOICE,
+    },
+  ]);
 }
 
 export type MainPartnerContact = {
