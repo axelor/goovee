@@ -270,3 +270,8 @@ export const INVOICE_STATUS = {
 export const INVOICE_CATEGORY = {
   SALE_INVOICE: 3,
 };
+
+export const INVOICE_TYPE = {
+  UNPAID: 'Unpaid',
+  PAID: 'Paid',
+};

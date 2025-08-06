@@ -22,11 +22,6 @@ const INVOICE_TAB_ITEMS = [
 
 const INVOICE_COLUMNS = ['Description', 'Rate', 'Qty', 'Amount'];
 
-const INVOICE_TYPE = {
-  UNPAID: 'Unpaid',
-  PAID: 'Paid',
-};
-
 const UNABLE_TO_FIND_INVOICE = 'Unable to load file';
 
 enum INVOICE_PAYMENT_OPTIONS {
@@ -39,7 +34,6 @@ export {
   HEADING,
   INVOICE_TAB_ITEMS,
   INVOICE_COLUMNS,
-  INVOICE_TYPE,
   INVOICE,
   UNABLE_TO_FIND_INVOICE,
   INVOICE_PAYMENT_OPTIONS,
