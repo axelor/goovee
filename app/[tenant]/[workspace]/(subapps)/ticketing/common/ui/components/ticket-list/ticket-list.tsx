@@ -134,7 +134,7 @@ export function ParentTicketList(props: {
           records={tickets}
           columns={columns}
           onRowClick={handleRowClick}
-          deleteCellRenderer={ticket => (
+          actionCellRenderer={ticket => (
             <RemoveParentButton
               ticketId={ticketId}
               relatedTicketId={ticket.id}
@@ -185,7 +185,7 @@ export function ChildTicketList(props: {
           records={tickets ?? []}
           columns={columns}
           onRowClick={handleRowClick}
-          deleteCellRenderer={ticket => (
+          actionCellRenderer={ticket => (
             <RemoveChildButton
               ticketId={ticketId}
               relatedTicketId={ticket.id}
@@ -236,7 +236,7 @@ export function RelatedTicketList(props: {
           records={links ?? []}
           columns={columns}
           onRowClick={handleRowClick}
-          deleteCellRenderer={link =>
+          actionCellRenderer={link =>
             link.relatedTask && (
               <RemoveLinkButton
                 ticketId={ticketId}

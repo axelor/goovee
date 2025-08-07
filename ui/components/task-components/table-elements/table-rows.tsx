@@ -18,13 +18,13 @@ type TableRowsProps<T extends Record<string, any>> = {
   records: T[];
   columns: Column<T>[];
   onRowClick?: (record: T, e: MouseEvent<HTMLTableRowElement>) => void;
-  deleteCellRenderer?: (record: T) => ReactNode;
+  actionCellRenderer?: (record: T) => ReactNode;
 };
 
 export function TableRows<T extends Record<string, any>>(
   props: TableRowsProps<T>,
 ) {
-  const {records, columns, deleteCellRenderer, onRowClick} = props;
+  const {records, columns, actionCellRenderer, onRowClick} = props;
   const [openId, setOpenId] = useState<string | null>(null);
 
   const res = useResponsive();
@@ -80,9 +80,9 @@ export function TableRows<T extends Record<string, any>>(
               <Arrow className="cursor-pointer inline" />
             </TableCell>
           )}
-          {deleteCellRenderer && (
+          {actionCellRenderer && (
             <TableCell className="text-center action pointer-events-none p-3 w-16">
-              {deleteCellRenderer(record)}
+              {actionCellRenderer(record)}
             </TableCell>
           )}
         </TableRow>
