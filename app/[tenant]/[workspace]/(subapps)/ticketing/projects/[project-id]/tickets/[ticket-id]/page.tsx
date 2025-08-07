@@ -6,7 +6,7 @@ import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
 import {Comments, isCommentEnabled, SORT_TYPE} from '@/comments';
-import {SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES, TASK_TYPE_SELECT} from '@/constants';
 import {t} from '@/locale/server';
 import {type Tenant} from '@/tenant';
 import {
@@ -39,8 +39,9 @@ import {
   findRelatedTicketLinks,
   findTicket,
   findTicketLinkTypes,
+  findTimesheetLines,
 } from '../../../../common/orm/tickets';
-import type {TaskCategory} from '@/orm/project-task';
+import type {AuthProps, TaskCategory} from '@/orm/project-task';
 import type {TaskPriority} from '@/orm/project-task';
 import type {MainPartnerContact} from '@/orm/project-task';
 import {TicketDetails} from '../../../../common/ui/components/ticket-details';
@@ -49,6 +50,7 @@ import {
   ChildTicketList,
   ParentTicketList,
   RelatedTicketList,
+  TimesheetLines,
 } from '../../../../common/ui/components/ticket-list';
 import {ensureAuth} from '../../../../common/utils/auth-helper';
 import {EncodedTicketFilter} from '../../../../common/utils/validators';
@@ -57,9 +59,26 @@ import {
   ParentTicketsHeader,
   RelatedTicketsHeader,
 } from './headers';
+import {getSkip} from '../../../../common/utils/search-param';
+import {getTotalTimeSpent} from '@/orm/project-task';
+import {getPages} from '../../../../common/utils';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/ui/components/pagination';
+import {ChevronLeft, ChevronRight} from 'lucide-react';
+import {getPaginationButtons} from '@/utils/pagination';
+import {TicketDetailsSearchParams} from '../../../../common/types';
+import {formatNumber} from '@/lib/core/locale/server/formatters';
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: {
     tenant: string;
@@ -67,6 +86,7 @@ export default async function Page({
     'project-id': string;
     'ticket-id': string;
   };
+  searchParams: TicketDetailsSearchParams;
 }) {
   const {workspaceURI, workspaceURL} = workspacePathname(params);
   const projectId = params['project-id'];
@@ -201,6 +221,19 @@ export default async function Page({
                   projectId={ticket.project?.id}
                   tenantId={tenant}
                   fields={workspace.config.ticketingFieldSet}
+                />
+              </Suspense>
+            )}
+            {true && (
+              //TODO: change config
+              <Suspense fallback={<Skeleton className="h-[160px]" />}>
+                <TimeSpentList
+                  ticketId={ticket.id}
+                  auth={auth}
+                  fields={workspace.config.ticketingFieldSet}
+                  searchParams={searchParams}
+                  workspaceURI={workspaceURI}
+                  projectId={projectId}
                 />
               </Suspense>
             )}
@@ -351,6 +384,120 @@ async function RelatedTickets({
         ticketId={ticketId.toString()}
         fields={clone(fields)}
       />
+    </div>
+  );
+}
+
+async function TimeSpentList({
+  ticketId,
+  fields,
+  searchParams,
+  workspaceURI,
+  projectId,
+  auth,
+}: {
+  ticketId: ID;
+  auth: AuthProps;
+  fields: PortalAppConfig['ticketingFieldSet'];
+  searchParams: TicketDetailsSearchParams;
+  workspaceURI: string;
+  projectId: string;
+}) {
+  const {timesheetPage: page = 1, timesheetLimit: limit = 7} = searchParams;
+  const [timesheetlines, totalTimespent] = await Promise.all([
+    findTimesheetLines({
+      ticketId,
+      auth,
+      orderBy: {date: 'DESC'},
+      take: +limit,
+      skip: getSkip(limit, page),
+    }).then(clone),
+    getTotalTimeSpent({
+      taskId: ticketId,
+      projectId,
+      auth,
+      typeSelect: TASK_TYPE_SELECT.TICKET,
+    }).then(hours => formatNumber(hours, {scale: 2, type: 'DECIMAL'})),
+  ]);
+  const pages = getPages(timesheetlines, limit);
+  const pathname = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`;
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-xl font-semibold">{await t('Time spent')}</h4>
+        <div className="font-semibold">
+          {await t('Total')}:{totalTimespent} ({await t('hours')})
+        </div>
+      </div>
+      <hr className="mt-5" />
+      <TimesheetLines
+        timesheetlines={timesheetlines ?? []}
+        fields={clone(fields)}
+      />
+
+      {pages > 1 && (
+        <Pagination className="!mb-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious asChild>
+                <Link
+                  scroll={false}
+                  className={cn({['invisible']: +page <= 1})}
+                  replace
+                  href={{
+                    pathname,
+                    query: {...searchParams, page: +page - 1},
+                  }}>
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="sr-only">Previous</span>
+                </Link>
+              </PaginationPrevious>
+            </PaginationItem>
+            {getPaginationButtons({
+              currentPage: +page,
+              totalPages: pages,
+            }).map((value, i) => {
+              if (typeof value == 'string') {
+                return (
+                  <PaginationItem key={i}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                );
+              }
+              return (
+                <PaginationItem key={value}>
+                  <PaginationLink isActive={+page === value} asChild>
+                    <Link
+                      scroll={false}
+                      replace
+                      href={{
+                        pathname,
+                        query: {...searchParams, page: value},
+                      }}>
+                      {value}
+                    </Link>
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            <PaginationItem>
+              <PaginationNext asChild>
+                <Link
+                  scroll={false}
+                  replace
+                  className={cn({['invisible']: +page >= pages})}
+                  href={{
+                    pathname,
+                    query: {...searchParams, page: +page + 1},
+                  }}>
+                  <span className="sr-only">Next</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </PaginationNext>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }

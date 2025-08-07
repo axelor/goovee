@@ -1,4 +1,13 @@
-import type {Entity, ID, Payload, SelectOptions, UpdateArgs} from '@goovee/orm';
+import type {
+  BigDecimal,
+  Entity,
+  ID,
+  OrderByArg,
+  Payload,
+  SelectOptions,
+  UpdateArgs,
+  WhereArg,
+} from '@goovee/orm';
 import axios from 'axios';
 
 // ---- CORE IMPORTS ---- //
@@ -11,7 +20,10 @@ import {
   TASK_INVOICING_TYPE,
   TASK_TYPE_SELECT,
 } from '@/constants';
-import type {AOSProjectTask} from '@/goovee/.generated/models';
+import type {
+  AOSHRTimesheetLine,
+  AOSProjectTask,
+} from '@/goovee/.generated/models';
 import {t} from '@/locale/server';
 import {manager, type Tenant} from '@/tenant';
 import {sql} from '@/utils/template-string';
@@ -37,9 +49,11 @@ import type {CreateTicketInfo, UpdateTicketInfo} from '../utils/validators';
 import type {QueryProps} from './helpers';
 import {
   getProjectAccessFilter,
+  getTimesheetLineAccessFilter,
   withTicketAccessFilter,
 } from '@/orm/project-task';
 import {getMailRecipients} from './mail';
+import {and} from '@/utils/orm';
 
 export type TicketProps<T extends Entity> = QueryProps<T> & {
   projectId: ID;
@@ -1371,4 +1385,51 @@ export async function deleteRelatedTicketLink({
     where: {id: {in: linksToDelete}},
   });
   return deleteCount;
+}
+
+export type TimesheetLine = {
+  id: string;
+  version: number;
+  employee?: {id: string; version: number; name?: string};
+  date?: Date;
+  customerDurationHours?: BigDecimal;
+  comments?: string;
+  projectTask?: {id: string; version: number; typeSelect?: string};
+  project?: {id: string; version: number};
+  _count?: string;
+};
+
+export async function findTimesheetLines(props: {
+  ticketId?: ID;
+  projectId?: ID;
+  auth: AuthProps;
+  take?: number;
+  skip?: number;
+  orderBy?: OrderByArg<AOSHRTimesheetLine>;
+  where?: WhereArg<AOSHRTimesheetLine> | null;
+}): Promise<TimesheetLine[]> {
+  const {ticketId, projectId, auth, take, skip, orderBy, where} = props;
+  const client = await manager.getClient(auth.tenantId);
+
+  const timesheetLines = await client.aOSHRTimesheetLine.find({
+    where: and<AOSHRTimesheetLine>([
+      getTimesheetLineAccessFilter({auth, typeSelect: TASK_TYPE_SELECT.TICKET}),
+      projectId && {project: {id: projectId}},
+      ticketId && {projectTask: {id: ticketId}},
+      where,
+    ]),
+    select: {
+      employee: {name: true, user: {id: true}},
+      date: true,
+      customerDurationHours: true,
+      comments: true,
+      projectTask: {id: true, typeSelect: true},
+      project: {id: true},
+    },
+    ...(orderBy && {orderBy}),
+    ...(take && {take}),
+    ...(skip && {skip}),
+  });
+
+  return timesheetLines;
 }

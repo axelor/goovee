@@ -14,6 +14,8 @@ import type {
   TicketListTicket,
 } from '../../../types';
 import {isWithProvider} from '../../../utils';
+import {TimesheetLine} from '../../../orm/tickets';
+import {i18n} from '@/lib/core/locale';
 
 export const ticketColumns: Column<Cloned<TicketListTicket>>[] = [
   {
@@ -265,5 +267,43 @@ export const relatedColumns: Column<Cloned<TicketLink>>[] = [
     label: 'Updated',
     content: ({relatedTask: t}) => formatDate(t?.updatedOn!),
     getter: 'relatedTask.updatedOn',
+  },
+];
+
+export const timesheetColumns: Column<Cloned<TimesheetLine>>[] = [
+  {
+    key: 'date',
+    label: 'Date',
+    content: t => formatDate(t.date!),
+    getter: 'date',
+    mobile: true,
+    required: true,
+  },
+  {
+    key: 'employee',
+    label: 'Employee',
+    content: t => t.employee?.name,
+    getter: 'employee.name',
+    required: true,
+  },
+  {
+    key: 'customerDurationHours',
+    label: 'Duration',
+    content: t => (
+      <p className="font-medium">
+        <span>{t.customerDurationHours}</span>
+        <span className="ms-1 text-xs">{i18n.t('Hours')}</span>
+      </p>
+    ),
+    getter: 'customerDurationHours',
+    mobile: true,
+    required: true,
+  },
+  {
+    key: 'comments',
+    label: 'Comments',
+    content: t => <p className="max-w-[80ch] line-clamp-3">{t.comments}</p>,
+    getter: 'comments',
+    required: true,
   },
 ];

@@ -1,0 +1,74 @@
+{
+  "name": "AOSHRTimesheetLine",
+  "table": "hr_timesheet_line",
+  "synchronize": false,
+  "fields": [
+    {
+      "name": "date",
+      "type": "Date",
+      "column": "date_val",
+      "required": true
+    },
+    {
+      "name": "toInvoice",
+      "type": "Boolean"
+    },
+    {
+      "name": "projectTask",
+      "type": "ManyToOne",
+      "target": "AOSProjectTask"
+    },
+    {
+      "name": "finalInvoice",
+      "type": "ManyToOne",
+      "target": "AOSInvoice"
+    },
+    {
+      "name": "project",
+      "type": "ManyToOne",
+      "target": "AOSProject"
+    },
+    {
+      "name": "employee",
+      "type": "ManyToOne",
+      "target": "AOSHREmployee"
+    },
+    {
+      "name": "duration",
+      "type": "Decimal"
+    },
+    {
+      "name": "durationForCustomer",
+      "type": "Decimal"
+    },
+    {
+      "name": "customerDurationHours",
+      "type": "Decimal"
+    },
+    {
+      "name": "hoursDuration",
+      "type": "Decimal"
+    },
+    {
+      "name": "archived",
+      "type": "Boolean"
+    },
+    {
+      "name": "comments",
+      "type": "String"
+    },
+    {
+      "name": "invoiced",
+      "type": "Boolean"
+    },
+    {
+      "name": "sequence",
+      "type": "Int"
+    },
+    {
+      "name": "timesheet",
+      "type": "ManyToOne",
+      "target": "AOSHRTimesheet"
+    }
+  ]
+}

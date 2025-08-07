@@ -21,6 +21,7 @@ import {
   parentColumns,
   relatedColumns,
   ticketColumns,
+  timesheetColumns,
 } from './columns';
 import {
   RemoveChildButton,
@@ -28,6 +29,7 @@ import {
   RemoveParentButton,
 } from './ticket-row-buttons';
 import type {PortalAppConfig} from '@/types';
+import {TimesheetLine} from '../../../orm/tickets';
 
 type TicketListProps = {
   tickets: Cloned<TicketListTicket>[];
@@ -246,6 +248,31 @@ export function RelatedTicketList(props: {
             )
           }
         />
+      </TableBody>
+    </Table>
+  );
+}
+
+export function TimesheetLines({
+  timesheetlines,
+  fields,
+}: {
+  timesheetlines: Cloned<TimesheetLine>[];
+  fields: PortalAppConfig['ticketingFieldSet'];
+}) {
+  const columns = useMemo(() => {
+    return filterColumns(timesheetColumns, fields);
+  }, [fields]);
+
+  return (
+    <Table className="rounded-lg bg-card text-card-foreground">
+      <TableHeader>
+        <TableRow>
+          <TableHeads columns={columns} />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRows records={timesheetlines} columns={columns} />
       </TableBody>
     </Table>
   );

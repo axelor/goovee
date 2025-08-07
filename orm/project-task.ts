@@ -23,6 +23,8 @@ import {
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {and, or} from '@/utils/orm';
 import type {ID, WhereOptions} from '@goovee/orm';
+import {startOfYear} from 'date-fns';
+import {AuthProps} from './project-task';
 
 export type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
   Required<Pick<PortalWorkspace, 'config'>>;
@@ -351,5 +353,42 @@ export async function findProjectMemberEmployees(
 
   return (
     project?.membersUserSet?.map(user => user.employee!).filter(Boolean) ?? []
+  );
+}
+export async function getTotalTimeSpent(props: {
+  projectId: ID;
+  taskId?: ID;
+  auth: AuthProps;
+  typeSelect?: TASK_TYPE_SELECT;
+}): Promise<number> {
+  const {projectId, taskId, auth, typeSelect} = props;
+
+  const client = await manager.getClient(auth.tenantId);
+
+  //NOTE: ORM is ignoring decimal values
+  // const res = await client.aOSHRTimesheetLine.aggregate({
+  //   where: and<AOSHRTimesheetLine>([
+  //     getTimesheetLineAccessFilter({auth, typeSelect}),
+  //     {project: {id: projectId}},
+  //     auth.workspace.config.isResetValuesOnYearStart && {
+  //       date: {ge: startOfYear(new Date())},
+  //     },
+  //   ]),
+  //   sum: {customerDurationHours: true},
+  // });
+  const lines = await client.aOSHRTimesheetLine.find({
+    where: and<AOSHRTimesheetLine>([
+      getTimesheetLineAccessFilter({auth, typeSelect}),
+      {project: {id: projectId}},
+      taskId && {projectTask: {id: taskId}},
+      auth.workspace.config.isResetValuesOnYearStart && {
+        date: {ge: startOfYear(new Date())},
+      },
+    ]),
+    select: {customerDurationHours: true},
+  });
+  return lines.reduce(
+    (acc, line) => acc + (line.customerDurationHours?.toNumber() || 0),
+    0,
   );
 }
