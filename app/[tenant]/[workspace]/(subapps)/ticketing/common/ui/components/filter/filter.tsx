@@ -88,6 +88,7 @@ const defaultValues = {
   managedBy: [] as string[],
   category: [] as string[],
   updatedOn: ['', ''] as [string, string],
+  taskDate: ['', ''] as [string, string],
   priority: [] as string[],
   status: [] as string[],
   myTickets: false,
@@ -206,9 +207,26 @@ function FilterForm(props: FilterFormProps) {
   } = props;
 
   const router = useRouter();
+
+  const filterKeys = useMemo(() => {
+    if (!filter) return new Set();
+    return new Set(Object.keys(filter));
+  }, [filter]);
+
   const allowedFields = useMemo(
     () => new Set(fields?.map(f => f.name)),
     [fields],
+  );
+
+  const showField = useCallback(
+    ({
+      field,
+      formKey,
+    }: {
+      field: string;
+      formKey: keyof z.infer<typeof TicketFilterSchema>;
+    }) => allowedFields.has(field) || filterKeys.has(formKey),
+    [allowedFields, filterKeys],
   );
 
   const onSubmit = (value: z.infer<typeof TicketFilterSchema>) => {
@@ -250,41 +268,44 @@ function FilterForm(props: FilterFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="relative overflow-x-hidden lg:h-fit lg:max-h-[--radix-popper-available-height] lg:overflow-y-auto p-4">
         <div className="space-y-4">
-          {(allowedFields.has(FIELDS.CREATED_BY) ||
-            allowedFields.has(FIELDS.MANAGED_BY)) && (
+          {(showField({field: FIELDS.CREATED_BY, formKey: 'myTickets'}) ||
+            showField({field: FIELDS.MANAGED_BY, formKey: 'myTickets'})) && (
             <MyTicketsField form={form} />
           )}
           {!form.watch('myTickets') && (
             <>
-              {allowedFields.has(FIELDS.CREATED_BY) && (
+              {showField({field: FIELDS.CREATED_BY, formKey: 'createdBy'}) && (
                 <CreatedByField
                   form={form}
                   contacts={contacts}
                   company={company}
                 />
               )}
-              {allowedFields.has(FIELDS.MANAGED_BY) && (
+              {showField({field: FIELDS.MANAGED_BY, formKey: 'managedBy'}) && (
                 <ManagedByField form={form} contacts={contacts} />
               )}
             </>
           )}
-          {allowedFields.has(FIELDS.ASSIGNMENT) && (
+          {showField({field: FIELDS.ASSIGNMENT, formKey: 'assignment'}) && (
             <AssignedToField
               form={form}
               company={company}
               clientPartner={clientPartner}
             />
           )}
-          {allowedFields.has(FIELDS.UPDATED_ON) && (
-            <DatesField form={form} name="updatedOn" />
+          {showField({field: FIELDS.UPDATED_ON, formKey: 'updatedOn'}) && (
+            <DatesField form={form} name="updatedOn" title="Updated" />
           )}
-          {allowedFields.has(FIELDS.PRIORITY) && (
+          {showField({field: FIELDS.TASK_DATE, formKey: 'taskDate'}) && (
+            <DatesField form={form} name="taskDate" title="Task Date" />
+          )}
+          {showField({field: FIELDS.PRIORITY, formKey: 'priority'}) && (
             <PriorityField form={form} priorities={priorities} />
           )}
-          {allowedFields.has(FIELDS.STATUS) && (
+          {showField({field: FIELDS.STATUS, formKey: 'status'}) && (
             <StatusField form={form} statuses={statuses} />
           )}
-          {allowedFields.has(FIELDS.CATEGORY) && (
+          {showField({field: FIELDS.CATEGORY, formKey: 'category'}) && (
             <CategoryField form={form} categories={categories} />
           )}
           <Button

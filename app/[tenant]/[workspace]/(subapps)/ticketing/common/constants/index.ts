@@ -52,6 +52,7 @@ export const FIELDS = {
   PROGRESS: 'progress',
   TARGET_VERSION: 'targetVersion',
   TASK_END_DATE: 'taskEndDate',
+  TASK_DATE: 'taskDate',
 };
 
 export const FILTER_FIELDS = [

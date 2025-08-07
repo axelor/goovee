@@ -36,6 +36,7 @@ export function getTicketWhere(
     myTickets,
     assignment,
     category,
+    taskDate,
   } = data;
 
   const where: Where<AOSProjectTask> = {
@@ -43,6 +44,7 @@ export function getTicketWhere(
     ...(priority && {priority: {id: {in: priority}}}),
     ...(category && {projectTaskCategory: {id: {in: category}}}),
     ...(updatedOn && {updatedOn: {between: updatedOn}}),
+    ...(taskDate && {taskDate: {between: taskDate}}),
     ...(assignment && {assignment}),
   };
 

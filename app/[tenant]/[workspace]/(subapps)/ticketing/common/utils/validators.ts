@@ -84,6 +84,7 @@ export const TicketFilterSchema = z.object({
   status: z.array(z.string()).optional(),
   category: z.array(z.string()).optional(),
   updatedOn: dateFilterSchema.optional(),
+  taskDate: dateFilterSchema.optional(),
   myTickets: z.boolean().optional(),
   managedBy: z.array(z.string()).optional(),
   assignment: z.number().nullable().optional(),
@@ -102,8 +103,12 @@ export const EncodedTicketFilterSchema = TicketFilterSchema.partial().transform(
         if (value == null) return false; // remove null and undefined
         return true;
       }),
-    ) as Omit<Partial<z.infer<typeof TicketFilterSchema>>, 'updatedOn'> & {
+    ) as Omit<
+      Partial<z.infer<typeof TicketFilterSchema>>,
+      'updatedOn' | 'taskDate'
+    > & {
       updatedOn?: [string, string];
+      taskDate?: [string, string];
     };
     if (!Object.keys(filter).length) return null; // remove empty object
     return filter;
