@@ -4,7 +4,7 @@ import type {Maybe} from '@/types/util';
 import type {ID, WhereOptions} from '@goovee/orm';
 import {set} from 'lodash';
 import {COMPANY} from '../constants';
-import {EncodedFilterSchema} from '../utils/validators';
+import {EncodedTicketFilterSchema} from '../utils/validators';
 import type {Where} from '@/types/orm';
 
 export function getOrderBy(
@@ -25,7 +25,7 @@ export function getWhere(
   userId: ID,
 ): WhereOptions<AOSProjectTask> | null {
   if (!filter) return null;
-  const {success, data} = EncodedFilterSchema.safeParse(filter);
+  const {success, data} = EncodedTicketFilterSchema.safeParse(filter);
   if (!success || !data) return null;
   const {
     createdBy,

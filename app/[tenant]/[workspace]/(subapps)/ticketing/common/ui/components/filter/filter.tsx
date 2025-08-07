@@ -61,9 +61,9 @@ import {z} from 'zod';
 import {ASSIGNMENT, COMPANY, FIELDS} from '../../../constants';
 import {SearchParams} from '../../../types/search-param';
 import {
-  EncodedFilter,
-  EncodedFilterSchema,
-  FilterSchema,
+  EncodedTicketFilter,
+  EncodedTicketFilterSchema,
+  TicketFilterSchema,
 } from '../../../utils/validators';
 
 type FilterProps = {
@@ -211,12 +211,12 @@ function FilterForm(props: FilterFormProps) {
     [fields],
   );
 
-  const onSubmit = (value: z.infer<typeof FilterSchema>) => {
-    const filter = EncodedFilterSchema.parse(value);
+  const onSubmit = (value: z.infer<typeof TicketFilterSchema>) => {
+    const filter = EncodedTicketFilterSchema.parse(value);
     const params = new URLSearchParams(searchParams);
     params.delete('page');
     if (filter) {
-      params.set('filter', encodeFilter<EncodedFilter>(filter));
+      params.set('filter', encodeFilter<EncodedTicketFilter>(filter));
     } else {
       params.delete('filter');
     }
@@ -229,13 +229,13 @@ function FilterForm(props: FilterFormProps) {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  const form = useForm<z.infer<typeof FilterSchema>>({
-    resolver: zodResolver(FilterSchema),
+  const form = useForm<z.infer<typeof TicketFilterSchema>>({
+    resolver: zodResolver(TicketFilterSchema),
     defaultValues,
   });
 
   useEffect(() => {
-    const {success, data} = EncodedFilterSchema.safeParse(filter);
+    const {success, data} = EncodedTicketFilterSchema.safeParse(filter);
     if (!success || !data) {
       form.reset(defaultValues);
     } else {
@@ -481,5 +481,5 @@ function AssignedToField(
 }
 
 type FieldProps = {
-  form: UseFormReturn<z.infer<typeof FilterSchema>>;
+  form: UseFormReturn<z.infer<typeof TicketFilterSchema>>;
 };

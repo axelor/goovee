@@ -26,7 +26,7 @@ import {findTaskStatuses} from '@/orm/project-task';
 import {findProjectMainPartnerContacts} from '@/orm/project-task';
 import {findTicketAccess} from '../../../../common/orm/tickets';
 import {ensureAuth} from '../../../../common/utils/auth-helper';
-import {EncodedFilter} from '../../../../common/utils/validators';
+import {EncodedTicketFilter} from '../../../../common/utils/validators';
 import {Form} from './client-form';
 
 export default async function Page({
@@ -85,7 +85,7 @@ export default async function Page({
 
   const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   return (
     <div className="container mt-5 mb-20">
