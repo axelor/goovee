@@ -58,7 +58,7 @@ import {ensureAuth} from '../../../common/utils/auth-helper';
 import {
   getOrderBy,
   getSkip,
-  getWhere,
+  getTicketWhere,
 } from '../../../common/utils/search-param';
 import Search from '../search';
 
@@ -104,7 +104,7 @@ export default async function Page({
     projectId,
     take: +limit,
     skip: getSkip(limit, page),
-    where: getWhere(decodeFilter(filter), auth.user.id),
+    where: getTicketWhere(decodeFilter(filter), auth.user.id),
     orderBy: getOrderBy(sort, sortKeyPathMap),
     auth,
   }).then(clone);

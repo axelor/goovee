@@ -20,7 +20,7 @@ export function getOrderBy(
   return query;
 }
 
-export function getWhere(
+export function getTicketWhere(
   filter: unknown,
   userId: ID,
 ): WhereOptions<AOSProjectTask> | null {
