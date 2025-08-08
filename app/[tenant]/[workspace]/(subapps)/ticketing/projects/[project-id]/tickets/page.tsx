@@ -41,7 +41,7 @@ import {
 import {findProject} from '../../../common/orm/projects';
 import {findTickets} from '../../../common/orm/tickets';
 import type {SearchParams} from '../../../common/types/search-param';
-import {Filter} from '../../../common/ui/components/filter';
+import {ClientFilter} from './client-filter';
 import {TicketList} from '../../../common/ui/components/ticket-list';
 import {getPages} from '../../../common/utils';
 import {ensureAuth} from '../../../common/utils/auth-helper';
@@ -219,7 +219,7 @@ async function AsyncFilter({
     ]).then(clone);
 
   return (
-    <Filter
+    <ClientFilter
       contacts={contacts}
       priorities={priorities}
       statuses={statuses}

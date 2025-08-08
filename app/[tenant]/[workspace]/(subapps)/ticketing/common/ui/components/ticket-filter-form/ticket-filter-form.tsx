@@ -12,16 +12,12 @@ import type {
 import type {PortalAppConfig} from '@/types';
 import type {Cloned} from '@/types/util';
 import {
-  Badge,
   Checkbox,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  PopoverResponsive,
-  PopoverContentResponsive,
-  PopoverTriggerResponsive,
 } from '@/ui/components';
 import {Button} from '@/ui/components/button';
 import {
@@ -46,15 +42,13 @@ import {
   PriorityField,
   StatusField,
 } from '@/ui/components/task-components/filter-fields';
-import {useResponsive} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {decodeFilter, encodeFilter} from '@/utils/url';
+import {encodeFilter} from '@/utils/url';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {X as RemoveIcon} from 'lucide-react';
 import {useRouter} from 'next/navigation';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useRef} from 'react';
 import {useForm, UseFormReturn} from 'react-hook-form';
-import {FaFilter} from 'react-icons/fa';
 import {z} from 'zod';
 
 import {ASSIGNMENT, COMPANY, FIELDS} from '../../../constants';
@@ -65,7 +59,7 @@ import {
   TicketFilterSchema,
 } from '../../../utils/validators';
 
-type FilterProps = {
+export type FilterProps = {
   url: string;
   searchParams: SearchParams;
   contacts: Cloned<MainPartnerContact>[];
@@ -76,7 +70,6 @@ type FilterProps = {
   clientPartner?: Cloned<ProjectClientPartner>;
   fields: PortalAppConfig['ticketingFieldSet'];
 };
-
 type FilterFormProps = FilterProps & {
   close: () => void;
   filter: unknown;
@@ -100,93 +93,7 @@ const defaultValues = {
 // 3. Connect the form field
 // 4. Add the where clause in getWhere function
 
-export function Filter(props: FilterProps) {
-  const {
-    contacts,
-    priorities,
-    statuses,
-    url,
-    searchParams,
-    company,
-    clientPartner,
-    fields,
-    categories,
-  } = props;
-
-  const [open, setOpen] = useState(false);
-  const filter = useMemo(
-    () => searchParams.filter && decodeFilter(searchParams.filter),
-    [searchParams.filter],
-  );
-  const filterCount = useMemo(
-    () => (filter ? Object.keys(filter).length : 0),
-    [filter],
-  );
-
-  const res = useResponsive();
-  const small = (['xs', 'sm', 'md'] as const).some(x => res[x]);
-
-  const close = useCallback(() => {
-    setOpen(false);
-  }, []);
-
-  return (
-    <div className={cn('relative', {'mt-5': small})}>
-      <PopoverResponsive open={open} onOpenChange={setOpen} isSmall={small}>
-        <PopoverTriggerResponsive asChild>
-          <Button
-            variant={filterCount ? 'success' : 'outline'}
-            className={cn('flex justify-between w-[400px]', {
-              ['w-full']: small,
-            })}>
-            <div className="flex items-center space-x-2">
-              <FaFilter className="size-4" />
-              <span> {i18n.t('Filters')}</span>
-            </div>
-            {filterCount > 0 && (
-              <Badge
-                className="ms-auto ps-[0.45rem] pe-2"
-                variant="success-inverse">
-                {filterCount}
-              </Badge>
-            )}
-          </Button>
-        </PopoverTriggerResponsive>
-
-        <PopoverContentResponsive
-          className={
-            small
-              ? 'px-5 pb-5 max-h-full'
-              : 'w-[--radix-popper-anchor-width] p-0'
-          }>
-          {small && (
-            <>
-              <h3 className="text-xl font-semibold mb-2">
-                {i18n.t('Filters')}
-              </h3>
-              <hr className="mb-2" />
-            </>
-          )}
-          <FilterForm
-            url={url}
-            searchParams={searchParams}
-            contacts={contacts}
-            priorities={priorities}
-            statuses={statuses}
-            categories={categories}
-            company={company}
-            clientPartner={clientPartner}
-            fields={fields}
-            filter={filter}
-            close={close}
-          />
-        </PopoverContentResponsive>
-      </PopoverResponsive>
-    </div>
-  );
-}
-
-function FilterForm(props: FilterFormProps) {
+export function TicketFilterForm(props: FilterFormProps) {
   const {
     contacts,
     priorities,
@@ -315,7 +222,7 @@ function FilterForm(props: FilterFormProps) {
   );
 }
 
-function ManagedByField(props: FieldProps & Pick<FilterProps, 'contacts'>) {
+function ManagedByField(props: FieldProps & Pick<FilterFormProps, 'contacts'>) {
   const {form, contacts} = props;
   return (
     <FormField
@@ -356,7 +263,7 @@ function ManagedByField(props: FieldProps & Pick<FilterProps, 'contacts'>) {
   );
 }
 function CreatedByField(
-  props: FieldProps & Pick<FilterProps, 'contacts' | 'company'>,
+  props: FieldProps & Pick<FilterFormProps, 'contacts' | 'company'>,
 ) {
   const {form, contacts, company} = props;
   return (
@@ -435,7 +342,7 @@ function MyTicketsField(props: FieldProps) {
 }
 
 function AssignedToField(
-  props: FieldProps & Pick<FilterProps, 'company' | 'clientPartner'>,
+  props: FieldProps & Pick<FilterFormProps, 'company' | 'clientPartner'>,
 ) {
   const {form, company, clientPartner} = props;
 
