@@ -50,6 +50,7 @@ import type {QueryProps} from './helpers';
 import {
   getProjectAccessFilter,
   getTimesheetLineAccessFilter,
+  safeguardTimesheetLineDuration,
   withTicketAccessFilter,
 } from '@/orm/project-task';
 import {getMailRecipients} from './mail';
@@ -1411,25 +1412,31 @@ export async function findTimesheetLines(props: {
   const {ticketId, projectId, auth, take, skip, orderBy, where} = props;
   const client = await manager.getClient(auth.tenantId);
 
-  const timesheetLines = await client.aOSHRTimesheetLine.find({
-    where: and<AOSHRTimesheetLine>([
-      getTimesheetLineAccessFilter({auth, typeSelect: TASK_TYPE_SELECT.TICKET}),
-      projectId && {project: {id: projectId}},
-      ticketId && {projectTask: {id: ticketId}},
-      where,
-    ]),
-    select: {
-      employee: {name: true, user: {id: true}},
-      date: true,
-      customerDurationHours: true,
-      comments: true,
-      projectTask: {id: true, typeSelect: true},
-      project: {id: true},
-    },
-    ...(orderBy && {orderBy}),
-    ...(take && {take}),
-    ...(skip && {skip}),
-  });
+  const timesheetLines = await client.aOSHRTimesheetLine
+    .find({
+      where: and<AOSHRTimesheetLine>([
+        getTimesheetLineAccessFilter({
+          auth,
+          typeSelect: TASK_TYPE_SELECT.TICKET,
+        }),
+        projectId && {project: {id: projectId}},
+        ticketId && {projectTask: {id: ticketId}},
+        where,
+      ]),
+      select: {
+        employee: {name: true, user: {id: true}},
+        date: true,
+        hoursDuration: true,
+        customerDurationHours: true,
+        comments: true,
+        projectTask: {id: true, typeSelect: true},
+        project: {id: true},
+      },
+      ...(orderBy && {orderBy}),
+      ...(take && {take}),
+      ...(skip && {skip}),
+    })
+    .then(safeguardTimesheetLineDuration);
 
   return timesheetLines;
 }

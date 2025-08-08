@@ -20,11 +20,11 @@ import {
   PartnerKey,
   type PortalWorkspace,
 } from '@/types';
+import type {DeepPartial} from '@/types/util';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {and, or} from '@/utils/orm';
 import type {ID, WhereOptions} from '@goovee/orm';
 import {startOfYear} from 'date-fns';
-import {AuthProps} from './project-task';
 
 export type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
   Required<Pick<PortalWorkspace, 'config'>>;
@@ -123,6 +123,33 @@ export function withTicketAndTaskAccessFilter(props: AuthProps) {
     ]);
   };
 }
+/**
+ * Removes duration/hoursDuration from the response.
+ * Adds them as fallback to durationForCustomer/customerDurationHours if available.
+ * so always use durationForCustomer/customerDurationHours instead of duration/hoursDuration
+ */
+export function safeguardTimesheetLineDuration<
+  T extends
+    | DeepPartial<AOSHRTimesheetLine>
+    | DeepPartial<AOSHRTimesheetLine>[]
+    | null,
+>(value: T): Omit<T, 'duration' | 'hoursDuration'> {
+  if (!value) return value;
+  const lines: DeepPartial<AOSHRTimesheetLine>[] = Array.isArray(value)
+    ? value
+    : [value];
+  lines.forEach(line => {
+    if (line.customerDurationHours == null && line.hoursDuration) {
+      line.customerDurationHours = line.hoursDuration;
+    }
+    if (line.durationForCustomer == null && line.duration) {
+      line.durationForCustomer = line.duration;
+    }
+    delete line.hoursDuration;
+    delete line.duration;
+  });
+  return value;
+}
 
 export function getTimesheetLineAccessFilter({
   auth,
@@ -141,7 +168,6 @@ export function getTimesheetLineAccessFilter({
   const filter = {
     timesheet: {statusSelect: TIMESHEET_STATUS.VALIDATED},
     OR: [{projectTask: {id: null}}, {projectTask: withAccessFilter(auth)()}],
-    customerDurationHours: {gt: 0},
   } satisfies WhereOptions<AOSHRTimesheetLine>;
   return filter;
 }
@@ -365,28 +391,19 @@ export async function getTotalTimeSpent(props: {
 
   const client = await manager.getClient(auth.tenantId);
 
-  //NOTE: ORM is ignoring decimal values
-  // const res = await client.aOSHRTimesheetLine.aggregate({
-  //   where: and<AOSHRTimesheetLine>([
-  //     getTimesheetLineAccessFilter({auth, typeSelect}),
-  //     {project: {id: projectId}},
-  //     auth.workspace.config.isResetValuesOnYearStart && {
-  //       date: {ge: startOfYear(new Date())},
-  //     },
-  //   ]),
-  //   sum: {customerDurationHours: true},
-  // });
-  const lines = await client.aOSHRTimesheetLine.find({
-    where: and<AOSHRTimesheetLine>([
-      getTimesheetLineAccessFilter({auth, typeSelect}),
-      {project: {id: projectId}},
-      taskId && {projectTask: {id: taskId}},
-      auth.workspace.config.isResetValuesOnYearStart && {
-        date: {ge: startOfYear(new Date())},
-      },
-    ]),
-    select: {customerDurationHours: true},
-  });
+  const lines = await client.aOSHRTimesheetLine
+    .find({
+      where: and<AOSHRTimesheetLine>([
+        getTimesheetLineAccessFilter({auth, typeSelect}),
+        {project: {id: projectId}},
+        taskId && {projectTask: {id: taskId}},
+        auth.workspace.config.isResetValuesOnYearStart && {
+          date: {ge: startOfYear(new Date())},
+        },
+      ]),
+      select: {customerDurationHours: true, hoursDuration: true},
+    })
+    .then(safeguardTimesheetLineDuration);
   return lines.reduce(
     (acc, line) => acc + (line.customerDurationHours?.toNumber() || 0),
     0,
