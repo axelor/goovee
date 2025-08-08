@@ -1,3 +1,4 @@
+import {RESPONSIVE_SIZES} from '@/constants';
 import {i18n} from '@/locale';
 import {
   Badge,
@@ -26,7 +27,7 @@ export function Filter(props: FilterProps) {
   );
 
   const res = useResponsive();
-  const small = (['xs', 'sm', 'md'] as const).some(x => res[x]);
+  const small = RESPONSIVE_SIZES.some(x => res[x]);
 
   const close = useCallback(() => {
     setOpen(false);
