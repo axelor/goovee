@@ -24,13 +24,24 @@ import {encodeFilter, getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import {formatNumber} from '@/lib/core/locale/server/formatters';
+import type {
+  AuthProps,
+  MainPartnerContact,
+  TaskCategory,
+  TaskPriority,
+} from '@/orm/project-task';
+import {
+  findProjectMainPartnerContacts,
+  findTaskCategories,
+  findTaskPriorities,
+  findTaskStatuses,
+  getTotalTimeSpent,
+} from '@/orm/project-task';
 import type {PortalAppConfig} from '@/types';
+import {PageLinks} from '@/ui/components/page-links';
 import {createComment, fetchComments} from '../../../../common/actions';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
-import {findTaskCategories} from '@/orm/project-task';
-import {findTaskPriorities} from '@/orm/project-task';
-import {findTaskStatuses} from '@/orm/project-task';
-import {findProjectMainPartnerContacts} from '@/orm/project-task';
 import {
   findChildTicketIds,
   findChildTickets,
@@ -41,9 +52,7 @@ import {
   findTicketLinkTypes,
   findTimesheetLines,
 } from '../../../../common/orm/tickets';
-import type {AuthProps, TaskCategory} from '@/orm/project-task';
-import type {TaskPriority} from '@/orm/project-task';
-import type {MainPartnerContact} from '@/orm/project-task';
+import {TicketDetailsSearchParams} from '../../../../common/types';
 import {TicketDetails} from '../../../../common/ui/components/ticket-details';
 import {TicketDetailsProvider} from '../../../../common/ui/components/ticket-details/ticket-details-provider';
 import {
@@ -52,29 +61,15 @@ import {
   RelatedTicketList,
   TimesheetLines,
 } from '../../../../common/ui/components/ticket-list';
+import {getPages} from '../../../../common/utils';
 import {ensureAuth} from '../../../../common/utils/auth-helper';
+import {getSkip} from '../../../../common/utils/search-param';
 import {EncodedTicketFilter} from '../../../../common/utils/validators';
 import {
   ChildTicketsHeader,
   ParentTicketsHeader,
   RelatedTicketsHeader,
 } from './headers';
-import {getSkip} from '../../../../common/utils/search-param';
-import {getTotalTimeSpent} from '@/orm/project-task';
-import {getPages} from '../../../../common/utils';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/ui/components/pagination';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {getPaginationButtons} from '@/utils/pagination';
-import {TicketDetailsSearchParams} from '../../../../common/types';
-import {formatNumber} from '@/lib/core/locale/server/formatters';
 
 export default async function Page({
   params,
@@ -436,67 +431,13 @@ async function TimeSpentList({
       />
 
       {pages > 1 && (
-        <Pagination className="!mb-4">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious asChild>
-                <Link
-                  scroll={false}
-                  className={cn({['invisible']: +page <= 1})}
-                  replace
-                  href={{
-                    pathname,
-                    query: {...searchParams, page: +page - 1},
-                  }}>
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">Previous</span>
-                </Link>
-              </PaginationPrevious>
-            </PaginationItem>
-            {getPaginationButtons({
-              currentPage: +page,
-              totalPages: pages,
-            }).map((value, i) => {
-              if (typeof value == 'string') {
-                return (
-                  <PaginationItem key={i}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                );
-              }
-              return (
-                <PaginationItem key={value}>
-                  <PaginationLink isActive={+page === value} asChild>
-                    <Link
-                      scroll={false}
-                      replace
-                      href={{
-                        pathname,
-                        query: {...searchParams, page: value},
-                      }}>
-                      {value}
-                    </Link>
-                  </PaginationLink>
-                </PaginationItem>
-              );
-            })}
-            <PaginationItem>
-              <PaginationNext asChild>
-                <Link
-                  scroll={false}
-                  replace
-                  className={cn({['invisible']: +page >= pages})}
-                  href={{
-                    pathname,
-                    query: {...searchParams, page: +page + 1},
-                  }}>
-                  <span className="sr-only">Next</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              </PaginationNext>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <PageLinks
+          url={`${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`}
+          searchParams={searchParams}
+          pages={pages}
+          pageKey="timesheetPage"
+          className="p-4"
+        />
       )}
     </div>
   );
