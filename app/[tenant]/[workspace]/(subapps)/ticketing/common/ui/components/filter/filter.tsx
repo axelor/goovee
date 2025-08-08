@@ -14,17 +14,16 @@ import type {Cloned} from '@/types/util';
 import {
   Badge,
   Checkbox,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  PopoverResponsive,
+  PopoverContentResponsive,
+  PopoverTriggerResponsive,
 } from '@/ui/components';
 import {Button} from '@/ui/components/button';
-import {Drawer, DrawerContent, DrawerTrigger} from '@/ui/components/drawer';
 import {
   Form,
   FormControl,
@@ -127,18 +126,14 @@ export function Filter(props: FilterProps) {
   const res = useResponsive();
   const small = (['xs', 'sm', 'md'] as const).some(x => res[x]);
 
-  const [Controller, Trigger, Content] = small
-    ? ([Drawer, DrawerTrigger, DrawerContent] as const)
-    : ([Popover, PopoverTrigger, PopoverContent] as const);
-
   const close = useCallback(() => {
     setOpen(false);
   }, []);
 
   return (
     <div className={cn('relative', {'mt-5': small})}>
-      <Controller open={open} onOpenChange={setOpen}>
-        <Trigger asChild>
+      <PopoverResponsive open={open} onOpenChange={setOpen} isSmall={small}>
+        <PopoverTriggerResponsive asChild>
           <Button
             variant={filterCount ? 'success' : 'outline'}
             className={cn('flex justify-between w-[400px]', {
@@ -156,9 +151,9 @@ export function Filter(props: FilterProps) {
               </Badge>
             )}
           </Button>
-        </Trigger>
+        </PopoverTriggerResponsive>
 
-        <Content
+        <PopoverContentResponsive
           className={
             small
               ? 'px-5 pb-5 max-h-full'
@@ -185,8 +180,8 @@ export function Filter(props: FilterProps) {
             filter={filter}
             close={close}
           />
-        </Content>
-      </Controller>
+        </PopoverContentResponsive>
+      </PopoverResponsive>
     </div>
   );
 }
