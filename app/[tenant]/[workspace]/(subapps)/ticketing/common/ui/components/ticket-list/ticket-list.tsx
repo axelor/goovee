@@ -264,13 +264,16 @@ export function TimesheetLines({
     return filterColumns(timesheetColumns, fields);
   }, [fields]);
 
+  const hasLines = Boolean(timesheetlines?.length);
   return (
     <Table className="rounded-lg bg-card text-card-foreground">
-      <TableHeader>
-        <TableRow>
-          <TableHeads columns={columns} />
-        </TableRow>
-      </TableHeader>
+      {hasLines && (
+        <TableHeader>
+          <TableRow>
+            <TableHeads columns={columns} />
+          </TableRow>
+        </TableHeader>
+      )}
       <TableBody>
         <TableRows records={timesheetlines} columns={columns} />
       </TableBody>
