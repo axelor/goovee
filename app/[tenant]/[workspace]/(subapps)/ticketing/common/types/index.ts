@@ -17,6 +17,7 @@ export type TicketListTicket = {
   assignment?: number;
   assignedTo?: {id: string; version: number; name?: string};
   priority?: {id: string; version: number; name?: string};
+  typeSelect?: string;
   managedByContact?: {
     id: string;
     version: number;
@@ -53,6 +54,7 @@ export type TicketLink = {
     version: number;
     name: string;
     assignment?: number | undefined;
+    typeSelect?: string;
     assignedTo?: {id: string; version: number; name?: string};
     managedByContact?: {
       id: string;
@@ -87,6 +89,7 @@ export type ChildTicket = {
   version: number;
   name: string;
   assignment?: number | undefined;
+  typeSelect?: string;
   assignedTo?: {id: string; version: number; name?: string};
   managedByContact?: {
     id: string;

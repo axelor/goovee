@@ -690,6 +690,7 @@ export async function findTickets(
       status: {name: true},
       projectTaskCategory: {name: true},
       priority: {name: true},
+      typeSelect: true,
       project: {
         name: true,
         company: {name: true},
@@ -723,6 +724,7 @@ export async function findRelatedTicketLinks(
             updatedOn: true,
             status: {name: true},
             projectTaskCategory: {name: true},
+            typeSelect: true,
             priority: {name: true},
             project: {
               name: true,
@@ -764,6 +766,7 @@ export async function findChildTickets(
       status: {name: true},
       projectTaskCategory: {name: true},
       priority: {name: true},
+      typeSelect: true,
       project: {
         name: true,
         company: {name: true},
