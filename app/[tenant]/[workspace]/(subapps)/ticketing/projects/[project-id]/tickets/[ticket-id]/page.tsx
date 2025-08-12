@@ -93,7 +93,7 @@ export default async function Page({
   if (forceLogin) {
     redirect(
       getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`,
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}?${new URLSearchParams(searchParams).toString()}`,
         workspaceURI,
         tenant,
       }),

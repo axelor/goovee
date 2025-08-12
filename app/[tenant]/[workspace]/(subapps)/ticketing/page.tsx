@@ -20,7 +20,7 @@ export default async function Page({
   searchParams,
 }: {
   params: {tenant: string; workspace: string};
-  searchParams: {[key: string]: string | undefined};
+  searchParams: {[key: string]: string};
 }) {
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
@@ -29,7 +29,7 @@ export default async function Page({
   if (forceLogin) {
     redirect(
       getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}`,
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}?${new URLSearchParams(searchParams).toString()}`,
         workspaceURI,
         tenant,
       }),
