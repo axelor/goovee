@@ -145,6 +145,9 @@
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
+  "optionalDependencies": {
+    "dhx-suite-package": "workspace:*"
+  },
   "devDependencies": {
     "@swc-node/register": "^1.10.10",
     "@swc/cli": "^0.7.8",
