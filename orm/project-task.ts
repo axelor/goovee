@@ -397,8 +397,8 @@ export async function getTotalTimeSpent(props: {
         getTimesheetLineAccessFilter({auth, typeSelect}),
         {project: {id: projectId}},
         taskId && {projectTask: {id: taskId}},
-        auth.workspace.config.isResetValuesOnYearStart && {
-          date: {ge: startOfYear(new Date())},
+        auth.workspace.config.resetValueDate && {
+          date: {ge: auth.workspace.config.resetValueDate},
         },
       ]),
       select: {customerDurationHours: true, hoursDuration: true},
