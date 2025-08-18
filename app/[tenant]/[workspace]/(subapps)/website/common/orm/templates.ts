@@ -34,21 +34,16 @@ import {
   isRelationalField,
 } from '../utils/templates';
 import {Cache, formatCustomFieldName} from '../utils/helper';
+import {getStoragePath} from '@/lib/core/storage';
 
 const pump = promisify(pipeline);
 
-/** seeding  variables **/
-const storage = process.env.DATA_STORAGE as string;
 const disableUpdates = false;
 const enableMetaSelect = true;
 const demoFileDirectory = '/public';
 const FILE_PREFIX = 'goovee-template-file';
 function getContentTitle({code, language}: {code: string; language: string}) {
   return `Demo - ${startCase(code)} - ${language}`;
-}
-
-if (!fs.existsSync(storage)) {
-  fs.mkdirSync(storage, {recursive: true});
 }
 
 export async function createCustomFields({
@@ -702,7 +697,7 @@ async function createMetaFile({
   const buffer = await getFileFromPublic(originPath);
   await pump(
     Readable.from(buffer),
-    fs.createWriteStream(path.resolve(storage, metaFilePath)),
+    fs.createWriteStream(path.resolve(getStoragePath(), metaFilePath)),
   );
 
   const metaFileData: CreateArgs<AOSMetaFile> = {

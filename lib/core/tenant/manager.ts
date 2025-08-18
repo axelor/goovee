@@ -6,6 +6,7 @@ import {DEFAULT_TENANT} from '@/constants';
 import {createClient} from '@/goovee/.generated/client';
 import {LRUCache} from './lru';
 import type {Tenant, TenantConfig} from './types';
+import {getStoragePath} from '@/lib/core/storage';
 
 const CACHE_CAPACITY = 20;
 
@@ -55,7 +56,7 @@ export class SingleTenantManager implements TenantManager {
       },
       aos: {
         url: process.env.GOOVEE_PUBLIC_AOS_URL!,
-        storage: process.env.DATA_STORAGE!,
+        storage: getStoragePath(),
         auth: {
           username: process.env.BASIC_AUTH_USERNAME!,
           password: process.env.BASIC_AUTH_PASSWORD!,

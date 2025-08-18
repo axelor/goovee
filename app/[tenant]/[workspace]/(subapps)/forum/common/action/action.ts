@@ -28,6 +28,7 @@ import {
 } from '@/comments';
 import {zodParseFormData} from '@/utils/formdata';
 import {addComment, findComments} from '@/comments/orm';
+import {getStoragePath} from '@/lib/core/storage';
 
 //----LOCAL IMPORTS -----//
 import {
@@ -53,8 +54,6 @@ interface AttachmentResponse {
 }
 
 const pump = promisify(pipeline);
-
-const storage = process.env.DATA_STORAGE as string;
 
 function extractFileValues(formData: FormData) {
   let values: any = [];
@@ -479,9 +478,7 @@ export async function addPost({
   let attachmentListArray: {id: number; fileName: string; title: string}[] = [];
 
   if (formData) {
-    if (!fs.existsSync(storage)) {
-      fs.mkdirSync(storage, {recursive: true});
-    }
+    const storage = getStoragePath();
 
     const attachmentResponse = await uploadAttachment(formData);
 
@@ -727,7 +724,7 @@ async function uploadAttachment(formData: FormData): Promise<any> {
     try {
       await pump(
         file.stream(),
-        fs.createWriteStream(path.resolve(storage, timestampFilename)),
+        fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
       );
 
       const metaFile: any = await client.aOSMetaFile.create({

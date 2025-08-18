@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {DEFAULT_TENANT} from '@/constants';
 import type {TenantConfig} from '@/tenant';
+import {getStoragePath} from '@/lib/core/storage';
 
 const CHECK_AUTH = false;
 
@@ -18,7 +19,7 @@ const tenants: {[key: string]: TenantConfig} = [DEFAULT_TENANT].reduce(
       },
       aos: {
         url: process.env.GOOVEE_PUBLIC_AOS_URL,
-        storage: process.env.DATA_STORAGE,
+        storage: getStoragePath(),
         auth: {
           username: process.env.BASIC_AUTH_USERNAME,
           password: process.env.BASIC_AUTH_PASSWORD,

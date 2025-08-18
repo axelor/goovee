@@ -16,18 +16,13 @@ import {findWorkspace, findSubappAccess} from '@/orm/workspace';
 import {getCurrentDateTime} from '@/utils/date';
 import {TENANT_HEADER} from '@/middleware';
 import {getFileSizeText} from '@/utils/files';
+import {getStoragePath} from '@/lib/core/storage';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
 import {ACTION} from '@/subapps/resources/common/constants';
 
 const pump = promisify(pipeline);
-
-const storage = process.env.DATA_STORAGE as string;
-
-if (!fs.existsSync(storage)) {
-  fs.mkdirSync(storage);
-}
 
 function extractFileValues(formData: FormData) {
   let values: any = [];
@@ -172,7 +167,7 @@ export async function upload(formData: FormData, workspaceURL: string) {
 
       await pump(
         file.stream(),
-        fs.createWriteStream(path.resolve(storage, timestampFilename)),
+        fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
       );
 
       const timestamp = getCurrentDateTime();

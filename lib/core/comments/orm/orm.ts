@@ -12,6 +12,7 @@ import {manager, type Tenant} from '@/tenant';
 import type {ID} from '@/types';
 import {getFileSizeText} from '@/utils/files';
 import {sql} from '@/utils/template-string';
+import {getStoragePath} from '@/lib/core/storage';
 
 // ---- LOCAL IMPORTS ---- //
 import {MAIL_MESSAGE_TYPE, SORT_TYPE} from '../constants';
@@ -28,12 +29,6 @@ import {CommentSchema, CommentsSchema} from '../utils';
 import {and} from '@/utils/orm';
 
 const pump = promisify(pipeline);
-
-const storage = process.env.DATA_STORAGE as string;
-
-if (!fs.existsSync(storage)) {
-  fs.mkdirSync(storage, {recursive: true});
-}
 
 function getSelectFields({
   showRepliesInMainThread,
@@ -306,7 +301,7 @@ async function upload({
 
     await pump(
       file.stream(),
-      fs.createWriteStream(path.resolve(storage, timestampFilename)),
+      fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
     );
 
     const metaFile = await client.aOSMetaFile.create({
