@@ -352,6 +352,121 @@
       "type": "Boolean"
     },
     {
+      "type": "Boolean",
+      "name": "isAllowUserComment"
+    },
+    {
+      "type": "Boolean",
+      "name": "isDisplayRelatedElements"
+    },
+    {
+      "name": "taskDisplayTypeSelect",
+      "type": "Int"
+    },
+    {
+      "name": "isDisplayTotalOpenTasks",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTotalOpenTickets",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTotalTimespent",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTotalInvoiced",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayParentTask",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayChildTasks",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayRelatedTasks",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTimespentList",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTotalTimespentPerTask",
+      "type": "Boolean"
+    },
+    {
+      "name": "taskFieldSet",
+      "type": "ManyToMany",
+      "target": "AOSMetaField"
+    },
+    {
+      "name": "invoiceFieldSet",
+      "type": "ManyToMany",
+      "target": "AOSMetaField"
+    },
+    {
+      "name": "timespentFieldSet",
+      "type": "ManyToMany",
+      "target": "AOSMetaField"
+    },
+    {
+      "name": "isDisplayTaskCompletionReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTaskCompletionByMonthReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTicketCompletionReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTicketCompletionByMonthReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTaskProgressReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTaskProgressByMonthReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTicketProgressReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTicketProgressByMonthReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDiplayInvoiceByMonthReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTimespentByEmployeeReport",
+      "type": "Boolean"
+    },
+    {
+      "name": "isDisplayTimespentByMonthReport",
+      "type": "Boolean"
+    },
+    {
+      "type": "Int",
+      "name": "monthValueTypeSelect"
+    },
+    {
+      "type": "Date",
+      "name": "resetValueDate"
+    },
+    {
       "type": "String",
       "name": "projectHeroTitle"
     },
@@ -369,80 +484,17 @@
       "target": "AOSMetaFile"
     },
     {
-      "type": "Boolean",
-      "name": "isAllowUserComment"
+      "name": "isDisplayTimespentListForTicket",
+      "type": "Boolean"
     },
     {
-      "type": "Boolean",
-      "name": "isAllowTicketUpdate"
+      "name": "isDisplayTotalTimespentPerTicket",
+      "type": "Boolean"
     },
     {
-      "type": "Boolean",
-      "name": "isDisplayTaskList"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayPerTaskOrProject"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayTimeSpentComment"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayRelatedElements"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayTotalCompletedTasksReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayOpenTasksReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayTotalInvoicedReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayPercentageCompletionReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayProgressReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayCompletedTasksReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayCompletedTicketsReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayTotalTimespentReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayTotalInvoicesReport"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayTotalConsoliatedSales"
-    },
-    {
-      "type": "Boolean",
-      "name": "isDisplayEmployeeTimespent"
-    },
-    {
-      "type": "Boolean",
-      "name": "isResetValuesOnYearStart"
-    },
-    {
-      "type": "Int",
-      "name": "monthValueTypeSelect"
+      "name": "ticketTimespentFieldSet",
+      "type": "ManyToMany",
+      "target": "AOSMetaField"
     }
   ]
 }
