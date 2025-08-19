@@ -219,19 +219,16 @@ export default async function Page({
                 />
               </Suspense>
             )}
-            {true && (
-              //TODO: change config
-              <Suspense fallback={<Skeleton className="h-[160px]" />}>
-                <TimeSpentList
-                  ticketId={ticket.id}
-                  auth={auth}
-                  fields={workspace.config.ticketingFieldSet}
-                  searchParams={searchParams}
-                  workspaceURI={workspaceURI}
-                  projectId={projectId}
-                />
-              </Suspense>
-            )}
+            <Suspense fallback={<Skeleton className="h-[160px]" />}>
+              <TimeSpentList
+                ticketId={ticket.id}
+                auth={auth}
+                fields={workspace.config.ticketTimespentFieldSet}
+                searchParams={searchParams}
+                workspaceURI={workspaceURI}
+                projectId={projectId}
+              />
+            </Suspense>
           </div>
         </>
       </TicketDetailsProvider>
@@ -393,51 +390,60 @@ async function TimeSpentList({
 }: {
   ticketId: ID;
   auth: AuthProps;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: PortalAppConfig['ticketTimespentFieldSet'];
   searchParams: TicketDetailsSearchParams;
   workspaceURI: string;
   projectId: string;
 }) {
+  const {workspace} = auth;
   const {timesheetPage: page = 1, timesheetLimit: limit = 7} = searchParams;
   const [timesheetlines, totalTimespent] = await Promise.all([
-    findTimesheetLines({
-      ticketId,
-      auth,
-      orderBy: {date: 'DESC'},
-      take: +limit,
-      skip: getSkip(limit, page),
-    }).then(clone),
-    getTotalTimeSpent({
-      taskId: ticketId,
-      projectId,
-      auth,
-      typeSelect: TASK_TYPE_SELECT.TICKET,
-    }).then(hours => formatNumber(hours, {scale: 2, type: 'DECIMAL'})),
+    workspace.config.isDisplayTimespentListForTicket &&
+      findTimesheetLines({
+        ticketId,
+        auth,
+        orderBy: {date: 'DESC'},
+        take: +limit,
+        skip: getSkip(limit, page),
+      }).then(clone),
+    workspace.config.isDisplayTotalTimespentPerTicket &&
+      getTotalTimeSpent({
+        taskId: ticketId,
+        projectId,
+        auth,
+        typeSelect: TASK_TYPE_SELECT.TICKET,
+      }).then(hours => formatNumber(hours, {scale: 2, type: 'DECIMAL'})),
   ]);
-  const pages = getPages(timesheetlines, limit);
-  const pathname = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`;
+  const pages = getPages(timesheetlines || [], limit);
+  const pathName = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`;
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
         <h4 className="text-xl font-semibold">{await t('Time spent')}</h4>
-        <div className="font-semibold">
-          {await t('Total')}:{totalTimespent} ({await t('hours')})
-        </div>
+        {workspace.config.isDisplayTotalTimespentPerTicket && (
+          <div className="font-semibold">
+            {await t('Total')}:{totalTimespent} ({await t('hours')})
+          </div>
+        )}
       </div>
-      <hr className="mt-5" />
-      <TimesheetLines
-        timesheetlines={timesheetlines ?? []}
-        fields={clone(fields)}
-      />
+      {workspace.config.isDisplayTimespentListForTicket && (
+        <>
+          <hr className="mt-5" />
+          <TimesheetLines
+            timesheetlines={timesheetlines || []}
+            fields={clone(fields)}
+          />
 
-      {pages > 1 && (
-        <PageLinks
-          url={`${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`}
-          searchParams={searchParams}
-          pages={pages}
-          pageKey="timesheetPage"
-          className="p-4"
-        />
+          {pages > 1 && (
+            <PageLinks
+              url={pathName}
+              searchParams={searchParams}
+              pages={pages}
+              pageKey="timesheetPage"
+              className="p-4"
+            />
+          )}
+        </>
       )}
     </div>
   );
