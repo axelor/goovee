@@ -86,4 +86,3 @@ const PopoverContentResponsive = React.forwardRef<
 PopoverContentResponsive.displayName = 'PopoverContentResponsive';
 
 export {PopoverResponsive, PopoverTriggerResponsive, PopoverContentResponsive};
-
