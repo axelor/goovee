@@ -219,16 +219,19 @@ export default async function Page({
                 />
               </Suspense>
             )}
-            <Suspense fallback={<Skeleton className="h-[160px]" />}>
-              <TimeSpentList
-                ticketId={ticket.id}
-                auth={auth}
-                fields={workspace.config.ticketTimespentFieldSet}
-                searchParams={searchParams}
-                workspaceURI={workspaceURI}
-                projectId={projectId}
-              />
-            </Suspense>
+            {(workspace.config.isDisplayTimespentListForTicket ||
+              workspace.config.isDisplayTotalTimespentPerTicket) && (
+              <Suspense fallback={<Skeleton className="h-[160px]" />}>
+                <TimeSpentList
+                  ticketId={ticket.id}
+                  auth={auth}
+                  fields={workspace.config.ticketTimespentFieldSet}
+                  searchParams={searchParams}
+                  workspaceURI={workspaceURI}
+                  projectId={projectId}
+                />
+              </Suspense>
+            )}
           </div>
         </>
       </TicketDetailsProvider>
