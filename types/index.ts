@@ -157,6 +157,7 @@ export interface PortalAppConfig extends Model {
   isDisplayTimespentListForTicket: boolean;
   isDisplayTotalTimespentPerTicket: boolean;
   ticketTimespentFieldSet: {id: string; name: string}[];
+  taskFormFieldSet: {id: string; name: string}[];
   ticketHeroTitle: string;
   ticketHeroDescription: string;
   ticketHeroOverlayColorSelect: OverlayColor;

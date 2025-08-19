@@ -74,6 +74,7 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   isDisplayTimespentListForTicket: true,
   isDisplayTotalTimespentPerTicket: true,
   ticketTimespentFieldSet: {select: {name: true}},
+  taskFormFieldSet: {select: {name: true}},
   forumHeroTitle: true,
   forumHeroDescription: true,
   forumHeroOverlayColorSelect: true,
