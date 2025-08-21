@@ -67,6 +67,7 @@ export const about2Schema = {
       title: 'About List',
       target: 'BulletList',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
   ],
   models: [bulletListModel, bulletPointModel],

@@ -39,6 +39,7 @@ export const services2Schema = {
       title: 'Services',
       type: 'json-many-to-one',
       target: 'BulletList',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
   ],
   models: [bulletListModel, bulletPointModel],
