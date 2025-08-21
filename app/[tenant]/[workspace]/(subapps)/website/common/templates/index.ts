@@ -5,6 +5,7 @@ import {formatComponentCode} from '../utils/templates';
 
 import {About1, about1Schema} from './about-1';
 import {About2, about2Schema} from './about-2';
+import {About3, about3Schema} from './about-3';
 import {Clients1, clients1Schema} from './clients-1';
 import {Contact4, contact4Schema} from './contacts-4';
 import {CTA1, cta1Schema} from './cta-1';
@@ -24,6 +25,7 @@ import {Wiki1, wiki1Schema} from './wiki-1';
 const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [about1Schema.code]: About1,
   [about2Schema.code]: About2,
+  [about3Schema.code]: About3,
   [hero1Schema.code]: Hero1,
   [pageProgress1Schema.code]: PageProgress1,
   [services1Schema.code]: Services1,
