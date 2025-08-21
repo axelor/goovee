@@ -2,22 +2,36 @@ import {FC, Fragment} from 'react';
 
 // ======================================================
 type Banner4Props = {
-  imageName?: string;
+  thumbnail?: string;
+  media?: string;
+  mediaType?: string;
   hideShape?: boolean;
   btnColor?: 'white' | 'primary';
 };
 // ======================================================
 
+function getDataType(mediaType?: string) {
+  if (mediaType?.startsWith('image/')) {
+    return 'image';
+  }
+  if (mediaType?.startsWith('video/')) {
+    return 'video';
+  }
+}
+
 const Banner4: FC<Banner4Props> = ({
   hideShape,
-  imageName = 'about12',
+  thumbnail,
+  media,
+  mediaType,
   btnColor = 'primary',
 }) => {
   return (
     <Fragment>
       <a
         data-glightbox
-        href="/media/movie.mp4"
+        data-type={getDataType(mediaType)}
+        href={media}
         className={`btn btn-circle btn-${btnColor} btn-play ripple mx-auto mb-5 position-absolute`}
         style={{
           top: '50%',
@@ -41,11 +55,7 @@ const Banner4: FC<Banner4Props> = ({
       )}
 
       <figure className="rounded">
-        <img
-          src={`/img/photos/${imageName}.jpg`}
-          srcSet={`/img/photos/${imageName}@2x.jpg 2x`}
-          alt={imageName}
-        />
+        <img src={thumbnail} alt="video thumbnail" />
       </figure>
     </Fragment>
   );
