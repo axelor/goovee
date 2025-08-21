@@ -657,13 +657,14 @@ export async function createCMSContent(props: {
 async function createMetaJsonRecord(props: {
   jsonModel: string;
   attrs: any;
+  name?: string;
   tenantId: Tenant['id'];
 }) {
-  const {tenantId, jsonModel, attrs} = props;
+  const {tenantId, jsonModel, attrs, name} = props;
   const client = await manager.getClient(tenantId);
   const timeStamp = new Date();
   const record = await client.aOSMetaJsonRecord.create({
-    data: {jsonModel, attrs, updatedOn: timeStamp, createdOn: timeStamp},
+    data: {jsonModel, attrs, updatedOn: timeStamp, createdOn: timeStamp, name},
     select: {id: true, version: true},
   });
 
@@ -788,10 +789,13 @@ async function createAttrs(props: {
         const modelFields = schema.models!.find(
           m => m.name === field.target,
         )!.fields;
+
+        const nameField = modelFields.find(f => f.nameField)?.name;
         if (isArrayField(field)) {
           const metaJsonRecords = await Promise.all(
             value.map(async (record: any) => {
               return createMetaJsonRecord({
+                name: nameField && record.attrs?.[nameField],
                 jsonModel: field.target,
                 attrs: await createAttrs({
                   tenantId,
@@ -810,6 +814,7 @@ async function createAttrs(props: {
         } else {
           const metaJsonRecord = await createMetaJsonRecord({
             jsonModel: field.target,
+            name: nameField && value.attrs?.[nameField],
             attrs: await createAttrs({
               tenantId,
               fields: modelFields,
