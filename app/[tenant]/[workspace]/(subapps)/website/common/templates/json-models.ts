@@ -1,23 +1,25 @@
 import type {Model} from '../types/templates';
-export {};
 
-// export const exampleModel = {
-//   title: 'Reusable Example Model',
-//   name: 'ReusableExampleModel',
-//   fields: [
-//     {
-//       name: 'name',
-//       title: 'Name',
-//       type: 'string',
-//       nameField: true,
-//       visibleInGrid: true,
-//     },
-//     {
-//       name: 'description',
-//       title: 'Description',
-//       type: 'string',
-//     },
-//   ],
-// } as const satisfies Model;
-
-// This can be used in multiple schema
+export const accordionModel = {
+  name: 'Accordion',
+  title: 'Accordions',
+  fields: [
+    {
+      name: 'heading',
+      title: 'Heading',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+    {
+      name: 'body',
+      title: 'Body',
+      type: 'string',
+    },
+    {
+      name: 'expand',
+      title: 'Expand',
+      type: 'boolean',
+    },
+  ],
+} as const satisfies Model;
