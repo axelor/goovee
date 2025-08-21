@@ -76,8 +76,8 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/illustrations/i6.png',
       },
-      about1Title: 'Why Choose Us?',
-      about1Caption: 'We provide solutions that make our clients live easier.',
+      about1Caption: 'Why Choose Us?',
+      about1Title: 'We provide solutions that make our clients live easier.',
       about1Accordions: [
         {
           id: '11',
@@ -117,8 +117,8 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/illustrations/i6.png',
       },
-      about1Title: 'Pourquoi nous choisir ?',
-      about1Caption:
+      about1Caption: 'Pourquoi nous choisir ?',
+      about1Title:
         'Nous proposons des solutions qui facilitent la vie de nos clients.',
       about1Accordions: [
         {

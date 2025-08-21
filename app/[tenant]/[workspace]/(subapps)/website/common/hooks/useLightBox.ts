@@ -1,8 +1,10 @@
 import {useEffect} from 'react';
+import GLightbox from 'glightbox';
+import {html} from '@/utils/template-string';
 
 const useLightBox = () => {
   const lightboxLoad = () => {
-    const GLightbox = require('glightbox');
+    console.log('initating lightbox');
 
     GLightbox({
       loop: false,

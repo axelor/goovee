@@ -1,4 +1,5 @@
 import {about1Demos, about1Schema} from './about-1/meta';
+import {about2Demos, about2Schema} from './about-2/meta';
 import {clients1Demos, clients1Schema} from './clients-1/meta';
 import {contact4Demos, contact4Schema} from './contacts-4/meta';
 import {cta1Demos, cta1Schema} from './cta-1/meta';
@@ -17,6 +18,7 @@ import {wiki1Demos, wiki1Schema} from './wiki-1/meta';
 
 export const metas = [
   {schema: about1Schema, demos: about1Demos},
+  {schema: about2Schema, demos: about2Demos},
   {schema: hero1Schema, demos: hero1Demos},
   {schema: services1Schema, demos: services1Demos},
   {schema: cta1Schema, demos: cta1Demos},
