@@ -40,7 +40,7 @@ export function About1(props: TemplateProps<About1Data>) {
             <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>
             <h3 className="display-4 mb-7">{title}</h3>
 
-            <AccordionList accordions={accordions} />
+            <AccordionList accordions={accordions} id="about1" />
           </div>
         </div>
       </div>

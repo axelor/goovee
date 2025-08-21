@@ -3,15 +3,16 @@ import {FC} from 'react';
 // ==================================================
 type AccordionProps = {
   no: string;
-  body: string;
-  heading: string;
-  expand: boolean;
+  body?: string;
+  heading?: string;
+  expand?: boolean;
+  parentId: string;
   type?: 'plain' | 'shadow-lg';
 };
 // ==================================================
 
 const Accordion: FC<AccordionProps> = props => {
-  const {no, body, heading, expand, type = ''} = props;
+  const {no, parentId, body, heading, expand, type = ''} = props;
 
   return (
     <div className={`card ${type} accordion-item`}>
@@ -29,7 +30,7 @@ const Accordion: FC<AccordionProps> = props => {
       <div
         id={`collapse${no}`}
         aria-labelledby={`heading${no}`}
-        data-bs-parent="#accordionExample"
+        data-bs-parent={`#${parentId}`}
         className={`accordion-collapse collapse ${expand && 'show'}`}>
         <div className="card-body">
           <p className="fs-16">{body}</p>
