@@ -21,19 +21,6 @@ export function Services2(props: TemplateProps<Services2Data>) {
     ...props,
   });
 
-  const list: string[][] = [];
-
-  if (services?.length) {
-    for (let i = 0; i < services.length; i += 2) {
-      const item = [];
-
-      services[i] && item.push(services[i].attrs.title);
-      services[i + 1] && item.push(services[i + 1].attrs.title);
-
-      list.push(item);
-    }
-  }
-
   return (
     <section className="wrapper bg-light">
       <div className="container">
@@ -49,7 +36,11 @@ export function Services2(props: TemplateProps<Services2Data>) {
             <h3 className="display-4 mb-5">{caption}</h3>
 
             <p className="mb-6">{description}</p>
-            <ListColumn list={list} />
+            <ListColumn
+              list={services?.attrs.list}
+              bulletColor={services?.attrs.bulletColor}
+              rowClass={services?.attrs.rowClass}
+            />
           </div>
         </div>
       </div>

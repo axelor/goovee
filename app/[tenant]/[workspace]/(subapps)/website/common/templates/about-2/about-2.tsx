@@ -3,7 +3,7 @@ import {type About2Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
-import {LightBox} from './lightbox';
+import {LightBox} from '../../hooks/lightbox';
 
 export function About2(props: TemplateProps<About2Data>) {
   const {data} = props;
@@ -30,18 +30,6 @@ export function About2(props: TemplateProps<About2Data>) {
     ...props,
   });
 
-  const fields = (aboutlist || []).map(v => v?.attrs?.title).filter(Boolean);
-  const list = [];
-
-  for (let i = 0; i < fields.length; i += 2) {
-    const item = [];
-
-    fields[i] && item.push(fields[i]);
-    fields[i + 1] && item.push(fields[i + 1]);
-
-    list.push(item);
-  }
-
   return (
     <div className="container">
       <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center mb-14 mb-md-17 mb-lg-19">
@@ -60,7 +48,11 @@ export function About2(props: TemplateProps<About2Data>) {
           <h3 className="display-4 mb-6">{title}</h3>
 
           <p className="mb-6">{para}</p>
-          <ListColumn list={list} />
+          <ListColumn
+            list={aboutlist?.attrs.list ?? []}
+            rowClass={aboutlist?.attrs.rowClass}
+            bulletColor={aboutlist?.attrs.bulletColor}
+          />
         </div>
       </div>
       <LightBox />

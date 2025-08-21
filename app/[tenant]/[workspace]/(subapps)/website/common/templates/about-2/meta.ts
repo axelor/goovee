@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {bulletListModel, bulletPointModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const about2Schema = {
@@ -64,25 +65,11 @@ export const about2Schema = {
     {
       name: 'aboutlist',
       title: 'About List',
-      target: 'About2Aboutlist',
-      type: 'json-one-to-many',
+      target: 'BulletList',
+      type: 'json-many-to-one',
     },
   ],
-  models: [
-    {
-      name: 'About2Aboutlist',
-      title: 'About 2 Aboutlist',
-      fields: [
-        {
-          name: 'title',
-          title: 'Title',
-          type: 'string',
-          nameField: true,
-          visibleInGrid: true,
-        },
-      ],
-    },
-  ],
+  models: [bulletListModel, bulletPointModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -112,28 +99,36 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
-      about2Aboutlist: [
-        {
-          id: '1',
-          version: 0,
-          attrs: {title: 'We are a firm that understands the impact'},
+      about2Aboutlist: {
+        id: '1',
+        version: 0,
+        attrs: {
+          name: 'aboutlist',
+          bulletColor: 'primary',
+          list: [
+            {
+              id: '1',
+              version: 0,
+              attrs: {title: 'We are a firm that understands the impact'},
+            },
+            {
+              id: '2',
+              version: 0,
+              attrs: {title: 'We are a firm that understands the impact'},
+            },
+            {
+              id: '3',
+              version: 0,
+              attrs: {title: 'We are a firm that understands the impact'},
+            },
+            {
+              id: '4',
+              version: 0,
+              attrs: {title: 'We are a firm that understands the impact'},
+            },
+          ],
         },
-        {
-          id: '2',
-          version: 0,
-          attrs: {title: 'We are a firm that understands the impact'},
-        },
-        {
-          id: '3',
-          version: 0,
-          attrs: {title: 'We are a firm that understands the impact'},
-        },
-        {
-          id: '4',
-          version: 0,
-          attrs: {title: 'We are a firm that understands the impact'},
-        },
-      ],
+      },
     },
   },
   {
@@ -160,28 +155,44 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
-      about2Aboutlist: [
-        {
-          id: '1',
-          version: 0,
-          attrs: {title: 'Nous sommes une entreprise qui comprend l’impact'},
+      about2Aboutlist: {
+        id: '1',
+        version: 0,
+        attrs: {
+          name: 'aboutlist',
+          bulletColor: 'primary',
+          list: [
+            {
+              id: '1',
+              version: 0,
+              attrs: {
+                title: 'Nous sommes une entreprise qui comprend l’impact',
+              },
+            },
+            {
+              id: '2',
+              version: 0,
+              attrs: {
+                title: 'Nous sommes une entreprise qui comprend l’impact',
+              },
+            },
+            {
+              id: '3',
+              version: 0,
+              attrs: {
+                title: 'Nous sommes une entreprise qui comprend l’impact',
+              },
+            },
+            {
+              id: '4',
+              version: 0,
+              attrs: {
+                title: 'Nous sommes une entreprise qui comprend l’impact',
+              },
+            },
+          ],
         },
-        {
-          id: '2',
-          version: 0,
-          attrs: {title: 'Nous sommes une entreprise qui comprend l’impact'},
-        },
-        {
-          id: '3',
-          version: 0,
-          attrs: {title: 'Nous sommes une entreprise qui comprend l’impact'},
-        },
-        {
-          id: '4',
-          version: 0,
-          attrs: {title: 'Nous sommes une entreprise qui comprend l’impact'},
-        },
-      ],
+      },
     },
   },
 ];
