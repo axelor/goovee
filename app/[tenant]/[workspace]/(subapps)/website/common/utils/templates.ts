@@ -136,15 +136,15 @@ function validateSchemas(schemas: TemplateSchema[]) {
 }
 
 function getModels(schemas: TemplateSchema[]): Model[] {
-  const models = new Set<Model>(); // use a set to remove referencially duplicate models
+  const models = new Map<string, Model>();
   for (const schema of schemas) {
     if (schema.models?.length) {
       for (const model of schema.models) {
-        models.add(model);
+        models.set(model.name, model);
       }
     }
   }
-  return Array.from(models);
+  return Array.from(models.values());
 }
 
 function getContentFields(
@@ -202,7 +202,9 @@ function formatSchema<T extends TemplateSchema>(schema: T): T {
 
 export async function seedComponents(tenantId: Tenant['id']) {
   const _schemas = metas.map(demo => demo.schema);
-  if (!validateSchemas(_schemas)) return;
+  if (!validateSchemas(_schemas)) {
+    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+  }
   const schemas = _schemas.map(formatSchema);
 
   const componentsPromise = schemas.map(schema =>
@@ -272,7 +274,9 @@ export async function resetFields(tenantId: Tenant['id']) {
 
 export async function seedContents(tenantId: Tenant['id']) {
   const _schemas = metas.map(demo => demo.schema);
-  if (!validateSchemas(_schemas)) return;
+  if (!validateSchemas(_schemas)) {
+    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+  }
 
   const fileCache = new Cache<Promise<{id: string}>>();
   const res = await processBatch(metas, async ({schema, demos}) => {
