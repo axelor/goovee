@@ -69,7 +69,7 @@ export const services2Demos: Demo<typeof services2Schema>[] = [
         version: 0,
         attrs: {
           name: 'services',
-          bulletColor: 'primary',
+          bulletColor: 'soft-primary',
           list: [
             {
               id: '40',
@@ -116,7 +116,7 @@ export const services2Demos: Demo<typeof services2Schema>[] = [
         version: 0,
         attrs: {
           name: 'services',
-          bulletColor: 'primary',
+          bulletColor: 'soft-primary',
           list: [
             {
               id: '40',

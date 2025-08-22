@@ -11,7 +11,7 @@ type ListColumnProps = {
 const ListColumn: FC<ListColumnProps> = ({
   list,
   rowClass = '',
-  bulletColor = 'primary',
+  bulletColor = 'soft-primary',
 }) => {
   const fields = (list || []).map(v => v?.attrs?.title).filter(Boolean);
   const items = [];
@@ -28,7 +28,7 @@ const ListColumn: FC<ListColumnProps> = ({
     <div className={'row gy-3 ' + rowClass}>
       {items.map((item, i) => (
         <div className="col-xl-6" key={i}>
-          <ul className={`icon-list bullet-bg bullet-soft-${bulletColor} mb-0`}>
+          <ul className={`icon-list bullet-bg bullet-${bulletColor} mb-0`}>
             {item.map((li, i) => {
               const liProps = i !== 0 ? {className: 'mt-3'} : {};
               return (

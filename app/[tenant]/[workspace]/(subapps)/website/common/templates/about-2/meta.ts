@@ -105,7 +105,7 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         version: 0,
         attrs: {
           name: 'aboutlist',
-          bulletColor: 'primary',
+          bulletColor: 'soft-primary',
           list: [
             {
               id: '1',
@@ -161,7 +161,7 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         version: 0,
         attrs: {
           name: 'aboutlist',
-          bulletColor: 'primary',
+          bulletColor: 'soft-primary',
           list: [
             {
               id: '1',
