@@ -70,3 +70,31 @@ export const bulletPointModel = {
     },
   ],
 } as const satisfies Model;
+
+export const progressListModel = {
+  name: 'ProgressList',
+  title: 'Progress List',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+    {
+      name: 'percent',
+      title: 'Percent',
+      type: 'integer',
+    },
+    {
+      name: 'color',
+      title: 'Color',
+      type: 'string',
+      selection: colors.map(color => ({
+        title: startCase(color),
+        value: color,
+      })),
+    },
+  ],
+} as const satisfies Model;
