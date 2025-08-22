@@ -1,0 +1,19 @@
+{
+  "name": "AOSYear",
+  "table": "base_year",
+  "synchronize": false,
+  "fields": [
+    {
+      "name": "name",
+      "type": "String"
+    },
+    {
+      "name": "code",
+      "type": "String"
+    },
+    {
+      "name": "typeSelect",
+      "type": "Int"
+    }
+  ]
+}

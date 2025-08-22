@@ -7,6 +7,7 @@ import type {
   SelectOptions,
   UpdateArgs,
   WhereArg,
+  WhereOptions,
 } from '@goovee/orm';
 import axios from 'axios';
 
@@ -15,6 +16,7 @@ import {MAIL_MESSAGE_TYPE, type Track} from '@/comments';
 import {addComment} from '@/comments/orm';
 import {
   ModelMap,
+  MONTH_VALUE_TYPE_SELECT,
   ORDER_BY,
   SUBAPP_CODES,
   TASK_INVOICING_TYPE,
@@ -48,13 +50,14 @@ import {sendTrackMail} from '../utils/mail';
 import type {CreateTicketInfo, UpdateTicketInfo} from '../utils/validators';
 import type {QueryProps} from './helpers';
 import {
+  findApprovedPeriodBetweenDates,
   getProjectAccessFilter,
   getTimesheetLineAccessFilter,
   safeguardTimesheetLineDuration,
   withTicketAccessFilter,
 } from '@/orm/project-task';
 import {getMailRecipients} from './mail';
-import {and} from '@/utils/orm';
+import {and, or} from '@/utils/orm';
 
 export type TicketProps<T extends Entity> = QueryProps<T> & {
   projectId: ID;
@@ -1415,6 +1418,17 @@ export async function findTimesheetLines(props: {
   const {ticketId, projectId, auth, take, skip, orderBy, where} = props;
   const client = await manager.getClient(auth.tenantId);
 
+  let dateFilter: WhereOptions<AOSHRTimesheetLine> | undefined;
+  if (
+    auth.workspace.config.monthValueTypeSelect ===
+    MONTH_VALUE_TYPE_SELECT.APPROVED_PERIOD_ONLY
+  ) {
+    const betweenDates = await findApprovedPeriodBetweenDates(auth);
+    if (!betweenDates.length) return [];
+    dateFilter = or<AOSHRTimesheetLine>(
+      betweenDates.map(dates => ({date: {between: dates}})),
+    );
+  }
   const timesheetLines = await client.aOSHRTimesheetLine
     .find({
       where: and<AOSHRTimesheetLine>([
@@ -1424,6 +1438,7 @@ export async function findTimesheetLines(props: {
         }),
         projectId && {project: {id: projectId}},
         ticketId && {projectTask: {id: ticketId}},
+        dateFilter,
         where,
       ]),
       select: {

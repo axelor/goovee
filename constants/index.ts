@@ -275,3 +275,8 @@ export const INVOICE_TYPE = {
   UNPAID: 'Unpaid',
   PAID: 'Paid',
 };
+
+export const MONTH_VALUE_TYPE_SELECT = {
+  REAL_TIME: 1,
+  APPROVED_PERIOD_ONLY: 2,
+};

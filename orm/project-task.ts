@@ -1,6 +1,7 @@
 import {
   INVOICE_CATEGORY,
   INVOICE_STATUS,
+  MONTH_VALUE_TYPE_SELECT,
   ORDER_BY,
   ROLE,
   SUBAPP_CODES,
@@ -15,16 +16,16 @@ import type {
 } from '@/goovee/.generated/models';
 import {type Tenant, manager} from '@/lib/core/tenant';
 import {
-  type User,
-  type Subapp,
   PartnerKey,
   type PortalWorkspace,
+  type Subapp,
+  type User,
 } from '@/types';
 import type {DeepPartial} from '@/types/util';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {and, or} from '@/utils/orm';
 import type {ID, WhereOptions} from '@goovee/orm';
-import {startOfYear} from 'date-fns';
+import {differenceInCalendarDays} from 'date-fns';
 
 export type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
   Required<Pick<PortalWorkspace, 'config'>>;
@@ -391,6 +392,17 @@ export async function getTotalTimeSpent(props: {
 
   const client = await manager.getClient(auth.tenantId);
 
+  let dateFilter: WhereOptions<AOSHRTimesheetLine> | undefined;
+  if (
+    auth.workspace.config.monthValueTypeSelect ===
+    MONTH_VALUE_TYPE_SELECT.APPROVED_PERIOD_ONLY
+  ) {
+    const betweenDates = await findApprovedPeriodBetweenDates(auth);
+    if (!betweenDates.length) return 0;
+    dateFilter = or<AOSHRTimesheetLine>(
+      betweenDates.map(dates => ({date: {between: dates}})),
+    );
+  }
   const lines = await client.aOSHRTimesheetLine
     .find({
       where: and<AOSHRTimesheetLine>([
@@ -400,6 +412,7 @@ export async function getTotalTimeSpent(props: {
         auth.workspace.config.resetValueDate && {
           date: {ge: auth.workspace.config.resetValueDate},
         },
+        dateFilter,
       ]),
       select: {customerDurationHours: true, hoursDuration: true},
     })
@@ -408,4 +421,39 @@ export async function getTotalTimeSpent(props: {
     (acc, line) => acc + (line.customerDurationHours?.toNumber() || 0),
     0,
   );
+}
+
+export async function findApprovedPeriodBetweenDates(
+  auth: AuthProps,
+): Promise<[Date, Date][]> {
+  const client = await manager.getClient(auth.tenantId);
+  const periods = await client.aOSPeriod.find({
+    where: {
+      isApproved: true,
+      year: {typeSelect: 1},
+    },
+    orderBy: {fromDate: 'ASC'},
+    select: {name: true, fromDate: true, toDate: true},
+  });
+  if (!periods.length) return [];
+
+  const betweenDates: [Date, Date][] = [];
+
+  let fromDate = periods[0].fromDate!;
+  let toDate = periods[0].toDate!;
+
+  for (let i = 1; i < periods.length; i++) {
+    const period = periods[i];
+
+    if (differenceInCalendarDays(period.fromDate!, toDate) === 1) {
+      toDate = period.toDate!;
+    } else {
+      betweenDates.push([fromDate, toDate]);
+      fromDate = period.fromDate!;
+      toDate = period.toDate!;
+    }
+  }
+
+  betweenDates.push([fromDate, toDate]);
+  return betweenDates;
 }
