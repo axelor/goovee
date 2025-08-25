@@ -2,7 +2,6 @@ import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ProgressList from '@/subapps/website/common/components/common/ProgressList';
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
-import {LightBox} from '../../hooks/lightbox';
 import {type About10Data} from './meta';
 
 export function About10(props: TemplateProps<About10Data>) {
@@ -57,8 +56,6 @@ export function About10(props: TemplateProps<About10Data>) {
           <ProgressList items={list} />
         </div>
       </div>
-      <LightBox />
     </div>
   );
 }
-

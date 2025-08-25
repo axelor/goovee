@@ -1,4 +1,3 @@
-import {ProgressBar} from '@/subapps/website/common/hooks/progress-bar';
 // -------- data -------- //
 
 function ProgressList(props: {
@@ -14,7 +13,6 @@ function ProgressList(props: {
   return (
     <ul className="progress-list mt-3">
       {/* used for the animated line */}
-      <ProgressBar />
       {items.map(({color, id, percent, title}) => (
         <li key={id}>
           <p>{title}</p>

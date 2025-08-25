@@ -1,5 +1,3 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
 import {
   Template,
   type Data,

@@ -1,0 +1,21 @@
+import {formatComponentCode} from '../utils/templates';
+import {about10Schema} from './about-10/meta';
+import {about13Schema} from './about-13/meta';
+import {about18Schema} from './about-18/meta';
+import {about2Schema} from './about-2/meta';
+import {about5Schema} from './about-5/meta';
+
+const pluginsMap = {
+  [about2Schema.code]: ['lightbox'],
+  [about5Schema.code]: ['progress-bar'],
+  [about10Schema.code]: ['progress-bar', 'lightbox'],
+  [about13Schema.code]: ['lightbox'],
+  [about18Schema.code]: ['progress-bar'],
+};
+
+export const PluginsMap = Object.fromEntries(
+  Object.entries(pluginsMap).map(([key, value]) => [
+    formatComponentCode(key),
+    value,
+  ]),
+);
