@@ -8,6 +8,7 @@ import {about7Demos, about7Schema} from './about-7/meta';
 import {about8Demos, about8Schema} from './about-8/meta';
 import {about9Demos, about9Schema} from './about-9/meta';
 import {about10Demos, about10Schema} from './about-10/meta';
+import {about11Demos, about11Schema} from './about-11/meta';
 import {clients1Demos, clients1Schema} from './clients-1/meta';
 import {contact4Demos, contact4Schema} from './contacts-4/meta';
 import {cta1Demos, cta1Schema} from './cta-1/meta';
@@ -35,6 +36,7 @@ export const metas = [
   {schema: about8Schema, demos: about8Demos},
   {schema: about9Schema, demos: about9Demos},
   {schema: about10Schema, demos: about10Demos},
+  {schema: about11Schema, demos: about11Demos},
   {schema: hero1Schema, demos: hero1Demos},
   {schema: services1Schema, demos: services1Demos},
   {schema: cta1Schema, demos: cta1Demos},
