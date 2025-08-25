@@ -19,6 +19,7 @@ import {About13, about13Schema} from './about-13';
 import {About14, about14Schema} from './about-14';
 import {About15, about15Schema} from './about-15';
 import {About16, about16Schema} from './about-16';
+import {About17, about17Schema} from './about-17';
 import {Clients1, clients1Schema} from './clients-1';
 import {Contact4, contact4Schema} from './contacts-4';
 import {CTA1, cta1Schema} from './cta-1';
@@ -52,6 +53,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [about14Schema.code]: About14,
   [about15Schema.code]: About15,
   [about16Schema.code]: About16,
+  [about17Schema.code]: About17,
   [hero1Schema.code]: Hero1,
   [pageProgress1Schema.code]: PageProgress1,
   [services1Schema.code]: Services1,
