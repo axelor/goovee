@@ -3,7 +3,6 @@ import {type About2Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
-import {LightBox} from '../../hooks/lightbox';
 
 export function About2(props: TemplateProps<About2Data>) {
   const {data} = props;
@@ -55,7 +54,6 @@ export function About2(props: TemplateProps<About2Data>) {
           />
         </div>
       </div>
-      <LightBox />
     </div>
   );
 }

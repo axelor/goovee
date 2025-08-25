@@ -1,10 +1,8 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About13Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
-import {LightBox} from '../../hooks/lightbox';
 
 export function About13(props: TemplateProps<About13Data>) {
   const {data} = props;
@@ -56,7 +54,6 @@ export function About13(props: TemplateProps<About13Data>) {
           />
         </div>
       </div>
-      <LightBox />
     </div>
   );
 }
