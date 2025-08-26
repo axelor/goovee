@@ -1,4 +1,5 @@
 import type {Expand} from '@/types/util';
+import {dateFilterSchema} from '@/ui/components/task-components/filter-fields/validators';
 import {z} from 'zod';
 
 export const CreateFormSchema = z.object({
@@ -50,34 +51,6 @@ export const ChildTicketSchema = z.object({
   ),
 });
 
-const dateFilterSchema = z
-  .tuple([z.string().optional(), z.string().optional()])
-  .superRefine((data, ctx) => {
-    const [start, end] = data;
-    if (!start && !end) return;
-    if (!start) {
-      return ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Start date is required.',
-        path: [0],
-      });
-    }
-    if (!end) {
-      return ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'End date is required.',
-        path: [1],
-      });
-    }
-    const [startDate, endDate] = [start, end].map(d => new Date(d).getTime());
-    if (startDate > endDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Start date must be earlier than End date.',
-      });
-    }
-  });
-
 export const TicketFilterSchema = z.object({
   createdBy: z.array(z.string()).optional(),
   priority: z.array(z.string()).optional(),
@@ -95,7 +68,7 @@ export const EncodedTicketFilterSchema = TicketFilterSchema.partial().transform(
     const filter = Object.fromEntries(
       Object.entries(arg).filter(([_, value]) => {
         if (Array.isArray(value)) {
-          return value.length && value.every(v => v != undefined && v != ''); // remove empty arrays and arrays with empty values
+          return value.length && value.some(v => v != undefined && v != ''); // remove empty arrays and arrays with empty values
         }
         if (typeof value === 'boolean') {
           return value; // remove false
@@ -103,13 +76,7 @@ export const EncodedTicketFilterSchema = TicketFilterSchema.partial().transform(
         if (value == null) return false; // remove null and undefined
         return true;
       }),
-    ) as Omit<
-      Partial<z.infer<typeof TicketFilterSchema>>,
-      'updatedOn' | 'taskDate'
-    > & {
-      updatedOn?: [string, string];
-      taskDate?: [string, string];
-    };
+    ) as Partial<z.infer<typeof TicketFilterSchema>>;
     if (!Object.keys(filter).length) return null; // remove empty object
     return filter;
   },

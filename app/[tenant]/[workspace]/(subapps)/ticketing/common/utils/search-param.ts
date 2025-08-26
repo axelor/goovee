@@ -6,6 +6,7 @@ import {set} from 'lodash';
 import {COMPANY} from '../constants';
 import {EncodedTicketFilterSchema} from '../utils/validators';
 import type {Where} from '@/types/orm';
+import {getDateFilter} from '@/utils/orm';
 
 export function getOrderBy(
   sort: Maybe<string>,
@@ -43,8 +44,8 @@ export function getTicketWhere(
     ...(status && {status: {id: {in: status}}}),
     ...(priority && {priority: {id: {in: priority}}}),
     ...(category && {projectTaskCategory: {id: {in: category}}}),
-    ...(updatedOn && {updatedOn: {between: updatedOn}}),
-    ...(taskDate && {taskDate: {between: taskDate}}),
+    ...(updatedOn && {updatedOn: getDateFilter(updatedOn)}),
+    ...(taskDate && {taskDate: getDateFilter(taskDate)}),
     ...(assignment && {assignment}),
   };
 
