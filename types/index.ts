@@ -148,7 +148,8 @@ export interface PortalAppConfig extends Model {
   isDiplayInvoiceByMonthReport: boolean;
   isDisplayTimespentByEmployeeReport: boolean;
   isDisplayTimespentByMonthReport: boolean;
-  monthValueTypeSelect: number;
+  projectTimespentTypeSelect: number;
+  ticketingTimespentTypeSelect: number;
   resetValueDate: Date;
   projectHeroTitle: string;
   projectHeroDescription: string;

@@ -1,7 +1,7 @@
 import {
   INVOICE_CATEGORY,
   INVOICE_STATUS,
-  MONTH_VALUE_TYPE_SELECT,
+  TIMSPENT_TYPE_SELECT,
   ORDER_BY,
   ROLE,
   SUBAPP_CODES,
@@ -387,15 +387,19 @@ export async function getTotalTimeSpent(props: {
   taskId?: ID;
   auth: AuthProps;
   typeSelect?: TASK_TYPE_SELECT;
+  subappCode: string;
 }): Promise<number> {
-  const {projectId, taskId, auth, typeSelect} = props;
+  const {projectId, taskId, auth, typeSelect, subappCode} = props;
 
   const client = await manager.getClient(auth.tenantId);
 
   let dateFilter: WhereOptions<AOSHRTimesheetLine> | undefined;
   if (
-    auth.workspace.config.monthValueTypeSelect ===
-    MONTH_VALUE_TYPE_SELECT.APPROVED_PERIOD_ONLY
+    auth.workspace.config[
+      subappCode === SUBAPP_CODES.projects
+        ? 'projectTimespentTypeSelect'
+        : 'ticketingTimespentTypeSelect'
+    ] === TIMSPENT_TYPE_SELECT.APPROVED_PERIOD_ONLY
   ) {
     const betweenDates = await findApprovedPeriodBetweenDates(auth);
     if (!betweenDates.length) return 0;

@@ -16,7 +16,7 @@ import {MAIL_MESSAGE_TYPE, type Track} from '@/comments';
 import {addComment} from '@/comments/orm';
 import {
   ModelMap,
-  MONTH_VALUE_TYPE_SELECT,
+  TIMSPENT_TYPE_SELECT,
   ORDER_BY,
   SUBAPP_CODES,
   TASK_INVOICING_TYPE,
@@ -1420,8 +1420,8 @@ export async function findTimesheetLines(props: {
 
   let dateFilter: WhereOptions<AOSHRTimesheetLine> | undefined;
   if (
-    auth.workspace.config.monthValueTypeSelect ===
-    MONTH_VALUE_TYPE_SELECT.APPROVED_PERIOD_ONLY
+    auth.workspace.config.ticketingTimespentTypeSelect ===
+    TIMSPENT_TYPE_SELECT.APPROVED_PERIOD_ONLY
   ) {
     const betweenDates = await findApprovedPeriodBetweenDates(auth);
     if (!betweenDates.length) return [];

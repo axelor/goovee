@@ -356,14 +356,6 @@
       "name": "isAllowUserComment"
     },
     {
-      "type": "Boolean",
-      "name": "isDisplayRelatedElements"
-    },
-    {
-      "name": "taskDisplayTypeSelect",
-      "type": "Int"
-    },
-    {
       "name": "isDisplayTotalOpenTasks",
       "type": "Boolean"
     },
@@ -460,7 +452,11 @@
     },
     {
       "type": "Int",
-      "name": "monthValueTypeSelect"
+      "name": "projectTimespentTypeSelect"
+    },
+    {
+      "type": "Int",
+      "name": "ticketingTimespentTypeSelect"
     },
     {
       "type": "Date",

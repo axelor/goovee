@@ -276,7 +276,7 @@ export const INVOICE_TYPE = {
   PAID: 'Paid',
 };
 
-export const MONTH_VALUE_TYPE_SELECT = {
+export const TIMSPENT_TYPE_SELECT = {
   REAL_TIME: 1,
   APPROVED_PERIOD_ONLY: 2,
 };

@@ -415,6 +415,7 @@ async function TimeSpentList({
         projectId,
         auth,
         typeSelect: TASK_TYPE_SELECT.TICKET,
+        subappCode: SUBAPP_CODES.ticketing,
       }).then(hours => formatNumber(hours, {scale: 2, type: 'DECIMAL'})),
   ]);
   const pages = getPages(timesheetlines || [], limit);
