@@ -5,10 +5,10 @@ import NextLink from '../links/NextLink';
 
 // ======================================================
 type BlogCard1Props = {
-  date: string;
-  image: string;
-  title: string;
-  category: string;
+  date?: string;
+  image?: string;
+  title?: string;
+  category?: string;
 };
 // ======================================================
 
