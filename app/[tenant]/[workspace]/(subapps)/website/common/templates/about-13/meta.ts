@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -6,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import { bulletListModel, bulletPointModel } from '../json-models';
+import {bulletListModel, bulletPointModel} from '../json-models';
 
 export const about13Schema = {
   title: 'About 13',
@@ -89,7 +88,8 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
         filePath: '/img/photos/about11.jpg',
       },
       about13Caption: 'Who Are We?',
-      about13Title: 'The organization that thinks about the efficacy of strategies.',
+      about13Title:
+        'The organization that thinks about the efficacy of strategies.',
       about13Description:
         'Customers may choose your company because you provide excellent customer service that makes them feel valued and appreciated. This can include fast response times, personalized attention.',
       about13BtnColor: 'white',
@@ -118,7 +118,7 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
               version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
-             {
+            {
               id: '3',
               version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
@@ -166,22 +166,30 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
             {
               id: '1',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
             {
               id: '2',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
-             {
+            {
               id: '3',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
             {
               id: '4',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
           ],
         },

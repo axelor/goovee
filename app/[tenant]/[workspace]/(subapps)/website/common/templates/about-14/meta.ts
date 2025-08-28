@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -6,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import { accordionModel } from '../json-models';
+import {accordionModel} from '../json-models';
 
 export const about14Schema = {
   title: 'About 14',
@@ -89,7 +88,8 @@ export const about14Demos: Demo<typeof about14Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/illustrations/i2.png',
       },
-      about14Title: 'Quelques raisons pour lesquelles nos précieux clients nous choisissent.',
+      about14Title:
+        'Quelques raisons pour lesquelles nos précieux clients nous choisissent.',
       about14Accordions: [
         {
           id: '11',
