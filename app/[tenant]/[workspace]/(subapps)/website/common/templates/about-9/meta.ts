@@ -5,8 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {serviceList3Model} from '../json-models';
 
 export const about9Schema = {
   title: 'About 9',
@@ -39,39 +38,10 @@ export const about9Schema = {
       name: 'aboutList',
       title: 'About List',
       type: 'json-one-to-many',
-      target: 'About9AboutList',
+      target: 'ServiceList3',
     },
   ],
-  models: [
-    {
-      name: 'About9AboutList',
-      title: 'About List',
-      fields: [
-        {
-          name: 'title',
-          title: 'Title',
-          type: 'string',
-          nameField: true,
-          visibleInGrid: true,
-        },
-        {
-          name: 'description',
-          title: 'Description',
-          type: 'string',
-        },
-        {
-          name: 'icon',
-          title: 'Icon',
-          type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
-          visibleInGrid: true,
-        },
-      ],
-    },
-  ],
+  models: [serviceList3Model],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -153,4 +123,3 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
     },
   },
 ];
-

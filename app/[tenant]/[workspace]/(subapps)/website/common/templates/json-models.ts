@@ -1,6 +1,7 @@
 import {startCase} from 'lodash-es';
 import {colors} from '../constants/colors';
 import type {Model} from '../types/templates';
+import {solidIcons} from '@/subapps/website/common/icons/solid';
 
 export const accordionModel = {
   name: 'Accordion',
@@ -94,6 +95,34 @@ export const progressListModel = {
       selection: colors.map(color => ({
         title: startCase(color),
         value: color,
+      })),
+    },
+  ],
+} as const satisfies Model;
+
+export const serviceList3Model = {
+  name: 'ServiceList3',
+  title: 'Service List',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+    {
+      name: 'description',
+      title: 'Description',
+      type: 'string',
+    },
+    {
+      name: 'icon',
+      title: 'Icon',
+      type: 'string',
+      selection: solidIcons.map(icon => ({
+        title: startCase(icon),
+        value: icon,
       })),
     },
   ],

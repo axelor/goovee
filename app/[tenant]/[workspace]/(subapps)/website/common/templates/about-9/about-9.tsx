@@ -58,7 +58,11 @@ export function About9(props: TemplateProps<About9Data>) {
                   <ServiceCard3
                     title={item.title}
                     description={item.description}
-                    Icon={Icon ? <Icon className="solid icon-svg-sm text-aqua me-4" /> : null}
+                    Icon={
+                      Icon ? (
+                        <Icon className="solid icon-svg-sm text-aqua me-4" />
+                      ) : null
+                    }
                   />
                 </div>
               );
