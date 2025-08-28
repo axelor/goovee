@@ -28,7 +28,7 @@ import {
 } from '@/comments';
 import {zodParseFormData} from '@/utils/formdata';
 import {addComment, findComments} from '@/comments/orm';
-import {getStoragePath} from '@/lib/core/storage';
+import {getStoragePath} from '@/storage/index';
 
 //----LOCAL IMPORTS -----//
 import {

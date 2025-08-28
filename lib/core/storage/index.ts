@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 export function getStoragePath() {
-  const storage = process.env.DATA_STORAGE || './storage';
+  const storage = process.env.DATA_STORAGE;
 
   if (!storage) {
     return `${process.cwd()}/storage`;

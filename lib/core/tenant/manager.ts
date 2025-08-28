@@ -6,7 +6,7 @@ import {DEFAULT_TENANT} from '@/constants';
 import {createClient} from '@/goovee/.generated/client';
 import {LRUCache} from './lru';
 import type {Tenant, TenantConfig} from './types';
-import {getStoragePath} from '@/lib/core/storage';
+import {getStoragePath} from '@/storage/index';
 
 const CACHE_CAPACITY = 20;
 

@@ -12,7 +12,7 @@ import {manager, type Tenant} from '@/tenant';
 import type {ID} from '@/types';
 import {getFileSizeText} from '@/utils/files';
 import {sql} from '@/utils/template-string';
-import {getStoragePath} from '@/lib/core/storage';
+import {getStoragePath} from '@/storage/index';
 
 // ---- LOCAL IMPORTS ---- //
 import {MAIL_MESSAGE_TYPE, SORT_TYPE} from '../constants';

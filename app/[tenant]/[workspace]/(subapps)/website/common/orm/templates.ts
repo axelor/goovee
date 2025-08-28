@@ -34,7 +34,7 @@ import {
   isRelationalField,
 } from '../utils/templates';
 import {Cache, formatCustomFieldName} from '../utils/helper';
-import {getStoragePath} from '@/lib/core/storage';
+import {getStoragePath} from '@/storage/index';
 
 const pump = promisify(pipeline);
 

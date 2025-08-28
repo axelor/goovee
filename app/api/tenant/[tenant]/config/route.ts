@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {DEFAULT_TENANT} from '@/constants';
 import type {TenantConfig} from '@/tenant';
-import {getStoragePath} from '@/lib/core/storage';
+import {getStoragePath} from '@/storage/index';
 
 const CHECK_AUTH = false;
 

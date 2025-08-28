@@ -16,7 +16,7 @@ import {findWorkspace, findSubappAccess} from '@/orm/workspace';
 import {getCurrentDateTime} from '@/utils/date';
 import {TENANT_HEADER} from '@/middleware';
 import {getFileSizeText} from '@/utils/files';
-import {getStoragePath} from '@/lib/core/storage';
+import {getStoragePath} from '@/storage/index';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
