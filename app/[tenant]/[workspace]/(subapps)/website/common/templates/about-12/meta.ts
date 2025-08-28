@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -6,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import { accordionModel } from '../json-models';
+import {accordionModel} from '../json-models';
 
 export const about12Schema = {
   title: 'About 12',

@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -6,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import { progressListModel } from '../json-models';
+import {progressListModel} from '../json-models';
 
 export const about10Schema = {
   title: 'About 10',
@@ -83,7 +82,8 @@ export const about10Demos: Demo<typeof about10Schema>[] = [
         filePath: '/img/photos/about11.jpg',
       },
       about10Caption: 'The Lighthouse is Fabulous',
-      about10Title: 'We designed our strategies to help you at each stage of achievement.',
+      about10Title:
+        'We designed our strategies to help you at each stage of achievement.',
       about10BtnColor: 'white',
       about10Media: {
         id: '1',
@@ -135,7 +135,8 @@ export const about10Demos: Demo<typeof about10Schema>[] = [
         filePath: '/img/photos/about11.jpg',
       },
       about10Caption: 'Le phare est fabuleux',
-      about10Title: 'Nous avons conçu nos stratégies pour vous aider à chaque étape de votre réussite.',
+      about10Title:
+        'Nous avons conçu nos stratégies pour vous aider à chaque étape de votre réussite.',
       about10BtnColor: 'white',
       about10Media: {
         id: '1',

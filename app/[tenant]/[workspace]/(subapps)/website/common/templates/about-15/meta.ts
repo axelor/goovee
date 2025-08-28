@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -6,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import { bulletListModel, bulletPointModel } from '../json-models';
+import {bulletListModel, bulletPointModel} from '../json-models';
 
 export const about15Schema = {
   title: 'About 15',
@@ -87,7 +86,7 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
               version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
-             {
+            {
               id: '3',
               version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
@@ -127,22 +126,30 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
             {
               id: '1',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
             {
               id: '2',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
-             {
+            {
               id: '3',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
             {
               id: '4',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
           ],
         },

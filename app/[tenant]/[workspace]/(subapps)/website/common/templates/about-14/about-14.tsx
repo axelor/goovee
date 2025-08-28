@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About14Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';

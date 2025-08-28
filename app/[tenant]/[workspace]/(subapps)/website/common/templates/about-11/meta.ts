@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import { bulletListModel, bulletPointModel } from '../json-models';
+import {bulletListModel, bulletPointModel} from '../json-models';
 
 export const about11Schema = {
   title: 'About 11',
@@ -63,7 +63,7 @@ export const about11Schema = {
     },
   ],
   models: [
-    bulletListModel, 
+    bulletListModel,
     bulletPointModel,
     {
       name: 'About11AboutList2',
@@ -115,7 +115,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
         filePath: '/img/photos/ab3.jpg',
       },
       about11Caption: 'Discover our company',
-      about11Title: 'We are a creative advertising firm that focuses on the influence of great design and creative thinking.',
+      about11Title:
+        'We are a creative advertising firm that focuses on the influence of great design and creative thinking.',
       about11Description:
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Communities can be found in various forms.',
       about11AboutList1: {
@@ -135,7 +136,7 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
               version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
-             {
+            {
               id: '3',
               version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
@@ -154,7 +155,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
           version: 0,
           attrs: {
             title: 'Our Vision',
-            description: 'Customers may choose company offer high-quality product. Customers may choose company high-quality product.',
+            description:
+              'Customers may choose company offer high-quality product. Customers may choose company high-quality product.',
           },
         },
         {
@@ -162,7 +164,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
           version: 0,
           attrs: {
             title: 'Our Mission',
-            description: 'Customers may choose company offer high-quality product. Customers may choose company high-quality product.',
+            description:
+              'Customers may choose company offer high-quality product. Customers may choose company high-quality product.',
           },
         },
         {
@@ -170,7 +173,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
           version: 0,
           attrs: {
             title: 'Our Values',
-            description: 'Customers may choose company offer high-quality product. Customers may choose company high-quality product.',
+            description:
+              'Customers may choose company offer high-quality product. Customers may choose company high-quality product.',
           },
         },
       ],
@@ -201,7 +205,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
         filePath: '/img/photos/ab3.jpg',
       },
       about11Caption: 'Découvrez notre entreprise',
-      about11Title: 'Nous sommes une agence de publicité créative qui se concentre sur l’influence d’un bon design et d’une pensée créative.',
+      about11Title:
+        'Nous sommes une agence de publicité créative qui se concentre sur l’influence d’un bon design et d’une pensée créative.',
       about11Description:
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel. Les communautés peuvent être trouvées sous diverses formes.',
       about11AboutList1: {
@@ -214,22 +219,30 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
             {
               id: '1',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
             {
               id: '2',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
-             {
+            {
               id: '3',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
             {
               id: '4',
               version: 0,
-              attrs: {title: 'Nous offrons un contrôle des dépenses sans stress.'},
+              attrs: {
+                title: 'Nous offrons un contrôle des dépenses sans stress.',
+              },
             },
           ],
         },
@@ -240,7 +253,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
           version: 0,
           attrs: {
             title: 'Notre vision',
-            description: 'Les clients peuvent choisir une entreprise offrant des produits de haute qualité. Les clients peuvent choisir une entreprise de produits de haute qualité.',
+            description:
+              'Les clients peuvent choisir une entreprise offrant des produits de haute qualité. Les clients peuvent choisir une entreprise de produits de haute qualité.',
           },
         },
         {
@@ -248,7 +262,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
           version: 0,
           attrs: {
             title: 'Notre mission',
-            description: 'Les clients peuvent choisir une entreprise offrant des produits de haute qualité. Les clients peuvent choisir une entreprise de produits de haute qualité.',
+            description:
+              'Les clients peuvent choisir une entreprise offrant des produits de haute qualité. Les clients peuvent choisir une entreprise de produits de haute qualité.',
           },
         },
         {
@@ -256,7 +271,8 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
           version: 0,
           attrs: {
             title: 'Nos valeurs',
-            description: 'Les clients peuvent choisir une entreprise offrant des produits de haute qualité. Les clients peuvent choisir une entreprise de produits de haute qualité.',
+            description:
+              'Les clients peuvent choisir une entreprise offrant des produits de haute qualité. Les clients peuvent choisir une entreprise de produits de haute qualité.',
           },
         },
       ],

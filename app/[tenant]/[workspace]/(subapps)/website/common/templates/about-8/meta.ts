@@ -152,4 +152,3 @@ export const about8Demos: Demo<typeof about8Schema>[] = [
     },
   },
 ];
-

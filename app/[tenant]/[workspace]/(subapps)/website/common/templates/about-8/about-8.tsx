@@ -43,4 +43,3 @@ export function About8(props: TemplateProps<About8Data>) {
     </div>
   );
 }
-

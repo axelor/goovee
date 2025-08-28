@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -6,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import { bulletListModel, bulletPointModel } from '../json-models';
+import {bulletListModel, bulletPointModel} from '../json-models';
 
 export const about18Schema = {
   title: 'About 18',
@@ -86,7 +85,8 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
         filePath: '/img/photos/about27.jpg',
       },
       about18Caption: 'What Makes Us Different?',
-      about18Title: 'We take the stress out of using it so that you can be full charge.',
+      about18Title:
+        'We take the stress out of using it so that you can be full charge.',
       about18Description:
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Goals and interact with one another in a shared location or virtual space.',
       about18Heading1: 'Happy Clients',
@@ -132,7 +132,8 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
         filePath: '/img/photos/about27.jpg',
       },
       about18Caption: 'Qu’est-ce qui nous rend différents ?',
-      about18Title: 'Nous éliminons le stress lié à son utilisation afin que vous puissiez être pleinement responsable.',
+      about18Title:
+        'Nous éliminons le stress lié à son utilisation afin que vous puissiez être pleinement responsable.',
       about18Description:
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel. Les objectifs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel.',
       about18Heading1: 'Clients heureux',
@@ -150,17 +151,26 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
             {
               id: '1',
               version: 0,
-              attrs: {title: 'Les clients peuvent choisir un produit de qualité d’entreprise.'},
+              attrs: {
+                title:
+                  'Les clients peuvent choisir un produit de qualité d’entreprise.',
+              },
             },
             {
               id: '2',
               version: 0,
-              attrs: {title: 'Les clients peuvent choisir un produit de qualité d’entreprise.'},
+              attrs: {
+                title:
+                  'Les clients peuvent choisir un produit de qualité d’entreprise.',
+              },
             },
             {
               id: '3',
               version: 0,
-              attrs: {title: 'Les clients peuvent choisir un produit de qualité d’entreprise.'},
+              attrs: {
+                title:
+                  'Les clients peuvent choisir un produit de qualité d’entreprise.',
+              },
             },
           ],
         },
