@@ -21,6 +21,7 @@ import {about20Demos, about20Schema} from './about-20/meta';
 import {about21Demos, about21Schema} from './about-21/meta';
 import {about22Demos, about22Schema} from './about-22/meta';
 import {about23Demos, about23Schema} from './about-23/meta';
+import {about24Demos, about24Schema} from './about-24/meta';
 import {clients1Demos, clients1Schema} from './clients-1/meta';
 import {contact4Demos, contact4Schema} from './contacts-4/meta';
 import {cta1Demos, cta1Schema} from './cta-1/meta';
@@ -61,6 +62,7 @@ export const metas = [
   {schema: about21Schema, demos: about21Demos},
   {schema: about22Schema, demos: about22Demos},
   {schema: about23Schema, demos: about23Demos},
+  {schema: about24Schema, demos: about24Demos},
   {schema: hero1Schema, demos: hero1Demos},
   {schema: services1Schema, demos: services1Demos},
   {schema: cta1Schema, demos: cta1Demos},
