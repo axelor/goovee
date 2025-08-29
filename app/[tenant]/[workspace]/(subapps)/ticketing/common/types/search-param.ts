@@ -15,3 +15,7 @@ export type FilterParams = {
 };
 
 export type SearchParams = Expand<SortParams & PageParams & FilterParams>;
+export type TicketDetailsSearchParams = {
+  timesheetPage?: string | undefined;
+  timesheetLimit?: string | undefined;
+};

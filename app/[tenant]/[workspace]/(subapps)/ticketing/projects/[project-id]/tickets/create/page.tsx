@@ -19,16 +19,14 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
-import {
-  findMainPartnerContacts,
-  findProject,
-  findTicketCategories,
-  findTicketPriorities,
-  findTicketStatuses,
-} from '../../../../common/orm/projects';
+import {findProject} from '../../../../common/orm/projects';
+import {findTaskCategories} from '@/orm/project-task';
+import {findTaskPriorities} from '@/orm/project-task';
+import {findTaskStatuses} from '@/orm/project-task';
+import {findProjectMainPartnerContacts} from '@/orm/project-task';
 import {findTicketAccess} from '../../../../common/orm/tickets';
 import {ensureAuth} from '../../../../common/utils/auth-helper';
-import {EncodedFilter} from '../../../../common/utils/validators';
+import {EncodedTicketFilter} from '../../../../common/utils/validators';
 import {Form} from './client-form';
 
 export default async function Page({
@@ -47,7 +45,7 @@ export default async function Page({
   const projectId = params['project-id'];
   const {parentId} = searchParams;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -59,7 +57,7 @@ export default async function Page({
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   if (parentId) {
     const parentTicket = await findTicketAccess({
@@ -73,17 +71,21 @@ export default async function Page({
   const [project, statuses, categories, priorities, contacts] =
     await Promise.all([
       findProject(projectId, auth),
-      findTicketStatuses(projectId, tenant),
-      findTicketCategories(projectId, tenant).then(clone),
-      findTicketPriorities(projectId, tenant).then(clone),
-      findMainPartnerContacts(projectId, tenant).then(clone),
+      findTaskStatuses(projectId, tenant),
+      findTaskCategories(projectId, tenant).then(clone),
+      findTaskPriorities(projectId, tenant).then(clone),
+      findProjectMainPartnerContacts({
+        projectId,
+        tenantId: tenant,
+        appCode: SUBAPP_CODES.ticketing,
+      }).then(clone),
     ]);
 
   if (!project) notFound();
 
   const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   return (
     <div className="container mt-5 mb-20">
@@ -135,7 +137,7 @@ export default async function Page({
         categories={categories}
         priorities={priorities}
         contacts={contacts}
-        userId={auth.userId}
+        userId={auth.user.id}
         parentId={parentId}
         workspaceURI={workspaceURI}
         formFields={clone(workspace.config.ticketingFormFieldSet)}

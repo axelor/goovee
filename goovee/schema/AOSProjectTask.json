@@ -178,6 +178,10 @@
     {
       "type": "Boolean",
       "name": "archived"
+    },
+    {
+      "type": "Boolean",
+      "name": "invoiced"
     }
   ]
 }

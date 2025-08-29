@@ -12,23 +12,11 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components';
 import {Button} from '@/ui/components/button';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/ui/components/pagination';
 import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
-import {cn} from '@/utils/css';
-import {getPaginationButtons} from '@/utils/pagination';
 import {decodeFilter, getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import type {ID} from '@goovee/orm';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
@@ -36,26 +24,31 @@ import {FaChevronRight} from 'react-icons/fa';
 import {MdAdd} from 'react-icons/md';
 
 // ---- LOCAL IMPORTS ---- //
-import {DEFAULT_SORT, FIELDS, sortKeyPathMap} from '../../../common/constants';
 import {
-  findClientPartner,
-  findCompany,
-  findMainPartnerContacts,
-  findProject,
-  findTicketCategories,
-  findTicketPriorities,
-  findTicketStatuses,
-} from '../../../common/orm/projects';
+  findProjectClientPartner,
+  findProjectCompany,
+  findProjectMainPartnerContacts,
+  findTaskCategories,
+  findTaskPriorities,
+  findTaskStatuses,
+} from '@/orm/project-task';
+import {PageLinks} from '@/ui/components/page-links';
+import {
+  DEFAULT_SORT,
+  FILTER_FIELDS,
+  sortKeyPathMap,
+} from '../../../common/constants';
+import {findProject} from '../../../common/orm/projects';
 import {findTickets} from '../../../common/orm/tickets';
 import type {SearchParams} from '../../../common/types/search-param';
-import {Filter} from '../../../common/ui/components/filter';
+import {ClientFilter} from './client-filter';
 import {TicketList} from '../../../common/ui/components/ticket-list';
 import {getPages} from '../../../common/utils';
 import {ensureAuth} from '../../../common/utils/auth-helper';
 import {
   getOrderBy,
   getSkip,
-  getWhere,
+  getTicketWhere,
 } from '../../../common/utils/search-param';
 import Search from '../search';
 
@@ -79,7 +72,7 @@ export default async function Page({
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -91,7 +84,7 @@ export default async function Page({
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const project = await findProject(projectId, auth);
 
@@ -101,7 +94,7 @@ export default async function Page({
     projectId,
     take: +limit,
     skip: getSkip(limit, page),
-    where: getWhere(decodeFilter(filter), auth.userId),
+    where: getTicketWhere(decodeFilter(filter), auth.user.id),
     orderBy: getOrderBy(sort, sortKeyPathMap),
     auth,
   }).then(clone);
@@ -110,14 +103,7 @@ export default async function Page({
     workspace.config.ticketingFieldSet?.map(f => f.name),
   );
 
-  const hasFilter = [
-    FIELDS.PRIORITY,
-    FIELDS.STATUS,
-    FIELDS.UPDATED_ON,
-    FIELDS.CREATED_BY,
-    FIELDS.MANAGED_BY,
-    FIELDS.ASSIGNMENT,
-  ].some(field => allowedFields.has(field));
+  const hasFilter = FILTER_FIELDS.some(field => allowedFields.has(field));
 
   const url = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
   const pages = getPages(tickets, limit);
@@ -193,81 +179,15 @@ export default async function Page({
           fields={clone(workspace.config.ticketingFieldSet)}
         />
         {pages > 1 && (
-          <TablePagination
+          <PageLinks
             url={url}
             pages={pages}
             searchParams={searchParams}
+            className="p-4"
           />
         )}
       </div>
     </div>
-  );
-}
-
-type TablePaginationProps = {
-  url: string;
-  searchParams: SearchParams;
-  pages: number;
-};
-
-function TablePagination(props: TablePaginationProps) {
-  const {url, searchParams, pages} = props;
-  const {page = 1} = searchParams;
-  return (
-    <Pagination className="p-4">
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious asChild>
-            <Link
-              replace
-              scroll={false}
-              className={cn({['invisible']: +page <= 1})}
-              href={{pathname: url, query: {...searchParams, page: +page - 1}}}>
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous</span>
-            </Link>
-          </PaginationPrevious>
-        </PaginationItem>
-        {getPaginationButtons({currentPage: +page, totalPages: pages}).map(
-          (value, i) => {
-            if (typeof value == 'string') {
-              return (
-                <PaginationItem key={i}>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              );
-            }
-            return (
-              <PaginationItem key={value}>
-                <PaginationLink isActive={+page === value} asChild>
-                  <Link
-                    replace
-                    scroll={false}
-                    href={{
-                      pathname: url,
-                      query: {...searchParams, page: value},
-                    }}>
-                    {value}
-                  </Link>
-                </PaginationLink>
-              </PaginationItem>
-            );
-          },
-        )}
-        <PaginationItem>
-          <PaginationNext asChild>
-            <Link
-              replace
-              scroll={false}
-              className={cn({['invisible']: +page >= pages})}
-              href={{pathname: url, query: {...searchParams, page: +page + 1}}}>
-              <span className="sr-only">Next</span>
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          </PaginationNext>
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
   );
 }
 
@@ -286,16 +206,20 @@ async function AsyncFilter({
 }) {
   const [contacts, statuses, priorities, company, clientPartner, categories] =
     await Promise.all([
-      findMainPartnerContacts(projectId, tenantId),
-      findTicketStatuses(projectId, tenantId),
-      findTicketPriorities(projectId, tenantId),
-      findCompany(projectId, tenantId),
-      findClientPartner(projectId, tenantId),
-      findTicketCategories(projectId, tenantId),
+      findProjectMainPartnerContacts({
+        projectId,
+        tenantId,
+        appCode: SUBAPP_CODES.ticketing,
+      }),
+      findTaskStatuses(projectId, tenantId),
+      findTaskPriorities(projectId, tenantId),
+      findProjectCompany(projectId, tenantId),
+      findProjectClientPartner(projectId, tenantId),
+      findTaskCategories(projectId, tenantId),
     ]).then(clone);
 
   return (
-    <Filter
+    <ClientFilter
       contacts={contacts}
       priorities={priorities}
       statuses={statuses}

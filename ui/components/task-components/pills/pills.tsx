@@ -1,53 +1,51 @@
 import {forwardRef} from 'react';
 import {Maybe} from '@/types/util';
-import {Tag} from '@/ui/components';
-import type {Variant} from '@/ui/components/tag';
 import {cn} from '@/utils/css';
-
-const statusMap = new Map<string, Variant>();
-statusMap.set('New', 'default');
-statusMap.set('In progress', 'yellow');
-statusMap.set('Done', 'success');
-statusMap.set('Canceled', 'destructive');
+import {Tag} from '../../tag';
+import type {Variant} from '../../tag';
 
 type PillProps = {
   name: Maybe<string>;
   className?: string;
 };
 
+export const taskStatusMap = new Map<string, Variant>();
+taskStatusMap.set('New', 'default');
+taskStatusMap.set('In progress', 'yellow');
+taskStatusMap.set('Done', 'success');
+taskStatusMap.set('Canceled', 'destructive');
+
 export const Status = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
   if (!name) return null;
 
   return (
     <Tag
-      variant={statusMap.get(name) ?? 'default'}
+      variant={taskStatusMap.get(name) ?? 'default'}
       className="text-[10px] py-1 w-max"
       outline>
       {name}
     </Tag>
   );
 });
-
 Status.displayName = 'Status';
 
-const priorityMap = new Map<string, Variant>();
-priorityMap.set('High', 'orange');
-priorityMap.set('Low', 'success');
-priorityMap.set('Normal', 'yellow');
-priorityMap.set('Urgent', 'destructive');
+export const taskPriorityMap = new Map<string, Variant>();
+taskPriorityMap.set('High', 'orange');
+taskPriorityMap.set('Low', 'success');
+taskPriorityMap.set('Normal', 'yellow');
+taskPriorityMap.set('Urgent', 'destructive');
 
 export const Priority = forwardRef<HTMLDivElement, PillProps>(({name}, ref) => {
   if (!name) return null;
 
   return (
     <Tag
-      variant={priorityMap.get(name) ?? 'default'}
+      variant={taskPriorityMap.get(name) ?? 'default'}
       className="text-[10px] py-1 w-max">
       {name}
     </Tag>
   );
 });
-
 Priority.displayName = 'Priority';
 
 export const Category = forwardRef<HTMLDivElement, PillProps>(
@@ -62,5 +60,4 @@ export const Category = forwardRef<HTMLDivElement, PillProps>(
     );
   },
 );
-
 Category.displayName = 'Category';

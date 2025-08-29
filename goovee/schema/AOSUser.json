@@ -19,6 +19,11 @@
       "name": "partner",
       "type": "OneToOne",
       "target": "AOSPartner"
+    },
+    {
+      "name": "employee",
+      "type": "OneToOne",
+      "target": "AOSHREmployee"
     }
   ]
 }

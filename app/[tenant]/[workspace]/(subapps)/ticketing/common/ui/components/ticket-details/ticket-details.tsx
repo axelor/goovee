@@ -1,9 +1,15 @@
 'use client';
 
+import {TASK_INVOICING_TYPE} from '@/constants';
 import {i18n} from '@/locale';
 import {formatDate} from '@/locale/formatters';
+import type {
+  MainPartnerContact,
+  TaskCategory as TCategory,
+  TaskPriority as TPriority,
+} from '@/orm/project-task';
 import type {PortalAppConfig} from '@/types';
-import type {Cloned, Maybe} from '@/types/util';
+import type {Maybe} from '@/types/util';
 import {
   Button,
   Dialog,
@@ -30,16 +36,15 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {Progress} from '@/ui/components/progress';
+import {
+  Category,
+  Priority,
+  Status,
+} from '@/ui/components/task-components/pills';
 import {cn} from '@/utils/css';
 import {useMemo} from 'react';
-import {FIELDS, INVOICING_TYPE, UPDATABLE_FIELDS} from '../../../constants';
-import type {
-  ContactPartner,
-  Category as TCategory,
-  Priority as TPriority,
-} from '../../../types';
+import {FIELDS, UPDATABLE_FIELDS} from '../../../constants';
 import {isWithProvider} from '../../../utils';
-import {Category, Priority, Status} from '../pills';
 import {useTicketDetails} from './ticket-details-provider';
 
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
@@ -47,7 +52,7 @@ import '@/ui/components/rich-text-editor/rich-text-editor.css';
 type Props = {
   categories: TCategory[];
   priorities: TPriority[];
-  contacts: ContactPartner[];
+  contacts: MainPartnerContact[];
   formFields: PortalAppConfig['ticketingFormFieldSet'];
   showCancel?: boolean;
   showClose?: boolean;
@@ -358,7 +363,7 @@ export function TicketDetails(props: Props) {
               })}
             />
             {ticket.displayFinancialData &&
-              ticket.invoicingType === INVOICING_TYPE.PACKAGE && (
+              ticket.invoicingType === TASK_INVOICING_TYPE.PACKAGE && (
                 <>
                   <div className="flex gap-4">
                     <span className="font-medium">

@@ -122,6 +122,43 @@ export interface PortalAppConfig extends Model {
   directoryHeroBgImage: {
     id: string;
   };
+  isAllowUserComment: boolean;
+  isDisplayRelatedElements: boolean;
+  taskDisplayTypeSelect: number;
+  isDisplayTotalOpenTasks: boolean;
+  isDisplayTotalOpenTickets: boolean;
+  isDisplayTotalTimespent: boolean;
+  isDisplayTotalInvoiced: boolean;
+  isDisplayParentTask: boolean;
+  isDisplayChildTasks: boolean;
+  isDisplayRelatedTasks: boolean;
+  isDisplayTimespentList: boolean;
+  isDisplayTotalTimespentPerTask: boolean;
+  taskFieldSet: {id: string; name: string}[];
+  invoiceFieldSet: {id: string; name: string}[];
+  timespentFieldSet: {id: string; name: string}[];
+  isDisplayTaskCompletionReport: boolean;
+  isDisplayTaskCompletionByMonthReport: boolean;
+  isDisplayTicketCompletionReport: boolean;
+  isDisplayTicketCompletionByMonthReport: boolean;
+  isDisplayTaskProgressReport: boolean;
+  isDisplayTaskProgressByMonthReport: boolean;
+  isDisplayTicketProgressReport: boolean;
+  isDisplayTicketProgressByMonthReport: boolean;
+  isDiplayInvoiceByMonthReport: boolean;
+  isDisplayTimespentByEmployeeReport: boolean;
+  isDisplayTimespentByMonthReport: boolean;
+  projectTimespentTypeSelect: number;
+  ticketingTimespentTypeSelect: number;
+  resetValueDate: Date;
+  projectHeroTitle: string;
+  projectHeroDescription: string;
+  projectHeroOverlayColorSelect: OverlayColor;
+  projectHeroBgImage: {id: string};
+  isDisplayTimespentListForTicket: boolean;
+  isDisplayTotalTimespentPerTicket: boolean;
+  ticketTimespentFieldSet: {id: string; name: string}[];
+  taskFormFieldSet: {id: string; name: string}[];
   ticketHeroTitle: string;
   ticketHeroDescription: string;
   ticketHeroOverlayColorSelect: OverlayColor;
@@ -175,6 +212,12 @@ export interface PortalApp extends Model {
   orderForTopMenu: number;
   showInMySpace: boolean;
   showInTopMenu: boolean;
+}
+
+export interface Subapp extends Omit<PortalApp, 'installed'> {
+  installed: boolean;
+  isContactAdmin: boolean;
+  role?: 'restricted' | 'total';
 }
 
 export interface Product extends Model {

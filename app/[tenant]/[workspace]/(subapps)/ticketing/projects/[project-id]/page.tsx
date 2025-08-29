@@ -1,19 +1,3 @@
-// ---- CORE IMPORTS ---- //
-import {SUBAPP_CODES} from '@/constants';
-import {t} from '@/locale/server';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-  Button,
-} from '@/ui/components';
-import {Skeleton} from '@/ui/components/skeleton';
-import {clone} from '@/utils';
-import {encodeFilter, getLoginURL} from '@/utils/url';
-import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
@@ -28,9 +12,28 @@ import {
   MdPending,
 } from 'react-icons/md';
 
-// ---- LOCAL IMPORTS ---- //
+// ---- CORE IMPORTS ---- //
+import {SUBAPP_CODES} from '@/constants';
+import {t} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
+import {findTaskStatuses} from '@/orm/project-task';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  Button,
+} from '@/ui/components';
+import {Skeleton} from '@/ui/components/skeleton';
+import {Swipe} from '@/ui/components/task-components/swipe';
+import {clone} from '@/utils';
 import {cn} from '@/utils/css';
+import {encodeFilter, getLoginURL} from '@/utils/url';
+import {workspacePathname} from '@/utils/workspace';
+
+// ---- LOCAL IMPORTS ---- //
 import {
   ALL_TICKETS_TITLE,
   CREATED_TICKETS_TITLE,
@@ -40,7 +43,7 @@ import {
   RESOLVED_TICKETS_TITLE,
   sortKeyPathMap,
 } from '../../common/constants';
-import {findProject, findTicketStatuses} from '../../common/orm/projects';
+import {findProject} from '../../common/orm/projects';
 import {
   findTickets,
   getAllTicketCount,
@@ -50,11 +53,10 @@ import {
   getResolvedTicketCount,
 } from '../../common/orm/tickets';
 import type {SearchParams} from '../../common/types/search-param';
-import {Swipe} from '../../common/ui/components/swipe';
 import {TicketList} from '../../common/ui/components/ticket-list';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {getOrderBy, getSkip} from '../../common/utils/search-param';
-import {EncodedFilter} from '../../common/utils/validators';
+import {EncodedTicketFilter} from '../../common/utils/validators';
 import Search from './search';
 
 export default async function Page({
@@ -70,7 +72,7 @@ export default async function Page({
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -82,7 +84,7 @@ export default async function Page({
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const [project, tickets, statuses] = await Promise.all([
     findProject(projectId, auth),
@@ -94,7 +96,7 @@ export default async function Page({
       where: {status: {isCompleted: false}},
       auth,
     }).then(clone),
-    findTicketStatuses(projectId, tenant),
+    findTaskStatuses(projectId, tenant),
   ]);
 
   if (!project) notFound();
@@ -102,7 +104,7 @@ export default async function Page({
   const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
   const statusCompleted = statuses.filter(s => s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   const items = [
     workspace.config.isShowAllTickets && {
@@ -115,7 +117,7 @@ export default async function Page({
     workspace.config.isShowMyTickets && {
       label: await t(MY_TICKETS_TITLE),
       count: getMyTicketCount({projectId, auth}),
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status, myTickets: true})}&title=${encodeURIComponent(MY_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, myTickets: true})}&title=${encodeURIComponent(MY_TICKETS_TITLE)}`,
       icon: MdAllInbox,
       iconClassName: 'bg-palette-blue text-palette-blue-dark',
     },
@@ -123,21 +125,21 @@ export default async function Page({
       label: await t(MANAGED_TICKETS_TITLE),
       count: getManagedTicketCount({projectId, auth}),
       icon: MdListAlt,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status, managedBy: [auth.userId.toString()]})}&title=${encodeURIComponent(MANAGED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, managedBy: [auth.user.id.toString()]})}&title=${encodeURIComponent(MANAGED_TICKETS_TITLE)}`,
       iconClassName: 'bg-palette-purple text-palette-purple-dark',
     },
     workspace.config.isShowCreatedTicket && {
       label: await t(CREATED_TICKETS_TITLE),
       count: getCreatedTicketCount({projectId, auth}),
       icon: MdPending,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status, createdBy: [auth.userId.toString()]})}&title=${encodeURIComponent(CREATED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, createdBy: [auth.user.id.toString()]})}&title=${encodeURIComponent(CREATED_TICKETS_TITLE)}`,
       iconClassName: 'bg-palette-yellow text-palette-yellow-dark',
     },
     workspace.config.isShowResolvedTicket && {
       label: await t(RESOLVED_TICKETS_TITLE),
       count: getResolvedTicketCount({projectId, auth}),
       icon: MdCheckCircleOutline,
-      href: `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status: statusCompleted})}&title=${encodeURIComponent(RESOLVED_TICKETS_TITLE)}`,
+      href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status: statusCompleted})}&title=${encodeURIComponent(RESOLVED_TICKETS_TITLE)}`,
       iconClassName: 'text-success bg-success-light',
     },
   ]
@@ -178,7 +180,7 @@ export default async function Page({
         projectId={projectId}
         inputClassName="h-[39px] placeholder:!text-sm text-sm"
       />
-      <Swipe items={items} />
+      <Swipe items={items} className="!w-[220px] !h-[120px] cursor-pointer" />
       <div className="flex items-center justify-between !mt-0">
         <h2 className="font-semibold text-xl">{await t('Latest tickets')}</h2>
         <Button variant="success" className="flex items-center" asChild>

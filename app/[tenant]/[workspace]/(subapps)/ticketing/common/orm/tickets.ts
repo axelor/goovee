@@ -1,11 +1,31 @@
-import type {Entity, ID, Payload, SelectOptions, UpdateArgs} from '@goovee/orm';
+import type {
+  BigDecimal,
+  Entity,
+  ID,
+  OrderByArg,
+  Payload,
+  SelectOptions,
+  UpdateArgs,
+  WhereArg,
+  WhereOptions,
+} from '@goovee/orm';
 import axios from 'axios';
 
 // ---- CORE IMPORTS ---- //
 import {MAIL_MESSAGE_TYPE, type Track} from '@/comments';
 import {addComment} from '@/comments/orm';
-import {ModelMap, ORDER_BY, SUBAPP_CODES} from '@/constants';
-import type {AOSProjectTask} from '@/goovee/.generated/models';
+import {
+  ModelMap,
+  TIMSPENT_TYPE_SELECT,
+  ORDER_BY,
+  SUBAPP_CODES,
+  TASK_INVOICING_TYPE,
+  TASK_TYPE_SELECT,
+} from '@/constants';
+import type {
+  AOSHRTimesheetLine,
+  AOSProjectTask,
+} from '@/goovee/.generated/models';
 import {t} from '@/locale/server';
 import {manager, type Tenant} from '@/tenant';
 import {sql} from '@/utils/template-string';
@@ -13,8 +33,6 @@ import {sql} from '@/utils/template-string';
 // ---- LOCAL IMPORTS ---- //
 import {
   ASSIGNMENT,
-  INVOICING_TYPE,
-  TYPE_SELECT,
   VERSION_MISMATCH_CAUSE_CLASS,
   VERSION_MISMATCH_ERROR,
 } from '../constants';
@@ -27,12 +45,19 @@ import type {
   TicketListTicket,
   TicketSearch,
 } from '../types';
-import type {AuthProps} from '../utils/auth-helper';
+import type {AuthProps} from '@/orm/project-task';
 import {sendTrackMail} from '../utils/mail';
 import type {CreateTicketInfo, UpdateTicketInfo} from '../utils/validators';
 import type {QueryProps} from './helpers';
-import {getProjectAccessFilter, withTicketAccessFilter} from './helpers';
+import {
+  findApprovedPeriodBetweenDates,
+  getProjectAccessFilter,
+  getTimesheetLineAccessFilter,
+  safeguardTimesheetLineDuration,
+  withTicketAccessFilter,
+} from '@/orm/project-task';
 import {getMailRecipients} from './mail';
+import {and, or} from '@/utils/orm';
 
 export type TicketProps<T extends Entity> = QueryProps<T> & {
   projectId: ID;
@@ -89,7 +114,7 @@ export async function createTicket({
     parentId,
   } = data;
   let {managedBy} = data;
-  managedBy = managedBy || String(auth.userId);
+  managedBy = managedBy || String(auth.user.id);
 
   if (!auth.tenantId) {
     throw new Error(await t('TenantId is required'));
@@ -141,12 +166,12 @@ export async function createTicket({
       updatedOn: new Date(),
       taskDate: new Date(),
       assignment: ASSIGNMENT.CUSTOMER,
-      typeSelect: TYPE_SELECT.TICKET,
-      invoicingType: INVOICING_TYPE.NO_INVOICING,
+      typeSelect: TASK_TYPE_SELECT.TICKET,
+      invoicingType: TASK_INVOICING_TYPE.NO_INVOICING,
       isPrivate: false,
       isInternal: false,
       progress: '0.00',
-      createdByContact: {select: {id: auth.userId}},
+      createdByContact: {select: {id: auth.user.id}},
       project: {select: {id: projectId}},
       name: subject,
       description: description,
@@ -260,10 +285,10 @@ export async function createTicket({
     if (workspaceUserId) {
       addComment({
         modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: auth.userId,
+        userId: auth.user.id,
         workspaceUserId: workspaceUserId,
         recordId: newTicket.id,
-        subject: `Record Created by ${auth.simpleFullName}`,
+        subject: `Record Created by ${auth.user.simpleFullName}`,
         messageBody: {title: 'Record created', tracks: tracks, tags: []},
         messageType: MAIL_MESSAGE_TYPE.notification,
         tenantId: auth.tenantId,
@@ -277,7 +302,7 @@ export async function createTicket({
   }
 
   getMailRecipients({
-    userId: auth.userId,
+    userId: auth.user.id,
     contacts: new Set([
       newTicket.createdByContact?.id,
       newTicket.managedByContact?.id,
@@ -288,7 +313,7 @@ export async function createTicket({
     .then(reciepients => {
       if (reciepients.length) {
         return sendTrackMail({
-          author: auth.simpleFullName,
+          author: auth.user.simpleFullName,
           type: 'create',
           tracks,
           projectName: newTicket.project?.name!,
@@ -489,10 +514,10 @@ export async function updateTicket({
     if (workspaceUserId && !fromWS) {
       addComment({
         modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: auth.userId,
+        userId: auth.user.id,
         workspaceUserId: workspaceUserId,
         recordId: newTicket.id,
-        subject: `Record Updated by ${auth.simpleFullName}`,
+        subject: `Record Updated by ${auth.user.simpleFullName}`,
         messageBody: {title: 'Record updated', tracks: tracks, tags: []},
         messageType: MAIL_MESSAGE_TYPE.notification,
         tenantId: auth.tenantId,
@@ -506,7 +531,7 @@ export async function updateTicket({
   }
 
   getMailRecipients({
-    userId: auth.userId,
+    userId: auth.user.id,
     contacts: new Set([
       newTicket.createdByContact?.id,
       newTicket.managedByContact?.id,
@@ -518,7 +543,7 @@ export async function updateTicket({
     .then(reciepients => {
       if (reciepients.length) {
         return sendTrackMail({
-          author: auth.simpleFullName,
+          author: auth.user.simpleFullName,
           type: 'update',
           tracks,
           projectName: newTicket.project?.name!,
@@ -571,8 +596,8 @@ export async function getMyTicketCount(props: {
       project: {id: projectId},
       status: {isCompleted: false},
       OR: [
-        {managedByContact: {id: auth.userId}},
-        {createdByContact: {id: auth.userId}},
+        {managedByContact: {id: auth.user.id}},
+        {createdByContact: {id: auth.user.id}},
       ],
     }),
   });
@@ -593,7 +618,7 @@ export async function getManagedTicketCount(props: {
     where: withTicketAccessFilter(auth)({
       project: {id: projectId},
       status: {isCompleted: false},
-      managedByContact: {id: auth.userId},
+      managedByContact: {id: auth.user.id},
     }),
   });
 
@@ -614,7 +639,7 @@ export async function getCreatedTicketCount(props: {
     where: withTicketAccessFilter(auth)({
       project: {id: projectId},
       status: {isCompleted: false},
-      createdByContact: {id: auth.userId},
+      createdByContact: {id: auth.user.id},
     }),
   });
 
@@ -668,6 +693,7 @@ export async function findTickets(
       status: {name: true},
       projectTaskCategory: {name: true},
       priority: {name: true},
+      typeSelect: true,
       project: {
         name: true,
         company: {name: true},
@@ -701,6 +727,7 @@ export async function findRelatedTicketLinks(
             updatedOn: true,
             status: {name: true},
             projectTaskCategory: {name: true},
+            typeSelect: true,
             priority: {name: true},
             project: {
               name: true,
@@ -742,6 +769,7 @@ export async function findChildTickets(
       status: {name: true},
       projectTaskCategory: {name: true},
       priority: {name: true},
+      typeSelect: true,
       project: {
         name: true,
         company: {name: true},
@@ -1364,4 +1392,69 @@ export async function deleteRelatedTicketLink({
     where: {id: {in: linksToDelete}},
   });
   return deleteCount;
+}
+
+export type TimesheetLine = {
+  id: string;
+  version: number;
+  employee?: {id: string; version: number; name?: string};
+  date?: Date;
+  customerDurationHours?: BigDecimal;
+  comments?: string;
+  projectTask?: {id: string; version: number; typeSelect?: string};
+  project?: {id: string; version: number};
+  _count?: string;
+};
+
+export async function findTimesheetLines(props: {
+  ticketId?: ID;
+  projectId?: ID;
+  auth: AuthProps;
+  take?: number;
+  skip?: number;
+  orderBy?: OrderByArg<AOSHRTimesheetLine>;
+  where?: WhereArg<AOSHRTimesheetLine> | null;
+}): Promise<TimesheetLine[]> {
+  const {ticketId, projectId, auth, take, skip, orderBy, where} = props;
+  const client = await manager.getClient(auth.tenantId);
+
+  let dateFilter: WhereOptions<AOSHRTimesheetLine> | undefined;
+  if (
+    auth.workspace.config.ticketingTimespentTypeSelect ===
+    TIMSPENT_TYPE_SELECT.APPROVED_PERIOD_ONLY
+  ) {
+    const betweenDates = await findApprovedPeriodBetweenDates(auth);
+    if (!betweenDates.length) return [];
+    dateFilter = or<AOSHRTimesheetLine>(
+      betweenDates.map(dates => ({date: {between: dates}})),
+    );
+  }
+  const timesheetLines = await client.aOSHRTimesheetLine
+    .find({
+      where: and<AOSHRTimesheetLine>([
+        getTimesheetLineAccessFilter({
+          auth,
+          typeSelect: TASK_TYPE_SELECT.TICKET,
+        }),
+        projectId && {project: {id: projectId}},
+        ticketId && {projectTask: {id: ticketId}},
+        dateFilter,
+        where,
+      ]),
+      select: {
+        employee: {name: true, user: {id: true}},
+        date: true,
+        hoursDuration: true,
+        customerDurationHours: true,
+        comments: true,
+        projectTask: {id: true, typeSelect: true},
+        project: {id: true},
+      },
+      ...(orderBy && {orderBy}),
+      ...(take && {take}),
+      ...(skip && {skip}),
+    })
+    .then(safeguardTimesheetLineDuration);
+
+  return timesheetLines;
 }

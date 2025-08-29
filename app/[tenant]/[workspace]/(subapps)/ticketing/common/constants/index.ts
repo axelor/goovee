@@ -11,21 +11,9 @@ export const sortKeyPathMap: Record<string, string> = {
   updatedOn: 'updatedOn',
 };
 
-export const TYPE_SELECT = {
-  TASK: 'task',
-  TICKET: 'ticket',
-} as const;
-
 export const ASSIGNMENT = {
   CUSTOMER: 1,
   PROVIDER: 2,
-} as const;
-
-export const INVOICING_TYPE = {
-  TIME_SPENT: 1,
-  PACKAGE: 2,
-  NO_INVOICING: 3,
-  ON_PROGRESS: 4,
 } as const;
 
 export const VERSION_MISMATCH_ERROR = 'OptimisticLockVersionMismatchError';
@@ -64,8 +52,17 @@ export const FIELDS = {
   PROGRESS: 'progress',
   TARGET_VERSION: 'targetVersion',
   TASK_END_DATE: 'taskEndDate',
+  TASK_DATE: 'taskDate',
 };
 
+export const FILTER_FIELDS = [
+  FIELDS.PRIORITY,
+  FIELDS.STATUS,
+  FIELDS.UPDATED_ON,
+  FIELDS.CREATED_BY,
+  FIELDS.MANAGED_BY,
+  FIELDS.ASSIGNMENT,
+];
 export const UPDATABLE_FIELDS = [
   FIELDS.PRIORITY,
   FIELDS.CATEGORY,

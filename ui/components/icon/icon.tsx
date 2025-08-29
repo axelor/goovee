@@ -19,6 +19,7 @@ import {
   MdFolder,
   MdOutlinePoll,
   MdAccountCircle,
+  MdPieChartOutline,
 } from 'react-icons/md';
 
 interface IconMapping {
@@ -40,6 +41,7 @@ interface IconMapping {
   directory: IconType;
   survey: IconType;
   account: IconType;
+  projects: IconType;
 }
 
 function getIcon(type: keyof IconMapping): IconType | undefined {
@@ -62,6 +64,7 @@ function getIcon(type: keyof IconMapping): IconType | undefined {
     directory: MdFolder,
     survey: MdOutlinePoll,
     account: MdAccountCircle,
+    projects: MdPieChartOutline,
   };
 
   const icon = iconMapping[type];

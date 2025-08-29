@@ -70,11 +70,11 @@ export async function mutate(
 
   const {force} = config || {};
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const allowedFields = new Set(
     workspace.config.ticketingFormFieldSet
@@ -230,11 +230,11 @@ export async function updateAssignment(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {workspace, auth} = info;
+  const {workspace} = auth;
   const {workspaceUser} = workspace;
 
   if (!workspace.config.isDisplayAssignmentBtn) {
@@ -292,11 +292,11 @@ export async function closeTicket(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {workspace, auth} = info;
+  const {workspace} = auth;
   const {workspaceUser} = workspace;
 
   if (!workspace.config.isDisplayCloseBtn) {
@@ -359,11 +359,11 @@ export async function cancelTicket(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {workspace, auth} = info;
+  const {workspace} = auth;
   const {workspaceUser} = workspace;
 
   if (!workspace.config.isDisplayCancelBtn) {
@@ -428,11 +428,11 @@ export async function createRelatedLink(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
   if (!workspace.config.isDisplayRelatedTicket) {
     return {error: true, message: await t('Related tickets are not enabled')};
   }
@@ -464,11 +464,11 @@ export async function createChildLink(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -498,11 +498,11 @@ export async function createParentLink(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -537,11 +537,11 @@ export async function deleteChildLink(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -576,11 +576,11 @@ export async function deleteParentLink(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -614,11 +614,11 @@ export async function deleteRelatedLink(
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) return {error: true, message};
 
-  const {auth, workspace} = info;
+  const {workspace} = auth;
   if (!workspace.config.isDisplayRelatedTicket) {
     return {error: true, message: await t('Related tickets are not enabled')};
   }
@@ -652,13 +652,11 @@ export async function searchTickets({
     };
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) {
     return {error: true, message};
   }
-  const {auth} = info;
-
   const tickets = await findTicketsBySearch({
     search,
     projectId,
@@ -680,12 +678,12 @@ export const createComment: CreateComment = async formData => {
     CreateCommentPropsSchema,
   );
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) {
     return {error: true, message};
   }
-  const {auth, workspace, user} = info;
+  const {workspace, user} = auth;
 
   const {workspaceUser} = workspace;
 
@@ -720,7 +718,7 @@ export const createComment: CreateComment = async formData => {
   try {
     const res = await addComment({
       modelName,
-      userId: auth.userId,
+      userId: auth.user.id,
       workspaceUserId: workspaceUser.id,
       tenantId,
       commentField: 'note',
@@ -732,7 +730,7 @@ export const createComment: CreateComment = async formData => {
     const [comment, parentComment] = res;
 
     getMailRecipients({
-      userId: auth.userId,
+      userId: auth.user.id,
       contacts: new Set([
         parentComment?.partner?.id,
         ticket.createdByContact?.id,
@@ -779,12 +777,12 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {error, message, info} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
   if (error) {
     return {error: true, message};
   }
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const {workspaceUser} = workspace;
 

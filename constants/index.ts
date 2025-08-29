@@ -1,3 +1,5 @@
+import type {Variant} from '@/ui/components/tag';
+
 /**
  * CURRENCY
  */
@@ -67,6 +69,7 @@ export enum SUBAPP_CODES {
   directory = 'directory',
   survey = 'survey',
   website = 'website',
+  projects = 'projects',
 }
 
 /**
@@ -218,6 +221,7 @@ export const ModelMap: Partial<Record<SUBAPP_CODES, string>> = {
   [SUBAPP_CODES.events]: 'com.axelor.apps.portal.db.PortalEvent',
   [SUBAPP_CODES.ticketing]: 'com.axelor.apps.project.db.ProjectTask',
   [SUBAPP_CODES.quotations]: 'com.axelor.apps.sale.db.SaleOrder',
+  [SUBAPP_CODES.projects]: 'com.axelor.apps.project.db.ProjectTask',
 };
 
 /**
@@ -237,3 +241,42 @@ export const INVOICE_ENTITY_TYPE = {
 
 export const NO_IMAGE_URL = '/images/no-image.png';
 export const DEFAULT_LOGO_URL = `/images/default-logo.png`;
+
+export enum TASK_TYPE_SELECT {
+  TASK = 'task',
+  TICKET = 'ticket',
+}
+
+export const TASK_INVOICING_TYPE = {
+  TIME_SPENT: 1,
+  PACKAGE: 2,
+  NO_INVOICING: 3,
+  ON_PROGRESS: 4,
+} as const;
+
+export const TIMESHEET_STATUS = {
+  DRAFT: 1,
+  CONFIRMED: 2,
+  VALIDATED: 3,
+  REFUSED: 4,
+  CANCELLED: 5,
+};
+
+export const INVOICE_STATUS = {
+  VENTILATED: 3,
+  UNPAID: 0,
+};
+
+export const INVOICE_CATEGORY = {
+  SALE_INVOICE: 3,
+};
+
+export const INVOICE_TYPE = {
+  UNPAID: 'Unpaid',
+  PAID: 'Paid',
+};
+
+export const TIMSPENT_TYPE_SELECT = {
+  REAL_TIME: 1,
+  APPROVED_PERIOD_ONLY: 2,
+};

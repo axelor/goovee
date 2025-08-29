@@ -6,7 +6,7 @@ import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
 import {Comments, isCommentEnabled, SORT_TYPE} from '@/comments';
-import {SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES, TASK_TYPE_SELECT} from '@/constants';
 import {t} from '@/locale/server';
 import {type Tenant} from '@/tenant';
 import {
@@ -24,15 +24,24 @@ import {encodeFilter, getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import {formatNumber} from '@/lib/core/locale/server/formatters';
+import type {
+  AuthProps,
+  MainPartnerContact,
+  TaskCategory,
+  TaskPriority,
+} from '@/orm/project-task';
+import {
+  findProjectMainPartnerContacts,
+  findTaskCategories,
+  findTaskPriorities,
+  findTaskStatuses,
+  getTotalTimeSpent,
+} from '@/orm/project-task';
 import type {PortalAppConfig} from '@/types';
+import {PageLinks} from '@/ui/components/page-links';
 import {createComment, fetchComments} from '../../../../common/actions';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
-import {
-  findMainPartnerContacts,
-  findTicketCategories,
-  findTicketPriorities,
-  findTicketStatuses,
-} from '../../../../common/orm/projects';
 import {
   findChildTicketIds,
   findChildTickets,
@@ -41,21 +50,21 @@ import {
   findRelatedTicketLinks,
   findTicket,
   findTicketLinkTypes,
+  findTimesheetLines,
 } from '../../../../common/orm/tickets';
-import type {
-  Category,
-  ContactPartner,
-  Priority,
-} from '../../../../common/types';
+import {TicketDetailsSearchParams} from '../../../../common/types';
 import {TicketDetails} from '../../../../common/ui/components/ticket-details';
 import {TicketDetailsProvider} from '../../../../common/ui/components/ticket-details/ticket-details-provider';
 import {
   ChildTicketList,
   ParentTicketList,
   RelatedTicketList,
+  TimesheetLines,
 } from '../../../../common/ui/components/ticket-list';
+import {getPages} from '../../../../common/utils';
 import {ensureAuth} from '../../../../common/utils/auth-helper';
-import {EncodedFilter} from '../../../../common/utils/validators';
+import {getSkip} from '../../../../common/utils/search-param';
+import {EncodedTicketFilter} from '../../../../common/utils/validators';
 import {
   ChildTicketsHeader,
   ParentTicketsHeader,
@@ -64,6 +73,7 @@ import {
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: {
     tenant: string;
@@ -71,6 +81,7 @@ export default async function Page({
     'project-id': string;
     'ticket-id': string;
   };
+  searchParams: TicketDetailsSearchParams;
 }) {
   const {workspaceURI, workspaceURL} = workspacePathname(params);
   const projectId = params['project-id'];
@@ -78,11 +89,11 @@ export default async function Page({
 
   const {tenant} = params;
 
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`,
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}?${new URLSearchParams(searchParams).toString()}`,
         workspaceURI,
         tenant,
       }),
@@ -90,22 +101,26 @@ export default async function Page({
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const [ticket, statuses, categories, priorities, contacts] =
     await Promise.all([
       findTicket({ticketId, projectId, auth}),
-      findTicketStatuses(projectId, tenant),
-      findTicketCategories(projectId, tenant),
-      findTicketPriorities(projectId, tenant),
-      findMainPartnerContacts(projectId, tenant),
+      findTaskStatuses(projectId, tenant),
+      findTaskCategories(projectId, tenant),
+      findTaskPriorities(projectId, tenant),
+      findProjectMainPartnerContacts({
+        projectId,
+        tenantId: tenant,
+        appCode: SUBAPP_CODES.ticketing,
+      }),
     ]).then(clone);
 
   if (!ticket) notFound();
 
   const ticketsURL = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
-  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
+  const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   return (
     <div className="container mt-5 mb-20">
@@ -187,7 +202,7 @@ export default async function Page({
                   categories={categories}
                   priorities={priorities}
                   contacts={contacts}
-                  userId={auth.userId}
+                  userId={auth.user.id}
                   tenantId={tenant}
                   fields={workspace.config.ticketingFieldSet}
                   formFields={workspace.config.ticketingFormFieldSet}
@@ -201,6 +216,19 @@ export default async function Page({
                   projectId={ticket.project?.id}
                   tenantId={tenant}
                   fields={workspace.config.ticketingFieldSet}
+                />
+              </Suspense>
+            )}
+            {(workspace.config.isDisplayTimespentListForTicket ||
+              workspace.config.isDisplayTotalTimespentPerTicket) && (
+              <Suspense fallback={<Skeleton className="h-[160px]" />}>
+                <TimeSpentList
+                  ticketId={ticket.id}
+                  auth={auth}
+                  fields={workspace.config.ticketTimespentFieldSet}
+                  searchParams={searchParams}
+                  workspaceURI={workspaceURI}
+                  projectId={projectId}
                 />
               </Suspense>
             )}
@@ -249,9 +277,9 @@ async function ChildTickets({
 }: {
   ticketId: ID;
   projectId?: ID;
-  categories: Category[];
-  priorities: Priority[];
-  contacts: ContactPartner[];
+  categories: TaskCategory[];
+  priorities: TaskPriority[];
+  contacts: MainPartnerContact[];
   userId: ID;
   tenantId: Tenant['id'];
   fields: PortalAppConfig['ticketingFieldSet'];
@@ -351,6 +379,76 @@ async function RelatedTickets({
         ticketId={ticketId.toString()}
         fields={clone(fields)}
       />
+    </div>
+  );
+}
+
+async function TimeSpentList({
+  ticketId,
+  fields,
+  searchParams,
+  workspaceURI,
+  projectId,
+  auth,
+}: {
+  ticketId: ID;
+  auth: AuthProps;
+  fields: PortalAppConfig['ticketTimespentFieldSet'];
+  searchParams: TicketDetailsSearchParams;
+  workspaceURI: string;
+  projectId: string;
+}) {
+  const {workspace} = auth;
+  const {timesheetPage: page = 1, timesheetLimit: limit = 7} = searchParams;
+  const [timesheetlines, totalTimespent] = await Promise.all([
+    workspace.config.isDisplayTimespentListForTicket &&
+      findTimesheetLines({
+        ticketId,
+        auth,
+        orderBy: {date: 'DESC'},
+        take: +limit,
+        skip: getSkip(limit, page),
+      }).then(clone),
+    workspace.config.isDisplayTotalTimespentPerTicket &&
+      getTotalTimeSpent({
+        taskId: ticketId,
+        projectId,
+        auth,
+        typeSelect: TASK_TYPE_SELECT.TICKET,
+        subappCode: SUBAPP_CODES.ticketing,
+      }).then(hours => formatNumber(hours, {scale: 2, type: 'DECIMAL'})),
+  ]);
+  const pages = getPages(timesheetlines || [], limit);
+  const pathName = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`;
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-xl font-semibold">{await t('Time spent')}</h4>
+        {workspace.config.isDisplayTotalTimespentPerTicket && (
+          <div className="font-semibold">
+            {await t('Total')}:{totalTimespent} ({await t('hours')})
+          </div>
+        )}
+      </div>
+      {workspace.config.isDisplayTimespentListForTicket && (
+        <>
+          <hr className="mt-5" />
+          <TimesheetLines
+            timesheetlines={timesheetlines || []}
+            fields={clone(fields)}
+          />
+
+          {pages > 1 && (
+            <PageLinks
+              url={pathName}
+              searchParams={searchParams}
+              pages={pages}
+              pageKey="timesheetPage"
+              className="p-4"
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

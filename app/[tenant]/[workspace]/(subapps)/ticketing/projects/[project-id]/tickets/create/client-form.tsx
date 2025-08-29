@@ -4,19 +4,17 @@ import type {PortalAppConfig} from '@/types';
 import type {ID} from '@goovee/orm';
 import {useRouter} from 'next/navigation';
 import {useCallback} from 'react';
-import type {
-  Category,
-  ContactPartner,
-  Priority,
-} from '../../../../common/types';
+import type {TaskCategory} from '@/orm/project-task';
+import type {TaskPriority} from '@/orm/project-task';
+import type {MainPartnerContact} from '@/orm/project-task';
 import {TicketForm} from '../../../../common/ui/components/ticket-form';
 
 export function Form(props: {
   projectId: string;
   userId: ID;
-  categories: Category[];
-  priorities: Priority[];
-  contacts: ContactPartner[];
+  categories: TaskCategory[];
+  priorities: TaskPriority[];
+  contacts: MainPartnerContact[];
   workspaceURI: string;
   parentId?: string;
   formFields: PortalAppConfig['ticketingFormFieldSet'];

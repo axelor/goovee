@@ -4,12 +4,10 @@ import type {PortalAppConfig} from '@/types';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
 import type {ID} from '@goovee/orm';
-import type {
-  Category,
-  ContactPartner,
-  Priority,
-  TicketLink,
-} from '../../../../common/types';
+import type {TicketLink} from '../../../../common/types';
+import type {TaskCategory} from '@/orm/project-task';
+import type {TaskPriority} from '@/orm/project-task';
+import type {MainPartnerContact} from '@/orm/project-task';
 import {useTicketDetails} from '../../../../common/ui/components/ticket-details/ticket-details-provider';
 import {TicketForm} from '../../../../common/ui/components/ticket-form';
 import {
@@ -60,9 +58,9 @@ export function ChildTicketsHeader(props: {
   projectId: ID;
   ticketId: ID;
   parentIds: ID[];
-  categories: Category[];
-  priorities: Priority[];
-  contacts: ContactPartner[];
+  categories: TaskCategory[];
+  priorities: TaskPriority[];
+  contacts: MainPartnerContact[];
   userId: ID;
   childrenIds: ID[];
   formFields: PortalAppConfig['ticketingFormFieldSet'];

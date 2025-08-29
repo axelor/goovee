@@ -1,10 +1,12 @@
 import {ORDER_BY} from '@/constants';
 import type {AOSProjectTask} from '@/goovee/.generated/models';
 import type {Maybe} from '@/types/util';
-import type {Entity, ID, IdFilter, WhereArg, WhereOptions} from '@goovee/orm';
+import type {ID, WhereOptions} from '@goovee/orm';
 import {set} from 'lodash';
 import {COMPANY} from '../constants';
-import {EncodedFilterSchema} from '../utils/validators';
+import {EncodedTicketFilterSchema} from '../utils/validators';
+import type {Where} from '@/types/orm';
+import {getDateFilter} from '@/utils/orm';
 
 export function getOrderBy(
   sort: Maybe<string>,
@@ -19,20 +21,12 @@ export function getOrderBy(
   return query;
 }
 
-type Where<T extends Entity> = {
-  -readonly [K in keyof T]?: K extends 'id' ? IdFilter : WhereArg<T[K]>;
-} & {
-  OR?: WhereOptions<T>[];
-  AND?: WhereOptions<T>[];
-  NOT?: WhereOptions<T>[];
-};
-
-export function getWhere(
+export function getTicketWhere(
   filter: unknown,
   userId: ID,
 ): WhereOptions<AOSProjectTask> | null {
   if (!filter) return null;
-  const {success, data} = EncodedFilterSchema.safeParse(filter);
+  const {success, data} = EncodedTicketFilterSchema.safeParse(filter);
   if (!success || !data) return null;
   const {
     createdBy,
@@ -43,13 +37,15 @@ export function getWhere(
     myTickets,
     assignment,
     category,
+    taskDate,
   } = data;
 
   const where: Where<AOSProjectTask> = {
     ...(status && {status: {id: {in: status}}}),
     ...(priority && {priority: {id: {in: priority}}}),
     ...(category && {projectTaskCategory: {id: {in: category}}}),
-    ...(updatedOn && {updatedOn: {between: updatedOn}}),
+    ...(updatedOn && {updatedOn: getDateFilter(updatedOn)}),
+    ...(taskDate && {taskDate: getDateFilter(taskDate)}),
     ...(assignment && {assignment}),
   };
 
