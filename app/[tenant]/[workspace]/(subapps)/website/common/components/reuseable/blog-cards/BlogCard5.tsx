@@ -5,12 +5,12 @@ import NextLink from '../links/NextLink';
 
 // ======================================================
 type BlogCard5Props = {
-  image: string;
-  title: string;
-  author: string;
-  category: string;
-  comments: number;
-  createdAt: string;
+  image?: string;
+  title?: string;
+  author?: string;
+  category?: string;
+  comments?: number;
+  createdAt?: string;
 };
 // ======================================================
 
