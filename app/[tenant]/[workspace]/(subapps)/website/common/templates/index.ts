@@ -29,11 +29,11 @@ import {About23, about23Schema} from './about-23';
 import {About24, about24Schema} from './about-24';
 import {About25, about25Schema} from './about-25';
 import {Blog1, blog1Schema} from './blog-1';
-import {Clients1, clients1Schema} from './clients-1';
 import {Blog2, blog2Schema} from './blog-2';
 import {Blog3, blog3Schema} from './blog-3';
 import {Blog4, blog4Schema} from './blog-4';
 import {Blog5, blog5Schema} from './blog-5';
+import {Clientlist1, clientlist1Schema} from './clientlist-1';
 import {Contact4, contact4Schema} from './contacts-4';
 import {CTA1, cta1Schema} from './cta-1';
 import {Footer1, footer1Schema} from './footer-1';
@@ -90,7 +90,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [testimonial1Schema.code]: Testimonial1,
   [pricing1Schema.code]: Pricing1,
   [contact4Schema.code]: Contact4,
-  [clients1Schema.code]: Clients1,
+  [clientlist1Schema.code]: Clientlist1,
   [navbar1Schema.code]: Navbar1,
   [footer1Schema.code]: Footer1,
   [wiki1Schema.code]: Wiki1,
