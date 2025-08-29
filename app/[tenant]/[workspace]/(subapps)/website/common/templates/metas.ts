@@ -24,11 +24,11 @@ import {about23Demos, about23Schema} from './about-23/meta';
 import {about24Demos, about24Schema} from './about-24/meta';
 import {about25Demos, about25Schema} from './about-25/meta';
 import {blog1Demos, blog1Schema} from './blog-1/meta';
-import {clients1Demos, clients1Schema} from './clients-1/meta';
 import {blog2Demos, blog2Schema} from './blog-2/meta';
 import {blog3Demos, blog3Schema} from './blog-3/meta';
 import {blog4Demos, blog4Schema} from './blog-4/meta';
 import {blog5Demos, blog5Schema} from './blog-5/meta';
+import {clientlist1Demos, clientlist1Schema} from './clientlist-1/meta';
 import {contact4Demos, contact4Schema} from './contacts-4/meta';
 import {cta1Demos, cta1Schema} from './cta-1/meta';
 import {footer1Demos, footer1Schema} from './footer-1/meta';
@@ -84,7 +84,7 @@ export const metas = [
   {schema: testimonial1Schema, demos: testimonial1Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
   {schema: contact4Schema, demos: contact4Demos},
-  {schema: clients1Schema, demos: clients1Demos},
+  {schema: clientlist1Schema, demos: clientlist1Demos},
   {schema: pageProgress1Schema, demos: pageProgress1Demos},
   {schema: footer1Schema, demos: footer1Demos},
   {schema: sidebarMenu1Schema, demos: sidebarMenu1Demos},

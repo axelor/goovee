@@ -1,59 +1,40 @@
 import {
-  Data,
-  Demo,
   Template,
-  TemplateSchema,
-} from '@/subapps/website/common/types/templates';
+  type Data,
+  type Demo,
+  type TemplateSchema,
+} from '../../types/templates';
+import {clientsModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
-export const clients1Schema = {
-  title: 'Clients 1',
-  code: 'clients1',
+export const clientlist1Schema = {
+  title: 'Client List 1',
+  code: 'clientlist1',
   type: Template.block,
   fields: [
     {
-      name: 'clientList',
-      title: 'Client List',
+      name: 'clients',
+      title: 'Clients',
       type: 'json-one-to-many',
-      target: 'Clients1ClientList',
+      target: 'Clients',
     },
   ],
-  models: [
-    {
-      name: 'Clients1ClientList',
-      title: 'Client List',
-      fields: [
-        {
-          name: 'name',
-          title: 'Name',
-          type: 'string',
-          visibleInGrid: true,
-          nameField: true,
-        },
-        {
-          name: 'image',
-          title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
-        },
-      ],
-    },
-  ],
+  models: [clientsModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
-export type Clients1Data = Data<typeof clients1Schema>;
+export type Clientlist1Data = Data<typeof clientlist1Schema>;
 
-export const clients1Demos: Demo<typeof clients1Schema>[] = [
+export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   {
     language: 'en_US',
     data: {
-      clients1ClientList: [
+      clientlist1Clients: [
         {
-          id: '18',
+          id: '1',
           version: 0,
           attrs: {
+            name: 'Client 1',
             image: {
               id: '1',
               version: 1,
@@ -61,13 +42,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c1.png',
             },
-            name: 'Client 1',
           },
         },
         {
-          id: '19',
+          id: '2',
           version: 0,
           attrs: {
+            name: 'Client 2',
             image: {
               id: '1',
               version: 1,
@@ -75,13 +56,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c2.png',
             },
-            name: 'Client 2',
           },
         },
         {
-          id: '20',
+          id: '3',
           version: 0,
           attrs: {
+            name: 'Client 3',
             image: {
               id: '1',
               version: 1,
@@ -89,13 +70,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c3.png',
             },
-            name: 'Client 3',
           },
         },
         {
-          id: '21',
+          id: '4',
           version: 0,
           attrs: {
+            name: 'Client 4',
             image: {
               id: '1',
               version: 1,
@@ -103,13 +84,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c4.png',
             },
-            name: 'Client 4',
           },
         },
         {
-          id: '22',
+          id: '5',
           version: 0,
           attrs: {
+            name: 'Client 5',
             image: {
               id: '1',
               version: 1,
@@ -117,13 +98,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c5.png',
             },
-            name: 'Client 5',
           },
         },
         {
-          id: '23',
+          id: '6',
           version: 0,
           attrs: {
+            name: 'Client 6',
             image: {
               id: '1',
               version: 1,
@@ -131,7 +112,6 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c6.png',
             },
-            name: 'Client 6',
           },
         },
       ],
@@ -140,11 +120,12 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
   {
     language: 'fr_FR',
     data: {
-      clients1ClientList: [
+      clientlist1Clients: [
         {
-          id: '18',
+          id: '1',
           version: 0,
           attrs: {
+            name: 'Client 1',
             image: {
               id: '1',
               version: 1,
@@ -152,13 +133,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c1.png',
             },
-            name: 'Client 1',
           },
         },
         {
-          id: '19',
+          id: '2',
           version: 0,
           attrs: {
+            name: 'Client 2',
             image: {
               id: '1',
               version: 1,
@@ -166,13 +147,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c2.png',
             },
-            name: 'Client 2',
           },
         },
         {
-          id: '20',
+          id: '3',
           version: 0,
           attrs: {
+            name: 'Client 3',
             image: {
               id: '1',
               version: 1,
@@ -180,13 +161,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c3.png',
             },
-            name: 'Client 3',
           },
         },
         {
-          id: '21',
+          id: '4',
           version: 0,
           attrs: {
+            name: 'Client 4',
             image: {
               id: '1',
               version: 1,
@@ -194,13 +175,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c4.png',
             },
-            name: 'Client 4',
           },
         },
         {
-          id: '22',
+          id: '5',
           version: 0,
           attrs: {
+            name: 'Client 5',
             image: {
               id: '1',
               version: 1,
@@ -208,13 +189,13 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c5.png',
             },
-            name: 'Client 5',
           },
         },
         {
-          id: '23',
+          id: '6',
           version: 0,
           attrs: {
+            name: 'Client 6',
             image: {
               id: '1',
               version: 1,
@@ -222,7 +203,6 @@ export const clients1Demos: Demo<typeof clients1Schema>[] = [
               fileType: 'image/png',
               filePath: '/img/brands/c6.png',
             },
-            name: 'Client 6',
           },
         },
       ],

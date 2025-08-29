@@ -127,3 +127,24 @@ export const serviceList3Model = {
     },
   ],
 } as const satisfies Model;
+
+export const clientsModel = {
+  name: 'Clients',
+  title: 'Clients',
+  fields: [
+    {
+      name: 'name',
+      title: 'Name',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+    {
+      name: 'image',
+      title: 'Image',
+      type: 'many-to-one',
+      target: 'com.axelor.meta.db.MetaFile',
+      widget: 'Image',
+    },
+  ],
+} as const satisfies Model;
