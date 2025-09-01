@@ -9,9 +9,14 @@ if (!tenantId) {
 }
 
 seedContents(tenantId)
-  .then(() =>
-    console.log('\x1b[32m🔥 Success:\x1b[0m Contents seeded successfully!'),
-  )
+  .then(res => {
+    const failed = res.filter(res => res.status === 'rejected');
+    if (failed.length) {
+      console.log('\x1b[31m🔥 Failed:\x1b[0m');
+      console.dir(failed, {depth: null});
+    }
+    console.log('\x1b[32m🔥 Success:\x1b[0m Contents seeded successfully!');
+  })
   .catch(e => {
     console.error(e);
     process.exit(1);

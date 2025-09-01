@@ -675,6 +675,7 @@ async function getFileFromPublic(filePath: string) {
   filePath = process.cwd() + `${demoFileDirectory}${filePath}`;
   const file = await fsPromise.readFile(filePath);
   if (!file) {
+    console.log(`\x1b[31m✖ File at location ${filePath} not found.\x1b[0m`);
     throw new Error(`File at location ${filePath} not found`);
   }
   return file;
@@ -768,6 +769,7 @@ async function getMetaFile({
     fileCache.set(fileCacheKey, metaFilePromise);
     return metaFilePromise;
   } catch (error) {
+    console.log(`\x1b[31m✖ Failed to create meta file: ${fileName}\x1b[0m`);
     throw new Error('Failed to create meta file');
   }
 }
