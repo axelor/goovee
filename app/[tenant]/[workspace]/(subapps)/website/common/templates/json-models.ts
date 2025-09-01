@@ -2,6 +2,7 @@ import {startCase} from 'lodash-es';
 import {colors} from '../constants/colors';
 import type {Model} from '../types/templates';
 import {solidIcons} from '@/subapps/website/common/icons/solid';
+import {socialMediaUnicons} from '../constants/unicons';
 
 export const accordionModel = {
   name: 'Accordion',
@@ -145,6 +146,37 @@ export const clientsModel = {
       type: 'many-to-one',
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
+    },
+  ],
+} as const satisfies Model;
+
+export const socialLinksModel = {
+  name: 'SocialLinks',
+  title: 'Social Links',
+  fields: [
+    {
+      name: 'name',
+      title: 'Name',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+    {
+      name: 'icon',
+      title: 'Icon',
+      type: 'string',
+      selection: socialMediaUnicons.map(icon => ({
+        title: startCase(icon),
+        value: icon,
+      })),
+      visibleInGrid: true,
+      required: true,
+    },
+    {
+      name: 'url',
+      title: 'Url',
+      type: 'string',
+      required: true,
     },
   ],
 } as const satisfies Model;
