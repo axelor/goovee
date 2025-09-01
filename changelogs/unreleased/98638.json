@@ -1,5 +1,0 @@
-{
-  "title": "Replace native <textarea> with cire <Textarea/> component",
-  "type": "change",
-  "scope": ["shop"]
-}

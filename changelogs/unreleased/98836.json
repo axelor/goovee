@@ -1,5 +1,0 @@
-{
-  "title": "Update proper type for component during template seed",
-  "type": "fix",
-  "scope": ["website"]
-}

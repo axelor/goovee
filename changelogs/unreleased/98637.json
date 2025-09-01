@@ -1,5 +1,0 @@
-{
-  "title": "Refactor routing by replacing router.push with Next.js <Link> component",
-  "type": "change",
-  "scope": ["shop"]
-}

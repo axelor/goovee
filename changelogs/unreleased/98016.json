@@ -1,5 +1,0 @@
-{
-  "title": "Add projects app",
-  "type": "feature",
-  "scope": ["projects", "invoices", "ticketing"]
-}

@@ -1,5 +1,0 @@
-{
-  "title": "Make DATA_STORAGE variable optional during build",
-  "type": "fix",
-  "scope": ["core"]
-}

@@ -1,6 +1,0 @@
-{
-  "title": "Restrict access to ticket details",
-  "type": "security",
-  "scope": ["ticketing"],
-  "description": "Only allow access to ticket details if the user has access to the project."
-}
