@@ -180,3 +180,48 @@ export const socialLinksModel = {
     },
   ],
 } as const satisfies Model;
+
+export const contactInfoModel = {
+  name: 'ContactInfo',
+  title: 'Contact Info',
+  fields: [
+    {
+      name: 'name',
+      title: 'Name',
+      type: 'string',
+      visibleInGrid: true,
+      nameField: true,
+    },
+    {
+      name: 'addressTitle',
+      title: 'Address Title',
+      type: 'string',
+    },
+    {
+      name: 'address',
+      title: 'Address',
+      type: 'string',
+    },
+    {
+      name: 'phoneTitle',
+      title: 'Phone Title',
+      type: 'string',
+    },
+    {
+      name: 'phone',
+      title: 'Phone',
+      type: 'string',
+    },
+    {
+      name: 'emailTitle',
+      title: 'Email Title',
+      type: 'string',
+    },
+    {
+      name: 'email',
+      title: 'Email',
+      type: 'string',
+      widget: 'Email',
+    },
+  ],
+} as const satisfies Model;
