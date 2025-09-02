@@ -33,6 +33,7 @@ import {clientlist2Demos, clientlist2Schema} from './clientlist-2/meta';
 import {clientlist3Demos, clientlist3Schema} from './clientlist-3/meta';
 import {clientlist4Demos, clientlist4Schema} from './clientlist-4/meta';
 import {clientlist5Demos, clientlist5Schema} from './clientlist-5/meta';
+import {contact1Demos, contact1Schema} from './contact-1/meta';
 import {contact4Demos, contact4Schema} from './contact-4/meta';
 import {cta1Demos, cta1Schema} from './cta-1/meta';
 import {footer1Demos, footer1Schema} from './footer-1/meta';
@@ -87,6 +88,7 @@ export const metas = [
   {schema: services2Schema, demos: services2Demos},
   {schema: testimonial1Schema, demos: testimonial1Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
+  {schema: contact1Schema, demos: contact1Demos},
   {schema: contact4Schema, demos: contact4Demos},
   {schema: clientlist1Schema, demos: clientlist1Demos},
   {schema: clientlist2Schema, demos: clientlist2Demos},
