@@ -95,6 +95,7 @@ import {Footer10, footer10Schema} from './footer-10';
 import {Footer11, footer11Schema} from './footer-11';
 import {Footer12, footer12Schema} from './footer-12';
 import {Footer13, footer13Schema} from './footer-13';
+import {Footer14, footer14Schema} from './footer-14';
 import {Hero1, hero1Schema} from './hero-1';
 import {Navbar1, navbar1Schema} from './navbar-1';
 import {PageProgress1, pageProgress1Schema} from './page-progress-1';
@@ -209,6 +210,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [footer11Schema.code]: Footer11,
   [footer12Schema.code]: Footer12,
   [footer13Schema.code]: Footer13,
+  [footer14Schema.code]: Footer14,
   [wiki1Schema.code]: Wiki1,
   [sidebarMenu1Schema.code]: SidebarMenu1,
 };
