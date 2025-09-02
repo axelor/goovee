@@ -51,6 +51,7 @@ import {Contact10, contact10Schema} from './contact-10';
 import {Contact11, contact11Schema} from './contact-11';
 import {Contact12, contact12Schema} from './contact-12';
 import {CTA1, cta1Schema} from './cta-1';
+import {CTA2, cta2Schema} from './cta-2';
 import {Footer1, footer1Schema} from './footer-1';
 import {Hero1, hero1Schema} from './hero-1';
 import {Navbar1, navbar1Schema} from './navbar-1';
@@ -99,6 +100,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [pageProgress1Schema.code]: PageProgress1,
   [services1Schema.code]: Services1,
   [cta1Schema.code]: CTA1,
+  [cta2Schema.code]: CTA2,
   [process1Schema.code]: Process1,
   [team1Schema.code]: Team1,
   [services2Schema.code]: Services2,
