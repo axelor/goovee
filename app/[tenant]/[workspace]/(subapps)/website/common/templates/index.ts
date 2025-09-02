@@ -79,6 +79,7 @@ import {Facts17, facts17Schema} from './facts-17';
 import {FAQ1, faq1Schema} from './faq-1';
 import {FAQ2, faq2Schema} from './faq-2';
 import {FAQ3, faq3Schema} from './faq-3';
+import {FAQ4, faq4Schema} from './faq-4';
 import {Footer1, footer1Schema} from './footer-1';
 import {Hero1, hero1Schema} from './hero-1';
 import {Navbar1, navbar1Schema} from './navbar-1';
@@ -155,6 +156,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [faq1Schema.code]: FAQ1,
   [faq2Schema.code]: FAQ2,
   [faq3Schema.code]: FAQ3,
+  [faq4Schema.code]: FAQ4,
   [process1Schema.code]: Process1,
   [team1Schema.code]: Team1,
   [services2Schema.code]: Services2,
