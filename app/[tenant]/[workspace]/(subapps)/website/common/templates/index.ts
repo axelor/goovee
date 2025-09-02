@@ -46,6 +46,7 @@ import {Contact5, contact5Schema} from './contact-5';
 import {Contact6, contact6Schema} from './contact-6';
 import {Contact7, contact7Schema} from './contact-7';
 import {Contact8, contact8Schema} from './contact-8';
+import {Contact9, contact9Schema} from './contact-9';
 import {CTA1, cta1Schema} from './cta-1';
 import {Footer1, footer1Schema} from './footer-1';
 import {Hero1, hero1Schema} from './hero-1';
@@ -108,6 +109,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [contact6Schema.code]: Contact6,
   [contact7Schema.code]: Contact7,
   [contact8Schema.code]: Contact8,
+  [contact9Schema.code]: Contact9,
   [clientlist1Schema.code]: Clientlist1,
   [clientlist2Schema.code]: Clientlist2,
   [clientlist3Schema.code]: Clientlist3,
