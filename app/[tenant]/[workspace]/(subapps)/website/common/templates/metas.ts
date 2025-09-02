@@ -76,6 +76,7 @@ import {faq2Demos, faq2Schema} from './faq-2/meta';
 import {faq3Demos, faq3Schema} from './faq-3/meta';
 import {faq4Demos, faq4Schema} from './faq-4/meta';
 import {faq5Demos, faq5Schema} from './faq-5/meta';
+import {faq6Demos, faq6Schema} from './faq-6/meta';
 import {footer1Demos, footer1Schema} from './footer-1/meta';
 import {hero1Demos, hero1Schema} from './hero-1/meta';
 import {navbar1Demos, navbar1Schema} from './navbar-1/meta';
@@ -153,6 +154,7 @@ export const metas = [
   {schema: faq3Schema, demos: faq3Demos},
   {schema: faq4Schema, demos: faq4Demos},
   {schema: faq5Schema, demos: faq5Demos},
+  {schema: faq6Schema, demos: faq6Demos},
   {schema: process1Schema, demos: process1Demos},
   {schema: team1Schema, demos: team1Demos},
   {schema: services2Schema, demos: services2Demos},
