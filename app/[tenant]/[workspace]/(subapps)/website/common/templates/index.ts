@@ -38,7 +38,7 @@ import {Clientlist2, clientlist2Schema} from './clientlist-2';
 import {Clientlist3, clientlist3Schema} from './clientlist-3';
 import {Clientlist4, clientlist4Schema} from './clientlist-4';
 import {Clientlist5, clientlist5Schema} from './clientlist-5';
-import {Contact4, contact4Schema} from './contacts-4';
+import {Contact4, contact4Schema} from './contact-4';
 import {CTA1, cta1Schema} from './cta-1';
 import {Footer1, footer1Schema} from './footer-1';
 import {Hero1, hero1Schema} from './hero-1';
