@@ -98,6 +98,7 @@ import {hero3Demos, hero3Schema} from './hero-3/meta';
 import {hero4Demos, hero4Schema} from './hero-4/meta';
 import {hero5Demos, hero5Schema} from './hero-5/meta';
 import {hero6Demos, hero6Schema} from './hero-6/meta';
+import {hero7Demos, hero7Schema} from './hero-7/meta';
 import {navbar1Demos, navbar1Schema} from './navbar-1/meta';
 import {pageProgress1Demos, pageProgress1Schema} from './page-progress-1/meta';
 import {pricing1Demos, pricing1Schema} from './pricing-1/meta';
@@ -146,6 +147,7 @@ export const metas = [
   {schema: hero4Schema, demos: hero4Demos},
   {schema: hero5Schema, demos: hero5Demos},
   {schema: hero6Schema, demos: hero6Demos},
+  {schema: hero7Schema, demos: hero7Demos},
   {schema: services1Schema, demos: services1Demos},
   {schema: cta1Schema, demos: cta1Demos},
   {schema: cta2Schema, demos: cta2Demos},
