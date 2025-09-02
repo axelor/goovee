@@ -62,6 +62,7 @@ import {facts5Demos, facts5Schema} from './facts-5/meta';
 import {facts6Demos, facts6Schema} from './facts-6/meta';
 import {facts7Demos, facts7Schema} from './facts-7/meta';
 import {facts8Demos, facts8Schema} from './facts-8/meta';
+import {facts9Demos, facts9Schema} from './facts-9/meta';
 import {footer1Demos, footer1Schema} from './footer-1/meta';
 import {hero1Demos, hero1Schema} from './hero-1/meta';
 import {navbar1Demos, navbar1Schema} from './navbar-1/meta';
@@ -125,6 +126,7 @@ export const metas = [
   {schema: facts6Schema, demos: facts6Demos},
   {schema: facts7Schema, demos: facts7Demos},
   {schema: facts8Schema, demos: facts8Demos},
+  {schema: facts9Schema, demos: facts9Demos},
   {schema: process1Schema, demos: process1Demos},
   {schema: team1Schema, demos: team1Demos},
   {schema: services2Schema, demos: services2Demos},
