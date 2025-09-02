@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About18Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
-import {CountUp} from './count-up';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import CloudGroup from '@/subapps/website/common/icons/solid-duo/CloudGroup';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 

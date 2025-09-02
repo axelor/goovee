@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About24Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
-import {CountUp} from './count-up';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 
 export function About24(props: TemplateProps<About24Data>) {
   const {data} = props;
