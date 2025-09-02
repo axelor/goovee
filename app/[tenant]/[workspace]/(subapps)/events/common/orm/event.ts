@@ -422,7 +422,15 @@ export async function findEvents({
       select: {
         id: true,
         eventTitle: true,
-        eventCategorySet: {select: {id: true, name: true, color: true}},
+        eventCategorySet: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+            image: {id: true},
+            thumbnailImage: {id: true},
+          },
+        },
         eventImage: {id: true},
         eventDescription: true,
         eventStartDateTime: true,
