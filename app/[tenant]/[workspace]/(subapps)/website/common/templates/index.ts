@@ -55,6 +55,7 @@ import {CTA2, cta2Schema} from './cta-2';
 import {CTA3, cta3Schema} from './cta-3';
 import {CTA4, cta4Schema} from './cta-4';
 import {CTA5, cta5Schema} from './cta-5';
+import {CTA6, cta6Schema} from './cta-6';
 import {Footer1, footer1Schema} from './footer-1';
 import {Hero1, hero1Schema} from './hero-1';
 import {Navbar1, navbar1Schema} from './navbar-1';
@@ -107,6 +108,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [cta3Schema.code]: CTA3,
   [cta4Schema.code]: CTA4,
   [cta5Schema.code]: CTA5,
+  [cta6Schema.code]: CTA6,
   [process1Schema.code]: Process1,
   [team1Schema.code]: Team1,
   [services2Schema.code]: Services2,
