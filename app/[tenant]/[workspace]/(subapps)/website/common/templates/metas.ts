@@ -81,6 +81,7 @@ import {footer1Demos, footer1Schema} from './footer-1/meta';
 import {footer2Demos, footer2Schema} from './footer-2/meta';
 import {footer3Demos, footer3Schema} from './footer-3/meta';
 import {footer4Demos, footer4Schema} from './footer-4/meta';
+import {footer5Demos, footer5Schema} from './footer-5/meta';
 import {hero1Demos, hero1Schema} from './hero-1/meta';
 import {navbar1Demos, navbar1Schema} from './navbar-1/meta';
 import {pageProgress1Demos, pageProgress1Schema} from './page-progress-1/meta';
@@ -185,6 +186,7 @@ export const metas = [
   {schema: footer2Schema, demos: footer2Demos},
   {schema: footer3Schema, demos: footer3Demos},
   {schema: footer4Schema, demos: footer4Demos},
+  {schema: footer5Schema, demos: footer5Demos},
   {schema: sidebarMenu1Schema, demos: sidebarMenu1Demos},
   {schema: navbar1Schema, demos: navbar1Demos},
   {schema: wiki1Schema, demos: wiki1Demos},
