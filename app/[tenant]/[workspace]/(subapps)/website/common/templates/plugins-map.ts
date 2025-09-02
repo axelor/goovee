@@ -6,6 +6,7 @@ import {about2Schema} from './about-2/meta';
 import {about5Schema} from './about-5/meta';
 import {about21Schema} from './about-21/meta';
 import {about24Schema} from './about-24/meta';
+import {facts13Schema} from './facts-13/meta';
 
 const pluginsMap = {
   [about2Schema.code]: ['lightbox'],
@@ -15,6 +16,7 @@ const pluginsMap = {
   [about18Schema.code]: ['progress-bar'],
   [about21Schema.code]: ['lightbox'],
   [about24Schema.code]: ['progress-bar'],
+  [facts13Schema.code]: ['progress-bar'],
 };
 
 export const PluginsMap = Object.fromEntries(
