@@ -1,0 +1,49 @@
+import type {TemplateProps} from '@/subapps/website/common/types';
+import {type Cta2Data} from './meta';
+import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+
+export function CTA2(props: TemplateProps<Cta2Data>) {
+  const {data} = props;
+  const {
+    cta2Title: title,
+    cta2LinkTitle1: linkTitle1,
+    cta2LinkTitle2: linkTitle2,
+    cta2LinkHref1: linkHref1,
+    cta2LinkHref2: linkHref2,
+    cta2Image,
+  } = data || {};
+
+  const image = getMetaFileURL({
+    metaFile: cta2Image,
+    path: 'cta2Image',
+    ...props,
+  });
+
+  return (
+    <section
+      style={{backgroundImage: `url(${image})`}}
+      className="wrapper image-wrapper bg-auto no-overlay bg-image text-center bg-map">
+      <div className="container pt-0 pb-14 pt-md-18 pb-md-18">
+        <div className="row">
+          <div className="col-lg-10 col-xl-9 col-xxl-8 mx-auto">
+            <h3 className="display-4 mb-8 px-lg-17">{title}</h3>
+          </div>
+        </div>
+
+        <div className="d-flex justify-content-center">
+          <NextLink
+            href={linkHref1}
+            title={linkTitle1}
+            className="btn btn-primary rounded mx-1"
+          />
+          <NextLink
+            href={linkHref2}
+            title={linkTitle2}
+            className="btn btn-green rounded mx-1"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
