@@ -44,6 +44,7 @@ import {contact8Demos, contact8Schema} from './contact-8/meta';
 import {contact9Demos, contact9Schema} from './contact-9/meta';
 import {contact10Demos, contact10Schema} from './contact-10/meta';
 import {contact11Demos, contact11Schema} from './contact-11/meta';
+import {contact12Demos, contact12Schema} from './contact-12/meta';
 import {cta1Demos, cta1Schema} from './cta-1/meta';
 import {footer1Demos, footer1Schema} from './footer-1/meta';
 import {hero1Demos, hero1Schema} from './hero-1/meta';
@@ -108,6 +109,7 @@ export const metas = [
   {schema: contact9Schema, demos: contact9Demos},
   {schema: contact10Schema, demos: contact10Demos},
   {schema: contact11Schema, demos: contact11Demos},
+  {schema: contact12Schema, demos: contact12Demos},
   {schema: clientlist1Schema, demos: clientlist1Demos},
   {schema: clientlist2Schema, demos: clientlist2Demos},
   {schema: clientlist3Schema, demos: clientlist3Demos},
