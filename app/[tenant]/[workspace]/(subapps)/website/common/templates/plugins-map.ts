@@ -14,6 +14,7 @@ import {hero15Schema} from './hero-15/meta';
 import {hero22Schema} from './hero-22/meta';
 import {hero24Schema} from './hero-24/meta';
 import {portfolio5Schema} from './portfolio-5/meta';
+import {portfolio10Schema} from './portfolio-10/meta';
 
 const pluginsMap = {
   [about2Schema.code]: ['lightbox'],
@@ -31,6 +32,7 @@ const pluginsMap = {
   [hero22Schema.code]: ['lightbox'],
   [hero24Schema.code]: ['lightbox'],
   [portfolio5Schema.code]: ['lightbox'],
+  [portfolio10Schema.code]: ['lightbox'],
 };
 
 export const PluginsMap = Object.fromEntries(
