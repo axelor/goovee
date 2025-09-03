@@ -1,0 +1,6 @@
+{
+  "title": "Remove Projects app",
+  "type": "remove",
+  "description": "Removes the Projects app due to backend incompatiblity",
+  "scope": ["core"]
+}
