@@ -1,26 +1,19 @@
+'use client';
 import {FC, Fragment, useState} from 'react';
 import type Swiper from 'swiper';
 import {FreeMode, Navigation, Thumbs} from 'swiper/modules';
 import {Swiper as SwiperCarousel, SwiperSlide} from 'swiper/react';
 
-const Carousel2: FC = () => {
+function Carousel2(props: {
+  slides: {
+    image?: string;
+    thumb?: string;
+  }[];
+}) {
+  const {slides} = props;
   const [thumbsSwiper, setThumbsSwiper] = useState<Swiper>();
   const [prevEl, setPrevEl] = useState<HTMLElement | null>(null);
   const [nextEl, setNextEl] = useState<HTMLElement | null>(null);
-
-  const slideImages = [
-    {id: 1, url: '/img/photos/bg28.jpg'},
-    {id: 2, url: '/img/photos/bg29.jpg'},
-    {id: 3, url: '/img/photos/bg30.jpg'},
-    {id: 4, url: '/img/photos/bg31.jpg'},
-  ];
-
-  const thumbImages = [
-    {id: 1, url: '/img/photos/bg28-th.jpg'},
-    {id: 2, url: '/img/photos/bg29-th.jpg'},
-    {id: 3, url: '/img/photos/bg30-th.jpg'},
-    {id: 4, url: '/img/photos/bg31-th.jpg'},
-  ];
 
   return (
     <Fragment>
@@ -32,10 +25,10 @@ const Carousel2: FC = () => {
         thumbs={{
           swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
         }}>
-        {slideImages.map(({url, id}) => (
+        {slides.map(({image, thumb}, i) => (
           <SwiperSlide
-            key={id}
-            style={{backgroundImage: `url(${url})`}}
+            key={i}
+            style={{backgroundImage: `url(${image})`}}
             className="bg-overlay bg-overlay-400 bg-dark bg-image"
           />
         ))}
@@ -65,14 +58,14 @@ const Carousel2: FC = () => {
         watchSlidesProgress
         onSwiper={setThumbsSwiper}
         modules={[FreeMode, Navigation, Thumbs]}>
-        {thumbImages.map(({url, id}) => (
-          <SwiperSlide key={id}>
-            <img src={url} alt="product" />
+        {slides.map(({thumb, image}, i) => (
+          <SwiperSlide key={i}>
+            <img src={thumb} alt="product" />
           </SwiperSlide>
         ))}
       </SwiperCarousel>
     </Fragment>
   );
-};
+}
 
 export default Carousel2;

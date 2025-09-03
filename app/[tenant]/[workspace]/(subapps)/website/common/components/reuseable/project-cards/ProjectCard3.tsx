@@ -4,11 +4,11 @@ import NextLink from '../links/NextLink';
 
 // ==============================================================================
 type ProjectCard3Props = {
-  link: string;
-  title: string;
-  image: string;
-  category: string;
-  fullImage: string;
+  link?: string;
+  title?: string;
+  image?: string;
+  category?: string;
+  fullImage?: string;
 };
 // ==============================================================================
 
