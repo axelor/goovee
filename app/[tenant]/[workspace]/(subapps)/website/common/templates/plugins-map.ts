@@ -10,6 +10,7 @@ import {facts13Schema} from './facts-13/meta';
 import {facts16Schema} from './facts-16/meta';
 import {hero3Schema} from './hero-3/meta';
 import {hero13Schema} from './hero-13/meta';
+import {hero15Schema} from './hero-15/meta';
 
 const pluginsMap = {
   [about2Schema.code]: ['lightbox'],
@@ -23,6 +24,7 @@ const pluginsMap = {
   [facts16Schema.code]: ['progress-bar'],
   [hero3Schema.code]: ['lightbox'],
   [hero13Schema.code]: ['lightbox'],
+  [hero15Schema.code]: ['lightbox'],
 };
 
 export const PluginsMap = Object.fromEntries(
