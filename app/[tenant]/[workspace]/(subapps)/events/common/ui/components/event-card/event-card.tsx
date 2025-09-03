@@ -20,11 +20,33 @@ import {formatDateTime} from '@/locale/formatters';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
-import {EventCardProps} from '@/subapps/events/common/ui/components/events/types';
+import {
+  EventCardProps,
+  ListEvent,
+} from '@/subapps/events/common/ui/components/events/types';
 import styles from './event-card.module.scss';
 import mainStyles from '@/subapps/events/styles.module.scss';
 import {Skeleton} from '@/ui/components/skeleton';
 import Image from 'next/image';
+
+function getListEventImageURL({
+  event,
+  workspaceURI,
+}: {
+  event: ListEvent;
+  workspaceURI: string;
+}) {
+  const categoryWithImage = event.eventCategorySet?.find(
+    cat => cat.thumbnailImage?.id || cat.image?.id,
+  );
+  if (categoryWithImage) {
+    return `${workspaceURI}/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.thumbnailImage?.id || categoryWithImage.image?.id}`;
+  }
+  if (event.eventImage?.id) {
+    return `${workspaceURI}/${SUBAPP_CODES.events}/api/event/${event.slug}/image`;
+  }
+  return NO_IMAGE_URL;
+}
 
 export const EventCard = ({event}: EventCardProps) => {
   const {workspaceURI} = useWorkspace();
@@ -40,11 +62,7 @@ export const EventCard = ({event}: EventCardProps) => {
           width={150}
           alt="Event image"
           className="rounded-lg w-[150px] h-[150px] object-cover"
-          src={
-            event.eventImage?.id
-              ? `${workspaceURI}/${SUBAPP_CODES.events}/api/event/${event.slug}/image`
-              : NO_IMAGE_URL
-          }
+          src={getListEventImageURL({event, workspaceURI})}
         />
       </div>
 

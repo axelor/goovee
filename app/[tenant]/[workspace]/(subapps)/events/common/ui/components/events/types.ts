@@ -51,9 +51,17 @@ export interface perPageProps {
 }
 export interface Category {
   id: string;
-  name: string;
-  color: string;
+  name?: string;
+  color?: string;
   version: number;
+  thumbnailImage?: {
+    id: string;
+    version: number;
+  } | null;
+  image?: {
+    id: string;
+    version: number;
+  } | null;
 }
 export interface CategoriesProps {
   eventsCategories: Category[];
@@ -71,6 +79,14 @@ export interface ListEvent {
     id: string;
     version: number;
     name?: string;
+    image: {
+      id: string;
+      version: number;
+    } | null;
+    thumbnailImage: {
+      id: string;
+      version: number;
+    } | null;
     color?: string;
   }[];
   eventStartDateTime?: Date;

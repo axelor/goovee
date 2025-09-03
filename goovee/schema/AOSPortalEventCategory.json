@@ -37,6 +37,16 @@
     {
       "name": "archived",
       "type": "Boolean"
+    },
+    {
+      "name": "image",
+      "type": "ManyToOne",
+      "target": "AOSMetaFile"
+    },
+    {
+      "name": "thumbnailImage",
+      "type": "ManyToOne",
+      "target": "AOSMetaFile"
     }
   ]
 }

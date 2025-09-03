@@ -1,0 +1,6 @@
+{
+  "title": "Show category image in event list",
+  "type": "feature",
+  "description": "Shows the category image in event list if available, if not show the event image",
+  "scope": ["events"]
+}
