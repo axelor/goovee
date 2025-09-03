@@ -12,19 +12,18 @@ import {MdArrowDropDown, MdArrowDropUp} from 'react-icons/md';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Column} from './types';
-import {cn} from '@/utils/css';
 
 type TableRowsProps<T extends Record<string, any>> = {
   records: T[];
   columns: Column<T>[];
   onRowClick?: (record: T, e: MouseEvent<HTMLTableRowElement>) => void;
-  actionCellRenderer?: (record: T) => ReactNode;
+  deleteCellRenderer?: (record: T) => ReactNode;
 };
 
 export function TableRows<T extends Record<string, any>>(
   props: TableRowsProps<T>,
 ) {
-  const {records, columns, actionCellRenderer, onRowClick} = props;
+  const {records, columns, deleteCellRenderer, onRowClick} = props;
   const [openId, setOpenId] = useState<string | null>(null);
 
   const res = useResponsive();
@@ -64,10 +63,7 @@ export function TableRows<T extends Record<string, any>>(
       <Fragment key={record.id}>
         <TableRow
           onClick={handleClick}
-          className={cn('text-sm', {
-            '[&:not(:has(.action:hover)):hover]:bg-slate-100 cursor-pointer':
-              !!onRowClick,
-          })}>
+          className="cursor-pointer [&:not(:has(.action:hover)):hover]:bg-slate-100 text-sm">
           {mainColumns.map(column => (
             <TableCell key={column.key} className="p-3">
               {column.content(record)}
@@ -80,9 +76,9 @@ export function TableRows<T extends Record<string, any>>(
               <Arrow className="cursor-pointer inline" />
             </TableCell>
           )}
-          {actionCellRenderer && (
+          {deleteCellRenderer && (
             <TableCell className="text-center action pointer-events-none p-3 w-16">
-              {actionCellRenderer(record)}
+              {deleteCellRenderer(record)}
             </TableCell>
           )}
         </TableRow>
@@ -116,8 +112,8 @@ type ItemProps = {
 function Item({label, children}: ItemProps) {
   return (
     <>
-      <div className="text-xs font-semibold mb-0">{label}</div>
-      <div className="flex justify-self-end items-center">{children}</div>
+      <p className="text-xs font-semibold mb-0">{label}</p>
+      <p className="flex justify-self-end items-center">{children}</p>
     </>
   );
 }

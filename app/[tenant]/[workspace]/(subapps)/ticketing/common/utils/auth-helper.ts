@@ -1,11 +1,27 @@
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {AuthProps, PortalWorkspaceWithConfig} from '@/orm/project-task';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {Tenant} from '@/tenant';
+import type {PortalWorkspace, User} from '@/types';
 import {Maybe} from '@/types/util';
+import type {ID} from '@goovee/orm';
 import {cache} from 'react';
+
+export type UserAuthProps = {
+  userId: ID;
+  simpleFullName: string;
+  email: string;
+  isContact: boolean;
+  isContactAdmin: boolean;
+  role?: 'total' | 'restricted';
+};
+
+export type WorkspaceAuthProps = {workspaceId: ID; workspaceURL: string};
+export type TenantAuthProps = {tenantId: Tenant['id']};
+export type AuthProps = UserAuthProps & WorkspaceAuthProps & TenantAuthProps;
+export type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
+  Required<Pick<PortalWorkspace, 'config'>>;
 
 export const ensureAuth = cache(async function ensureAuth(
   workspaceURL: Maybe<string>,
@@ -15,13 +31,18 @@ export const ensureAuth = cache(async function ensureAuth(
       error: true;
       message: string;
       forceLogin?: boolean;
-      auth?: never;
+      info?: never;
     }
   | {
       error: false;
       message?: never;
       forceLogin?: never;
-      auth: AuthProps;
+      info: {
+        auth: AuthProps;
+        user: User;
+        subapp: any;
+        workspace: PortalWorkspaceWithConfig;
+      };
     }
 > {
   if (!workspaceURL) {
@@ -72,12 +93,21 @@ export const ensureAuth = cache(async function ensureAuth(
 
   return {
     error: false,
-    auth: {
+    info: {
       user,
       subapp,
       workspace: workspace as PortalWorkspaceWithConfig,
-      workspaceURL,
-      tenantId,
+      auth: {
+        email: user.email,
+        userId: user.id,
+        simpleFullName: user.simpleFullName,
+        workspaceId: workspace.id,
+        workspaceURL: workspaceURL,
+        isContact: user.isContact!,
+        tenantId,
+        role: subapp.role,
+        isContactAdmin: subapp.isContactAdmin,
+      },
     },
   };
 });

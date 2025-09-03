@@ -9,7 +9,7 @@ import {PortalWorkspace} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
-import {INVOICE_TYPE} from '@/constants';
+import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
 interface ContentProps {

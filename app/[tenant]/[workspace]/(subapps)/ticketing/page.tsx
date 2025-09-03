@@ -2,16 +2,27 @@
 import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {HeroSearch} from '@/ui/components';
-import {getLoginURL} from '@/utils/url';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/ui/components/pagination';
+import {cn} from '@/utils/css';
 import {workspacePathname} from '@/utils/workspace';
+import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
+import {getLoginURL} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {formatNumber} from '@/locale/server/formatters';
-import {PageLinks} from '@/ui/components/page-links';
 import {findProjectsWithTaskCount} from './common/orm/projects';
 import {getPages} from './common/utils';
+import {getPaginationButtons} from '@/utils/pagination';
 import {ensureAuth} from './common/utils/auth-helper';
 import {getSkip} from './common/utils/search-param';
 
@@ -20,16 +31,16 @@ export default async function Page({
   searchParams,
 }: {
   params: {tenant: string; workspace: string};
-  searchParams: {[key: string]: string};
+  searchParams: {[key: string]: string | undefined};
 }) {
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const {limit = 8, page = 1} = searchParams;
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}?${new URLSearchParams(searchParams).toString()}`,
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}`,
         workspaceURI,
         tenant,
       }),
@@ -37,7 +48,7 @@ export default async function Page({
   }
   if (error) notFound();
 
-  const {workspace} = auth;
+  const {auth, workspace} = info;
 
   const projects = await findProjectsWithTaskCount({
     take: +limit,
@@ -88,7 +99,7 @@ export default async function Page({
           {projects.map(async project => (
             <Link
               key={project.id}
-              href={`${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${project.id}`}>
+              href={`${workspaceURI}/ticketing/projects/${project.id}`}>
               <div className="bg-card p-6 rounded-lg">
                 <p className="text-[1rem] font-semibold text-ellipsis whitespace-nowrap overflow-hidden">
                   {project.name}
@@ -104,12 +115,67 @@ export default async function Page({
           ))}
         </div>
         {pages > 1 && (
-          <PageLinks
-            url={`${workspaceURI}/${SUBAPP_CODES.ticketing}`}
-            pages={pages}
-            searchParams={searchParams}
-            className="!mb-4"
-          />
+          <Pagination className="!mb-4">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious asChild>
+                  <Link
+                    scroll={false}
+                    className={cn({['invisible']: +page <= 1})}
+                    replace
+                    href={{
+                      pathname: `${workspaceURI}/ticketing`,
+                      query: {...searchParams, page: +page - 1},
+                    }}>
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="sr-only">Previous</span>
+                  </Link>
+                </PaginationPrevious>
+              </PaginationItem>
+              {getPaginationButtons({
+                currentPage: +page,
+                totalPages: pages,
+              }).map((value, i) => {
+                if (typeof value == 'string') {
+                  return (
+                    <PaginationItem key={i}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                return (
+                  <PaginationItem key={value}>
+                    <PaginationLink isActive={+page === value} asChild>
+                      <Link
+                        scroll={false}
+                        replace
+                        href={{
+                          pathname: `${workspaceURI}/ticketing`,
+                          query: {...searchParams, page: value},
+                        }}>
+                        {value}
+                      </Link>
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              <PaginationItem>
+                <PaginationNext asChild>
+                  <Link
+                    scroll={false}
+                    replace
+                    className={cn({['invisible']: +page >= pages})}
+                    href={{
+                      pathname: `${workspaceURI}/ticketing`,
+                      query: {...searchParams, page: +page + 1},
+                    }}>
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </PaginationNext>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </div>
     </>

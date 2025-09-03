@@ -25,16 +25,17 @@ export async function GET(
   const {workspaceURL, tenant} = workspacePathname(params);
   const {'ticket-id': ticketId, 'file-id': fileId} = params;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenant);
+  const {error, info} = await ensureAuth(workspaceURL, tenant);
   if (error) {
     return new NextResponse('Unauthorized', {status: 401});
   }
-  const {workspace} = auth;
+  const {workspace} = info;
 
   if (!isCommentEnabled({subapp: SUBAPP_CODES.quotations, workspace})) {
     return new NextResponse('Forbidden', {status: 403});
   }
 
+  const {auth} = info;
   const ticket = await findTicketAccess({auth, recordId: ticketId});
   if (!ticket) {
     return new NextResponse('Forbidden', {status: 403});

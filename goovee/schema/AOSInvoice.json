@@ -75,11 +75,6 @@
       "target": "AOSOrder"
     },
     {
-      "type": "ManyToOne",
-      "name": "project",
-      "target": "AOSProject"
-    },
-    {
       "name": "invoicePaymentList",
       "type": "OneToMany",
       "target": "AOSInvoicePayment",

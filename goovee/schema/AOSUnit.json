@@ -10,10 +10,6 @@
     {
       "type": "Int",
       "name": "unitTypeSelect"
-    },
-    {
-      "type": "String",
-      "name": "labelToPrinting"
     }
   ]
 }

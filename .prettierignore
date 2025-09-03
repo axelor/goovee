@@ -1,3 +1,0 @@
-# Ignore all workspace package folders
-packages/*
-app/**/packages/*

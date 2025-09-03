@@ -31,18 +31,16 @@ import type {PortalAppConfig} from '@/types';
 import type {MutateProps, MutateResponse} from '../../../actions';
 import {mutate} from '../../../actions';
 import {FIELDS} from '../../../constants';
-import type {TaskCategory} from '@/orm/project-task';
-import type {TaskPriority} from '@/orm/project-task';
-import type {MainPartnerContact} from '@/orm/project-task';
+import type {Category, ContactPartner, Priority} from '../../../types';
 import type {CreateFormData} from '../../../utils/validators';
 import {CreateFormSchema} from '../../../utils/validators';
 
 type TicketFormProps = {
   projectId: string;
   userId: ID;
-  categories: TaskCategory[];
-  priorities: TaskPriority[];
-  contacts: MainPartnerContact[];
+  categories: Category[];
+  priorities: Priority[];
+  contacts: ContactPartner[];
   parentId?: string;
   className?: string;
   onSuccess?: (ticketId: string, projectId: string) => void;

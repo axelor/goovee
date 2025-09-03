@@ -2,12 +2,35 @@ import {type BigDecimal} from '@goovee/orm';
 
 export type * from './search-param';
 
+export type Company = {id: string; version: number; name?: string};
+export type Category = {id: string; version: number; name?: string};
+export type Priority = {id: string; version: number; name?: string};
 export type LinkType = {id: string; version: number; name: string};
 export type TicketSearch = {
   id: string;
   version: number;
   fullName?: string;
   name?: string;
+};
+
+export type Status = {
+  id: string;
+  version: number;
+  name?: string;
+  sequence?: number;
+  isCompleted?: boolean;
+};
+
+export type ClientPartner = {
+  id: string;
+  version: number;
+  simpleFullName?: string;
+};
+
+export type ContactPartner = {
+  id: string;
+  version: number;
+  simpleFullName?: string;
 };
 
 export type TicketListTicket = {
@@ -17,7 +40,6 @@ export type TicketListTicket = {
   assignment?: number;
   assignedTo?: {id: string; version: number; name?: string};
   priority?: {id: string; version: number; name?: string};
-  typeSelect?: string;
   managedByContact?: {
     id: string;
     version: number;
@@ -54,7 +76,6 @@ export type TicketLink = {
     version: number;
     name: string;
     assignment?: number | undefined;
-    typeSelect?: string;
     assignedTo?: {id: string; version: number; name?: string};
     managedByContact?: {
       id: string;
@@ -89,7 +110,6 @@ export type ChildTicket = {
   version: number;
   name: string;
   assignment?: number | undefined;
-  typeSelect?: string;
   assignedTo?: {id: string; version: number; name?: string};
   managedByContact?: {
     id: string;

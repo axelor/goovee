@@ -8,7 +8,7 @@ import {Button, Chip} from '@/ui/components';
 import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
-import {INVOICE_TYPE} from '@/constants';
+import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
 
 export const Columns = [
   {

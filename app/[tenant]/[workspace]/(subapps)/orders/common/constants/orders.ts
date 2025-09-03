@@ -46,6 +46,11 @@ export const ORDER_DELIVERY_STATUS = {
   DELIVERED: 3,
 };
 
+export const INVOICE_STATUS = {
+  VENTILATED: 3,
+  UNPAID: 0,
+};
+
 export const CUSTOMERS_DELIVERY_STATUS = {
   DRAFT: 1,
   PLANNED: 2,

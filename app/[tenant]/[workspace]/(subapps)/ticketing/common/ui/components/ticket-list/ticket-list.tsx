@@ -11,17 +11,12 @@ import type {
   TicketLink,
   TicketListTicket,
 } from '../../../types';
-import {
-  type Column,
-  TableHeads,
-  TableRows,
-} from '@/ui/components/task-components/table-elements';
+import {type Column, TableHeads, TableRows} from '../table-elements';
 import {
   childColumns,
   parentColumns,
   relatedColumns,
   ticketColumns,
-  timesheetColumns,
 } from './columns';
 import {
   RemoveChildButton,
@@ -29,8 +24,6 @@ import {
   RemoveParentButton,
 } from './ticket-row-buttons';
 import type {PortalAppConfig} from '@/types';
-import {TimesheetLine} from '../../../orm/tickets';
-import {SUBAPP_CODES, TASK_TYPE_SELECT} from '@/constants';
 
 type TicketListProps = {
   tickets: Cloned<TicketListTicket>[];
@@ -115,16 +108,10 @@ export function ParentTicketList(props: {
 
   const handleRowClick = useCallback(
     (record: Cloned<TicketListTicket>) => {
-      if (!record.project?.id || !record.id) return;
-      if (record.typeSelect === TASK_TYPE_SELECT.TASK) {
+      record.project?.id &&
         router.push(
-          `${workspaceURI}/${SUBAPP_CODES.projects}/${record.project.id}/tasks/${record.id}`,
+          `${workspaceURI}/ticketing/projects/${record.project.id}/tickets/${record.id}`,
         );
-      } else {
-        router.push(
-          `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${record.project.id}/tickets/${record.id}`,
-        );
-      }
     },
     [router, workspaceURI],
   );
@@ -143,7 +130,7 @@ export function ParentTicketList(props: {
           records={tickets}
           columns={columns}
           onRowClick={handleRowClick}
-          actionCellRenderer={ticket => (
+          deleteCellRenderer={ticket => (
             <RemoveParentButton
               ticketId={ticketId}
               relatedTicketId={ticket.id}
@@ -172,16 +159,10 @@ export function ChildTicketList(props: {
 
   const handleRowClick = useCallback(
     (record: Cloned<ChildTicket>) => {
-      if (!record.project?.id || !record.id) return;
-      if (record.typeSelect === TASK_TYPE_SELECT.TASK) {
+      record.project?.id &&
         router.push(
-          `${workspaceURI}/${SUBAPP_CODES.projects}/${record.project.id}/tasks/${record.id}`,
+          `${workspaceURI}/ticketing/projects/${record.project.id}/tickets/${record.id}`,
         );
-      } else {
-        router.push(
-          `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${record.project.id}/tickets/${record.id}`,
-        );
-      }
     },
     [router, workspaceURI],
   );
@@ -200,7 +181,7 @@ export function ChildTicketList(props: {
           records={tickets ?? []}
           columns={columns}
           onRowClick={handleRowClick}
-          actionCellRenderer={ticket => (
+          deleteCellRenderer={ticket => (
             <RemoveChildButton
               ticketId={ticketId}
               relatedTicketId={ticket.id}
@@ -229,16 +210,10 @@ export function RelatedTicketList(props: {
 
   const handleRowClick = useCallback(
     (record: Cloned<TicketLink>) => {
-      if (!record.relatedTask?.project?.id || !record.relatedTask?.id) return;
-      if (record.relatedTask.typeSelect === TASK_TYPE_SELECT.TASK) {
+      record.relatedTask?.project?.id &&
         router.push(
-          `${workspaceURI}/${SUBAPP_CODES.projects}/${record.relatedTask.project.id}/tasks/${record.relatedTask.id}`,
+          `${workspaceURI}/ticketing/projects/${record.relatedTask.project.id}/tickets/${record.relatedTask.id}`,
         );
-      } else {
-        router.push(
-          `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${record.relatedTask.project.id}/tickets/${record.relatedTask.id}`,
-        );
-      }
     },
     [router, workspaceURI],
   );
@@ -257,7 +232,7 @@ export function RelatedTicketList(props: {
           records={links ?? []}
           columns={columns}
           onRowClick={handleRowClick}
-          actionCellRenderer={link =>
+          deleteCellRenderer={link =>
             link.relatedTask && (
               <RemoveLinkButton
                 ticketId={ticketId}
@@ -267,34 +242,6 @@ export function RelatedTicketList(props: {
             )
           }
         />
-      </TableBody>
-    </Table>
-  );
-}
-
-export function TimesheetLines({
-  timesheetlines,
-  fields,
-}: {
-  timesheetlines: Cloned<TimesheetLine>[];
-  fields: PortalAppConfig['ticketingFieldSet'];
-}) {
-  const columns = useMemo(() => {
-    return filterColumns(timesheetColumns, fields);
-  }, [fields]);
-
-  const hasLines = Boolean(timesheetlines?.length);
-  return (
-    <Table className="rounded-lg bg-card text-card-foreground">
-      {hasLines && (
-        <TableHeader>
-          <TableRow>
-            <TableHeads columns={columns} />
-          </TableRow>
-        </TableHeader>
-      )}
-      <TableBody>
-        <TableRows records={timesheetlines} columns={columns} />
       </TableBody>
     </Table>
   );

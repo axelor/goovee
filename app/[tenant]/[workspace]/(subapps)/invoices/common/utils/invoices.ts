@@ -1,9 +1,10 @@
 // ---- LOCAL IMPORTS ---- //
 
-import {INVOICE} from '@/subapps/invoices/common/constants/invoices';
-import {INVOICE_CATEGORY, INVOICE_STATUS} from '@/constants';
-import type {WhereOptions} from '@goovee/orm';
-import type {AOSInvoice} from '@/goovee/.generated/models';
+import {
+  INVOICE,
+  INVOICE_CATEGORY,
+  INVOICE_STATUS,
+} from '@/subapps/invoices/common/constants/invoices';
 
 export function extractAmount(amount: string | number): number {
   const amountStr = String(amount);
@@ -21,11 +22,10 @@ export function buildWhereClause({
   workspaceURL: string;
   type?: string;
 }) {
-  const workspaceConditions: WhereOptions<AOSInvoice> = {
+  const workspaceConditions: any = {
     OR: [
       {portalWorkspace: {url: workspaceURL}},
       {saleOrder: {portalWorkspace: {url: workspaceURL}}},
-      {project: {portalWorkspace: {url: workspaceURL}}},
     ],
   };
 

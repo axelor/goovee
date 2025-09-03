@@ -16,7 +16,6 @@ export const isCommentEnabled = ({
   const config: Partial<Record<SUBAPP_CODES, boolean>> = {
     [SUBAPP_CODES.events]: workspace.config?.enableEventComment,
     [SUBAPP_CODES.news]: workspace.config?.enableNewsComment,
-    [SUBAPP_CODES.projects]: workspace.config?.isAllowUserComment,
   };
 
   if (Object.keys(config).includes(subapp)) {
