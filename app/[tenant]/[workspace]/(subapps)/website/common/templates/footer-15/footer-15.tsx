@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer15Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
@@ -24,11 +23,12 @@ export function Footer15(props: TemplateProps<Footer15Data>) {
     ...props,
   });
 
-  const socialLinks = footer15SocialLinks?.map(socialLink => ({
-    id: socialLink.id,
-    icon: `uil uil-${socialLink.attrs.icon || ''}`,
-    url: socialLink.attrs.url || '#',
-  })) ?? [];
+  const socialLinks =
+    footer15SocialLinks?.map(socialLink => ({
+      id: socialLink.id,
+      icon: `uil uil-${socialLink.attrs.icon || ''}`,
+      url: socialLink.attrs.url || '#',
+    })) ?? [];
 
   return (
     <footer className="bg-gray">
@@ -82,7 +82,10 @@ export function Footer15(props: TemplateProps<Footer15Data>) {
         <hr className="mt-11 mt-md-12 mb-7" />
         <div className="d-md-flex align-items-center justify-content-between">
           <p className="mb-2 mb-lg-0">{copyright}</p>
-          <SocialLinks links={socialLinks} className="nav social social-muted mb-0 text-md-end" />
+          <SocialLinks
+            links={socialLinks}
+            className="nav social social-muted mb-0 text-md-end"
+          />
         </div>
       </div>
     </footer>

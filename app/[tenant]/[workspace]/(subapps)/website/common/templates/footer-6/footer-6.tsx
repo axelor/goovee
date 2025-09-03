@@ -26,11 +26,12 @@ export function Footer6(props: TemplateProps<Footer6Data>) {
     ...props,
   });
 
-  const socialLinks = footer6SocialLinks?.map(socialLink => ({
-    id: socialLink.id,
-    icon: `uil uil-${socialLink.attrs.icon || ''}`,
-    url: socialLink.attrs.url || '#',
-  })) ?? [];
+  const socialLinks =
+    footer6SocialLinks?.map(socialLink => ({
+      id: socialLink.id,
+      icon: `uil uil-${socialLink.attrs.icon || ''}`,
+      url: socialLink.attrs.url || '#',
+    })) ?? [];
 
   return (
     <footer className="bg-dark text-inverse mt-5 mt-md-16">
@@ -42,16 +43,17 @@ export function Footer6(props: TemplateProps<Footer6Data>) {
 
               <p className="mb-4">{copyright}</p>
 
-              <SocialLinks links={socialLinks} className="nav social social-white" />
+              <SocialLinks
+                links={socialLinks}
+                className="nav social social-white"
+              />
             </div>
           </div>
 
           <div className="col-md-4 col-lg-3">
             <div className="widget">
               <h4 className="widget-title text-white mb-3">{addressTitle}</h4>
-              <address className="pe-xl-15 pe-xxl-17">
-                {addressLine}
-              </address>
+              <address className="pe-xl-15 pe-xxl-17">{addressLine}</address>
               <NextLink title={email} href={`mailto:${email}`} />
               <br /> {phone}
             </div>
@@ -72,7 +74,9 @@ export function Footer6(props: TemplateProps<Footer6Data>) {
 
           <div className="col-md-12 col-lg-3">
             <div className="widget">
-              <h4 className="widget-title text-white mb-3">{newsletterTitle}</h4>
+              <h4 className="widget-title text-white mb-3">
+                {newsletterTitle}
+              </h4>
               <p className="mb-5">{newsletterDescription}</p>
 
               <div className="newsletter-wrapper">
@@ -83,8 +87,7 @@ export function Footer6(props: TemplateProps<Footer6Data>) {
                     className="validate dark-fields"
                     id="mc-embedded-subscribe-form2"
                     name="mc-embedded-subscribe-form"
-                    action="https://elemisfreebies.us20.list-manage.com/subscribe/post?u=aa4947f70a475ce162057838d&amp;id=b49ef47a9a"
-                  >
+                    action="https://elemisfreebies.us20.list-manage.com/subscribe/post?u=aa4947f70a475ce162057838d&amp;id=b49ef47a9a">
                     <div id="mc_embed_signup_scroll2">
                       <div className="mc-field-group input-group form-floating">
                         <input
@@ -120,8 +123,7 @@ export function Footer6(props: TemplateProps<Footer6Data>) {
 
                       <div
                         style={{position: 'absolute', left: '-5000px'}}
-                        aria-hidden="true"
-                      >
+                        aria-hidden="true">
                         <input
                           type="text"
                           tabIndex={-1}

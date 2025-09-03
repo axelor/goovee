@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -112,7 +111,8 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
       },
       footer11Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer11AddressTitle: 'Get in Touch',
-      footer11AddressLine: 'Moonshine St. 14/05 Light City, London, United Kingdom',
+      footer11AddressLine:
+        'Moonshine St. 14/05 Light City, London, United Kingdom',
       footer11Email: 'info@email.com',
       footer11Phone: '00 (123) 456 78 90',
       footer11ListTitle: 'Learn More',
@@ -187,7 +187,8 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
       },
       footer11Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer11AddressTitle: 'Contactez-nous',
-      footer11AddressLine: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
+      footer11AddressLine:
+        'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
       footer11Email: 'info@email.com',
       footer11Phone: '00 (123) 456 78 90',
       footer11ListTitle: 'En savoir plus',

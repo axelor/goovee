@@ -4,14 +4,20 @@ import Accordion from '@/subapps/website/common/components/reuseable/accordion';
 
 export function FAQ2(props: TemplateProps<Faq2Data>) {
   const {data} = props;
-  const {faq2Title: title, faq2Caption: caption, faq2Questions: questions} = data || {};
+  const {
+    faq2Title: title,
+    faq2Caption: caption,
+    faq2Questions: questions,
+  } = data || {};
 
   return (
     <section className="wrapper bg-soft-primary">
       <div className="container py-14 py-md-16">
         <div className="row">
           <div className="col-lg-11 col-xxl-10 mx-auto text-center">
-            <h2 className="fs-15 text-uppercase text-primary mb-3">{caption}</h2>
+            <h2 className="fs-15 text-uppercase text-primary mb-3">
+              {caption}
+            </h2>
             <h3 className="display-5 mb-10 px-lg-12 px-xl-10 px-xxl-17">
               {title}
             </h3>

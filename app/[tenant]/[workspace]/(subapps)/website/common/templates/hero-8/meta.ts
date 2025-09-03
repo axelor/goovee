@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,

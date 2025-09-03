@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer11Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
@@ -27,11 +26,12 @@ export function Footer11(props: TemplateProps<Footer11Data>) {
     ...props,
   });
 
-  const socialLinks = footer11SocialLinks?.map(socialLink => ({
-    id: socialLink.id,
-    icon: `uil uil-${socialLink.attrs.icon || ''}`,
-    url: socialLink.attrs.url || '#',
-  })) ?? [];
+  const socialLinks =
+    footer11SocialLinks?.map(socialLink => ({
+      id: socialLink.id,
+      icon: `uil uil-${socialLink.attrs.icon || ''}`,
+      url: socialLink.attrs.url || '#',
+    })) ?? [];
 
   return (
     <footer className="bg-light">
@@ -50,10 +50,12 @@ export function Footer11(props: TemplateProps<Footer11Data>) {
           <div className="col-md-4 col-lg-3">
             <div className="widget">
               <h4 className="widget-title mb-3">{addressTitle}</h4>
-              <address className="pe-xl-15 pe-xxl-17">
-                {addressLine}
-              </address>
-              <NextLink title={email} href={`mailto:${email}`} className="link-body" />
+              <address className="pe-xl-15 pe-xxl-17">{addressLine}</address>
+              <NextLink
+                title={email}
+                href={`mailto:${email}`}
+                className="link-body"
+              />
               <br /> {phone}
             </div>
           </div>
@@ -84,8 +86,7 @@ export function Footer11(props: TemplateProps<Footer11Data>) {
                     className="validate dark-fields"
                     id="mc-embedded-subscribe-form2"
                     name="mc-embedded-subscribe-form"
-                    action="https://elemisfreebies.us20.list-manage.com/subscribe/post?u=aa4947f70a475ce162057838d&amp;id=b49ef47a9a"
-                  >
+                    action="https://elemisfreebies.us20.list-manage.com/subscribe/post?u=aa4947f70a475ce162057838d&amp;id=b49ef47a9a">
                     <div id="mc_embed_signup_scroll2">
                       <div className="mc-field-group input-group form-floating">
                         <input
@@ -121,8 +122,7 @@ export function Footer11(props: TemplateProps<Footer11Data>) {
 
                       <div
                         style={{position: 'absolute', left: '-5000px'}}
-                        aria-hidden="true"
-                      >
+                        aria-hidden="true">
                         <input
                           type="text"
                           tabIndex={-1}

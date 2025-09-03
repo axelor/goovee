@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer10Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -23,11 +22,12 @@ export function Footer10(props: TemplateProps<Footer10Data>) {
     footer10SocialLinks,
   } = data || {};
 
-  const socialLinks = footer10SocialLinks?.map(socialLink => ({
-    id: socialLink.id,
-    icon: `uil uil-${socialLink.attrs.icon || ''}`,
-    url: socialLink.attrs.url || '#',
-  })) ?? [];
+  const socialLinks =
+    footer10SocialLinks?.map(socialLink => ({
+      id: socialLink.id,
+      icon: `uil uil-${socialLink.attrs.icon || ''}`,
+      url: socialLink.attrs.url || '#',
+    })) ?? [];
 
   const widget = (list: any[], title: string) => {
     return (
@@ -84,7 +84,10 @@ export function Footer10(props: TemplateProps<Footer10Data>) {
 
         <div className="d-md-flex align-items-center justify-content-between">
           <p className="mb-2 mb-lg-0">{copyright}</p>
-          <SocialLinks links={socialLinks} className="nav social social-white text-md-end" />
+          <SocialLinks
+            links={socialLinks}
+            className="nav social social-white text-md-end"
+          />
         </div>
       </div>
     </footer>

@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero4Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
@@ -36,21 +35,18 @@ export function Hero4(props: TemplateProps<Hero4Data>) {
             <div className="mt-10 mt-md-11 mt-lg-n10 px-10 px-md-11 ps-lg-0 pe-lg-13 text-center text-lg-start">
               <h1
                 className="display-2 mb-5"
-                style={slideInDownAnimate('600ms')}
-              >
+                style={slideInDownAnimate('600ms')}>
                 {title}
               </h1>
               <p
                 className="lead fs-23 lh-sm mb-7 pe-md-10"
-                style={slideInDownAnimate('900ms')}
-              >
+                style={slideInDownAnimate('900ms')}>
                 {description}
               </p>
 
               <div
                 className="d-flex justify-content-center justify-content-lg-start"
-                style={slideInDownAnimate('900ms')}
-              >
+                style={slideInDownAnimate('900ms')}>
                 <span style={slideInDownAnimate('1200ms')}>
                   <NextLink
                     href={buttonLink1}

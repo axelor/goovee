@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero12Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
@@ -30,15 +29,11 @@ export function Hero12(props: TemplateProps<Hero12Data>) {
           <div className="col-md-10 offset-md-1 offset-lg-0 col-lg-5 text-center text-lg-start order-2 order-lg-0">
             <h1
               className="display-1 mb-5 mx-md-n5 mx-lg-0"
-              style={slideInDownAnimate('600ms')}
-            >
+              style={slideInDownAnimate('600ms')}>
               {title}
             </h1>
 
-            <p
-              className="lead fs-lg mb-7"
-              style={slideInDownAnimate('900ms')}
-            >
+            <p className="lead fs-lg mb-7" style={slideInDownAnimate('900ms')}>
               {description}
             </p>
 

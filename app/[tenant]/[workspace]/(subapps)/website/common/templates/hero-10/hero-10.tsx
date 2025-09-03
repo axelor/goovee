@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero10Data} from './meta';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
@@ -20,15 +19,13 @@ export function Hero10(props: TemplateProps<Hero10Data>) {
           <div className="col-lg-8 col-xl-7 col-xxl-6 mx-auto">
             <h1
               className="display-1 fs-60 mb-4 px-md-15 px-lg-0"
-              style={slideInDownAnimate('0ms')}
-            >
+              style={slideInDownAnimate('0ms')}>
               {title}
             </h1>
 
             <p
               className="lead fs-24 lh-sm mb-7 mx-md-13 mx-lg-10"
-              style={slideInDownAnimate('300ms')}
-            >
+              style={slideInDownAnimate('300ms')}>
               {description}
             </p>
 
