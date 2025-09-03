@@ -19,7 +19,9 @@ export function FAQ6(props: TemplateProps<Faq6Data>) {
       <div className="container pt-6 pb-14 pb-md-16">
         <div className="row gx-lg-8 gx-xl-12 gy-10">
           <div className="col-lg-6 mb-0">
-            <h2 className="fs-16 text-uppercase text-primary mb-4">{caption}</h2>
+            <h2 className="fs-16 text-uppercase text-primary mb-4">
+              {caption}
+            </h2>
             <h3 className="display-3 mb-4">{title}</h3>
             <p className="mb-6">{description}</p>
             <NextLink

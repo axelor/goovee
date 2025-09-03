@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -78,7 +77,8 @@ export const hero2Demos: Demo<typeof hero2Schema>[] = [
   {
     language: 'fr_FR',
     data: {
-      hero2Title: 'Nous créons des solutions qui facilitent la vie de nos clients.',
+      hero2Title:
+        'Nous créons des solutions qui facilitent la vie de nos clients.',
       hero2Description:
         'Nous proposons des solutions qui répondent aux besoins de votre entreprise, quel que soit votre stade de croissance.',
       hero2ButtonLabel1: 'Explorer maintenant',

@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer9Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
@@ -27,11 +26,12 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
     ...props,
   });
 
-  const socialLinks = footer9SocialLinks?.map(socialLink => ({
-    id: socialLink.id,
-    icon: `uil uil-${socialLink.attrs.icon || ''}`,
-    url: socialLink.attrs.url || '#',
-  })) ?? [];
+  const socialLinks =
+    footer9SocialLinks?.map(socialLink => ({
+      id: socialLink.id,
+      icon: `uil uil-${socialLink.attrs.icon || ''}`,
+      url: socialLink.attrs.url || '#',
+    })) ?? [];
 
   const widget = (list: any[], title: string) => {
     return (
@@ -58,7 +58,10 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
 
               <p className="mb-4">{copyright}</p>
 
-              <SocialLinks links={socialLinks} className="nav social social-white" />
+              <SocialLinks
+                links={socialLinks}
+                className="nav social social-white"
+              />
             </div>
           </div>
 

@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -59,7 +58,8 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
   {
     language: 'en_US',
     data: {
-      hero4Title: "Simple get down & calm down and we're control your requirements.",
+      hero4Title:
+        "Simple get down & calm down and we're control your requirements.",
       hero4Description:
         'Simplify your spending and take full control of your finances without any stress.',
       hero4ButtonLabel1: 'Explore Now',

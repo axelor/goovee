@@ -4,7 +4,11 @@ import Accordion from '@/subapps/website/common/components/reuseable/accordion';
 
 export function FAQ3(props: TemplateProps<Faq3Data>) {
   const {data} = props;
-  const {faq3Title: title, faq3Caption: caption, faq3Questions: questions} = data || {};
+  const {
+    faq3Title: title,
+    faq3Caption: caption,
+    faq3Questions: questions,
+  } = data || {};
 
   return (
     <div className="container">
@@ -17,7 +21,9 @@ export function FAQ3(props: TemplateProps<Faq3Data>) {
             </div>
 
             <div className="col-lg-6">
-              <div className="accordion accordion-wrapper" id={`faq-3-${props.contentId}`}>
+              <div
+                className="accordion accordion-wrapper"
+                id={`faq-3-${props.contentId}`}>
                 {questions?.map(({id, attrs: item}) => (
                   <Accordion
                     type="plain"

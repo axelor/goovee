@@ -32,11 +32,12 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
     ...props,
   });
 
-  const socialLinks = footer3SocialLinks?.map(socialLink => ({
-    id: socialLink.id,
-    icon: `uil uil-${socialLink.attrs.icon || ''}`,
-    url: socialLink.attrs.url || '#',
-  })) ?? [];
+  const socialLinks =
+    footer3SocialLinks?.map(socialLink => ({
+      id: socialLink.id,
+      icon: `uil uil-${socialLink.attrs.icon || ''}`,
+      url: socialLink.attrs.url || '#',
+    })) ?? [];
 
   const widget = (list: any[], title: string) => {
     return (
@@ -58,8 +59,7 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
       <div className="container pt-13 pt-md-15 pb-7">
         <div
           className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400 mb-13"
-          style={{backgroundImage: `url(${image})`}}
-        >
+          style={{backgroundImage: `url(${image})`}}>
           <div className="card-body p-9 p-xl-11">
             <div className="row align-items-center gy-6">
               <div className="col-lg-7">
@@ -78,8 +78,7 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
                       id="mc-embedded-subscribe-form2"
                       name="mc-embedded-subscribe-form"
                       className="validate dark-fields"
-                      target="_blank"
-                    >
+                      target="_blank">
                       <div id="mc_embed_signup_scroll2">
                         <div className="mc-field-group input-group form-floating">
                           <input
@@ -91,8 +90,7 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
                           />
                           <label
                             htmlFor="mce-EMAIL2"
-                            className="position-absolute"
-                          >
+                            className="position-absolute">
                             Email Address
                           </label>
                           <input
@@ -118,8 +116,7 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
 
                         <div
                           style={{position: 'absolute', left: -5000}}
-                          aria-hidden="true"
-                        >
+                          aria-hidden="true">
                           <input
                             type="text"
                             name="b_ddc180777a163e0f9f66ee014_4b1bcfa0bc"

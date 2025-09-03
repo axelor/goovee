@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero5Data} from './meta';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
@@ -26,15 +25,13 @@ export function Hero5(props: TemplateProps<Hero5Data>) {
 
             <p
               className="lead fs-lg px-xl-12 px-xxl-4 mb-7"
-              style={slideInDownAnimate('300ms')}
-            >
+              style={slideInDownAnimate('300ms')}>
               {description}
             </p>
 
             <div
               className="d-flex justify-content-center"
-              style={slideInDownAnimate('600ms')}
-            >
+              style={slideInDownAnimate('600ms')}>
               <span style={slideInDownAnimate('900ms')}>
                 <NextLink
                   href={buttonLink1}

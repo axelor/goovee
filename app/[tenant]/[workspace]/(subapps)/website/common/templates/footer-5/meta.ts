@@ -111,7 +111,8 @@ export const footer5Demos: Demo<typeof footer5Schema>[] = [
       },
       footer5Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer5AddressTitle: 'Get in Touch',
-      footer5AddressLine: 'Moonshine St. 14/05 Light City, London, United Kingdom',
+      footer5AddressLine:
+        'Moonshine St. 14/05 Light City, London, United Kingdom',
       footer5Email: 'info@email.com',
       footer5Phone: '00 (123) 456 78 90',
       footer5LinkTitle: 'Learn More',
@@ -186,7 +187,8 @@ export const footer5Demos: Demo<typeof footer5Schema>[] = [
       },
       footer5Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer5AddressTitle: 'Contactez-nous',
-      footer5AddressLine: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
+      footer5AddressLine:
+        'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
       footer5Email: 'info@email.com',
       footer5Phone: '00 (123) 456 78 90',
       footer5LinkTitle: 'En savoir plus',

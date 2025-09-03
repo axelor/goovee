@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero7Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
@@ -38,8 +37,7 @@ export function Hero7(props: TemplateProps<Hero7Data>) {
 
             <p
               className="lead fs-24 lh-sm px-md-5 px-xl-15 px-xxl-10 mb-7"
-              style={zoomInAnimate('500ms')}
-            >
+              style={zoomInAnimate('500ms')}>
               {description}
             </p>
           </div>

@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -125,12 +124,14 @@ export const footer13Demos: Demo<typeof footer13Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/logo-light.png',
       },
-      footer13Title: 'Join our community by utilizing our services to help your business.',
+      footer13Title:
+        'Join our community by utilizing our services to help your business.',
       footer13LinkTitle: 'Try It For Free',
       footer13LinkHref: '#',
       footer13Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer13AddressTitle: 'Get in Touch',
-      footer13AddressLine: 'Moonshine St. 14/05 Light City, London, United Kingdom',
+      footer13AddressLine:
+        'Moonshine St. 14/05 Light City, London, United Kingdom',
       footer13Email: 'info@email.com',
       footer13Phone: '00 (123) 456 78 90',
       footer13ListTitle: 'Learn More',
@@ -203,12 +204,14 @@ export const footer13Demos: Demo<typeof footer13Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/logo-light.png',
       },
-      footer13Title: 'Rejoignez notre communauté en utilisant nos services pour aider votre entreprise.',
+      footer13Title:
+        'Rejoignez notre communauté en utilisant nos services pour aider votre entreprise.',
       footer13LinkTitle: 'Essayez-le gratuitement',
       footer13LinkHref: '#',
       footer13Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer13AddressTitle: 'Contactez-nous',
-      footer13AddressLine: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
+      footer13AddressLine:
+        'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
       footer13Email: 'info@email.com',
       footer13Phone: '00 (123) 456 78 90',
       footer13ListTitle: 'En savoir plus',

@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer7Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -23,11 +22,12 @@ export function Footer7(props: TemplateProps<Footer7Data>) {
     footer7SocialLinks,
   } = data || {};
 
-  const socialLinks = footer7SocialLinks?.map(socialLink => ({
-    id: socialLink.id,
-    icon: `uil uil-${socialLink.attrs.icon || ''}`,
-    url: socialLink.attrs.url || '#',
-  })) ?? [];
+  const socialLinks =
+    footer7SocialLinks?.map(socialLink => ({
+      id: socialLink.id,
+      icon: `uil uil-${socialLink.attrs.icon || ''}`,
+      url: socialLink.attrs.url || '#',
+    })) ?? [];
 
   const widget = (list: any[], title: string) => {
     return (

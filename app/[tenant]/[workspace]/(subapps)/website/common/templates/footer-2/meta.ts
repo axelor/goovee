@@ -258,4 +258,3 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
     },
   },
 ];
-

@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -139,12 +138,14 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
         fileType: 'image/jpeg',
         filePath: '/img/photos/bg27.jpg',
       },
-      footer14Title: 'Over 5K+ customers have put faith in us. Join them by utilize our offer to help your company develop.',
+      footer14Title:
+        'Over 5K+ customers have put faith in us. Join them by utilize our offer to help your company develop.',
       footer14LinkTitle: 'Join Us',
       footer14LinkHref: '#',
       footer14Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer14AddressTitle: 'Get in Touch',
-      footer14AddressLine: 'Moonshine St. 14/05 Light City, London, United Kingdom',
+      footer14AddressLine:
+        'Moonshine St. 14/05 Light City, London, United Kingdom',
       footer14Email: 'info@email.com',
       footer14Phone: '00 (123) 456 78 90',
       footer14ListTitle: 'Learn More',
@@ -224,12 +225,14 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
         fileType: 'image/jpeg',
         filePath: '/img/photos/bg27.jpg',
       },
-      footer14Title: 'Plus de 5 000 clients nous ont fait confiance. Rejoignez-les en utilisant notre offre pour aider votre entreprise à se développer.',
+      footer14Title:
+        'Plus de 5 000 clients nous ont fait confiance. Rejoignez-les en utilisant notre offre pour aider votre entreprise à se développer.',
       footer14LinkTitle: 'Rejoignez-nous',
       footer14LinkHref: '#',
       footer14Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer14AddressTitle: 'Contactez-nous',
-      footer14AddressLine: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
+      footer14AddressLine:
+        'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
       footer14Email: 'info@email.com',
       footer14Phone: '00 (123) 456 78 90',
       footer14ListTitle: 'En savoir plus',

@@ -1,4 +1,3 @@
-
 import {
   Template,
   type Data,
@@ -79,10 +78,12 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/logo-dark.png',
       },
-      footer15Title: "I'm Caitlyn Lighthouse, a photographer specializing in food, drink and product photography.",
+      footer15Title:
+        "I'm Caitlyn Lighthouse, a photographer specializing in food, drink and product photography.",
       footer15Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer15AddressTitle: 'Address',
-      footer15AddressLine: 'Moonshine St. 14/05 Light City, London, United Kingdom',
+      footer15AddressLine:
+        'Moonshine St. 14/05 Light City, London, United Kingdom',
       footer15PhoneTitle: 'Phone',
       footer15Phone1: '00 (123) 456 78 90',
       footer15Phone2: '00 (987) 654 32 10',
@@ -145,10 +146,12 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/logo-dark.png',
       },
-      footer15Title: 'Je suis Caitlyn Lighthouse, une photographe spécialisée dans la photographie de nourriture, de boissons et de produits.',
+      footer15Title:
+        'Je suis Caitlyn Lighthouse, une photographe spécialisée dans la photographie de nourriture, de boissons et de produits.',
       footer15Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer15AddressTitle: 'Adresse',
-      footer15AddressLine: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
+      footer15AddressLine:
+        'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
       footer15PhoneTitle: 'Téléphone',
       footer15Phone1: '00 (123) 456 78 90',
       footer15Phone2: '00 (987) 654 32 10',

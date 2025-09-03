@@ -1,4 +1,3 @@
-
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero2Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
@@ -31,8 +30,7 @@ export function Hero2(props: TemplateProps<Hero2Data>) {
       <div className="row gx-lg-0 gx-xl-8 gy-10 gy-md-13 gy-lg-0 mb-7 mb-md-10 mb-lg-16 align-items-center">
         <div
           className="col-md-8 offset-md-2 col-lg-6 offset-lg-1 position-relative order-lg-2"
-          style={zoomInAnimate('0ms')}
-        >
+          style={zoomInAnimate('0ms')}>
           <div
             className="shape bg-dot primary rellax w-17 h-19"
             style={{top: '-1.7rem', left: '-1.5rem'}}
@@ -59,8 +57,7 @@ export function Hero2(props: TemplateProps<Hero2Data>) {
 
           <p
             className="lead fs-22 lh-sm mb-7 px-md-10 px-lg-0"
-            style={slideInDownAnimate('900ms')}
-          >
+            style={slideInDownAnimate('900ms')}>
             {description}
           </p>
 
