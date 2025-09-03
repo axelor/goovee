@@ -117,7 +117,7 @@ export default async function Layout({
       {!isSideNav && menu}
       <div className={`flex ${isSideNav ? 'flex-col lg:flex-row' : ''}`}>
         {isSideNav && menu}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {website.header?.component && (
             <Header
               workspaceURI={workspaceURI}
