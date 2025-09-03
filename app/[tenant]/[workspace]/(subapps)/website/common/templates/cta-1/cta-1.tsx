@@ -1,9 +1,9 @@
 import {TemplateProps} from '@/subapps/website/common/types';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 
-import type {CTA1Data} from './meta.ts';
+import type {Cta1Data} from './meta.ts';
 
-export function CTA1(props: TemplateProps<CTA1Data>) {
+export function CTA1(props: TemplateProps<Cta1Data>) {
   const {data} = props;
   const {
     cta1Title: title,
