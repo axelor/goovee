@@ -85,6 +85,7 @@ export default async function Page({
       <Component
         key={line.id}
         data={clone(line.content.attrs)}
+        lineId={line.id}
         contentId={line.content.id}
         contentVersion={line.content.version}
         workspaceURI={workspaceURI}

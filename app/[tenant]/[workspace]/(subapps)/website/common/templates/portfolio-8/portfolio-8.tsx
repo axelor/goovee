@@ -12,6 +12,7 @@ export function Portfolio8(props: TemplateProps<Portfolio8Data>) {
     portfolio8PortfolioList: portfolioList,
   } = data || {};
 
+  const isotopeId = `portfolio8-${props.lineId || props.contentId}-${props.mountType}`;
   return (
     <section className="wrapper bg-light">
       <div className="container py-14 py-md-17">
@@ -25,7 +26,7 @@ export function Portfolio8(props: TemplateProps<Portfolio8Data>) {
         </div>
 
         <div className="grid grid-view projects-masonry">
-          <div className="row gx-md-8 gy-10 gy-md-13 isotope">
+          <div className="row gx-md-8 gy-10 gy-md-13 isotope" id={isotopeId}>
             {portfolioList?.map(({id, attrs: item}, i) => (
               <div className="project item col-md-6 col-xl-4 product" key={id}>
                 <figure className="lift rounded mb-6">
