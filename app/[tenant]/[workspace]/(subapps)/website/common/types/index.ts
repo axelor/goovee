@@ -18,6 +18,7 @@ export type Menu = {
 export type TemplateProps<T = any, M = any> = {
   data?: T;
   menu?: M;
+  lineId?: ID;
   contentId?: ID;
   contentVersion?: number;
   workspaceURI: string;

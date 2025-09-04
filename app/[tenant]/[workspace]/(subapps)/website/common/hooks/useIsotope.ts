@@ -1,7 +1,7 @@
 import type Isotope from 'isotope-layout';
 import {useEffect, useRef, useState} from 'react';
 
-const useIsotope = () => {
+const useIsotope = (selector: string) => {
   const isotope = useRef<Isotope | undefined>(undefined);
   const [filterKey, setFilterKey] = useState('*');
 
@@ -10,25 +10,20 @@ const useIsotope = () => {
 
     (async function () {
       const Isotope = (await import('isotope-layout')).default;
-      const grids = document.querySelectorAll('.grid');
 
-      if (grids !== null) {
-        grids.forEach(g => {
-          const grid = g.querySelector('.isotope') as HTMLElement;
+      const grid = document.querySelector(selector) as HTMLElement;
 
-          isotope.current = new Isotope(grid, {
-            itemSelector: '.item',
-            layoutMode: 'masonry',
-            masonry: {columnWidth: grid.offsetWidth / 12},
-            percentPosition: true,
-            transitionDuration: '0.7s',
-          });
-        });
-      }
+      isotope.current = new Isotope(grid, {
+        itemSelector: '.item',
+        layoutMode: 'masonry',
+        masonry: {columnWidth: grid.offsetWidth / 12},
+        percentPosition: true,
+        transitionDuration: '0.7s',
+      });
     })();
 
     return () => isotope.current?.destroy();
-  }, []);
+  }, [selector]);
 
   useEffect(() => {
     const filtered = filterKey === '*' ? {filter: '*'} : {filter: filterKey};

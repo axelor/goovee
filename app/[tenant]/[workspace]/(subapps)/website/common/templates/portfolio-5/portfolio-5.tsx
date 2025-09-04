@@ -1,8 +1,7 @@
-'use client';
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio5Data} from './meta';
 import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
-import useIsotope from '@/subapps/website/common/hooks/useIsotope';
+import {Filter} from './filter';
 
 export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
   const {data} = props;
@@ -13,8 +12,7 @@ export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
     portfolio5FilterList: filterList,
   } = data || {};
 
-  const {filterKey, handleFilterKeyChange} = useIsotope();
-
+  const isotopeId = `portfolio5-${props.lineId || props.contentId}-${props.mountType}`;
   return (
     <section id="portfolio">
       <div className="wrapper bg-gray">
@@ -29,19 +27,11 @@ export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
           <div className="grid grid-view projects-masonry">
             <div className="isotope-filter filter mb-10">
               <ul>
-                {list?.map(({id, attrs: item}) => (
-                  <li key={id}>
-                    <a
-                      onClick={handleFilterKeyChange(item.value)}
-                      className={`filter-item ${filterKey === item.value ? 'active' : ''}`}>
-                      {item.title}
-                    </a>
-                  </li>
-                ))}
+                <Filter list={list} selector={`#${isotopeId}`} />
               </ul>
             </div>
 
-            <div className="row gx-md-6 gy-6 isotope">
+            <div className="row gx-md-6 gy-6 isotope" id={isotopeId}>
               {filterList?.map(({id, attrs: item}, i) => (
                 <div
                   className={`project item col-md-6 col-xl-4 ${item.category}`}

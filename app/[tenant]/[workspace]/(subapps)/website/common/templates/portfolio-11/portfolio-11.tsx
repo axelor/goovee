@@ -29,7 +29,7 @@ export function Portfolio11(props: TemplateProps<Portfolio11Data>) {
         </div>
 
         <div className="grid grid-view projects-masonry">
-          <div className="row gx-md-8 gy-10 gy-md-13 isotope">
+          <div className="row gx-md-8 gy-10 gy-md-13">
             {portfolioList?.map(({id, attrs: item}, i) => (
               <div className="project item col-md-6 col-xl-4" key={id}>
                 <ProjectCard3
