@@ -56,6 +56,8 @@ export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
                       data-glightbox
                       data-gallery="shots-group">
                       <img
+                        width={item.imageWidth}
+                        height={item.imageHeight}
                         src={getMetaFileURL({
                           metaFile: item.image,
                           path: `portfolio5FilterList[${i}].attrs.image`,

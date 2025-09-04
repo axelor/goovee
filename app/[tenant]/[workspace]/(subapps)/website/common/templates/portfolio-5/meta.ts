@@ -65,6 +65,16 @@ export const portfolio5Schema = {
           widget: 'Image',
         },
         {
+          name: 'imageWidth',
+          title: 'Image Width',
+          type: 'integer',
+        },
+        {
+          name: 'imageHeight',
+          title: 'Image Height',
+          type: 'integer',
+        },
+        {
           name: 'fullImage',
           title: 'Full Image',
           type: 'many-to-one',
@@ -119,6 +129,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf1.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 254,
             fullImage: {
               id: '1',
               version: 1,
@@ -141,6 +153,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf2.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 294,
             fullImage: {
               id: '1',
               version: 1,
@@ -163,6 +177,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf3.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 502,
             fullImage: {
               id: '1',
               version: 1,
@@ -185,6 +201,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf4.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 456,
             fullImage: {
               id: '1',
               version: 1,
@@ -207,6 +225,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf5.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 305,
             fullImage: {
               id: '1',
               version: 1,
@@ -229,6 +249,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf6.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 253,
             fullImage: {
               id: '1',
               version: 1,
@@ -251,6 +273,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf7.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 359,
             fullImage: {
               id: '1',
               version: 1,
@@ -273,6 +297,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf8.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 254,
             fullImage: {
               id: '1',
               version: 1,
@@ -295,6 +321,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf9.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 284,
             fullImage: {
               id: '1',
               version: 1,
@@ -317,6 +345,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf10.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 477,
             fullImage: {
               id: '1',
               version: 1,
@@ -339,6 +369,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf11.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 274,
             fullImage: {
               id: '1',
               version: 1,
@@ -361,6 +393,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf12.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 507,
             fullImage: {
               id: '1',
               version: 1,
@@ -383,6 +417,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf13.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 391,
             fullImage: {
               id: '1',
               version: 1,
@@ -426,6 +462,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf1.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 254,
             fullImage: {
               id: '1',
               version: 1,
@@ -448,6 +486,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf2.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 294,
             fullImage: {
               id: '1',
               version: 1,
@@ -470,6 +510,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf3.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 502,
             fullImage: {
               id: '1',
               version: 1,
@@ -492,6 +534,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf4.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 456,
             fullImage: {
               id: '1',
               version: 1,
@@ -514,6 +558,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf5.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 305,
             fullImage: {
               id: '1',
               version: 1,
@@ -536,6 +582,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf6.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 253,
             fullImage: {
               id: '1',
               version: 1,
@@ -558,6 +606,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf7.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 359,
             fullImage: {
               id: '1',
               version: 1,
@@ -580,6 +630,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf8.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 254,
             fullImage: {
               id: '1',
               version: 1,
@@ -602,6 +654,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf9.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 284,
             fullImage: {
               id: '1',
               version: 1,
@@ -624,6 +678,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf10.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 477,
             fullImage: {
               id: '1',
               version: 1,
@@ -646,6 +702,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf11.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 274,
             fullImage: {
               id: '1',
               version: 1,
@@ -668,6 +726,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf12.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 507,
             fullImage: {
               id: '1',
               version: 1,
@@ -690,6 +750,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/photos/pf13.jpg',
             },
+            imageWidth: 380,
+            imageHeight: 391,
             fullImage: {
               id: '1',
               version: 1,
