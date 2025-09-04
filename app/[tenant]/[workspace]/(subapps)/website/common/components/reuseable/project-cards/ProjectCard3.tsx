@@ -32,6 +32,7 @@ const ProjectCard3: FC<ProjectCard3Props> = ({
         <a
           className="item-link"
           href={fullImage}
+          data-type="image"
           data-glightbox
           data-gallery="projects-group">
           <i className="uil uil-focus-add" />
