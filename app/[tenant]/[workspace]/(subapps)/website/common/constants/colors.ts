@@ -40,3 +40,27 @@ export const colors = [
   'soft-dark',
   'soft-primary',
 ] as const;
+
+export const fullColors = [
+  ...colors,
+  'pale-blue',
+  'pale-sky',
+  'pale-purple',
+  'pale-grape',
+  'pale-violet',
+  'pale-pink',
+  'pale-fuchsia',
+  'pale-red',
+  'pale-orange',
+  'pale-yellow',
+  'pale-green',
+  'pale-leaf',
+  'pale-aqua',
+  'pale-navy',
+  'pale-ash',
+  'pale-white',
+  'pale-light',
+  'pale-gray',
+  'pale-dark',
+  'pale-primary',
+] as const;
