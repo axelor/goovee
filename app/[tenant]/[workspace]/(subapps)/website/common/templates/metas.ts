@@ -142,6 +142,7 @@ import {process2Demos, process2Schema} from './process-2/meta';
 import {process3Demos, process3Schema} from './process-3/meta';
 import {process4Demos, process4Schema} from './process-4/meta';
 import {process5Demos, process5Schema} from './process-5/meta';
+import {process6Demos, process6Schema} from './process-6/meta';
 import {services1Demos, services1Schema} from './services-1/meta';
 import {services2Demos, services2Schema} from './services-2/meta';
 import {sidebarMenu1Demos, sidebarMenu1Schema} from './sidebar-menu-1/meta';
@@ -242,6 +243,7 @@ export const metas = [
   {schema: process3Schema, demos: process3Demos},
   {schema: process4Schema, demos: process4Demos},
   {schema: process5Schema, demos: process5Demos},
+  {schema: process6Schema, demos: process6Demos},
   {schema: team1Schema, demos: team1Demos},
   {schema: services2Schema, demos: services2Demos},
   {schema: testimonial1Schema, demos: testimonial1Demos},
