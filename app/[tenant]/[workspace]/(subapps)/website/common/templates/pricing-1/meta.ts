@@ -4,6 +4,7 @@ import {
   Demo,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
+import {planFeatureModel, planModel} from '../json-models';
 
 export const pricing1Schema = {
   title: 'Pricing 1',
@@ -54,75 +55,10 @@ export const pricing1Schema = {
       name: 'plans',
       title: 'Plans',
       type: 'json-one-to-many',
-      target: 'Pricing1Plan',
+      target: 'Plan',
     },
   ],
-  models: [
-    {
-      name: 'Pricing1Plan',
-      title: 'Pricing 1 Plan',
-      fields: [
-        {
-          name: 'plan',
-          title: 'Plan',
-          type: 'string',
-          nameField: true,
-          visibleInGrid: true,
-        },
-        {
-          name: 'price1',
-          title: 'Price 1',
-          type: 'decimal',
-          visibleInGrid: true,
-        },
-        {
-          name: 'price2',
-          title: 'Price 2',
-          type: 'decimal',
-          visibleInGrid: true,
-        },
-        {
-          name: 'bulletBg',
-          title: 'Bullet Background',
-          type: 'boolean',
-        },
-        {
-          name: 'roundedButton',
-          title: 'Rounded Button',
-          type: 'boolean',
-        },
-        {
-          name: 'buttonLink',
-          title: 'Button Link',
-          type: 'string',
-        },
-        {
-          name: 'buttonText',
-          title: 'Button Text',
-          type: 'string',
-        },
-        {
-          name: 'features',
-          title: 'Features',
-          type: 'json-one-to-many',
-          target: 'Pricing1Feature',
-        },
-      ],
-    },
-    {
-      name: 'Pricing1Feature',
-      title: 'Pricing 1 Feature',
-      fields: [
-        {
-          name: 'label',
-          title: 'Label',
-          type: 'string',
-          nameField: true,
-          visibleInGrid: true,
-        },
-      ],
-    },
-  ],
+  models: [planModel, planFeatureModel],
 } as const satisfies TemplateSchema;
 
 export type Pricing1Data = Data<typeof pricing1Schema>;

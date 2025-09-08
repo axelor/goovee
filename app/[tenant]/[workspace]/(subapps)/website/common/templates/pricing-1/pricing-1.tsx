@@ -74,7 +74,7 @@ export function Pricing1(props: TemplateProps<Pricing1Data>) {
                     planName={item.plan}
                     monthlyPrice={Number(item.price1)}
                     yearlyPrice={Number(item.price2)}
-                    features={item.features.map(
+                    features={item.features?.map(
                       feature => feature.attrs?.label,
                     )}
                     buttonLink={item.buttonLink}
