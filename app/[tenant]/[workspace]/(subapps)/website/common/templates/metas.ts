@@ -119,6 +119,7 @@ import {hero24Demos, hero24Schema} from './hero-24/meta';
 import {navbar1Demos, navbar1Schema} from './navbar-1/meta';
 import {pageProgress1Demos, pageProgress1Schema} from './page-progress-1/meta';
 import {pricing1Demos, pricing1Schema} from './pricing-1/meta';
+import {pricing2Demos, pricing2Schema} from './pricing-2/meta';
 import {portfolio1Demos, portfolio1Schema} from './portfolio-1/meta';
 import {portfolio2Demos, portfolio2Schema} from './portfolio-2/meta';
 import {portfolio3Demos, portfolio3Schema} from './portfolio-3/meta';
@@ -231,6 +232,7 @@ export const metas = [
   {schema: services2Schema, demos: services2Demos},
   {schema: testimonial1Schema, demos: testimonial1Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
+  {schema: pricing2Schema, demos: pricing2Demos},
   {schema: portfolio1Schema, demos: portfolio1Demos},
   {schema: portfolio2Schema, demos: portfolio2Demos},
   {schema: portfolio3Schema, demos: portfolio3Demos},
