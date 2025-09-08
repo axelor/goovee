@@ -60,6 +60,11 @@ export const service3Schema = {
           title: 'Link URL',
           type: 'string',
         },
+        {
+          name: 'linkTitle',
+          title: 'Link Title',
+          type: 'string',
+        },
       ],
     },
   ],
@@ -84,6 +89,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
+            linkTitle: 'Learn More',
           },
         },
         {
@@ -95,6 +101,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
+            linkTitle: 'Learn More',
           },
         },
         {
@@ -106,6 +113,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
+            linkTitle: 'Learn More',
           },
         },
         {
@@ -117,6 +125,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
+            linkTitle: 'Learn More',
           },
         },
       ],
@@ -138,6 +147,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
           },
         },
         {
@@ -149,6 +159,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
           },
         },
         {
@@ -160,6 +171,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
           },
         },
         {
@@ -171,6 +183,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
           },
         },
       ],
