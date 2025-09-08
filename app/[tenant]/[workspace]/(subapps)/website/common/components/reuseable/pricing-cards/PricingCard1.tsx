@@ -4,8 +4,8 @@ import NextLink from '../links/NextLink';
 
 // ================================================================
 type PricingCard1Props = {
-  planName: string;
-  features: string[];
+  planName?: string;
+  features?: string[];
   bulletBg?: boolean;
   yearlyPrice: number;
   monthlyPrice: number;
@@ -44,7 +44,7 @@ const PricingCard1: FC<PricingCard1Props> = props => {
 
         <ul
           className={`icon-list ${bulletBg ? 'bullet-bg' : ''} bullet-soft-primary mt-7 mb-8`}>
-          {features.map((item, i) => (
+          {features?.map((item, i) => (
             <li key={i}>
               <i className="uil uil-check fs-21" />
               {item}

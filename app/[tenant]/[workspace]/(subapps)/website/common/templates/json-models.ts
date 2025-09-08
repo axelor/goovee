@@ -225,3 +225,70 @@ export const contactInfoModel = {
     },
   ],
 } as const satisfies Model;
+
+export const planModel = {
+  name: 'Plan',
+  title: 'Plan',
+  fields: [
+    {
+      name: 'plan',
+      title: 'Plan',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+    {
+      name: 'price1',
+      title: 'Price 1',
+      type: 'decimal',
+      visibleInGrid: true,
+    },
+    {
+      name: 'price2',
+      title: 'Price 2',
+      type: 'decimal',
+      visibleInGrid: true,
+    },
+    {
+      name: 'bulletBg',
+      title: 'Bullet Background',
+      type: 'boolean',
+    },
+    {
+      name: 'roundedButton',
+      title: 'Rounded Button',
+      type: 'boolean',
+    },
+    {
+      name: 'buttonLink',
+      title: 'Button Link',
+      type: 'string',
+    },
+    {
+      name: 'buttonText',
+      title: 'Button Text',
+      type: 'string',
+    },
+    {
+      name: 'features',
+      title: 'Features',
+      type: 'json-one-to-many',
+      target: 'PlanFeature',
+    },
+  ],
+} as const satisfies Model;
+
+export const planFeatureModel = {
+  name: 'PlanFeature',
+  title: 'Plan Feature',
+  fields: [
+    {
+      name: 'label',
+      title: 'Label',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+      required: true,
+    },
+  ],
+} as const satisfies Model;
