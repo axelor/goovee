@@ -1,0 +1,173 @@
+import {
+  Template,
+  type Data,
+  type Demo,
+  type TemplateSchema,
+} from '../../types/templates';
+
+export const service3Schema = {
+  title: 'Service 3',
+  code: 'service3',
+  type: Template.block,
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+    },
+    {
+      name: 'caption',
+      title: 'Caption',
+      type: 'string',
+    },
+    {
+      name: 'services',
+      title: 'Services',
+      type: 'json-one-to-many',
+      target: 'Service3Service',
+    },
+  ],
+  models: [
+    {
+      name: 'Service3Service',
+      title: 'Service',
+      fields: [
+        {
+          name: 'title',
+          title: 'Title',
+          type: 'string',
+          nameField: true,
+          visibleInGrid: true,
+        },
+        {
+          name: 'description',
+          title: 'Description',
+          type: 'string',
+        },
+        {
+          name: 'icon',
+          title: 'Icon',
+          type: 'string',
+        },
+        {
+          name: 'linkUrl',
+          title: 'Link URL',
+          type: 'string',
+        },
+      ],
+    },
+  ],
+} as const satisfies TemplateSchema;
+
+export type Service3Data = Data<typeof service3Schema>;
+
+export const service3Demos: Demo<typeof service3Schema>[] = [
+  {
+    language: 'en_US',
+    data: {
+      service3Title: 'What We Do?',
+      service3Caption:
+        'We took pleasure in offering unique solutions to your particular needs.',
+      service3Services: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            icon: 'uil-circuit',
+            title: 'IoT Development',
+            description:
+              'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            icon: 'uil-processor',
+            title: 'Artificial Intelligence',
+            description:
+              'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            icon: 'uil-setting',
+            title: 'Software Maintenance',
+            description:
+              'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '4',
+          version: 0,
+          attrs: {
+            icon: 'uil-lock-access',
+            title: 'Cybersecurity',
+            description:
+              'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
+            linkUrl: '#',
+          },
+        },
+      ],
+    },
+  },
+  {
+    language: 'fr_FR',
+    data: {
+      service3Title: 'Que faisons-nous ?',
+      service3Caption:
+        'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
+      service3Services: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            icon: 'uil-circuit',
+            title: 'Développement IoT',
+            description:
+              'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            icon: 'uil-processor',
+            title: 'Intelligence artificielle',
+            description:
+              'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            icon: 'uil-setting',
+            title: 'Maintenance logicielle',
+            description:
+              'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '4',
+          version: 0,
+          attrs: {
+            icon: 'uil-lock-access',
+            title: 'Cybersécurité',
+            description:
+              'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
+            linkUrl: '#',
+          },
+        },
+      ],
+    },
+  },
+];

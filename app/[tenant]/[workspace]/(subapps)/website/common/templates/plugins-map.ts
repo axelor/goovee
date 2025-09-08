@@ -17,6 +17,7 @@ import {portfolio5Schema} from './portfolio-5/meta';
 import {portfolio10Schema} from './portfolio-10/meta';
 import {portfolio11Schema} from './portfolio-11/meta';
 import {portfolio12Schema} from './portfolio-12/meta';
+import {process9Schema} from './process-9/meta';
 
 const pluginsMap = {
   [about2Schema.code]: ['lightbox'],
@@ -37,6 +38,7 @@ const pluginsMap = {
   [portfolio10Schema.code]: ['lightbox'],
   [portfolio11Schema.code]: ['lightbox'],
   [portfolio12Schema.code]: ['lightbox'],
+  [process9Schema.code]: ['lightbox'],
 };
 
 export const PluginsMap = Object.fromEntries(
