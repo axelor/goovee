@@ -7,9 +7,9 @@ import {
 import {solidIcons} from '@/subapps/website/common/icons/solid';
 import {startCase} from 'lodash-es';
 
-export const services1Schema = {
-  title: 'Services 1',
-  code: 'services1',
+export const service1Schema = {
+  title: 'Service 1',
+  code: 'service1',
   type: Template.block,
   fields: [
     {
@@ -26,13 +26,13 @@ export const services1Schema = {
       name: 'services',
       title: 'Services',
       type: 'json-one-to-many',
-      target: 'Services1Services',
+      target: 'Service1Services',
     },
   ],
   models: [
     {
-      name: 'Services1Services',
-      title: 'Services 1 Services',
+      name: 'Service1Services',
+      title: 'Service 1 Services',
       fields: [
         {
           name: 'title',
@@ -72,16 +72,16 @@ export const services1Schema = {
   ],
 } as const satisfies TemplateSchema;
 
-export type Services1Data = Data<typeof services1Schema>;
+export type Service1Data = Data<typeof service1Schema>;
 
-export const services1Demos: Demo<typeof services1Schema>[] = [
+export const service1Demos: Demo<typeof service1Schema>[] = [
   {
     language: 'en_US',
     data: {
-      services1Title: 'What We Do?',
-      services1Caption:
+      service1Title: 'What We Do?',
+      service1Caption:
         'We have designed our services with your specific needs in mind.',
-      services1Services: [
+      service1Services: [
         {
           id: '5',
           version: 1,
@@ -135,10 +135,10 @@ export const services1Demos: Demo<typeof services1Schema>[] = [
   {
     language: 'fr_FR',
     data: {
-      services1Title: 'Que faisons-nous ?',
-      services1Caption:
+      service1Title: 'Que faisons-nous ?',
+      service1Caption:
         'Nous avons conçu nos services en pensant à vos besoins spécifiques.',
-      services1Services: [
+      service1Services: [
         {
           id: '5',
           version: 1,

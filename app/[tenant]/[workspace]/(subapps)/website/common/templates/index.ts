@@ -156,8 +156,8 @@ import {Process12, process12Schema} from './process-12';
 import {Process13, process13Schema} from './process-13';
 import {Process14, process14Schema} from './process-14';
 import {Process15, process15Schema} from './process-15';
-import {Services1, services1Schema} from './services-1';
-import {Services2, services2Schema} from './services-2';
+import {Service1, service1Schema} from './service-1';
+import {Service2, service2Schema} from './service-2';
 import {SidebarMenu1, sidebarMenu1Schema} from './sidebar-menu-1';
 import {Team1, team1Schema} from './team-1';
 import {Testimonial1, testimonial1Schema} from './testimonial-1';
@@ -219,7 +219,6 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [hero23Schema.code]: Hero23,
   [hero24Schema.code]: Hero24,
   [pageProgress1Schema.code]: PageProgress1,
-  [services1Schema.code]: Services1,
   [cta1Schema.code]: CTA1,
   [cta2Schema.code]: CTA2,
   [cta3Schema.code]: CTA3,
@@ -267,7 +266,8 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [process14Schema.code]: Process14,
   [process15Schema.code]: Process15,
   [team1Schema.code]: Team1,
-  [services2Schema.code]: Services2,
+  [service1Schema.code]: Service1,
+  [service2Schema.code]: Service2,
   [testimonial1Schema.code]: Testimonial1,
   [pricing1Schema.code]: Pricing1,
   [pricing2Schema.code]: Pricing2,

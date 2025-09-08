@@ -5,19 +5,19 @@ import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 
 import type {Services2Data} from './meta';
 
-export function Services2(props: TemplateProps<Services2Data>) {
+export function Service2(props: TemplateProps<Services2Data>) {
   const {data} = props;
   const {
-    services2Image,
-    services2Title: title,
-    services2Caption: caption,
-    services2Description: description,
-    services2Services: services,
+    service2Image,
+    service2Title: title,
+    service2Caption: caption,
+    service2Description: description,
+    service2Services: services,
   } = data || {};
 
   const image = getMetaFileURL({
-    metaFile: services2Image,
-    path: `services2Image`,
+    metaFile: service2Image,
+    path: `service2Image`,
     ...props,
   });
 

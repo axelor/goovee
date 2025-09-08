@@ -1,11 +1,10 @@
-'use client';
 import {ServiceCard1} from '@/subapps/website/common/components/reuseable/service-cards';
 // -------- data -------- //
 import Design from '@/subapps/website/common/icons/solid/Design';
 import dynamic from 'next/dynamic';
 import {TemplateProps} from '@/subapps/website/common/types';
 
-import type {Services1Data} from './meta';
+import type {Service1Data} from './meta';
 
 function getIcon(icon: string) {
   return icon
@@ -17,12 +16,12 @@ function getIcon(icon: string) {
     : Design;
 }
 
-export function Services1(props: TemplateProps<Services1Data>) {
+export function Service1(props: TemplateProps<Service1Data>) {
   const {data} = props;
   const {
-    services1Title: title,
-    services1Caption: caption,
-    services1Services: services,
+    service1Title: title,
+    service1Caption: caption,
+    service1Services: services,
   } = data || {};
 
   return (
