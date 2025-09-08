@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {faq5QuestionsModel} from '../json-models';
 
 export const faq5Schema = {
   title: 'FAQ 5',
@@ -17,26 +18,7 @@ export const faq5Schema = {
       target: 'Faq5Questions',
     },
   ],
-  models: [
-    {
-      name: 'Faq5Questions',
-      title: 'Questions',
-      fields: [
-        {
-          name: 'title',
-          title: 'Title',
-          type: 'string',
-          nameField: true,
-          visibleInGrid: true,
-        },
-        {
-          name: 'description',
-          title: 'Description',
-          type: 'string',
-        },
-      ],
-    },
-  ],
+  models: [faq5QuestionsModel],
 } as const satisfies TemplateSchema;
 
 export type Faq5Data = Data<typeof faq5Schema>;

@@ -292,3 +292,22 @@ export const planFeatureModel = {
     },
   ],
 } as const satisfies Model;
+
+export const faq5QuestionsModel = {
+  name: 'Faq5Questions',
+  title: 'Questions',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+    {
+      name: 'description',
+      title: 'Description',
+      type: 'string',
+    },
+  ],
+} as const satisfies Model;

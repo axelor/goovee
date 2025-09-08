@@ -125,6 +125,7 @@ import {pricing4Demos, pricing4Schema} from './pricing-4/meta';
 import {pricing5Demos, pricing5Schema} from './pricing-5/meta';
 import {pricing6Demos, pricing6Schema} from './pricing-6/meta';
 import {pricing7Demos, pricing7Schema} from './pricing-7/meta';
+import {pricing8Demos, pricing8Schema} from './pricing-8/meta';
 import {portfolio1Demos, portfolio1Schema} from './portfolio-1/meta';
 import {portfolio2Demos, portfolio2Schema} from './portfolio-2/meta';
 import {portfolio3Demos, portfolio3Schema} from './portfolio-3/meta';
@@ -243,6 +244,7 @@ export const metas = [
   {schema: pricing5Schema, demos: pricing5Demos},
   {schema: pricing6Schema, demos: pricing6Demos},
   {schema: pricing7Schema, demos: pricing7Demos},
+  {schema: pricing8Schema, demos: pricing8Demos},
   {schema: portfolio1Schema, demos: portfolio1Demos},
   {schema: portfolio2Schema, demos: portfolio2Demos},
   {schema: portfolio3Schema, demos: portfolio3Demos},
