@@ -27,7 +27,7 @@ export function Service3(props: TemplateProps<Service3Data>) {
               key={id}
               title={item.title}
               linkUrl={item.linkUrl}
-              icon={item.icon}
+              icon={`uil-${item.icon}`}
               description={item.description}
             />
           ))}

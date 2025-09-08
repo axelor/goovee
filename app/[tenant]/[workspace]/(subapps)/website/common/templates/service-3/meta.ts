@@ -1,3 +1,5 @@
+import {startCase} from 'lodash-es';
+import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
@@ -48,6 +50,10 @@ export const service3Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
+          selection: unicons.map(icon => ({
+            title: startCase(icon),
+            value: icon,
+          })),
         },
         {
           name: 'linkUrl',
@@ -73,7 +79,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '1',
           version: 0,
           attrs: {
-            icon: 'uil-circuit',
+            icon: 'circuit',
             title: 'IoT Development',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
@@ -84,7 +90,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '2',
           version: 0,
           attrs: {
-            icon: 'uil-processor',
+            icon: 'processor',
             title: 'Artificial Intelligence',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
@@ -95,7 +101,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '3',
           version: 0,
           attrs: {
-            icon: 'uil-setting',
+            icon: 'setting',
             title: 'Software Maintenance',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
@@ -106,7 +112,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '4',
           version: 0,
           attrs: {
-            icon: 'uil-lock-access',
+            icon: 'lock-access',
             title: 'Cybersecurity',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
@@ -127,7 +133,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '1',
           version: 0,
           attrs: {
-            icon: 'uil-circuit',
+            icon: 'circuit',
             title: 'Développement IoT',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
@@ -138,7 +144,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '2',
           version: 0,
           attrs: {
-            icon: 'uil-processor',
+            icon: 'processor',
             title: 'Intelligence artificielle',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
@@ -149,7 +155,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '3',
           version: 0,
           attrs: {
-            icon: 'uil-setting',
+            icon: 'setting',
             title: 'Maintenance logicielle',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
@@ -160,7 +166,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           id: '4',
           version: 0,
           attrs: {
-            icon: 'uil-lock-access',
+            icon: 'lock-access',
             title: 'Cybersécurité',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',

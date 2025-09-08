@@ -4,10 +4,10 @@ import NextLink from '../links/NextLink';
 
 // ================================================
 type ServiceCard2Props = {
-  icon: string;
-  title: string;
-  linkUrl: string;
-  description: string;
+  icon?: string;
+  title?: string;
+  linkUrl?: string;
+  description?: string;
   titleColor?: string;
   hiddenBtn?: boolean;
   iconBoxClassNames?: HTMLAttributes<HTMLDivElement>['className'];
