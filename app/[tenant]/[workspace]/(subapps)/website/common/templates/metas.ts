@@ -151,8 +151,8 @@ import {process12Demos, process12Schema} from './process-12/meta';
 import {process13Demos, process13Schema} from './process-13/meta';
 import {process14Demos, process14Schema} from './process-14/meta';
 import {process15Demos, process15Schema} from './process-15/meta';
-import {services1Demos, services1Schema} from './services-1/meta';
-import {services2Demos, services2Schema} from './services-2/meta';
+import {service1Demos, service1Schema} from './service-1/meta';
+import {service2Demos, service2Schema} from './service-2/meta';
 import {sidebarMenu1Demos, sidebarMenu1Schema} from './sidebar-menu-1/meta';
 import {team1Demos, team1Schema} from './team-1/meta';
 import {testimonial1Demos, testimonial1Schema} from './testimonial-1/meta';
@@ -213,7 +213,6 @@ export const metas = [
   {schema: hero22Schema, demos: hero22Demos},
   {schema: hero23Schema, demos: hero23Demos},
   {schema: hero24Schema, demos: hero24Demos},
-  {schema: services1Schema, demos: services1Demos},
   {schema: cta1Schema, demos: cta1Demos},
   {schema: cta2Schema, demos: cta2Demos},
   {schema: cta3Schema, demos: cta3Demos},
@@ -260,8 +259,9 @@ export const metas = [
   {schema: process13Schema, demos: process13Demos},
   {schema: process14Schema, demos: process14Demos},
   {schema: process15Schema, demos: process15Demos},
+  {schema: service1Schema, demos: service1Demos},
+  {schema: service2Schema, demos: service2Demos},
   {schema: team1Schema, demos: team1Demos},
-  {schema: services2Schema, demos: services2Demos},
   {schema: testimonial1Schema, demos: testimonial1Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
   {schema: pricing2Schema, demos: pricing2Demos},
