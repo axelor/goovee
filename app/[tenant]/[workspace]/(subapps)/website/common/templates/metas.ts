@@ -154,6 +154,7 @@ import {process15Demos, process15Schema} from './process-15/meta';
 import {service1Demos, service1Schema} from './service-1/meta';
 import {service2Demos, service2Schema} from './service-2/meta';
 import {service3Demos, service3Schema} from './service-3/meta';
+import {service4Demos, service4Schema} from './service-4/meta';
 import {sidebarMenu1Demos, sidebarMenu1Schema} from './sidebar-menu-1/meta';
 import {team1Demos, team1Schema} from './team-1/meta';
 import {testimonial1Demos, testimonial1Schema} from './testimonial-1/meta';
@@ -263,6 +264,7 @@ export const metas = [
   {schema: service1Schema, demos: service1Demos},
   {schema: service2Schema, demos: service2Demos},
   {schema: service3Schema, demos: service3Demos},
+  {schema: service4Schema, demos: service4Demos},
   {schema: team1Schema, demos: team1Demos},
   {schema: testimonial1Schema, demos: testimonial1Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
