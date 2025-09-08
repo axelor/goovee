@@ -129,6 +129,7 @@ import {Pricing3, pricing3Schema} from './pricing-3';
 import {Pricing4, pricing4Schema} from './pricing-4';
 import {Pricing5, pricing5Schema} from './pricing-5';
 import {Pricing6, pricing6Schema} from './pricing-6';
+import {Pricing7, pricing7Schema} from './pricing-7';
 import {Portfolio1, portfolio1Schema} from './portfolio-1';
 import {Portfolio2, portfolio2Schema} from './portfolio-2';
 import {Portfolio3, portfolio3Schema} from './portfolio-3';
@@ -247,6 +248,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [pricing4Schema.code]: Pricing4,
   [pricing5Schema.code]: Pricing5,
   [pricing6Schema.code]: Pricing6,
+  [pricing7Schema.code]: Pricing7,
   [portfolio1Schema.code]: Portfolio1,
   [portfolio2Schema.code]: Portfolio2,
   [portfolio3Schema.code]: Portfolio3,
