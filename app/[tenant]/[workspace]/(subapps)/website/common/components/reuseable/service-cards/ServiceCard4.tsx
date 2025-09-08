@@ -2,11 +2,11 @@ import {FC, ReactElement} from 'react';
 
 // ==================================================================================
 type ServiceCardProps = {
-  title: string;
-  cardColor: string;
-  Icon: ReactElement;
-  columnClass: string;
-  description: string;
+  title?: string;
+  cardColor?: string;
+  Icon?: ReactElement;
+  columnClass?: string;
+  description?: string;
 };
 // ==================================================================================
 

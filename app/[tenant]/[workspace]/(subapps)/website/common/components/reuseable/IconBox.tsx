@@ -2,7 +2,7 @@ import {FC, HTMLAttributes} from 'react';
 
 // ====================================================
 type IconBoxProps = {
-  icon: string;
+  icon?: string;
   className?: HTMLAttributes<HTMLDivElement>['className'];
 };
 // ====================================================
