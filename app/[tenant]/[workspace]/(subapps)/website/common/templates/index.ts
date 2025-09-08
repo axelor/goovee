@@ -161,6 +161,7 @@ import {Service2, service2Schema} from './service-2';
 import {Service3, service3Schema} from './service-3';
 import {Service4, service4Schema} from './service-4';
 import {Service5, service5Schema} from './service-5';
+import {Service6, service6Schema} from './service-6';
 import {SidebarMenu1, sidebarMenu1Schema} from './sidebar-menu-1';
 import {Team1, team1Schema} from './team-1';
 import {Testimonial1, testimonial1Schema} from './testimonial-1';
@@ -274,6 +275,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [service3Schema.code]: Service3,
   [service4Schema.code]: Service4,
   [service5Schema.code]: Service5,
+  [service6Schema.code]: Service6,
   [testimonial1Schema.code]: Testimonial1,
   [pricing1Schema.code]: Pricing1,
   [pricing2Schema.code]: Pricing2,
