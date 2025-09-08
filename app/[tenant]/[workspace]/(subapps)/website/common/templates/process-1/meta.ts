@@ -53,6 +53,12 @@ export const process1Schema = {
       title: 'Process 1 Process List',
       fields: [
         {
+          name: 'no',
+          title: 'Number',
+          type: 'string',
+          required: true,
+        },
+        {
           name: 'title',
           title: 'Title',
           type: 'string',
@@ -91,6 +97,7 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           id: '8',
           version: 1,
           attrs: {
+            no: '1',
             title: 'Specialization',
             subtitle: 'This involves focusing on a specific niche of expertise',
             className: 'me-lg-6',
@@ -100,6 +107,7 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           id: '9',
           version: 1,
           attrs: {
+            no: '2',
             title: 'Collaboration',
             subtitle: 'This involves focusing on a specific niche expertise',
             className: 'ms-lg-13 mt-6',
@@ -109,6 +117,7 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           id: '10',
           version: 1,
           attrs: {
+            no: '3',
             title: 'Innovation',
             subtitle: 'This involves focusing on a specific niche of expertise',
             className: 'mx-lg-6 mt-6',
@@ -134,6 +143,7 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           id: '8',
           version: 1,
           attrs: {
+            no: '1',
             title: 'Spécialisation',
             subtitle:
               "Cela implique de se concentrer sur un créneau d'expertise spécifique",
@@ -144,6 +154,7 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           id: '9',
           version: 1,
           attrs: {
+            no: '2',
             title: 'Collaboration',
             subtitle:
               'Cela implique de se concentrer sur une expertise de niche spécifique',
@@ -154,6 +165,7 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           id: '10',
           version: 1,
           attrs: {
+            no: '3',
             title: 'Innovation',
             subtitle:
               "Cela implique de se concentrer sur un créneau d'expertise spécifique",

@@ -20,11 +20,11 @@ export function Process1(props: TemplateProps<Process1Data>) {
       <div className="container pt-14 pt-md-17">
         <div className="row gx-md-8 gx-xl-12 gy-10 mb-14 mb-md-18 align-items-center">
           <div className="col-lg-6 order-lg-2">
-            {processList?.map(item => (
+            {processList?.map((item, i) => (
               <ProcessList1
                 shadow
                 key={item.id}
-                no={item.id}
+                no={item.attrs.no}
                 title={item.attrs.title}
                 subtitle={item.attrs.subtitle}
                 className={item.attrs.className}

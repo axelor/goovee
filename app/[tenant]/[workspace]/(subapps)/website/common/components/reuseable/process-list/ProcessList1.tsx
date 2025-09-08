@@ -2,9 +2,9 @@ import {FC, HTMLAttributes} from 'react';
 
 // ==============================================================
 type ProcessList1Props = {
-  no: string;
-  title: string;
-  subtitle: string;
+  no?: string;
+  title?: string;
+  subtitle?: string;
   shadow?: boolean;
   className: HTMLAttributes<HTMLDivElement>['className'];
 };
