@@ -125,6 +125,7 @@ import {Navbar1, navbar1Schema} from './navbar-1';
 import {PageProgress1, pageProgress1Schema} from './page-progress-1';
 import {Pricing1, pricing1Schema} from './pricing-1';
 import {Pricing2, pricing2Schema} from './pricing-2';
+import {Pricing3, pricing3Schema} from './pricing-3';
 import {Portfolio1, portfolio1Schema} from './portfolio-1';
 import {Portfolio2, portfolio2Schema} from './portfolio-2';
 import {Portfolio3, portfolio3Schema} from './portfolio-3';
@@ -239,6 +240,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [testimonial1Schema.code]: Testimonial1,
   [pricing1Schema.code]: Pricing1,
   [pricing2Schema.code]: Pricing2,
+  [pricing3Schema.code]: Pricing3,
   [portfolio1Schema.code]: Portfolio1,
   [portfolio2Schema.code]: Portfolio2,
   [portfolio3Schema.code]: Portfolio3,
