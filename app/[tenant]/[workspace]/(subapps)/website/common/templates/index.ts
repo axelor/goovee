@@ -148,6 +148,7 @@ import {Process3, process3Schema} from './process-3';
 import {Process4, process4Schema} from './process-4';
 import {Process5, process5Schema} from './process-5';
 import {Process6, process6Schema} from './process-6';
+import {Process7, process7Schema} from './process-7';
 import {Services1, services1Schema} from './services-1';
 import {Services2, services2Schema} from './services-2';
 import {SidebarMenu1, sidebarMenu1Schema} from './sidebar-menu-1';
@@ -250,6 +251,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [process4Schema.code]: Process4,
   [process5Schema.code]: Process5,
   [process6Schema.code]: Process6,
+  [process7Schema.code]: Process7,
   [team1Schema.code]: Team1,
   [services2Schema.code]: Services2,
   [testimonial1Schema.code]: Testimonial1,
