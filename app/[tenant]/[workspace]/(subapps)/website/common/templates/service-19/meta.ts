@@ -1,0 +1,199 @@
+import {startCase} from 'lodash-es';
+import {colors, linkColors} from '../../constants/colors';
+import {
+  Template,
+  type Data,
+  type Demo,
+  type TemplateSchema,
+} from '../../types/templates';
+import {unicons} from '../../constants/unicons';
+
+export const service19Schema = {
+  title: 'Service 19',
+  code: 'service19',
+  type: Template.block,
+  fields: [
+    {
+      name: 'caption',
+      title: 'Caption',
+      type: 'string',
+    },
+    {
+      name: 'description',
+      title: 'Description',
+      type: 'string',
+    },
+    {
+      name: 'services',
+      title: 'Services',
+      type: 'json-one-to-many',
+      target: 'Service19Service',
+    },
+  ],
+  models: [
+    {
+      name: 'Service19Service',
+      title: 'Service',
+      fields: [
+        {
+          name: 'title',
+          title: 'Title',
+          type: 'string',
+          nameField: true,
+          visibleInGrid: true,
+        },
+        {
+          name: 'linkUrl',
+          title: 'Link Url',
+          type: 'string',
+        },
+        {
+          name: 'description',
+          title: 'Description',
+          type: 'string',
+        },
+        {
+          name: 'iconColor',
+          title: 'Icon Color',
+          type: 'string',
+          selection: colors.map(color => ({
+            title: startCase(color),
+            value: color,
+          })),
+        },
+        {
+          name: 'icon',
+          title: 'Icon',
+          type: 'string',
+          selection: unicons.map(icon => ({
+            title: startCase(icon),
+            value: icon,
+          })),
+        },
+        {
+          name: 'linkTitle',
+          title: 'Link Title',
+          type: 'string',
+        },
+        {
+          name: 'linkColor',
+          title: 'Link Color',
+          type: 'string',
+          selection: linkColors.map(color => ({
+            title: startCase(color),
+            value: color,
+          })),
+        },
+      ],
+    },
+  ],
+} as const satisfies TemplateSchema;
+
+export type Service19Data = Data<typeof service19Schema>;
+
+export const service19Demos: Demo<typeof service19Schema>[] = [
+  {
+    language: 'en_US',
+    data: {
+      service19Caption: 'What We Do?',
+      service19Description:
+        'We have designed our services with your specific needs in mind.',
+      service19Services: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            title: 'IoT Development',
+            linkUrl: '#',
+            description:
+              'IoT development, devices are connected to the internet devices are connected to the internet.',
+            iconColor: 'soft-purple',
+            linkColor: 'purple',
+            icon: 'circuit',
+            linkTitle: 'Learn More',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            title: 'Artificial Intelligence',
+            linkUrl: '#',
+            description:
+              'IoT development, devices are connected to the internet devices are connected to the internet.',
+            iconColor: 'soft-green',
+            linkColor: 'green',
+            icon: 'brain',
+            linkTitle: 'Learn More',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            title: 'Software Maintenance',
+            linkUrl: '#',
+            description:
+              'IoT development, devices are connected to the internet devices are connected to the internet.',
+            iconColor: 'soft-orange',
+            linkColor: 'orange',
+            icon: 'process',
+            linkTitle: 'Learn More',
+          },
+        },
+      ],
+    },
+  },
+  {
+    language: 'fr_FR',
+    data: {
+      service19Caption: 'Que faisons-nous ?',
+      service19Description:
+        'Nous avons conçu nos services en pensant à vos besoins spécifiques.',
+      service19Services: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            title: 'Développement IoT',
+            linkUrl: '#',
+            description:
+              'Développement IoT, les appareils sont connectés à Internet les appareils sont connectés à Internet.',
+            iconColor: 'soft-purple',
+            linkColor: 'purple',
+            icon: 'circuit',
+            linkTitle: 'En savoir plus',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            title: 'Intelligence artificielle',
+            linkUrl: '#',
+            description:
+              'Développement IoT, les appareils sont connectés à Internet les appareils sont connectés à Internet.',
+            iconColor: 'soft-green',
+            linkColor: 'green',
+            icon: 'brain',
+            linkTitle: 'En savoir plus',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            title: 'Maintenance logicielle',
+            linkUrl: '#',
+            description:
+              'Développement IoT, les appareils sont connectés à Internet les appareils sont connectés à Internet.',
+            iconColor: 'soft-orange',
+            linkColor: 'orange',
+            icon: 'process',
+            linkTitle: 'En savoir plus',
+          },
+        },
+      ],
+    },
+  },
+];
