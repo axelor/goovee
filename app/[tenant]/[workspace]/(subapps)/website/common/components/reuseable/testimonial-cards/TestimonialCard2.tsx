@@ -2,9 +2,9 @@ import {FC, HTMLAttributes} from 'react';
 
 // =================================================
 type TestimonialCard2Props = {
-  name: string;
-  review: string;
-  designation: string;
+  name?: string;
+  review?: string;
+  designation?: string;
   blockClassName?: HTMLAttributes<HTMLQuoteElement>['className'];
   blockDetailsClassName?: HTMLAttributes<HTMLDivElement>['className'];
 };

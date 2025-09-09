@@ -3,22 +3,32 @@ import Image from 'next/image';
 
 // =================================================
 type TestimonialCard3Props = {
-  name: string;
-  image: string;
-  review: string;
+  name?: string;
+  image?: string;
+  review?: string;
+  rating?: number;
   shadow?: boolean;
-  designation: string;
-  hideRating?: boolean;
+  designation?: string;
 };
 // =================================================
 
 const TestimonialCard3: FC<TestimonialCard3Props> = props => {
-  const {name, image, review, designation, hideRating, shadow} = props;
+  const {name, image, review, designation, rating, shadow} = props;
+
+  const ratingMap: {[key: number]: string} = {
+    1: 'one',
+    2: 'two',
+    3: 'three',
+    4: 'four',
+    5: 'five',
+  };
 
   return (
     <div className={`card ${shadow ? 'shadow-lg' : ''}`}>
       <div className="card-body">
-        {!hideRating && <span className="ratings five mb-3" />}
+        {rating && ratingMap[rating] && (
+          <span className={`ratings ${ratingMap[rating]} mb-3`} />
+        )}
 
         <blockquote className="icon mb-0">
           <p>“{review}”</p>

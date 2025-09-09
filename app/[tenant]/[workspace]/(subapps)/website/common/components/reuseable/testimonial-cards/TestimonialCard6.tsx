@@ -2,9 +2,9 @@ import {FC} from 'react';
 
 // =================================================
 type TestimonialCard6Props = {
-  name: string;
-  review: string;
-  designation: string;
+  name?: string;
+  review?: string;
+  designation?: string;
   borderBottom?: boolean;
 };
 // =================================================
