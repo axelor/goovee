@@ -202,6 +202,7 @@ import {testimonial13Demos, testimonial13Schema} from './testimonial-13/meta';
 import {testimonial14Demos, testimonial14Schema} from './testimonial-14/meta';
 import {testimonial15Demos, testimonial15Schema} from './testimonial-15/meta';
 import {testimonial16Demos, testimonial16Schema} from './testimonial-16/meta';
+import {testimonial17Demos, testimonial17Schema} from './testimonial-17/meta';
 import {wiki1Demos, wiki1Schema} from './wiki-1/meta';
 
 export const metas = [
@@ -355,6 +356,7 @@ export const metas = [
   {schema: testimonial14Schema, demos: testimonial14Demos},
   {schema: testimonial15Schema, demos: testimonial15Demos},
   {schema: testimonial16Schema, demos: testimonial16Demos},
+  {schema: testimonial17Schema, demos: testimonial17Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
   {schema: pricing2Schema, demos: pricing2Demos},
   {schema: pricing3Schema, demos: pricing3Demos},
