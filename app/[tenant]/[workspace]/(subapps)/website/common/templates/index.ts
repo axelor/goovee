@@ -199,6 +199,7 @@ import {Testimonial5, testimonial5Schema} from './testimonial-5';
 import {Testimonial6, testimonial6Schema} from './testimonial-6';
 import {Testimonial7, testimonial7Schema} from './testimonial-7';
 import {Testimonial8, testimonial8Schema} from './testimonial-8';
+import {Testimonial9, testimonial9Schema} from './testimonial-9';
 import {Wiki1, wiki1Schema} from './wiki-1';
 
 const componentMap: Record<string, ComponentType<TemplateProps>> = {
@@ -345,6 +346,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [testimonial6Schema.code]: Testimonial6,
   [testimonial7Schema.code]: Testimonial7,
   [testimonial8Schema.code]: Testimonial8,
+  [testimonial9Schema.code]: Testimonial9,
   [pricing1Schema.code]: Pricing1,
   [pricing2Schema.code]: Pricing2,
   [pricing3Schema.code]: Pricing3,
