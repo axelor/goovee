@@ -6,6 +6,7 @@ import {
 } from '@/subapps/website/common/types/templates';
 import {solidIcons} from '@/subapps/website/common/icons/solid';
 import {startCase} from 'lodash-es';
+import {linkColors} from '../../constants/colors';
 
 export const service1Schema = {
   title: 'Service 1',
@@ -66,6 +67,10 @@ export const service1Schema = {
           title: 'Link Type',
           type: 'string',
           visibleInGrid: true,
+          selection: linkColors.map(color => ({
+            title: startCase(color),
+            value: color,
+          })),
         },
       ],
     },

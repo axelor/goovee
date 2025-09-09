@@ -4,10 +4,11 @@ import NextLink from '../links/NextLink';
 
 // ================================================
 type ServiceCard6Props = {
-  icon: string;
-  title: string;
-  linkUrl: string;
-  description: string;
+  icon?: string;
+  title?: string;
+  linkUrl?: string;
+  linkTitle?: string;
+  description?: string;
   iconBoxClassNames?: HTMLAttributes<HTMLDivElement>['className'];
 };
 // ================================================
@@ -16,6 +17,7 @@ const ServiceCard6: FC<ServiceCard6Props> = props => {
   const {
     title,
     linkUrl,
+    linkTitle,
     description,
     icon,
     iconBoxClassNames = 'icon btn btn-circle btn-lg btn-primary pe-none mb-5',
@@ -28,7 +30,7 @@ const ServiceCard6: FC<ServiceCard6Props> = props => {
           <IconBox icon={icon} className={iconBoxClassNames} />
           <h4>{title}</h4>
           <p className="mb-3">{description}</p>
-          <NextLink title="Learn More" href={linkUrl} className="more hover" />
+          <NextLink title={linkTitle} href={linkUrl} className="more hover" />
         </div>
       </div>
     </div>
