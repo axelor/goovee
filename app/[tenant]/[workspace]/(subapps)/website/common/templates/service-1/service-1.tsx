@@ -6,7 +6,7 @@ import {TemplateProps} from '@/subapps/website/common/types';
 
 import type {Service1Data} from './meta';
 
-function getIcon(icon: string) {
+function getIcon(icon?: string) {
   return icon
     ? dynamic(() =>
         import(`@/subapps/website/common/icons/solid/${icon}`).catch(err => {
@@ -46,7 +46,7 @@ export function Service1(props: TemplateProps<Service1Data>) {
           />
 
           <div className="row gx-md-5 gy-5 text-center">
-            {services?.map(({id, attrs: item}: any) => (
+            {services?.map(({id, attrs: item}) => (
               <ServiceCard1
                 key={id}
                 Icon={getIcon(item.icon)}

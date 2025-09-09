@@ -1,14 +1,13 @@
 import {FC, ReactElement} from 'react';
 import IconProps from '@/subapps/website/common/types/icons';
-import {LinkType} from '@/subapps/website/common/types/demo-1';
 import NextLink from '../links/NextLink';
 
 // ===============================================================
 type ServiceCard1Props = {
-  title: string;
-  linkUrl: string;
-  linkType: LinkType;
-  description: string;
+  title?: string;
+  linkUrl?: string;
+  linkType?: string;
+  description?: string;
   cardClassName?: string;
   iconClassName?: string;
   Icon: (props: IconProps) => ReactElement;

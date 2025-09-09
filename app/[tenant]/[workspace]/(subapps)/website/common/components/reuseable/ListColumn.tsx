@@ -11,8 +11,9 @@ type ListColumnProps = {
 const ListColumn: FC<ListColumnProps> = ({
   list,
   rowClass = '',
-  bulletColor = 'soft-primary',
+  bulletColor,
 }) => {
+  bulletColor = bulletColor || 'soft-primary';
   const fields = (list || []).map(v => v?.attrs?.title).filter(Boolean);
   const items = [];
 

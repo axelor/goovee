@@ -64,3 +64,26 @@ export const fullColors = [
   'pale-dark',
   'pale-primary',
 ] as const;
+
+export const linkColors = [
+  'blue',
+  'sky',
+  'purple',
+  'grape',
+  'violet',
+  'pink',
+  'fuchsia',
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'leaf',
+  'aqua',
+  'navy',
+  'ash',
+  'white',
+  'light',
+  'gray',
+  'dark',
+  'primary',
+] as const;
