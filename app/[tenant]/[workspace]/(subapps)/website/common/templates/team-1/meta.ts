@@ -5,6 +5,7 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {metaFileModel} from '../meta-models';
+import {socialLinksModel} from '../json-models';
 
 export const team1Schema = {
   title: 'Team 1',
@@ -54,27 +55,19 @@ export const team1Schema = {
           visibleInGrid: true,
         },
         {
-          name: 'dribbbleUrl',
-          title: 'Dribbble URL',
-          type: 'string',
-        },
-        {
-          name: 'twitterUrl',
-          title: 'Twitter URL',
-          type: 'string',
-        },
-        {
-          name: 'facebookUrl',
-          title: 'Facebook URL',
-          type: 'string',
-        },
-        {
           name: 'description',
           title: 'Description',
           type: 'string',
         },
+        {
+          name: 'socialLinks',
+          title: 'Social Links',
+          type: 'json-one-to-many',
+          target: 'SocialLinks',
+        },
       ],
     },
+    socialLinksModel,
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -101,11 +94,37 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t8.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description: "I'm passionate about creating elegant theme.",
             designation: 'Developer',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
         {
@@ -113,7 +132,6 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
           version: 0,
           attrs: {
             name: 'Selina Anteree',
-
             image: {
               id: '1',
               version: 1,
@@ -121,11 +139,37 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t9.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description: "I'm passionate about creating elegant theme.",
             designation: 'Developer',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
         {
@@ -140,11 +184,37 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t10.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description: "I'm passionate about creating elegant theme.",
             designation: 'Designer',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
         {
@@ -159,11 +229,37 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t11.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description: "I'm passionate about creating elegant theme.",
             designation: 'Manager',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
       ],
@@ -188,12 +284,38 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t8.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description:
               'Je suis passionné par la création de thèmes élégants.',
             designation: 'Développeur',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
         {
@@ -209,12 +331,38 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t9.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description:
               'Je suis passionné par la création de thèmes élégants.',
             designation: 'Développeur',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
         {
@@ -229,12 +377,38 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t10.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description:
               'Je suis passionné par la création de thèmes élégants.',
             designation: 'Designer',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
         {
@@ -249,12 +423,38 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
               fileType: 'image/jpeg',
               filePath: '/img/avatars/t11.jpg',
             },
-            twitterUrl: 'https://www.twitter.com',
             description:
               'Je suis passionné par la création de thèmes élégants.',
             designation: 'Directeur',
-            dribbbleUrl: 'https://dribbble.com',
-            facebookUrl: 'https://www.facebook.com',
+            socialLinks: [
+              {
+                id: '1',
+                version: 1,
+                attrs: {
+                  name: 'Twitter',
+                  icon: 'twitter',
+                  url: 'https://www.twitter.com',
+                },
+              },
+              {
+                id: '2',
+                version: 1,
+                attrs: {
+                  name: 'Facebook',
+                  icon: 'facebook-f',
+                  url: 'https://www.facebook.com',
+                },
+              },
+              {
+                id: '3',
+                version: 1,
+                attrs: {
+                  name: 'Dribbble',
+                  icon: 'dribbble',
+                  url: 'https://dribbble.com',
+                },
+              },
+            ],
           },
         },
       ],

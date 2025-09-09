@@ -2,9 +2,9 @@ import {FC} from 'react';
 
 // ==========================================================
 type TeamCard3Props = {
-  name: string;
-  designation: string;
-  image: {'1x': string; '2x': string};
+  name?: string;
+  designation?: string;
+  image?: string;
 };
 // ==========================================================
 const TeamCard3: FC<TeamCard3Props> = ({name, image, designation}) => {
@@ -23,12 +23,7 @@ const TeamCard3: FC<TeamCard3Props> = ({name, image, designation}) => {
 
       <div className="card shadow-lg">
         <figure className="card-img-top">
-          <img
-            className="img-fluid"
-            src={image['1x']}
-            srcSet={image['2x']}
-            alt=""
-          />
+          <img className="img-fluid" src={image} alt="" />
         </figure>
 
         <div className="card-body px-6 py-5">

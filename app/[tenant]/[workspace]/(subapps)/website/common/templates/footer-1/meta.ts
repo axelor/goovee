@@ -5,8 +5,6 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {metaFileModel} from '../meta-models';
-import {socialMediaUnicons} from '../../constants/unicons';
-import {startCase} from 'lodash-es';
 import {socialLinksModel} from '../json-models';
 
 export const footer1Schema = {
