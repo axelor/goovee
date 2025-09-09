@@ -184,6 +184,7 @@ import {team2Demos, team2Schema} from './team-2/meta';
 import {team3Demos, team3Schema} from './team-3/meta';
 import {team4Demos, team4Schema} from './team-4/meta';
 import {team5Demos, team5Schema} from './team-5/meta';
+import {team6Demos, team6Schema} from './team-6/meta';
 import {testimonial1Demos, testimonial1Schema} from './testimonial-1/meta';
 import {wiki1Demos, wiki1Schema} from './wiki-1/meta';
 
@@ -320,6 +321,7 @@ export const metas = [
   {schema: team3Schema, demos: team3Demos},
   {schema: team4Schema, demos: team4Demos},
   {schema: team5Schema, demos: team5Demos},
+  {schema: team6Schema, demos: team6Demos},
   {schema: testimonial1Schema, demos: testimonial1Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
   {schema: pricing2Schema, demos: pricing2Demos},
