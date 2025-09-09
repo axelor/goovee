@@ -1,29 +1,19 @@
 import {FC} from 'react';
 import Image from 'next/image';
-import IconLink from '../links/IconLink';
+import SocialLinks from '../SocialLinks';
 
 // ==========================================================
 type TeamCard2Props = {
-  name: string;
-  image: string;
-  twitterUrl: string;
-  designation: string;
-  description: string;
-  facebookUrl: string;
-  dribbbleUrl: string;
+  name?: string;
+  image?: string;
+  designation?: string;
+  description?: string;
+  socialLinks?: {id: string; icon: string; url: string}[];
 };
 // ==========================================================
 
 const TeamCard2: FC<TeamCard2Props> = props => {
-  const {
-    name,
-    description,
-    designation,
-    image,
-    facebookUrl,
-    twitterUrl,
-    dribbbleUrl,
-  } = props;
+  const {name, description, designation, image, socialLinks} = props;
 
   return (
     <div className="text-center">
@@ -41,17 +31,10 @@ const TeamCard2: FC<TeamCard2Props> = props => {
       <div className="meta mb-2">{designation}</div>
       <p className="mb-2">{description}</p>
 
-      <nav className="nav social justify-content-center text-center mb-0">
-        <IconLink href={twitterUrl} icon={<i className="uil uil-twitter" />} />
-        <IconLink
-          href={facebookUrl}
-          icon={<i className="uil uil-facebook-f" />}
-        />
-        <IconLink
-          href={dribbbleUrl}
-          icon={<i className="uil uil-dribbble" />}
-        />
-      </nav>
+      <SocialLinks
+        links={socialLinks || []}
+        className="nav social justify-content-center text-center mb-0"
+      />
     </div>
   );
 };
