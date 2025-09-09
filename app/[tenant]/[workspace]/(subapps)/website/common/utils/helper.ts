@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {MountType} from '../types';
+import type {MountType, TemplateProps} from '../types';
 import {MOUNT_TYPE} from '../constants';
 import {camelCase} from 'lodash-es';
 
@@ -92,4 +92,9 @@ export class Cache<T = any> {
 export function formatCustomFieldName(name: string, prefix?: string) {
   prefix = prefix || '';
   return camelCase(`${prefix} ${name}`);
+}
+
+export function getTemplateId(props: TemplateProps): string {
+  const {contentId, mountType, lineId, code} = props;
+  return [code, lineId, contentId, mountType].filter(Boolean).join('-');
 }
