@@ -171,6 +171,7 @@ import {service17Demos, service17Schema} from './service-17/meta';
 import {service18Demos, service18Schema} from './service-18/meta';
 import {service19Demos, service19Schema} from './service-19/meta';
 import {service20Demos, service20Schema} from './service-20/meta';
+import {service21Demos, service21Schema} from './service-21/meta';
 import {sidebarMenu1Demos, sidebarMenu1Schema} from './sidebar-menu-1/meta';
 import {team1Demos, team1Schema} from './team-1/meta';
 import {testimonial1Demos, testimonial1Schema} from './testimonial-1/meta';
@@ -297,6 +298,7 @@ export const metas = [
   {schema: service18Schema, demos: service18Demos},
   {schema: service19Schema, demos: service19Demos},
   {schema: service20Schema, demos: service20Demos},
+  {schema: service21Schema, demos: service21Demos},
   {schema: team1Schema, demos: team1Demos},
   {schema: testimonial1Schema, demos: testimonial1Demos},
   {schema: pricing1Schema, demos: pricing1Demos},
