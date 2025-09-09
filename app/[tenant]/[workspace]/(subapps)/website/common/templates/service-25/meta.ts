@@ -1,0 +1,188 @@
+import {startCase} from 'lodash-es';
+import {unicons} from '../../constants/unicons';
+import {
+  Template,
+  type Data,
+  type Demo,
+  type TemplateSchema,
+} from '../../types/templates';
+import {colors, linkColors} from '../../constants/colors';
+
+export const service25Schema = {
+  title: 'Service 25',
+  code: 'service25',
+  type: Template.block,
+  fields: [
+    {
+      name: 'caption',
+      title: 'Caption',
+      type: 'string',
+    },
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+    },
+    {
+      name: 'services',
+      title: 'Services',
+      type: 'json-one-to-many',
+      target: 'Service25Service',
+    },
+  ],
+  models: [
+    {
+      name: 'Service25Service',
+      title: 'Service',
+      fields: [
+        {
+          name: 'title',
+          title: 'Title',
+          type: 'string',
+          nameField: true,
+          visibleInGrid: true,
+        },
+        {
+          name: 'description',
+          title: 'Description',
+          type: 'string',
+        },
+        {
+          name: 'icon',
+          title: 'Icon',
+          type: 'string',
+          selection: unicons.map(icon => ({
+            title: startCase(icon),
+            value: icon,
+          })),
+        },
+        {
+          name: 'iconColor',
+          title: 'Icon Color',
+          type: 'string',
+          selection: colors.map(color => ({
+            title: startCase(color),
+            value: color,
+          })),
+        },
+        {
+          name: 'linkUrl',
+          title: 'Link Url',
+          type: 'string',
+        },
+        {
+          name: 'linkColor',
+          title: 'Link Color',
+          type: 'string',
+          selection: linkColors.map(color => ({
+            title: startCase(color),
+            value: color,
+          })),
+        },
+      ],
+    },
+  ],
+} as const satisfies TemplateSchema;
+
+export type Service25Data = Data<typeof service25Schema>;
+
+export const service25Demos: Demo<typeof service25Schema>[] = [
+  {
+    language: 'en_US',
+    data: {
+      service25Caption: 'What We Do?',
+      service25Title:
+        'We took pleasure in offering unique solutions to your particular needs.',
+      service25Services: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            title: 'Web Design',
+            description:
+              'Nulla vitae elit libero, a pharetra augue. Donec id elit non mi porta gravida at eget. Fusce dapibus tellus.',
+            icon: 'monitor',
+            iconColor: 'soft-purple',
+            linkColor: 'purple',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            title: 'Graphic Design',
+            description:
+              'Maecenas faucibus mollis interdum. Vivamus sagittis lacus vel augue laoreet. Sed posuere consectetur.',
+            icon: 'swatchbook',
+            iconColor: 'soft-green',
+            linkColor: 'green',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            title: '3D Animation',
+            description:
+              'Cras justo odio, dapibus ac facilisis in, egestas eget quam. Praesent commodo cursus magna scelerisque.',
+            icon: 'presentation-play',
+            iconColor: 'soft-pink',
+            linkColor: 'pink',
+            linkUrl: '#',
+          },
+        },
+      ],
+    },
+  },
+  {
+    language: 'fr_FR',
+    data: {
+      service25Caption: 'Que faisons-nous ?',
+      service25Title:
+        'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
+      service25Services: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            title: 'Conception de sites Web',
+            description:
+              'Nulla vitae elit libero, a pharetra augue. Donec id elit non mi porta gravida at eget. Fusce dapibus tellus.',
+            icon: 'monitor',
+            iconColor: 'soft-purple',
+            linkColor: 'purple',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            title: 'Conception graphique',
+            description:
+              'Maecenas faucibus mollis interdum. Vivamus sagittis lacus vel augue laoreet. Sed posuere consectetur.',
+            icon: 'swatchbook',
+            iconColor: 'soft-green',
+            linkColor: 'green',
+            linkUrl: '#',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            title: 'Animation 3D',
+            description:
+              'Cras justo odio, dapibus ac facilisis in, egestas eget quam. Praesent commodo cursus magna scelerisque.',
+            icon: 'presentation-play',
+            iconColor: 'soft-pink',
+            linkColor: 'pink',
+            linkUrl: '#',
+          },
+        },
+      ],
+    },
+  },
+];
