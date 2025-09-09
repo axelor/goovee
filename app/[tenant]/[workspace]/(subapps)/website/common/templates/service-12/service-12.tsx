@@ -1,6 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service12Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getMetaFileURL,
+  getTemplateId,
+} from '@/subapps/website/common/utils/helper';
 import {Fragment} from 'react';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import IconProps from '../../types/icons';
@@ -19,6 +22,7 @@ export function Service12(props: TemplateProps<Service12Data>) {
     service12Tabs: tabs,
   } = data || {};
 
+  const tabId = getTemplateId(props);
   return (
     <div className="container">
       <Fragment>
@@ -38,7 +42,7 @@ export function Service12(props: TemplateProps<Service12Data>) {
               <li className="nav-item" role="presentation" key={id}>
                 <a
                   role="tab"
-                  href={`#tab2-${i + 1}`}
+                  href={`#${tabId}-${i + 1}`}
                   data-bs-toggle="tab"
                   aria-selected={i === 0}
                   className={`nav-link d-flex flex-row ${i === 0 ? 'active' : ''}`}>
@@ -60,7 +64,7 @@ export function Service12(props: TemplateProps<Service12Data>) {
           {tabs?.map(({id, attrs: item}, i) => (
             <div
               className={`tab-pane fade ${i === 0 ? 'active show' : ''}`}
-              id={`tab2-${i + 1}`}
+              id={`${tabId}-${i + 1}`}
               role="tabpanel"
               key={id}>
               <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">

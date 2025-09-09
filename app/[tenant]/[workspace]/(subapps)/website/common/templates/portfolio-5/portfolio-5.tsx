@@ -1,6 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio5Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getMetaFileURL,
+  getTemplateId,
+} from '@/subapps/website/common/utils/helper';
 import {Filter} from './filter';
 
 export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
@@ -12,7 +15,7 @@ export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
     portfolio5FilterList: filterList,
   } = data || {};
 
-  const isotopeId = `portfolio5-${props.lineId || props.contentId}-${props.mountType}`;
+  const isotopeId = getTemplateId(props);
   return (
     <section id="portfolio">
       <div className="wrapper bg-gray">

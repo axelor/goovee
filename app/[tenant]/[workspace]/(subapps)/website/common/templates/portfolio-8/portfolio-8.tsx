@@ -1,6 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio8Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getMetaFileURL,
+  getTemplateId,
+} from '@/subapps/website/common/utils/helper';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -12,7 +15,7 @@ export function Portfolio8(props: TemplateProps<Portfolio8Data>) {
     portfolio8PortfolioList: portfolioList,
   } = data || {};
 
-  const isotopeId = `portfolio8-${props.lineId || props.contentId}-${props.mountType}`;
+  const isotopeId = getTemplateId(props);
   return (
     <section className="wrapper bg-light">
       <div className="container py-14 py-md-17">
