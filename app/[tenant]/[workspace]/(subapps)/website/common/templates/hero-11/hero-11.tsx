@@ -43,6 +43,7 @@ export function Hero11(props: TemplateProps<Hero11Data>) {
       <div>
         <a
           data-glightbox
+          data-type="video"
           data-gallery="hero"
           href={videoHref}
           className="btn btn-circle btn-white btn-play ripple mx-auto mb-5 position-absolute"
