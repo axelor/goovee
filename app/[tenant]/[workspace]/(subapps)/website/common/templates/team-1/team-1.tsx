@@ -35,23 +35,29 @@ export function Team1(props: TemplateProps<Team1Data>) {
             />
 
             <div className="row grid-view gy-6 gy-xl-0">
-              {teams?.slice(0, 4).map((item, i) => (
-                <div className="col-md-6 col-xl-3" key={item.id}>
-                  <TeamCard1
-                    name={item.attrs.name}
-                    image={getMetaFileURL({
-                      metaFile: item.attrs.image,
-                      path: `team1Teams[${i}].attrs.image`,
-                      ...props,
-                    })}
-                    designation={item.attrs.designation}
-                    dribbbleUrl={item.attrs.dribbbleUrl}
-                    twitterUrl={item.attrs.twitterUrl}
-                    facebookUrl={item.attrs.facebookUrl}
-                    description={item.attrs.description}
-                  />
-                </div>
-              ))}
+              {teams?.slice(0, 4).map((item, i) => {
+                const socialLinks = item.attrs.socialLinks?.map(socialLink => ({
+                  id: socialLink.id,
+                  icon: `uil uil-${socialLink.attrs.icon || ''}`,
+                  url: socialLink.attrs.url || '#',
+                }));
+
+                return (
+                  <div className="col-md-6 col-xl-3" key={item.id}>
+                    <TeamCard1
+                      name={item.attrs.name}
+                      image={getMetaFileURL({
+                        metaFile: item.attrs.image,
+                        path: `team1Teams[${i}].attrs.image`,
+                        ...props,
+                      })}
+                      designation={item.attrs.designation}
+                      description={item.attrs.description}
+                      socialLinks={socialLinks || []}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

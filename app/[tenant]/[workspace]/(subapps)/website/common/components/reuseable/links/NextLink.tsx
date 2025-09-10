@@ -3,9 +3,9 @@ import {FC, ReactElement} from 'react';
 
 // ==============================================================
 type NextLinkProps = {
-  href: string;
+  href?: string;
   className?: string;
-  title: string | ReactElement;
+  title?: string | ReactElement;
 };
 // ==============================================================
 

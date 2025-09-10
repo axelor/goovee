@@ -1,5 +1,5 @@
 import {FC, ReactNode} from 'react';
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 
 // ====================================================
 type CounterProps = {

@@ -1,15 +1,15 @@
 import {FC} from 'react';
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 
 // ====================================================
 type CounterProps = {
-  title: string;
-  number: number;
+  title?: string;
+  number?: number;
   titleColor?: string;
 };
 // ====================================================
 
-const Counter1: FC<CounterProps> = ({title, number, titleColor = ''}) => {
+const Counter1: FC<CounterProps> = ({title, number = 0, titleColor = ''}) => {
   const isThousand = number > 1000;
 
   return (

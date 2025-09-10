@@ -23,19 +23,20 @@ const accordions = [
 
 type AccordionItem = {
   id: string;
-  expand: boolean;
-  heading: string;
-  body: string;
+  expand?: boolean;
+  heading?: string;
+  body?: string;
 };
 
 type AccordionProps = {
   accordions: AccordionItem[];
+  id: string;
 };
 
 function AccordionList(props: AccordionProps) {
-  const {accordions} = props;
+  const {accordions, id} = props;
   return (
-    <div className="accordion accordion-wrapper" id="accordionExample">
+    <div className="accordion accordion-wrapper" id={id}>
       {accordions.map(item => (
         <Accordion
           type="plain"
@@ -44,6 +45,7 @@ function AccordionList(props: AccordionProps) {
           expand={item.expand}
           heading={item.heading}
           body={item.body}
+          parentId={id}
         />
       ))}
     </div>

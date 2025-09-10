@@ -1,5 +1,5 @@
 import {FC} from 'react';
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 // -------- data -------- //
 import {countList} from '@/subapps/website/common/data/demo-7';
 
