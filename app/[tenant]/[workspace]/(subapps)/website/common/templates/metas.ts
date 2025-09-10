@@ -30,6 +30,7 @@ import {blog4Demos, blog4Schema} from './blog-4/meta';
 import {blog5Demos, blog5Schema} from './blog-5/meta';
 import {banner1Demos, banner1Schema} from './banner-1/meta';
 import {banner2Demos, banner2Schema} from './banner-2/meta';
+import {banner3Demos, banner3Schema} from './banner-3/meta';
 import {clientlist1Demos, clientlist1Schema} from './clientlist-1/meta';
 import {clientlist2Demos, clientlist2Schema} from './clientlist-2/meta';
 import {clientlist3Demos, clientlist3Schema} from './clientlist-3/meta';
@@ -242,6 +243,7 @@ export const metas = [
   {schema: blog5Schema, demos: blog5Demos},
   {schema: banner1Schema, demos: banner1Demos},
   {schema: banner2Schema, demos: banner2Demos},
+  {schema: banner3Schema, demos: banner3Demos},
   {schema: hero1Schema, demos: hero1Demos},
   {schema: hero2Schema, demos: hero2Demos},
   {schema: hero3Schema, demos: hero3Demos},
