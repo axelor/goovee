@@ -485,4 +485,3 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
     },
   },
 ];
-
