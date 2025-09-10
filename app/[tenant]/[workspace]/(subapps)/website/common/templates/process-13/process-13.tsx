@@ -9,7 +9,6 @@ const getIcon = (icon: string) => {
   return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
 };
 
-
 export function Process13(props: TemplateProps<Process13Data>) {
   const {data} = props;
   const {

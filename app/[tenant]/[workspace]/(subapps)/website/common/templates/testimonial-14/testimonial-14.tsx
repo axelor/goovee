@@ -23,4 +23,3 @@ export function Testimonial14(props: TemplateProps<Testimonial14Data>) {
     </div>
   );
 }
-
