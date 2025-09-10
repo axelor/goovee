@@ -20,6 +20,7 @@ import {portfolio12Schema} from './portfolio-12/meta';
 import {process9Schema} from './process-9/meta';
 import {service18Schema} from './service-18/meta';
 import {banner3Schema} from './banner-3/meta';
+import {banner6Schema} from './banner-6/meta';
 
 const pluginsMap = {
   [about2Schema.code]: ['lightbox'],
@@ -43,6 +44,7 @@ const pluginsMap = {
   [process9Schema.code]: ['lightbox'],
   [service18Schema.code]: ['progress-bar'],
   [banner3Schema.code]: ['lightbox'],
+  [banner6Schema.code]: ['lightbox'],
 };
 
 export const PluginsMap = Object.fromEntries(
