@@ -1,0 +1,6 @@
+{
+  "title": "Add Permission check to wiki page",
+  "type": "feature",
+  "description": "Only allow users with canEditWiki permission to edit wiki pages",
+  "scope": ["website"]
+}
