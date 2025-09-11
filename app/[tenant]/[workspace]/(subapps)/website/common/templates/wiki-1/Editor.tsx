@@ -59,8 +59,9 @@ export default function Editor(props: {
   contentId: string;
   contentVersion: number;
   content: string | undefined;
+  canEditWiki: boolean;
 }): JSX.Element {
-  const {contentId, contentVersion, content} = props;
+  const {contentId, contentVersion, content, canEditWiki} = props;
   const {historyState} = useSharedHistoryContext();
   const isEditable = useLexicalEditable();
   const placeholder = 'Enter some text...';
@@ -187,6 +188,7 @@ export default function Editor(props: {
           content={content}
           contentId={contentId}
           contentVersion={contentVersion}
+          canEditWiki={canEditWiki}
         />
       </div>
     </>

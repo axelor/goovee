@@ -1,10 +1,10 @@
 'use client';
+import type {TemplateProps} from '@/subapps/website/common/types';
 import {
   InitialConfigType,
   LexicalComposer,
 } from '@lexical/react/LexicalComposer';
 import {$isTextNode, DOMConversionMap, TextNode} from 'lexical';
-import type {TemplateProps} from '@/subapps/website/common/types';
 import Editor from './Editor';
 import {FlashMessageContext} from './context/FlashMessageContext';
 import {SharedHistoryContext} from './context/SharedHistoryContext';
@@ -86,7 +86,7 @@ function buildImportMap(): DOMConversionMap {
 }
 
 export function Wiki1(props: TemplateProps<Wiki1Data>) {
-  const {data, contentId, contentVersion} = props;
+  const {data, contentId, contentVersion, canEditWiki} = props;
   const {wiki1Content: content} = data || {};
 
   const initialConfig: InitialConfigType = {
@@ -113,6 +113,7 @@ export function Wiki1(props: TemplateProps<Wiki1Data>) {
                       content={content}
                       contentId={String(contentId!)}
                       contentVersion={contentVersion!}
+                      canEditWiki={!!canEditWiki}
                     />
                   </div>
                   <aside className="lexical-sidebar">

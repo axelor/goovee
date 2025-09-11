@@ -14,6 +14,7 @@ import type {ActionResponse} from '@/types/action';
 
 // ---- LOCAL IMPORTS ---- //
 import {
+  canEditWiki,
   findAllMainWebsiteLanguages,
   findWebsiteBySlug,
   findWebsitePageBySlug,
@@ -164,6 +165,13 @@ export async function updateWikiContent({
   const session = await getSession();
   const user = session?.user;
 
+  if (!user) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
+    };
+  }
+
   const tenantId = headers().get(TENANT_HEADER);
 
   if (!tenantId) {
@@ -177,6 +185,13 @@ export async function updateWikiContent({
     return {
       error: true,
       message: await t('Bad request'),
+    };
+  }
+
+  if (!(await canEditWiki({userId: user.id, tenantId}))) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
     };
   }
 
