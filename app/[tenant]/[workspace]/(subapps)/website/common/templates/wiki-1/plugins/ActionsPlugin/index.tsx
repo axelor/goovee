@@ -44,10 +44,12 @@ export default function ActionsPlugin({
   contentId,
   contentVersion,
   content,
+  canEditWiki,
 }: {
   content: string | undefined;
   contentId: string;
   contentVersion: number;
+  canEditWiki: boolean;
 }): JSX.Element {
   const {workspaceURL} = useWorkspace();
 
@@ -220,15 +222,17 @@ export default function ActionsPlugin({
           </button>
         </>
       )}
-      <button
-        className={`action-button ${!isEditable ? 'unlock' : 'lock'}`}
-        onClick={() => {
-          editor.setEditable(!editor.isEditable());
-        }}
-        title={!isEditable ? 'Edit' : 'Lock'}
-        aria-label={!isEditable ? 'Edit' : 'Lock'}>
-        <i className={!isEditable ? 'edit' : 'lock'} />
-      </button>
+      {canEditWiki && (
+        <button
+          className={`action-button ${!isEditable ? 'unlock' : 'lock'}`}
+          onClick={() => {
+            editor.setEditable(!editor.isEditable());
+          }}
+          title={!isEditable ? 'Edit' : 'Lock'}
+          aria-label={!isEditable ? 'Edit' : 'Lock'}>
+          <i className={!isEditable ? 'edit' : 'lock'} />
+        </button>
+      )}
       {modal}
     </div>
   );

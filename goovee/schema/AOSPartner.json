@@ -156,6 +156,10 @@
       "name": "mainPartnerContacts",
       "target": "AOSPartner",
       "mappedBy": "mainPartner"
+    },
+    {
+      "type": "Boolean",
+      "name": "canEditWiki"
     }
   ]
 }

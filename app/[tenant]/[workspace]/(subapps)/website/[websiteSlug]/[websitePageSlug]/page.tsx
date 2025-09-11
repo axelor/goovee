@@ -4,7 +4,10 @@ import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
-import {findWebsitePageBySlug} from '@/subapps/website/common/orm/website';
+import {
+  canEditWiki,
+  findWebsitePageBySlug,
+} from '@/subapps/website/common/orm/website';
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
 import {getWebsiteComponent} from '@/subapps/website/common/utils/component';
 import {MOUNT_TYPE} from '@/subapps/website/common/constants';
@@ -61,13 +64,16 @@ export default async function Page({
   const session = await getSession();
   const user = session?.user;
 
-  const websitePage = await findWebsitePageBySlug({
-    websiteSlug,
-    websitePageSlug,
-    workspaceURL,
-    user,
-    tenantId: tenant,
-  });
+  const [canUserEditWiki, websitePage] = await Promise.all([
+    canEditWiki({userId: user?.id, tenantId: tenant}),
+    findWebsitePageBySlug({
+      websiteSlug,
+      websitePageSlug,
+      workspaceURL,
+      user,
+      tenantId: tenant,
+    }),
+  ]);
 
   if (!websitePage) {
     return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
@@ -87,6 +93,7 @@ export default async function Page({
         websitePageSlug={websitePageSlug}
         code={line.content.component.code}
         mountType={MOUNT_TYPE.PAGE}
+        canEditWiki={canUserEditWiki}
       />
     );
   });
