@@ -12,7 +12,7 @@
     "generate": "goovee generate",
     "website:common:dir": "app/[tenant]/[workspace]/(subapps)/website/common/",
     "website:run": "node -r @swc-node/register",
-    "website:sass": "sass --no-source-map $npm_package_scripts_website_common_dir/assets/scss:$npm_package_scripts_website_common_dir/assets/css",
+    "website:sass": "sass --no-source-map --quiet $npm_package_scripts_website_common_dir/assets/scss:$npm_package_scripts_website_common_dir/assets/css",
     "website:seed:templates": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-templates.ts",
     "website:reset:templates": "npm run website:run $npm_package_scripts_website_common_dir/scripts/reset-templates.ts",
     "website:seed:contents": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-contents.ts",

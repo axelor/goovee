@@ -37,6 +37,7 @@ Some important commands:
 
 - Install the dependencies : `pnpm i`
 - Generate ORM client : `pnpm generate`
+- Compile sass for website: `pnpm website:sass`
 - Build the project : `pnpm build`
 - Start the app : `pnpm start`
 - Run development server : `pnpm dev`
