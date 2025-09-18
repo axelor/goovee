@@ -5,8 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection} from '../meta-selections';
 
 export const process5Schema = {
   title: 'Process 5',
@@ -51,10 +50,7 @@ export const process5Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -72,6 +68,7 @@ export const process5Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process5Data = Data<typeof process5Schema>;

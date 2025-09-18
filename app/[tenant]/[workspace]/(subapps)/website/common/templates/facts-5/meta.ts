@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {linealIcons} from '@/subapps/website/common/icons/lineal';
-import {startCase} from 'lodash-es';
+import {linealIconsSelection} from '../meta-selections';
 
 export const facts5Schema = {
   title: 'Facts 5',
@@ -40,14 +39,12 @@ export const facts5Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: linealIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'lineal-icons',
         },
       ],
     },
   ],
+  selections: [linealIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Facts5Data = Data<typeof facts5Schema>;

@@ -1,12 +1,14 @@
-import {startCase} from 'lodash-es';
-import {colors, linkColors} from '../../constants/colors';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {unicons} from '../../constants/unicons';
+import {
+  uniconsSelection,
+  colorsSelection,
+  linkColorsSelection,
+} from '../meta-selections';
 
 export const service19Schema = {
   title: 'Service 19',
@@ -56,19 +58,13 @@ export const service19Schema = {
           name: 'iconColor',
           title: 'Icon Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
         {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'linkTitle',
@@ -79,14 +75,12 @@ export const service19Schema = {
           name: 'linkColor',
           title: 'Link Color',
           type: 'string',
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
       ],
     },
   ],
+  selections: [uniconsSelection, colorsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service19Data = Data<typeof service19Schema>;

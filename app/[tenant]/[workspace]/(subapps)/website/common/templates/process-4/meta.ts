@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
 import {metaFileModel} from '../meta-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const process4Schema = {
   title: 'Process 4',
@@ -47,10 +46,7 @@ export const process4Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -68,6 +64,7 @@ export const process4Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process4Data = Data<typeof process4Schema>;

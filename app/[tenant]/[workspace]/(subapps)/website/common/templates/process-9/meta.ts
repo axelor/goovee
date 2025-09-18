@@ -5,8 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection, buttonColorSelection} from '../meta-selections';
 
 export const process9Schema = {
   title: 'Process 9',
@@ -39,16 +38,7 @@ export const process9Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'video',
@@ -84,10 +74,7 @@ export const process9Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -105,6 +92,7 @@ export const process9Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection, solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process9Data = Data<typeof process9Schema>;

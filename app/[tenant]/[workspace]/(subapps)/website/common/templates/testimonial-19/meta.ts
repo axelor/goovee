@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {ratingsSelection} from '../meta-selections';
 
 export const testimonial19Schema = {
   title: 'Testimonial 19',
@@ -67,12 +67,13 @@ export const testimonial19Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
       ],
     },
   ],
   metaModels: [metaFileModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial19Data = Data<typeof testimonial19Schema>;

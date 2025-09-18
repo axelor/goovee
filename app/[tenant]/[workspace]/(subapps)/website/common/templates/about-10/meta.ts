@@ -6,6 +6,7 @@ import {
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
 import {progressListModel} from '../json-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about10Schema = {
   title: 'About 10',
@@ -33,16 +34,7 @@ export const about10Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -66,6 +58,7 @@ export const about10Schema = {
   ],
   models: [progressListModel],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About10Data = Data<typeof about10Schema>;

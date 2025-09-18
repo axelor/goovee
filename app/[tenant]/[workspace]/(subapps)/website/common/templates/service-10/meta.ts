@@ -1,5 +1,3 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
@@ -7,6 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
+import {uniconsSelection} from '../meta-selections';
 
 export const service10Schema = {
   title: 'Service 10',
@@ -66,19 +65,13 @@ export const service10Schema = {
       name: 'cardIcon1',
       title: 'Card Icon 1',
       type: 'string',
-      selection: unicons.map(icon => ({
-        title: startCase(icon),
-        value: icon,
-      })),
+      selection: 'unicons',
     },
     {
       name: 'cardIcon2',
       title: 'Card Icon 2',
       type: 'string',
-      selection: unicons.map(icon => ({
-        title: startCase(icon),
-        value: icon,
-      })),
+      selection: 'unicons',
     },
     {
       name: 'cardDescription1',
@@ -113,6 +106,7 @@ export const service10Schema = {
   ],
   models: [],
   metaModels: [metaFileModel],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service10Data = Data<typeof service10Schema>;

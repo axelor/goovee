@@ -6,6 +6,7 @@ import {
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
 import {serviceList3Model} from '../json-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about21Schema = {
   title: 'About 21',
@@ -33,16 +34,7 @@ export const about21Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -66,6 +58,7 @@ export const about21Schema = {
   ],
   models: [serviceList3Model],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About21Data = Data<typeof about21Schema>;

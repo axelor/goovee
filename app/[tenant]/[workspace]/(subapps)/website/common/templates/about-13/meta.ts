@@ -6,6 +6,7 @@ import {
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
 import {bulletListModel, bulletPointModel} from '../json-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about13Schema = {
   title: 'About 13',
@@ -38,16 +39,7 @@ export const about13Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -72,6 +64,7 @@ export const about13Schema = {
   ],
   models: [bulletListModel, bulletPointModel],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About13Data = Data<typeof about13Schema>;

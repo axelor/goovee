@@ -6,6 +6,7 @@ import {
 } from '../../types/templates';
 import {bulletListModel, bulletPointModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about2Schema = {
   title: 'About 2',
@@ -43,16 +44,7 @@ export const about2Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -72,6 +64,7 @@ export const about2Schema = {
   ],
   models: [bulletListModel, bulletPointModel],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About2Data = Data<typeof about2Schema>;

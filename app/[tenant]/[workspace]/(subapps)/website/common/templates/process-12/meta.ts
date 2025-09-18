@@ -1,11 +1,10 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {colorsSelection} from '../meta-selections';
 
 export const process12Schema = {
   title: 'Process 12',
@@ -80,14 +79,12 @@ export const process12Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
       ],
     },
   ],
+  selections: [colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process12Data = Data<typeof process12Schema>;

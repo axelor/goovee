@@ -1,11 +1,10 @@
-import {startCase} from 'lodash-es';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {unicons} from '../../constants/unicons';
+import {uniconsSelection} from '../meta-selections';
 
 export const service14Schema = {
   title: 'Service 14',
@@ -45,10 +44,7 @@ export const service14Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'description',
@@ -68,6 +64,7 @@ export const service14Schema = {
       ],
     },
   ],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service14Data = Data<typeof service14Schema>;

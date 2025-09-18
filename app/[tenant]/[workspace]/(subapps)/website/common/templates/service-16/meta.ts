@@ -4,9 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {linkColors} from '../../constants/colors';
+import {solidIconsSelection, linkColorsSelection} from '../meta-selections';
 
 export const service16Schema = {
   title: 'Service 16',
@@ -41,19 +39,13 @@ export const service16Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'linkType',
           title: 'Link Type',
           type: 'string',
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
         {
           name: 'iconClassName',
@@ -73,6 +65,7 @@ export const service16Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service16Data = Data<typeof service16Schema>;

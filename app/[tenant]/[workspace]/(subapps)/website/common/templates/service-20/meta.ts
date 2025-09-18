@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service20Schema = {
   title: 'Service 20',
@@ -45,10 +44,7 @@ export const service20Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'description',
@@ -58,6 +54,7 @@ export const service20Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service20Data = Data<typeof service20Schema>;

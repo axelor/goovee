@@ -1,5 +1,3 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
 import {
   Template,
   type Data,
@@ -7,6 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
+import {colorsSelection} from '../meta-selections';
 
 export const portfolio8Schema = {
   title: 'Portfolio 8',
@@ -39,10 +38,7 @@ export const portfolio8Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
         {
           name: 'title',
@@ -72,6 +68,7 @@ export const portfolio8Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Portfolio8Data = Data<typeof portfolio8Schema>;
