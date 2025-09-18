@@ -17,6 +17,9 @@ import {
   createCMSComponent,
   deleteCustomFields,
   deleteMetaJsonModels,
+  createMetaSelect,
+  getCommnonSelectionName,
+  deleteMetaSelects,
 } from '@/subapps/website/common/orm/templates';
 import {camelCase} from 'lodash-es';
 import {metas} from '@/subapps/website/common/templates/metas';
@@ -30,6 +33,7 @@ import {
   Model,
   ObjectField,
   RelationalField,
+  MetaSelection,
 } from '../types/templates';
 import {processBatch, Cache, formatCustomFieldName} from './helper';
 
@@ -76,13 +80,19 @@ export function isObjectField(field: Field): field is ObjectField {
 function validateSchemas(schemas: TemplateSchema[]) {
   let isValid = true;
   const jsonModelMap = new Map<string, Model>();
+  const selectionMap = new Map<string, MetaSelection>();
   schemas.forEach(schema => {
     const targetModels = new Set();
+    const targetSelections = new Set();
     schema.fields?.forEach(field => {
       if (isJsonRelationalField(field)) {
         targetModels.add(field.target);
       }
+      if ('selection' in field && typeof field.selection === 'string') {
+        targetSelections.add(field.selection);
+      }
     });
+
     schema.models?.forEach(model => {
       if (
         jsonModelMap.has(model.name) &&
@@ -105,6 +115,9 @@ function validateSchemas(schemas: TemplateSchema[]) {
       for (const field of model.fields) {
         if (isJsonRelationalField(field)) {
           targetModels.add(field.target);
+        }
+        if ('selection' in field && typeof field.selection === 'string') {
+          targetSelections.add(field.selection);
         }
         if (field.visibleInGrid) visibleInGridCount++;
         if (field.nameField) nameFieldCount++;
@@ -131,7 +144,29 @@ function validateSchemas(schemas: TemplateSchema[]) {
         `\x1b[31m✖ model:${[...targetModels].join(', ')} in ${schema.code} does not have a model declaration .\x1b[0m`,
       );
     }
+
+    schema.selections?.forEach(selection => {
+      if (
+        selectionMap.has(selection.name) &&
+        selection !== selectionMap.get(selection.name) // check reference equality
+      ) {
+        isValid = false;
+        console.log(
+          `\x1b[31m✖ model:${selection.name} in ${schema.code} is duplicated.\x1b[0m`,
+        );
+      }
+      selectionMap.set(selection.name, selection);
+      targetSelections.delete(selection.name);
+    });
+
+    if (targetSelections.size) {
+      isValid = false;
+      console.log(
+        `\x1b[31m✖ selection:${[...targetSelections].join(', ')} in ${schema.code} does not have a selection declaration .\x1b[0m`,
+      );
+    }
   });
+
   return isValid;
 }
 
@@ -145,6 +180,18 @@ function getModels(schemas: TemplateSchema[]): Model[] {
     }
   }
   return Array.from(models.values());
+}
+
+function getSelections(schemas: TemplateSchema[]): Map<string, MetaSelection> {
+  const selections = new Map<string, MetaSelection>();
+  for (const schema of schemas) {
+    if (schema.selections?.length) {
+      for (const selection of schema.selections) {
+        selections.set(selection.name, selection);
+      }
+    }
+  }
+  return selections;
 }
 
 function getContentFields(
@@ -240,6 +287,42 @@ export async function seedComponents(tenantId: Tenant['id']) {
     console.dir(failedJsonModels, {depth: null});
   }
 
+  const selections = getSelections(schemas);
+  const selectionsSettled = await processBatch(
+    Array.from(selections.values()),
+    async selection => {
+      const timeStamp = new Date();
+      const name = getCommnonSelectionName(selection.name);
+      return createMetaSelect({
+        tenantId,
+        metaSelectData: {
+          isCustom: true,
+          priority: 20,
+          name: name,
+          xmlId: name,
+          updatedOn: timeStamp,
+        },
+        metaSelectItemsData: selection.options.map((option, i) => ({
+          title: option.title,
+          value: String(option.value),
+          color: option.color,
+          icon: option.icon,
+          order: i + 1,
+          updatedOn: timeStamp,
+        })),
+      });
+    },
+  );
+
+  const failedSelections = selectionsSettled.filter(
+    res => res.status === 'rejected',
+  );
+
+  if (failedSelections.length) {
+    console.log('\x1b[31m🔥 Failed:\x1b[0m');
+    console.dir(failedSelections, {depth: null});
+  }
+
   const customModels = await processBatch(models, async model => {
     const jsonModel = jsonModels.find(m => m.name === model.name);
     if (!jsonModel) {
@@ -254,6 +337,7 @@ export async function seedComponents(tenantId: Tenant['id']) {
       jsonModel,
       tenantId,
       addPanel: true,
+      selections,
     });
     return {...jsonModel, fields};
   });
@@ -267,9 +351,15 @@ export async function seedComponents(tenantId: Tenant['id']) {
     fields,
     tenantId,
     addPanel: true,
+    selections,
   });
 
-  return {components: componentsSettled, contentFields, customModels};
+  return {
+    components: componentsSettled,
+    contentFields,
+    customModels,
+    selections: selectionsSettled,
+  };
 }
 
 export async function resetFields(tenantId: Tenant['id']) {
@@ -291,6 +381,8 @@ export async function resetFields(tenantId: Tenant['id']) {
     jsonModelPrefix: CUSTOM_MODEL_PREFIX,
     tenantId,
   });
+
+  await deleteMetaSelects({tenantId});
 }
 
 export async function seedContents(tenantId: Tenant['id']) {

@@ -15,6 +15,13 @@ type CommonField = {
   widgetAttrs?: Record<string, string>;
 };
 
+export type SelectionOption<T extends string | number = string | number> = {
+  title: string;
+  value: T;
+  color?: Color;
+  icon?: Icon;
+};
+
 type Color =
   | 'red'
   | 'pink'
@@ -60,12 +67,7 @@ type BooleanField = CommonField & {
 type IntegerField = CommonField & {
   type: 'integer';
   title: string;
-  selection?: {
-    title: string;
-    value: number;
-    color?: Color;
-    icon?: Icon;
-  }[];
+  selection?: SelectionOption<number>[] | string;
   widget?:
     | 'RelativeTime'
     | 'Duration'
@@ -81,12 +83,7 @@ type IntegerField = CommonField & {
 type StringField = CommonField & {
   type: 'string';
   title: string;
-  selection?: {
-    title: string;
-    value: string;
-    color?: Color;
-    icon?: Icon;
-  }[];
+  selection?: SelectionOption<string>[] | string;
   widget?:
     | 'Email'
     | 'Url'
@@ -271,6 +268,11 @@ export enum Template {
   leftRightMenu = 3,
 }
 
+export type MetaSelection = {
+  name: string;
+  options: readonly SelectionOption[];
+};
+
 export type TemplateSchema = {
   title: string;
   code: string;
@@ -278,6 +280,7 @@ export type TemplateSchema = {
   fields: ContentField[];
   models?: Model[];
   metaModels?: MetaModel[];
+  selections?: MetaSelection[];
 };
 
 // === Type Resolution ===
@@ -342,7 +345,21 @@ type JSONRecord = {
   name?: string | null;
   jsonModel?: string;
 };
-type SelectionValue<T> = T extends readonly {value: infer V}[] ? V : never;
+type FindSelection<
+  Name extends string,
+  TSchema extends TemplateSchema,
+> = TSchema['selections'] extends readonly any[]
+  ? Extract<TSchema['selections'][number], {name: Name}>['options']
+  : never;
+
+type SelectionValue<
+  Sel extends readonly {value: any}[] | string | undefined,
+  TSchema extends TemplateSchema,
+> = Sel extends readonly {value: any}[]
+  ? Sel[number]['value']
+  : Sel extends string
+    ? FindSelection<Sel, TSchema>[number]['value']
+    : never;
 
 type FieldType<F, TSchema extends TemplateSchema> = F extends {
   type: JsonToMany;
@@ -355,10 +372,10 @@ type FieldType<F, TSchema extends TemplateSchema> = F extends {
       ? RelationalModelAttrs<F['target'], TSchema>[]
       : F extends {type: RelToOne; target: string}
         ? RelationalModelAttrs<F['target'], TSchema>
-        : F extends {type: 'integer'; selection: readonly any[]}
-          ? SelectionValue<F['selection']>
-          : F extends {type: 'string'; selection: readonly any[]}
-            ? SelectionValue<F['selection']>
+        : F extends {type: 'integer'; selection: any}
+          ? SelectionValue<F['selection'], TSchema>
+          : F extends {type: 'string'; selection: any}
+            ? SelectionValue<F['selection'], TSchema>
             : F extends {type: keyof PrimitiveMap}
               ? PrimitiveMap[F['type']]
               : F extends {type: DecorativeFieldType}
