@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {planFeatureModel, planModel} from '../json-models';
+import {planModel} from '../json-models';
 
 export const pricing7Schema = {
   title: 'Pricing 7',
@@ -58,7 +58,7 @@ export const pricing7Schema = {
       target: 'Plan',
     },
   ],
-  models: [planModel, planFeatureModel],
+  models: [planModel],
 } as const satisfies TemplateSchema;
 
 export type Pricing7Data = Data<typeof pricing7Schema>;

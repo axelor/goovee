@@ -6,7 +6,7 @@ import {
 } from '../../types/templates';
 import {linealIcons} from '@/subapps/website/common/icons/lineal';
 import {startCase} from 'lodash-es';
-import {planFeatureModel, planModel} from '../json-models';
+import {planModel} from '../json-models';
 
 export const pricing4Schema = {
   title: 'Pricing 4',
@@ -35,7 +35,7 @@ export const pricing4Schema = {
       target: 'Plan',
     },
   ],
-  models: [planModel, planFeatureModel],
+  models: [planModel],
 } as const satisfies TemplateSchema;
 
 export type Pricing4Data = Data<typeof pricing4Schema>;

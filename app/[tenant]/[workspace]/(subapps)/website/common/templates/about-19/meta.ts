@@ -4,8 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {bulletListModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
 
 export const about19Schema = {
   title: 'About 19',
@@ -64,7 +64,6 @@ export const about19Schema = {
   ],
   models: [
     bulletListModel,
-    bulletPointModel,
     {
       name: 'About19AboutList2',
       title: 'About List 2',

@@ -1,5 +1,8 @@
 import type {MetaSelection} from '../types/templates';
-import {unicons} from '@/subapps/website/common/constants/unicons';
+import {
+  socialMediaUnicons,
+  unicons,
+} from '@/subapps/website/common/constants/unicons';
 import {solidIcons} from '@/subapps/website/common/icons/solid';
 import {
   colors,
@@ -31,6 +34,13 @@ export const uniconsSelection = {
   })),
 } as const satisfies MetaSelection;
 
+export const socialMediaUniconsSelection = {
+  name: 'social-media-unicons',
+  options: socialMediaUnicons.map(icon => ({
+    title: startCase(icon),
+    value: icon,
+  })),
+};
 export const solidIconsSelection = {
   name: 'solid-icons',
   options: solidIcons.map(icon => ({

@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 import {buttonColorSelection} from '../meta-selections';
 
 export const about13Schema = {
@@ -62,7 +62,7 @@ export const about13Schema = {
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
   selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;

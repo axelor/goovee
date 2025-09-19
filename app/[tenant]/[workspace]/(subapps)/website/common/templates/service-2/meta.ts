@@ -5,7 +5,7 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 
 export const service2Schema = {
   title: 'Service 2',
@@ -42,7 +42,7 @@ export const service2Schema = {
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 

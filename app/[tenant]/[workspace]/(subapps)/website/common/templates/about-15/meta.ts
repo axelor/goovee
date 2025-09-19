@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 
 export const about15Schema = {
   title: 'About 15',
@@ -47,7 +47,7 @@ export const about15Schema = {
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 

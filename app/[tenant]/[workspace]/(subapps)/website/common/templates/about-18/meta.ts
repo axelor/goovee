@@ -4,8 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {bulletListModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
 
 export const about18Schema = {
   title: 'About 18',
@@ -67,7 +67,7 @@ export const about18Schema = {
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 

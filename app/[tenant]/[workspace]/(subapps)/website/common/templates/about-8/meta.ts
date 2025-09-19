@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const about8Schema = {
@@ -42,7 +42,7 @@ export const about8Schema = {
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 

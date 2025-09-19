@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 import {solidIconsSelection} from '../meta-selections';
 
 export const service5Schema = {
@@ -77,7 +77,6 @@ export const service5Schema = {
       ],
     },
     bulletListModel,
-    bulletPointModel,
   ],
   selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
