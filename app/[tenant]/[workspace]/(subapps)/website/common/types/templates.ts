@@ -8,6 +8,12 @@ import type {
 } from '@goovee/orm';
 import fontAwesome from '../constants/fa-icons';
 
+export enum Template {
+  block = 1,
+  topMenu = 2,
+  leftRightMenu = 3,
+}
+
 // === Common Base ===
 type CommonField = {
   name: string;
@@ -249,6 +255,9 @@ export type Model = {
   name: string;
   title: string;
   fields: ModelField[];
+  models?: Model[];
+  metaModels?: MetaModel[];
+  selections?: MetaSelection[];
 };
 
 type Entities = Omit<Client, keyof QueryClient>;
@@ -261,12 +270,6 @@ export type MetaModel<T extends EntityName = any> = {
   entity: T;
   select: SelectOptions<EntityClass<T>>;
 };
-
-export enum Template {
-  block = 1,
-  topMenu = 2,
-  leftRightMenu = 3,
-}
 
 export type MetaSelection = {
   name: string;
@@ -307,35 +310,80 @@ type NonDecorativeFields<T extends Field[]> = T extends (infer F)[]
     : F
   : never;
 
+// Collect all models recursively (flatten)
+type CollectModels<M extends Model | undefined> = M extends Model
+  ?
+      | M
+      | (M extends {models: (infer Sub extends Model)[]}
+          ? CollectModels<Sub>
+          : never)
+  : never;
+
+type CollectMetaModels<M extends Model | undefined> = M extends Model
+  ?
+      | (M['metaModels'] extends (infer MM extends MetaModel)[] ? MM : never)
+      | (M['models'] extends (infer Sub extends Model)[]
+          ? CollectMetaModels<Sub>
+          : never)
+  : never;
+
+type CollectSelections<M extends Model | undefined> = M extends Model
+  ?
+      | (M['selections'] extends (infer S extends MetaSelection)[] ? S : never)
+      | (M['models'] extends (infer Sub extends Model)[]
+          ? CollectSelections<Sub>
+          : never)
+  : never;
+
 type JsonModelAttrs<
   ModelName extends string,
   TSchema extends TemplateSchema,
-> = TSchema['models'] extends any[]
-  ? Extract<TSchema['models'][number], {name: ModelName}> extends infer M
-    ? M extends {fields: Field[]}
-      ? {
-          [F in NonDecorativeFields<M['fields']> as F extends {required: true}
-            ? F['name']
-            : never]: FieldType<F, TSchema>;
-        } & {
-          [F in NonDecorativeFields<M['fields']> as F extends {required: true}
-            ? never
-            : F['name']]?: FieldType<F, TSchema>;
-        }
-      : never
+> = (
+  TSchema['models'] extends (infer M extends Model)[]
+    ? Extract<M | CollectModels<M>, {name: ModelName}>
+    : never
+) extends infer Match
+  ? Match extends {fields: Field[]}
+    ? {
+        [F in NonDecorativeFields<Match['fields']> as F extends {required: true}
+          ? F['name']
+          : never]: FieldType<F, TSchema>;
+      } & {
+        [F in NonDecorativeFields<Match['fields']> as F extends {required: true}
+          ? never
+          : F['name']]?: FieldType<F, TSchema>;
+      }
     : never
   : never;
 
 type RelationalModelAttrs<
   ModelName extends string,
   TSchema extends TemplateSchema,
-> = TSchema['metaModels'] extends any[]
-  ? Extract<TSchema['metaModels'][number], {name: ModelName}> extends infer M
-    ? M extends {entity: EntityName; select: any}
-      ? Payload<EntityClass<M['entity']>, {select: M['select']}>
+> =
+  | (TSchema['metaModels'] extends (infer MM extends MetaModel)[] ? MM : never)
+  | (TSchema['models'] extends (infer M extends Model)[]
+      ? CollectMetaModels<M>
+      : never) extends infer AllMetaModels
+  ? Extract<AllMetaModels, {name: ModelName}> extends infer Match
+    ? Match extends {entity: EntityName; select: any}
+      ? Payload<EntityClass<Match['entity']>, {select: Match['select']}>
       : any
     : any
   : any;
+
+type FindSelection<Name extends string, TSchema extends TemplateSchema> =
+  | (TSchema['selections'] extends (infer S extends MetaSelection)[]
+      ? S
+      : never)
+  | (TSchema['models'] extends (infer M extends Model)[]
+      ? CollectSelections<M>
+      : never) extends infer AllSelections
+  ? Extract<AllSelections, {name: Name}> extends infer Match
+    ? Match extends {options: any}
+      ? Match['options']
+      : never
+    : never
+  : never;
 
 type JSONRecord = {
   id: string;
@@ -345,12 +393,6 @@ type JSONRecord = {
   name?: string | null;
   jsonModel?: string;
 };
-type FindSelection<
-  Name extends string,
-  TSchema extends TemplateSchema,
-> = TSchema['selections'] extends readonly any[]
-  ? Extract<TSchema['selections'][number], {name: Name}>['options']
-  : never;
 
 type SelectionValue<
   Sel extends readonly {value: any}[] | string | undefined,

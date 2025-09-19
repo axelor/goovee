@@ -35,7 +35,15 @@ import {
   RelationalField,
   MetaSelection,
 } from '../types/templates';
-import {processBatch, Cache, formatCustomFieldName} from './helper';
+import {
+  processBatch,
+  Cache,
+  formatCustomFieldName,
+  collectModels,
+  collectSelections,
+  collectUniqueModels,
+  collectUniqueSelections,
+} from './helper';
 
 const CUSTOM_MODEL_PREFIX = 'GooveeTemplate';
 
@@ -75,7 +83,9 @@ export function isObjectField(field: Field): field is ObjectField {
  * 2. model should have only one nameField
  * 3. model should have at least one visibleInGrid field
  * 4. json target model should have a model declaration within the same schema
+ * 5. selection should have a selection declaration within the same schema
  * 5. model names should be unique if models are not referencially equal
+ * 6. selection names should be unique if selections are not referencially equal
  */
 function validateSchemas(schemas: TemplateSchema[]) {
   let isValid = true;
@@ -93,7 +103,8 @@ function validateSchemas(schemas: TemplateSchema[]) {
       }
     });
 
-    schema.models?.forEach(model => {
+    const models = collectModels(schema);
+    models?.forEach(model => {
       if (
         jsonModelMap.has(model.name) &&
         model !== jsonModelMap.get(model.name) // check reference equality
@@ -145,14 +156,15 @@ function validateSchemas(schemas: TemplateSchema[]) {
       );
     }
 
-    schema.selections?.forEach(selection => {
+    const selections = collectSelections(schema);
+    selections?.forEach(selection => {
       if (
         selectionMap.has(selection.name) &&
         selection !== selectionMap.get(selection.name) // check reference equality
       ) {
         isValid = false;
         console.log(
-          `\x1b[31m✖ model:${selection.name} in ${schema.code} is duplicated.\x1b[0m`,
+          `\x1b[31m✖ selection:${selection.name} in ${schema.code} is duplicated.\x1b[0m`,
         );
       }
       selectionMap.set(selection.name, selection);
@@ -172,24 +184,18 @@ function validateSchemas(schemas: TemplateSchema[]) {
 
 function getModels(schemas: TemplateSchema[]): Model[] {
   const models = new Map<string, Model>();
+
   for (const schema of schemas) {
-    if (schema.models?.length) {
-      for (const model of schema.models) {
-        models.set(model.name, model);
-      }
-    }
+    collectUniqueModels(schema, models);
   }
   return Array.from(models.values());
 }
 
 function getSelections(schemas: TemplateSchema[]): Map<string, MetaSelection> {
   const selections = new Map<string, MetaSelection>();
+
   for (const schema of schemas) {
-    if (schema.selections?.length) {
-      for (const selection of schema.selections) {
-        selections.set(selection.name, selection);
-      }
-    }
+    collectUniqueSelections(schema, selections);
   }
   return selections;
 }
@@ -218,6 +224,24 @@ function getContentFields(
   return fields;
 }
 
+function formatModels(models: Model[]): Model[] {
+  return models?.map(model => ({
+    ...model,
+    name: formatCustomModelName(model.name),
+    fields: model.fields.map(field => {
+      if (isJsonRelationalField(field)) {
+        return {
+          ...field,
+          name: formatCustomFieldName(field.name),
+          target: formatCustomModelName(field.target),
+        };
+      }
+      return field;
+    }),
+    ...(model.models && {models: formatModels(model.models)}),
+  }));
+}
+
 function formatSchema<T extends TemplateSchema>(schema: T): T {
   const code = formatComponentCode(schema.code);
   return {
@@ -230,20 +254,7 @@ function formatSchema<T extends TemplateSchema>(schema: T): T {
         target: formatCustomModelName(field.target),
       }),
     })),
-    models: schema.models?.map(model => ({
-      ...model,
-      name: formatCustomModelName(model.name),
-      fields: model.fields.map(field => {
-        if (isJsonRelationalField(field)) {
-          return {
-            ...field,
-            name: formatCustomFieldName(field.name),
-            target: formatCustomModelName(field.target),
-          };
-        }
-        return field;
-      }),
-    })),
+    ...(schema.models && {models: formatModels(schema.models)}),
   };
 }
 

@@ -35,7 +35,11 @@ import {
   isJsonRelationalField,
   isRelationalField,
 } from '../utils/templates';
-import {Cache, formatCustomFieldName} from '../utils/helper';
+import {
+  Cache,
+  collectUniqueModels,
+  formatCustomFieldName,
+} from '../utils/helper';
 import {getStoragePath} from '@/storage/index';
 
 const pump = promisify(pipeline);
@@ -792,14 +796,13 @@ async function createAttrs(props: {
 }) {
   const attrs: Record<string, any> = {};
   const {tenantId, fields, schema, data, fileCache} = props;
+  const models = collectUniqueModels(schema);
   await Promise.all(
     Object.entries(data || {}).map(async ([key, value]: [string, any]) => {
       const field = fields.find(f => f.name === key);
       if (!field) return;
       if (isJsonRelationalField(field)) {
-        const modelFields = schema.models!.find(
-          m => m.name === field.target,
-        )!.fields;
+        const modelFields = models.get(field.target)!.fields;
 
         const nameField = modelFields.find(f => f.nameField)?.name;
         if (isArrayField(field)) {

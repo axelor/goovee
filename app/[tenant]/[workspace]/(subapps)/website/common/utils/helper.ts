@@ -2,6 +2,7 @@ import {SUBAPP_CODES} from '@/constants';
 import type {MountType, TemplateProps} from '../types';
 import {MOUNT_TYPE} from '../constants';
 import {camelCase} from 'lodash-es';
+import {TemplateSchema, Model, MetaSelection} from '../types/templates';
 
 export function getMetaFileURL(props: {
   metaFile: {id: string | number} | undefined;
@@ -97,4 +98,65 @@ export function formatCustomFieldName(name: string, prefix?: string) {
 export function getTemplateId(props: TemplateProps): string {
   const {contentId, mountType, lineId, code} = props;
   return [code, lineId, contentId, mountType].filter(Boolean).join('-');
+}
+
+export function collectModels(
+  schema: TemplateSchema | Model,
+  models: Model[] = [],
+): Model[] {
+  if (schema.models?.length) {
+    for (const model of schema.models) {
+      models.push(model);
+      collectModels(model, models);
+    }
+  }
+  return models;
+}
+
+export function collectSelections(
+  schema: TemplateSchema | Model,
+  selections: MetaSelection[] = [],
+): MetaSelection[] {
+  if (schema.selections?.length) {
+    for (const selection of schema.selections) {
+      selections.push(selection);
+    }
+  }
+
+  if (schema.models?.length) {
+    for (const model of schema.models) {
+      collectSelections(model, selections);
+    }
+  }
+  return selections;
+}
+
+export function collectUniqueModels(
+  schema: TemplateSchema | Model,
+  models = new Map<string, Model>(),
+): Map<string, Model> {
+  if (schema.models?.length) {
+    for (const model of schema.models) {
+      models.set(model.name, model);
+      collectUniqueModels(model, models);
+    }
+  }
+  return models;
+}
+
+export function collectUniqueSelections(
+  schema: TemplateSchema | Model,
+  selections = new Map<string, MetaSelection>(),
+): Map<string, MetaSelection> {
+  if (schema.selections?.length) {
+    for (const selection of schema.selections) {
+      selections.set(selection.name, selection);
+    }
+  }
+  if (schema.models?.length) {
+    for (const model of schema.models) {
+      collectUniqueSelections(model, selections);
+    }
+  }
+  return selections;
 }
