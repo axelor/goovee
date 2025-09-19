@@ -84,8 +84,9 @@ export function isObjectField(field: Field): field is ObjectField {
  * 3. model should have at least one visibleInGrid field
  * 4. json target model should have a model declaration within the same schema
  * 5. selection should have a selection declaration within the same schema
- * 5. model names should be unique if models are not referencially equal
- * 6. selection names should be unique if selections are not referencially equal
+ * 6. model names should be unique if models are not referencially equal
+ * 7. selection names should be unique if selections are not referencially equal
+ * 8. selections should have at least one option
  */
 function validateSchemas(schemas: TemplateSchema[]) {
   let isValid = true;
@@ -158,6 +159,12 @@ function validateSchemas(schemas: TemplateSchema[]) {
 
     const selections = collectSelections(schema);
     selections?.forEach(selection => {
+      if (!selection.options?.length) {
+        isValid = false;
+        console.log(
+          `\x1b[31m✖ selection:${selection.name} in ${schema.code} should have at least 1 option.\x1b[0m`,
+        );
+      }
       if (
         selectionMap.has(selection.name) &&
         selection !== selectionMap.get(selection.name) // check reference equality
