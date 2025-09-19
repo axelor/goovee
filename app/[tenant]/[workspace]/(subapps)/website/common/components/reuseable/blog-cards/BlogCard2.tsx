@@ -4,10 +4,10 @@ import NextLink from '../links/NextLink';
 
 // ========================================================
 type BlogCard2Props = {
-  link: string;
-  title: string;
-  category: string;
-  description: string;
+  link?: string;
+  title?: string;
+  category?: string;
+  description?: string;
   cardTop: ReactElement;
 };
 // ========================================================

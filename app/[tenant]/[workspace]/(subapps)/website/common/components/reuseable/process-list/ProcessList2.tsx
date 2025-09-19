@@ -2,9 +2,9 @@ import {FC} from 'react';
 
 // ==============================================================
 type ProcessList2Props = {
-  no: string;
-  title: string;
-  subtitle: string;
+  no?: string;
+  title?: string;
+  subtitle?: string;
   className?: string;
 };
 // ==============================================================

@@ -1,17 +1,17 @@
-import {FC, ReactElement} from 'react';
+import {FC} from 'react';
 import Price from './Price';
 import NextLink from '../links/NextLink';
-import IconProps from '../../../types/icons';
 
 // ================================================================
 type PricingCard2Props = {
-  planName: string;
-  features: string[];
+  planName?: string;
+  features?: string[];
   yearlyPrice: number;
   monthlyPrice: number;
   activeYearly: boolean;
   roundedButton?: boolean;
-  Icon: (props: IconProps) => ReactElement;
+  buttonText?: string;
+  buttonLink?: string;
 };
 // ================================================================
 
@@ -23,7 +23,8 @@ const PricingCard2: FC<PricingCard2Props> = props => {
     monthlyPrice,
     activeYearly,
     roundedButton,
-    Icon,
+    buttonLink,
+    buttonText,
   } = props;
 
   const yearClasses = activeYearly ? 'price-show' : 'price-hide price-hidden';
@@ -42,7 +43,7 @@ const PricingCard2: FC<PricingCard2Props> = props => {
         </div>
 
         <ul className="icon-list bullet-bg bullet-soft-primary mt-7 mb-8 text-start">
-          {features.map((item, i) => (
+          {features?.map((item, i) => (
             <li key={i}>
               <i className="uil uil-check" />
               <span>
@@ -54,8 +55,8 @@ const PricingCard2: FC<PricingCard2Props> = props => {
         </ul>
 
         <NextLink
-          href="#"
-          title="Choose Plan"
+          href={buttonLink || '#'}
+          title={buttonText}
           className={`btn btn-primary ${roundedButton ? 'rounded' : 'rounded-pill'}`}
         />
       </div>

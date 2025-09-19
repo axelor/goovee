@@ -1,6 +1,7 @@
 @import './scss/fonts/custom-fonts.scss';
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700');
 
+@import '../../../../../../../node_modules/glightbox/dist/css/glightbox';
 .gv {
   /* Root styles start here */
   --bs-gray-100: #fefefe;
@@ -214,8 +215,6 @@
   @import '../../../../../../../node_modules/swiper/modules/pagination.min';
   @import '../../../../../../../node_modules/swiper/modules/thumbs.min';
   @import '../plugins/scrollcue/scrollCue';
-  @import '../../../../../../../node_modules/glightbox/dist/css/glightbox';
-
   @import '../../../../../../../node_modules/plyr-react/plyr';
   @import './css/style';
 

@@ -1,20 +1,19 @@
-import {FC} from 'react';
-import useProgressbar from '@/subapps/website/common/hooks/useProgressbar';
 // -------- data -------- //
-const list = [
-  {id: 1, percent: 100, title: 'Marketing', color: 'blue'},
-  {id: 2, percent: 80, title: 'Strategy', color: 'yellow'},
-  {id: 3, percent: 85, title: 'Development', color: 'orange'},
-  {id: 4, percent: 90, title: 'Data Analysis', color: 'green'},
-];
 
-const ProgressList: FC = () => {
-  // used for the animated line
-  useProgressbar();
+function ProgressList(props: {
+  items: {
+    color?: string;
+    id: string;
+    percent?: number;
+    title?: string;
+  }[];
+}) {
+  const {items} = props;
 
   return (
     <ul className="progress-list mt-3">
-      {list.map(({color, id, percent, title}) => (
+      {/* used for the animated line */}
+      {items.map(({color, id, percent, title}) => (
         <li key={id}>
           <p>{title}</p>
           <div className={`progressbar line ${color}`} data-value={percent} />
@@ -22,6 +21,6 @@ const ProgressList: FC = () => {
       ))}
     </ul>
   );
-};
+}
 
 export default ProgressList;

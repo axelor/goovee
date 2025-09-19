@@ -1,0 +1,237 @@
+import {
+  Template,
+  type Data,
+  type Demo,
+  type TemplateSchema,
+} from '../../types/templates';
+import {solidIcons} from '@/subapps/website/common/icons/solid';
+import {startCase} from 'lodash-es';
+import {fullColors} from '../../constants/colors';
+
+export const service9Schema = {
+  title: 'Service 9',
+  code: 'service9',
+  type: Template.block,
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+    },
+    {
+      name: 'description',
+      title: 'Description',
+      type: 'string',
+    },
+    {
+      name: 'caption',
+      title: 'Caption',
+      type: 'string',
+    },
+    {
+      name: 'linkTitle',
+      title: 'Link Title',
+      type: 'string',
+    },
+    {
+      name: 'linkHref',
+      title: 'Link Href',
+      type: 'string',
+    },
+    {
+      name: 'serviceList',
+      title: 'Service List',
+      type: 'json-one-to-many',
+      target: 'Service9ServiceList',
+    },
+  ],
+  models: [
+    {
+      name: 'Service9ServiceList',
+      title: 'Service List',
+      fields: [
+        {
+          name: 'icon',
+          title: 'Icon',
+          type: 'string',
+          selection: solidIcons.map(icon => ({
+            title: startCase(icon),
+            value: icon,
+          })),
+        },
+        {
+          name: 'iconColor',
+          title: 'Icon Color',
+          type: 'string',
+          selection: fullColors.map(color => ({
+            title: startCase(color),
+            value: color,
+          })),
+        },
+        {
+          name: 'title',
+          title: 'Title',
+          type: 'string',
+          nameField: true,
+          visibleInGrid: true,
+        },
+        {
+          name: 'description',
+          title: 'Description',
+          type: 'string',
+        },
+        {
+          name: 'columnClass',
+          title: 'Column Class',
+          type: 'string',
+        },
+        {
+          name: 'cardColor',
+          title: 'Card Color',
+          type: 'string',
+          selection: fullColors.map(color => ({
+            title: startCase(color),
+            value: color,
+          })),
+        },
+      ],
+    },
+  ],
+} as const satisfies TemplateSchema;
+
+export type Service9Data = Data<typeof service9Schema>;
+
+export const service9Demos: Demo<typeof service9Schema>[] = [
+  {
+    language: 'en_US',
+    data: {
+      service9Title:
+        'Our service is customized to your individual requirements.',
+      service9Description:
+        'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Goals and interact with one another in a shared location or virtual space.',
+      service9Caption: 'What We Provide?',
+      service9LinkTitle: 'More Details',
+      service9LinkHref: '#',
+      service9ServiceList: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            icon: 'DevicesThree',
+            title: 'IoT Development',
+            description:
+              'IoT development, devices are connected to the internet provide useful.',
+            columnClass: 'col-md-5 offset-md-1 align-self-end',
+            cardColor: 'pale-yellow',
+            iconColor: 'yellow',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            icon: 'AI',
+            title: 'Artificial Intelligence',
+            description:
+              'IoT development, devices are connected to the internet provide useful.',
+            columnClass: 'col-md-6 align-self-end',
+            cardColor: 'pale-red',
+            iconColor: 'red',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            icon: 'Setting',
+            title: 'Software Maintenance',
+            description:
+              'IoT development, devices are connected to the internet provide useful.',
+            columnClass: 'col-md-5',
+            cardColor: 'pale-leaf',
+            iconColor: 'leaf',
+          },
+        },
+        {
+          id: '4',
+          version: 0,
+          attrs: {
+            icon: 'Shield',
+            title: 'Cybersecurity',
+            description:
+              'IoT development, devices are connected to the internet provide useful.',
+            columnClass: 'col-md-6 align-self-start',
+            cardColor: 'pale-primary',
+            iconColor: 'primary',
+          },
+        },
+      ],
+    },
+  },
+  {
+    language: 'fr_FR',
+    data: {
+      service9Title:
+        'Notre service est personnalisé pour répondre à vos besoins individuels.',
+      service9Description:
+        'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et qui interagissent les unes avec les autres dans un lieu ou un espace virtuel partagé. Les objectifs et l’interaction les uns avec les autres dans un lieu ou un espace virtuel partagé.',
+      service9Caption: 'Ce que nous offrons ?',
+      service9LinkTitle: 'Plus de détails',
+      service9LinkHref: '#',
+      service9ServiceList: [
+        {
+          id: '1',
+          version: 0,
+          attrs: {
+            icon: 'DevicesThree',
+            title: 'Développement IoT',
+            description:
+              'Développement IoT, les appareils sont connectés à Internet pour fournir des services utiles.',
+            columnClass: 'col-md-5 offset-md-1 align-self-end',
+            cardColor: 'pale-yellow',
+            iconColor: 'yellow',
+          },
+        },
+        {
+          id: '2',
+          version: 0,
+          attrs: {
+            icon: 'AI',
+            title: 'Intelligence artificielle',
+            description:
+              'Développement IoT, les appareils sont connectés à Internet pour fournir des services utiles.',
+            columnClass: 'col-md-6 align-self-end',
+            cardColor: 'pale-red',
+            iconColor: 'red',
+          },
+        },
+        {
+          id: '3',
+          version: 0,
+          attrs: {
+            icon: 'Setting',
+            title: 'Maintenance logicielle',
+            description:
+              'Développement IoT, les appareils sont connectés à Internet pour fournir des services utiles.',
+            columnClass: 'col-md-5',
+            cardColor: 'pale-leaf',
+            iconColor: 'leaf',
+          },
+        },
+        {
+          id: '4',
+          version: 0,
+          attrs: {
+            icon: 'Shield',
+            title: 'Cybersécurité',
+            description:
+              'Développement IoT, les appareils sont connectés à Internet pour fournir des services utiles.',
+            columnClass: 'col-md-6 align-self-start',
+            cardColor: 'pale-primary',
+            iconColor: 'primary',
+          },
+        },
+      ],
+    },
+  },
+];

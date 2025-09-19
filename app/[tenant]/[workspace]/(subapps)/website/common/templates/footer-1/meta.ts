@@ -5,8 +5,7 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {metaFileModel} from '../meta-models';
-import {socialMediaUnicons} from '../../constants/unicons';
-import {startCase} from 'lodash-es';
+import {socialLinksModel} from '../json-models';
 
 export const footer1Schema = {
   title: 'Footer 1',
@@ -55,7 +54,7 @@ export const footer1Schema = {
       name: 'socialLinks',
       title: 'Social Links',
       type: 'json-one-to-many',
-      target: 'Footer1SocialLinks',
+      target: 'SocialLinks',
     },
     {
       name: 'email',
@@ -90,36 +89,7 @@ export const footer1Schema = {
     },
   ],
   models: [
-    {
-      name: 'Footer1SocialLinks',
-      title: 'Footer 1 Social Links',
-      fields: [
-        {
-          name: 'name',
-          title: 'Name',
-          type: 'string',
-          nameField: true,
-          visibleInGrid: true,
-        },
-        {
-          name: 'icon',
-          title: 'Icon',
-          type: 'string',
-          selection: socialMediaUnicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
-          visibleInGrid: true,
-          required: true,
-        },
-        {
-          name: 'url',
-          title: 'Url',
-          type: 'string',
-          required: true,
-        },
-      ],
-    },
+    socialLinksModel,
     {
       name: 'Footer1NavLinks',
       title: 'Footer 1 NavLinks',
