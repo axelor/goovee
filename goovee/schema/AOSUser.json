@@ -5,10 +5,6 @@
   "fields": [
     {
       "type": "String",
-      "name": "id"
-    },
-    {
-      "type": "String",
       "name": "name"
     },
     {

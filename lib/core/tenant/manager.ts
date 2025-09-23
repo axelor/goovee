@@ -66,6 +66,12 @@ export class SingleTenantManager implements TenantManager {
 
     const client = createClient({
       url: process.env.DATABASE_URL!,
+      features: {
+        normalization: {
+          lowerCase: true,
+          unaccent: true,
+        },
+      },
     });
 
     if (!client) {
@@ -74,6 +80,8 @@ export class SingleTenantManager implements TenantManager {
 
     await client.$connect();
     await client.$sync();
+    // Create unaccent extension for PostgreSQL if it doesn't exist
+    await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
 
     const tenant = {
       id: DEFAULT_TENANT,
@@ -125,6 +133,12 @@ export class MultiTenantManager implements TenantManager {
       } else {
         const client = createClient({
           url: config?.db?.url,
+          features: {
+            normalization: {
+              lowerCase: true,
+              unaccent: true,
+            },
+          },
         });
 
         if (!client) {
@@ -133,6 +147,8 @@ export class MultiTenantManager implements TenantManager {
 
         await client.$connect();
         await client.$sync();
+        // Create unaccent extension for PostgreSQL if it doesn't exist
+        await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
 
         const tenant = {
           id,

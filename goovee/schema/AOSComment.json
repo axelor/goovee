@@ -3,7 +3,6 @@
   "table": "base_comment",
   "synchronize": false,
   "fields": [
-    {"name": "id", "type": "String"},
     {
       "name": "portalNews",
       "type": "ManyToOne",
