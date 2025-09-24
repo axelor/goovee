@@ -77,7 +77,6 @@ export interface PortalAppConfig extends Model {
   displayTwoPrices: string;
   mainPrice: string;
   eSignature: boolean;
-  payInAdvance: boolean;
   priceAfterLogin: string;
   requestQuotation: boolean;
   paymentOptionSet?: Array<{}>;
@@ -165,6 +164,8 @@ export interface PortalAppConfig extends Model {
   contactEmailAddress?: {address?: string};
   contactPhone?: string;
   isCompanyOrAddressRequired?: boolean;
+  payInAdvance?: boolean;
+  advancePaymentPercentage?: BigDecimal;
 }
 
 export interface PortalApp extends Model {

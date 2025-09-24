@@ -27,6 +27,7 @@ import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {type PortalWorkspace} from '@/types';
 import {formatNumber} from '@/locale/formatters';
+import {calculateAdvanceAmount} from '@/utils/payment';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct} from '@/subapps/shop/common/actions/cart';
@@ -92,13 +93,26 @@ function Total({cart, shippingType, workspace}: any) {
     scale: {currency: currencyScale},
     currency: {symbol: currencySymbol},
   } = computeTotal({cart, workspace});
+
+  const payInAdvance = workspace.config?.payInAdvance;
+  const advancePaymentPercentage = workspace.config?.advancePaymentPercentage;
+
   const shipping = Number(
     scale(SHIPPING_TYPE_COST[shippingType], currencyScale),
   ) as number;
-  const totalWithShipping = formatNumber(Number(total) + Number(shipping), {
+
+  const totalAmount = Number(total) + Number(shipping);
+
+  const totalWithShipping = formatNumber(totalAmount, {
     currency: currencySymbol,
     scale: currencyScale,
     type: 'DECIMAL',
+  });
+
+  const advanceAmount = calculateAdvanceAmount({
+    amount: Number(total),
+    percentage: advancePaymentPercentage,
+    payInAdvance,
   });
 
   return (
@@ -130,6 +144,23 @@ function Total({cart, shippingType, workspace}: any) {
           <p className="text-xl font-semibold">{`${totalWithShipping} `}</p>
         </div>
       </div>
+      {payInAdvance && advanceAmount && (
+        <>
+          <Separator className="my-4" />
+          <div className="flex items-center justify-between">
+            <p className="font-medium">{i18n.t('Advance Amount Due')}:</p>
+            <div>
+              <p className="text-lg font-semibold">
+                {formatNumber(advanceAmount, {
+                  currency: currencySymbol,
+                  scale: currencyScale,
+                  type: 'DECIMAL',
+                })}
+              </p>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
