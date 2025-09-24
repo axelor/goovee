@@ -119,6 +119,8 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   contactName: true,
   contactPhone: true,
   isCompanyOrAddressRequired: true,
+  payInAdvance: true,
+  advancePaymentPercentage: true,
 };
 
 export async function findWorkspaceMembers({

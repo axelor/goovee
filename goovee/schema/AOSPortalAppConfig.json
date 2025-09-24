@@ -350,6 +350,10 @@
     {
       "name": "isCompanyOrAddressRequired",
       "type": "Boolean"
+    },
+    {
+      "name": "advancePaymentPercentage",
+      "type": "Decimal"
     }
   ]
 }
