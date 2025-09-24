@@ -6,12 +6,17 @@ import {findGooveeUserByEmail} from '@/orm/partner';
 import {type Tenant} from '@/tenant';
 
 import google from './(ee)/google';
+import keycloak from './(ee)/keycloak';
 import credentials from './credentials';
 
 export const authOptions: NextAuthOptions = {
-  providers: [credentials, google],
+  providers: [credentials, google, keycloak],
   callbacks: {
     async session({session, token}) {
+      if (token.provider) {
+        (session as any).provider = token.provider;
+      }
+
       const user =
         session?.user?.email &&
         (await findGooveeUserByEmail(
@@ -44,7 +49,11 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
-    async jwt({user, token, trigger, session}: any) {
+    async jwt({user, token, trigger, session, account}: any) {
+      if (account) {
+        token.provider = account.provider;
+      }
+
       if (
         trigger === 'update' &&
         session?.email &&
