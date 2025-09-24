@@ -43,6 +43,7 @@ import {
   collectSelections,
   collectUniqueModels,
   collectUniqueSelections,
+  formatComponentCode,
 } from './helper';
 
 const CUSTOM_MODEL_PREFIX = 'GooveeTemplate';
@@ -54,10 +55,6 @@ function capitalCase(str: string) {
 
 export function formatCustomModelName(modelName: string) {
   return CUSTOM_MODEL_PREFIX + capitalCase(modelName);
-}
-
-export function formatComponentCode(name: string) {
-  return camelCase(name);
 }
 
 export function isRelationalField(field: Field): field is RelationalField {

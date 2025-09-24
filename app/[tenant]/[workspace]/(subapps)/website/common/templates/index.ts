@@ -1,7 +1,7 @@
 import {ComponentType} from 'react';
 
 import type {TemplateProps} from '../types';
-import {formatComponentCode} from '../utils/templates';
+import {formatComponentCode} from '../utils/helper';
 
 import {About1, about1Schema} from './about-1';
 import {About2, about2Schema} from './about-2';

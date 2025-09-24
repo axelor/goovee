@@ -95,6 +95,10 @@ export function formatCustomFieldName(name: string, prefix?: string) {
   return camelCase(`${prefix} ${name}`);
 }
 
+export function formatComponentCode(name: string) {
+  return camelCase(name);
+}
+
 export function getTemplateId(props: TemplateProps): string {
   const {contentId, mountType, lineId, code} = props;
   return [code, lineId, contentId, mountType].filter(Boolean).join('-');

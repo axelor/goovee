@@ -1,4 +1,4 @@
-import {formatComponentCode} from '../utils/templates';
+import {formatComponentCode} from '../utils/helper';
 import {about10Schema} from './about-10/meta';
 import {about13Schema} from './about-13/meta';
 import {about18Schema} from './about-18/meta';
