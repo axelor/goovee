@@ -23,7 +23,7 @@ import {
   MOUNT_TYPE,
 } from '../constants';
 import {LayoutMountType, MenuItem} from '../types';
-import {Cache} from '../utils/helper';
+import {Cache, chunkArray} from '../utils/helper';
 import {metaModels} from '../templates/meta-models';
 import {Maybe} from '@/types/util';
 
@@ -443,7 +443,6 @@ export async function findWebsitePageBySlug({
   user,
   tenantId,
   contentId,
-  path,
 }: {
   websiteSlug: Website['slug'];
   websitePageSlug: WebsitePage['slug'];
@@ -451,10 +450,6 @@ export async function findWebsitePageBySlug({
   user?: User;
   tenantId: Tenant['id'];
   contentId?: string;
-  /** @param contentId is required if path is provide
-   * ex: path:[ "team1Reviews", "1", "attrs", "image" ]
-   **/
-  path?: string[];
 }) {
   if (!(websiteSlug && websitePageSlug && workspaceURL && tenantId)) {
     return null;
@@ -512,20 +507,7 @@ export async function findWebsitePageBySlug({
   });
 
   if (!page) return null;
-  let contentLines: (ReplacedContentLine | undefined)[] = [];
-
-  if (page.contentLines?.length) {
-    contentLines = await populateContent({
-      contentLines: page?.contentLines,
-      tenantId,
-      path,
-    });
-  }
-
-  return {
-    ...page,
-    contentLines,
-  };
+  return page;
 }
 
 export async function findAllMainWebsiteLanguages({
@@ -770,7 +752,7 @@ async function getCustomRelationalFieldTypeData({
   }
 }
 
-type ContentLine = {
+export type ContentLine = {
   id: string;
   version: number;
   sequence?: number;
@@ -788,7 +770,7 @@ type ContentLine = {
   };
 };
 
-type ReplacedContentLine = {
+export type ReplacedContentLine = {
   id: string;
   version: number;
   sequence?: number;
@@ -870,7 +852,7 @@ const populateAttributes = async ({
   for (const fieldName of fieldNames) {
     const value = attributes[fieldName];
 
-    const isPrimitiveType = typeof value !== 'object' && value !== null;
+    const isPrimitiveType = typeof value !== 'object';
 
     if (isPrimitiveType) {
       data[fieldName] = value;
@@ -928,49 +910,104 @@ const populateAttributes = async ({
   return data;
 };
 
-async function populateContent({
+export async function populateContent({
+  line,
+  path,
+  tenantId,
+  modelFieldCache = new Cache(),
+  modelRecordCache = new Cache(),
+  jsonModelCache = new Cache(),
+  jsonModelRecordCache = new Cache(),
+}: {
+  line: ContentLine;
+  /**
+   * ex: path:[ "team1Reviews", "1", "attrs", "image" ]
+   **/
+  path?: string[];
+  tenantId: Tenant['id'];
+  modelFieldCache?: Cache;
+  modelRecordCache?: Cache;
+  jsonModelCache?: Cache;
+  jsonModelRecordCache?: Cache;
+}): Promise<ReplacedContentLine> {
+  if (!line.content) return line;
+  const attrs = await line.content?.attrs;
+  return {
+    ...line,
+    content: {
+      ...line.content,
+      attrs: await populateAttributes({
+        attributes: attrs,
+        modelName: CONTENT_MODEL,
+        modelField: CONTENT_MODEL_ATTRS,
+        tenantId,
+        modelFieldCache,
+        modelRecordCache,
+        jsonModelCache,
+        jsonModelRecordCache,
+        path: path,
+      }),
+    },
+  };
+}
+
+export function populateLinesByChunk({
   contentLines,
   tenantId,
   path,
+  chunkSize,
 }: {
+  /**
+   * ex: path:[ "team1Reviews", "1", "attrs", "image" ]
+   **/
   path?: string[];
+  chunkSize?: number;
   contentLines: ContentLine[];
   tenantId: Tenant['id'];
-}): Promise<(ReplacedContentLine | undefined)[]> {
+}): Promise<ReplacedContentLine[]>[] {
   const jsonModelCache = new Cache();
   const jsonModelRecordCache = new Cache();
   const modelRecordCache = new Cache();
   const modelFieldCache = new Cache();
 
-  const populatedContentLines = await Promise.allSettled(
-    contentLines.map(async line => {
-      if (!line.content) return line;
-      const attrs = await line.content?.attrs;
-      return {
-        ...line,
-        content: {
-          ...line.content,
-          attrs: await populateAttributes({
-            attributes: attrs,
-            modelName: CONTENT_MODEL,
-            modelField: CONTENT_MODEL_ATTRS,
+  const chunkedContentLines = chunkSize
+    ? chunkArray(contentLines, chunkSize)
+    : [contentLines];
+
+  const promises: Promise<ReplacedContentLine[]>[] = [];
+  let previousPromise: Promise<any> = Promise.resolve();
+
+  for (const chunk of chunkedContentLines) {
+    const currentPromise = previousPromise.then(async () => {
+      const populatedContentLines = await Promise.allSettled(
+        chunk.map(line =>
+          populateContent({
+            line,
             tenantId,
+            path,
             modelFieldCache,
             modelRecordCache,
             jsonModelCache,
             jsonModelRecordCache,
-            path: path,
           }),
-        },
-      };
-    }),
-  ).then(results =>
-    results.map((result, i) =>
-      result.status === 'fulfilled' ? result.value : undefined,
-    ),
-  );
+        ),
+      ).then(
+        results =>
+          results
+            .map(result =>
+              result.status === 'fulfilled' ? result.value : undefined,
+            )
+            .filter(Boolean) as ReplacedContentLine[],
+      );
 
-  return populatedContentLines;
+      return populatedContentLines;
+    });
+
+    promises.push(currentPromise);
+    previousPromise = currentPromise; // chain for next chunk
+  }
+
+  return promises;
 }
 
 async function findModelRecords({

@@ -238,7 +238,7 @@ export async function updateWikiContent({
     };
   }
 
-  const attributes = contentLine.content?.attrs;
+  const attributes = await contentLine.content?.attrs;
 
   const client = await manager.getClient(tenantId);
   const fieldName = getWiki1ContentFieldName();

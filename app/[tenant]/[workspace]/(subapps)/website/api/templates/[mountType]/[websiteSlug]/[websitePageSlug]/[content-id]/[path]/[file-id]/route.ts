@@ -6,6 +6,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {
   findWebsiteBySlug,
   findWebsitePageBySlug,
+  populateContent,
 } from '@/subapps/website/common/orm/website';
 import {get} from 'lodash';
 import {findFile, streamFile} from '@/utils/download';
@@ -82,14 +83,18 @@ export async function GET(
       user,
       tenantId,
       contentId,
-      path: stringToPath(path),
     });
 
-    if (!websitePage) {
+    if (!websitePage?.contentLines?.[0]) {
       return new NextResponse('Page not found', {status: 404});
     }
 
-    attrs = websitePage.contentLines?.[0]?.content?.attrs;
+    const line = await populateContent({
+      line: websitePage.contentLines[0],
+      tenantId,
+      path: stringToPath(path),
+    });
+    attrs = line?.content?.attrs;
   } else {
     const website = await findWebsiteBySlug({
       websiteSlug,
