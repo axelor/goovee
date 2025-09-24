@@ -7,6 +7,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {
   canEditWiki,
   findWebsitePageBySlug,
+  findWebsitePageSeoBySlug,
 } from '@/subapps/website/common/orm/website';
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
 import {
@@ -32,7 +33,7 @@ export async function generateMetadata({
   const session = await getSession();
   const user = session?.user;
 
-  const websitePage = await findWebsitePageBySlug({
+  const websitePage = await findWebsitePageSeoBySlug({
     websiteSlug,
     websitePageSlug,
     workspaceURL,

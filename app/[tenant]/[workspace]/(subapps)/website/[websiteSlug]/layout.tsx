@@ -11,6 +11,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {
   findAllMainWebsiteLanguages,
   findWebsiteBySlug,
+  findWebsiteSeoBySlug,
 } from '@/subapps/website/common/orm/website';
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
 import {getWebsiteComponent} from '@/subapps/website/common/utils/component';
@@ -36,7 +37,7 @@ export async function generateMetadata({
   const session = await getSession();
   const user = session?.user;
 
-  const website = await findWebsiteBySlug({
+  const website = await findWebsiteSeoBySlug({
     websiteSlug,
     workspaceURL,
     user,

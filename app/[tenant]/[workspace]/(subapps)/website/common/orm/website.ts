@@ -162,6 +162,41 @@ async function buildMenuHierarchy(
   return menulines.filter((item: any) => !item.parentMenu);
 }
 
+export async function findWebsiteSeoBySlug({
+  websiteSlug,
+  workspaceURL,
+  user,
+  tenantId,
+}: {
+  websiteSlug: Website['slug'];
+  workspaceURL: PortalWorkspace['url'];
+  user?: User;
+  tenantId: Tenant['id'];
+}) {
+  if (!(websiteSlug && workspaceURL && tenantId)) {
+    return null;
+  }
+
+  const client = await manager.getClient(tenantId);
+
+  if (!client) {
+    return null;
+  }
+
+  const website = await client.aOSPortalCmsSite.findOne({
+    where: {
+      slug: websiteSlug,
+      mainWebsite: {workspaceSet: {url: workspaceURL}},
+      AND: [
+        await filterPrivate({tenantId, user}),
+        {OR: [{archived: false}, {archived: null}]},
+      ],
+    },
+    select: {name: true},
+  });
+  return website;
+}
+
 export async function findWebsiteBySlug({
   websiteSlug,
   workspaceURL,
@@ -356,6 +391,51 @@ export async function findAllWebsitePages({
   return pages;
 }
 
+export async function findWebsitePageSeoBySlug({
+  websiteSlug,
+  websitePageSlug,
+  workspaceURL,
+  user,
+  tenantId,
+}: {
+  websiteSlug: Website['slug'];
+  websitePageSlug: WebsitePage['slug'];
+  workspaceURL: PortalWorkspace['url'];
+  user?: User;
+  tenantId: Tenant['id'];
+}) {
+  if (!(websiteSlug && websitePageSlug && workspaceURL && tenantId)) {
+    return null;
+  }
+
+  const client = await manager.getClient(tenantId);
+
+  if (!client) {
+    return null;
+  }
+
+  const page = await client.aOSPortalCmsPage.findOne({
+    where: {
+      slug: websitePageSlug,
+      statusSelect: '1',
+      website: {
+        slug: websiteSlug,
+        mainWebsite: {
+          workspaceSet: {
+            url: workspaceURL,
+          },
+        },
+      },
+      AND: [
+        await filterPrivate({tenantId, user}),
+        {OR: [{archived: false}, {archived: null}]},
+      ],
+    },
+    select: {seoTitle: true, seoDescription: true, seoKeyword: true},
+  });
+  return page;
+}
+
 export async function findWebsitePageBySlug({
   websiteSlug,
   websitePageSlug,
@@ -407,9 +487,6 @@ export async function findWebsitePageBySlug({
     select: {
       isWiki: true,
       title: true,
-      seoTitle: true,
-      seoDescription: true,
-      seoKeyword: true,
       contentLines: {
         ...(contentId && {where: {content: {id: contentId}}}),
         select: {
