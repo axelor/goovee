@@ -11,7 +11,6 @@ import {
   findGooveeUserByEmail,
   findPartnerByEmail,
   findPartnerById,
-  registerContact,
   registerPartner,
   updatePartner,
 } from '@/orm/partner';
