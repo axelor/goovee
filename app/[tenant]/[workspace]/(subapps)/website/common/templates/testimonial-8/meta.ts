@@ -23,6 +23,16 @@ export const testimonial8Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial8Testimonial',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

@@ -60,6 +60,16 @@ export const footer15Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [socialLinksModel],
   metaModels: [metaFileModel],

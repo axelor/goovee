@@ -12,11 +12,13 @@ export function Portfolio11(props: TemplateProps<Portfolio11Data>) {
     portfolio11LinkTitle: linkTitle,
     portfolio11LinkHref: linkHref,
     portfolio11PortfolioList: portfolioList,
+    portfolio11WrapperClassName: wrapperClassName = 'bg-light',
+    portfolio11ContainerClassName: containerClassName = 'py-15 py-md-17',
   } = data || {};
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-15 py-md-17">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row">
           <div className="col-lg-11 col-xl-10 mx-auto mb-10">
             <h2 className="fs-16 text-uppercase text-muted text-center mb-3">

@@ -40,6 +40,16 @@ export const facts13Schema = {
       title: 'Data Value 2',
       type: 'integer',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [],
 } as const satisfies TemplateSchema;

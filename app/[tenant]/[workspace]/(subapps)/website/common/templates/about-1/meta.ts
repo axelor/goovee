@@ -35,6 +35,16 @@ export const about1Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],

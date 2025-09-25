@@ -49,6 +49,16 @@ export const about20Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [serviceList3Model],
   metaModels: [metaFileModel],

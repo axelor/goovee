@@ -43,6 +43,16 @@ export const pricing8Schema = {
       type: 'json-one-to-many',
       target: 'Faq5Questions',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [planModel, faq5QuestionsModel],
 } as const satisfies TemplateSchema;

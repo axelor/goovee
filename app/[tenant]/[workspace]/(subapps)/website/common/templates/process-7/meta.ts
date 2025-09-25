@@ -51,6 +51,16 @@ export const process7Schema = {
       type: 'json-one-to-many',
       target: 'Process7Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

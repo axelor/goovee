@@ -61,6 +61,16 @@ export const about19Schema = {
       type: 'json-one-to-many',
       target: 'About19AboutList2',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     bulletListModel,

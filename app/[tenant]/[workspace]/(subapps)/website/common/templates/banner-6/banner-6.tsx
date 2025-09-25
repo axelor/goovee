@@ -4,7 +4,12 @@ import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 
 export function Banner6(props: TemplateProps<Banner6Data>) {
   const {data} = props;
-  const {banner6Video, banner6Image} = data || {};
+  const {
+    banner6Video,
+    banner6Image,
+    banner6WrapperClassName: wrapperClassName = '',
+    banner6ContainerClassName: containerClassName = 'py-18 text-center',
+  } = data || {};
 
   const image = getMetaFileURL({
     metaFile: banner6Image,
@@ -20,9 +25,10 @@ export function Banner6(props: TemplateProps<Banner6Data>) {
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay"
+      className={`wrapper image-wrapper bg-image bg-overlay ${wrapperClassName}`}
+      data-code={props.code}
       style={{backgroundImage: `url(${image})`}}>
-      <div className="container py-18 text-center">
+      <div className={`container ${containerClassName}`}>
         <div className="row">
           <div className="col-lg-10 col-xl-10 col-xxl-8 mx-auto">
             <a

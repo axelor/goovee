@@ -32,6 +32,16 @@ export const portfolio2Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio2CarouselImages',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

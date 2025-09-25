@@ -17,6 +17,16 @@ export const hero15Schema = {
       type: 'json-one-to-many',
       target: 'Hero15Slides',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

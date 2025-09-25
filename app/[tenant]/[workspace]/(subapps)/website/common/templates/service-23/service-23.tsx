@@ -26,6 +26,8 @@ export function Service23(props: TemplateProps<Service23Data>) {
     service23Section3LinkHref,
     service23Section3Image,
     service23Section3Services,
+    service23WrapperClassName: wrapperClassName = 'bg-light',
+    service23ContainerClassName: containerClassName = 'py-15 py-md-17',
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -51,8 +53,8 @@ export function Service23(props: TemplateProps<Service23Data>) {
   const list3 = service23Section3Services?.map(item => item.attrs.title) || [];
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-15 py-md-17">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row text-center mb-10">
           <div className="col-md-10 col-lg-9 col-xxl-8 mx-auto">
             <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>

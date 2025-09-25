@@ -30,6 +30,16 @@ export const hero10Schema = {
       title: 'Button Link',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [],
 } as const satisfies TemplateSchema;

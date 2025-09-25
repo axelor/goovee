@@ -35,6 +35,16 @@ export const testimonial16Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial16Testimonial',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

@@ -23,6 +23,16 @@ export const banner2Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],

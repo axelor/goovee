@@ -15,6 +15,8 @@ export function Hero3(props: TemplateProps<Hero3Data>) {
     hero3Image,
     hero3Video,
     hero3Typewriter: typewriter,
+    hero3WrapperClassName: wrapperClassName = 'bg-dark angled lower-start',
+    hero3ContainerClassName: containerClassName = 'pt-7 pt-md-11 pb-8',
   } = data || {};
 
   const image = getMetaFileURL({
@@ -29,8 +31,8 @@ export function Hero3(props: TemplateProps<Hero3Data>) {
     ...props,
   });
   return (
-    <section className="wrapper bg-dark angled lower-start">
-      <div className="container pt-7 pt-md-11 pb-8">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gx-0 gy-10 align-items-center">
           <div className="col-lg-6">
             <h1

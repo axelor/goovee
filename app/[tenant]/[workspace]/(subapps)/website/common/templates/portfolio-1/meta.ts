@@ -27,6 +27,16 @@ export const portfolio1Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio1Images',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

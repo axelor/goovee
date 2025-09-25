@@ -27,6 +27,16 @@ export const blog5Schema = {
       type: 'json-one-to-many',
       target: 'Blog5BlogList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

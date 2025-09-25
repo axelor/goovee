@@ -9,6 +9,8 @@ export function Contact6(props: TemplateProps<Contact6Data>) {
     contact6Title: title,
     contact6Image,
     contact6ContactInfo: contactInfo,
+    contact6WrapperClassName: wrapperClassName = 'bg-soft-primary',
+    contact6ContainerClassName: containerClassName = 'py-14 py-md-17',
   } = data || {};
 
   const image = getMetaFileURL({
@@ -18,8 +20,8 @@ export function Contact6(props: TemplateProps<Contact6Data>) {
   });
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-14 py-md-17">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>

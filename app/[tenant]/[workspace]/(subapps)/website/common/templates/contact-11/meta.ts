@@ -36,6 +36,16 @@ export const contact11Schema = {
       target: 'ContactInfo',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [contactInfoModel],
   metaModels: [metaFileModel],

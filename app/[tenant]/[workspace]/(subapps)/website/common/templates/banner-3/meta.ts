@@ -31,6 +31,16 @@ export const banner3Schema = {
       widget: 'binary-link',
       widgetAttrs: {'x-accept': 'video/*'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],

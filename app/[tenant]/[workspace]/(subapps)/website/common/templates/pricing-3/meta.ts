@@ -52,6 +52,16 @@ export const pricing3Schema = {
       type: 'json-one-to-many',
       target: 'Plan',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [planModel],
 } as const satisfies TemplateSchema;

@@ -32,6 +32,16 @@ export const portfolio4Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio4PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

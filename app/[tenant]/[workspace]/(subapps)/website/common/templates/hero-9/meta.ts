@@ -54,6 +54,16 @@ export const hero9Schema = {
       type: 'json-one-to-many',
       target: 'Hero9Typewriter',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

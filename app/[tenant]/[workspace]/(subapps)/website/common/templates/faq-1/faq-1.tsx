@@ -9,6 +9,8 @@ export function FAQ1(props: TemplateProps<Faq1Data>) {
     faq1Title: title,
     faq1Caption: caption,
     faq1Questions: questions,
+    faq1WrapperClassName: wrapperClassName = '',
+    faq1ContainerClassName: containerClassName = '',
   } = data || {};
 
   const half = Math.ceil((questions?.length ?? 0) / 2);
@@ -16,42 +18,44 @@ export function FAQ1(props: TemplateProps<Faq1Data>) {
   const questions2 = questions?.slice(half);
 
   return (
-    <div className="container">
-      <Fragment>
-        <h2 className="fs-15 text-uppercase text-muted mb-3 text-center">
-          {caption}
-        </h2>
-        <h3 className="display-4 mb-10 px-lg-12 text-center">{title}</h3>
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
+        <Fragment>
+          <h2 className="fs-15 text-uppercase text-muted mb-3 text-center">
+            {caption}
+          </h2>
+          <h3 className="display-4 mb-10 px-lg-12 text-center">{title}</h3>
 
-        <div className="accordion-wrapper" id={`faq-1-${props.contentId}`}>
-          <div className="row">
-            <div className="col-md-6">
-              {questions1?.map(({id, attrs: item}) => (
-                <Accordion
-                  key={id}
-                  no={id}
-                  expand={item.expand}
-                  heading={item.heading}
-                  body={item.body}
-                  parentId={`faq-1-${props.contentId}`}
-                />
-              ))}
-            </div>
-            <div className="col-md-6">
-              {questions2?.map(({id, attrs: item}) => (
-                <Accordion
-                  key={id}
-                  no={id}
-                  expand={item.expand}
-                  heading={item.heading}
-                  body={item.body}
-                  parentId={`faq-1-${props.contentId}`}
-                />
-              ))}
+          <div className="accordion-wrapper" id={`faq-1-${props.contentId}`}>
+            <div className="row">
+              <div className="col-md-6">
+                {questions1?.map(({id, attrs: item}) => (
+                  <Accordion
+                    key={id}
+                    no={id}
+                    expand={item.expand}
+                    heading={item.heading}
+                    body={item.body}
+                    parentId={`faq-1-${props.contentId}`}
+                  />
+                ))}
+              </div>
+              <div className="col-md-6">
+                {questions2?.map(({id, attrs: item}) => (
+                  <Accordion
+                    key={id}
+                    no={id}
+                    expand={item.expand}
+                    heading={item.heading}
+                    body={item.body}
+                    parentId={`faq-1-${props.contentId}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </Fragment>
-    </div>
+        </Fragment>
+      </div>
+    </section>
   );
 }

@@ -30,6 +30,16 @@ export const about5Schema = {
       target: 'ProgressList',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [progressListModel],
   metaModels: [metaFileModel],

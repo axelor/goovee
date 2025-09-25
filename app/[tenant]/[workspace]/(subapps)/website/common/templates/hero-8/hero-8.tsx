@@ -22,6 +22,8 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
     hero8CountUp: countUp,
     hero8Suffix: suffix,
     hero8Heading: heading,
+    hero8WrapperClassName: wrapperClassName = 'bg-soft-primary rounded-4',
+    hero8ContainerClassName: containerClassName = 'p-md-10 py-xl-11 px-xl-15',
   } = data || {};
 
   const image = getMetaFileURL({
@@ -31,8 +33,10 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
   });
 
   return (
-    <div className="card bg-soft-primary rounded-4 mt-2 mb-13 mb-md-17">
-      <div className="card-body p-md-10 py-xl-11 px-xl-15">
+    <section
+      className={`wrapper card ${wrapperClassName}`}
+      data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gx-lg-8 gx-xl-0 gy-10 align-items-center">
           <div className="col-lg-6 order-lg-2 d-flex position-relative">
             <img
@@ -56,7 +60,7 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
                     </div>
 
                     <div>
-                      <h3 className="counter mb-0 text-nowrap">
+                      <h3 className="counter mb-1 text-nowrap">
                         <CountUp end={countUp || 0} suffix={suffix} />
                       </h3>
                       <p className="fs-14 lh-sm mb-0 text-nowrap">{heading}</p>
@@ -98,6 +102,6 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

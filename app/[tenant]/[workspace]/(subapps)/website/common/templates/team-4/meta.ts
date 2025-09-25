@@ -18,6 +18,16 @@ export const team4Schema = {
       type: 'json-one-to-many',
       target: 'Team4Member',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

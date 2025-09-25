@@ -46,6 +46,16 @@ export const process14Schema = {
       type: 'json-one-to-many',
       target: 'Process14Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

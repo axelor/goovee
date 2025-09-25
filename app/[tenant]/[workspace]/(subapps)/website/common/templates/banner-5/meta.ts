@@ -20,6 +20,16 @@ export const banner5Schema = {
       title: 'Video',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [],
 } as const satisfies TemplateSchema;

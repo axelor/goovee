@@ -92,6 +92,16 @@ export const contact10Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [socialLinksModel],
 } as const satisfies TemplateSchema;

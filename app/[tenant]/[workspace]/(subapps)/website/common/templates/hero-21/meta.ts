@@ -55,6 +55,16 @@ export const hero21Schema = {
       type: 'json-one-to-many',
       target: 'Clients',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [clientsModel],
   metaModels: [metaFileModel],

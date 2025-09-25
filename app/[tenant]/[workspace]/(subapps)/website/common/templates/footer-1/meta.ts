@@ -87,6 +87,16 @@ export const footer1Schema = {
       title: 'Form Description',
       type: 'string',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     socialLinksModel,

@@ -23,6 +23,9 @@ export function Footer1(props: TemplateProps<Footer1Data>) {
     footer1NavLinks: navLinks,
     footer1FormTitle: formTitle,
     footer1FormDescription: formDescription,
+    footer1FooterClassName: footerClassName = 'bg-navy text-inverse',
+    footer1ContainerClassName:
+      containerClassName = 'pt-15 pt-md-17 pb-13 pb-md-15',
   } = data || {};
 
   const logo = getMetaFileURL({
@@ -38,8 +41,8 @@ export function Footer1(props: TemplateProps<Footer1Data>) {
   }));
 
   return (
-    <footer className="bg-navy text-inverse">
-      <div className="container pt-15 pt-md-17 pb-13 pb-md-15">
+    <footer className={`footer ${footerClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="d-lg-flex flex-row align-items-lg-center">
           <h3 className="display-4 mb-6 mb-lg-0 pe-lg-20 pe-xl-22 pe-xxl-25 text-white">
             {title}

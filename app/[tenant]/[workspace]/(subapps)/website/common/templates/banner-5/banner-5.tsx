@@ -4,11 +4,16 @@ import Plyr from '@/subapps/website/common/components/reuseable/Plyr';
 
 export function Banner5(props: TemplateProps<Banner5Data>) {
   const {data} = props;
-  const {banner5Heading: heading, banner5Video: video} = data || {};
+  const {
+    banner5Heading: heading,
+    banner5Video: video,
+    banner5WrapperClassName: wrapperClassName = 'bg-soft-primary',
+    banner5ContainerClassName: containerClassName = 'py-14 py-md-16',
+  } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-14 py-md-16">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row">
           <div className="col-xl-9 col-xxl-7 mx-auto text-center">
             <i className="icn-flower text-leaf fs-30 opacity-25"></i>

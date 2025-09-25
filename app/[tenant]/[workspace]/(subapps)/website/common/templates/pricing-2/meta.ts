@@ -12,16 +12,6 @@ export const pricing2Schema = {
   type: Template.block,
   fields: [
     {
-      name: 'title',
-      title: 'Title',
-      type: 'string',
-    },
-    {
-      name: 'caption',
-      title: 'Caption',
-      type: 'string',
-    },
-    {
       name: 'switchLeftLabel',
       title: 'Switch Left Label',
       type: 'string',
@@ -37,6 +27,11 @@ export const pricing2Schema = {
       type: 'json-one-to-many',
       target: 'Plan',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
   ],
   models: [planModel],
 } as const satisfies TemplateSchema;
@@ -47,9 +42,6 @@ export const pricing2Demos: Demo<typeof pricing2Schema>[] = [
   {
     language: 'en_US',
     data: {
-      pricing2Title: 'Our Pricing',
-      pricing2Caption:
-        'We offer great prices, premium products and quality service for your business.',
       pricing2SwitchLeftLabel: 'Monthly',
       pricing2SwitchRightLabel: 'Yearly',
       pricing2Plans: [
@@ -113,9 +105,6 @@ export const pricing2Demos: Demo<typeof pricing2Schema>[] = [
   {
     language: 'fr_FR',
     data: {
-      pricing2Title: 'Nos tarifs',
-      pricing2Caption:
-        'Nous offrons des prix avantageux, des produits haut de gamme et un service de qualité pour votre entreprise.',
       pricing2SwitchLeftLabel: 'Mensuel',
       pricing2SwitchRightLabel: 'Annuel',
       pricing2Plans: [

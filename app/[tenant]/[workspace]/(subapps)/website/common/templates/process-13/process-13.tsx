@@ -16,6 +16,8 @@ export function Process13(props: TemplateProps<Process13Data>) {
     process13Heading: heading,
     process13Video,
     process13Processes: processes,
+    process13WrapperClassName: wrapperClassName = 'bg-light',
+    process13ContainerClassName: containerClassName = 'py-15 py-md-17',
   } = data || {};
 
   const videoSrc = getMetaFileURL({
@@ -24,8 +26,8 @@ export function Process13(props: TemplateProps<Process13Data>) {
     ...props,
   });
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-15 py-md-17">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row text-center">
           <div className="col-lg-10 mx-auto position-relative">
             <div className="position-relative">

@@ -11,6 +11,9 @@ export function Banner1(props: TemplateProps<Banner1Data>) {
     banner1Image,
     banner1Button1: button1,
     banner1Button2: button2,
+    banner1WrapperClassName: wrapperClassName = 'bg-soft-primary',
+    banner1ContainerClassName:
+      containerClassName = 'pt-5 pb-15 pt-lg-10 pb-lg-2',
   } = data || {};
 
   const image = getMetaFileURL({
@@ -20,8 +23,8 @@ export function Banner1(props: TemplateProps<Banner1Data>) {
   });
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container pt-5 pb-15 pt-lg-10 pb-lg-2">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gx-lg-8 gx-xl-12 align-items-center">
           <div className="col-lg-6">
             <img alt="" src={image} className="w-100" />

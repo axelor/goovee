@@ -11,12 +11,14 @@ export function Blog5(props: TemplateProps<Blog5Data>) {
     blog5Title: title,
     blog5Pagination: pagination,
     blog5BlogList: blogList = [],
+    blog5WrapperClassName: wrapperClassName = 'bg-soft-primary',
+    blog5ContainerClassName: containerClassName = 'py-14 py-md-16',
   } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
       <div className="overflow-hidden">
-        <div className="container py-14 py-md-16">
+        <div className={`container ${containerClassName}`}>
           <div className="row">
             <div className="col-xl-7 col-xxl-6 mx-auto text-center">
               <i className="icn-flower text-leaf fs-30 opacity-25"></i>

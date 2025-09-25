@@ -10,11 +10,14 @@ export function Hero10(props: TemplateProps<Hero10Data>) {
     hero10Description: description,
     hero10ButtonLabel: buttonLabel,
     hero10ButtonLink: buttonLink,
+    hero10WrapperClassName: wrapperClassName = 'bg-light',
+    hero10ContainerClassName:
+      containerClassName = 'pt-11 pt-md-13 pb-11 pb-md-19 pb-lg-22 text-center',
   } = data || {};
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container pt-11 pt-md-13 pb-11 pb-md-19 pb-lg-22 text-center">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row">
           <div className="col-lg-8 col-xl-7 col-xxl-6 mx-auto">
             <h1

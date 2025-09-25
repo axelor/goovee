@@ -10,6 +10,9 @@ export function Hero22(props: TemplateProps<Hero22Data>) {
     hero22Caption: caption,
     hero22Video,
     hero22BackgroundImage,
+    hero22WrapperClassName: wrapperClassName = '',
+    hero22ContainerClassName:
+      containerClassName = 'pt-18 pt-lg-21 pb-17 pb-lg-19 text-center',
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -24,11 +27,13 @@ export function Hero22(props: TemplateProps<Hero22Data>) {
     ...props,
   });
   return (
-    <section className="section-frame br-fix overflow-hidden">
+    <section
+      className={`wrapper section-frame br-fix overflow-hidden ${wrapperClassName}`}
+      data-code={props.code}>
       <div
-        className="wrapper image-wrapper bg-cover bg-image bg-overlay bg-overlay-500"
+        className={`wrapper image-wrapper bg-cover bg-image bg-overlay bg-overlay-500`}
         style={{backgroundImage: `url(${backgroundImage})`}}>
-        <div className="container pt-18 pt-lg-21 pb-17 pb-lg-19 text-center">
+        <div className={`container ${containerClassName}`}>
           <div className="row">
             <div className="col-md-9 col-lg-8 col-xl-7 col-xxl-7 mx-auto">
               <h2

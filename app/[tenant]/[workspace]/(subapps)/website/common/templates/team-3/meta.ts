@@ -33,6 +33,16 @@ export const team3Schema = {
       type: 'json-one-to-many',
       target: 'Team3Member',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

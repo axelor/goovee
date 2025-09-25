@@ -28,6 +28,16 @@ export const portfolio8Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio8PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

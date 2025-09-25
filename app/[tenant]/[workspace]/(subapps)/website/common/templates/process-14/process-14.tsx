@@ -13,11 +13,13 @@ export function Process14(props: TemplateProps<Process14Data>) {
     process14LinkTitle: linkTitle,
     process14LinkHref: linkHref,
     process14Processes: processes,
+    process14WrapperClassName: wrapperClassName = 'bg-light',
+    process14ContainerClassName: containerClassName = 'pb-14 pb-md-17',
   } = data || {};
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container pb-14 pb-md-17">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gx-md-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-6 order-lg-2">
             {processes?.map(item => (

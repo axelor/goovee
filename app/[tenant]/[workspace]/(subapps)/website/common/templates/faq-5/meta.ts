@@ -17,6 +17,16 @@ export const faq5Schema = {
       type: 'json-one-to-many',
       target: 'Faq5Questions',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [faq5QuestionsModel],
 } as const satisfies TemplateSchema;

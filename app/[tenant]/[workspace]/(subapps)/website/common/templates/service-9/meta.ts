@@ -47,6 +47,16 @@ export const service9Schema = {
       type: 'json-one-to-many',
       target: 'Service9ServiceList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

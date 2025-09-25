@@ -48,6 +48,16 @@ export const hero2Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;

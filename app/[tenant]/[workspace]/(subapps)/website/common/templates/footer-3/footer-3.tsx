@@ -24,6 +24,8 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
     footer3Helps: helps,
     footer3LearnMore: learnMore,
     footer3SocialLinks,
+    footer3FooterClassName: footerClassName = 'bg-gradient-reverse-primary',
+    footer3ContainerClassName: containerClassName = 'pt-13 pt-md-15 pb-7',
   } = data || {};
 
   const image = getMetaFileURL({
@@ -55,8 +57,8 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
   };
 
   return (
-    <footer className="bg-gradient-reverse-primary">
-      <div className="container pt-13 pt-md-15 pb-7">
+    <footer className={`footer ${footerClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div
           className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400 mb-13"
           style={{backgroundImage: `url(${image})`}}>

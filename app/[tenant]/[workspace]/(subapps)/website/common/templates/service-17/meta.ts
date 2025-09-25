@@ -90,6 +90,16 @@ export const service17Schema = {
       target: 'BulletList',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [bulletListModel],
   metaModels: [metaFileModel],

@@ -27,6 +27,16 @@ export const faq2Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [accordionModel],
 } as const satisfies TemplateSchema;

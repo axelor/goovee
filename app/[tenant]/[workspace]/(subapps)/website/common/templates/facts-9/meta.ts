@@ -31,6 +31,16 @@ export const facts9Schema = {
       type: 'json-one-to-many',
       target: 'Facts9Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

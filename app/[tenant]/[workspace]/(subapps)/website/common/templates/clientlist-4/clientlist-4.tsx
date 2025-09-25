@@ -9,11 +9,13 @@ export function Clientlist4(props: TemplateProps<Clientlist4Data>) {
     clientlist4Title: title,
     clientlist4Caption: caption,
     clientlist4Clients: clients,
+    clientlist4WrapperClassName: wrapperClassName = 'bg-gray',
+    clientlist4ContainerClassName: containerClassName = 'py-14 py-md-16',
   } = data || {};
 
   return (
-    <section className="wrapper bg-gray">
-      <div className="container py-14 py-md-16">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0 mb-10">
           <div className="col-lg-4 mt-lg-2">
             <h3 className="display-4 mb-3">{title}</h3>

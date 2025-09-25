@@ -18,6 +18,8 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
     footer9Helps: helps,
     footer9FooterNav: footerNav,
     footer9SocialLinks,
+    footer9FooterClassName: footerClassName = 'bg-dark text-inverse',
+    footer9ContainerClassName: containerClassName = 'py-13 py-md-15',
   } = data || {};
 
   const logo = getMetaFileURL({
@@ -49,8 +51,8 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
   };
 
   return (
-    <footer className="bg-dark text-inverse">
-      <div className="container py-13 py-md-15">
+    <footer className={`footer ${footerClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-lg-4">
             <div className="widget">

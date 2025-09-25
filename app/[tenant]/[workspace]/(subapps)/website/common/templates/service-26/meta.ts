@@ -22,6 +22,16 @@ export const service26Schema = {
       type: 'json-one-to-many',
       target: 'Service26Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [
     {

@@ -13,6 +13,9 @@ export function Contact4(props: TemplateProps<Contact4Data>) {
     contact4LinkText: linkText,
     contact4LinkUrl: linkUrl,
     contact4Image,
+    contact4WrapperClassName:
+      wrapperClassName = 'bg-light angled upper-end lower-end',
+    contact4ContainerClassName: containerClassName = '',
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,8 +25,8 @@ export function Contact4(props: TemplateProps<Contact4Data>) {
   });
 
   return (
-    <section className="wrapper bg-light angled upper-end lower-end">
-      <div className="container">
+    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+      <div className={`container ${containerClassName}`}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-10 mb-md-14 align-items-center">
           <div className="col-lg-6">
             <figure>

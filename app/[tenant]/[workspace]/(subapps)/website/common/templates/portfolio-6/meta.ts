@@ -117,6 +117,16 @@ export const portfolio6Schema = {
       title: 'Title 3',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],

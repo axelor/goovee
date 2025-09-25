@@ -4,8 +4,6 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {linealIcons} from '@/subapps/website/common/icons/lineal';
-import {startCase} from 'lodash-es';
 import {planModel} from '../json-models';
 
 export const pricing4Schema = {
@@ -33,6 +31,36 @@ export const pricing4Schema = {
       title: 'Plans',
       type: 'json-one-to-many',
       target: 'Plan',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'innerWrapper1ClassName',
+      title: 'Inner Wrapper 1 Class Name',
+      type: 'string',
+    },
+    {
+      name: 'innerContainer1ClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
+    {
+      name: 'innerWrapper2ClassName',
+      title: 'Inner Wrapper 2 Class Name',
+      type: 'string',
+    },
+    {
+      name: 'innerContainer2ClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
+    {
+      name: 'pricingWrapperClassName',
+      title: 'Pricing Wrapper Class Name',
+      type: 'string',
     },
   ],
   models: [planModel],

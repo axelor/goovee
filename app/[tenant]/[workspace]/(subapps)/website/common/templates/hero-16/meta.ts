@@ -63,6 +63,16 @@ export const hero16Schema = {
       title: 'Heading',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
