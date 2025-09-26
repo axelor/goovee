@@ -171,6 +171,10 @@ export async function createCustomFields({
           ...WidgetAttrsMap[field.type],
           ...field.widgetAttrs,
         }),
+        ...('defaultValue' in field &&
+          field.defaultValue != null && {
+            defaultValue: String(field.defaultValue),
+          }),
         ...(isRelational && {targetModel: field.target}),
         ...(isJsonRelational && {
           targetJsonModel: {select: {name: field.target}},
@@ -794,12 +798,25 @@ async function createAttrs(props: {
   data: any;
   fileCache: Cache<Promise<{id: string}>>;
 }) {
-  const attrs: Record<string, any> = {};
   const {tenantId, fields, schema, data, fileCache} = props;
+  const {attrs, fieldsMap} = fields.reduce<{
+    attrs: Record<string, any>;
+    fieldsMap: Map<string, Field>;
+  }>(
+    (acc, field) => {
+      acc.fieldsMap.set(field.name, field);
+      if ('defaultValue' in field && field.defaultValue != null) {
+        acc.attrs[field.name] = field.defaultValue;
+      }
+      return acc;
+    },
+    {attrs: {}, fieldsMap: new Map()},
+  );
+
   const models = collectUniqueModels(schema);
   await Promise.all(
     Object.entries(data || {}).map(async ([key, value]: [string, any]) => {
-      const field = fields.find(f => f.name === key);
+      const field = fieldsMap.get(key);
       if (!field) return;
       if (isJsonRelationalField(field)) {
         const modelFields = models.get(field.target)!.fields;

@@ -57,6 +57,7 @@ type Icon = (typeof fontAwesome)[number];
 type BooleanField = CommonField & {
   type: 'boolean';
   title: string;
+  defaultValue?: boolean;
   widget?:
     | 'InlineCheckbox'
     | 'Toggle'
@@ -73,6 +74,7 @@ type BooleanField = CommonField & {
 type IntegerField = CommonField & {
   type: 'integer';
   title: string;
+  defaultValue?: number;
   selection?: SelectionOption<number>[] | string;
   widget?:
     | 'RelativeTime'
@@ -89,6 +91,7 @@ type IntegerField = CommonField & {
 type StringField = CommonField & {
   type: 'string';
   title: string;
+  defaultValue?: string;
   selection?: SelectionOption<string>[] | string;
   widget?:
     | 'Email'
@@ -107,6 +110,7 @@ type StringField = CommonField & {
 type DecimalField = CommonField & {
   type: 'decimal';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'RelativeTime'
     | 'Duration'
@@ -122,6 +126,7 @@ type DecimalField = CommonField & {
 type DatetimeField = CommonField & {
   type: 'datetime';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'NavSelect'
     | 'CheckboxSelect'
@@ -133,6 +138,7 @@ type DatetimeField = CommonField & {
 type DateField = CommonField & {
   type: 'date';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'NavSelect'
     | 'CheckboxSelect'
@@ -144,6 +150,7 @@ type DateField = CommonField & {
 type TimeField = CommonField & {
   type: 'time';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'NavSelect'
     | 'CheckboxSelect'

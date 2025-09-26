@@ -56,6 +56,7 @@ To add a new template, follow these steps:
           title: 'Title',
           type: 'string',
           required: true,
+          defaultValue: 'Default Title', // Example of a default value
         },
         {
           name: 'subTitle',
@@ -380,6 +381,7 @@ Each object in the `fields` array defines a single piece of content for the temp
 - **`name`** (string): The `camelCase` name of the field, used to access its data.
 - **`title`** (string): A `Start Case` label for the field in the UI.
 - **`required`** (boolean, optional): Whether the field must have a value.
+- **`defaultValue`** (any, optional): Sets a default value for the field when a new content item is created. This is supported for primitive field types (`string`, `integer`, `decimal`, `boolean`, `date`, `time`, `datetime`).
 - **`widgetAttrs`** (Record<string, string>, optional): Allows passing arbitrary string attributes to the rendering widget for custom styling or behavior.
 
 ---
