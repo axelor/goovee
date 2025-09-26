@@ -18,9 +18,8 @@ export function Footer5(props: TemplateProps<Footer5Data>) {
     footer5NewsletterDescription: newsletterDescription,
     footer5Links: links,
     footer5SocialLinks,
-    footer5FooterClassName: footerClassName = 'bg-dark text-inverse',
-    footer5ContainerClassName:
-      containerClassName = 'pt-15 pt-md-17 pb-13 pb-md-15',
+    footer5FooterClassName: footerClassName,
+    footer5ContainerClassName: containerClassName,
   } = data || {};
 
   const logo = getMetaFileURL({
@@ -37,8 +36,8 @@ export function Footer5(props: TemplateProps<Footer5Data>) {
     })) ?? [];
 
   return (
-    <footer className={`footer ${footerClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">

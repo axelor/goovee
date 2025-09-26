@@ -16,8 +16,8 @@ export function About25(props: TemplateProps<About25Data>) {
     about25Heading: heading,
     about25Description: description,
     about25AboutList: aboutList,
-    about25WrapperClassName: wrapperClassName = 'bg-gray',
-    about25ContainerClassName: containerClassName = 'py-14 py-md-16',
+    about25WrapperClassName: wrapperClassName,
+    about25ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -27,8 +27,8 @@ export function About25(props: TemplateProps<About25Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-6 align-items-center">
           <div className="col-md-8 col-lg-6 order-lg-2 mx-auto">
             <div className="img-mask mask-2">

@@ -14,9 +14,8 @@ export function Hero21(props: TemplateProps<Hero21Data>) {
     hero21Image,
     hero21ListTitle: listTitle,
     hero21Clients: clients,
-    hero21WrapperClassName: wrapperClassName = 'bg-light',
-    hero21ContainerClassName:
-      containerClassName = 'pt-10 pt-md-14 pb-14 pb-md-16 text-center',
+    hero21WrapperClassName: wrapperClassName,
+    hero21ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -26,8 +25,8 @@ export function Hero21(props: TemplateProps<Hero21Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-xl-0 mb-14 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <figure>

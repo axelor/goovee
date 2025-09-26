@@ -7,13 +7,13 @@ export function Hero24(props: TemplateProps<Hero24Data>) {
   const {data} = props;
   const {
     hero24Images: images = [],
-    hero24WrapperClassName: wrapperClassName = 'bg-gray overflow-hidden',
-    hero24ContainerClassName: containerClassName = 'px-xl-0 pt-6 pb-10',
+    hero24WrapperClassName: wrapperClassName,
+    hero24ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="swiper-container swiper-auto">
           <Carousel
             className="overflow-visible"

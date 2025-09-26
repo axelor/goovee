@@ -24,8 +24,8 @@ export function Service10(props: TemplateProps<Service10Data>) {
     service10CardUrl2,
     service10CardButtonText1,
     service10CardButtonText2,
-    service10WrapperClassName: wrapperClassName = '',
-    service10ContainerClassName: containerClassName = '',
+    service10WrapperClassName: wrapperClassName,
+    service10ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -41,8 +41,8 @@ export function Service10(props: TemplateProps<Service10Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-0 gy-10 mb-15 mb-md-18 align-items-center">
           <div className="col-lg-6">
             <div className="row g-6 text-center">

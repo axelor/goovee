@@ -42,11 +42,13 @@ export const hero1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-10 pt-md-14 pb-8 text-center',
     },
   ],
   metaModels: [metaFileModel],

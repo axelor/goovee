@@ -8,13 +8,13 @@ export function Process6(props: TemplateProps<Process6Data>) {
     process6Title: title,
     process6Caption: caption,
     process6Processes: processes,
-    process6WrapperClassName: wrapperClassName = '',
-    process6ContainerClassName: containerClassName = '',
+    process6WrapperClassName: wrapperClassName,
+    process6ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <h2 className="display-4 mb-3">{title}</h2>
           <p className="lead fs-lg mb-8">{caption}</p>

@@ -12,8 +12,8 @@ export function Portfolio12(props: TemplateProps<Portfolio12Data>) {
     portfolio12Description: description,
     portfolio12Navigation: navigation,
     portfolio12PortfolioList: portfolioList = [],
-    portfolio12WrapperClassName: wrapperClassName = '',
-    portfolio12ContainerClassName: containerClassName = '',
+    portfolio12WrapperClassName: wrapperClassName,
+    portfolio12ContainerClassName: containerClassName,
   } = data || {};
 
   const carouselBreakpoints = {
@@ -23,8 +23,8 @@ export function Portfolio12(props: TemplateProps<Portfolio12Data>) {
   };
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row">
             <div className="col-lg-10 col-xl-8 mx-auto text-center">

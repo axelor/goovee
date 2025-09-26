@@ -56,11 +56,13 @@ export const hero3Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-dark angled lower-start',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-7 pt-md-11 pb-8',
     },
   ],
   models: [

@@ -23,8 +23,8 @@ export function About9(props: TemplateProps<About9Data>) {
     about9Description: description,
     about9Image,
     about9AboutList: aboutList,
-    about9WrapperClassName: wrapperClassName = '',
-    about9ContainerClassName: containerClassName = '',
+    about9WrapperClassName: wrapperClassName,
+    about9ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -34,8 +34,8 @@ export function About9(props: TemplateProps<About9Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-18 align-items-center">
           <div className="col-md-8 col-lg-6 position-relative">
             <div

@@ -13,15 +13,14 @@ export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
     portfolio5Caption: caption,
     portfolio5List: list,
     portfolio5FilterList: filterList,
-    portfolio5WrapperClassName: wrapperClassName = 'bg-gray',
-    portfolio5ContainerClassName:
-      containerClassName = 'py-15 py-md-17 text-center',
+    portfolio5WrapperClassName: wrapperClassName,
+    portfolio5ContainerClassName: containerClassName,
   } = data || {};
 
   const isotopeId = getTemplateId(props);
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-11 col-xl-9 col-xxl-8 mx-auto mb-8">
             <h2 className="display-5 mb-3">{caption}</h2>

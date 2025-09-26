@@ -21,11 +21,13 @@ export const hero24Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-gray overflow-hidden',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container px-xl-0 pt-6 pb-10',
     },
   ],
   models: [

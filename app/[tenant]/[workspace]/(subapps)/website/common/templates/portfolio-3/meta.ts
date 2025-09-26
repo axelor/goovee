@@ -41,11 +41,13 @@ export const portfolio3Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper overflow-hidden',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-12 pt-lg-7 pb-14 pb-md-16',
     },
   ],
   models: [

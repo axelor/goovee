@@ -58,11 +58,13 @@ export const hero9Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-10 pb-14 pb-lg-0',
     },
   ],
   models: [

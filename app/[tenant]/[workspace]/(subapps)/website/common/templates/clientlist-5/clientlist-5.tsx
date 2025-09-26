@@ -10,13 +10,13 @@ export function Clientlist5(props: TemplateProps<Clientlist5Data>) {
     clientlist5Caption: caption,
     clientlist5Description: description,
     clientlist5Clients: clients,
-    clientlist5WrapperClassName: wrapperClassName = 'bg-light',
-    clientlist5ContainerClassName: containerClassName = 'py-15 py-md-17',
+    clientlist5WrapperClassName: wrapperClassName,
+    clientlist5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0">
           <div className="col-lg-4 mt-lg-2">
             <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>

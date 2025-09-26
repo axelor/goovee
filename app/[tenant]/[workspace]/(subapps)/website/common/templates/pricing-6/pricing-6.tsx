@@ -18,15 +18,15 @@ export function Pricing6(props: TemplateProps<Pricing6Data>) {
     pricing6SwitchLeftLabel: switchLeftLabel,
     pricing6SwitchRightLabel: switchRightLabel,
     pricing6Plans: plans,
-    pricing6WrapperClassName: wrapperClassName = '',
-    pricing6ContainerClassName: containerClassName = '',
+    pricing6WrapperClassName: wrapperClassName,
+    pricing6ContainerClassName: containerClassName,
   } = data || {};
 
   const [activeYearly, setActiveYearly] = useState(false);
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 align-items-center">
           <div className="col-lg-4">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{title}</h2>

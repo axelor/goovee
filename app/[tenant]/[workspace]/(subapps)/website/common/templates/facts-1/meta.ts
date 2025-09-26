@@ -30,11 +30,13 @@ export const facts1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-14 pt-md-17 pb-md-21',
     },
   ],
   models: [

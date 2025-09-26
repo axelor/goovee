@@ -12,13 +12,13 @@ export function Facts2(props: TemplateProps<Facts2Data>) {
     facts2Title: title,
     facts2Subtitle: subtitle,
     facts2Facts: facts,
-    facts2WrapperClassName: wrapperClassName = '',
-    facts2ContainerClassName: containerClassName = '',
+    facts2WrapperClassName: wrapperClassName,
+    facts2ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0">
           <div className="col-lg-4">
             <h3 className="display-4 mb-3 pe-xl-10">{title}</h3>

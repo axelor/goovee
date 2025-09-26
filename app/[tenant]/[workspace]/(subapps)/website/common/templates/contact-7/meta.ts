@@ -35,11 +35,13 @@ export const contact7Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-light angled upper-end lower-end',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-18 pb-14 pt-md-19 pb-md-16',
     },
   ],
   models: [contactInfoModel],

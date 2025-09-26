@@ -17,8 +17,8 @@ export function Contact8(props: TemplateProps<Contact8Data>) {
     contact8Heading: heading,
     contact8CountUp: countUp,
     contact8Suffix: suffix,
-    contact8WrapperClassName: wrapperClassName = '',
-    contact8ContainerClassName: containerClassName = '',
+    contact8WrapperClassName: wrapperClassName,
+    contact8ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -34,8 +34,8 @@ export function Contact8(props: TemplateProps<Contact8Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gx-lg-8 gx-xl-12 align-items-center">
           <div className="col-lg-7 position-relative">
             <Tiles3

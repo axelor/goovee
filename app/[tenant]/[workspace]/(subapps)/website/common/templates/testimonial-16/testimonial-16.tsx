@@ -10,8 +10,8 @@ export function Testimonial16(props: TemplateProps<Testimonial16Data>) {
     testimonial16SlidesPerView: slidesPerView,
     testimonial16Navigation: navigation,
     testimonial16Testimonials: testimonials = [],
-    testimonial16WrapperClassName: wrapperClassName = '',
-    testimonial16ContainerClassName: containerClassName = '',
+    testimonial16WrapperClassName: wrapperClassName,
+    testimonial16ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -29,8 +29,8 @@ export function Testimonial16(props: TemplateProps<Testimonial16Data>) {
   };
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="card shadow-lg mt-n21 mt-md-n23">
           <div className="row gx-0">
             <div

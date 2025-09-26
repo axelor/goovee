@@ -17,8 +17,8 @@ export function Contact5(props: TemplateProps<Contact5Data>) {
     contact5Heading: heading,
     contact5CountUp: countUp,
     contact5Suffix: suffix,
-    contact5WrapperClassName: wrapperClassName = '',
-    contact5ContainerClassName: containerClassName = '',
+    contact5WrapperClassName: wrapperClassName,
+    contact5ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -34,8 +34,8 @@ export function Contact5(props: TemplateProps<Contact5Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gx-lg-8 gx-xl-12 mb-10 mb-md-14 align-items-center">
           <div className="col-lg-7 position-relative">
             <Tiles3

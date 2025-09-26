@@ -15,13 +15,13 @@ export function Process7(props: TemplateProps<Process7Data>) {
     process7LinkTitle: linkTitle,
     process7LinkHref: linkHref,
     process7Processes: processes,
-    process7WrapperClassName: wrapperClassName = '',
-    process7ContainerClassName: containerClassName = '',
+    process7WrapperClassName: wrapperClassName,
+    process7ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row mb-5">
             <div className="col-md-10 col-xl-8 col-xxl-7 mx-auto text-center">

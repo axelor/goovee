@@ -7,13 +7,13 @@ export function Banner5(props: TemplateProps<Banner5Data>) {
   const {
     banner5Heading: heading,
     banner5Video: video,
-    banner5WrapperClassName: wrapperClassName = 'bg-soft-primary',
-    banner5ContainerClassName: containerClassName = 'py-14 py-md-16',
+    banner5WrapperClassName: wrapperClassName,
+    banner5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-xl-9 col-xxl-7 mx-auto text-center">
             <i className="icn-flower text-leaf fs-30 opacity-25"></i>

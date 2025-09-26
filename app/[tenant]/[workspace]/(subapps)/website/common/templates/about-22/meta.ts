@@ -39,11 +39,13 @@ export const about22Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-gradient-reverse-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
     },
   ],
   models: [accordionModel],

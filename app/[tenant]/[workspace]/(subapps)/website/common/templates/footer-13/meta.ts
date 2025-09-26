@@ -90,11 +90,13 @@ export const footer13Schema = {
       name: 'footerClassName',
       title: 'Footer Class Name',
       type: 'string',
+      defaultValue: 'footer bg-navy text-inverse',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-12 pt-lg-6 pb-13 pb-md-15',
     },
   ],
   models: [

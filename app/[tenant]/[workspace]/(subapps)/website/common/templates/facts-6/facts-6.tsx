@@ -9,13 +9,13 @@ export function Facts6(props: TemplateProps<Facts6Data>) {
     facts6Caption: caption,
     facts6Description: description,
     facts6Facts: facts,
-    facts6WrapperClassName: wrapperClassName = '',
-    facts6ContainerClassName: containerClassName = '',
+    facts6WrapperClassName: wrapperClassName,
+    facts6ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-0 gy-10 align-items-center">
           <div className="col-lg-6 order-lg-2 offset-lg-1">
             <div className="row gx-md-5 gy-5 align-items-center counter-wrapper">

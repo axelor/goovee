@@ -10,8 +10,8 @@ export function Testimonial18(props: TemplateProps<Testimonial18Data>) {
     testimonial18SlidesPerView: slidesPerView,
     testimonial18Navigation: navigation,
     testimonial18Testimonials: testimonials = [],
-    testimonial18WrapperClassName: wrapperClassName = 'text-white',
-    testimonial18ContainerClassName: containerClassName = 'py-14 py-md-17',
+    testimonial18WrapperClassName: wrapperClassName,
+    testimonial18ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,10 +22,10 @@ export function Testimonial18(props: TemplateProps<Testimonial18Data>) {
 
   return (
     <section
-      className={`wrapper image-wrapper bg-image bg-overlay ${wrapperClassName}`}
-      style={{backgroundImage: `url(${image})`}}
-      data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+      className={wrapperClassName}
+      data-code={props.code}
+      style={{backgroundImage: `url(${image})`}}>
+      <div className={containerClassName}>
         <i className="icn-flower text-white fs-30 opacity-50" />
         <div className="row mt-3">
           <div className="col-xl-9 col-xxl-8 mx-auto">

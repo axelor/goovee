@@ -8,12 +8,12 @@ export function Hero15(props: TemplateProps<Hero15Data>) {
   const {data} = props;
   const {
     hero15Slides: slides = [],
-    hero15WrapperClassName: wrapperClassName = 'bg-dark',
-    hero15ContainerClassName: containerClassName = 'h-100',
+    hero15WrapperClassName: wrapperClassName,
+    hero15ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+    <section className={wrapperClassName} data-code={props.code}>
       <div className="swiper-container swiper-hero dots-over">
         <Carousel
           slidesPerView={1}
@@ -29,7 +29,7 @@ export function Hero15(props: TemplateProps<Hero15Data>) {
                   ...props,
                 })})`,
               }}>
-              <div className={`container ${containerClassName}`}>
+              <div className={containerClassName}>
                 <div className="row h-100">
                   <div className="col-md-10 offset-md-1 col-lg-7 offset-lg-0 col-xl-6 col-xxl-5 text-center text-lg-start justify-content-center align-self-center align-items-start">
                     <h2 className="display-1 fs-56 mb-4 text-white animate__animated animate__slideInDown animate__delay-1s">

@@ -15,8 +15,8 @@ export function Process5(props: TemplateProps<Process5Data>) {
     process5Description: description,
     process5Image,
     process5Processes: processes,
-    process5WrapperClassName: wrapperClassName = '',
-    process5ContainerClassName: containerClassName = '',
+    process5WrapperClassName: wrapperClassName,
+    process5ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -26,8 +26,8 @@ export function Process5(props: TemplateProps<Process5Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-10 mb-lg-19 mb-xl-22 align-items-center">
           <div className="col-lg-6">
             <figure>

@@ -34,11 +34,14 @@ export const hero10Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue:
+        'container pt-11 pt-md-13 pb-11 pb-md-19 pb-lg-22 text-center',
     },
   ],
   models: [],

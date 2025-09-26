@@ -8,13 +8,13 @@ export function Facts11(props: TemplateProps<Facts11Data>) {
     facts11Title: title,
     facts11Caption: caption,
     facts11Facts: facts,
-    facts11WrapperClassName: wrapperClassName = '',
-    facts11ContainerClassName: containerClassName = '',
+    facts11WrapperClassName: wrapperClassName,
+    facts11ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0 align-items-end">
           <div className="col-lg-4">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>

@@ -7,13 +7,13 @@ export function Team5(props: TemplateProps<Team5Data>) {
   const {data} = props;
   const {
     team5Members: members,
-    team5WrapperClassName: wrapperClassName = '',
-    team5ContainerClassName: containerClassName = '',
+    team5WrapperClassName: wrapperClassName,
+    team5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row grid-view gx-md-8 gx-xl-10 gy-8 gy-lg-0 mb-16 mb-md-19">
           {members?.map(({id, attrs: item}, i) => (
             <div className="col-md-6 col-lg-3" key={id}>

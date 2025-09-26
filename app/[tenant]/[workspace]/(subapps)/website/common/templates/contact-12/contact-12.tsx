@@ -21,8 +21,8 @@ export function Contact12(props: TemplateProps<Contact12Data>) {
     contact12Placeholder1: placeholder1,
     contact12Placeholder2: placeholder2,
     contact12Placeholder3: placeholder3,
-    contact12WrapperClassName: wrapperClassName = '',
-    contact12ContainerClassName: containerClassName = 'py-15 py-md-17',
+    contact12WrapperClassName: wrapperClassName,
+    contact12ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -33,10 +33,10 @@ export function Contact12(props: TemplateProps<Contact12Data>) {
 
   return (
     <section
-      className={`wrapper image-wrapper bg-image bg-overlay ${wrapperClassName}`}
+      className={wrapperClassName}
       style={{backgroundImage: `url(${image})`}}
       data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-xl-9 mx-auto">
             <div className="card border-0 bg-white-900">

@@ -12,8 +12,8 @@ export function Blog2(props: TemplateProps<Blog2Data>) {
     blog2Navigation: navigation,
     blog2SpaceBetween: spaceBetween,
     blog2BlogList: blogList = [],
-    blog2WrapperClassName: wrapperClassName = '',
-    blog2ContainerClassName: containerClassName = '',
+    blog2WrapperClassName: wrapperClassName,
+    blog2ContainerClassName: containerClassName,
   } = data || {};
 
   const carouselBreakpoints = {
@@ -23,8 +23,8 @@ export function Blog2(props: TemplateProps<Blog2Data>) {
   };
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-lg-9 col-xl-8 col-xxl-8 mx-auto">
             <h2 className="fs-15 text-uppercase text-primary mb-3">

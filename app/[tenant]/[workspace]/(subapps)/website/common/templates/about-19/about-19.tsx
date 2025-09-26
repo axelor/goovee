@@ -16,8 +16,8 @@ export function About19(props: TemplateProps<About19Data>) {
     about19TileImage3,
     about19AboutList1: aboutList1,
     about19AboutList2: aboutList2,
-    about19WrapperClassName: wrapperClassName = '',
-    about19ContainerClassName: containerClassName = '',
+    about19WrapperClassName: wrapperClassName,
+    about19ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -39,8 +39,8 @@ export function About19(props: TemplateProps<About19Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row gy-10 gy-sm-13 gx-md-8 gx-xl-12 align-items-center mb-10 mb-md-12">
             <div className="col-lg-6">

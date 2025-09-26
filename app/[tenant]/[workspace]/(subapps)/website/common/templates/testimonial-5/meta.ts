@@ -38,11 +38,13 @@ export const testimonial5Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-16 pb-14 pb-md-0',
     },
   ],
   models: [

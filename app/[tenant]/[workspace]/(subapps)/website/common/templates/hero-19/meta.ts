@@ -47,11 +47,14 @@ export const hero19Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-image bg-overlay bg-overlay-300 text-white',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-17 pb-19 pt-md-18 pb-md-17 text-center',
     },
   ],
   models: [],

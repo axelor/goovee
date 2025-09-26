@@ -40,11 +40,13 @@ export const hero22Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper section-frame br-fix overflow-hidden',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-18 pt-lg-21 pb-17 pb-lg-19 text-center',
     },
   ],
   models: [],

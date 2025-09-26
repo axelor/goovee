@@ -42,11 +42,13 @@ export const cta7Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'container-card mb-14',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container card-body py-14 px-0',
     },
   ],
   models: [],

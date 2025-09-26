@@ -50,11 +50,13 @@ export const process1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-light angled upper-start lower-start',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-14 pt-md-17',
     },
   ],
   models: [

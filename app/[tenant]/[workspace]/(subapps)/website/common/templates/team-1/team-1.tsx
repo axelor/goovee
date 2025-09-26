@@ -10,12 +10,12 @@ export function Team1(props: TemplateProps<Team1Data>) {
     team1Title: title,
     team1Caption: caption,
     team1Teams: teams,
-    team1WrapperClassName: wrapperClassName = 'bg-gradient-primary',
-    team1ContainerClassName: containerClassName = 'py-14 pt-md-16 pb-md-18',
+    team1WrapperClassName: wrapperClassName,
+    team1ContainerClassName: containerClassName,
   } = data || {};
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="position-relative mt-8 mt-lg-n23 mt-xl-n25">
           <div className="row text-center">
             <div className="col-lg-8 col-xl-7 mx-auto">

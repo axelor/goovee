@@ -21,13 +21,13 @@ export function Service5(props: TemplateProps<Service5Data>) {
     service5ExperienceDescription: experienceDescription,
     service5Services: services,
     service5Features: features,
-    service5WrapperClassName: wrapperClassName = '',
-    service5ContainerClassName: containerClassName = '',
+    service5WrapperClassName: wrapperClassName,
+    service5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row gx-lg-8 gx-xl-12 gy-12 align-items-center mb-10 mb-md-13">
             <div className="col-lg-6 position-relative">

@@ -52,11 +52,14 @@ export const hero4Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper position-relative min-vh-70 d-lg-flex align-items-center bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container',
     },
   ],
   metaModels: [metaFileModel],

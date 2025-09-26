@@ -15,8 +15,8 @@ export function About2(props: TemplateProps<About2Data>) {
     about2BtnColor: btnColor,
     about2Media,
     about2Aboutlist: aboutlist,
-    about2WrapperClassName: wrapperClassName = '',
-    about2ContainerClassName: containerClassName = '',
+    about2WrapperClassName: wrapperClassName,
+    about2ContainerClassName: containerClassName,
   } = data || {};
 
   const thumbnail = getMetaFileURL({
@@ -32,8 +32,8 @@ export function About2(props: TemplateProps<About2Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center mb-14 mb-md-17 mb-lg-19">
           <div className="col-md-8 col-lg-6 position-relative">
             <Banner4

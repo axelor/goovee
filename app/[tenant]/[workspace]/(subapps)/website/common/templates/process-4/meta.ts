@@ -40,11 +40,13 @@ export const process4Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-14 pt-md-16 pt-lg-0 pb-md-16',
     },
   ],
   models: [

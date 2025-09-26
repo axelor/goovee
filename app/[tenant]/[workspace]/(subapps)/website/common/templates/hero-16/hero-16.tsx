@@ -19,9 +19,8 @@ export function Hero16(props: TemplateProps<Hero16Data>) {
     hero16CountUp: countUp,
     hero16Suffix: suffix,
     hero16Heading: heading,
-    hero16WrapperClassName: wrapperClassName = 'bg-gray',
-    hero16ContainerClassName:
-      containerClassName = 'pt-12 pt-md-14 pb-14 pb-md-16',
+    hero16WrapperClassName: wrapperClassName,
+    hero16ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -31,8 +30,8 @@ export function Hero16(props: TemplateProps<Hero16Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gy-md-13 gy-lg-0 align-items-center">
           <div className="col-md-8 col-lg-5 d-flex position-relative mx-auto">
             <div className="img-mask mask-1" style={slideInDownAnimate('0ms')}>

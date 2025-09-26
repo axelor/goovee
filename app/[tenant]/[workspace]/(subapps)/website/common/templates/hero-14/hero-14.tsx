@@ -11,9 +11,8 @@ export function Hero14(props: TemplateProps<Hero14Data>) {
     hero14LinkTitle: linkTitle,
     hero14LinkHref: linkHref,
     hero14Image,
-    hero14WrapperClassName: wrapperClassName = 'bg-soft-primary',
-    hero14ContainerClassName:
-      containerClassName = 'pt-10 pt-md-14 pb-14 pb-md-0',
+    hero14WrapperClassName: wrapperClassName,
+    hero14ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -23,8 +22,8 @@ export function Hero14(props: TemplateProps<Hero14Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-lg-12 gy-3 gy-lg-0 mb-13">
           <div className="col-lg-6">
             <h1 className="display-1 fs-66 lh-xxs mb-0">{title}</h1>

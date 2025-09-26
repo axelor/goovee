@@ -11,8 +11,8 @@ export function Facts17(props: TemplateProps<Facts17Data>) {
     facts17Description: description,
     facts17Image,
     facts17Facts: facts,
-    facts17WrapperClassName: wrapperClassName = 'bg-gray min-vh-60 ',
-    facts17ContainerClassName: containerClassName = '',
+    facts17WrapperClassName: wrapperClassName,
+    facts17ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,9 +22,7 @@ export function Facts17(props: TemplateProps<Facts17Data>) {
   });
 
   return (
-    <section
-      className={`wrapper position-relative d-lg-flex align-items-center ${wrapperClassName}`}
-      data-code={props.code}>
+    <section className={wrapperClassName} data-code={props.code}>
       <div
         className="col-lg-6 position-lg-absolute top-0 end-0 image-wrapper bg-image bg-cover h-100"
         style={{backgroundImage: `url(${image})`}}>
@@ -43,7 +41,7 @@ export function Facts17(props: TemplateProps<Facts17Data>) {
         </div>
       </div>
 
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row gx-0">
           <div className="col-lg-6">
             <div className="pt-13 pb-15 pb-md-17 py-lg-16 pe-lg-15">

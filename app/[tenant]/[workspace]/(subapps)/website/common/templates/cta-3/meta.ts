@@ -42,11 +42,14 @@ export const cta3Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-auto no-overlay bg-image bg-map text-center mb-14 mb-md-16',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-md-18',
     },
   ],
   models: [],

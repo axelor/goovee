@@ -10,8 +10,8 @@ export function Process2(props: TemplateProps<Process2Data>) {
     process2Caption: caption,
     process2Image,
     process2Processes: processes,
-    process2WrapperClassName: wrapperClassName = '',
-    process2ContainerClassName: containerClassName = '',
+    process2WrapperClassName: wrapperClassName,
+    process2ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -21,8 +21,8 @@ export function Process2(props: TemplateProps<Process2Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center mb-14 mb-md-17 mb-lg-19">
           <div className="col-md-8 col-lg-6 position-relative">
             <div

@@ -31,6 +31,7 @@ export const pricing2Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'pricing-wrapper position-relative',
     },
   ],
   models: [planModel],

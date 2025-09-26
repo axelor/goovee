@@ -32,11 +32,13 @@ export const team1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-14 pt-md-16 pb-md-18',
     },
   ],
   models: [

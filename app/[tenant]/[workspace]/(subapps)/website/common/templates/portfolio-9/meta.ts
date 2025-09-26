@@ -163,11 +163,13 @@ export const portfolio9Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-light wrapper-border',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-14 pt-md-18 pb-md-16',
     },
   ],
   models: [],

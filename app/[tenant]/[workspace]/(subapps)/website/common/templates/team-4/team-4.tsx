@@ -7,13 +7,13 @@ export function Team4(props: TemplateProps<Team4Data>) {
   const {data} = props;
   const {
     team4Members: members,
-    team4WrapperClassName: wrapperClassName = '',
-    team4ContainerClassName: containerClassName = '',
+    team4WrapperClassName: wrapperClassName,
+    team4ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row grid-view gy-6 gy-xl-0">
           {members?.map(({id, attrs: item}, i) => {
             const socialLinks = item.socialLinks?.map(socialLink => ({

@@ -7,9 +7,8 @@ export function Banner2(props: TemplateProps<Banner2Data>) {
   const {
     banner2Heading: heading,
     banner2Image,
-    banner2WrapperClassName: wrapperClassName = 'text-white',
-    banner2ContainerClassName:
-      containerClassName = 'py-16 py-md-19 text-center',
+    banner2WrapperClassName: wrapperClassName,
+    banner2ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -20,10 +19,10 @@ export function Banner2(props: TemplateProps<Banner2Data>) {
 
   return (
     <section
-      className={`wrapper mobile image-wrapper bg-image bg-overlay ${wrapperClassName}`}
+      className={wrapperClassName}
       data-code={props.code}
       style={{backgroundImage: `url(${image})`}}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <h2 className="display-1 text-white mb-0">{heading}</h2>
       </div>
     </section>

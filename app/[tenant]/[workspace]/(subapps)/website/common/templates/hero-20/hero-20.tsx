@@ -9,8 +9,8 @@ export function Hero20(props: TemplateProps<Hero20Data>) {
     hero20Description: description,
     hero20Video,
     hero20Poster,
-    hero20WrapperClassName: wrapperClassName = '',
-    hero20ContainerClassName: containerClassName = 'text-center',
+    hero20WrapperClassName: wrapperClassName,
+    hero20ContainerClassName: containerClassName,
   } = data || {};
 
   const poster = getMetaFileURL({
@@ -26,13 +26,11 @@ export function Hero20(props: TemplateProps<Hero20Data>) {
   });
 
   return (
-    <section
-      className={`wrapper video-wrapper bg-overlay bg-overlay-gradient px-0 mt-0 min-vh-80 ${wrapperClassName}`}
-      data-code={props.code}>
+    <section className={wrapperClassName} data-code={props.code}>
       <video loop muted autoPlay playsInline src={videoSrc} poster={poster} />
 
       <div className="video-content">
-        <div className={`container ${containerClassName}`}>
+        <div className={containerClassName}>
           <div className="row">
             <div className="col-lg-8 col-xl-6 text-center text-white mx-auto">
               <h1 className="display-1 fs-54 text-white mb-5">

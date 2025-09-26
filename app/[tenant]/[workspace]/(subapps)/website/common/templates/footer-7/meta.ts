@@ -88,11 +88,13 @@ export const footer7Schema = {
       name: 'footerClassName',
       title: 'Footer Class Name',
       type: 'string',
+      defaultValue: 'footer bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 pb-7',
     },
   ],
   models: [

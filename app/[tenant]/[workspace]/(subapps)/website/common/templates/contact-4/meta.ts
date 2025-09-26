@@ -47,11 +47,13 @@ export const contact4Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-light angled upper-end lower-end',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container',
     },
   ],
   metaModels: [metaFileModel],

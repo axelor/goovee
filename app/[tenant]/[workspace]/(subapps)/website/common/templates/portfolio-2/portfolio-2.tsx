@@ -12,15 +12,13 @@ export function Portfolio2(props: TemplateProps<Portfolio2Data>) {
     portfolio2SlidesPerView: slidesPerView,
     portfolio2Pagination: pagination,
     portfolio2CarouselImages: carouselImages = [],
-    portfolio2WrapperClassName: wrapperClassName = '',
-    portfolio2ContainerClassName: containerClassName = 'pb-9 pb-md-14',
+    portfolio2WrapperClassName: wrapperClassName,
+    portfolio2ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section
-      className={`wrapper overflow-hidden ${wrapperClassName}`}
-      data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-9 col-xl-8 col-xxl-7 mx-auto text-center">
             <h3 className="display-4 mb-8">{caption}</h3>

@@ -13,13 +13,13 @@ export function Service16(props: TemplateProps<Service16Data>) {
   const {data} = props;
   const {
     service16Services: services,
-    service16WrapperClassName: wrapperClassName = '',
-    service16ContainerClassName: containerClassName = '',
+    service16WrapperClassName: wrapperClassName,
+    service16ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-5 gy-5 mt-n18 mt-md-n21 mb-14 mb-md-17">
           {services?.map(({id, attrs: item}) => {
             return (

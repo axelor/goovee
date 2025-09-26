@@ -15,8 +15,8 @@ export function Service8(props: TemplateProps<Service8Data>) {
     service8TileImage3,
     service8TileImage4,
     service8Services: services,
-    service8WrapperClassName: wrapperClassName = '',
-    service8ContainerClassName: containerClassName = '',
+    service8WrapperClassName: wrapperClassName,
+    service8ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -44,8 +44,8 @@ export function Service8(props: TemplateProps<Service8Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gy-8 mt-5 mt-md-12 mt-lg-0 mb-15 align-items-center">
           <div className="col-lg-6 position-relative order-lg-2">
             <div className="row gx-md-5 gy-5 position-relative">

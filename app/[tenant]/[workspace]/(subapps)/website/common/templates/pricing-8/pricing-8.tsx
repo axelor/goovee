@@ -15,15 +15,15 @@ export function Pricing8(props: TemplateProps<Pricing8Data>) {
     pricing8SwitchRightLabel: switchRightLabel,
     pricing8Plans: plans,
     pricing8Faq: faq,
-    pricing8WrapperClassName: wrapperClassName = '',
-    pricing8ContainerClassName: containerClassName = '',
+    pricing8WrapperClassName: wrapperClassName,
+    pricing8ContainerClassName: containerClassName,
   } = data || {};
 
   const [activeYearly, setActiveYearly] = useState(false);
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row text-center">
             <div className="col-md-11 col-lg-9 col-xl-8 mx-auto">

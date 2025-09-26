@@ -13,8 +13,8 @@ export function Service6(props: TemplateProps<Service6Data>) {
     service6Image2,
     service6Image3,
     service6ServiceList: serviceList,
-    service6WrapperClassName: wrapperClassName = '',
-    service6ContainerClassName: containerClassName = '',
+    service6WrapperClassName: wrapperClassName,
+    service6ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -36,8 +36,8 @@ export function Service6(props: TemplateProps<Service6Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-6 position-relative">
             <div className="row gx-md-5 gy-5 position-relative align-items-center">

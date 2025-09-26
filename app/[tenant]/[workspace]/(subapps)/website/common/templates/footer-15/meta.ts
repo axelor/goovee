@@ -64,11 +64,13 @@ export const footer15Schema = {
       name: 'footerClassName',
       title: 'Footer Class Name',
       type: 'string',
+      defaultValue: 'footer bg-gray',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-13 pb-7',
     },
   ],
   models: [socialLinksModel],

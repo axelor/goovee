@@ -9,8 +9,8 @@ export function Testimonial2(props: TemplateProps<Testimonial2Data>) {
   const {
     testimonial2Image,
     testimonial2Testimonials: testimonials = [],
-    testimonial2WrapperClassName: wrapperClassName = '',
-    testimonial2ContainerClassName: containerClassName = '',
+    testimonial2WrapperClassName: wrapperClassName,
+    testimonial2ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -19,8 +19,8 @@ export function Testimonial2(props: TemplateProps<Testimonial2Data>) {
     ...props,
   });
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="position-relative">
           <div
             className="shape rounded-circle bg-line primary rellax w-18 h-18"

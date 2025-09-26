@@ -10,13 +10,13 @@ export function Facts13(props: TemplateProps<Facts13Data>) {
     facts13Heading2: heading2,
     facts13DataValue1: dataValue1,
     facts13DataValue2: dataValue2,
-    facts13WrapperClassName: wrapperClassName = 'bg-gray',
-    facts13ContainerClassName: containerClassName = 'py-15 py-md-17 pb-md-19',
+    facts13WrapperClassName: wrapperClassName,
+    facts13ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row align-items-center gy-8">
           <div className="col-lg-7 text-center text-lg-start">
             <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>

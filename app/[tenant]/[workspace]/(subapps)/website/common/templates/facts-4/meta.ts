@@ -38,11 +38,14 @@ export const facts4Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-auto no-overlay bg-image bg-map text-center',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-0 pb-14 pt-md-16 pb-md-18',
     },
   ],
   models: [

@@ -8,8 +8,8 @@ export function Facts3(props: TemplateProps<Facts3Data>) {
   const {
     facts3BackgroundImage,
     facts3Facts: facts,
-    facts3WrapperClassName: wrapperClassName = '',
-    facts3ContainerClassName: containerClassName = '',
+    facts3WrapperClassName: wrapperClassName,
+    facts3ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -19,8 +19,8 @@ export function Facts3(props: TemplateProps<Facts3Data>) {
   });
 
   return (
-    <section className={`wrapper  ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-xl-10 mx-auto">
             <div

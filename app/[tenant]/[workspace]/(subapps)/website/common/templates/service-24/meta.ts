@@ -31,11 +31,13 @@ export const service24Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-12 pt-lg-8 pb-14 pb-md-17',
     },
   ],
   models: [

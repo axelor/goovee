@@ -99,11 +99,13 @@ export const footer2Schema = {
       name: 'footerClassName',
       title: 'Footer Class Name',
       type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-13 py-md-15',
     },
   ],
   models: [socialLinksModel],

@@ -40,11 +40,14 @@ export const hero20Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper video-wrapper bg-overlay bg-overlay-gradient px-0 mt-0 min-vh-80',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container text-center',
     },
   ],
   models: [],

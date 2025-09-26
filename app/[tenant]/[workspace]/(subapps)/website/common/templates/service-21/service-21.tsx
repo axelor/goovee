@@ -12,13 +12,13 @@ export function Service21(props: TemplateProps<Service21Data>) {
   const {data} = props;
   const {
     service21Services: services,
-    service21WrapperClassName: wrapperClassName = '',
-    service21ContainerClassName: containerClassName = '',
+    service21WrapperClassName: wrapperClassName,
+    service21ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-5 gy-5 mt-n19 mb-14 mb-md-17">
           {services?.map(({id, attrs: item}) => {
             return (

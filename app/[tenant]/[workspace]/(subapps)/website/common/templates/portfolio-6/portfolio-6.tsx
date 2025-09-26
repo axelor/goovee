@@ -26,8 +26,8 @@ export function Portfolio6(props: TemplateProps<Portfolio6Data>) {
     portfolio6Image2Height,
     portfolio6Image3Width,
     portfolio6Image3Height,
-    portfolio6WrapperClassName: wrapperClassName = '',
-    portfolio6ContainerClassName: containerClassName = '',
+    portfolio6WrapperClassName: wrapperClassName,
+    portfolio6ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -49,8 +49,8 @@ export function Portfolio6(props: TemplateProps<Portfolio6Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="projects-tiles">
           <div className="project grid grid-view">
             <div className="row gx-md-8 gx-xl-12 gy-10 gy-md-12">

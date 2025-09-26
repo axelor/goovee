@@ -11,8 +11,8 @@ export function Facts14(props: TemplateProps<Facts14Data>) {
     facts14Caption: caption,
     facts14Image,
     facts14Facts: facts,
-    facts14WrapperClassName: wrapperClassName = '',
-    facts14ContainerClassName: containerClassName = '',
+    facts14WrapperClassName: wrapperClassName,
+    facts14ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,8 +22,8 @@ export function Facts14(props: TemplateProps<Facts14Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row text-center mb-7">
             <div className="col-lg-11 col-xl-10 col-xxl-9 mx-auto">

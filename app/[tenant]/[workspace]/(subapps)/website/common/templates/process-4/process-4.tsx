@@ -16,9 +16,8 @@ export function Process4(props: TemplateProps<Process4Data>) {
     process4Caption: caption,
     process4Description: description,
     process4Processes: processes,
-    process4WrapperClassName: wrapperClassName = 'bg-soft-primary',
-    process4ContainerClassName:
-      containerClassName = 'py-14 pt-md-16 pt-lg-0 pb-md-16',
+    process4WrapperClassName: wrapperClassName,
+    process4ContainerClassName: containerClassName,
   } = data || {};
 
   const videoSrc = getMetaFileURL({
@@ -28,8 +27,8 @@ export function Process4(props: TemplateProps<Process4Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div
           className="row text-center"
           style={animation({name: 'slideInUp', delay: '0ms'})}>

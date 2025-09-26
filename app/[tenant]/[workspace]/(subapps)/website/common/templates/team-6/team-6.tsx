@@ -10,13 +10,13 @@ export function Team6(props: TemplateProps<Team6Data>) {
     team6Caption: caption,
     team6Title: title,
     team6Members: members,
-    team6WrapperClassName: wrapperClassName = '',
-    team6ContainerClassName: containerClassName = '',
+    team6WrapperClassName: wrapperClassName,
+    team6ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row mb-3">
             <div className="col-md-10 col-lg-12 col-xl-10 col-xxl-9 mx-auto text-center">

@@ -11,8 +11,8 @@ export function Contact9(props: TemplateProps<Contact9Data>) {
     contact9LinkTitle: linkTitle,
     contact9LinkHref: linkHref,
     contact9Image,
-    contact9WrapperClassName: wrapperClassName = '',
-    contact9ContainerClassName: containerClassName = 'py-18',
+    contact9WrapperClassName: wrapperClassName,
+    contact9ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -23,10 +23,10 @@ export function Contact9(props: TemplateProps<Contact9Data>) {
 
   return (
     <section
-      className={`wrapper image-wrapper bg-image bg-overlay ${wrapperClassName}`}
+      className={wrapperClassName}
       data-code={props.code}
       style={{backgroundImage: `url(${image})`}}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-md-8 col-lg-7 col-xl-5 mx-auto">
             <h2 className="fs-16 text-uppercase text-white mb-3">{caption}</h2>

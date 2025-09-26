@@ -19,13 +19,13 @@ export function Service9(props: TemplateProps<Service9Data>) {
     service9LinkTitle: linkTitle,
     service9LinkHref: linkHref,
     service9ServiceList: serviceList,
-    service9WrapperClassName: wrapperClassName = '',
-    service9ContainerClassName: containerClassName = '',
+    service9WrapperClassName: wrapperClassName,
+    service9ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-lg-22 mb-xl-24 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <div className="row gx-md-5 gy-5">

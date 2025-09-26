@@ -8,13 +8,13 @@ export function FAQ3(props: TemplateProps<Faq3Data>) {
     faq3Title: title,
     faq3Caption: caption,
     faq3Questions: questions,
-    faq3WrapperClassName: wrapperClassName = '',
-    faq3ContainerClassName: containerClassName = '',
+    faq3WrapperClassName: wrapperClassName,
+    faq3ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="card bg-soft-primary rounded-4">
           <div className="card-body p-md-10 p-xl-11">
             <div className="row gx-lg-8 gx-xl-12 gy-10">

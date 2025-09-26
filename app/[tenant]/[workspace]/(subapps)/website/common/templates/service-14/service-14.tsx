@@ -9,13 +9,13 @@ export function Service14(props: TemplateProps<Service14Data>) {
     service14Caption: caption,
     service14Title: title,
     service14Services: services,
-    service14WrapperClassName: wrapperClassName = '',
-    service14ContainerClassName: containerClassName = '',
+    service14WrapperClassName: wrapperClassName,
+    service14ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row text-center">
             <div className="col-md-10 offset-md-1 col-lg-8 offset-lg-2">

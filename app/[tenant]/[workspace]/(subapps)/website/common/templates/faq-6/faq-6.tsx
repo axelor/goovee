@@ -12,13 +12,13 @@ export function FAQ6(props: TemplateProps<Faq6Data>) {
     faq6LinkTitle: linkTitle,
     faq6LinkHref: linkHref,
     faq6Questions: questions,
-    faq6WrapperClassName: wrapperClassName = 'bg-light',
-    faq6ContainerClassName: containerClassName = 'pt-6 pb-14 pb-md-16',
+    faq6WrapperClassName: wrapperClassName,
+    faq6ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10">
           <div className="col-lg-6 mb-0">
             <h2 className="fs-16 text-uppercase text-primary mb-4">

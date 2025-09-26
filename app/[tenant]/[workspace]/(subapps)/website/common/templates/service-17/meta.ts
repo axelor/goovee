@@ -94,11 +94,13 @@ export const service17Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-14 pt-md-23 pb-14 pb-md-17',
     },
   ],
   models: [bulletListModel],

@@ -5,13 +5,13 @@ export function FAQ5(props: TemplateProps<Faq5Data>) {
   const {data} = props;
   const {
     faq5Questions: questions,
-    faq5WrapperClassName: wrapperClassName = '',
-    faq5ContainerClassName: containerClassName = '',
+    faq5WrapperClassName: wrapperClassName,
+    faq5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-10">
           {questions?.map(({id, attrs: item}) => (
             <div className="col-lg-6" key={id}>

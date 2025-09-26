@@ -12,8 +12,8 @@ export function Testimonial19(props: TemplateProps<Testimonial19Data>) {
     testimonial19Navigation: navigation,
     testimonial19SpaceBetween: spaceBetween,
     testimonial19Testimonials: testimonials = [],
-    testimonial19WrapperClassName: wrapperClassName = '',
-    testimonial19ContainerClassName: containerClassName = 'pt-15 pb-13',
+    testimonial19WrapperClassName: wrapperClassName,
+    testimonial19ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -32,9 +32,9 @@ export function Testimonial19(props: TemplateProps<Testimonial19Data>) {
 
   return (
     <section
-      className={`wrapper image-wrapper bg-image bg-overlay ${wrapperClassName}`}
+      className={wrapperClassName}
       style={{backgroundImage: `url(${image})`}}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <h2 className="display-5 mb-4 text-center text-white">{caption}</h2>
 
         <div className="swiper-container dots-closer dots-light dots-light-75">

@@ -10,8 +10,8 @@ export function Testimonial6(props: TemplateProps<Testimonial6Data>) {
     testimonial6Review: review,
     testimonial6Rating: rating,
     testimonial6Image,
-    testimonial6WrapperClassName: wrapperClassName = '',
-    testimonial6ContainerClassName: containerClassName = '',
+    testimonial6WrapperClassName: wrapperClassName,
+    testimonial6ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -29,8 +29,8 @@ export function Testimonial6(props: TemplateProps<Testimonial6Data>) {
   };
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="card bg-soft-primary">
           <div className="card-body p-md-10 py-xxl-16 position-relative">
             <div

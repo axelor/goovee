@@ -13,16 +13,13 @@ export function Portfolio3(props: TemplateProps<Portfolio3Data>) {
     portfolio3SlidesPerView: slidesPerView,
     portfolio3Pagination: pagination,
     portfolio3PortfolioList: portfolioList = [],
-    portfolio3WrapperClassName: wrapperClassName = '',
-    portfolio3ContainerClassName:
-      containerClassName = 'pt-12 pt-lg-7 pb-14 pb-md-16',
+    portfolio3WrapperClassName: wrapperClassName,
+    portfolio3ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section
-      className={`wrapper overflow-hidden ${wrapperClassName}`}
-      data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-10 col-xl-9 col-xxl-8 mx-auto text-center">
             <h2 className="fs-16 text-uppercase text-primary mb-3">

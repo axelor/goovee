@@ -10,8 +10,8 @@ export function About22(props: TemplateProps<About22Data>) {
     about22Caption: caption,
     about22Image,
     about22Accordions: accordionsList,
-    about22WrapperClassName: wrapperClassName = 'bg-gradient-reverse-primary',
-    about22ContainerClassName: containerClassName = 'pb-14 pb-md-16',
+    about22WrapperClassName: wrapperClassName,
+    about22ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -29,8 +29,8 @@ export function About22(props: TemplateProps<About22Data>) {
     })) ?? [];
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>

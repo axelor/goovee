@@ -12,8 +12,8 @@ export function Service27(props: TemplateProps<Service27Data>) {
     service27LinkTitle: linkTitle,
     service27LinkHref: linkHref,
     service27Services: services,
-    service27WrapperClassName: wrapperClassName = 'bg-gray',
-    service27ContainerClassName: containerClassName = 'py-15 py-md-17',
+    service27WrapperClassName: wrapperClassName,
+    service27ContainerClassName: containerClassName,
   } = data || {};
 
   const serviceList = services || [];
@@ -22,8 +22,8 @@ export function Service27(props: TemplateProps<Service27Data>) {
   const secondColServices = serviceList.slice(middleIndex);
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-0 gy-10 align-items-center">
           <div className="col-lg-6">
             <div className="row g-6 text-center">

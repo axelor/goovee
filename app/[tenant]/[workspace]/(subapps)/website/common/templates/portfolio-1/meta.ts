@@ -31,11 +31,13 @@ export const portfolio1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container row pt-8 pt-md-14 mx-auto ',
     },
   ],
   models: [

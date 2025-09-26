@@ -8,13 +8,13 @@ export function Testimonial8(props: TemplateProps<Testimonial8Data>) {
   const {
     testimonial8Caption: caption,
     testimonial8Testimonials: testimonials,
-    testimonial8WrapperClassName: wrapperClassName = '',
-    testimonial8ContainerClassName: containerClassName = '',
+    testimonial8WrapperClassName: wrapperClassName,
+    testimonial8ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <h2 className="display-4 text-center mb-8">{caption}</h2>
 
         <div className="grid">

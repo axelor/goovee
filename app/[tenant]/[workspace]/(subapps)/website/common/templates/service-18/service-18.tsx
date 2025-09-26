@@ -15,13 +15,13 @@ export function Service18(props: TemplateProps<Service18Data>) {
     service18Description: description,
     service18Services1: services1,
     service18Services2: services2,
-    service18WrapperClassName: wrapperClassName = 'bg-light wrapper-border',
-    service18ContainerClassName: containerClassName = 'py-14 py-md-18',
+    service18WrapperClassName: wrapperClassName,
+    service18ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-6 mb-10">
           <div className="col-lg-6 order-lg-2">
             <ul className="progress-list">

@@ -42,11 +42,13 @@ export const banner1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-5 pb-15 pt-lg-10 pb-lg-2',
     },
   ],
   models: [],

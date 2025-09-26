@@ -8,13 +8,13 @@ export function Clientlist3(props: TemplateProps<Clientlist3Data>) {
   const {
     clientlist3Caption: caption,
     clientlist3Clients: clients,
-    clientlist3WrapperClassName: wrapperClassName = '',
-    clientlist3ContainerClassName: containerClassName = '',
+    clientlist3WrapperClassName: wrapperClassName,
+    clientlist3ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <h2 className="fs-15 text-uppercase text-muted text-center mb-8">
             {caption}

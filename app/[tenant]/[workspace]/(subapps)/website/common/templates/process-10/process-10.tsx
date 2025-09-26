@@ -9,8 +9,8 @@ export function Process10(props: TemplateProps<Process10Data>) {
     process10Title: title,
     process10Image,
     process10Processes: processes,
-    process10WrapperClassName: wrapperClassName = '',
-    process10ContainerClassName: containerClassName = '',
+    process10WrapperClassName: wrapperClassName,
+    process10ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -20,8 +20,8 @@ export function Process10(props: TemplateProps<Process10Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
           <div className="col-lg-7">
             <figure>

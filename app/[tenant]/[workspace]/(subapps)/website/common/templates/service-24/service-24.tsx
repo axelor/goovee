@@ -9,14 +9,13 @@ export function Service24(props: TemplateProps<Service24Data>) {
     service24Caption: caption,
     service24Title: title,
     service24Services: services,
-    service24WrapperClassName: wrapperClassName = 'bg-gradient-primary',
-    service24ContainerClassName:
-      containerClassName = 'pt-12 pt-lg-8 pb-14 pb-md-17',
+    service24WrapperClassName: wrapperClassName,
+    service24ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
             <h2 className="fs-16 text-uppercase text-primary mb-3">

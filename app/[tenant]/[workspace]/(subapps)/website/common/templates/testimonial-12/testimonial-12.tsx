@@ -6,13 +6,13 @@ export function Testimonial12(props: TemplateProps<Testimonial12Data>) {
   const {data} = props;
   const {
     testimonial12Testimonials: testimonials,
-    testimonial12WrapperClassName: wrapperClassName = '',
-    testimonial12ContainerClassName: containerClassName = '',
+    testimonial12WrapperClassName: wrapperClassName,
+    testimonial12ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="grid mb-14 mb-md-18 mt-3">
           <div className="row isotope gy-6 mt-n19 mt-md-n22">
             {testimonials?.map(({id, attrs: item}) => (

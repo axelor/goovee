@@ -43,11 +43,14 @@ export const facts17Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper position-relative d-lg-flex align-items-center bg-gray min-vh-60 ',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container',
     },
   ],
   models: [

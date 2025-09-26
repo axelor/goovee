@@ -6,13 +6,13 @@ export function Clientlist1(props: TemplateProps<Clientlist1Data>) {
   const {data} = props;
   const {
     clientlist1Clients: clients,
-    clientlist1WrapperClassName: wrapperClassName = '',
-    clientlist1ContainerClassName: containerClassName = '',
+    clientlist1WrapperClassName: wrapperClassName,
+    clientlist1ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-0 gx-md-8 gx-xl-12 gy-8 align-items-center">
           {clients?.map(({id, attrs: item}, i) => (
             <div className="col-4 col-md-2" key={id}>

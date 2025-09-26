@@ -13,13 +13,13 @@ export function Facts5(props: TemplateProps<Facts5Data>) {
   const {data} = props;
   const {
     facts5Facts: facts,
-    facts5WrapperClassName: wrapperClassName = 'bg-soft-primary',
-    facts5ContainerClassName: containerClassName = 'py-14 py-md-16',
+    facts5WrapperClassName: wrapperClassName,
+    facts5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mb-10">
           <div className="col-xl-10 mx-auto">
             <div className="row align-items-center counter-wrapper gy-6 text-center">

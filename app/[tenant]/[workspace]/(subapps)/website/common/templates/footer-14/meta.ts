@@ -97,11 +97,13 @@ export const footer14Schema = {
       name: 'footerClassName',
       title: 'Footer Class Name',
       type: 'string',
+      defaultValue: 'footer bg-dark section-frame mt-15',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pb-13 pb-md-15',
     },
   ],
   models: [

@@ -9,8 +9,8 @@ export function FAQ1(props: TemplateProps<Faq1Data>) {
     faq1Title: title,
     faq1Caption: caption,
     faq1Questions: questions,
-    faq1WrapperClassName: wrapperClassName = '',
-    faq1ContainerClassName: containerClassName = '',
+    faq1WrapperClassName: wrapperClassName,
+    faq1ContainerClassName: containerClassName,
   } = data || {};
 
   const half = Math.ceil((questions?.length ?? 0) / 2);
@@ -18,8 +18,8 @@ export function FAQ1(props: TemplateProps<Faq1Data>) {
   const questions2 = questions?.slice(half);
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <h2 className="fs-15 text-uppercase text-muted mb-3 text-center">
             {caption}

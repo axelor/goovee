@@ -12,8 +12,8 @@ export function Process11(props: TemplateProps<Process11Data>) {
     process11Heading: heading,
     process11Image,
     process11Processes: processes,
-    process11WrapperClassName: wrapperClassName = '',
-    process11ContainerClassName: containerClassName = '',
+    process11WrapperClassName: wrapperClassName,
+    process11ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -23,8 +23,8 @@ export function Process11(props: TemplateProps<Process11Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row mb-8 text-center">
             <div className="col-lg-9 col-xl-8 col-xxl-7 mx-auto">

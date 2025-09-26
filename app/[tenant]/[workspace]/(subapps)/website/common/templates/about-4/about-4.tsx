@@ -12,8 +12,8 @@ export function About4(props: TemplateProps<About4Data>) {
     about4TileImage3,
     about4TileImage4,
     about4Accordions: accordionsList,
-    about4WrapperClassName: wrapperClassName = '',
-    about4ContainerClassName: containerClassName = '',
+    about4WrapperClassName: wrapperClassName,
+    about4ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -49,8 +49,8 @@ export function About4(props: TemplateProps<About4Data>) {
     })) ?? [];
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gy-sm-13 gx-lg-8 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <div className="row gx-md-5 gy-5">

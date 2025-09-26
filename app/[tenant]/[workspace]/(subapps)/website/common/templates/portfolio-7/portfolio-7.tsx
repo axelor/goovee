@@ -20,8 +20,8 @@ export function Portfolio7(props: TemplateProps<Portfolio7Data>) {
     portfolio7Image1Link,
     portfolio7Image2Link,
     portfolio7Image3Link,
-    portfolio7WrapperClassName: wrapperClassName = '',
-    portfolio7ContainerClassName: containerClassName = '',
+    portfolio7WrapperClassName: wrapperClassName,
+    portfolio7ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -43,8 +43,8 @@ export function Portfolio7(props: TemplateProps<Portfolio7Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="projects-tiles">
           <div className="project grid grid-view">
             <div className="row gx-md-8 gx-xl-12 gy-10 gy-md-12">

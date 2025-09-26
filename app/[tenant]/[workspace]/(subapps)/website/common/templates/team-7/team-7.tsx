@@ -11,8 +11,8 @@ export function Team7(props: TemplateProps<Team7Data>) {
     team7Description: description,
     team7Image,
     team7List: list,
-    team7WrapperClassName: wrapperClassName = '',
-    team7ContainerClassName: containerClassName = '',
+    team7WrapperClassName: wrapperClassName,
+    team7ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,8 +22,8 @@ export function Team7(props: TemplateProps<Team7Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
           <div className="col-md-8 col-lg-6 order-lg-2">
             <figure className="rounded">

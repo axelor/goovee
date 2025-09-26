@@ -8,8 +8,8 @@ export function FAQ4(props: TemplateProps<Faq4Data>) {
   const {
     faq4Image,
     faq4Facts: facts,
-    faq4WrapperClassName: wrapperClassName = '',
-    faq4ContainerClassName: containerClassName = '',
+    faq4WrapperClassName: wrapperClassName,
+    faq4ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -19,8 +19,8 @@ export function FAQ4(props: TemplateProps<Faq4Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row ">
           <div className="col-xl-10 mx-auto">
             <div

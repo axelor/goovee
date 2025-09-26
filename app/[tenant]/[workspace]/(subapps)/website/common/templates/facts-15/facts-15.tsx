@@ -10,13 +10,13 @@ export function Facts15(props: TemplateProps<Facts15Data>) {
     facts15Caption: caption,
     facts15Description: description,
     facts15Facts: facts,
-    facts15WrapperClassName: wrapperClassName = '',
-    facts15ContainerClassName: containerClassName = '',
+    facts15WrapperClassName: wrapperClassName,
+    facts15ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0 ">
           <div className="col-lg-4 text-center text-lg-start">
             <h2 className="fs-16 text-uppercase text-primary mb-3">

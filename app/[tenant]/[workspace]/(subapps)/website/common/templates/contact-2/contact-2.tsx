@@ -12,8 +12,8 @@ export function Contact2(props: TemplateProps<Contact2Data>) {
     contact2LinkTitle: linkTitle,
     contact2LinkHref: linkHref,
     contact2Image,
-    contact2WrapperClassName: wrapperClassName = '',
-    contact2ContainerClassName: containerClassName = '',
+    contact2WrapperClassName: wrapperClassName,
+    contact2ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -23,8 +23,8 @@ export function Contact2(props: TemplateProps<Contact2Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-0">
           <div
             className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start d-none d-md-block"

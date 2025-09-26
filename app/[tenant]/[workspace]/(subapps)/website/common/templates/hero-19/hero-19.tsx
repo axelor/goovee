@@ -13,9 +13,8 @@ export function Hero19(props: TemplateProps<Hero19Data>) {
     hero19ButtonLabel: buttonLabel,
     hero19ButtonLink: buttonLink,
     hero19BackgroundImage,
-    hero19WrapperClassName: wrapperClassName = 'text-white',
-    hero19ContainerClassName:
-      containerClassName = 'pt-17 pb-19 pt-md-18 pb-md-17 text-center',
+    hero19WrapperClassName: wrapperClassName,
+    hero19ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -26,10 +25,10 @@ export function Hero19(props: TemplateProps<Hero19Data>) {
 
   return (
     <section
-      className={`wrapper image-wrapper bg-image bg-overlay bg-overlay-300 ${wrapperClassName}`}
+      className={wrapperClassName}
       data-code={props.code}
       style={{backgroundImage: `url(${backgroundImage})`}}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-8 col-xl-7 mx-auto">
             <h1

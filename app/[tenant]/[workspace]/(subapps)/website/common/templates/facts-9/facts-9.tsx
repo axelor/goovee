@@ -10,8 +10,8 @@ export function Facts9(props: TemplateProps<Facts9Data>) {
     facts9BackgroundImage,
     facts9Image,
     facts9Facts: facts,
-    facts9WrapperClassName: wrapperClassName = 'mt-20',
-    facts9ContainerClassName: containerClassName = '',
+    facts9WrapperClassName: wrapperClassName,
+    facts9ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -27,8 +27,8 @@ export function Facts9(props: TemplateProps<Facts9Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div
           className="row"
           style={animation({name: 'slideInUp', delay: '100ms'})}>

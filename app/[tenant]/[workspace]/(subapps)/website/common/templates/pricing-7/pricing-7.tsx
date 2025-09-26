@@ -18,15 +18,15 @@ export function Pricing7(props: TemplateProps<Pricing7Data>) {
     pricing7SwitchLeftLabel: switchLeftLabel,
     pricing7SwitchRightLabel: switchRightLabel,
     pricing7Plans: plans,
-    pricing7WrapperClassName: wrapperClassName = '',
-    pricing7ContainerClassName: containerClassName = '',
+    pricing7WrapperClassName: wrapperClassName,
+    pricing7ContainerClassName: containerClassName,
   } = data || {};
 
   const [activeYearly, setActiveYearly] = useState(false);
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0 mb-10 mb-md-18">
           <div className="col-lg-4">
             <h2 className="display-5 mt-lg-18 mb-3">{title}</h2>

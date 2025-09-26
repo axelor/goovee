@@ -13,8 +13,8 @@ export function About6(props: TemplateProps<About6Data>) {
     about6Image1,
     about6Image2,
     about6List,
-    about6WrapperClassName: wrapperClassName = '',
-    about6ContainerClassName: containerClassName = '',
+    about6WrapperClassName: wrapperClassName,
+    about6ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -30,8 +30,8 @@ export function About6(props: TemplateProps<About6Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
           <div className="col-lg-6 position-relative order-lg-2">
             <Tiles5 images={[image1, image2]} />

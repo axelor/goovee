@@ -13,14 +13,14 @@ export function Portfolio8(props: TemplateProps<Portfolio8Data>) {
     portfolio8Caption: caption,
     portfolio8Description: description,
     portfolio8PortfolioList: portfolioList,
-    portfolio8WrapperClassName: wrapperClassName = 'bg-light',
-    portfolio8ContainerClassName: containerClassName = 'py-14 py-md-17',
+    portfolio8WrapperClassName: wrapperClassName,
+    portfolio8ContainerClassName: containerClassName,
   } = data || {};
 
   const isotopeId = getTemplateId(props);
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mb-8 text-center">
           <div className="col-lg-10 col-xl-9 col-xxl-8 mx-auto">
             <h2 className="fs-16 text-uppercase text-primary mb-3">

@@ -7,16 +7,16 @@ export function Facts16(props: TemplateProps<Facts16Data>) {
     facts16Title: title,
     facts16Caption: caption,
     facts16Facts: facts,
-    facts16WrapperClassName: wrapperClassName = 'bg-soft-primary',
-    facts16ContainerClassName: containerClassName = 'py-17',
+    facts16WrapperClassName: wrapperClassName,
+    facts16ContainerClassName: containerClassName,
   } = data || {};
 
   return (
     <section
-      className={`wrapper section-frame overflow-hidden ${wrapperClassName}`}
+      className={wrapperClassName}
       data-code={props.code}
       style={{borderRadius: '1rem'}}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-xl-11 col-xxl-10 mx-auto">
             <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>

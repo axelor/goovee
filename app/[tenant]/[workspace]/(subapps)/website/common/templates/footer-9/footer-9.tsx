@@ -18,8 +18,8 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
     footer9Helps: helps,
     footer9FooterNav: footerNav,
     footer9SocialLinks,
-    footer9FooterClassName: footerClassName = 'bg-dark text-inverse',
-    footer9ContainerClassName: containerClassName = 'py-13 py-md-15',
+    footer9FooterClassName: footerClassName,
+    footer9ContainerClassName: containerClassName,
   } = data || {};
 
   const logo = getMetaFileURL({
@@ -42,7 +42,7 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
         <ul className="list-unstyled text-reset mb-0">
           {list.map(({id, attrs: {title, url}}) => (
             <li key={id}>
-              <NextLink title={title} href={url} />
+              <NextLink href={url} title={title} />
             </li>
           ))}
         </ul>
@@ -51,8 +51,8 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
   };
 
   return (
-    <footer className={`footer ${footerClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-lg-4">
             <div className="widget">

@@ -17,8 +17,8 @@ export function Hero11(props: TemplateProps<Hero11Data>) {
     hero11BackgroundImage,
     hero11VideoHref: videoHref,
     hero11CarouselImages: carouselImages = [],
-    hero11WrapperClassName: wrapperClassName = 'text-white',
-    hero11ContainerClassName: containerClassName = 'pt-18 pb-16',
+    hero11WrapperClassName: wrapperClassName,
+    hero11ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -63,10 +63,10 @@ export function Hero11(props: TemplateProps<Hero11Data>) {
 
   return (
     <section
-      className={`wrapper image-wrapper bg-image bg-overlay bg-overlay-400 bg-content ${wrapperClassName}`}
+      className={wrapperClassName}
       data-code={props.code}
       style={{backgroundImage: `url(${backgroundImage})`}}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row gx-0 gy-12 align-items-center">
           <div className="col-md-10 offset-md-1 offset-lg-0 col-lg-6 content text-center text-lg-start">
             <h1

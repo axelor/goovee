@@ -44,11 +44,13 @@ export const hero5Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-10 pb-15 pt-md-14 pb-md-20 text-center',
     },
   ],
   models: [],

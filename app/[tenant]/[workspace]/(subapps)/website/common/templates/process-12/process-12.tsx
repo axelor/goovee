@@ -13,13 +13,13 @@ export function Process12(props: TemplateProps<Process12Data>) {
     process12LinkTitle: linkTitle,
     process12LinkHref: linkHref,
     process12Processes: processes,
-    process12WrapperClassName: wrapperClassName = '',
-    process12ContainerClassName: containerClassName = '',
+    process12WrapperClassName: wrapperClassName,
+    process12ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-6">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>

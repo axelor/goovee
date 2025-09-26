@@ -11,8 +11,8 @@ export function CTA8(props: TemplateProps<Cta8Data>) {
     cta8LinkTitle: linkTitle,
     cta8LinkHref: linkHref,
     cta8Image,
-    cta8WrapperClassName: wrapperClassName = '',
-    cta8ContainerClassName: containerClassName = '',
+    cta8WrapperClassName: wrapperClassName,
+    cta8ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,9 +22,9 @@ export function CTA8(props: TemplateProps<Cta8Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
+    <section className={wrapperClassName} data-code={props.code}>
       <div
-        className={`container card image-wrapper bg-full bg-image bg-overlay bg-overlay-300 ${containerClassName}`}
+        className={containerClassName}
         style={{backgroundImage: `url(${image})`}}>
         <div className="card-body p-10 p-xl-12">
           <div className="row text-center">

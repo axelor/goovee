@@ -11,8 +11,8 @@ export function CTA4(props: TemplateProps<Cta4Data>) {
     cta4LinkTitle: linkTitle,
     cta4LinkHref: linkHref,
     cta4Image,
-    cta4WrapperClassName: wrapperClassName = '',
-    cta4ContainerClassName: containerClassName = 'py-18',
+    cta4WrapperClassName: wrapperClassName,
+    cta4ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -23,10 +23,10 @@ export function CTA4(props: TemplateProps<Cta4Data>) {
 
   return (
     <section
-      className={`wrapper image-wrapper bg-image bg-overlay ${wrapperClassName}`}
+      className={wrapperClassName}
       data-code={props.code}
       style={{backgroundImage: `url(${image})`}}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-8">
             <h2 className="fs-16 text-uppercase text-white mb-3 text-line">

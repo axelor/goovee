@@ -12,13 +12,13 @@ export function Blog3(props: TemplateProps<Blog3Data>) {
     blog3Caption: caption,
     blog3Navigation: navigation,
     blog3BlogList: blogList = [],
-    blog3WrapperClassName: wrapperClassName = '',
-    blog3ContainerClassName: containerClassName = '',
+    blog3WrapperClassName: wrapperClassName,
+    blog3ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-xxl-9 mx-auto">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>

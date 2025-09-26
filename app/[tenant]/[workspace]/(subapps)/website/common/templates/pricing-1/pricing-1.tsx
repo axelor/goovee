@@ -21,16 +21,15 @@ export function Pricing1(props: TemplateProps<Pricing1Data>) {
     pricing1ButtonText: buttonText,
     pricing1ButtonLink: buttonLink,
     pricing1Plans: plans,
-    pricing1WrapperClassName:
-      wrapperClassName = 'bg-light angled upper-end lower-end',
-    pricing1ContainerClassName: containerClassName = 'pt-14 pt-md-14',
+    pricing1WrapperClassName: wrapperClassName,
+    pricing1ContainerClassName: containerClassName,
   } = data || {};
 
   const [activeYearly, setActiveYearly] = useState(false);
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 mb-14 mb-md-18">
           <div className="col-lg-4">
             <h2 className="fs-16 text-uppercase text-muted mt-lg-18 mb-3">

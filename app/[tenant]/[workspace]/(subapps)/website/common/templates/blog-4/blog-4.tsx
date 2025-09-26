@@ -12,13 +12,13 @@ export function Blog4(props: TemplateProps<Blog4Data>) {
     blog4Caption: caption,
     blog4Navigation: navigation,
     blog4BlogList: blogList = [],
-    blog4WrapperClassName: wrapperClassName = '',
-    blog4ContainerClassName: containerClassName = '',
+    blog4WrapperClassName: wrapperClassName,
+    blog4ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-lg-9 col-xxl-8 mx-auto">
             <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">

@@ -8,13 +8,13 @@ export function Service26(props: TemplateProps<Service26Data>) {
   const {
     service26Description: description,
     service26Services: services,
-    service26WrapperClassName: wrapperClassName = 'bg-light',
-    service26ContainerClassName: containerClassName = 'py-14 py-md-16',
+    service26WrapperClassName: wrapperClassName,
+    service26ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-12 col-xl-10 col-xxl-7 mx-auto text-center">
             <i className="icn-flower text-leaf fs-30 opacity-25" />

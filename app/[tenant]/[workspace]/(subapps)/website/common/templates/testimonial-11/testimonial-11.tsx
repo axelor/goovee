@@ -10,8 +10,8 @@ export function Testimonial11(props: TemplateProps<Testimonial11Data>) {
     testimonial11SlidesPerView: slidesPerView,
     testimonial11Navigation: navigation,
     testimonial11Testimonials: testimonials = [],
-    testimonial11WrapperClassName: wrapperClassName = '',
-    testimonial11ContainerClassName: containerClassName = '',
+    testimonial11WrapperClassName: wrapperClassName,
+    testimonial11ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -29,8 +29,8 @@ export function Testimonial11(props: TemplateProps<Testimonial11Data>) {
   };
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mt-md-n50p text-white text-center">
           <div className="col-xl-10 mx-auto mb-14 mb-lg-n6">
             <div

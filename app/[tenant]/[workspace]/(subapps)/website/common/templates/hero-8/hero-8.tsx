@@ -22,8 +22,8 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
     hero8CountUp: countUp,
     hero8Suffix: suffix,
     hero8Heading: heading,
-    hero8WrapperClassName: wrapperClassName = 'bg-soft-primary rounded-4',
-    hero8ContainerClassName: containerClassName = 'p-md-10 py-xl-11 px-xl-15',
+    hero8WrapperClassName: wrapperClassName,
+    hero8ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -33,10 +33,8 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
   });
 
   return (
-    <section
-      className={`wrapper card ${wrapperClassName}`}
-      data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-0 gy-10 align-items-center">
           <div className="col-lg-6 order-lg-2 d-flex position-relative">
             <img

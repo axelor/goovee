@@ -19,14 +19,14 @@ export function Service22(props: TemplateProps<Service22Data>) {
     service22Caption: caption,
     service22Title: title,
     service22Tabs: tabs,
-    service22WrapperClassName: wrapperClassName = '',
-    service22ContainerClassName: containerClassName = '',
+    service22WrapperClassName: wrapperClassName,
+    service22ContainerClassName: containerClassName,
   } = data || {};
 
   const tabId = getTemplateId(props);
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row">
             <div className="col-md-10 offset-md-1 col-lg-8 offset-lg-2 mx-auto text-center">

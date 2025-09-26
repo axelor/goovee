@@ -19,8 +19,8 @@ export function Testimonial3(props: TemplateProps<Testimonial3Data>) {
     testimonial3SlidesPerView: slidesPerView,
     testimonial3Navigation: navigation,
     testimonial3Testimonials: testimonials = [],
-    testimonial3WrapperClassName: wrapperClassName = '',
-    testimonial3ContainerClassName: containerClassName = '',
+    testimonial3WrapperClassName: wrapperClassName,
+    testimonial3ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -36,8 +36,8 @@ export function Testimonial3(props: TemplateProps<Testimonial3Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <h3 className="display-4 mb-3 text-center">{title}</h3>
           <p className="lead fs-lg mb-10 text-center">{description}</p>

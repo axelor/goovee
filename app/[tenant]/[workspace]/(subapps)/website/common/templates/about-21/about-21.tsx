@@ -26,8 +26,8 @@ export function About21(props: TemplateProps<About21Data>) {
     about21Media: media,
     about21HideShape: hideShape,
     about21AboutList: aboutList,
-    about21WrapperClassName: wrapperClassName = '',
-    about21ContainerClassName: containerClassName = '',
+    about21WrapperClassName: wrapperClassName,
+    about21ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -43,8 +43,8 @@ export function About21(props: TemplateProps<About21Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gy-sm-13 gx-md-8 gx-xl-12 align-items-center mb-15 mb-md-17">
           <div className="col-lg-6 position-relative">
             <Banner4

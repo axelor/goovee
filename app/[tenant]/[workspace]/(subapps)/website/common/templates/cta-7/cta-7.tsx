@@ -11,8 +11,8 @@ export function CTA7(props: TemplateProps<Cta7Data>) {
     cta7LinkTitle: linkTitle,
     cta7LinkHref: linkHref,
     cta7Image,
-    cta7WrapperClassName: wrapperClassName = 'mb-14',
-    cta7ContainerClassName: containerClassName = 'py-14 px-0',
+    cta7WrapperClassName: wrapperClassName,
+    cta7ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,13 +22,11 @@ export function CTA7(props: TemplateProps<Cta7Data>) {
   });
 
   return (
-    <section
-      className={`container-card ${wrapperClassName}`}
-      data-code={props.code}>
+    <section className={wrapperClassName} data-code={props.code}>
       <div
         className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500"
         style={{backgroundImage: `url(${image})`}}>
-        <div className={`container card-body ${containerClassName}`}>
+        <div className={containerClassName}>
           <div className="row text-center">
             <div className="col-md-7 col-lg-9 col-xl-8 col-xxl-7 mx-auto">
               <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">

@@ -23,8 +23,8 @@ export function Footer2(props: TemplateProps<Footer2Data>) {
     footer2NewsletterTitle: newsletterTitle,
     footer2NewsletterDescription: newsletterDescription,
     footer2SocialLinks,
-    footer2FooterClassName: footerClassName = '',
-    footer2ContainerClassName: containerClassName = 'py-13 py-md-15',
+    footer2FooterClassName: footerClassName,
+    footer2ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -42,10 +42,10 @@ export function Footer2(props: TemplateProps<Footer2Data>) {
 
   return (
     <footer
-      className={`wrapper image-wrapper bg-image bg-overlay ${footerClassName}`}
+      className={footerClassName}
       style={{backgroundImage: `url(${backgroundImage})`}}
       data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">

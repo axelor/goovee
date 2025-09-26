@@ -37,11 +37,13 @@ export const cta1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper bg-gradient-reverse-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-16 py-md-18',
     },
   ],
   metaModels: [metaFileModel],

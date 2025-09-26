@@ -106,11 +106,13 @@ export const footer3Schema = {
       name: 'footerClassName',
       title: 'Footer Class Name',
       type: 'string',
+      defaultValue: 'footer bg-gradient-reverse-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-13 pt-md-15 pb-7',
     },
   ],
   models: [

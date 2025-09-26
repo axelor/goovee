@@ -97,11 +97,13 @@ export const contact12Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-15 py-md-17',
     },
   ],
   models: [],

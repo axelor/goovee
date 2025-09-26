@@ -8,13 +8,13 @@ export function Clientlist2(props: TemplateProps<Clientlist2Data>) {
     clientlist2Title: title,
     clientlist2Caption: caption,
     clientlist2Clients: clients,
-    clientlist2WrapperClassName: wrapperClassName = '',
-    clientlist2ContainerClassName: containerClassName = '',
+    clientlist2WrapperClassName: wrapperClassName,
+    clientlist2ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0 mb-13 mb-md-17">
           <div className="col-lg-4 text-center text-lg-start">
             <h2 className="display-5 mb-3">{title}</h2>

@@ -43,11 +43,14 @@ export const testimonial13Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-image bg-overlay bg-overlay-300 text-white',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-14 py-md-17',
     },
   ],
   models: [

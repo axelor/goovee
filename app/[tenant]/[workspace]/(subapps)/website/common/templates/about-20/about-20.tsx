@@ -24,8 +24,8 @@ export function About20(props: TemplateProps<About20Data>) {
     about20Image2,
     about20Image3,
     about20AboutList: aboutList,
-    about20WrapperClassName: wrapperClassName = '',
-    about20ContainerClassName: containerClassName = '',
+    about20WrapperClassName: wrapperClassName,
+    about20ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -47,8 +47,8 @@ export function About20(props: TemplateProps<About20Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-10 gy-sm-13 gx-md-8 gx-xl-12 align-items-center mt-15">
           <div className="col-lg-6">
             <div className="row gx-md-5 gy-5">

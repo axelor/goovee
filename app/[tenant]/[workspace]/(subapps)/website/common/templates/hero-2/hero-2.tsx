@@ -17,8 +17,8 @@ export function Hero2(props: TemplateProps<Hero2Data>) {
     hero2ButtonLink1: buttonLink1,
     hero2ButtonLink2: buttonLink2,
     hero2Image,
-    hero2WrapperClassName: wrapperClassName = '',
-    hero2ContainerClassName: containerClassName = '',
+    hero2WrapperClassName: wrapperClassName,
+    hero2ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -28,8 +28,8 @@ export function Hero2(props: TemplateProps<Hero2Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-0 gx-xl-8 gy-10 gy-md-13 gy-lg-0 mb-7 mb-md-10 mb-lg-16 align-items-center">
           <div
             className="col-md-8 offset-md-2 col-lg-6 offset-lg-1 position-relative order-lg-2"

@@ -10,13 +10,13 @@ export function Service19(props: TemplateProps<Service19Data>) {
     service19Caption: caption,
     service19Description: description,
     service19Services: services,
-    service19WrapperClassName: wrapperClassName = '',
-    service19ContainerClassName: containerClassName = '',
+    service19WrapperClassName: wrapperClassName,
+    service19ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <Fragment>
           <div className="row text-center">
             <div className="col-lg-9 col-xl-8 col-xxl-7 mx-auto">

@@ -75,11 +75,13 @@ export const footer12Schema = {
       name: 'footerClassName',
       title: 'Footer Class Name',
       type: 'string',
+      defaultValue: 'footer bg-dark text-inverse',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container py-13 py-md-15',
     },
   ],
   models: [

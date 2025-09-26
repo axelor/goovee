@@ -10,8 +10,8 @@ export function Contact11(props: TemplateProps<Contact11Data>) {
     contact11Caption: caption,
     contact11Image,
     contact11ContactInfo: contactInfo,
-    contact11WrapperClassName: wrapperClassName = '',
-    contact11ContainerClassName: containerClassName = '',
+    contact11WrapperClassName: wrapperClassName,
+    contact11ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -21,8 +21,8 @@ export function Contact11(props: TemplateProps<Contact11Data>) {
   });
 
   return (
-    <section className={`wrapper ${wrapperClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-3 gy-10 mb-15 mb-md-18 align-items-center">
           <div className="col-lg-6">
             <figure>

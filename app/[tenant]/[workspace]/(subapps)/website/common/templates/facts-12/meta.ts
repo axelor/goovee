@@ -38,11 +38,14 @@ export const facts12Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue: 'wrapper',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue:
+        'container-card card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500',
     },
   ],
   models: [

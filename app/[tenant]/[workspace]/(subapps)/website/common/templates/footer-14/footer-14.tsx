@@ -22,8 +22,8 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
     footer14NewsletterDescription: newsletterDescription,
     footer14Links: links,
     footer14SocialLinks,
-    footer14FooterClassName: footerClassName = 'bg-dark section-frame mt-15',
-    footer14ContainerClassName: containerClassName = 'pb-13 pb-md-15',
+    footer14FooterClassName: footerClassName,
+    footer14ContainerClassName: containerClassName,
   } = data || {};
 
   const logo = getMetaFileURL({
@@ -46,8 +46,8 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
     })) ?? [];
 
   return (
-    <footer className={`footer ${footerClassName}`} data-code={props.code}>
-      <div className={`container ${containerClassName}`}>
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div
           className="card image-wrapper bg-full bg-image bg-overlay mt-n50p mx-md-5"
           style={{backgroundImage: `url(${backgroundImage})`}}>

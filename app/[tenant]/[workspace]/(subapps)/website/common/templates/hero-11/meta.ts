@@ -63,11 +63,14 @@ export const hero11Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-image bg-overlay bg-overlay-400 bg-content text-white',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
+      defaultValue: 'container pt-18 pb-16',
     },
   ],
   models: [
