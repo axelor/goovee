@@ -2,6 +2,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
