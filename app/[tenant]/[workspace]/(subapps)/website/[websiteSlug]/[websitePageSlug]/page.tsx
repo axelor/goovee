@@ -9,7 +9,10 @@ import {
   findWebsitePageBySlug,
 } from '@/subapps/website/common/orm/website';
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
-import {getWebsiteComponent} from '@/subapps/website/common/utils/component';
+import {
+  getWebsiteComponent,
+  getWebsitePlugins,
+} from '@/subapps/website/common/utils/component';
 import {MOUNT_TYPE} from '@/subapps/website/common/constants';
 import {clone} from '@/utils';
 
@@ -79,13 +82,16 @@ export default async function Page({
     return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
   }
 
+  const codes: string[] = [];
   const components = websitePage.contentLines.map(line => {
     if (!line?.content?.component) return;
     const Component = getWebsiteComponent(line.content.component);
+    codes.push(line.content.component.code!);
     return (
       <Component
         key={line.id}
         data={clone(line.content.attrs)}
+        lineId={line.id}
         contentId={line.content.id}
         contentVersion={line.content.version}
         workspaceURI={workspaceURI}
@@ -98,5 +104,13 @@ export default async function Page({
     );
   });
 
-  return components;
+  const plugins = getWebsitePlugins(codes).map((Plugin, i) => (
+    <Plugin key={i} />
+  ));
+  return (
+    <>
+      {plugins}
+      {components}
+    </>
+  );
 }

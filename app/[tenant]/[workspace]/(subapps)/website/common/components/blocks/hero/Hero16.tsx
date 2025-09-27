@@ -1,5 +1,5 @@
 import {FC} from 'react';
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 // -------- custom component -------- //
 import Check from '@/subapps/website/common/icons/lineal/Check';

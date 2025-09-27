@@ -6,12 +6,12 @@ import NextLink from '../links/NextLink';
 
 // ======================================================
 type BlogCard4Props = {
-  date: string;
-  image: string;
-  title: string;
-  category: string;
+  date?: string;
+  image?: string;
+  title?: string;
+  category?: string;
   className?: string;
-  description: string;
+  description?: string;
 };
 // ======================================================
 

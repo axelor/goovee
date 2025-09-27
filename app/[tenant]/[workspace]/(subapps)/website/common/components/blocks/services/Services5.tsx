@@ -1,4 +1,4 @@
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import {FC, Fragment} from 'react';
 import {Tiles1} from '@/subapps/website/common/components/elements/tiles';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';

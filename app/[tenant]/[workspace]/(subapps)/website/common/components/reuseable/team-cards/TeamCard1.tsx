@@ -1,17 +1,15 @@
 import {FC} from 'react';
 import Image from 'next/image';
-import IconLink from '../links/IconLink';
+import SocialLinks from '../SocialLinks';
 
 // ==========================================================
 type TeamCard1Props = {
-  name: string;
-  image: string;
+  name?: string;
+  image?: string;
   shadow?: boolean;
-  twitterUrl: string;
-  designation: string;
-  description: string;
-  facebookUrl: string;
-  dribbbleUrl: string;
+  designation?: string;
+  description?: string;
+  socialLinks?: {id: string; icon: string; url: string}[];
 };
 // ==========================================================
 
@@ -21,9 +19,7 @@ const TeamCard1: FC<TeamCard1Props> = props => {
     description,
     designation,
     image,
-    facebookUrl,
-    twitterUrl,
-    dribbbleUrl,
+    socialLinks,
     shadow = false,
   } = props;
 
@@ -44,20 +40,7 @@ const TeamCard1: FC<TeamCard1Props> = props => {
         <div className="meta mb-2">{designation}</div>
         <p className="mb-2">{description}</p>
 
-        <nav className="nav social mb-0">
-          <IconLink
-            href={twitterUrl}
-            icon={<i className="uil uil-twitter" />}
-          />
-          <IconLink
-            href={facebookUrl}
-            icon={<i className="uil uil-facebook-f" />}
-          />
-          <IconLink
-            href={dribbbleUrl}
-            icon={<i className="uil uil-dribbble" />}
-          />
-        </nav>
+        <SocialLinks links={socialLinks || []} className="nav social mb-0" />
       </div>
     </div>
   );

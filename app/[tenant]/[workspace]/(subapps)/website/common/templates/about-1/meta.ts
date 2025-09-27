@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {accordionModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const about1Schema = {
@@ -31,35 +32,11 @@ export const about1Schema = {
     {
       name: 'accordions',
       title: 'Accordions',
-      target: 'About1Accordion',
+      target: 'Accordion',
       type: 'json-one-to-many',
     },
   ],
-  models: [
-    {
-      name: 'About1Accordion',
-      title: 'About 1 Accordions',
-      fields: [
-        {
-          name: 'heading',
-          title: 'Heading',
-          type: 'string',
-          nameField: true,
-          visibleInGrid: true,
-        },
-        {
-          name: 'body',
-          title: 'Body',
-          type: 'string',
-        },
-        {
-          name: 'expand',
-          title: 'Expand',
-          type: 'boolean',
-        },
-      ],
-    },
-  ],
+  models: [accordionModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -76,8 +53,8 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/illustrations/i6.png',
       },
-      about1Title: 'Why Choose Us?',
-      about1Caption: 'We provide solutions that make our clients live easier.',
+      about1Caption: 'Why Choose Us?',
+      about1Title: 'We provide solutions that make our clients live easier.',
       about1Accordions: [
         {
           id: '11',
@@ -117,8 +94,8 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
         fileType: 'image/png',
         filePath: '/img/illustrations/i6.png',
       },
-      about1Title: 'Pourquoi nous choisir ?',
-      about1Caption:
+      about1Caption: 'Pourquoi nous choisir ?',
+      about1Title:
         'Nous proposons des solutions qui facilitent la vie de nos clients.',
       about1Accordions: [
         {

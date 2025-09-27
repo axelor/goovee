@@ -136,15 +136,15 @@ function validateSchemas(schemas: TemplateSchema[]) {
 }
 
 function getModels(schemas: TemplateSchema[]): Model[] {
-  const models = new Set<Model>(); // use a set to remove referencially duplicate models
+  const models = new Map<string, Model>();
   for (const schema of schemas) {
     if (schema.models?.length) {
       for (const model of schema.models) {
-        models.add(model);
+        models.set(model.name, model);
       }
     }
   }
-  return Array.from(models);
+  return Array.from(models.values());
 }
 
 function getContentFields(
@@ -202,21 +202,48 @@ function formatSchema<T extends TemplateSchema>(schema: T): T {
 
 export async function seedComponents(tenantId: Tenant['id']) {
   const _schemas = metas.map(demo => demo.schema);
-  if (!validateSchemas(_schemas)) return;
+  if (!validateSchemas(_schemas)) {
+    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+  }
   const schemas = _schemas.map(formatSchema);
 
-  const componentsPromise = schemas.map(schema =>
+  const componentsSettled = await processBatch(metas, async ({schema}) =>
     createCMSComponent({schema, tenantId}),
   );
+  const components = componentsSettled
+    .filter(res => res.status === 'fulfilled')
+    .map(res => res.value);
 
-  const models = getModels(schemas);
-  const jsonModels = await Promise.all(
-    models.map(async model => createMetaJsonModel({model, tenantId})),
+  const failedComponents = componentsSettled.filter(
+    res => res.status === 'rejected',
   );
 
-  const customModelPromises = models.map(async model => {
+  if (failedComponents.length) {
+    console.log('\x1b[31m🔥 Failed:\x1b[0m');
+    console.dir(failedComponents, {depth: null});
+  }
+
+  const models = getModels(schemas);
+  const jsonModelsSettled = await processBatch(models, async model =>
+    createMetaJsonModel({model, tenantId}),
+  );
+  const jsonModels = jsonModelsSettled
+    .filter(res => res.status === 'fulfilled')
+    .map(res => res.value);
+
+  const failedJsonModels = jsonModelsSettled.filter(
+    res => res.status === 'rejected',
+  );
+
+  if (failedJsonModels.length) {
+    console.log('\x1b[31m🔥 Failed:\x1b[0m');
+    console.dir(failedJsonModels, {depth: null});
+  }
+
+  const customModels = await processBatch(models, async model => {
     const jsonModel = jsonModels.find(m => m.name === model.name);
     if (!jsonModel) {
+      console.log(`\x1b[31m✖ Model ${model.name} was not created.\x1b[0m`);
       throw new Error(`Model ${model.name} was not created`);
     }
     const fields = await createCustomFields({
@@ -231,8 +258,6 @@ export async function seedComponents(tenantId: Tenant['id']) {
     return {...jsonModel, fields};
   });
 
-  const components = await Promise.all(componentsPromise);
-
   const fields = getContentFields(schemas, components);
   // NOTE: json models should be created before fields since target models are referenced in fields by name
   const contentFields = await createCustomFields({
@@ -244,9 +269,7 @@ export async function seedComponents(tenantId: Tenant['id']) {
     addPanel: true,
   });
 
-  const customModels = await Promise.all(customModelPromises);
-
-  return {components, contentFields, customModels};
+  return {components: componentsSettled, contentFields, customModels};
 }
 
 export async function resetFields(tenantId: Tenant['id']) {
@@ -272,7 +295,9 @@ export async function resetFields(tenantId: Tenant['id']) {
 
 export async function seedContents(tenantId: Tenant['id']) {
   const _schemas = metas.map(demo => demo.schema);
-  if (!validateSchemas(_schemas)) return;
+  if (!validateSchemas(_schemas)) {
+    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+  }
 
   const fileCache = new Cache<Promise<{id: string}>>();
   const res = await processBatch(metas, async ({schema, demos}) => {

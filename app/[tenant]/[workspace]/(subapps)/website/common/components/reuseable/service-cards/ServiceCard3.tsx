@@ -2,10 +2,10 @@ import {FC, ReactElement} from 'react';
 
 // ================================================
 type ServiceCard3Props = {
-  title: string;
-  Icon: ReactElement;
+  title?: string;
+  Icon?: ReactElement;
   className?: string;
-  description: string;
+  description?: string;
 };
 // ================================================
 

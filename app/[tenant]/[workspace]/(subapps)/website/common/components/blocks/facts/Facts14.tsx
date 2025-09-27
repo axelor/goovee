@@ -1,4 +1,4 @@
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import {FC, Fragment} from 'react';
 // -------- data -------- //
 import {factList7} from '@/subapps/website/common/data/facts';

@@ -1,5 +1,5 @@
 import {FC} from 'react';
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
 // -------- data -------- //
 import {skill2} from '@/subapps/website/common/data/skill';

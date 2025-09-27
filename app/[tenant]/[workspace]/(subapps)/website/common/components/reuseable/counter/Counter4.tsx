@@ -1,5 +1,6 @@
 import {FC} from 'react';
-import CountUp, {CountUpProps} from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
+import {CountUpProps} from 'react-countup';
 
 // ==============================================================
 interface CounterProps extends CountUpProps {

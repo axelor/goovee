@@ -1,5 +1,5 @@
 import {FC} from 'react';
-import CountUp from 'react-countup';
+import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import CloudGroup from '@/subapps/website/common/icons/solid-duo/CloudGroup';
 
 const About18: FC = () => {
