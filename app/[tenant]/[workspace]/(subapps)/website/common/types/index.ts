@@ -25,6 +25,7 @@ export type TemplateProps<T = any, M = any> = {
   websitePageSlug?: string;
   code?: string;
   mountType: MountType;
+  canEditWiki?: boolean;
 };
 
 export type MountType = 'page' | 'footer' | 'header' | 'menu';

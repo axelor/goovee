@@ -4,6 +4,7 @@ import axios from 'axios';
 import {filterPrivate} from '@/orm/filter';
 import {manager, type Tenant} from '@/tenant';
 import type {
+  ID,
   MainWebsite,
   PortalWorkspace,
   User,
@@ -24,6 +25,7 @@ import {
 import {LayoutMountType, MenuItem} from '../types';
 import {Cache} from '../utils/helper';
 import {metaModels} from '../templates/meta-models';
+import {Maybe} from '@/types/util';
 
 export async function findAllMainWebsites({
   workspaceURL,
@@ -938,4 +940,21 @@ async function findModelRecords({
   }
 
   return res.data;
+}
+
+export async function canEditWiki({
+  userId,
+  tenantId,
+}: {
+  userId: Maybe<ID>;
+  tenantId: Tenant['id'];
+}) {
+  const client = await manager.getClient(tenantId);
+  if (!userId) return false;
+  const user = await client.aOSPartner.findOne({
+    where: {id: userId},
+    select: {canEditWiki: true},
+  });
+
+  return !!user?.canEditWiki;
 }
