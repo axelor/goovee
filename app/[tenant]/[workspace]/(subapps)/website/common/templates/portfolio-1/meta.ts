@@ -37,7 +37,7 @@ export const portfolio1Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container row pt-8 pt-md-14 mx-auto ',
+      defaultValue: 'container-fluid px-md-6',
     },
   ],
   models: [
@@ -70,6 +70,8 @@ export type Portfolio1Data = Data<typeof portfolio1Schema>;
 export const portfolio1Demos: Demo<typeof portfolio1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 5,
     data: {
       portfolio1Caption: 'Latest Projects',
       portfolio1Description:
@@ -164,6 +166,8 @@ export const portfolio1Demos: Demo<typeof portfolio1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 5,
     data: {
       portfolio1Caption: 'Derniers projets',
       portfolio1Description:

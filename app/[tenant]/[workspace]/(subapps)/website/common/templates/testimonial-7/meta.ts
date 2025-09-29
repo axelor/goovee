@@ -60,13 +60,13 @@ export const testimonial7Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container py-14 py-md-17 mb-14',
     },
   ],
   models: [
@@ -102,6 +102,8 @@ export type Testimonial7Data = Data<typeof testimonial7Schema>;
 export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-5',
+    sequence: 4,
     data: {
       testimonial7TileImage1: {
         id: '1',
@@ -168,6 +170,8 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-5',
+    sequence: 4,
     data: {
       testimonial7TileImage1: {
         id: '1',

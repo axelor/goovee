@@ -66,6 +66,8 @@ export type Facts10Data = Data<typeof facts10Schema>;
 export const facts10Demos: Demo<typeof facts10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 5,
     data: {
       facts10Title: 'We feel proud of our achievements.',
       facts10Caption: 'Company Facts',
@@ -99,6 +101,8 @@ export const facts10Demos: Demo<typeof facts10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 5,
     data: {
       facts10Title: 'Nous sommes fiers de nos réalisations.',
       facts10Caption: 'Faits sur l’entreprise',

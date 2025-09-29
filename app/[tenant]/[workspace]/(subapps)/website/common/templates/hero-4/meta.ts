@@ -70,6 +70,8 @@ export type Hero4Data = Data<typeof hero4Schema>;
 export const hero4Demos: Demo<typeof hero4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 1,
     data: {
       hero4Title:
         "Simple get down & calm down and we're control your requirements.",
@@ -90,6 +92,8 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 1,
     data: {
       hero4Title: 'Calmez-vous et nous contrôlons vos besoins.',
       hero4Description:

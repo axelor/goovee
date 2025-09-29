@@ -52,6 +52,8 @@ export type About5Data = Data<typeof about5Schema>;
 export const about5Demos: Demo<typeof about5Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 1,
     data: {
       about5Title:
         'We bring rapid solutions to make the life of our customers easier.',
@@ -104,6 +106,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 1,
     data: {
       about5Title:
         'Nous apportons des solutions rapides pour faciliter la vie de nos clients.',

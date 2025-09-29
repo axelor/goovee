@@ -67,7 +67,8 @@ export const hero8Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper card bg-soft-primary rounded-4',
+      defaultValue:
+        'wrapper card bg-soft-primary rounded-4 mt-2 mb-13 mb-md-17',
     },
     {
       name: 'containerClassName',
@@ -84,6 +85,8 @@ export type Hero8Data = Data<typeof hero8Schema>;
 export const hero8Demos: Demo<typeof hero8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 1,
     data: {
       hero8Title: 'Creating particular project ideas with experience',
       hero8Description:
@@ -106,6 +109,8 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 1,
     data: {
       hero8Title: 'Créer des idées de projets particulières avec expérience',
       hero8Description:

@@ -10,7 +10,10 @@ export function Facts12(props: TemplateProps<Facts12Data>) {
     facts12Caption: caption,
     facts12Image,
     facts12Facts: facts,
-    facts12WrapperClassName: wrapperClassName,
+    facts12SectionClassName: sectionClassName,
+    facts12ContainerCardClassName: containerCardClassName,
+    facts12CardClassName: cardClassName,
+    facts12CardBodyClassName: cardBodyClassName,
     facts12ContainerClassName: containerClassName,
   } = data || {};
 
@@ -21,13 +24,13 @@ export function Facts12(props: TemplateProps<Facts12Data>) {
   });
 
   return (
-    <section className={wrapperClassName} data-code={props.code}>
-      <div className={containerClassName}>
+    <section className={sectionClassName} data-code={props.code}>
+      <div className={containerCardClassName}>
         <div
-          className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500"
+          className={cardClassName}
           style={{backgroundImage: `url(${image})`}}>
-          <div className="card-body py-14 px-0">
-            <div className="container">
+          <div className={cardBodyClassName}>
+            <div className={containerClassName}>
               <div className="row align-items-center gx-lg-8 gx-xl-12 gy-10 gy-lg-0">
                 <div className="col-lg-4 text-center text-lg-start">
                   <h3 className="display-4 mb-3">{title}</h3>

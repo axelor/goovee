@@ -47,13 +47,13 @@ export const pricing8Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-15 pb-md-17',
     },
   ],
   models: [planModel, faq5QuestionsModel],
@@ -64,6 +64,8 @@ export type Pricing8Data = Data<typeof pricing8Schema>;
 export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 7,
     data: {
       pricing8Title: 'Our Pricing',
       pricing8Caption: 'We provide perfect and competitive prices.',
@@ -167,6 +169,8 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 7,
     data: {
       pricing8Title: 'Nos tarifs',
       pricing8Caption: 'Nous offrons des prix parfaits et compétitifs.',

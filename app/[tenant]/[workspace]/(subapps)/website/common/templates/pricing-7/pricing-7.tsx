@@ -27,7 +27,7 @@ export function Pricing7(props: TemplateProps<Pricing7Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gy-6 gy-lg-0 mb-10 mb-md-18">
+        <div className="row gy-6 gy-lg-0">
           <div className="col-lg-4">
             <h2 className="display-5 mt-lg-18 mb-3">{title}</h2>
             <p>{caption}</p>

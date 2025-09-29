@@ -31,7 +31,7 @@ export function About7(props: TemplateProps<About7Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-lg-8 gx-xl-12 gy-10 mb-15 mb-md-18 align-items-center">
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <figure>
               <img className="w-auto" src={image} alt="" />

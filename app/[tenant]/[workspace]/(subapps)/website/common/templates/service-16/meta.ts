@@ -21,13 +21,13 @@ export const service16Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container py-14 py-md-16 mt-n18 mt-md-n21 mb-14 mb-md-17',
     },
   ],
   models: [
@@ -85,6 +85,8 @@ export type Service16Data = Data<typeof service16Schema>;
 export const service16Demos: Demo<typeof service16Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 2,
     data: {
       service16Services: [
         {
@@ -148,6 +150,8 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 2,
     data: {
       service16Services: [
         {

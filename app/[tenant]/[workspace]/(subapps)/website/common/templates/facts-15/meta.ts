@@ -36,13 +36,13 @@ export const facts15Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-12 pt-lg-8 mb-11',
     },
   ],
   models: [
@@ -84,6 +84,8 @@ export type Facts15Data = Data<typeof facts15Schema>;
 export const facts15Demos: Demo<typeof facts15Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 5,
     data: {
       facts15Title: 'We feel proud of our achievements.',
       facts15Caption: 'Company Facts',
@@ -125,6 +127,8 @@ export const facts15Demos: Demo<typeof facts15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 5,
     data: {
       facts15Title: 'Nous sommes fiers de nos réalisations.',
       facts15Caption: 'Faits sur l’entreprise',

@@ -65,6 +65,8 @@ export type Facts3Data = Data<typeof facts3Schema>;
 export const facts3Demos: Demo<typeof facts3Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 6,
     data: {
       facts3BackgroundImage: {
         id: '1',
@@ -111,6 +113,8 @@ export const facts3Demos: Demo<typeof facts3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 6,
     data: {
       facts3BackgroundImage: {
         id: '1',

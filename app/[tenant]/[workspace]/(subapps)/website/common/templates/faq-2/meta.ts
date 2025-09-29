@@ -48,6 +48,8 @@ export type Faq2Data = Data<typeof faq2Schema>;
 export const faq2Demos: Demo<typeof faq2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 7,
     data: {
       faq2Title:
         'If you cannot locate a solution to your query, please use our contact page to send us a message.',
@@ -94,6 +96,8 @@ export const faq2Demos: Demo<typeof faq2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 7,
     data: {
       faq2Title:
         'Si vous ne trouvez pas de solution à votre question, veuillez utiliser notre page de contact pour nous envoyer un message.',

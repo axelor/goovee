@@ -41,6 +41,8 @@ export type Banner5Data = Data<typeof banner5Schema>;
 export const banner5Demos: Demo<typeof banner5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 4,
     data: {
       banner5Heading:
         "I'd like to provide you with a one-of-a-kind video and photo package customized to your specific needs.",
@@ -49,6 +51,8 @@ export const banner5Demos: Demo<typeof banner5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 4,
     data: {
       banner5Heading:
         'Je souhaite vous proposer un forfait vidéo et photo unique en son genre, adapté à vos besoins spécifiques.',

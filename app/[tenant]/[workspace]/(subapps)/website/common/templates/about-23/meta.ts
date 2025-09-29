@@ -39,13 +39,13 @@ export const about23Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-15 pb-md-17',
     },
   ],
   models: [accordionModel],
@@ -57,6 +57,8 @@ export type About23Data = Data<typeof about23Schema>;
 export const about23Demos: Demo<typeof about23Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 4,
     data: {
       about23Image: {
         id: '1',
@@ -98,6 +100,8 @@ export const about23Demos: Demo<typeof about23Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 4,
     data: {
       about23Image: {
         id: '1',

@@ -35,7 +35,7 @@ export const facts9Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper mt-20',
+      defaultValue: 'wrapper bg-light angled upper-end mt-n20',
     },
     {
       name: 'containerClassName',
@@ -72,6 +72,8 @@ export type Facts9Data = Data<typeof facts9Schema>;
 export const facts9Demos: Demo<typeof facts9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 2,
     data: {
       facts9BackgroundImage: {
         id: '1',
@@ -125,6 +127,8 @@ export const facts9Demos: Demo<typeof facts9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 2,
     data: {
       facts9BackgroundImage: {
         id: '1',

@@ -143,6 +143,8 @@ export type Footer7Data = Data<typeof footer7Schema>;
 export const footer7Demos: Demo<typeof footer7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 11,
     data: {
       footer7Title: 'Join the Community',
       footer7Description:
@@ -221,6 +223,8 @@ export const footer7Demos: Demo<typeof footer7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 11,
     data: {
       footer7Title: 'Rejoignez la communauté',
       footer7Description:

@@ -32,13 +32,13 @@ export const service22Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-15 pb-md-17',
     },
   ],
   models: [
@@ -122,6 +122,8 @@ export type Service22Data = Data<typeof service22Schema>;
 export const service22Demos: Demo<typeof service22Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 3,
     data: {
       service22Caption: 'Why Choose us?',
       service22Title:
@@ -268,6 +270,8 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 3,
     data: {
       service22Caption: 'Pourquoi nous choisir ?',
       service22Title:

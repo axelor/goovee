@@ -135,6 +135,8 @@ export type Footer14Data = Data<typeof footer14Schema>;
 export const footer14Demos: Demo<typeof footer14Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 8,
     data: {
       footer14Logo: {
         id: '1',
@@ -222,6 +224,8 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 8,
     data: {
       footer14Logo: {
         id: '1',

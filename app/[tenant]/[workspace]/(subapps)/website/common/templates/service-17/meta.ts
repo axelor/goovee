@@ -112,6 +112,8 @@ export type Service17Data = Data<typeof service17Schema>;
 export const service17Demos: Demo<typeof service17Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 2,
     data: {
       service17Caption: 'What We Do',
       service17Title:
@@ -204,6 +206,8 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 2,
     data: {
       service17Caption: 'Ce que nous faisons',
       service17Title:

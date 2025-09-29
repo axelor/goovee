@@ -58,6 +58,8 @@ export type Hero22Data = Data<typeof hero22Schema>;
 export const hero22Demos: Demo<typeof hero22Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 1,
     data: {
       hero22Title: 'Expand your business with our marketing services.',
       hero22Caption: 'Hello! We are here',
@@ -79,6 +81,8 @@ export const hero22Demos: Demo<typeof hero22Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 1,
     data: {
       hero22Title:
         'Développez votre entreprise grâce à nos services marketing.',

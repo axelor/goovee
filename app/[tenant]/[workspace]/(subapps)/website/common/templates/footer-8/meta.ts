@@ -113,6 +113,8 @@ export type Footer8Data = Data<typeof footer8Schema>;
 export const footer8Demos: Demo<typeof footer8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 10,
     data: {
       footer8Logo: {
         id: '1',
@@ -189,6 +191,8 @@ export const footer8Demos: Demo<typeof footer8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 10,
     data: {
       footer8Logo: {
         id: '1',

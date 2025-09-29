@@ -115,6 +115,8 @@ export type Contact12Data = Data<typeof contact12Schema>;
 export const contact12Demos: Demo<typeof contact12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 7,
     data: {
       contact12Title: 'Request Photography Pricing',
       contact12Description:
@@ -143,6 +145,8 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 7,
     data: {
       contact12Title: 'Demander un devis de photographie',
       contact12Description:

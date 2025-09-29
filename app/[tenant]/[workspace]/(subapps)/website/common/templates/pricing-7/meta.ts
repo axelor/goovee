@@ -61,13 +61,13 @@ export const pricing7Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light angled upper-end',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container py-14 py-md-16 mb-10 mb-md-18',
     },
   ],
   models: [planModel],
@@ -78,6 +78,8 @@ export type Pricing7Data = Data<typeof pricing7Schema>;
 export const pricing7Demos: Demo<typeof pricing7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 8,
     data: {
       pricing7Title: 'Our Competitive Pricing',
       pricing7Caption:
@@ -129,6 +131,8 @@ export const pricing7Demos: Demo<typeof pricing7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 8,
     data: {
       pricing7Title: 'Nos tarifs compétitifs',
       pricing7Caption:

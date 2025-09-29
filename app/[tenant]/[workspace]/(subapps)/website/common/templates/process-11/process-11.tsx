@@ -35,7 +35,7 @@ export function Process11(props: TemplateProps<Process11Data>) {
             </div>
           </div>
 
-          <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
+          <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
             <div className="col-lg-6 position-relative">
               <div
                 className="shape bg-dot leaf rellax w-17 h-18"

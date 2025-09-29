@@ -81,6 +81,8 @@ export type Facts4Data = Data<typeof facts4Schema>;
 export const facts4Demos: Demo<typeof facts4Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 7,
     data: {
       facts4Title: 'Trust us, join 10K+ clients to grow your business.',
       facts4Caption: 'Join Our Community',
@@ -124,6 +126,8 @@ export const facts4Demos: Demo<typeof facts4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 7,
     data: {
       facts4Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',

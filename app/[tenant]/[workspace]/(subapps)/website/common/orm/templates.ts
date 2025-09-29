@@ -48,8 +48,18 @@ const disableUpdates = false;
 const demoFileDirectory = '/public';
 const FILE_PREFIX = 'goovee-template-file';
 const SELECT_PREFIX = 'goovee-template-select';
-function getContentTitle({code, language}: {code: string; language: string}) {
-  return `Demo - ${startCase(code)} - ${language}`;
+function getContentTitle({
+  code,
+  language,
+  page,
+  sequence,
+}: {
+  code: string;
+  language: string;
+  page: string;
+  sequence: number;
+}) {
+  return `Demo - ${startCase(code)} - ${language} - ${page} - ${sequence}`;
 }
 
 export function getCommnonSelectionName(name: string) {
@@ -615,6 +625,8 @@ export async function createCMSContent(props: {
       const title = getContentTitle({
         code: schema.code,
         language: demo.language,
+        page: demo.page,
+        sequence: demo.sequence,
       });
 
       const _content = await client.aOSPortalCmsContent.findOne({

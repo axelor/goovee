@@ -40,13 +40,13 @@ export const contact1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light angled lower-start',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-8 pb-md-9',
     },
   ],
   models: [contactInfoModel],
@@ -58,6 +58,8 @@ export type Contact1Data = Data<typeof contact1Schema>;
 export const contact1Demos: Demo<typeof contact1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 10,
     data: {
       contact1Image: {
         id: '1',
@@ -86,6 +88,8 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 10,
     data: {
       contact1Image: {
         id: '1',

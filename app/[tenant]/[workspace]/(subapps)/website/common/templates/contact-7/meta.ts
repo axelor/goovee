@@ -53,6 +53,8 @@ export type Contact7Data = Data<typeof contact7Schema>;
 export const contact7Demos: Demo<typeof contact7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 7,
     data: {
       contact7Image: {
         id: '1',
@@ -80,6 +82,8 @@ export const contact7Demos: Demo<typeof contact7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 7,
     data: {
       contact7Image: {
         id: '1',

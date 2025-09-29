@@ -46,6 +46,8 @@ export type Banner2Data = Data<typeof banner2Schema>;
 export const banner2Demos: Demo<typeof banner2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 3,
     data: {
       banner2Heading: 'I shoot with imagination, philosophy, and emotion.',
       banner2Image: {
@@ -59,6 +61,8 @@ export const banner2Demos: Demo<typeof banner2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 3,
     data: {
       banner2Heading:
         'Je photographie avec imagination, philosophie et émotion.',

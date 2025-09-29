@@ -66,6 +66,8 @@ export type Hero19Data = Data<typeof hero19Schema>;
 export const hero19Demos: Demo<typeof hero19Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 1,
     data: {
       hero19Title1: 'We provide quick solutions for your',
       hero19Title2: 'company',
@@ -84,6 +86,8 @@ export const hero19Demos: Demo<typeof hero19Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 1,
     data: {
       hero19Title1: 'Nous apportons des solutions rapides pour votre',
       hero19Title2: 'entreprise',

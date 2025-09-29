@@ -18,6 +18,12 @@ export const hero24Schema = {
       target: 'Hero24Images',
     },
     {
+      name: 'sectionClassName',
+      title: 'Section Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
@@ -27,7 +33,7 @@ export const hero24Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container px-xl-0 pt-6 pb-10',
+      defaultValue: 'container-fluid px-xl-0 pt-6 pb-10',
     },
   ],
   models: [
@@ -36,8 +42,8 @@ export const hero24Schema = {
       title: 'Images',
       fields: [
         {
-          name: 'title',
-          title: 'Title',
+          name: 'name',
+          title: 'Name',
           type: 'string',
           nameField: true,
           visibleInGrid: true,
@@ -60,13 +66,15 @@ export type Hero24Data = Data<typeof hero24Schema>;
 export const hero24Demos: Demo<typeof hero24Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 1,
     data: {
       hero24Images: [
         {
           id: '1',
           version: 0,
           attrs: {
-            title: 'Slide 1',
+            name: 'Image 1',
             image: {
               id: '1',
               version: 1,
@@ -80,7 +88,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '2',
           version: 0,
           attrs: {
-            title: 'Slide 2',
+            name: 'Image 2',
             image: {
               id: '1',
               version: 1,
@@ -94,7 +102,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '3',
           version: 0,
           attrs: {
-            title: 'Slide 3',
+            name: 'Image 3',
             image: {
               id: '1',
               version: 1,
@@ -108,7 +116,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '4',
           version: 0,
           attrs: {
-            title: 'Slide 4',
+            name: 'Image 4',
             image: {
               id: '1',
               version: 1,
@@ -122,7 +130,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '5',
           version: 0,
           attrs: {
-            title: 'Slide 5',
+            name: 'Image 5',
             image: {
               id: '1',
               version: 1,
@@ -136,7 +144,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '6',
           version: 0,
           attrs: {
-            title: 'Slide 6',
+            name: 'Image 6',
             image: {
               id: '1',
               version: 1,
@@ -151,13 +159,15 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 1,
     data: {
       hero24Images: [
         {
           id: '1',
           version: 0,
           attrs: {
-            title: 'Slide 1',
+            name: 'Image 1',
             image: {
               id: '1',
               version: 1,
@@ -171,7 +181,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '2',
           version: 0,
           attrs: {
-            title: 'Slide 2',
+            name: 'Image 2',
             image: {
               id: '1',
               version: 1,
@@ -185,7 +195,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '3',
           version: 0,
           attrs: {
-            title: 'Slide 3',
+            name: 'Image 3',
             image: {
               id: '1',
               version: 1,
@@ -199,7 +209,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '4',
           version: 0,
           attrs: {
-            title: 'Slide 4',
+            name: 'Image 4',
             image: {
               id: '1',
               version: 1,
@@ -213,7 +223,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '5',
           version: 0,
           attrs: {
-            title: 'Slide 5',
+            name: 'Image 5',
             image: {
               id: '1',
               version: 1,
@@ -227,7 +237,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           id: '6',
           version: 0,
           attrs: {
-            title: 'Slide 6',
+            name: 'Image 6',
             image: {
               id: '1',
               version: 1,

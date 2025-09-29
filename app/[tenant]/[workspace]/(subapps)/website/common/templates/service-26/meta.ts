@@ -75,6 +75,8 @@ export type Service26Data = Data<typeof service26Schema>;
 export const service26Demos: Demo<typeof service26Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 2,
     data: {
       service26Description:
         'I adore photographing brides and individuals there are so many emotions to capture.',
@@ -132,6 +134,8 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 2,
     data: {
       service26Description:
         'J’adore photographier les mariées et les personnes, il y a tellement d’émotions à capturer.',

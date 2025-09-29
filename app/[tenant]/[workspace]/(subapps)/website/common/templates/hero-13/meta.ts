@@ -59,6 +59,8 @@ export type Hero13Data = Data<typeof hero13Schema>;
 export const hero13Demos: Demo<typeof hero13Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 1,
     data: {
       hero13Title: 'We bring rapid solutions for your business',
       hero13Caption: 'HELLO 👋',
@@ -80,6 +82,8 @@ export const hero13Demos: Demo<typeof hero13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 1,
     data: {
       hero13Title: 'Nous apportons des solutions rapides pour votre entreprise',
       hero13Caption: 'HELLO 👋',

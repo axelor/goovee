@@ -19,7 +19,7 @@ export function Clientlist3(props: TemplateProps<Clientlist3Data>) {
           <h2 className="fs-15 text-uppercase text-muted text-center mb-8">
             {caption}
           </h2>
-          <div className="px-lg-5 mb-14 mb-md-19">
+          <div className="px-lg-5">
             <div className="row gx-0 gx-md-8 gx-xl-12 gy-8 align-items-center">
               {clients?.map(({id, attrs: item}, i) => (
                 <div className="col-4 col-md-2" key={id}>

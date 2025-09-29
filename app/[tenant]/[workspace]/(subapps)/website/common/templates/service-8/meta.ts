@@ -60,13 +60,13 @@ export const service8Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mt-5 mt-md-12 mt-lg-0 mb-15',
     },
   ],
   models: [
@@ -109,6 +109,8 @@ export type Service8Data = Data<typeof service8Schema>;
 export const service8Demos: Demo<typeof service8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 3,
     data: {
       service8Title: 'What We Provide?',
       service8Description:
@@ -187,6 +189,8 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 3,
     data: {
       service8Title: 'Ce que nous offrons ?',
       service8Description:

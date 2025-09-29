@@ -62,7 +62,7 @@ export const pricing3Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-16 mb-md-18',
     },
   ],
   models: [planModel],
@@ -73,6 +73,8 @@ export type Pricing3Data = Data<typeof pricing3Schema>;
 export const pricing3Demos: Demo<typeof pricing3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 9,
     data: {
       pricing3Title: 'Our Pricing',
       pricing3Caption: 'We provide perfect and competitive prices.',
@@ -120,6 +122,8 @@ export const pricing3Demos: Demo<typeof pricing3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 9,
     data: {
       pricing3Title: 'Nos tarifs',
       pricing3Caption: 'Nous offrons des prix parfaits et compétitifs.',

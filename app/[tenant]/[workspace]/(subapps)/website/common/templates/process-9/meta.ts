@@ -63,13 +63,13 @@ export const process9Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-19',
     },
   ],
   models: [
@@ -112,6 +112,8 @@ export type Process9Data = Data<typeof process9Schema>;
 export const process9Demos: Demo<typeof process9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 5,
     data: {
       process9Title: 'Our Working Process',
       process9Caption: 'How It Works?',
@@ -172,6 +174,8 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 5,
     data: {
       process9Title: 'Notre processus de travail',
       process9Caption: 'Comment ça marche ?',

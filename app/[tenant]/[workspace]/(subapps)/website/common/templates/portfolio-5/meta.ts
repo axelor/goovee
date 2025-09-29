@@ -116,6 +116,8 @@ export type Portfolio5Data = Data<typeof portfolio5Schema>;
 export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 4,
     data: {
       portfolio5Description:
         'My interest is taking pictures, and I enjoy transforming thoughts into lovely things.',
@@ -445,6 +447,8 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 4,
     data: {
       portfolio5Description:
         'Mon intérêt est de prendre des photos, et j’aime transformer les pensées en de belles choses.',

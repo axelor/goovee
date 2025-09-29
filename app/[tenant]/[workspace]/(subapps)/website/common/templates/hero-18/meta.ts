@@ -51,10 +51,29 @@ export const hero18Schema = {
       widget: 'Image',
     },
     {
-      name: 'wrapperClassName',
-      title: 'Wrapper Class Name',
+      name: 'sectionClassName',
+      title: 'Section Class Name',
       type: 'string',
       defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerCardClassName',
+      title: 'Container Card Class Name',
+      type: 'string',
+      defaultValue: 'container-card',
+    },
+    {
+      name: 'cardClassName',
+      title: 'Card Class Name',
+      type: 'string',
+      defaultValue:
+        'card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 mt-2 mb-5',
+    },
+    {
+      name: 'cardBodyClassName',
+      title: 'Card Body Class Name',
+      type: 'string',
+      defaultValue: 'card-body py-14 px-0',
     },
     {
       name: 'containerClassName',
@@ -72,6 +91,8 @@ export type Hero18Data = Data<typeof hero18Schema>;
 export const hero18Demos: Demo<typeof hero18Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-18',
+    sequence: 1,
     data: {
       hero18Title1: 'Networking',
       hero18Title2: 'solutions for worldwide communication',
@@ -97,6 +118,8 @@ export const hero18Demos: Demo<typeof hero18Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-18',
+    sequence: 1,
     data: {
       hero18Title1: 'Réseau',
       hero18Title2: 'solutions pour une communication mondiale',

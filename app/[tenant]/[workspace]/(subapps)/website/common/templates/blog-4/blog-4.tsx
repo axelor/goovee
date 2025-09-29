@@ -28,7 +28,7 @@ export function Blog4(props: TemplateProps<Blog4Data>) {
           </div>
         </div>
 
-        <div className="swiper-container blog grid-view mb-17 mb-md-20">
+        <div className="swiper-container blog grid-view">
           <Carousel
             grabCursor
             navigation={navigation}

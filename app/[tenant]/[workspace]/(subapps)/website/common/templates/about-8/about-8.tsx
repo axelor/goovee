@@ -24,7 +24,7 @@ export function About8(props: TemplateProps<About8Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-lg-8 gx-xl-12 gy-10 mb-15 mb-md-18 align-items-center">
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>
               <img className="w-auto" src={image} alt="" />

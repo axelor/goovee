@@ -71,7 +71,7 @@ export const about2Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-14 mb-md-17 mb-lg-19',
     },
   ],
   models: [bulletListModel],
@@ -84,6 +84,8 @@ export type About2Data = Data<typeof about2Schema>;
 export const about2Demos: Demo<typeof about2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 6,
     data: {
       about2Caption: 'Who Are We?',
       about2Title: 'We value the creativity of techniques in our company.',
@@ -139,6 +141,8 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 6,
     data: {
       about2Caption: 'Qui sommes-nous ?',
       about2Title:

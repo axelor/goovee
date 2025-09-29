@@ -89,6 +89,8 @@ export type Team1Data = Data<typeof team1Schema>;
 export const team1Demos: Demo<typeof team1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 6,
     data: {
       team1Title: 'Our Team',
       team1Caption:
@@ -279,6 +281,8 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 6,
     data: {
       team1Title: 'Notre équipe',
       team1Caption:

@@ -55,7 +55,7 @@ export const about4Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
@@ -73,6 +73,8 @@ export type About4Data = Data<typeof about4Schema>;
 export const about4Demos: Demo<typeof about4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 3,
     data: {
       about4Title:
         'There are some of the factors why the people we serve find us.',
@@ -137,6 +139,8 @@ export const about4Demos: Demo<typeof about4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 3,
     data: {
       about4Title:
         'Voici quelques-uns des facteurs pour lesquels les personnes que nous servons nous trouvent.',

@@ -30,13 +30,13 @@ export const service4Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-19 pt-md-21 mb-14 mb-md-18',
     },
   ],
   models: [
@@ -81,6 +81,8 @@ export type Service4Data = Data<typeof service4Schema>;
 export const service4Demos: Demo<typeof service4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 2,
     data: {
       service4Title: 'What We Do?',
       service4Caption:
@@ -143,6 +145,8 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 2,
     data: {
       service4Title: 'Que faisons-nous ?',
       service4Caption:

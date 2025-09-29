@@ -39,13 +39,13 @@ export const service11Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-14 mb-md-20',
     },
   ],
   models: [
@@ -83,6 +83,8 @@ export type Service11Data = Data<typeof service11Schema>;
 export const service11Demos: Demo<typeof service11Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 4,
     data: {
       service11Caption: 'What We Provide?',
       service11Title:
@@ -140,6 +142,8 @@ export const service11Demos: Demo<typeof service11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 4,
     data: {
       service11Caption: 'Ce que nous offrons ?',
       service11Title:

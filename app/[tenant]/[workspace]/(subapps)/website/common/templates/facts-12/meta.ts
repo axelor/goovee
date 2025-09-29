@@ -35,17 +35,35 @@ export const facts12Schema = {
       target: 'Facts12Facts',
     },
     {
-      name: 'wrapperClassName',
-      title: 'Wrapper Class Name',
+      name: 'sectionClassName',
+      title: 'Section Class Name',
       type: 'string',
       defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerCardClassName',
+      title: 'Container Card Class Name',
+      type: 'string',
+      defaultValue: 'container-card',
+    },
+    {
+      name: 'cardClassName',
+      title: 'Card Class Name',
+      type: 'string',
+      defaultValue:
+        'card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 pb-15',
+    },
+    {
+      name: 'cardBodyClassName',
+      title: 'Card Body Class Name',
+      type: 'string',
+      defaultValue: 'card-body py-14 px-0',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue:
-        'container-card card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500',
+      defaultValue: 'container',
     },
   ],
   models: [
@@ -81,6 +99,8 @@ export type Facts12Data = Data<typeof facts12Schema>;
 export const facts12Demos: Demo<typeof facts12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-18',
+    sequence: 5,
     data: {
       facts12Title: 'We feel proud of our achievements.',
       facts12Caption:
@@ -125,6 +145,8 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-18',
+    sequence: 5,
     data: {
       facts12Title: 'Nous sommes fiers de nos réalisations.',
       facts12Caption:

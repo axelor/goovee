@@ -84,6 +84,8 @@ export type Service3Data = Data<typeof service3Schema>;
 export const service3Demos: Demo<typeof service3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 3,
     data: {
       service3Title: 'What We Do?',
       service3Caption:
@@ -142,6 +144,8 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 3,
     data: {
       service3Title: 'Que faisons-nous ?',
       service3Caption:

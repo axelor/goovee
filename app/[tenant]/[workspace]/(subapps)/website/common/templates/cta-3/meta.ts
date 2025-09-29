@@ -61,6 +61,8 @@ export type Cta3Data = Data<typeof cta3Schema>;
 export const cta3Demos: Demo<typeof cta3Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 5,
     data: {
       cta3Title: 'Explore Our Community',
       cta3Description:
@@ -78,6 +80,8 @@ export const cta3Demos: Demo<typeof cta3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 5,
     data: {
       cta3Title: 'Découvrez notre communauté',
       cta3Description:

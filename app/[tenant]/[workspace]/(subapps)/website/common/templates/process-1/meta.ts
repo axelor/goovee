@@ -50,7 +50,7 @@ export const process1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-light angled upper-start lower-start',
+      defaultValue: 'wrapper bg-light angled upper-start',
     },
     {
       name: 'containerClassName',
@@ -98,6 +98,8 @@ export type Process1Data = Data<typeof process1Schema>;
 export const process1Demos: Demo<typeof process1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 4,
     data: {
       process1Link: '#',
       process1Title: 'Our Strategy',
@@ -144,6 +146,8 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 4,
     data: {
       process1Link: '#',
       process1Title: 'Notre stratégie',

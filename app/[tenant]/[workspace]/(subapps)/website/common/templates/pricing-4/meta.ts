@@ -77,6 +77,8 @@ export type Pricing4Data = Data<typeof pricing4Schema>;
 export const pricing4Demos: Demo<typeof pricing4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-5',
+    sequence: 6,
     data: {
       pricing4Title: 'We provide perfect and competitive prices.',
       pricing4SwitchLeftLabel: 'Monthly',
@@ -141,6 +143,8 @@ export const pricing4Demos: Demo<typeof pricing4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-5',
+    sequence: 6,
     data: {
       pricing4Title: 'Nous offrons des prix parfaits et compétitifs.',
       pricing4SwitchLeftLabel: 'Mensuel',

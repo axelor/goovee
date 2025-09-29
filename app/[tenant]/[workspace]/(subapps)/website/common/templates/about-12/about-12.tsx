@@ -31,7 +31,7 @@ export function About12(props: TemplateProps<About12Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center mb-14 mb-md-17">
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>
               <img className="w-auto" src={image} alt="" />

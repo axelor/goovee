@@ -56,13 +56,13 @@ export const pricing5Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-14 mb-md-18',
     },
   ],
   models: [planModel],
@@ -73,6 +73,8 @@ export type Pricing5Data = Data<typeof pricing5Schema>;
 export const pricing5Demos: Demo<typeof pricing5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 9,
     data: {
       pricing5Title: 'We provide perfect and competitive prices.',
       pricing5Description:
@@ -124,6 +126,8 @@ export const pricing5Demos: Demo<typeof pricing5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 9,
     data: {
       pricing5Title: 'Nous offrons des prix parfaits et compétitifs.',
       pricing5Description:

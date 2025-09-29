@@ -66,6 +66,8 @@ export type Cta2Data = Data<typeof cta2Schema>;
 export const cta2Demos: Demo<typeof cta2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-5',
+    sequence: 7,
     data: {
       cta2Title: 'Trust us, join 10K+ clients to grow your business.',
       cta2LinkTitle1: 'Get Started',
@@ -83,6 +85,8 @@ export const cta2Demos: Demo<typeof cta2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-5',
+    sequence: 7,
     data: {
       cta2Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',

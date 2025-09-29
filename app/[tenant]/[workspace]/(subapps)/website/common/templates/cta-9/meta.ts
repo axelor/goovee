@@ -55,6 +55,8 @@ export type Cta9Data = Data<typeof cta9Schema>;
 export const cta9Demos: Demo<typeof cta9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 6,
     data: {
       cta9Title:
         "I'm here to document your special moments. Searching for a professional photographer?",
@@ -71,6 +73,8 @@ export const cta9Demos: Demo<typeof cta9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 6,
     data: {
       cta9Title:
         'Je suis là pour documenter vos moments privilégiés. Vous recherchez un photographe professionnel ?',

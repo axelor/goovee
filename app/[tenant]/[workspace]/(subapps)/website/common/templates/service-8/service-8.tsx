@@ -46,7 +46,7 @@ export function Service8(props: TemplateProps<Service8Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-lg-8 gy-8 mt-5 mt-md-12 mt-lg-0 mb-15 align-items-center">
+        <div className="row gx-lg-8 gy-8 align-items-center">
           <div className="col-lg-6 position-relative order-lg-2">
             <div className="row gx-md-5 gy-5 position-relative">
               <div className="col-5">

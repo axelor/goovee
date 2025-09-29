@@ -26,7 +26,7 @@ export function Service14(props: TemplateProps<Service14Data>) {
             </div>
           </div>
 
-          <div className="position-relative mb-14 mb-md-17">
+          <div className="position-relative">
             <div
               className="shape rounded-circle bg-soft-primary rellax w-16 h-16"
               style={{bottom: '-0.5rem', right: '-2.5rem', zIndex: 0}}

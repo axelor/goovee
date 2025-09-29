@@ -80,6 +80,8 @@ export type Blog1Data = Data<typeof blog1Schema>;
 export const blog1Demos: Demo<typeof blog1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 6,
     data: {
       blog1Caption: 'Case Studies',
       blog1Title:
@@ -154,6 +156,8 @@ export const blog1Demos: Demo<typeof blog1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 6,
     data: {
       blog1Caption: 'Études de cas',
       blog1Title:

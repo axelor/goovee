@@ -24,7 +24,7 @@ export function Service15(props: TemplateProps<Service15Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center mb-md-15">
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <figure>
               <img className="w-auto" src={image} alt="" />

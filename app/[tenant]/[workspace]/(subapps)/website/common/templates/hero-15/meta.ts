@@ -83,6 +83,8 @@ export type Hero15Data = Data<typeof hero15Schema>;
 export const hero15Demos: Demo<typeof hero15Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 1,
     data: {
       hero15Slides: [
         {
@@ -148,6 +150,8 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 1,
     data: {
       hero15Slides: [
         {

@@ -69,6 +69,8 @@ export type Hero17Data = Data<typeof hero17Schema>;
 export const hero17Demos: Demo<typeof hero17Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-17',
+    sequence: 1,
     data: {
       hero17Title: 'We provide quick solutions for your company.',
       hero17Caption: 'Hello! This is Lighthouse',
@@ -87,6 +89,8 @@ export const hero17Demos: Demo<typeof hero17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-17',
+    sequence: 1,
     data: {
       hero17Title:
         'Nous apportons des solutions rapides pour votre entreprise.',

@@ -44,13 +44,13 @@ export const about9Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-14 mb-md-18',
     },
   ],
   models: [serviceList3Model],
@@ -62,6 +62,8 @@ export type About9Data = Data<typeof about9Schema>;
 export const about9Demos: Demo<typeof about9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 3,
     data: {
       about9Image: {
         id: '1',
@@ -99,6 +101,8 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 3,
     data: {
       about9Image: {
         id: '1',

@@ -34,7 +34,7 @@ export function About13(props: TemplateProps<About13Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center mb-14 mb-md-18">
+        <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center">
           <div className="col-md-8 col-lg-6 position-relative">
             <Banner4
               thumbnail={image}

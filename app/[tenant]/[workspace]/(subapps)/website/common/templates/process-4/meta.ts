@@ -84,6 +84,8 @@ export type Process4Data = Data<typeof process4Schema>;
 export const process4Demos: Demo<typeof process4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-5',
+    sequence: 3,
     data: {
       process4Video: {
         id: '1',
@@ -128,6 +130,8 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-5',
+    sequence: 3,
     data: {
       process4Video: {
         id: '1',

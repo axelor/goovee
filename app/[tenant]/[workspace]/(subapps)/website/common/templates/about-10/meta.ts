@@ -59,13 +59,13 @@ export const about10Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-14 mb-md-18',
     },
   ],
   models: [progressListModel],
@@ -78,6 +78,8 @@ export type About10Data = Data<typeof about10Schema>;
 export const about10Demos: Demo<typeof about10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 8,
     data: {
       about10Image: {
         id: '1',
@@ -131,6 +133,8 @@ export const about10Demos: Demo<typeof about10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 8,
     data: {
       about10Image: {
         id: '1',

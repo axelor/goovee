@@ -65,7 +65,7 @@ export function Service12(props: TemplateProps<Service12Data>) {
             })}
           </ul>
 
-          <div className="tab-content mt-6 mt-lg-8 mb-md-9">
+          <div className="tab-content mt-6 mt-lg-8">
             {tabs?.map(({id, attrs: item}, i) => (
               <div
                 className={`tab-pane fade ${i === 0 ? 'active show' : ''}`}

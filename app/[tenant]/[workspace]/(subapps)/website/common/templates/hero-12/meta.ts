@@ -69,6 +69,8 @@ export type Hero12Data = Data<typeof hero12Schema>;
 export const hero12Demos: Demo<typeof hero12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 1,
     data: {
       hero12Title: 'Inventive, Sharp, Magnificent.',
       hero12Description:
@@ -88,6 +90,8 @@ export const hero12Demos: Demo<typeof hero12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 1,
     data: {
       hero12Title: 'Inventif, pointu, magnifique.',
       hero12Description:

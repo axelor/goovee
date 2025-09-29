@@ -66,6 +66,8 @@ export type Facts7Data = Data<typeof facts7Schema>;
 export const facts7Demos: Demo<typeof facts7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-10',
+    sequence: 4,
     data: {
       facts7Title: 'We are proud of our achievements.',
       facts7Description:
@@ -100,6 +102,8 @@ export const facts7Demos: Demo<typeof facts7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-10',
+    sequence: 4,
     data: {
       facts7Title: 'Nous sommes fiers de nos réalisations.',
       facts7Description:

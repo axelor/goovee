@@ -65,13 +65,13 @@ export const about13Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-18',
     },
   ],
   models: [bulletListModel],
@@ -84,6 +84,8 @@ export type About13Data = Data<typeof about13Schema>;
 export const about13Demos: Demo<typeof about13Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 7,
     data: {
       about13Image: {
         id: '1',
@@ -140,6 +142,8 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 7,
     data: {
       about13Image: {
         id: '1',

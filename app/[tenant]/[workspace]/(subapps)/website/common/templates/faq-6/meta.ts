@@ -63,6 +63,8 @@ export type Faq6Data = Data<typeof faq6Schema>;
 export const faq6Demos: Demo<typeof faq6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 9,
     data: {
       faq6Title:
         "You can use our inquiry form to reach us if you don't see a reply to your query there.",
@@ -113,6 +115,8 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 9,
     data: {
       faq6Title:
         'Vous pouvez utiliser notre formulaire de demande pour nous joindre si vous ne voyez pas de réponse à votre question.',

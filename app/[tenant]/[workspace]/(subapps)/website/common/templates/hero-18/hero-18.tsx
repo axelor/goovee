@@ -17,7 +17,10 @@ export function Hero18(props: TemplateProps<Hero18Data>) {
     hero18ButtonLink: buttonLink,
     hero18Image,
     hero18BackgroundImage,
-    hero18WrapperClassName: wrapperClassName,
+    hero18SectionClassName: sectionClassName,
+    hero18ContainerCardClassName: containerCardClassName,
+    hero18CardClassName: cardClassName,
+    hero18CardBodyClassName: cardBodyClassName,
     hero18ContainerClassName: containerClassName,
   } = data || {};
 
@@ -34,12 +37,12 @@ export function Hero18(props: TemplateProps<Hero18Data>) {
   });
 
   return (
-    <section className={wrapperClassName} data-code={props.code}>
-      <div className="container-card">
+    <section className={sectionClassName} data-code={props.code}>
+      <div className={containerCardClassName}>
         <div
-          className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 mt-2 mb-5"
+          className={cardClassName}
           style={{backgroundImage: `url(${backgroundImage})`}}>
-          <div className="card-body py-14 px-0">
+          <div className={cardBodyClassName}>
             <div className={containerClassName}>
               <div className="row gx-md-8 gx-xl-12 gy-10 align-items-center text-center text-lg-start">
                 <div className="col-lg-6">

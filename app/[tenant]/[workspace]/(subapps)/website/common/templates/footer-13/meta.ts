@@ -128,6 +128,8 @@ export type Footer13Data = Data<typeof footer13Schema>;
 export const footer13Demos: Demo<typeof footer13Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 10,
     data: {
       footer13Logo: {
         id: '1',
@@ -208,6 +210,8 @@ export const footer13Demos: Demo<typeof footer13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 10,
     data: {
       footer13Logo: {
         id: '1',

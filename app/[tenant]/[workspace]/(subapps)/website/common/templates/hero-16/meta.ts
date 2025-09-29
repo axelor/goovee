@@ -84,6 +84,8 @@ export type Hero16Data = Data<typeof hero16Schema>;
 export const hero16Demos: Demo<typeof hero16Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-16',
+    sequence: 1,
     data: {
       hero16Title: 'I’m a Software Engineer & UX Designer.',
       hero16Description:
@@ -106,6 +108,8 @@ export const hero16Demos: Demo<typeof hero16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-16',
+    sequence: 1,
     data: {
       hero16Title: 'Je suis ingénieur logiciel et concepteur UX.',
       hero16Description:

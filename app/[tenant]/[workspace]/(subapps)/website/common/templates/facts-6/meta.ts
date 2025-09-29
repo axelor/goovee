@@ -36,13 +36,13 @@ export const facts6Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-15 mb-lg-18',
     },
   ],
   models: [
@@ -85,6 +85,8 @@ export type Facts6Data = Data<typeof facts6Schema>;
 export const facts6Demos: Demo<typeof facts6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 3,
     data: {
       facts6Title: 'Connect with Our Community',
       facts6Caption:
@@ -137,6 +139,8 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 3,
     data: {
       facts6Title: 'Connectez-vous avec notre communauté',
       facts6Caption:

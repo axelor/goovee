@@ -80,6 +80,8 @@ export type Testimonial5Data = Data<typeof testimonial5Schema>;
 export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 4,
     data: {
       testimonial5Image: {
         id: '1',
@@ -136,6 +138,8 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 4,
     data: {
       testimonial5Image: {
         id: '1',

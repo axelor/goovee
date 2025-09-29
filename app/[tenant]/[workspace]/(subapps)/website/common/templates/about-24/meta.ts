@@ -177,6 +177,8 @@ export type About24Data = Data<typeof about24Schema>;
 export const about24Demos: Demo<typeof about24Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 7,
     data: {
       about24Image: {
         id: '1',
@@ -332,6 +334,8 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 7,
     data: {
       about24Image: {
         id: '1',

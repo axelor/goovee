@@ -69,6 +69,8 @@ export type Hero6Data = Data<typeof hero6Schema>;
 export const hero6Demos: Demo<typeof hero6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 1,
     data: {
       hero6Title:
         'Put your physical activity, rest, and medicine routine into one place.',
@@ -89,6 +91,8 @@ export const hero6Demos: Demo<typeof hero6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 1,
     data: {
       hero6Title:
         'Regroupez votre activité physique, votre repos et votre routine médicale en un seul endroit.',

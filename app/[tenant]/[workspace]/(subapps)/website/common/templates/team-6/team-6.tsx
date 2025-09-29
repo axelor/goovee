@@ -27,7 +27,7 @@ export function Team6(props: TemplateProps<Team6Data>) {
             </div>
           </div>
 
-          <div className="row grid-view gx-md-8 gx-xl-10 gy-8 gy-lg-0 mb-md-20">
+          <div className="row grid-view gx-md-8 gx-xl-10 gy-8 gy-lg-0">
             {members?.map(({id, attrs: item}, i) => (
               <div className="col-md-6 col-lg-3" key={id}>
                 <TeamCard3

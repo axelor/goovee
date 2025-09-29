@@ -90,6 +90,8 @@ export type Portfolio3Data = Data<typeof portfolio3Schema>;
 export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 7,
     data: {
       portfolio3Caption: 'Latest Projects',
       portfolio3Description:
@@ -198,6 +200,8 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 7,
     data: {
       portfolio3Caption: 'Derniers projets',
       portfolio3Description:

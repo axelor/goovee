@@ -27,13 +27,13 @@ export const clientlist3Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-19',
     },
   ],
   models: [clientsModel],
@@ -45,6 +45,8 @@ export type Clientlist3Data = Data<typeof clientlist3Schema>;
 export const clientlist3Demos: Demo<typeof clientlist3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 2,
     data: {
       clientlist3Caption: 'OUR PARTNERS',
       clientlist3Clients: [
@@ -137,6 +139,8 @@ export const clientlist3Demos: Demo<typeof clientlist3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 2,
     data: {
       clientlist3Caption: 'NOS PARTENAIRES',
       clientlist3Clients: [

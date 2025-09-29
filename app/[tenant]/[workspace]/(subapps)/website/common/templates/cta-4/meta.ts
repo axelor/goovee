@@ -60,6 +60,8 @@ export type Cta4Data = Data<typeof cta4Schema>;
 export const cta4Demos: Demo<typeof cta4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 5,
     data: {
       cta4Title: 'Trust us, join 10K+ clients to grow your business.',
       cta4Caption: 'Join Our Community',
@@ -76,6 +78,8 @@ export const cta4Demos: Demo<typeof cta4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 5,
     data: {
       cta4Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',

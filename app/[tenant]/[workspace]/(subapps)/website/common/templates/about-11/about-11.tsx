@@ -64,7 +64,7 @@ export function About11(props: TemplateProps<About11Data>) {
             </div>
           </div>
 
-          <div className="row gx-lg-8 gx-xl-12 gy-6 mb-14 mb-md-18">
+          <div className="row gx-lg-8 gx-xl-12 gy-6">
             {aboutList2?.map(({id, attrs: item}, i) => (
               <div className="col-lg-4" key={id}>
                 <div className="d-flex flex-row">

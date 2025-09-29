@@ -39,13 +39,13 @@ export const testimonial16Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-16 pt-md-18 mt-n21 mt-md-n23',
     },
   ],
   models: [
@@ -88,6 +88,8 @@ export type Testimonial16Data = Data<typeof testimonial16Schema>;
 export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 5,
     data: {
       testimonial16BackgroundImage: {
         id: '1',
@@ -137,6 +139,8 @@ export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 5,
     data: {
       testimonial16BackgroundImage: {
         id: '1',

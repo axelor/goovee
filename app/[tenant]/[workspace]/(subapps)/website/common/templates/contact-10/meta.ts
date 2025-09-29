@@ -113,6 +113,8 @@ export type Contact10Data = Data<typeof contact10Schema>;
 export const contact10Demos: Demo<typeof contact10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-16',
+    sequence: 4,
     data: {
       contact10Title: "Let's collaborate in case you love the things you see.",
       contact10Description:
@@ -181,6 +183,8 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-16',
+    sequence: 4,
     data: {
       contact10Title:
         'Collaborons au cas où vous aimez les choses que vous voyez.',

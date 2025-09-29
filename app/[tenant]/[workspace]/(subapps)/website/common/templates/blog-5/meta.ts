@@ -31,7 +31,7 @@ export const blog5Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-soft-primary',
+      defaultValue: 'wrapper bg-soft-primary overflow-hidden',
     },
     {
       name: 'containerClassName',
@@ -95,6 +95,8 @@ export type Blog5Data = Data<typeof blog5Schema>;
 export const blog5Demos: Demo<typeof blog5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 8,
     data: {
       blog5Title: 'These are some of the popular articles from my site.',
       blog5Pagination: false,
@@ -218,6 +220,8 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 8,
     data: {
       blog5Title: 'Voici quelques-uns des articles populaires de mon site.',
       blog5Pagination: false,

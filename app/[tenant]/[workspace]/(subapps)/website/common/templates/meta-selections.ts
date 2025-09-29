@@ -40,7 +40,8 @@ export const socialMediaUniconsSelection = {
     title: startCase(icon),
     value: icon,
   })),
-};
+} as const satisfies MetaSelection;
+
 export const solidIconsSelection = {
   name: 'solid-icons',
   options: solidIcons.map(icon => ({

@@ -44,7 +44,7 @@ export const testimonial9Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper mb-14 mb-md-18',
     },
     {
       name: 'containerClassName',
@@ -63,6 +63,8 @@ export type Testimonial9Data = Data<typeof testimonial9Schema>;
 export const testimonial9Demos: Demo<typeof testimonial9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 5,
     data: {
       testimonial9Name: 'Ethan Johnson',
       testimonial9Designation: 'MARKETING MANAGER',
@@ -80,6 +82,8 @@ export const testimonial9Demos: Demo<typeof testimonial9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 5,
     data: {
       testimonial9Name: 'Ethan Johnson',
       testimonial9Designation: 'RESPONSABLE MARKETING',

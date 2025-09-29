@@ -24,7 +24,7 @@ export function About17(props: TemplateProps<About17Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-3 gy-10 mb-15 mb-md-18 align-items-center">
+        <div className="row gx-3 gy-10 align-items-center">
           <div className="col-lg-5 offset-lg-1">
             <figure>
               <img className="w-auto" src={image} alt="" />

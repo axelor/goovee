@@ -59,13 +59,13 @@ export const about21Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-15 pt-md-17 mb-15 mb-md-17',
     },
   ],
   models: [serviceList3Model],
@@ -78,6 +78,8 @@ export type About21Data = Data<typeof about21Schema>;
 export const about21Demos: Demo<typeof about21Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 6,
     data: {
       about21Image: {
         id: '1',
@@ -140,6 +142,8 @@ export const about21Demos: Demo<typeof about21Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 6,
     data: {
       about21Image: {
         id: '1',

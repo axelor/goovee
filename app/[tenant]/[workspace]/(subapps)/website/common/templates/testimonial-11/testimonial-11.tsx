@@ -31,8 +31,8 @@ export function Testimonial11(props: TemplateProps<Testimonial11Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row mt-md-n50p text-white text-center">
-          <div className="col-xl-10 mx-auto mb-14 mb-lg-n6">
+        <div className="row text-white text-center">
+          <div className="col-xl-10 mx-auto">
             <div
               className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400"
               style={{backgroundImage: `url(${image})`}}>

@@ -20,7 +20,7 @@ export function Service16(props: TemplateProps<Service16Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-md-5 gy-5 mt-n18 mt-md-n21 mb-14 mb-md-17">
+        <div className="row gx-md-5 gy-5">
           {services?.map(({id, attrs: item}) => {
             return (
               <ServiceCard1

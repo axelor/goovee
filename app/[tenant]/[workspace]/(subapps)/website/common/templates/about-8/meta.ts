@@ -45,13 +45,13 @@ export const about8Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-15 mb-md-18',
     },
   ],
   models: [bulletListModel],
@@ -63,6 +63,8 @@ export type About8Data = Data<typeof about8Schema>;
 export const about8Demos: Demo<typeof about8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 5,
     data: {
       about8Image: {
         id: '1',
@@ -110,6 +112,8 @@ export const about8Demos: Demo<typeof about8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 5,
     data: {
       about8Image: {
         id: '1',

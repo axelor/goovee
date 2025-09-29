@@ -86,6 +86,8 @@ export type Facts17Data = Data<typeof facts17Schema>;
 export const facts17Demos: Demo<typeof facts17Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 8,
     data: {
       facts17Title:
         'Just sit & relax while we take care of your business needs.',
@@ -123,6 +125,8 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 8,
     data: {
       facts17Title:
         'Asseyez-vous et détendez-vous pendant que nous nous occupons des besoins de votre entreprise.',

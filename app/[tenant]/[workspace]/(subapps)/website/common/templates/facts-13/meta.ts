@@ -61,6 +61,8 @@ export type Facts13Data = Data<typeof facts13Schema>;
 export const facts13Demos: Demo<typeof facts13Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 4,
     data: {
       facts13Title:
         'Choose our team of experts for reduced both cash and time.',
@@ -73,6 +75,8 @@ export const facts13Demos: Demo<typeof facts13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 4,
     data: {
       facts13Title:
         'Choisissez notre équipe d’experts pour réduire à la fois vos dépenses et votre temps.',

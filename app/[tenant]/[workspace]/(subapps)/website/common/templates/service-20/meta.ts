@@ -31,13 +31,13 @@ export const service20Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-14 pt-md-17 mb-17',
     },
   ],
   models: [
@@ -74,6 +74,8 @@ export type Service20Data = Data<typeof service20Schema>;
 export const service20Demos: Demo<typeof service20Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-18',
+    sequence: 2,
     data: {
       service20Caption: 'Our Features',
       service20Description:
@@ -144,6 +146,8 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-18',
+    sequence: 2,
     data: {
       service20Caption: 'Nos fonctionnalités',
       service20Description:

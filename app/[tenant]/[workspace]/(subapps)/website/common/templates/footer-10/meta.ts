@@ -143,6 +143,8 @@ export type Footer10Data = Data<typeof footer10Schema>;
 export const footer10Demos: Demo<typeof footer10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-17',
+    sequence: 9,
     data: {
       footer10Heading: 'Join the Community',
       footer10Description:
@@ -221,6 +223,8 @@ export const footer10Demos: Demo<typeof footer10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-17',
+    sequence: 9,
     data: {
       footer10Heading: 'Rejoignez la communauté',
       footer10Description:

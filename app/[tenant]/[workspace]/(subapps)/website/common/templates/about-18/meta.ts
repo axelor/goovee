@@ -70,13 +70,13 @@ export const about18Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-14 pb-md-18',
     },
   ],
   models: [bulletListModel],
@@ -88,6 +88,8 @@ export type About18Data = Data<typeof about18Schema>;
 export const about18Demos: Demo<typeof about18Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-18',
+    sequence: 4,
     data: {
       about18Image: {
         id: '1',
@@ -135,6 +137,8 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-18',
+    sequence: 4,
     data: {
       about18Image: {
         id: '1',

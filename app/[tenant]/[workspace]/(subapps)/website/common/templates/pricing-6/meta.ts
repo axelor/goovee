@@ -61,13 +61,13 @@ export const pricing6Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-14 pb-md-17',
     },
   ],
   models: [planModel],
@@ -78,6 +78,8 @@ export type Pricing6Data = Data<typeof pricing6Schema>;
 export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 6,
     data: {
       pricing6Title: 'Our Pricing',
       pricing6Caption: 'We provide perfect and competitive prices.',
@@ -130,6 +132,8 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 6,
     data: {
       pricing6Title: 'Nos tarifs',
       pricing6Caption: 'Nous offrons des prix parfaits et compétitifs.',

@@ -54,6 +54,8 @@ export type Cta1Data = Data<typeof cta1Schema>;
 export const cta1Demos: Demo<typeof cta1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 3,
     data: {
       cta1Image: {
         id: '1',
@@ -71,6 +73,8 @@ export const cta1Demos: Demo<typeof cta1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 3,
     data: {
       cta1Image: {
         id: '1',

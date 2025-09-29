@@ -96,6 +96,8 @@ export type Process14Data = Data<typeof process14Schema>;
 export const process14Demos: Demo<typeof process14Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 3,
     data: {
       process14Title:
         'These 3 practical measure help us organize company projects.',
@@ -142,6 +144,8 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 3,
     data: {
       process14Title:
         'Ces 3 mesures pratiques aident notre entreprise à organiser ses projets.',

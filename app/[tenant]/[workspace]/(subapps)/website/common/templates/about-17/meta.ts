@@ -45,13 +45,13 @@ export const about17Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-15 mb-md-18',
     },
   ],
   models: [bulletListModel],
@@ -63,6 +63,8 @@ export type About17Data = Data<typeof about17Schema>;
 export const about17Demos: Demo<typeof about17Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-18',
+    sequence: 3,
     data: {
       about17Image: {
         id: '1',
@@ -110,6 +112,8 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-18',
+    sequence: 3,
     data: {
       about17Image: {
         id: '1',

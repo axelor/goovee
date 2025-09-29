@@ -90,6 +90,8 @@ export type Service27Data = Data<typeof service27Schema>;
 export const service27Demos: Demo<typeof service27Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 2,
     data: {
       service27Title: 'My Services',
       service27Description:
@@ -166,6 +168,8 @@ export const service27Demos: Demo<typeof service27Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 2,
     data: {
       service27Title: 'Mes services',
       service27Description:

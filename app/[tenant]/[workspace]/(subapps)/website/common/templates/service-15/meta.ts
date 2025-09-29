@@ -45,13 +45,13 @@ export const service15Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-14 pb-md-17',
     },
   ],
   models: [bulletListModel],
@@ -63,6 +63,8 @@ export type Service15Data = Data<typeof service15Schema>;
 export const service15Demos: Demo<typeof service15Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 4,
     data: {
       service15Title:
         'We offer services to help control money in efficient way possible.',
@@ -109,6 +111,8 @@ export const service15Demos: Demo<typeof service15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 4,
     data: {
       service15Title:
         'Nous offrons des services pour aider à contrôler l’argent de la manière la plus efficace possible.',

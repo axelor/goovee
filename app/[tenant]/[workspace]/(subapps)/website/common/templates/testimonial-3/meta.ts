@@ -70,13 +70,13 @@ export const testimonial3Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mt-15 mt-md-18 mb-14 mb-md-17',
     },
   ],
   models: [
@@ -112,6 +112,8 @@ export type Testimonial3Data = Data<typeof testimonial3Schema>;
 export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 7,
     data: {
       testimonial3Title: 'What Our Customers Think About Us',
       testimonial3Description:
@@ -177,6 +179,8 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 7,
     data: {
       testimonial3Title: 'Ce que nos clients pensent de nous',
       testimonial3Description:

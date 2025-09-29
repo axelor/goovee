@@ -59,6 +59,8 @@ export type Hero20Data = Data<typeof hero20Schema>;
 export const hero20Demos: Demo<typeof hero20Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 1,
     data: {
       hero20Title: 'Swift Responses,Creative Thinking,Top-Notch Support',
       hero20Description:
@@ -81,6 +83,8 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 1,
     data: {
       hero20Title:
         'Réponses rapides, pensée créative, support de premier ordre',

@@ -113,6 +113,8 @@ export type Footer12Data = Data<typeof footer12Schema>;
 export const footer12Demos: Demo<typeof footer12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 8,
     data: {
       footer12Logo: {
         id: '1',
@@ -189,6 +191,8 @@ export const footer12Demos: Demo<typeof footer12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 8,
     data: {
       footer12Logo: {
         id: '1',

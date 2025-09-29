@@ -31,13 +31,13 @@ export const service7Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-17',
     },
   ],
   models: [
@@ -74,6 +74,8 @@ export type Service7Data = Data<typeof service7Schema>;
 export const service7Demos: Demo<typeof service7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 2,
     data: {
       service7Caption: 'App Features',
       service7Title:
@@ -144,6 +146,8 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 2,
     data: {
       service7Caption: 'Fonctionnalités de l’application',
       service7Title:

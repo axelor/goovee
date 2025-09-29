@@ -32,7 +32,7 @@ export function Service20(props: TemplateProps<Service20Data>) {
             </div>
           </div>
 
-          <div className="row gy-8 mb-17">
+          <div className="row gy-8">
             {services?.map(({id, attrs: item}) => {
               const Icon = item.icon && getIcon(item.icon);
               return (

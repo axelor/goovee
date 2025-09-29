@@ -69,6 +69,8 @@ export type Hero7Data = Data<typeof hero7Schema>;
 export const hero7Demos: Demo<typeof hero7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 1,
     data: {
       hero7Title: 'Inventive, sharp, and magnificent.',
       hero7Description:
@@ -88,6 +90,8 @@ export const hero7Demos: Demo<typeof hero7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 1,
     data: {
       hero7Title: 'Inventif, pointu et magnifique.',
       hero7Description:

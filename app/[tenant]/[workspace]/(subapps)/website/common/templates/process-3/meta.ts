@@ -49,7 +49,7 @@ export const process3Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-16 mb-md-18',
     },
   ],
   models: [
@@ -86,6 +86,8 @@ export type Process3Data = Data<typeof process3Schema>;
 export const process3Demos: Demo<typeof process3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 3,
     data: {
       process3Title: 'Our Working Process',
       process3Caption: 'How It Works?',
@@ -134,6 +136,8 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 3,
     data: {
       process3Title: 'Notre processus de travail',
       process3Caption: 'Comment ça marche ?',

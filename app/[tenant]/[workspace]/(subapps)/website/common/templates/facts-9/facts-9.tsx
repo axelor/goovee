@@ -32,7 +32,7 @@ export function Facts9(props: TemplateProps<Facts9Data>) {
         <div
           className="row"
           style={animation({name: 'slideInUp', delay: '100ms'})}>
-          <div className="col-12 mt-n20">
+          <div className="col-12">
             <figure className="rounded">
               <img src={image} alt="" />
             </figure>

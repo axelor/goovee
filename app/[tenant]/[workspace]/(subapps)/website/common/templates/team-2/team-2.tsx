@@ -23,7 +23,7 @@ export function Team2(props: TemplateProps<Team2Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-lg-8 gx-xl-12 gy-10 mb-16 mb-md-17 mb-xl-20 align-items-center">
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-4">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
             <h3 className="display-6 mb-5">{title}</h3>

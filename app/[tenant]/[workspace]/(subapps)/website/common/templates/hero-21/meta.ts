@@ -77,6 +77,8 @@ export type Hero21Data = Data<typeof hero21Schema>;
 export const hero21Demos: Demo<typeof hero21Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 1,
     data: {
       hero21Title: 'A tech company that focuses on',
       hero21RotatingTitle: 'mobile design,web design,3D animation',
@@ -182,6 +184,8 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 1,
     data: {
       hero21Title: 'Une entreprise technologique qui se concentre sur',
       hero21RotatingTitle: 'le design mobile, le design web, l’animation 3D',

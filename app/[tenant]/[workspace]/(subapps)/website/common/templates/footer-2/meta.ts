@@ -117,6 +117,8 @@ export type Footer2Data = Data<typeof footer2Schema>;
 export const footer2Demos: Demo<typeof footer2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 9,
     data: {
       footer2Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer2AddressTitle: 'Address',
@@ -194,6 +196,8 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 9,
     data: {
       footer2Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer2AddressTitle: 'Adresse',

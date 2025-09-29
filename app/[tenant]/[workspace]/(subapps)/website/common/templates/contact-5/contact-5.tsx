@@ -36,7 +36,7 @@ export function Contact5(props: TemplateProps<Contact5Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gy-10 gx-lg-8 gx-xl-12 mb-10 mb-md-14 align-items-center">
+        <div className="row gy-10 gx-lg-8 gx-xl-12 align-items-center">
           <div className="col-lg-7 position-relative">
             <Tiles3
               image1={tileImage1}

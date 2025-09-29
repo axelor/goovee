@@ -97,6 +97,8 @@ export type Portfolio11Data = Data<typeof portfolio11Schema>;
 export const portfolio11Demos: Demo<typeof portfolio11Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 4,
     data: {
       portfolio11Caption: 'Latest Projects',
       portfolio11Description:
@@ -224,6 +226,8 @@ export const portfolio11Demos: Demo<typeof portfolio11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 4,
     data: {
       portfolio11Caption: 'Derniers projets',
       portfolio11Description:

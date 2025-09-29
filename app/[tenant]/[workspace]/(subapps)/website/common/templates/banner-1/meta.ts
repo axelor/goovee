@@ -60,6 +60,8 @@ export type Banner1Data = Data<typeof banner1Schema>;
 export const banner1Demos: Demo<typeof banner1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 6,
     data: {
       banner1Heading:
         'Put your physical activity, rest, & medicine routine into one place.',
@@ -78,6 +80,8 @@ export const banner1Demos: Demo<typeof banner1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 6,
     data: {
       banner1Heading:
         'Mettez votre activité physique, votre repos et votre routine médicale en un seul endroit.',

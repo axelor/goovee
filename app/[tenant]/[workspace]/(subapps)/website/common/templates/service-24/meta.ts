@@ -85,6 +85,8 @@ export type Service24Data = Data<typeof service24Schema>;
 export const service24Demos: Demo<typeof service24Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'What We Do?',
       service24Title:
@@ -149,6 +151,8 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'Que faisons-nous ?',
       service24Title:

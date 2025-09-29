@@ -31,13 +31,13 @@ export const faq1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-soft-primary',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-lg-0 pb-md-16',
     },
   ],
   models: [accordionModel],
@@ -48,6 +48,8 @@ export type Faq1Data = Data<typeof faq1Schema>;
 export const faq1Demos: Demo<typeof faq1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 4,
     data: {
       faq1Title:
         'If you are unable to locate the answer to your query, you may send us an email using our contact page.',
@@ -112,6 +114,8 @@ export const faq1Demos: Demo<typeof faq1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 4,
     data: {
       faq1Title:
         'Si vous ne parvenez pas à trouver la réponse à votre question, vous pouvez nous envoyer un e-mail via notre page de contact.',

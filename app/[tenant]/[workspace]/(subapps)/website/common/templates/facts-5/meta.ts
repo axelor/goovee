@@ -64,6 +64,8 @@ export type Facts5Data = Data<typeof facts5Schema>;
 export const facts5Demos: Demo<typeof facts5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 6,
     data: {
       facts5Facts: [
         {
@@ -107,6 +109,8 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 6,
     data: {
       facts5Facts: [
         {

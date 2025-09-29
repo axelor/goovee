@@ -78,6 +78,8 @@ export type Hero23Data = Data<typeof hero23Schema>;
 export const hero23Demos: Demo<typeof hero23Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 1,
     data: {
       hero23Title: 'Capturing Life with Lighthouse',
       hero23Caption: "Hello! I'm Jhon",
@@ -150,6 +152,8 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 1,
     data: {
       hero23Title: 'Capturer la vie avec Lighthouse',
       hero23Caption: 'Bonjour ! Je suis Jhon',

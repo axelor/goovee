@@ -21,13 +21,13 @@ export const team5Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-16 mb-md-19',
     },
   ],
   models: [
@@ -65,6 +65,8 @@ export type Team5Data = Data<typeof team5Schema>;
 export const team5Demos: Demo<typeof team5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 7,
     data: {
       team5Members: [
         {
@@ -132,6 +134,8 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 7,
     data: {
       team5Members: [
         {

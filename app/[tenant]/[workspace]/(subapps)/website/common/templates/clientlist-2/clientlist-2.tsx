@@ -15,7 +15,7 @@ export function Clientlist2(props: TemplateProps<Clientlist2Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0 mb-13 mb-md-17">
+        <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0">
           <div className="col-lg-4 text-center text-lg-start">
             <h2 className="display-5 mb-3">{title}</h2>
             <p className="lead fs-lg mb-0 pe-xxl-2">{caption}</p>

@@ -451,4 +451,6 @@ export type Data<TSchema extends TemplateSchema> = ExpandRecursively<
 export type Demo<TSchema extends TemplateSchema> = {
   language: 'en_US' | 'fr_FR';
   data: Data<TSchema>;
+  page: string;
+  sequence: number;
 };

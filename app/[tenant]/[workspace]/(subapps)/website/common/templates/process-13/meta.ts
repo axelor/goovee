@@ -82,6 +82,8 @@ export type Process13Data = Data<typeof process13Schema>;
 export const process13Demos: Demo<typeof process13Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 3,
     data: {
       process13Caption: 'Our Working Process',
       process13Heading: 'Here are the 3 working steps on success.',
@@ -128,6 +130,8 @@ export const process13Demos: Demo<typeof process13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 3,
     data: {
       process13Caption: 'Notre processus de travail',
       process13Heading: 'Voici les 3 étapes de travail vers le succès.',

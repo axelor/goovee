@@ -27,7 +27,7 @@ export function Service19(props: TemplateProps<Service19Data>) {
             </div>
           </div>
 
-          <div className="row gx-md-8 gx-xl-12 gy-8 mb-14 mb-md-16 text-center">
+          <div className="row gx-md-8 gx-xl-12 gy-8 text-center">
             {services?.map(({id, attrs: item}) => (
               <div className="col-md-4" key={id}>
                 <IconBox

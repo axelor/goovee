@@ -156,6 +156,8 @@ export type Service23Data = Data<typeof service23Schema>;
 export const service23Demos: Demo<typeof service23Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 2,
     data: {
       service23Caption: 'What We Do?',
       service23Title:
@@ -251,6 +253,8 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 2,
     data: {
       service23Caption: 'Que faisons-nous ?',
       service23Title:

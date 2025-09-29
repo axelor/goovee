@@ -63,6 +63,8 @@ export type Testimonial6Data = Data<typeof testimonial6Schema>;
 export const testimonial6Demos: Demo<typeof testimonial6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 8,
     data: {
       testimonial6Name: 'Ethan Johnson',
       testimonial6Designation: 'MARKETING MANAGER',
@@ -80,6 +82,8 @@ export const testimonial6Demos: Demo<typeof testimonial6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 8,
     data: {
       testimonial6Name: 'Ethan Johnson',
       testimonial6Designation: 'RESPONSABLE MARKETING',

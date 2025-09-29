@@ -61,6 +61,8 @@ export type Hero5Data = Data<typeof hero5Schema>;
 export const hero5Demos: Demo<typeof hero5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-5',
+    sequence: 1,
     data: {
       hero5Title: 'Keeping track of your expenses is now even simpler.',
       hero5Description:
@@ -73,6 +75,8 @@ export const hero5Demos: Demo<typeof hero5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-5',
+    sequence: 1,
     data: {
       hero5Title: 'Le suivi de vos dépenses est désormais encore plus simple.',
       hero5Description:

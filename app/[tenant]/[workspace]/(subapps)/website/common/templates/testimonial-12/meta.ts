@@ -21,13 +21,13 @@ export const testimonial12Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container py-14 py-md-16 mb-14 mb-md-18 mt-3',
     },
   ],
   models: [
@@ -69,6 +69,8 @@ export type Testimonial12Data = Data<typeof testimonial12Schema>;
 export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 6,
     data: {
       testimonial12Testimonials: [
         {
@@ -120,6 +122,8 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 6,
     data: {
       testimonial12Testimonials: [
         {

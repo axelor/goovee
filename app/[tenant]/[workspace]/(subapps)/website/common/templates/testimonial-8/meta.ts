@@ -27,13 +27,13 @@ export const testimonial8Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-8 pb-lg-10',
     },
   ],
   models: [
@@ -83,6 +83,8 @@ export type Testimonial8Data = Data<typeof testimonial8Schema>;
 export const testimonial8Demos: Demo<typeof testimonial8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 7,
     data: {
       testimonial8Caption: 'What Our Customers Say About Us',
       testimonial8Testimonials: [
@@ -199,6 +201,8 @@ export const testimonial8Demos: Demo<typeof testimonial8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 7,
     data: {
       testimonial8Caption: 'Ce que nos clients disent de nous',
       testimonial8Testimonials: [

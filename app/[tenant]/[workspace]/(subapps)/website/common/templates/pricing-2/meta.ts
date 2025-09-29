@@ -42,6 +42,8 @@ export type Pricing2Data = Data<typeof pricing2Schema>;
 export const pricing2Demos: Demo<typeof pricing2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 10,
     data: {
       pricing2SwitchLeftLabel: 'Monthly',
       pricing2SwitchRightLabel: 'Yearly',
@@ -105,6 +107,8 @@ export const pricing2Demos: Demo<typeof pricing2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 10,
     data: {
       pricing2SwitchLeftLabel: 'Mensuel',
       pricing2SwitchRightLabel: 'Annuel',

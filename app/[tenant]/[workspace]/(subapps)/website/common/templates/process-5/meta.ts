@@ -44,13 +44,13 @@ export const process5Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-14 pb-md-17',
     },
   ],
   models: [
@@ -88,6 +88,8 @@ export type Process5Data = Data<typeof process5Schema>;
 export const process5Demos: Demo<typeof process5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 3,
     data: {
       process5Title:
         "Download the app, create your profile, and you're ready to go!",
@@ -134,6 +136,8 @@ export const process5Demos: Demo<typeof process5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 3,
     data: {
       process5Title:
         'Téléchargez l’application, créez votre profil et vous êtes prêt à partir !',

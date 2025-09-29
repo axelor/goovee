@@ -71,6 +71,8 @@ export type Facts8Data = Data<typeof facts8Schema>;
 export const facts8Demos: Demo<typeof facts8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 5,
     data: {
       facts8Title: 'We feel proud of our achievements.',
       facts8Description:
@@ -108,6 +110,8 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 5,
     data: {
       facts8Title: 'Nous sommes fiers de nos réalisations.',
       facts8Description:

@@ -80,6 +80,8 @@ export type Testimonial10Data = Data<typeof testimonial10Schema>;
 export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 4,
     data: {
       testimonial10Caption: 'Happy Clients',
       testimonial10Description:
@@ -192,6 +194,8 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 4,
     data: {
       testimonial10Caption: 'Clients satisfaits',
       testimonial10Description:

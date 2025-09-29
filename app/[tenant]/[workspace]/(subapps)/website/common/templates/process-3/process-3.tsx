@@ -24,7 +24,7 @@ export function Process3(props: TemplateProps<Process3Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="row gy-10 gy-sm-13 gx-lg-3 mb-16 mb-md-18 align-items-center">
+        <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center">
           <div className="col-md-8 col-lg-6 position-relative">
             <div
               className="shape bg-dot primary rellax w-17 h-21"

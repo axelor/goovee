@@ -54,13 +54,13 @@ export const service5Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pt-14 pt-md-18 mb-14 mb-md-17',
     },
   ],
   models: [
@@ -98,6 +98,8 @@ export type Service5Data = Data<typeof service5Schema>;
 export const service5Demos: Demo<typeof service5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 2,
     data: {
       service5Title:
         "Our goal is to develop solutions that make our clients' life easier.",
@@ -214,6 +216,8 @@ export const service5Demos: Demo<typeof service5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 2,
     data: {
       service5Title:
         'Notre objectif est de développer des solutions qui facilitent la vie de nos clients.',

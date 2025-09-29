@@ -32,13 +32,13 @@ export const clientlist2Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-13 mb-md-17',
     },
   ],
   models: [clientsModel],
@@ -50,6 +50,8 @@ export type Clientlist2Data = Data<typeof clientlist2Schema>;
 export const clientlist2Demos: Demo<typeof clientlist2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 2,
     data: {
       clientlist2Title: 'Over 20,000 customers have trusted in us.',
       clientlist2Caption:
@@ -172,6 +174,8 @@ export const clientlist2Demos: Demo<typeof clientlist2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 2,
     data: {
       clientlist2Title: 'Plus de 20 000 clients nous ont fait confiance.',
       clientlist2Caption:

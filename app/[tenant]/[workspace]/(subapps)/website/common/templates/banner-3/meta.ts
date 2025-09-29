@@ -53,6 +53,8 @@ export type Banner3Data = Data<typeof banner3Schema>;
 export const banner3Demos: Demo<typeof banner3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 4,
     data: {
       banner3Heading:
         'Discover all the essential information you need to create a business process model.',
@@ -74,6 +76,8 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 4,
     data: {
       banner3Heading:
         'Découvrez toutes les informations essentielles dont vous avez besoin pour créer un modèle de processus métier.',

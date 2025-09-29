@@ -87,9 +87,11 @@ export type Service1Data = Data<typeof service1Schema>;
 export const service1Demos: Demo<typeof service1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 2,
     data: {
-      service1Title: 'What We Do?',
-      service1Caption:
+      service1Caption: 'What We Do?',
+      service1Title:
         'We have designed our services with your specific needs in mind.',
       service1Services: [
         {
@@ -144,9 +146,11 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 2,
     data: {
-      service1Title: 'Que faisons-nous ?',
-      service1Caption:
+      service1Caption: 'Que faisons-nous ?',
+      service1Title:
         'Nous avons conçu nos services en pensant à vos besoins spécifiques.',
       service1Services: [
         {

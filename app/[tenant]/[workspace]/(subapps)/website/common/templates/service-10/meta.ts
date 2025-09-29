@@ -107,13 +107,13 @@ export const service10Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-15 mb-md-18',
     },
   ],
   models: [],
@@ -126,6 +126,8 @@ export type Service10Data = Data<typeof service10Schema>;
 export const service10Demos: Demo<typeof service10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 2,
     data: {
       service10Title: 'What We Provide?',
       service10Description:
@@ -164,6 +166,8 @@ export const service10Demos: Demo<typeof service10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 2,
     data: {
       service10Title: 'Ce que nous offrons ?',
       service10Description:

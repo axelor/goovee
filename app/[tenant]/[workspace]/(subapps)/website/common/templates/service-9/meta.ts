@@ -112,6 +112,8 @@ export type Process9Data = Data<typeof service9Schema>;
 export const service9Demos: Demo<typeof service9Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 11,
     data: {
       service9Title:
         'Our service is customized to your individual requirements.',
@@ -178,6 +180,8 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 11,
     data: {
       service9Title:
         'Notre service est personnalisé pour répondre à vos besoins individuels.',

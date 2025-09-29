@@ -48,6 +48,8 @@ export type Banner6Data = Data<typeof banner6Schema>;
 export const banner6Demos: Demo<typeof banner6Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 2,
     data: {
       banner6Video: {
         id: '1',
@@ -67,6 +69,8 @@ export const banner6Demos: Demo<typeof banner6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 2,
     data: {
       banner6Video: {
         id: '1',

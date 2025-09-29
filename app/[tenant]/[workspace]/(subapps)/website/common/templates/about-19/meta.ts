@@ -65,13 +65,13 @@ export const about19Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container mb-14 mb-md-18',
     },
   ],
   models: [
@@ -103,6 +103,8 @@ export type About19Data = Data<typeof about19Schema>;
 export const about19Demos: Demo<typeof about19Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-18',
+    sequence: 8,
     data: {
       about19TileImage1: {
         id: '1',
@@ -197,6 +199,8 @@ export const about19Demos: Demo<typeof about19Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-18',
+    sequence: 8,
     data: {
       about19TileImage1: {
         id: '1',

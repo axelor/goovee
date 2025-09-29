@@ -63,6 +63,8 @@ export type Services2Data = Data<typeof service2Schema>;
 export const service2Demos: Demo<typeof service2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 7,
     data: {
       service2Image: {
         id: '1',
@@ -110,6 +112,8 @@ export const service2Demos: Demo<typeof service2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 7,
     data: {
       service2Image: {
         id: '1',

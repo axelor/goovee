@@ -28,13 +28,13 @@ export const testimonial2Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper',
+      defaultValue: 'wrapper bg-light angled upper-end',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container position-relative mt-n18 mt-md-n23 mb-16 mb-md-18',
     },
   ],
   models: [
@@ -71,6 +71,8 @@ export type Testimonial2Data = Data<typeof testimonial2Schema>;
 export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 8,
     data: {
       testimonial2Image: {
         id: '1',
@@ -121,6 +123,8 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 8,
     data: {
       testimonial2Image: {
         id: '1',

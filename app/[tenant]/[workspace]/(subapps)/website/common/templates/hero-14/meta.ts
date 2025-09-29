@@ -60,6 +60,8 @@ export type Hero14Data = Data<typeof hero14Schema>;
 export const hero14Demos: Demo<typeof hero14Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 1,
     data: {
       hero14Title: 'We provide rapid solutions for your company.',
       hero14Description:
@@ -77,6 +79,8 @@ export const hero14Demos: Demo<typeof hero14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 1,
     data: {
       hero14Title:
         'Nous apportons des solutions rapides pour votre entreprise.',
