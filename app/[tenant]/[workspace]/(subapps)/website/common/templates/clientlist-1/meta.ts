@@ -610,7 +610,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
     sequence: 5,
     data: {
       clientlist1WrapperClassName: 'wrapper bg-light',
-      clientlist1ContainerClassName: 'container px-lg-5',
+      clientlist1ContainerClassName: 'container px-lg-5 pb-14 pb-md-17',
       clientlist1Clients: [
         {
           id: '1',
@@ -705,7 +705,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
     sequence: 5,
     data: {
       clientlist1WrapperClassName: 'wrapper bg-light',
-      clientlist1ContainerClassName: 'container px-lg-5',
+      clientlist1ContainerClassName: 'container px-lg-5 pb-14 pb-md-17',
       clientlist1Clients: [
         {
           id: '1',

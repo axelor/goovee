@@ -60,7 +60,7 @@ export const service6Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container mb-14 mb-md-18',
+      defaultValue: 'container pb-14 pb-md-16 mb-lg-21 mb-xl-23',
     },
   ],
   models: [bulletListModel],
