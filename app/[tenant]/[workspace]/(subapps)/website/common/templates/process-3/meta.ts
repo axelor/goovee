@@ -96,9 +96,9 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       process3Image: {
         id: '1',
         version: 1,
-        fileName: 'about9.jpg',
+        fileName: 'about7.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        filePath: '/img/photos/about7.jpg',
       },
       process3Processes: [
         {
@@ -146,9 +146,9 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       process3Image: {
         id: '1',
         version: 1,
-        fileName: 'about9.jpg',
+        fileName: 'about7.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        filePath: '/img/photos/about7.jpg',
       },
       process3Processes: [
         {

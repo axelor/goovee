@@ -34,7 +34,8 @@ export const testimonial2Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container position-relative mt-n18 mt-md-n23 mb-16 mb-md-18',
+      defaultValue:
+        'container position-relative py-16 py-md-18 mt-n18 mt-md-n23 mb-16 mb-md-18',
     },
   ],
   models: [

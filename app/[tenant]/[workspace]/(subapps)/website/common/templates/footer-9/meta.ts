@@ -243,7 +243,8 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
         {
           id: '4',
           version: 0,
-          attrs: {title: 'Politique de confidentialité', url: '#'}},
+          attrs: {title: 'Politique de confidentialité', url: '#'},
+        },
       ],
       footer9FooterNav: [
         {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
@@ -257,7 +258,8 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
         {
           id: '5',
           version: 0,
-          attrs: {title: 'Politique de confidentialité', url: '#'}},
+          attrs: {title: 'Politique de confidentialité', url: '#'},
+        },
       ],
       footer9SocialLinks: [
         {
@@ -309,6 +311,7 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
     },
   },
   {
+    language: 'en_US',
     page: 'demo-15',
     sequence: 9,
     data: {

@@ -250,7 +250,8 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
         {
           id: '5',
           version: 1,
-          attrs: {title: 'Politique de confidentialité', url: '#'}},
+          attrs: {title: 'Politique de confidentialité', url: '#'},
+        },
       ],
       footer1SocialLinks: [
         {

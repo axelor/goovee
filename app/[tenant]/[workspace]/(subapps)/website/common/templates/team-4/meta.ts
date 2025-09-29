@@ -79,7 +79,7 @@ export const team4Demos: Demo<typeof team4Schema>[] = [
   {
     language: 'en_US',
     page: 'demo-4',
-    sequence: 6,
+    sequence: 7,
     data: {
       team4Members: [
         {
@@ -268,7 +268,7 @@ export const team4Demos: Demo<typeof team4Schema>[] = [
   {
     language: 'fr_FR',
     page: 'demo-4',
-    sequence: 6,
+    sequence: 7,
     data: {
       team4Members: [
         {

@@ -223,7 +223,8 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
         {
           id: '5',
           version: 0,
-          attrs: {title: 'Politique de confidentialité', url: '#'}},
+          attrs: {title: 'Politique de confidentialité', url: '#'},
+        },
       ],
       footer11SocialLinks: [
         {

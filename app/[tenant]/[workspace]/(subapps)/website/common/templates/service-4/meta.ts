@@ -67,6 +67,11 @@ export const service4Schema = {
           type: 'string',
         },
         {
+          name: 'linkTitle',
+          title: 'Link Title',
+          type: 'string',
+        },
+        {
           name: 'iconBoxClassNames',
           title: 'Icon Box Class Names',
           type: 'string',
@@ -96,6 +101,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
             title: 'IoT Development',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
+            linkTitle: 'Learn More',
             linkUrl: '#',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
@@ -107,6 +113,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
           attrs: {
             icon: 'uil-processor',
             title: 'Artificial Intelligence',
+            linkTitle: 'Learn More',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
@@ -120,6 +127,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
           attrs: {
             icon: 'uil-setting',
             title: 'Software Maintenance',
+            linkTitle: 'Learn More',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
@@ -133,6 +141,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
           attrs: {
             icon: 'uil-lock-access',
             title: 'Cybersecurity',
+            linkTitle: 'Learn More',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
@@ -161,6 +170,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },
@@ -174,6 +184,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },
@@ -186,6 +197,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
             title: 'Maintenance logicielle',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
+            linkTitle: 'En savoir plus',
             linkUrl: '#',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
@@ -200,6 +212,7 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },

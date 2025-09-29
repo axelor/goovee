@@ -49,7 +49,7 @@ export function Footer1(props: TemplateProps<Footer1Data>) {
 
           <NextLink
             href={buttonLink || '#'}
-            title={buttonText || 'Try It For Free'}
+            title={buttonText}
             className="btn btn-primary rounded-pill mb-0 text-nowrap"
           />
         </div>

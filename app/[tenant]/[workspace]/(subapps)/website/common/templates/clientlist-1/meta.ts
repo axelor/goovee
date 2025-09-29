@@ -417,10 +417,10 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   {
     language: 'en_US',
     page: 'demo-4',
-    sequence: 8,
+    sequence: 10,
     data: {
       clientlist1WrapperClassName: 'wrapper bg-light position-relative',
-      clientlist1ContainerClassName: 'container px-lg-5 mb-16 mb-md-22',
+      clientlist1ContainerClassName: 'container px-lg-5 mb-14 mb-md-18',
       clientlist1Clients: [
         {
           id: '1',
@@ -512,10 +512,10 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   {
     language: 'fr_FR',
     page: 'demo-4',
-    sequence: 8,
+    sequence: 10,
     data: {
       clientlist1WrapperClassName: 'wrapper bg-light position-relative',
-      clientlist1ContainerClassName: 'container px-lg-5 mb-16 mb-md-22',
+      clientlist1ContainerClassName: 'container px-lg-5 mb-14 mb-md-18',
       clientlist1Clients: [
         {
           id: '1',
@@ -985,4 +985,3 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
     },
   },
 ];
-

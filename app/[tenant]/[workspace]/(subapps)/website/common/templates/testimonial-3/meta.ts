@@ -113,7 +113,7 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
   {
     language: 'en_US',
     page: 'demo-4',
-    sequence: 7,
+    sequence: 9,
     data: {
       testimonial3Title: 'What Our Customers Think About Us',
       testimonial3Description:
@@ -121,20 +121,20 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
       testimonial3TileImage1: {
         id: '1',
         version: 1,
-        fileName: 'sa5.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/sa5.png',
+        fileName: 'g5.jpg',
+        fileType: 'image/jpeg',
+        filePath: '/img/photos/g5.jpg',
       },
       testimonial3TileImage2: {
         id: '1',
         version: 1,
-        fileName: 'sa6.jpg',
+        fileName: 'g6.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/sa6.jpg',
+        filePath: '/img/photos/g6.jpg',
       },
       testimonial3Heading: 'Satisfied Clients',
-      testimonial3CountUp: 75,
-      testimonial3Suffix: '%',
+      testimonial3CountUp: 5000,
+      testimonial3Suffix: '+',
       testimonial3SlidesPerView: 1,
       testimonial3Navigation: false,
       testimonial3Testimonials: [
@@ -180,7 +180,7 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
   {
     language: 'fr_FR',
     page: 'demo-4',
-    sequence: 7,
+    sequence: 9,
     data: {
       testimonial3Title: 'Ce que nos clients pensent de nous',
       testimonial3Description:
@@ -188,20 +188,20 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
       testimonial3TileImage1: {
         id: '1',
         version: 1,
-        fileName: 'sa5.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/sa5.png',
+        fileName: 'g5.jpg',
+        fileType: 'image/jpeg',
+        filePath: '/img/photos/g5.jpg',
       },
       testimonial3TileImage2: {
         id: '1',
         version: 1,
-        fileName: 'sa6.jpg',
+        fileName: 'g6.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/sa6.jpg',
+        filePath: '/img/photos/g6.jpg',
       },
       testimonial3Heading: 'Clients satisfaits',
-      testimonial3CountUp: 75,
-      testimonial3Suffix: '%',
+      testimonial3CountUp: 5000,
+      testimonial3Suffix: '+',
       testimonial3SlidesPerView: 1,
       testimonial3Navigation: false,
       testimonial3Testimonials: [

@@ -223,7 +223,8 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
         {
           id: '5',
           version: 0,
-          attrs: {title: 'Politique de confidentialité', url: '#'}},
+          attrs: {title: 'Politique de confidentialité', url: '#'},
+        },
       ],
       footer4SocialLinks: [
         {
@@ -386,7 +387,8 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
         {
           id: '5',
           version: 0,
-          attrs: {title: 'Politique de confidentialité', url: '#'}},
+          attrs: {title: 'Politique de confidentialité', url: '#'},
+        },
       ],
       footer4SocialLinks: [
         {

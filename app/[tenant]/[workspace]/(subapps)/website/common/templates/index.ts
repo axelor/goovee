@@ -126,6 +126,7 @@ import {Hero21, hero21Schema} from './hero-21';
 import {Hero22, hero22Schema} from './hero-22';
 import {Hero23, hero23Schema} from './hero-23';
 import {Hero24, hero24Schema} from './hero-24';
+import {HR1, hr1Schema} from './hr-1';
 import {Navbar1, navbar1Schema} from './navbar-1';
 import {PageProgress1, pageProgress1Schema} from './page-progress-1';
 import {Pricing1, pricing1Schema} from './pricing-1';
@@ -277,6 +278,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [hero22Schema.code]: Hero22,
   [hero23Schema.code]: Hero23,
   [hero24Schema.code]: Hero24,
+  [hr1Schema.code]: HR1,
   [pageProgress1Schema.code]: PageProgress1,
   [cta1Schema.code]: CTA1,
   [cta2Schema.code]: CTA2,

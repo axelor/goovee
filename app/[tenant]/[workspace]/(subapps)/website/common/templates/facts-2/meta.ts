@@ -31,7 +31,7 @@ export const facts2Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-light position-relative',
+      defaultValue: 'wrapper bg-light position-relative mb-11',
     },
     {
       name: 'containerClassName',
@@ -80,7 +80,7 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
   {
     language: 'en_US',
     page: 'demo-4',
-    sequence: 5,
+    sequence: 6,
     data: {
       facts2Title: 'We feel proud of our achievements.',
       facts2Subtitle:
@@ -122,7 +122,7 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
   {
     language: 'fr_FR',
     page: 'demo-4',
-    sequence: 5,
+    sequence: 6,
     data: {
       facts2Title: 'Nous sommes fiers de nos réalisations.',
       facts2Subtitle:

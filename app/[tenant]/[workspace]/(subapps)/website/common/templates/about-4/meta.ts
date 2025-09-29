@@ -61,7 +61,7 @@ export const about4Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container',
+      defaultValue: 'container pb-14 pb-md-18',
     },
   ],
   models: [accordionModel],
@@ -74,7 +74,7 @@ export const about4Demos: Demo<typeof about4Schema>[] = [
   {
     language: 'en_US',
     page: 'demo-4',
-    sequence: 3,
+    sequence: 4,
     data: {
       about4Title:
         'There are some of the factors why the people we serve find us.',
@@ -140,7 +140,7 @@ export const about4Demos: Demo<typeof about4Schema>[] = [
   {
     language: 'fr_FR',
     page: 'demo-4',
-    sequence: 3,
+    sequence: 4,
     data: {
       about4Title:
         'Voici quelques-uns des facteurs pour lesquels les personnes que nous servons nous trouvent.',

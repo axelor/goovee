@@ -1,7 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service4Data} from './meta';
 import {ServiceCard2} from '@/subapps/website/common/components/reuseable/service-cards';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 
 export function Service4(props: TemplateProps<Service4Data>) {
   const {data} = props;
@@ -17,28 +16,25 @@ export function Service4(props: TemplateProps<Service4Data>) {
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
         <div className="row">
-          <div className="col-md-10 col-lg-8 col-xl-7 col-xxl-6 mx-auto text-center">
+          <div className="col-lg-8 col-xl-7 col-xxl-6">
             <h2 className="fs-16 text-uppercase text-line text-primary mb-3">
-              {caption}
+              {title}
             </h2>
-            <h3 className="display-4 mb-10">{title}</h3>
+            <h3 className="display-4 mb-9">{caption}</h3>
           </div>
         </div>
 
-        <div className="row gx-lg-8 gx-xl-12 gy-11">
-          {services?.map(({id, attrs: item}, i) => (
-            <div className="col-md-6 col-lg-4" key={id}>
-              <ServiceCard2
-                title={item.title}
-                linkUrl={item.linkUrl}
-                description={item.description}
-                icon={getMetaFileURL({
-                  metaFile: item.icon,
-                  path: `service4Services[${i}].attrs.icon`,
-                  ...props,
-                })}
-              />
-            </div>
+        <div className="row gx-md-8 gy-8">
+          {services?.map(({id, attrs: item}) => (
+            <ServiceCard2
+              key={id}
+              title={item.title}
+              linkUrl={item.linkUrl}
+              linkTitle={item.linkTitle}
+              icon={item.icon}
+              description={item.description}
+              iconBoxClassNames={item.iconBoxClassNames}
+            />
           ))}
         </div>
       </div>

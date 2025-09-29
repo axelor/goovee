@@ -75,7 +75,7 @@ export const portfolio1Demos: Demo<typeof portfolio1Schema>[] = [
     data: {
       portfolio1Caption: 'Latest Projects',
       portfolio1Description:
-        'Check out some of our awesome projects with creative ideas and great design.',
+        'Discover our exceptional projects, combining imaginative ideas with exceptional design.',
       portfolio1Images: [
         {
           id: '1',
