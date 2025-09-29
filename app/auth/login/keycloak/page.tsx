@@ -5,7 +5,11 @@ import {notFound} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {getTranslation} from '@/locale/server';
-import {findGooveeUserByEmail} from '@/orm/partner';
+import {findGooveeUserByEmail, registerPartner} from '@/orm/partner';
+import {findWorkspaceByURL} from '@/orm/workspace';
+import {l10n} from '@/locale/server/l10n';
+import {findRegistrationLocalization} from '@/orm/localizations';
+import {UserType} from '@/auth/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {extractSearchParams, isExistingUser} from '../../register/common/utils';
@@ -27,6 +31,8 @@ function Description({
     </div>
   );
 }
+
+const createUserOnLogin = process.env.KEYCLOAK_CREATE_USER_ON_LOGIN === 'true';
 
 export default async function Page({
   searchParams,
@@ -60,18 +66,79 @@ export default async function Page({
     );
   }
 
-  const partner = await findGooveeUserByEmail(user.email, tenantId);
+  let partner = await findGooveeUserByEmail(user.email, tenantId);
 
   if (!partner) {
-    return (
-      <Description
-        title={await getTranslation({tenant: tenantId}, 'Log In')}
-        description={await getTranslation(
-          {tenant: tenantId},
-          'We cannot find your record.',
-        )}
-      />
-    );
+    if (createUserOnLogin) {
+      try {
+        const workspace = await findWorkspaceByURL({
+          url: workspaceURL,
+          tenantId,
+        });
+
+        if (!workspace) {
+          return (
+            <Description
+              title={await getTranslation({tenant: tenantId}, 'Log In')}
+              description={await getTranslation(
+                {tenant: tenantId},
+                'Invalid Workspace',
+              )}
+            />
+          );
+        }
+
+        const existingUser = await findGooveeUserByEmail(user.email, tenantId);
+
+        if (existingUser) {
+          partner = existingUser;
+        } else {
+          const locale = (await l10n()).getLocale();
+
+          const localization = await findRegistrationLocalization({
+            locale,
+            tenantId,
+          });
+
+          await registerPartner({
+            type: UserType.individual,
+            email: user.email,
+            name: user.name || user.email,
+            workspaceURL,
+            tenantId,
+            localizationId: localization?.id,
+          });
+
+          partner = await findGooveeUserByEmail(user.email, tenantId);
+
+          console.log(partner);
+
+          if (!partner) {
+            throw new Error();
+          }
+        }
+      } catch (err) {
+        return (
+          <Description
+            title={await getTranslation({tenant: tenantId}, 'Log In')}
+            description={await getTranslation(
+              {tenant: tenantId},
+              'We cannot find your record.',
+            )}
+          />
+        );
+      }
+    } else {
+      return (
+        <Description
+          title={await getTranslation({tenant: tenantId}, 'Log In')}
+          description={await getTranslation(
+            {tenant: tenantId},
+            'We cannot find your record.',
+          )}
+        />
+      );
+    }
   }
 
   const existing = await isExistingUser({

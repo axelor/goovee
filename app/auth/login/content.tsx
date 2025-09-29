@@ -20,6 +20,7 @@ import {useToast} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
 import {revalidate} from './actions';
+import {useEnvironment} from '@/lib/core/environment';
 
 export default function Content({
   canRegister,
@@ -39,6 +40,7 @@ export default function Content({
   const searchQuery = new URLSearchParams(searchParams).toString();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
   const {status} = useSession();
+  const env = useEnvironment();
 
   const toggleShowPassword = () => setShowPassword(show => !show);
 
@@ -243,12 +245,18 @@ export default function Content({
                   disabled={submitting}>
                   <Image
                     alt="Google"
-                    src="/images/keycloak.svg"
+                    src={
+                      env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE ||
+                      '/images/keycloak.svg'
+                    }
                     height={24}
                     width={24}
                     className="me-2"
                   />
-                  {i18n.t('Log In with Keycloak')}
+                  {i18n.t(
+                    env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL ||
+                      'Log In with Keycloak',
+                  )}
                 </Button>
               </div>
             </>
