@@ -12,7 +12,10 @@ import {findRegistrationLocalization} from '@/orm/localizations';
 import {UserType} from '@/auth/types';
 
 // ---- LOCAL IMPORTS ---- //
-import {extractSearchParams, isExistingUser} from '../../register/common/utils';
+import {
+  extractSearchParams,
+  isExistingUser,
+} from '../../../register/common/utils';
 import Content from './content';
 
 function Description({
@@ -110,8 +113,6 @@ export default async function Page({
           });
 
           partner = await findGooveeUserByEmail(user.email, tenantId);
-
-          console.log(partner);
 
           if (!partner) {
             throw new Error();

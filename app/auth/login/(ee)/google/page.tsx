@@ -8,7 +8,7 @@ import {getTranslation} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
 
 // ---- LOCAL IMPORTS ---- //
-import {extractSearchParams, isExistingUser} from '../../register/common/utils';
+import {extractSearchParams, isExistingUser} from '../../../register/common/utils';
 import Content from './content';
 
 function Description({

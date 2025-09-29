@@ -5,7 +5,7 @@ import {useSession} from 'next-auth/react';
 import {useRouter, useSearchParams} from 'next/navigation';
 
 import {SEARCH_PARAMS} from '@/constants';
-import {revalidate} from '../actions';
+import {revalidate} from '../../actions';
 
 export default function Content({partner}: any) {
   const {data: session, update} = useSession();
