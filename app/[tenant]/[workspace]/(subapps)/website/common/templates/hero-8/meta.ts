@@ -67,14 +67,26 @@ export const hero8Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue:
-        'wrapper card bg-soft-primary rounded-4 mt-2 mb-13 mb-md-17',
+      defaultValue: 'wrapper  bg-light mb-13 mb-md-17',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container p-md-10 py-xl-11 px-xl-15',
+      defaultValue: 'container',
+    },
+    {
+      name: 'cardClassName',
+      title: 'Card Class Name',
+      type: 'string',
+      defaultValue: 'card bg-soft-primary rounded-4 mt-2',
+    },
+
+    {
+      name: 'cardBodyClassName',
+      title: 'Card Body Class Name',
+      type: 'string',
+      defaultValue: 'card-body p-md-10 py-xl-11 px-xl-15',
     },
   ],
   metaModels: [metaFileModel],
