@@ -51,6 +51,7 @@ export function ProductList({
   breadcrumbs,
   productPath,
   defaultSort,
+  hidePriceAndPurchase,
 }: {
   breadcrumbs?: any;
   products: ComputedProduct[];
@@ -60,6 +61,7 @@ export function ProductList({
   workspace?: PortalWorkspace;
   productPath?: string;
   defaultSort?: string;
+  hidePriceAndPurchase: boolean;
 }) {
   const {cart, addItem} = useCart();
   const {workspaceURI} = useWorkspace();
@@ -241,6 +243,7 @@ export function ProductList({
                     quantity={quantity}
                     onAdd={handleAdd}
                     displayPrices={workspace?.config?.displayPrices}
+                    hidePriceAndPurchase={hidePriceAndPurchase}
                     category={category}
                   />
                 );

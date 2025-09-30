@@ -14,7 +14,10 @@ import {
   ProductList,
   ProductListSkeleton,
 } from '@/subapps/shop/common/ui/components';
-import {findProducts} from '@/subapps/shop/common/orm/product';
+import {
+  findProducts,
+  shouldHidePricesAndPurchase,
+} from '@/subapps/shop/common/orm/product';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {SORT_BY_OPTIONS} from '@/subapps/shop/common/constants';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
@@ -103,6 +106,12 @@ async function Category({
 
   const parentcategories = categories?.filter((c: any) => !c.parent);
 
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId: tenant,
+  });
+
   return (
     <ProductList
       products={clone(products)}
@@ -110,6 +119,7 @@ async function Category({
       category={$category}
       categories={parentcategories}
       pageInfo={pageInfo}
+      hidePriceAndPurchase={hidePriceAndPurchase}
       workspace={workspace}
       productPath={`${workspaceURI}/shop/category/${$category.slug}/product/`}
       defaultSort={defaultSort}

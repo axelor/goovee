@@ -1,0 +1,24 @@
+{
+  "name": "AOSPartnerPriceList",
+  "table": "base_partner_price_list",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "label"
+    },
+    {
+      "type": "Int",
+      "name": "typeSelect"
+    },
+    {
+      "type": "Boolean",
+      "name": "isExclusive"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency"
+    }
+  ]
+}

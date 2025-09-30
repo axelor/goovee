@@ -79,6 +79,7 @@ export interface PortalAppConfig extends Model {
   eSignature: boolean;
   payInAdvance: boolean;
   priceAfterLogin: string;
+  hidePriceForEmptyPricelist: boolean;
   requestQuotation: boolean;
   paymentOptionSet?: Array<{}>;
   carouselList?: Array<{

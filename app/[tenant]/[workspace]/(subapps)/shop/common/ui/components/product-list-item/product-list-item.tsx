@@ -21,6 +21,7 @@ export type ProductListItemProps = {
   onAdd: (product: ComputedProduct) => Promise<void>;
   displayPrices?: boolean;
   category: Category;
+  hidePriceAndPurchase: boolean;
 };
 
 export function ProductListItem({
@@ -29,6 +30,7 @@ export function ProductListItem({
   onAdd,
   displayPrices,
   category,
+  hidePriceAndPurchase,
 }: ProductListItemProps) {
   const {product, price, errorMessage} = computedProduct;
   const {displayTwoPrices, displayPrimary, displaySecondary} = price;
@@ -37,7 +39,7 @@ export function ProductListItem({
   const {outOfStockConfig} = product;
   const isOutOfStock = outOfStockConfig?.outOfStock;
   const showMessage = outOfStockConfig?.showMessage;
-  const canBuy = outOfStockConfig?.canBuy;
+  const canBuy = outOfStockConfig?.canBuy && !hidePriceAndPurchase;
 
   const handleAdd = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -76,14 +78,14 @@ export function ProductListItem({
                   {i18n.t('Out of stock')}
                 </p>
               )}
-              {errorMessage && (
+              {errorMessage && displayPrices && !hidePriceAndPurchase && (
                 <p className="text-xs font-semibold mt-0 mb-0 text-destructive">
                   {i18n.t('Price may be incorrect')}
                 </p>
               )}
             </div>
             <div className="shrink-0 text-right">
-              {displayPrices && (
+              {displayPrices && !hidePriceAndPurchase && (
                 <>
                   <h4 className="text-xl font-semibold mb-0">
                     {displayPrimary}

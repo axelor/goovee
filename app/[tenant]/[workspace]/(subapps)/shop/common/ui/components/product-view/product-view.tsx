@@ -30,7 +30,9 @@ export function ProductView({
   breadcrumbs,
   categories,
   metaFields,
+  hidePriceAndPurchase,
 }: {
+  hidePriceAndPurchase: boolean;
   categories?: any;
   product: ComputedProduct;
   workspace?: PortalWorkspace;
@@ -51,7 +53,7 @@ export function ProductView({
   const {outOfStockConfig} = product;
   const isOutOfStock = outOfStockConfig?.outOfStock;
   const showMessage = outOfStockConfig?.showMessage;
-  const canBuy = outOfStockConfig?.canBuy;
+  const canBuy = outOfStockConfig?.canBuy && !hidePriceAndPurchase;
 
   const handleAddToCart = async (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -140,13 +142,15 @@ export function ProductView({
                   {i18n.t('Out of stock')}
                 </p>
               )}
-              {errorMessage && (
-                <p className="text-base font-semibold mt-0 mb-0 text-destructive">
-                  {i18n.t('Price may be incorrect')}
-                </p>
-              )}
+              {errorMessage &&
+                workspace?.config?.displayPrices &&
+                !hidePriceAndPurchase && (
+                  <p className="text-base font-semibold mt-0 mb-0 text-destructive">
+                    {i18n.t('Price may be incorrect')}
+                  </p>
+                )}
             </div>
-            {workspace?.config?.displayPrices && (
+            {workspace?.config?.displayPrices && !hidePriceAndPurchase && (
               <>
                 {price.displayTwoPrices && (
                   <p className="text-xl font-semibold mb-2">

@@ -22,6 +22,7 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   displayPrices: true,
   mainPrice: true,
   displayTwoPrices: true,
+  hidePriceForEmptyPricelist: true,
   confirmOrder: true,
   requestQuotation: true,
   priceAfterLogin: true,

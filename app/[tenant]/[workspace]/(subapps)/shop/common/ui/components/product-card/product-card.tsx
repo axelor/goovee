@@ -21,6 +21,7 @@ export type ProductCardProps = {
   onAdd: (product: ComputedProduct) => Promise<void>;
   displayPrices?: boolean;
   category: Category;
+  hidePriceAndPurchase: boolean;
 };
 
 export function ProductCard({
@@ -29,6 +30,7 @@ export function ProductCard({
   onAdd,
   category,
   displayPrices,
+  hidePriceAndPurchase,
 }: ProductCardProps) {
   const {product, price, errorMessage} = computedProduct;
   const {displayTwoPrices, displayPrimary, displaySecondary} = price;
@@ -37,7 +39,7 @@ export function ProductCard({
   const {outOfStockConfig} = product;
   const isOutOfStock = outOfStockConfig?.outOfStock;
   const showMessage = outOfStockConfig?.showMessage;
-  const canBuy = outOfStockConfig?.canBuy;
+  const canBuy = outOfStockConfig?.canBuy && !hidePriceAndPurchase;
 
   const handleAdd = (event: React.MouseEvent<HTMLButtonElement>) => {
     onAdd(computedProduct);
@@ -48,7 +50,7 @@ export function ProductCard({
       className={cn(
         'flex flex-col justify-start cursor-pointer rounded-2xl bg-card text-card-foreground',
         {
-          'min-h-[25.625rem]': displayPrices,
+          'min-h-[25.625rem]': displayPrices && !hidePriceAndPurchase,
         },
       )}>
       <Link
@@ -71,7 +73,7 @@ export function ProductCard({
           <h5 className="font-medium line-clamp-1">
             {i18n.tattr(product.name)}
           </h5>
-          {displayPrices && (
+          {displayPrices && !hidePriceAndPurchase && (
             <>
               <h5 className="font-semibold mt-2">{displayPrimary}</h5>
               {displayTwoPrices && (
@@ -88,7 +90,7 @@ export function ProductCard({
               {i18n.t('Out of stock')}
             </p>
           )}
-          {errorMessage && (
+          {errorMessage && displayPrices && !hidePriceAndPurchase && (
             <p className="text-xs font-bold mt-0 mb-0 text-destructive">
               {i18n.t('Price may be incorrect')}
             </p>

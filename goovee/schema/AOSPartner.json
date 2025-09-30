@@ -156,6 +156,11 @@
       "name": "mainPartnerContacts",
       "target": "AOSPartner",
       "mappedBy": "mainPartner"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "salePartnerPriceList",
+      "target": "AOSPartnerPriceList"
     }
   ]
 }

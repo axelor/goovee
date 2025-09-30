@@ -13,7 +13,11 @@ import type {Product, Category, ComputedProduct} from '@/types';
 // ---- LOCAL IMPORTS ---- //
 import {Link, ProductCard} from '@/subapps/shop/common/ui/components';
 
-export function FeaturedCategories({categories, workspace}: any) {
+export function FeaturedCategories({
+  categories,
+  workspace,
+  hidePriceAndPurchase,
+}: any) {
   const router = useRouter();
 
   const {workspaceURI} = useWorkspace();
@@ -56,6 +60,7 @@ export function FeaturedCategories({categories, workspace}: any) {
 
             return (
               <ProductCard
+                hidePriceAndPurchase={hidePriceAndPurchase}
                 key={computedProduct.product.id}
                 product={computedProduct}
                 quantity={quantity}
