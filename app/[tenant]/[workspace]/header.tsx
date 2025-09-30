@@ -18,7 +18,7 @@ import {
   SelectItem,
 } from '@/ui/components';
 import {i18n} from '@/locale';
-import {DEFAULT_LOGO_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
+import {DEFAULT_LOGO_URL, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Icon} from '@/ui/components';
 import {PortalWorkspace} from '@/types';
@@ -66,11 +66,13 @@ export default function Header({
   isTopNavigation = false,
   workspaces,
   workspace,
+  showCart,
 }: {
   subapps: any;
   isTopNavigation?: boolean;
   workspaces: PortalWorkspace[];
   workspace: PortalWorkspace;
+  showCart?: boolean;
 }) {
   const router = useRouter();
   const {data: session} = useSession();
@@ -89,12 +91,8 @@ export default function Header({
       : (visible ?? true)
     : false;
 
-  const shopSubapp = subapps?.find(
-    (app: any) => app.code === SUBAPP_CODES.shop,
-  );
-
   const shouldDisplayIcons = visible && !loading;
-  const showCart = shopSubapp?.installed && shouldDisplayIcons;
+  const showCartIcon = showCart && shouldDisplayIcons;
 
   return (
     <>
@@ -126,7 +124,7 @@ export default function Header({
                   );
                 })}
             {false && <Notification />}
-            {showCart && <Cart />}
+            {showCartIcon && <Cart />}
             <Account baseURL={workspaceURI} tenant={tenant} />
           </div>
         )}

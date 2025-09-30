@@ -9,7 +9,7 @@ import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
-import {shouldHidePricesAndPurchase} from '@/subapps/shop/common/orm/product';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 export default async function Page({
   params,

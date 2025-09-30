@@ -11,7 +11,7 @@ import {workspacePathname} from '@/utils/workspace';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {CheckoutSkeleton} from '@/subapps/shop/common/ui/components';
-import {shouldHidePricesAndPurchase} from '@/subapps/shop/common/orm/product';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 async function Checkout({
   params,

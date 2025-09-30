@@ -10,7 +10,7 @@ import type {Cart} from '@/types';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {CartSkeleton} from '@/subapps/shop/common/ui/components';
-import {shouldHidePricesAndPurchase} from '@/subapps/shop/common/orm/product';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {notFound} from 'next/navigation';
 
 async function CartView({

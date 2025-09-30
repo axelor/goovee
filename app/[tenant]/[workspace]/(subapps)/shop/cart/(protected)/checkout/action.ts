@@ -18,10 +18,8 @@ import {computeTotal} from '@/utils/cart';
 
 // ---- LOCAL IMPORTS ---- //
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {
-  findProduct,
-  shouldHidePricesAndPurchase,
-} from '@/subapps/shop/common/orm/product';
+import {findProduct} from '@/subapps/shop/common/orm/product';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {markPaymentAsProcessed} from '@/lib/core/payment/common/orm';
 
 const formatNumber = (n: any) => n;

@@ -12,10 +12,8 @@ import {
   ProductView,
   ProductViewSkeleton,
 } from '@/subapps/shop/common/ui/components';
-import {
-  findProductBySlug,
-  shouldHidePricesAndPurchase,
-} from '@/subapps/shop/common/orm/product';
+import {findProductBySlug} from '@/subapps/shop/common/orm/product';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
 import {findModelFields} from '@/orm/model-fields';

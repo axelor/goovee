@@ -7,7 +7,7 @@ import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {findWorkspace, findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
-import {NAVIGATION, SEARCH_PARAMS} from '@/constants';
+import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
@@ -18,6 +18,7 @@ import Sidebar from './sidebar';
 import MobileMenu from './mobile-menu';
 import AnonymousSignOut from './anonymous-signout';
 import Footer from './footer';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 const defaultTheme = {
   id: -1,
@@ -112,9 +113,20 @@ export default async function Layout({
     tenantId: tenant,
   });
 
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace: $workspace,
+    tenantId: tenant,
+  });
+
   const navigationSelect = $workspace?.navigationSelect || NAVIGATION.left;
   const isTopNavigation = navigationSelect === NAVIGATION.top;
   const isLeftNavigation = navigationSelect === NAVIGATION.left;
+
+  const shopSubapp = subapps?.find(
+    (app: any) => app.code === SUBAPP_CODES.shop,
+  );
+  const showCart = !hidePriceAndPurchase && shopSubapp?.installed;
 
   return (
     <Workspace
@@ -133,6 +145,7 @@ export default async function Layout({
               isTopNavigation={isTopNavigation}
               workspaces={workspaces}
               workspace={$workspace}
+              showCart={showCart}
             />
             <div className="flex flex-col flex-grow min-h-0">
               <div className="flex-grow">{children}</div>
@@ -143,6 +156,7 @@ export default async function Layout({
             subapps={subapps}
             workspaces={workspaces}
             workspace={$workspace}
+            showCart={showCart}
           />
         </div>
       </CartContext>

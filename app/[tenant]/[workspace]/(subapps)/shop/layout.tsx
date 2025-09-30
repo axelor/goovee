@@ -6,7 +6,6 @@ import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {findWorkspace, findSubapp} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //

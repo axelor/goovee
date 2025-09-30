@@ -8,10 +8,8 @@ import {workspacePathname} from '@/utils/workspace';
 import {findWorkspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
-import {
-  findProducts,
-  shouldHidePricesAndPurchase,
-} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
+import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {
   findCategories,
   findFeaturedCategories,

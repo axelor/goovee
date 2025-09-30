@@ -134,7 +134,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
   );
 }
 
-export function MobileMenu({subapps, workspaces, workspace}: any) {
+export function MobileMenu({subapps, workspaces, workspace, showCart}: any) {
   const router = useRouter();
   const redirect = () => router.push('/notifications');
 
@@ -166,7 +166,7 @@ export function MobileMenu({subapps, workspaces, workspace}: any) {
             onClick={redirect}
           />
         )}
-        <Cart />
+        {showCart && <Cart />}
         <Account baseURL={workspaceURI} tenant={tenant} />
       </div>
     </nav>

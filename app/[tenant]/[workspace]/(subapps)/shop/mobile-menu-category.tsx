@@ -18,6 +18,7 @@ export function MobileCategories({
 }: {
   categories?: Category[];
   onClick?: any;
+  showCart?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 

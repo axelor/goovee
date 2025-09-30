@@ -14,10 +14,8 @@ import {
   ProductList,
   ProductListSkeleton,
 } from '@/subapps/shop/common/ui/components';
-import {
-  findProducts,
-  shouldHidePricesAndPurchase,
-} from '@/subapps/shop/common/orm/product';
+import {findProducts} from '@/subapps/shop/common/orm/product';
+import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {SORT_BY_OPTIONS} from '@/subapps/shop/common/constants';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
