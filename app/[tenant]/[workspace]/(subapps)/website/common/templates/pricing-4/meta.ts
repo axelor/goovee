@@ -66,7 +66,7 @@ export const pricing4Schema = {
       name: 'pricingWrapperClassName',
       title: 'Pricing Wrapper Class Name',
       type: 'string',
-      defaultValue: 'mt-n22 mt-md-n24',
+      defaultValue: 'pricing-wrapper position-relative mt-n22 mt-md-n24',
     },
   ],
   models: [planModel],
