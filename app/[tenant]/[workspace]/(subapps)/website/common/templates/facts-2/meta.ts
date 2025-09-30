@@ -166,7 +166,7 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
     page: 'demo-8',
     sequence: 6,
     data: {
-      facts2WrapperClassName: 'wrapper bg-light',
+      facts2WrapperClassName: 'wrapper bg-light mb-11',
       facts2ContainerClassName: 'container',
       facts2Title: 'We feel proud of our achievements.',
       facts2Subtitle:
