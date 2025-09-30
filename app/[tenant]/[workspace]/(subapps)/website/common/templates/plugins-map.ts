@@ -8,6 +8,7 @@ import {about21Schema} from './about-21/meta';
 import {about24Schema} from './about-24/meta';
 import {facts13Schema} from './facts-13/meta';
 import {facts16Schema} from './facts-16/meta';
+import {faq1Schema} from './faq-1/meta';
 import {hero3Schema} from './hero-3/meta';
 import {hero11Schema} from './hero-11/meta';
 import {hero13Schema} from './hero-13/meta';
@@ -33,6 +34,7 @@ const pluginsMap = {
   [about24Schema.code]: ['progress-bar'],
   [facts13Schema.code]: ['progress-bar'],
   [facts16Schema.code]: ['progress-bar'],
+  [faq1Schema.code]: ['lightbox'],
   [hero3Schema.code]: ['lightbox'],
   [hero11Schema.code]: ['lightbox'],
   [hero13Schema.code]: ['lightbox'],
