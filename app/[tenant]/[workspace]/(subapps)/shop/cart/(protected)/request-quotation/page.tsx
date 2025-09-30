@@ -1,4 +1,4 @@
-import {redirect} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -9,6 +9,7 @@ import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
+import {shouldHidePricesAndPurchase} from '@/subapps/shop/common/orm/product';
 
 export default async function Page({
   params,
@@ -37,6 +38,13 @@ export default async function Page({
     tenantId: tenant,
   });
 
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user: session?.user,
+    workspace,
+    tenantId: tenant,
+  });
+
+  if (hidePriceAndPurchase) notFound();
   return (
     <Content workspace={workspace} quotationSubapp={Boolean(quotationSubapp)} />
   );

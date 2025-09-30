@@ -18,7 +18,10 @@ import {computeTotal} from '@/utils/cart';
 
 // ---- LOCAL IMPORTS ---- //
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {findProduct} from '@/subapps/shop/common/orm/product';
+import {
+  findProduct,
+  shouldHidePricesAndPurchase,
+} from '@/subapps/shop/common/orm/product';
 import {markPaymentAsProcessed} from '@/lib/core/payment/common/orm';
 
 const formatNumber = (n: any) => n;
@@ -252,6 +255,18 @@ export async function paypalCaptureOrder({
     };
   }
 
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId,
+  });
+
+  if (hidePriceAndPurchase) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
+    };
+  }
   try {
     const {amount, context} = await findPaypalOrder({
       id: orderId,
@@ -381,6 +396,18 @@ export async function paypalCreateOrder({
     };
   }
 
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId,
+  });
+
+  if (hidePriceAndPurchase) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
+    };
+  }
   const {total, currency} = computeTotal({
     cart,
     workspace,
@@ -497,6 +524,19 @@ export async function createStripeCheckoutSession({
     return {
       error: true,
       message: await t('Stripe is not available'),
+    };
+  }
+
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId,
+  });
+
+  if (hidePriceAndPurchase) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
     };
   }
 
@@ -629,6 +669,19 @@ export async function validateStripePayment({
     return {
       error: true,
       message: await t('Bad request'),
+    };
+  }
+
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId,
+  });
+
+  if (hidePriceAndPurchase) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
     };
   }
 
@@ -765,6 +818,18 @@ export async function payboxCreateOrder({
     };
   }
 
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId,
+  });
+
+  if (hidePriceAndPurchase) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
+    };
+  }
   const {total, currency} = computeTotal({
     cart,
     workspace,
@@ -878,6 +943,19 @@ export async function validatePayboxPayment({
     return {
       error: true,
       message: await t('Paybox is not available'),
+    };
+  }
+
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId,
+  });
+
+  if (hidePriceAndPurchase) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
     };
   }
 

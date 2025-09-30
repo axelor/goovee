@@ -10,6 +10,8 @@ import type {Cart} from '@/types';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {CartSkeleton} from '@/subapps/shop/common/ui/components';
+import {shouldHidePricesAndPurchase} from '@/subapps/shop/common/orm/product';
+import {notFound} from 'next/navigation';
 
 async function CartView({
   params,
@@ -27,6 +29,13 @@ async function CartView({
     tenantId: tenant,
   }).then(clone);
 
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user: session?.user,
+    workspace,
+    tenantId: tenant,
+  });
+
+  if (hidePriceAndPurchase) notFound();
   return <Content workspace={workspace} tenant={tenant} />;
 }
 

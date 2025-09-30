@@ -1,5 +1,5 @@
 import {Suspense} from 'react';
-import {redirect} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -11,6 +11,7 @@ import {workspacePathname} from '@/utils/workspace';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {CheckoutSkeleton} from '@/subapps/shop/common/ui/components';
+import {shouldHidePricesAndPurchase} from '@/subapps/shop/common/orm/product';
 
 async function Checkout({
   params,
@@ -40,6 +41,14 @@ async function Checkout({
     url: workspaceURL,
     tenantId: tenant,
   });
+
+  const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
+    user,
+    workspace,
+    tenantId: tenant,
+  });
+
+  if (hidePriceAndPurchase) notFound();
 
   return (
     <Content workspace={workspace} orderSubapp={orderSubapp} tenant={tenant} />
