@@ -17,6 +17,8 @@ export function Contact8(props: TemplateProps<Contact8Data>) {
     contact8Heading: heading,
     contact8CountUp: countUp,
     contact8Suffix: suffix,
+    contact8WrapperClassName: wrapperClassName,
+    contact8ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -32,31 +34,33 @@ export function Contact8(props: TemplateProps<Contact8Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gy-10 gx-lg-8 gx-xl-12 align-items-center">
-        <div className="col-lg-7 position-relative">
-          <Tiles3
-            image1={tileImage1}
-            image2={tileImage2}
-            heading={heading}
-            countUp={countUp}
-            suffix={suffix}
-          />
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gy-10 gx-lg-8 gx-xl-12 align-items-center">
+          <div className="col-lg-7 position-relative">
+            <Tiles3
+              image1={tileImage1}
+              image2={tileImage2}
+              heading={heading}
+              countUp={countUp}
+              suffix={suffix}
+            />
+          </div>
 
-        <div className="col-lg-5">
-          <h2 className="display-4 mb-3">{title}</h2>
-          <p className="lead fs-lg">{caption}</p>
+          <div className="col-lg-5">
+            <h2 className="display-4 mb-3">{title}</h2>
+            <p className="lead fs-lg">{caption}</p>
 
-          <p>{description}</p>
+            <p>{description}</p>
 
-          <NextLink
-            title={linkTitle}
-            href={linkHref}
-            className="btn btn-primary rounded-pill mt-2"
-          />
+            <NextLink
+              title={linkTitle}
+              href={linkHref}
+              className="btn btn-primary rounded-pill mt-2"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

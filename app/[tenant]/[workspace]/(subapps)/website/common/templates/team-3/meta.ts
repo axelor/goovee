@@ -33,6 +33,18 @@ export const team3Schema = {
       type: 'json-one-to-many',
       target: 'Team3Member',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [
     {
@@ -81,6 +93,8 @@ export type Team3Data = Data<typeof team3Schema>;
 export const team3Demos: Demo<typeof team3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 5,
     data: {
       team3Title:
         'Choose our team to enjoy the benefits of efficient & cost-effective solutions',
@@ -317,6 +331,8 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 5,
     data: {
       team3Title:
         'Choisissez notre équipe pour profiter des avantages de solutions efficaces et rentables',

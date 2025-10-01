@@ -43,6 +43,18 @@ export const contact4Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -52,6 +64,8 @@ export type Contact4Data = Data<typeof contact4Schema>;
 export const contact4Demos: Demo<typeof contact4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 10,
     data: {
       contact4Image: {
         id: '1',
@@ -71,6 +85,8 @@ export const contact4Demos: Demo<typeof contact4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 10,
     data: {
       contact4Image: {
         id: '1',

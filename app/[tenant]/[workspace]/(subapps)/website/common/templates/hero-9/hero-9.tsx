@@ -19,6 +19,8 @@ export function Hero9(props: TemplateProps<Hero9Data>) {
     hero9ButtonLink2: buttonLink2,
     hero9Image,
     hero9Typewriter: typewriter,
+    hero9WrapperClassName: wrapperClassName,
+    hero9ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -28,8 +30,8 @@ export function Hero9(props: TemplateProps<Hero9Data>) {
   });
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container pt-10 pb-14 pb-lg-0">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-md-10 offset-md-1 offset-lg-0 col-lg-5 mt-lg-n2 text-center text-lg-start order-2 order-lg-0">
             <h1

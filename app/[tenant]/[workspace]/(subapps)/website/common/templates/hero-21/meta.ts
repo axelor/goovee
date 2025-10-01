@@ -55,6 +55,18 @@ export const hero21Schema = {
       type: 'json-one-to-many',
       target: 'Clients',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pt-md-14 pb-14 pb-md-16 text-center',
+    },
   ],
   models: [clientsModel],
   metaModels: [metaFileModel],
@@ -65,6 +77,8 @@ export type Hero21Data = Data<typeof hero21Schema>;
 export const hero21Demos: Demo<typeof hero21Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 1,
     data: {
       hero21Title: 'A tech company that focuses on',
       hero21RotatingTitle: 'mobile design,web design,3D animation',
@@ -170,6 +184,8 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 1,
     data: {
       hero21Title: 'Une entreprise technologique qui se concentre sur',
       hero21RotatingTitle: 'le design mobile, le design web, l’animation 3D',

@@ -5,12 +5,16 @@ import Link from 'next/link';
 
 export function Service26(props: TemplateProps<Service26Data>) {
   const {data} = props;
-  const {service26Description: description, service26Services: services} =
-    data || {};
+  const {
+    service26Description: description,
+    service26Services: services,
+    service26WrapperClassName: wrapperClassName,
+    service26ContainerClassName: containerClassName,
+  } = data || {};
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-14 py-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-12 col-xl-10 col-xxl-7 mx-auto text-center">
             <i className="icn-flower text-leaf fs-30 opacity-25" />

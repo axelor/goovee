@@ -1,8 +1,10 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../constants/colors';
 import type {Model} from '../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {socialMediaUnicons} from '../constants/unicons';
+import {metaFileModel} from './meta-models';
+import {
+  colorsSelection,
+  socialMediaUniconsSelection,
+  solidIconsSelection,
+} from './meta-selections';
 
 export const accordionModel = {
   name: 'Accordion',
@@ -28,6 +30,20 @@ export const accordionModel = {
   ],
 } as const satisfies Model;
 
+export const bulletPointModel = {
+  name: 'BulletPoint',
+  title: 'Bullet Point',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+    },
+  ],
+} as const satisfies Model;
+
 export const bulletListModel = {
   name: 'BulletList',
   title: 'Bullet List',
@@ -43,7 +59,7 @@ export const bulletListModel = {
       name: 'bulletColor',
       title: 'Bullet Color',
       type: 'string',
-      selection: colors.map(color => ({title: startCase(color), value: color})),
+      selection: 'colors',
     },
     {
       name: 'rowClass',
@@ -57,20 +73,8 @@ export const bulletListModel = {
       target: 'BulletPoint',
     },
   ],
-} as const satisfies Model;
-
-export const bulletPointModel = {
-  name: 'BulletPoint',
-  title: 'Bullet Point',
-  fields: [
-    {
-      name: 'title',
-      title: 'Title',
-      type: 'string',
-      nameField: true,
-      visibleInGrid: true,
-    },
-  ],
+  models: [bulletPointModel],
+  selections: [colorsSelection],
 } as const satisfies Model;
 
 export const progressListModel = {
@@ -93,12 +97,10 @@ export const progressListModel = {
       name: 'color',
       title: 'Color',
       type: 'string',
-      selection: colors.map(color => ({
-        title: startCase(color),
-        value: color,
-      })),
+      selection: 'colors',
     },
   ],
+  selections: [colorsSelection],
 } as const satisfies Model;
 
 export const serviceList3Model = {
@@ -121,12 +123,10 @@ export const serviceList3Model = {
       name: 'icon',
       title: 'Icon',
       type: 'string',
-      selection: solidIcons.map(icon => ({
-        title: startCase(icon),
-        value: icon,
-      })),
+      selection: 'solid-icons',
     },
   ],
+  selections: [solidIconsSelection],
 } as const satisfies Model;
 
 export const clientsModel = {
@@ -148,6 +148,7 @@ export const clientsModel = {
       widget: 'Image',
     },
   ],
+  metaModels: [metaFileModel],
 } as const satisfies Model;
 
 export const socialLinksModel = {
@@ -165,10 +166,7 @@ export const socialLinksModel = {
       name: 'icon',
       title: 'Icon',
       type: 'string',
-      selection: socialMediaUnicons.map(icon => ({
-        title: startCase(icon),
-        value: icon,
-      })),
+      selection: 'social-media-unicons',
       visibleInGrid: true,
       required: true,
     },
@@ -179,6 +177,7 @@ export const socialLinksModel = {
       required: true,
     },
   ],
+  selections: [socialMediaUniconsSelection],
 } as const satisfies Model;
 
 export const contactInfoModel = {
@@ -222,6 +221,21 @@ export const contactInfoModel = {
       title: 'Email',
       type: 'string',
       widget: 'Email',
+    },
+  ],
+} as const satisfies Model;
+
+export const planFeatureModel = {
+  name: 'PlanFeature',
+  title: 'Plan Feature',
+  fields: [
+    {
+      name: 'label',
+      title: 'Label',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+      required: true,
     },
   ],
 } as const satisfies Model;
@@ -276,21 +290,7 @@ export const planModel = {
       target: 'PlanFeature',
     },
   ],
-} as const satisfies Model;
-
-export const planFeatureModel = {
-  name: 'PlanFeature',
-  title: 'Plan Feature',
-  fields: [
-    {
-      name: 'label',
-      title: 'Label',
-      type: 'string',
-      nameField: true,
-      visibleInGrid: true,
-      required: true,
-    },
-  ],
+  models: [planFeatureModel],
 } as const satisfies Model;
 
 export const faq5QuestionsModel = {

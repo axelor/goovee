@@ -12,6 +12,8 @@ export function Testimonial13(props: TemplateProps<Testimonial13Data>) {
     testimonial13SlidesPerView: slidesPerView,
     testimonial13Navigation: navigation,
     testimonial13Testimonials: testimonials = [],
+    testimonial13WrapperClassName: wrapperClassName,
+    testimonial13ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,9 +24,9 @@ export function Testimonial13(props: TemplateProps<Testimonial13Data>) {
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay bg-overlay-300 text-white"
+      className={wrapperClassName}
       style={{backgroundImage: `url(${image})`}}>
-      <div className="container py-14 py-md-17">
+      <div className={containerClassName}>
         <h2 className="display-4 mb-5 text-white text-center">{caption}</h2>
 
         <div className="row">

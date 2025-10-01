@@ -14,6 +14,8 @@ export function Hero4(props: TemplateProps<Hero4Data>) {
     hero4ButtonLink1: buttonLink1,
     hero4ButtonLink2: buttonLink2,
     hero4Image,
+    hero4WrapperClassName: wrapperClassName,
+    hero4ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -23,13 +25,13 @@ export function Hero4(props: TemplateProps<Hero4Data>) {
   });
 
   return (
-    <section className="wrapper bg-light position-relative min-vh-70 d-lg-flex align-items-center">
+    <section className={wrapperClassName} data-code={props.code}>
       <div
         style={{backgroundImage: `url(${image})`}}
         className="rounded-4-lg-start col-lg-6 order-lg-2 position-lg-absolute top-0 end-0 image-wrapper bg-image bg-cover h-100 min-vh-50"
       />
 
-      <div className="container">
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-6">
             <div className="mt-10 mt-md-11 mt-lg-n10 px-10 px-md-11 ps-lg-0 pe-lg-13 text-center text-lg-start">

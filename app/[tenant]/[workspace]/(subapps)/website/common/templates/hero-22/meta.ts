@@ -36,6 +36,18 @@ export const hero22Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper section-frame br-fix overflow-hidden',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-18 pt-lg-21 pb-17 pb-lg-19 text-center',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -46,6 +58,8 @@ export type Hero22Data = Data<typeof hero22Schema>;
 export const hero22Demos: Demo<typeof hero22Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 1,
     data: {
       hero22Title: 'Expand your business with our marketing services.',
       hero22Caption: 'Hello! We are here',
@@ -67,6 +81,8 @@ export const hero22Demos: Demo<typeof hero22Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 1,
     data: {
       hero22Title:
         'Développez votre entreprise grâce à nos services marketing.',

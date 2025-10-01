@@ -43,6 +43,19 @@ export const hero19Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-image bg-overlay bg-overlay-300 text-white',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-17 pb-19 pt-md-18 pb-md-17 text-center',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -53,6 +66,8 @@ export type Hero19Data = Data<typeof hero19Schema>;
 export const hero19Demos: Demo<typeof hero19Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 1,
     data: {
       hero19Title1: 'We provide quick solutions for your',
       hero19Title2: 'company',
@@ -71,6 +86,8 @@ export const hero19Demos: Demo<typeof hero19Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 1,
     data: {
       hero19Title1: 'Nous apportons des solutions rapides pour votre',
       hero19Title2: 'entreprise',

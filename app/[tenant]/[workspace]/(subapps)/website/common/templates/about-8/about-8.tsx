@@ -11,6 +11,8 @@ export function About8(props: TemplateProps<About8Data>) {
     about8Description: description,
     about8Image,
     about8AboutList: aboutList,
+    about8WrapperClassName: wrapperClassName,
+    about8ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -20,26 +22,28 @@ export function About8(props: TemplateProps<About8Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-12 gy-10 mb-15 mb-md-18 align-items-center">
-        <div className="col-lg-7">
-          <figure>
-            <img className="w-auto" src={image} alt="" />
-          </figure>
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
+          <div className="col-lg-7">
+            <figure>
+              <img className="w-auto" src={image} alt="" />
+            </figure>
+          </div>
 
-        <div className="col-lg-5">
-          <h3 className="display-4 mb-3">{caption}</h3>
-          <p className="lead fs-lg lh-sm">{title}</p>
-          <p className="mb-6">{description}</p>
+          <div className="col-lg-5">
+            <h3 className="display-4 mb-3">{caption}</h3>
+            <p className="lead fs-lg lh-sm">{title}</p>
+            <p className="mb-6">{description}</p>
 
-          <ListColumn
-            list={aboutList?.attrs.list ?? []}
-            rowClass={aboutList?.attrs.rowClass}
-            bulletColor={aboutList?.attrs.bulletColor}
-          />
+            <ListColumn
+              list={aboutList?.attrs.list ?? []}
+              rowClass={aboutList?.attrs.rowClass}
+              bulletColor={aboutList?.attrs.bulletColor}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

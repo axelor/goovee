@@ -39,6 +39,18 @@ export const process3Schema = {
       type: 'json-one-to-many',
       target: 'Process3Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-16 mb-md-18',
+    },
   ],
   models: [
     {
@@ -74,6 +86,8 @@ export type Process3Data = Data<typeof process3Schema>;
 export const process3Demos: Demo<typeof process3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 3,
     data: {
       process3Title: 'Our Working Process',
       process3Caption: 'How It Works?',
@@ -82,9 +96,9 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       process3Image: {
         id: '1',
         version: 1,
-        fileName: 'about9.jpg',
+        fileName: 'about7.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        filePath: '/img/photos/about7.jpg',
       },
       process3Processes: [
         {
@@ -122,6 +136,8 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 3,
     data: {
       process3Title: 'Notre processus de travail',
       process3Caption: 'Comment ça marche ?',
@@ -130,9 +146,9 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       process3Image: {
         id: '1',
         version: 1,
-        fileName: 'about9.jpg',
+        fileName: 'about7.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        filePath: '/img/photos/about7.jpg',
       },
       process3Processes: [
         {

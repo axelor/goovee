@@ -15,6 +15,8 @@ export function Footer15(props: TemplateProps<Footer15Data>) {
     footer15Phone1: phone1,
     footer15Phone2: phone2,
     footer15SocialLinks,
+    footer15FooterClassName: footerClassName,
+    footer15ContainerClassName: containerClassName,
   } = data || {};
 
   const logo = getMetaFileURL({
@@ -31,8 +33,8 @@ export function Footer15(props: TemplateProps<Footer15Data>) {
     })) ?? [];
 
   return (
-    <footer className="bg-gray">
-      <div className="container pt-13 pb-7">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-0 gy-6">
           <div className="col-lg-4">
             <div className="widget">

@@ -31,6 +31,18 @@ export const contact6Schema = {
       target: 'ContactInfo',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-17',
+    },
   ],
   models: [contactInfoModel],
   metaModels: [metaFileModel],
@@ -41,6 +53,8 @@ export type Contact6Data = Data<typeof contact6Schema>;
 export const contact6Demos: Demo<typeof contact6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 8,
     data: {
       contact6Image: {
         id: '1',
@@ -67,6 +81,8 @@ export const contact6Demos: Demo<typeof contact6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 8,
     data: {
       contact6Image: {
         id: '1',

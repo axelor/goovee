@@ -34,6 +34,18 @@ export const process15Schema = {
       type: 'json-one-to-many',
       target: 'Process15Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container my-14 my-md-17',
+    },
   ],
   models: [
     {
@@ -63,6 +75,8 @@ export type Process15Data = Data<typeof process15Schema>;
 export const process15Demos: Demo<typeof process15Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 3,
     data: {
       process15Title:
         'We provide ideas for creating the lives of our clients easier.',
@@ -116,6 +130,8 @@ export const process15Demos: Demo<typeof process15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 3,
     data: {
       process15Title:
         'Nous proposons des idées pour faciliter la vie de nos clients.',

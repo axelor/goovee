@@ -9,6 +9,8 @@ export function Process10(props: TemplateProps<Process10Data>) {
     process10Title: title,
     process10Image,
     process10Processes: processes,
+    process10WrapperClassName: wrapperClassName,
+    process10ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -18,27 +20,29 @@ export function Process10(props: TemplateProps<Process10Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
-        <div className="col-lg-7">
-          <figure>
-            <img className="w-auto" src={image} alt="" />
-          </figure>
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
+          <div className="col-lg-7">
+            <figure>
+              <img className="w-auto" src={image} alt="" />
+            </figure>
+          </div>
 
-        <div className="col-lg-5">
-          <h3 className="display-4 mb-7">{title}</h3>
-          {processes?.map(item => (
-            <ProcessList2
-              key={item.id}
-              no={item.attrs.no}
-              title={item.attrs.title}
-              subtitle={item.attrs.subtitle}
-              className="icon btn btn-circle btn-soft-primary pe-none me-5"
-            />
-          ))}
+          <div className="col-lg-5">
+            <h3 className="display-4 mb-7">{title}</h3>
+            {processes?.map(item => (
+              <ProcessList2
+                key={item.id}
+                no={item.attrs.no}
+                title={item.attrs.title}
+                subtitle={item.attrs.subtitle}
+                className="icon btn btn-circle btn-soft-primary pe-none me-5"
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

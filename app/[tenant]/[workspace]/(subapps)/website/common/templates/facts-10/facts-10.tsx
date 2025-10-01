@@ -8,11 +8,13 @@ export function Facts10(props: TemplateProps<Facts10Data>) {
     facts10Title: title,
     facts10Caption: caption,
     facts10Facts: facts,
+    facts10WrapperClassName: wrapperClassName,
+    facts10ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-14 pt-md-17 pb-md-19">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0 align-items-center">
           <div className="col-lg-4 text-center text-lg-start">
             <h2 className="fs-16 text-uppercase text-primary mb-3">

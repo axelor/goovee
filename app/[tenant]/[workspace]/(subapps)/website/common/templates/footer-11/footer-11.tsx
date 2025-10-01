@@ -18,6 +18,8 @@ export function Footer11(props: TemplateProps<Footer11Data>) {
     footer11NewsletterDescription: newsletterDescription,
     footer11Links: links,
     footer11SocialLinks,
+    footer11FooterClassName: footerClassName,
+    footer11ContainerClassName: containerClassName,
   } = data || {};
 
   const logo = getMetaFileURL({
@@ -34,8 +36,8 @@ export function Footer11(props: TemplateProps<Footer11Data>) {
     })) ?? [];
 
   return (
-    <footer className="bg-light">
-      <div className="container py-13 py-md-15">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">

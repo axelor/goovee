@@ -9,6 +9,8 @@ export function Hero23(props: TemplateProps<Hero23Data>) {
     hero23Title: title,
     hero23Caption: caption,
     hero23SlideImages: slideImages,
+    hero23WrapperClassName: wrapperClassName,
+    hero23ContainerClassName: containerClassName,
   } = data || {};
 
   const slides = slideImages?.map((item, i) => ({
@@ -25,12 +27,12 @@ export function Hero23(props: TemplateProps<Hero23Data>) {
   }));
 
   return (
-    <section className="wrapper bg-dark">
+    <section className={wrapperClassName} data-code={props.code}>
       <div className="swiper-container swiper-thumbs-container swiper-fullscreen nav-dark">
         <Carousel2 slides={slides || []} />
 
         <div className="swiper-static">
-          <div className="container h-100 d-flex align-items-center justify-content-center">
+          <div className={containerClassName}>
             <div className="row">
               <div className="col-lg-8 mx-auto mt-n10 text-center">
                 <h1 className="fs-19 text-uppercase ls-xl text-white mb-3 animate__animated animate__zoomIn animate__delay-1s">

@@ -11,6 +11,8 @@ export function CTA3(props: TemplateProps<Cta3Data>) {
     cta3LinkTitle: linkTitle,
     cta3LinkHref: linkHref,
     cta3Image,
+    cta3WrapperClassName: wrapperClassName,
+    cta3ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -21,9 +23,10 @@ export function CTA3(props: TemplateProps<Cta3Data>) {
 
   return (
     <section
-      className="wrapper image-wrapper bg-auto no-overlay bg-image text-center mb-14 mb-md-16 bg-map"
+      className={wrapperClassName}
+      data-code={props.code}
       style={{backgroundImage: `url(${image})`}}>
-      <div className="container py-md-18">
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-7 col-xl-7 mx-auto">
             <h2 className="display-4 mb-3 text-center">{title}</h2>

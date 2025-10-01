@@ -1,11 +1,10 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {colorsSelection} from '../meta-selections';
 
 export const process12Schema = {
   title: 'Process 12',
@@ -48,6 +47,18 @@ export const process12Schema = {
       type: 'json-one-to-many',
       target: 'Process12Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [
     {
@@ -80,14 +91,12 @@ export const process12Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
       ],
     },
   ],
+  selections: [colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process12Data = Data<typeof process12Schema>;
@@ -95,6 +104,8 @@ export type Process12Data = Data<typeof process12Schema>;
 export const process12Demos: Demo<typeof process12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-17',
+    sequence: 3,
     data: {
       process12Caption: 'Our Strategy',
       process12Heading:
@@ -147,6 +158,8 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-17',
+    sequence: 3,
     data: {
       process12Caption: 'Notre stratégie',
       process12Heading:

@@ -48,6 +48,18 @@ export const hero2Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -57,6 +69,8 @@ export type Hero2Data = Data<typeof hero2Schema>;
 export const hero2Demos: Demo<typeof hero2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 1,
     data: {
       hero2Title: 'We create solutions that make our customers lives easier.',
       hero2Description:
@@ -76,6 +90,8 @@ export const hero2Demos: Demo<typeof hero2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 1,
     data: {
       hero2Title:
         'Nous créons des solutions qui facilitent la vie de nos clients.',

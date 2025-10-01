@@ -87,6 +87,18 @@ export const portfolio7Schema = {
       title: 'Title 3',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -97,6 +109,8 @@ export type Portfolio7Data = Data<typeof portfolio7Schema>;
 export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 6,
     data: {
       portfolio7Title: 'Check out some of our recent projects below.',
       portfolio7Description: 'We love to turn ideas into beautiful things.',
@@ -134,6 +148,8 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 6,
     data: {
       portfolio7Title:
         'Découvrez quelques-uns de nos projets récents ci-dessous.',

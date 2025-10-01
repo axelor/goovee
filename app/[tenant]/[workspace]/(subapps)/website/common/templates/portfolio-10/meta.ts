@@ -32,6 +32,18 @@ export const portfolio10Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio10PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mt-17',
+    },
   ],
   models: [
     {
@@ -80,6 +92,8 @@ export type Portfolio10Data = Data<typeof portfolio10Schema>;
 export const portfolio10Demos: Demo<typeof portfolio10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 6,
     data: {
       portfolio10Caption: 'Latest Projects',
       portfolio10Description:
@@ -206,6 +220,8 @@ export const portfolio10Demos: Demo<typeof portfolio10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 6,
     data: {
       portfolio10Caption: 'Derniers projets',
       portfolio10Description:

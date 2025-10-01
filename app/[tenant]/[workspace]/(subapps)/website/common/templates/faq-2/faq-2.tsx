@@ -8,11 +8,13 @@ export function FAQ2(props: TemplateProps<Faq2Data>) {
     faq2Title: title,
     faq2Caption: caption,
     faq2Questions: questions,
+    faq2WrapperClassName: wrapperClassName,
+    faq2ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-14 py-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-11 col-xxl-10 mx-auto text-center">
             <h2 className="fs-15 text-uppercase text-primary mb-3">

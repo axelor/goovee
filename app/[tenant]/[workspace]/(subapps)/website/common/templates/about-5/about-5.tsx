@@ -9,6 +9,8 @@ export function About5(props: TemplateProps<About5Data>) {
     about5Title: title,
     about5Image,
     about5ProgressList: progressList,
+    about5WrapperClassName: wrapperClassName,
+    about5ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -26,19 +28,21 @@ export function About5(props: TemplateProps<About5Data>) {
     })) ?? [];
 
   return (
-    <div className="container">
-      <div className="row gy-10 gy-sm-13 gx-lg-8 align-items-center">
-        <div className="col-lg-7">
-          <figure>
-            <img className="w-auto" src={image} alt="" />
-          </figure>
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gy-10 gy-sm-13 gx-lg-8 align-items-center">
+          <div className="col-lg-7">
+            <figure>
+              <img className="w-auto" src={image} alt="" />
+            </figure>
+          </div>
 
-        <div className="col-lg-5">
-          <h3 className="display-4 mb-6 pe-xxl-6">{title}</h3>
-          <ProgressList items={list} />
+          <div className="col-lg-5">
+            <h3 className="display-4 mb-6 pe-xxl-6">{title}</h3>
+            <ProgressList items={list} />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

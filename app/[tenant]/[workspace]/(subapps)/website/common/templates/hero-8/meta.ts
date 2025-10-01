@@ -63,6 +63,31 @@ export const hero8Schema = {
       title: 'Heading',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper  bg-light mb-13 mb-md-17',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
+    {
+      name: 'cardClassName',
+      title: 'Card Class Name',
+      type: 'string',
+      defaultValue: 'card bg-soft-primary rounded-4 mt-2',
+    },
+
+    {
+      name: 'cardBodyClassName',
+      title: 'Card Body Class Name',
+      type: 'string',
+      defaultValue: 'card-body p-md-10 py-xl-11 px-xl-15',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -72,6 +97,8 @@ export type Hero8Data = Data<typeof hero8Schema>;
 export const hero8Demos: Demo<typeof hero8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 1,
     data: {
       hero8Title: 'Creating particular project ideas with experience',
       hero8Description:
@@ -94,6 +121,8 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 1,
     data: {
       hero8Title: 'Créer des idées de projets particulières avec expérience',
       hero8Description:

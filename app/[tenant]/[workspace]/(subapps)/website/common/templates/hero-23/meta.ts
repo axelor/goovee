@@ -27,6 +27,19 @@ export const hero23Schema = {
       type: 'json-one-to-many',
       target: 'Hero23SlideImages',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-dark',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue:
+        'container h-100 d-flex align-items-center justify-content-center',
+    },
   ],
   models: [
     {
@@ -65,6 +78,8 @@ export type Hero23Data = Data<typeof hero23Schema>;
 export const hero23Demos: Demo<typeof hero23Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 1,
     data: {
       hero23Title: 'Capturing Life with Lighthouse',
       hero23Caption: "Hello! I'm Jhon",
@@ -137,6 +152,8 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 1,
     data: {
       hero23Title: 'Capturer la vie avec Lighthouse',
       hero23Caption: 'Bonjour ! Je suis Jhon',

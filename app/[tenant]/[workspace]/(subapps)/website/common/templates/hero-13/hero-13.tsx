@@ -10,6 +10,8 @@ export function Hero13(props: TemplateProps<Hero13Data>) {
     hero13Caption: caption,
     hero13Video,
     hero13BackgroundImage,
+    hero13WrapperClassName: wrapperClassName,
+    hero13ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -26,9 +28,10 @@ export function Hero13(props: TemplateProps<Hero13Data>) {
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay bg-overlay-300 text-white"
+      className={wrapperClassName}
+      data-code={props.code}
       style={{backgroundImage: `url(${backgroundImage})`}}>
-      <div className="container pt-17 pb-19 pt-md-19 pb-md-20 text-center">
+      <div className={containerClassName}>
         <div className="row mb-11">
           <div className="col-md-9 col-lg-7 col-xxl-6 mx-auto">
             <h2

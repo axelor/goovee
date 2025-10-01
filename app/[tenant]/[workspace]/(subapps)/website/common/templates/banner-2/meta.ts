@@ -23,6 +23,19 @@ export const banner2Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper mobile image-wrapper bg-image bg-overlay text-white',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-16 py-md-19 text-center',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -33,6 +46,8 @@ export type Banner2Data = Data<typeof banner2Schema>;
 export const banner2Demos: Demo<typeof banner2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 3,
     data: {
       banner2Heading: 'I shoot with imagination, philosophy, and emotion.',
       banner2Image: {
@@ -46,6 +61,8 @@ export const banner2Demos: Demo<typeof banner2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 3,
     data: {
       banner2Heading:
         'Je photographie avec imagination, philosophie et émotion.',

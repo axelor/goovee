@@ -1,5 +1,3 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
 import {
   Template,
   type Data,
@@ -7,6 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
+import {colorsSelection} from '../meta-selections';
 
 export const portfolio8Schema = {
   title: 'Portfolio 8',
@@ -29,6 +28,18 @@ export const portfolio8Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio8PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-17',
+    },
   ],
   models: [
     {
@@ -39,10 +50,7 @@ export const portfolio8Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
         {
           name: 'title',
@@ -72,6 +80,7 @@ export const portfolio8Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Portfolio8Data = Data<typeof portfolio8Schema>;
@@ -79,6 +88,8 @@ export type Portfolio8Data = Data<typeof portfolio8Schema>;
 export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 4,
     data: {
       portfolio8Caption: 'Our Projects',
       portfolio8Description:
@@ -191,6 +202,8 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 4,
     data: {
       portfolio8Caption: 'Nos projets',
       portfolio8Description:

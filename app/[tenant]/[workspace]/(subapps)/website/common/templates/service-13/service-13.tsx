@@ -10,6 +10,8 @@ export function Service13(props: TemplateProps<Service13Data>) {
     service13Title: title,
     service13Image,
     service13Services: services,
+    service13WrapperClassName: wrapperClassName,
+    service13ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -19,8 +21,8 @@ export function Service13(props: TemplateProps<Service13Data>) {
   });
 
   return (
-    <section className="wrapper bg-dark">
-      <div className="container py-14 py-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <figure
           className="rounded mt-md-n21 mt-lg-n23 mb-14"
           style={slideInDownAnimate('900ms')}>

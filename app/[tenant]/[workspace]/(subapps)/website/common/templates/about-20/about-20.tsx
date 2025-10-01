@@ -24,6 +24,8 @@ export function About20(props: TemplateProps<About20Data>) {
     about20Image2,
     about20Image3,
     about20AboutList: aboutList,
+    about20WrapperClassName: wrapperClassName,
+    about20ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -45,54 +47,56 @@ export function About20(props: TemplateProps<About20Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gy-10 gy-sm-13 gx-md-8 gx-xl-12 align-items-center mt-15">
-        <div className="col-lg-6">
-          <div className="row gx-md-5 gy-5">
-            <div className="col-12">
-              <figure className="rounded mx-md-5">
-                <img src={image1} alt="" />
-              </figure>
-            </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gy-10 gy-sm-13 gx-md-8 gx-xl-12 align-items-center mt-15">
+          <div className="col-lg-6">
+            <div className="row gx-md-5 gy-5">
+              <div className="col-12">
+                <figure className="rounded mx-md-5">
+                  <img src={image1} alt="" />
+                </figure>
+              </div>
 
-            <div className="col-md-6">
-              <figure className="rounded">
-                <img src={image2} alt="" />
-              </figure>
-            </div>
+              <div className="col-md-6">
+                <figure className="rounded">
+                  <img src={image2} alt="" />
+                </figure>
+              </div>
 
-            <div className="col-md-6">
-              <figure className="rounded">
-                <img src={image3} alt="" />
-              </figure>
+              <div className="col-md-6">
+                <figure className="rounded">
+                  <img src={image3} alt="" />
+                </figure>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-lg-6">
-          <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>
-          <h3 className="display-3 mb-8">{description}</h3>
+          <div className="col-lg-6">
+            <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>
+            <h3 className="display-3 mb-8">{description}</h3>
 
-          <div className="row gy-6">
-            {aboutList?.map(({id, attrs: item}) => {
-              const Icon = getIcon(item.icon ?? '');
-              return (
-                <div className="col-md-6" key={id}>
-                  <ServiceCard3
-                    title={item.title}
-                    description={item.description}
-                    Icon={
-                      Icon ? (
-                        <Icon className="icon-svg-xs solid text-fuchsia me-4" />
-                      ) : null
-                    }
-                  />
-                </div>
-              );
-            })}
+            <div className="row gy-6">
+              {aboutList?.map(({id, attrs: item}) => {
+                const Icon = getIcon(item.icon ?? '');
+                return (
+                  <div className="col-md-6" key={id}>
+                    <ServiceCard3
+                      title={item.title}
+                      description={item.description}
+                      Icon={
+                        Icon ? (
+                          <Icon className="icon-svg-xs solid text-fuchsia me-4" />
+                        ) : null
+                      }
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

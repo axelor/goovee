@@ -35,6 +35,18 @@ export const about3Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-16 pb-md-18',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],
@@ -45,6 +57,8 @@ export type About3Data = Data<typeof about3Schema>;
 export const about3Demos: Demo<typeof about3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 4,
     data: {
       about3Title:
         'There are some of the factors why the people we serve find us.',
@@ -89,6 +103,8 @@ export const about3Demos: Demo<typeof about3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 4,
     data: {
       about3Title:
         'Voici quelques-uns des facteurs pour lesquels les personnes que nous servons nous trouvent.',

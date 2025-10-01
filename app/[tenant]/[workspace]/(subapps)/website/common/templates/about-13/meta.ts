@@ -5,7 +5,8 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about13Schema = {
   title: 'About 13',
@@ -38,16 +39,7 @@ export const about13Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -69,9 +61,22 @@ export const about13Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-18',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About13Data = Data<typeof about13Schema>;
@@ -79,6 +84,8 @@ export type About13Data = Data<typeof about13Schema>;
 export const about13Demos: Demo<typeof about13Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 7,
     data: {
       about13Image: {
         id: '1',
@@ -135,6 +142,8 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 7,
     data: {
       about13Image: {
         id: '1',

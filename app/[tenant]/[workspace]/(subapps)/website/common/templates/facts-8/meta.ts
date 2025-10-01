@@ -26,6 +26,18 @@ export const facts8Schema = {
       type: 'json-one-to-many',
       target: 'Facts8Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-15 pb-md-20',
+    },
   ],
   models: [
     {
@@ -59,6 +71,8 @@ export type Facts8Data = Data<typeof facts8Schema>;
 export const facts8Demos: Demo<typeof facts8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 5,
     data: {
       facts8Title: 'We feel proud of our achievements.',
       facts8Description:
@@ -96,6 +110,8 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 5,
     data: {
       facts8Title: 'Nous sommes fiers de nos réalisations.',
       facts8Description:

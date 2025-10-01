@@ -59,6 +59,19 @@ export const hero11Schema = {
       type: 'json-one-to-many',
       target: 'Hero11CarouselImages',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-image bg-overlay bg-overlay-400 bg-content text-white',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-18 pb-16',
+    },
   ],
   models: [
     {
@@ -90,6 +103,8 @@ export type Hero11Data = Data<typeof hero11Schema>;
 export const hero11Demos: Demo<typeof hero11Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 1,
     data: {
       hero11Title: 'Expertise in creating specific project solutions.',
       hero11Description:
@@ -154,6 +169,8 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 1,
     data: {
       hero11Title:
         'Expertise dans la création de solutions de projets spécifiques.',

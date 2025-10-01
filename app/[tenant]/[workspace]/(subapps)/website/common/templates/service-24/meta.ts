@@ -27,6 +27,18 @@ export const service24Schema = {
       type: 'json-one-to-many',
       target: 'Service24Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-lg-8 pb-14 pb-md-17',
+    },
   ],
   models: [
     {
@@ -73,6 +85,8 @@ export type Service24Data = Data<typeof service24Schema>;
 export const service24Demos: Demo<typeof service24Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'What We Do?',
       service24Title:
@@ -137,6 +151,8 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'Que faisons-nous ?',
       service24Title:

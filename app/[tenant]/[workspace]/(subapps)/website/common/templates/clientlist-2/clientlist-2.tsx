@@ -8,35 +8,39 @@ export function Clientlist2(props: TemplateProps<Clientlist2Data>) {
     clientlist2Title: title,
     clientlist2Caption: caption,
     clientlist2Clients: clients,
+    clientlist2WrapperClassName: wrapperClassName,
+    clientlist2ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0 mb-13 mb-md-17">
-        <div className="col-lg-4 text-center text-lg-start">
-          <h2 className="display-5 mb-3">{title}</h2>
-          <p className="lead fs-lg mb-0 pe-xxl-2">{caption}</p>
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 gy-lg-0">
+          <div className="col-lg-4 text-center text-lg-start">
+            <h2 className="display-5 mb-3">{title}</h2>
+            <p className="lead fs-lg mb-0 pe-xxl-2">{caption}</p>
+          </div>
 
-        <div className="col-lg-8">
-          <div className="row row-cols-2 row-cols-md-4 gx-0 gx-md-8 gx-xl-12 gy-11 mt-n10">
-            {clients?.map(({id, attrs: item}, i) => (
-              <div className="col" key={id}>
-                <figure className="px-4 px-lg-3 px-xxl-5">
-                  <img
-                    src={getMetaFileURL({
-                      metaFile: item.image,
-                      path: `clientlist2Clients[${i}].attrs.image`,
-                      ...props,
-                    })}
-                    alt="brand"
-                  />
-                </figure>
-              </div>
-            ))}
+          <div className="col-lg-8">
+            <div className="row row-cols-2 row-cols-md-4 gx-0 gx-md-8 gx-xl-12 gy-11 mt-n10">
+              {clients?.map(({id, attrs: item}, i) => (
+                <div className="col" key={id}>
+                  <figure className="px-4 px-lg-3 px-xxl-5">
+                    <img
+                      src={getMetaFileURL({
+                        metaFile: item.image,
+                        path: `clientlist2Clients[${i}].attrs.image`,
+                        ...props,
+                      })}
+                      alt="brand"
+                    />
+                  </figure>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

@@ -10,6 +10,8 @@ export function Contact11(props: TemplateProps<Contact11Data>) {
     contact11Caption: caption,
     contact11Image,
     contact11ContactInfo: contactInfo,
+    contact11WrapperClassName: wrapperClassName,
+    contact11ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -19,68 +21,70 @@ export function Contact11(props: TemplateProps<Contact11Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gx-3 gy-10 mb-15 mb-md-18 align-items-center">
-        <div className="col-lg-6">
-          <figure>
-            <img className="w-auto" src={image} alt="" />
-          </figure>
-        </div>
-
-        <div className="col-lg-5 offset-lg-1">
-          <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
-            {caption}
-          </h2>
-          <h3 className="display-4 mb-8">{title}</h3>
-          <div className="d-flex flex-row">
-            <div>
-              <IconBox
-                className="icon text-primary fs-28 me-4 mt-n1"
-                icon="uil-location-pin-alt"
-              />
-            </div>
-
-            <div>
-              <h5 className="mb-1">{contactInfo?.attrs.addressTitle}</h5>
-              <address>{contactInfo?.attrs.address}</address>
-            </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-3 gy-10 align-items-center">
+          <div className="col-lg-6">
+            <figure>
+              <img className="w-auto" src={image} alt="" />
+            </figure>
           </div>
 
-          <div className="d-flex flex-row">
-            <div>
-              <IconBox
-                className="icon text-primary fs-28 me-4 mt-n1"
-                icon="uil-phone-volume"
-              />
+          <div className="col-lg-5 offset-lg-1">
+            <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
+              {caption}
+            </h2>
+            <h3 className="display-4 mb-8">{title}</h3>
+            <div className="d-flex flex-row">
+              <div>
+                <IconBox
+                  className="icon text-primary fs-28 me-4 mt-n1"
+                  icon="uil-location-pin-alt"
+                />
+              </div>
+
+              <div>
+                <h5 className="mb-1">{contactInfo?.attrs.addressTitle}</h5>
+                <address>{contactInfo?.attrs.address}</address>
+              </div>
             </div>
 
-            <div>
-              <h5 className="mb-1">{contactInfo?.attrs.phoneTitle}</h5>
-              <p>{contactInfo?.attrs.phone}</p>
-            </div>
-          </div>
+            <div className="d-flex flex-row">
+              <div>
+                <IconBox
+                  className="icon text-primary fs-28 me-4 mt-n1"
+                  icon="uil-phone-volume"
+                />
+              </div>
 
-          <div className="d-flex flex-row">
-            <div>
-              <IconBox
-                className="icon text-primary fs-28 me-4 mt-n1"
-                icon="uil-envelope"
-              />
+              <div>
+                <h5 className="mb-1">{contactInfo?.attrs.phoneTitle}</h5>
+                <p>{contactInfo?.attrs.phone}</p>
+              </div>
             </div>
 
-            <div>
-              <h5 className="mb-1">{contactInfo?.attrs.emailTitle}</h5>
-              <p className="mb-0">
-                <a
-                  href={`mailto:${contactInfo?.attrs.email}`}
-                  className="link-body">
-                  {contactInfo?.attrs.email}
-                </a>
-              </p>
+            <div className="d-flex flex-row">
+              <div>
+                <IconBox
+                  className="icon text-primary fs-28 me-4 mt-n1"
+                  icon="uil-envelope"
+                />
+              </div>
+
+              <div>
+                <h5 className="mb-1">{contactInfo?.attrs.emailTitle}</h5>
+                <p className="mb-0">
+                  <a
+                    href={`mailto:${contactInfo?.attrs.email}`}
+                    className="link-body">
+                    {contactInfo?.attrs.email}
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

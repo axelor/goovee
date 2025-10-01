@@ -65,6 +65,18 @@ export const contact3Schema = {
       title: 'Suffix',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -75,6 +87,8 @@ export type Contact3Data = Data<typeof contact3Schema>;
 export const contact3Demos: Demo<typeof contact3Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 4,
     data: {
       contact3Title: 'Let’s Talk',
       contact3Description1:
@@ -104,6 +118,8 @@ export const contact3Demos: Demo<typeof contact3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 4,
     data: {
       contact3Title: 'Parlons',
       contact3Description1:

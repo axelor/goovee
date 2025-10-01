@@ -120,6 +120,18 @@ export const service23Schema = {
       type: 'json-one-to-many',
       target: 'Service23Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-15 py-md-17',
+    },
   ],
   models: [
     {
@@ -144,6 +156,8 @@ export type Service23Data = Data<typeof service23Schema>;
 export const service23Demos: Demo<typeof service23Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 2,
     data: {
       service23Caption: 'What We Do?',
       service23Title:
@@ -239,6 +253,8 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 2,
     data: {
       service23Caption: 'Que faisons-nous ?',
       service23Title:

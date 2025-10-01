@@ -32,6 +32,18 @@ export const portfolio12Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio12PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-15 pt-md-17',
+    },
   ],
   models: [
     {
@@ -80,6 +92,8 @@ export type Portfolio12Data = Data<typeof portfolio12Schema>;
 export const portfolio12Demos: Demo<typeof portfolio12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 6,
     data: {
       portfolio12Caption: 'Latest Projects',
       portfolio12Description:
@@ -206,6 +220,8 @@ export const portfolio12Demos: Demo<typeof portfolio12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 6,
     data: {
       portfolio12Caption: 'Derniers projets',
       portfolio12Description:

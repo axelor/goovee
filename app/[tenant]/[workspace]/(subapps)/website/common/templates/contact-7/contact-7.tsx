@@ -9,6 +9,8 @@ export function Contact7(props: TemplateProps<Contact7Data>) {
     contact7Title: title,
     contact7Image,
     contact7ContactInfo: contactInfo,
+    contact7WrapperClassName: wrapperClassName,
+    contact7ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -18,8 +20,8 @@ export function Contact7(props: TemplateProps<Contact7Data>) {
   });
 
   return (
-    <section className="wrapper bg-light angled upper-end lower-end">
-      <div className="container pt-18 pb-14 pt-md-19 pb-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-md-8 col-lg-6 offset-lg-0 col-xl-5 offset-xl-1 position-relative">
             <div

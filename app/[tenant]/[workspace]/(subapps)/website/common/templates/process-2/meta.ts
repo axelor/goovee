@@ -34,6 +34,18 @@ export const process2Schema = {
       type: 'json-one-to-many',
       target: 'Process2Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [
     {
@@ -68,6 +80,8 @@ export type Process2Data = Data<typeof process2Schema>;
 export const process2Demos: Demo<typeof process2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 4,
     data: {
       process2Title: 'Our Working Process',
       process2Caption:
@@ -115,6 +129,8 @@ export const process2Demos: Demo<typeof process2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 4,
     data: {
       process2Title: 'Notre processus de travail',
       process2Caption:

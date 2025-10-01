@@ -27,6 +27,18 @@ export const portfolio1Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio1Images',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container-fluid px-md-6',
+    },
   ],
   models: [
     {
@@ -58,10 +70,12 @@ export type Portfolio1Data = Data<typeof portfolio1Schema>;
 export const portfolio1Demos: Demo<typeof portfolio1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 5,
     data: {
       portfolio1Caption: 'Latest Projects',
       portfolio1Description:
-        'Check out some of our awesome projects with creative ideas and great design.',
+        'Discover our exceptional projects, combining imaginative ideas with exceptional design.',
       portfolio1Images: [
         {
           id: '1',
@@ -152,6 +166,8 @@ export const portfolio1Demos: Demo<typeof portfolio1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 5,
     data: {
       portfolio1Caption: 'Derniers projets',
       portfolio1Description:

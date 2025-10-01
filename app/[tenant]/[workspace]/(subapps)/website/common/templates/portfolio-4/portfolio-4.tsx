@@ -11,12 +11,14 @@ export function Portfolio4(props: TemplateProps<Portfolio4Data>) {
     portfolio4Pagination: pagination,
     portfolio4FigCaption: figCaption,
     portfolio4PortfolioList: portfolioList = [],
+    portfolio4WrapperClassName: wrapperClassName,
+    portfolio4ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-light">
+    <section className={wrapperClassName} data-code={props.code}>
       <div className="overflow-hidden">
-        <div className="container py-14 py-md-16">
+        <div className={containerClassName}>
           <div className="row">
             <div className="col-lg-9 col-xl-8 col-xxl-7 mx-auto text-center">
               <i className="icn-flower text-leaf fs-30 opacity-25"></i>

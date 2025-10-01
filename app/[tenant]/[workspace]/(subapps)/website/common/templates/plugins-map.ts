@@ -1,4 +1,4 @@
-import {formatComponentCode} from '../utils/templates';
+import {formatComponentCode} from '../utils/helper';
 import {about10Schema} from './about-10/meta';
 import {about13Schema} from './about-13/meta';
 import {about18Schema} from './about-18/meta';
@@ -8,10 +8,13 @@ import {about21Schema} from './about-21/meta';
 import {about24Schema} from './about-24/meta';
 import {facts13Schema} from './facts-13/meta';
 import {facts16Schema} from './facts-16/meta';
+import {faq1Schema} from './faq-1/meta';
 import {hero3Schema} from './hero-3/meta';
 import {hero11Schema} from './hero-11/meta';
 import {hero13Schema} from './hero-13/meta';
 import {hero15Schema} from './hero-15/meta';
+import {hero20Schema} from './hero-20/meta';
+import {hero21Schema} from './hero-21/meta';
 import {hero22Schema} from './hero-22/meta';
 import {hero24Schema} from './hero-24/meta';
 import {portfolio5Schema} from './portfolio-5/meta';
@@ -33,10 +36,13 @@ const pluginsMap = {
   [about24Schema.code]: ['progress-bar'],
   [facts13Schema.code]: ['progress-bar'],
   [facts16Schema.code]: ['progress-bar'],
+  [faq1Schema.code]: ['lightbox'],
   [hero3Schema.code]: ['lightbox'],
   [hero11Schema.code]: ['lightbox'],
   [hero13Schema.code]: ['lightbox'],
   [hero15Schema.code]: ['lightbox'],
+  [hero20Schema.code]: ['replace-me'],
+  [hero21Schema.code]: ['replace-me'],
   [hero22Schema.code]: ['lightbox'],
   [hero24Schema.code]: ['lightbox'],
   [portfolio5Schema.code]: ['lightbox'],

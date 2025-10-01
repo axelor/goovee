@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 
 export const about15Schema = {
   title: 'About 15',
@@ -46,8 +46,20 @@ export const about15Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-16 pb-md-17',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -56,6 +68,8 @@ export type About15Data = Data<typeof about15Schema>;
 export const about15Demos: Demo<typeof about15Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 8,
     data: {
       about15Image: {
         id: '1',
@@ -103,6 +117,8 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 8,
     data: {
       about15Image: {
         id: '1',

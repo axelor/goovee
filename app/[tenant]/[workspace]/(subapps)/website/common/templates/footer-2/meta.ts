@@ -4,8 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
 import {socialLinksModel} from '../json-models';
+import {metaFileModel} from '../meta-models';
 
 export const footer2Schema = {
   title: 'Footer 2',
@@ -13,9 +13,36 @@ export const footer2Schema = {
   type: Template.block,
   fields: [
     {
-      name: 'copyright',
-      title: 'Copyright',
+      name: 'contactTitle',
+      title: 'Contact Title',
       type: 'string',
+    },
+    {
+      name: 'contactDescription1',
+      title: 'Contact Description 1',
+      type: 'string',
+    },
+    {
+      name: 'contactDescription2',
+      title: 'Contact Description 2',
+      type: 'string',
+    },
+    {
+      name: 'contactLinkTitle',
+      title: 'Contact Link Title',
+      type: 'string',
+    },
+    {
+      name: 'contactLinkHref',
+      title: 'Contact Link Href',
+      type: 'string',
+    },
+    {
+      name: 'contactImage',
+      title: 'Contact Image',
+      type: 'many-to-one',
+      target: 'com.axelor.meta.db.MetaFile',
+      widget: 'Image',
     },
     {
       name: 'addressTitle',
@@ -23,45 +50,18 @@ export const footer2Schema = {
       type: 'string',
     },
     {
-      name: 'backgroundImage',
-      title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
-    },
-    {
-      name: 'caption',
-      title: 'Caption',
+      name: 'addressLine1',
+      title: 'Address Line 1',
       type: 'string',
     },
     {
-      name: 'para1',
-      title: 'Para 1',
+      name: 'addressLine2',
+      title: 'Address Line 2',
       type: 'string',
     },
     {
-      name: 'para2',
-      title: 'Para 2',
-      type: 'string',
-    },
-    {
-      name: 'linkTitle',
-      title: 'Link Title',
-      type: 'string',
-    },
-    {
-      name: 'addressLine',
-      title: 'Address Line',
-      type: 'string',
-    },
-    {
-      name: 'email1',
-      title: 'Email 1',
-      type: 'string',
-    },
-    {
-      name: 'email2',
-      title: 'Email 2',
+      name: 'phoneTitle',
+      title: 'Phone Title',
       type: 'string',
     },
     {
@@ -75,18 +75,23 @@ export const footer2Schema = {
       type: 'string',
     },
     {
-      name: 'linkHref1',
-      title: 'Link Href 1',
+      name: 'emailTitle',
+      title: 'Email Title',
       type: 'string',
     },
     {
-      name: 'newsletterTitle',
-      title: 'Newsletter Title',
+      name: 'email1',
+      title: 'Email 1',
       type: 'string',
     },
     {
-      name: 'newsletterDescription',
-      title: 'Newsletter Description',
+      name: 'email2',
+      title: 'Email 2',
+      type: 'string',
+    },
+    {
+      name: 'copyright',
+      title: 'Copyright',
       type: 'string',
     },
     {
@@ -94,6 +99,18 @@ export const footer2Schema = {
       title: 'Social Links',
       type: 'json-one-to-many',
       target: 'SocialLinks',
+    },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'bg-soft-primary mt-n20 pt-21 pt-md-22',
+    },
+    {
+      name: 'sectionClassName',
+      title: 'Section Class Name',
+      type: 'string',
+      defaultValue: 'position-relative',
     },
   ],
   models: [socialLinksModel],
@@ -105,32 +122,33 @@ export type Footer2Data = Data<typeof footer2Schema>;
 export const footer2Demos: Demo<typeof footer2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 11,
     data: {
-      footer2Copyright: '© 2022 Lighthouse. All rights reserved.',
-      footer2AddressTitle: 'Address',
-      footer2BackgroundImage: {
+      footer2ContactTitle: 'Let’s Talk',
+      footer2ContactDescription1:
+        'Lets make something great together. We are trusted by over 5000+ clients. Join them by using our services and grow your business.',
+      footer2ContactDescription2:
+        'Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas faucibus mollis interdum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.',
+      footer2ContactLinkTitle: 'Join Us',
+      footer2ContactLinkHref: '#',
+      footer2ContactImage: {
         id: '1',
         version: 1,
-        fileName: 'bg2.jpg',
+        fileName: 'tm1.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        filePath: '/img/photos/tm1.jpg',
       },
-      footer2Caption: 'Join Our Community',
-      footer2Para1:
-        'We are a company that focuses on establishing long-term relationships with our customers.',
-      footer2Para2:
-        'We are a company that focuses on establishing long-term relationships with our customers.',
-      footer2LinkTitle: 'About Us',
-      footer2AddressLine:
-        'Moonshine St. 14/05 Light City, London, United Kingdom',
-      footer2Email1: 'info@email.com',
-      footer2Email2: 'help@email.com',
+      footer2AddressTitle: 'Address',
+      footer2AddressLine1: 'Moonshine St. 14/05',
+      footer2AddressLine2: 'Light City, London, UK',
+      footer2PhoneTitle: 'Phone',
       footer2Phone1: '00 (123) 456 78 90',
       footer2Phone2: '00 (987) 654 32 10',
-      footer2LinkHref1: '#',
-      footer2NewsletterTitle: 'Subscribe to our newsletter',
-      footer2NewsletterDescription:
-        'Subscribe to our newsletter to get our news & deals delivered to you.',
+      footer2EmailTitle: 'E-mail',
+      footer2Email1: 'user@email.com',
+      footer2Email2: 'help@user.com',
+      footer2Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer2SocialLinks: [
         {
           id: '1',
@@ -138,7 +156,7 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
-            url: 'https://twitter.com/uilibofficial',
+            url: '#',
           },
         },
         {
@@ -147,7 +165,7 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
-            url: 'https://facebook.com/uiLibOfficial/',
+            url: '#',
           },
         },
         {
@@ -165,7 +183,7 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
-            url: 'https://www.instagram.com/uilibofficial/',
+            url: '#',
           },
         },
         {
@@ -174,7 +192,7 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
-            url: 'https://www.youtube.com/channel/UCsIyD-TSO1wQFz-n2Y4i3Rg',
+            url: '#',
           },
         },
       ],
@@ -182,32 +200,33 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 11,
     data: {
-      footer2Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
-      footer2AddressTitle: 'Adresse',
-      footer2BackgroundImage: {
+      footer2ContactTitle: 'Parlons',
+      footer2ContactDescription1:
+        'Faisons quelque chose de grand ensemble. Plus de 5000 clients nous font confiance. Rejoignez-les en utilisant nos services et développez votre entreprise.',
+      footer2ContactDescription2:
+        'Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas faucibus mollis interdum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.',
+      footer2ContactLinkTitle: 'Rejoignez-nous',
+      footer2ContactLinkHref: '#',
+      footer2ContactImage: {
         id: '1',
         version: 1,
-        fileName: 'bg2.jpg',
+        fileName: 'tm1.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        filePath: '/img/photos/tm1.jpg',
       },
-      footer2Caption: 'Rejoignez notre communauté',
-      footer2Para1:
-        'Nous sommes une entreprise qui se concentre sur l’établissement de relations à long terme avec nos clients.',
-      footer2Para2:
-        'Nous sommes une entreprise qui se concentre sur l’établissement de relations à long terme avec nos clients.',
-      footer2LinkTitle: 'À propos de nous',
-      footer2AddressLine:
-        'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
-      footer2Email1: 'info@email.com',
-      footer2Email2: 'help@email.com',
+      footer2AddressTitle: 'Adresse',
+      footer2AddressLine1: 'Moonshine St. 14/05',
+      footer2AddressLine2: 'Light City, Londres, Royaume-Uni',
+      footer2PhoneTitle: 'Téléphone',
       footer2Phone1: '00 (123) 456 78 90',
       footer2Phone2: '00 (987) 654 32 10',
-      footer2LinkHref1: '#',
-      footer2NewsletterTitle: 'Abonnez-vous à notre newsletter',
-      footer2NewsletterDescription:
-        'Abonnez-vous à notre newsletter pour recevoir nos actualités et nos offres.',
+      footer2EmailTitle: 'E-mail',
+      footer2Email1: 'user@email.com',
+      footer2Email2: 'help@user.com',
+      footer2Copyright: '© 2022 Lighthouse. Tous droits réservés.',
       footer2SocialLinks: [
         {
           id: '1',

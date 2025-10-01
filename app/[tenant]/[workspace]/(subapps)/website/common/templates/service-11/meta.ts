@@ -5,8 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service11Schema = {
   title: 'Service 11',
@@ -36,6 +35,18 @@ export const service11Schema = {
       type: 'json-one-to-many',
       target: 'Service11Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-20',
+    },
   ],
   models: [
     {
@@ -46,10 +57,7 @@ export const service11Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -67,6 +75,7 @@ export const service11Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service11Data = Data<typeof service11Schema>;
@@ -74,6 +83,8 @@ export type Service11Data = Data<typeof service11Schema>;
 export const service11Demos: Demo<typeof service11Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 4,
     data: {
       service11Caption: 'What We Provide?',
       service11Title:
@@ -131,6 +142,8 @@ export const service11Demos: Demo<typeof service11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 4,
     data: {
       service11Caption: 'Ce que nous offrons ?',
       service11Title:

@@ -35,6 +35,18 @@ export const about16Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],
@@ -45,6 +57,8 @@ export type About16Data = Data<typeof about16Schema>;
 export const about16Demos: Demo<typeof about16Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-17',
+    sequence: 7,
     data: {
       about16Image: {
         id: '1',
@@ -86,6 +100,8 @@ export const about16Demos: Demo<typeof about16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-17',
+    sequence: 7,
     data: {
       about16Image: {
         id: '1',

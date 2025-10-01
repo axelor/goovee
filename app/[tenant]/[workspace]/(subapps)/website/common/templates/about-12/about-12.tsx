@@ -10,6 +10,8 @@ export function About12(props: TemplateProps<About12Data>) {
     about12Caption: caption,
     about12Image,
     about12Accordions: accordionsList,
+    about12WrapperClassName: wrapperClassName,
+    about12ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -27,20 +29,24 @@ export function About12(props: TemplateProps<About12Data>) {
     })) ?? [];
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center mb-14 mb-md-17">
-        <div className="col-lg-7">
-          <figure>
-            <img className="w-auto" src={image} alt="" />
-          </figure>
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
+          <div className="col-lg-7">
+            <figure>
+              <img className="w-auto" src={image} alt="" />
+            </figure>
+          </div>
 
-        <div className="col-lg-5">
-          <h2 className="fs-15 text-uppercase text-primary mb-3">{caption}</h2>
-          <h3 className="display-4 mb-7">{title}</h3>
-          <AccordionList accordions={accordions} id="about12" />
+          <div className="col-lg-5">
+            <h2 className="fs-15 text-uppercase text-primary mb-3">
+              {caption}
+            </h2>
+            <h3 className="display-4 mb-7">{title}</h3>
+            <AccordionList accordions={accordions} id="about12" />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

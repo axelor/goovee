@@ -13,6 +13,8 @@ export function About15(props: TemplateProps<About15Data>) {
     about15LinkTitle: linkTitle,
     about15LinkHref: linkHref,
     about15AboutList: aboutList,
+    about15WrapperClassName: wrapperClassName,
+    about15ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -22,36 +24,38 @@ export function About15(props: TemplateProps<About15Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
-        <div className="col-lg-6 order-lg-2 position-relative">
-          <div
-            className="shape rounded-circle bg-line leaf rellax w-18 h-18"
-            style={{bottom: '-2.5rem', right: '-1.5rem'}}
-          />
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
+          <div className="col-lg-6 order-lg-2 position-relative">
+            <div
+              className="shape rounded-circle bg-line leaf rellax w-18 h-18"
+              style={{bottom: '-2.5rem', right: '-1.5rem'}}
+            />
 
-          <figure className="rounded">
-            <img src={image} alt="" />
-          </figure>
-        </div>
+            <figure className="rounded">
+              <img src={image} alt="" />
+            </figure>
+          </div>
 
-        <div className="col-lg-6">
-          <h3 className="display-6 mb-4">{caption}</h3>
-          <p className="mb-5">{description}</p>
+          <div className="col-lg-6">
+            <h3 className="display-6 mb-4">{caption}</h3>
+            <p className="mb-5">{description}</p>
 
-          <ListColumn
-            list={aboutList?.attrs.list ?? []}
-            rowClass={aboutList?.attrs.rowClass}
-            bulletColor={aboutList?.attrs.bulletColor}
-          />
+            <ListColumn
+              list={aboutList?.attrs.list ?? []}
+              rowClass={aboutList?.attrs.rowClass}
+              bulletColor={aboutList?.attrs.bulletColor}
+            />
 
-          <NextLink
-            title={linkTitle}
-            href={linkHref}
-            className="btn btn-soft-primary rounded-pill mt-6 mb-0"
-          />
+            <NextLink
+              title={linkTitle}
+              href={linkHref}
+              className="btn btn-soft-primary rounded-pill mt-6 mb-0"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

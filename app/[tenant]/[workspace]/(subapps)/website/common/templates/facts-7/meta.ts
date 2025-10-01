@@ -26,6 +26,18 @@ export const facts7Schema = {
       type: 'json-one-to-many',
       target: 'Facts7Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-dark',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-17 pb-md-21',
+    },
   ],
   models: [
     {
@@ -54,6 +66,8 @@ export type Facts7Data = Data<typeof facts7Schema>;
 export const facts7Demos: Demo<typeof facts7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-10',
+    sequence: 4,
     data: {
       facts7Title: 'We are proud of our achievements.',
       facts7Description:
@@ -88,6 +102,8 @@ export const facts7Demos: Demo<typeof facts7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-10',
+    sequence: 4,
     data: {
       facts7Title: 'Nous sommes fiers de nos réalisations.',
       facts7Description:

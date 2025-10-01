@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {ratingsSelection} from '../meta-selections';
 
 export const testimonial9Schema = {
   title: 'Testimonial 9',
@@ -31,7 +31,7 @@ export const testimonial9Schema = {
       name: 'rating',
       title: 'Rating',
       type: 'integer',
-      selection: ratings,
+      selection: 'ratings',
     },
     {
       name: 'image',
@@ -40,9 +40,22 @@ export const testimonial9Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper mb-14 mb-md-18',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial9Data = Data<typeof testimonial9Schema>;
@@ -50,6 +63,8 @@ export type Testimonial9Data = Data<typeof testimonial9Schema>;
 export const testimonial9Demos: Demo<typeof testimonial9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 5,
     data: {
       testimonial9Name: 'Ethan Johnson',
       testimonial9Designation: 'MARKETING MANAGER',
@@ -67,6 +82,8 @@ export const testimonial9Demos: Demo<typeof testimonial9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 5,
     data: {
       testimonial9Name: 'Ethan Johnson',
       testimonial9Designation: 'RESPONSABLE MARKETING',

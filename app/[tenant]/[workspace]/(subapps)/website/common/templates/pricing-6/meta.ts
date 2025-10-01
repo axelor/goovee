@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {planFeatureModel, planModel} from '../json-models';
+import {planModel} from '../json-models';
 
 export const pricing6Schema = {
   title: 'Pricing 6',
@@ -57,8 +57,20 @@ export const pricing6Schema = {
       type: 'json-one-to-many',
       target: 'Plan',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
+    },
   ],
-  models: [planModel, planFeatureModel],
+  models: [planModel],
 } as const satisfies TemplateSchema;
 
 export type Pricing6Data = Data<typeof pricing6Schema>;
@@ -66,6 +78,8 @@ export type Pricing6Data = Data<typeof pricing6Schema>;
 export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 6,
     data: {
       pricing6Title: 'Our Pricing',
       pricing6Caption: 'We provide perfect and competitive prices.',
@@ -118,6 +132,8 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 6,
     data: {
       pricing6Title: 'Nos tarifs',
       pricing6Caption: 'Nous offrons des prix parfaits et compétitifs.',

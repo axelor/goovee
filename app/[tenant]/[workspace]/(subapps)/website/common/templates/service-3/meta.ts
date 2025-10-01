@@ -1,11 +1,10 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {uniconsSelection} from '../meta-selections';
 
 export const service3Schema = {
   title: 'Service 3',
@@ -27,6 +26,18 @@ export const service3Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service3Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
   models: [
@@ -50,10 +61,7 @@ export const service3Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'linkUrl',
@@ -68,6 +76,7 @@ export const service3Schema = {
       ],
     },
   ],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service3Data = Data<typeof service3Schema>;
@@ -75,6 +84,8 @@ export type Service3Data = Data<typeof service3Schema>;
 export const service3Demos: Demo<typeof service3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 3,
     data: {
       service3Title: 'What We Do?',
       service3Caption:
@@ -133,6 +144,8 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 3,
     data: {
       service3Title: 'Que faisons-nous ?',
       service3Caption:

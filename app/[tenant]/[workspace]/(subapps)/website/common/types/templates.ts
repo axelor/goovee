@@ -8,11 +8,24 @@ import type {
 } from '@goovee/orm';
 import fontAwesome from '../constants/fa-icons';
 
+export enum Template {
+  block = 1,
+  topMenu = 2,
+  leftRightMenu = 3,
+}
+
 // === Common Base ===
 type CommonField = {
   name: string;
   required?: boolean;
   widgetAttrs?: Record<string, string>;
+};
+
+export type SelectionOption<T extends string | number = string | number> = {
+  title: string;
+  value: T;
+  color?: Color;
+  icon?: Icon;
 };
 
 type Color =
@@ -44,6 +57,7 @@ type Icon = (typeof fontAwesome)[number];
 type BooleanField = CommonField & {
   type: 'boolean';
   title: string;
+  defaultValue?: boolean;
   widget?:
     | 'InlineCheckbox'
     | 'Toggle'
@@ -60,12 +74,8 @@ type BooleanField = CommonField & {
 type IntegerField = CommonField & {
   type: 'integer';
   title: string;
-  selection?: {
-    title: string;
-    value: number;
-    color?: Color;
-    icon?: Icon;
-  }[];
+  defaultValue?: number;
+  selection?: SelectionOption<number>[] | string;
   widget?:
     | 'RelativeTime'
     | 'Duration'
@@ -81,12 +91,8 @@ type IntegerField = CommonField & {
 type StringField = CommonField & {
   type: 'string';
   title: string;
-  selection?: {
-    title: string;
-    value: string;
-    color?: Color;
-    icon?: Icon;
-  }[];
+  defaultValue?: string;
+  selection?: SelectionOption<string>[] | string;
   widget?:
     | 'Email'
     | 'Url'
@@ -104,6 +110,7 @@ type StringField = CommonField & {
 type DecimalField = CommonField & {
   type: 'decimal';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'RelativeTime'
     | 'Duration'
@@ -119,6 +126,7 @@ type DecimalField = CommonField & {
 type DatetimeField = CommonField & {
   type: 'datetime';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'NavSelect'
     | 'CheckboxSelect'
@@ -130,6 +138,7 @@ type DatetimeField = CommonField & {
 type DateField = CommonField & {
   type: 'date';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'NavSelect'
     | 'CheckboxSelect'
@@ -141,6 +150,7 @@ type DateField = CommonField & {
 type TimeField = CommonField & {
   type: 'time';
   title: string;
+  defaultValue?: string;
   widget?:
     | 'NavSelect'
     | 'CheckboxSelect'
@@ -252,6 +262,9 @@ export type Model = {
   name: string;
   title: string;
   fields: ModelField[];
+  models?: Model[];
+  metaModels?: MetaModel[];
+  selections?: MetaSelection[];
 };
 
 type Entities = Omit<Client, keyof QueryClient>;
@@ -265,11 +278,10 @@ export type MetaModel<T extends EntityName = any> = {
   select: SelectOptions<EntityClass<T>>;
 };
 
-export enum Template {
-  block = 1,
-  topMenu = 2,
-  leftRightMenu = 3,
-}
+export type MetaSelection = {
+  name: string;
+  options: readonly SelectionOption[];
+};
 
 export type TemplateSchema = {
   title: string;
@@ -278,6 +290,7 @@ export type TemplateSchema = {
   fields: ContentField[];
   models?: Model[];
   metaModels?: MetaModel[];
+  selections?: MetaSelection[];
 };
 
 // === Type Resolution ===
@@ -304,35 +317,80 @@ type NonDecorativeFields<T extends Field[]> = T extends (infer F)[]
     : F
   : never;
 
+// Collect all models recursively (flatten)
+type CollectModels<M extends Model | undefined> = M extends Model
+  ?
+      | M
+      | (M extends {models: (infer Sub extends Model)[]}
+          ? CollectModels<Sub>
+          : never)
+  : never;
+
+type CollectMetaModels<M extends Model | undefined> = M extends Model
+  ?
+      | (M['metaModels'] extends (infer MM extends MetaModel)[] ? MM : never)
+      | (M['models'] extends (infer Sub extends Model)[]
+          ? CollectMetaModels<Sub>
+          : never)
+  : never;
+
+type CollectSelections<M extends Model | undefined> = M extends Model
+  ?
+      | (M['selections'] extends (infer S extends MetaSelection)[] ? S : never)
+      | (M['models'] extends (infer Sub extends Model)[]
+          ? CollectSelections<Sub>
+          : never)
+  : never;
+
 type JsonModelAttrs<
   ModelName extends string,
   TSchema extends TemplateSchema,
-> = TSchema['models'] extends any[]
-  ? Extract<TSchema['models'][number], {name: ModelName}> extends infer M
-    ? M extends {fields: Field[]}
-      ? {
-          [F in NonDecorativeFields<M['fields']> as F extends {required: true}
-            ? F['name']
-            : never]: FieldType<F, TSchema>;
-        } & {
-          [F in NonDecorativeFields<M['fields']> as F extends {required: true}
-            ? never
-            : F['name']]?: FieldType<F, TSchema>;
-        }
-      : never
+> = (
+  TSchema['models'] extends (infer M extends Model)[]
+    ? Extract<M | CollectModels<M>, {name: ModelName}>
+    : never
+) extends infer Match
+  ? Match extends {fields: Field[]}
+    ? {
+        [F in NonDecorativeFields<Match['fields']> as F extends {required: true}
+          ? F['name']
+          : never]: FieldType<F, TSchema>;
+      } & {
+        [F in NonDecorativeFields<Match['fields']> as F extends {required: true}
+          ? never
+          : F['name']]?: FieldType<F, TSchema>;
+      }
     : never
   : never;
 
 type RelationalModelAttrs<
   ModelName extends string,
   TSchema extends TemplateSchema,
-> = TSchema['metaModels'] extends any[]
-  ? Extract<TSchema['metaModels'][number], {name: ModelName}> extends infer M
-    ? M extends {entity: EntityName; select: any}
-      ? Payload<EntityClass<M['entity']>, {select: M['select']}>
+> =
+  | (TSchema['metaModels'] extends (infer MM extends MetaModel)[] ? MM : never)
+  | (TSchema['models'] extends (infer M extends Model)[]
+      ? CollectMetaModels<M>
+      : never) extends infer AllMetaModels
+  ? Extract<AllMetaModels, {name: ModelName}> extends infer Match
+    ? Match extends {entity: EntityName; select: any}
+      ? Payload<EntityClass<Match['entity']>, {select: Match['select']}>
       : any
     : any
   : any;
+
+type FindSelection<Name extends string, TSchema extends TemplateSchema> =
+  | (TSchema['selections'] extends (infer S extends MetaSelection)[]
+      ? S
+      : never)
+  | (TSchema['models'] extends (infer M extends Model)[]
+      ? CollectSelections<M>
+      : never) extends infer AllSelections
+  ? Extract<AllSelections, {name: Name}> extends infer Match
+    ? Match extends {options: any}
+      ? Match['options']
+      : never
+    : never
+  : never;
 
 type JSONRecord = {
   id: string;
@@ -342,7 +400,15 @@ type JSONRecord = {
   name?: string | null;
   jsonModel?: string;
 };
-type SelectionValue<T> = T extends readonly {value: infer V}[] ? V : never;
+
+type SelectionValue<
+  Sel extends readonly {value: any}[] | string | undefined,
+  TSchema extends TemplateSchema,
+> = Sel extends readonly {value: any}[]
+  ? Sel[number]['value']
+  : Sel extends string
+    ? FindSelection<Sel, TSchema>[number]['value']
+    : never;
 
 type FieldType<F, TSchema extends TemplateSchema> = F extends {
   type: JsonToMany;
@@ -355,10 +421,10 @@ type FieldType<F, TSchema extends TemplateSchema> = F extends {
       ? RelationalModelAttrs<F['target'], TSchema>[]
       : F extends {type: RelToOne; target: string}
         ? RelationalModelAttrs<F['target'], TSchema>
-        : F extends {type: 'integer'; selection: readonly any[]}
-          ? SelectionValue<F['selection']>
-          : F extends {type: 'string'; selection: readonly any[]}
-            ? SelectionValue<F['selection']>
+        : F extends {type: 'integer'; selection: any}
+          ? SelectionValue<F['selection'], TSchema>
+          : F extends {type: 'string'; selection: any}
+            ? SelectionValue<F['selection'], TSchema>
             : F extends {type: keyof PrimitiveMap}
               ? PrimitiveMap[F['type']]
               : F extends {type: DecorativeFieldType}
@@ -385,4 +451,6 @@ export type Data<TSchema extends TemplateSchema> = ExpandRecursively<
 export type Demo<TSchema extends TemplateSchema> = {
   language: 'en_US' | 'fr_FR';
   data: Data<TSchema>;
+  page: string;
+  sequence: number;
 };

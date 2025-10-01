@@ -20,6 +20,8 @@ export function Footer10(props: TemplateProps<Footer10Data>) {
     footer10Helps: helps,
     footer10LearnMore: learnMore,
     footer10SocialLinks,
+    footer10FooterClassName: footerClassName,
+    footer10ContainerClassName: containerClassName,
   } = data || {};
 
   const socialLinks =
@@ -45,8 +47,8 @@ export function Footer10(props: TemplateProps<Footer10Data>) {
   };
 
   return (
-    <footer className="bg-dark text-inverse">
-      <div className="container pt-20 pt-lg-21 pb-7">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-lg-4">
             <div className="widget">

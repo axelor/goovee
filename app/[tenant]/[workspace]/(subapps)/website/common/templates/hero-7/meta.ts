@@ -48,6 +48,18 @@ export const hero7Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-15 pb-md-18',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -57,6 +69,8 @@ export type Hero7Data = Data<typeof hero7Schema>;
 export const hero7Demos: Demo<typeof hero7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 1,
     data: {
       hero7Title: 'Inventive, sharp, and magnificent.',
       hero7Description:
@@ -76,6 +90,8 @@ export const hero7Demos: Demo<typeof hero7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 1,
     data: {
       hero7Title: 'Inventif, pointu et magnifique.',
       hero7Description:

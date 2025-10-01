@@ -17,6 +17,8 @@ export function Contact3(props: TemplateProps<Contact3Data>) {
     contact3Heading: heading,
     contact3CountUp: countUp,
     contact3Suffix: suffix,
+    contact3WrapperClassName: wrapperClassName,
+    contact3ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -32,36 +34,38 @@ export function Contact3(props: TemplateProps<Contact3Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gy-10 gx-lg-8 gx-xl-12 align-items-center">
-        <div className="col-lg-7 position-relative">
-          <div
-            className="shape bg-dot primary rellax w-18 h-18"
-            style={{top: 0, left: '-1.4rem', zIndex: 0}}
-          />
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gy-10 gx-lg-8 gx-xl-12 align-items-center">
+          <div className="col-lg-7 position-relative">
+            <div
+              className="shape bg-dot primary rellax w-18 h-18"
+              style={{top: 0, left: '-1.4rem', zIndex: 0}}
+            />
 
-          <Tiles3
-            image1={tileImage1}
-            image2={tileImage2}
-            heading={heading}
-            countUp={countUp}
-            suffix={suffix}
-          />
-        </div>
+            <Tiles3
+              image1={tileImage1}
+              image2={tileImage2}
+              heading={heading}
+              countUp={countUp}
+              suffix={suffix}
+            />
+          </div>
 
-        <div className="col-lg-5">
-          <h2 className="display-4 mb-3">{title}</h2>
-          <p className="lead fs-lg">{description1}</p>
+          <div className="col-lg-5">
+            <h2 className="display-4 mb-3">{title}</h2>
+            <p className="lead fs-lg">{description1}</p>
 
-          <p>{description2}</p>
+            <p>{description2}</p>
 
-          <NextLink
-            title={linkTitle}
-            href={linkHref}
-            className="btn btn-primary rounded-pill mt-2"
-          />
+            <NextLink
+              title={linkTitle}
+              href={linkHref}
+              className="btn btn-primary rounded-pill mt-2"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

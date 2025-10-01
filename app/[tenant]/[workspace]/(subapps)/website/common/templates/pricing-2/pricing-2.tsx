@@ -11,12 +11,13 @@ export function Pricing2(props: TemplateProps<Pricing2Data>) {
     pricing2SwitchLeftLabel: switchLeftLabel,
     pricing2SwitchRightLabel: switchRightLabel,
     pricing2Plans: plans,
+    pricing2WrapperClassName: wrapperClassName,
   } = data || {};
 
   const [activeYearly, setActiveYearly] = useState(false);
 
   return (
-    <div className="pricing-wrapper position-relative mt-n22 mt-md-n24">
+    <div className={wrapperClassName}>
       <div
         className="shape bg-dot primary rellax w-16 h-18"
         style={{top: '2rem', right: '-2.4rem'}}

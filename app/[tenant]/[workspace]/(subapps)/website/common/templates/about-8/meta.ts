@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const about8Schema = {
@@ -41,8 +41,20 @@ export const about8Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-15 mb-md-18',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -51,6 +63,8 @@ export type About8Data = Data<typeof about8Schema>;
 export const about8Demos: Demo<typeof about8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 5,
     data: {
       about8Image: {
         id: '1',
@@ -98,6 +112,8 @@ export const about8Demos: Demo<typeof about8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 5,
     data: {
       about8Image: {
         id: '1',

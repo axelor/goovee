@@ -12,6 +12,8 @@ export function Service27(props: TemplateProps<Service27Data>) {
     service27LinkTitle: linkTitle,
     service27LinkHref: linkHref,
     service27Services: services,
+    service27WrapperClassName: wrapperClassName,
+    service27ContainerClassName: containerClassName,
   } = data || {};
 
   const serviceList = services || [];
@@ -20,68 +22,66 @@ export function Service27(props: TemplateProps<Service27Data>) {
   const secondColServices = serviceList.slice(middleIndex);
 
   return (
-    <section id="services">
-      <div className="wrapper bg-gray">
-        <div className="container py-15 py-md-17">
-          <div className="row gx-lg-0 gy-10 align-items-center">
-            <div className="col-lg-6">
-              <div className="row g-6 text-center">
-                <div className="col-md-6">
-                  {firstColServices.map((service, index) => (
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-0 gy-10 align-items-center">
+          <div className="col-lg-6">
+            <div className="row g-6 text-center">
+              <div className="col-md-6">
+                {firstColServices.map((service, index) => (
+                  <Card
+                    key={index}
+                    title={service?.attrs.title}
+                    figCaption={service?.attrs.figcaption}
+                    imageLink={service?.attrs.url}
+                    image={getMetaFileURL({
+                      metaFile: service?.attrs.image,
+                      path: `service27Services[${index}].attrs.image`,
+                      ...props,
+                    })}
+                    className={
+                      index < firstColServices.length - 1 ? 'mb-6' : ''
+                    }
+                  />
+                ))}
+              </div>
+              <div className="col-md-6">
+                {secondColServices.map((service, index) => {
+                  const classNames = [];
+                  if (index === 0) {
+                    classNames.push('mt-md-6');
+                  }
+                  if (index < secondColServices.length - 1) {
+                    classNames.push('mb-6');
+                  }
+                  return (
                     <Card
                       key={index}
-                      title={service?.attrs.title}
                       figCaption={service?.attrs.figcaption}
                       imageLink={service?.attrs.url}
+                      title={service?.attrs.title}
                       image={getMetaFileURL({
                         metaFile: service?.attrs.image,
-                        path: `service27Services[${index}].attrs.image`,
+                        path: `service27Services[${middleIndex + index}].attrs.image`,
                         ...props,
                       })}
-                      className={
-                        index < firstColServices.length - 1 ? 'mb-6' : ''
-                      }
+                      className={classNames.join(' ')}
                     />
-                  ))}
-                </div>
-                <div className="col-md-6">
-                  {secondColServices.map((service, index) => {
-                    const classNames = [];
-                    if (index === 0) {
-                      classNames.push('mt-md-6');
-                    }
-                    if (index < secondColServices.length - 1) {
-                      classNames.push('mb-6');
-                    }
-                    return (
-                      <Card
-                        key={index}
-                        figCaption={service?.attrs.figcaption}
-                        imageLink={service?.attrs.url}
-                        title={service?.attrs.title}
-                        image={getMetaFileURL({
-                          metaFile: service?.attrs.image,
-                          path: `service27Services[${middleIndex + index}].attrs.image`,
-                          ...props,
-                        })}
-                        className={classNames.join(' ')}
-                      />
-                    );
-                  })}
-                </div>
+                  );
+                })}
               </div>
             </div>
+          </div>
 
-            <div className="col-lg-5 offset-lg-1">
-              <h2 className="display-5 mb-3">{title}</h2>
-              <p className="lead fs-lg">{description}</p>
+          <div className="col-lg-5 offset-lg-1">
+            <h2 className="display-5 mb-3">{title}</h2>
+            <p className="lead fs-lg">{description}</p>
 
-              <NextLink
-                title={linkTitle}
-                href={linkHref}
-                className="btn btn-primary rounded-pill mt-2"
-              />
-            </div>
+            <NextLink
+              title={linkTitle}
+              href={linkHref}
+              className="btn btn-primary rounded-pill mt-2"
+            />
           </div>
         </div>
       </div>

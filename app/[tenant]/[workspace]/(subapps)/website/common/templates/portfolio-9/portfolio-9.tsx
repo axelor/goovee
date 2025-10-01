@@ -34,6 +34,8 @@ export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
     portfolio9Image2,
     portfolio9Image3,
     portfolio9Image4,
+    portfolio9WrapperClassName: wrapperClassName,
+    portfolio9ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -61,8 +63,8 @@ export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
   });
 
   return (
-    <section className="wrapper bg-light wrapper-border">
-      <div className="container py-14 pt-md-18 pb-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row align-items-center mb-10">
           <div className="col-md-8 col-lg-9 col-xl-8 col-xxl-7 pe-xl-20">
             <h2 className="display-4 mb-3">{title}</h2>

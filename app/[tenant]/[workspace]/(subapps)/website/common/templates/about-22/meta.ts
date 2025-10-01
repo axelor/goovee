@@ -35,6 +35,18 @@ export const about22Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-reverse-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],
@@ -45,6 +57,8 @@ export type About22Data = Data<typeof about22Schema>;
 export const about22Demos: Demo<typeof about22Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 4,
     data: {
       about22Image: {
         id: '1',
@@ -86,6 +100,8 @@ export const about22Demos: Demo<typeof about22Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 4,
     data: {
       about22Image: {
         id: '1',

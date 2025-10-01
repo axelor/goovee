@@ -32,6 +32,18 @@ export const portfolio4Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio4PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper overflow-hidden bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [
     {
@@ -78,6 +90,8 @@ export type Portfolio4Data = Data<typeof portfolio4Schema>;
 export const portfolio4Demos: Demo<typeof portfolio4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-23',
+    sequence: 5,
     data: {
       portfolio4Description:
         'A few of the most touching stories I experienced and got the opportunity to photograph',
@@ -191,6 +205,8 @@ export const portfolio4Demos: Demo<typeof portfolio4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-23',
+    sequence: 5,
     data: {
       portfolio4Description:
         'Quelques-unes des histoires les plus touchantes que j’ai vécues et que j’ai eu l’occasion de photographier',
