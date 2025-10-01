@@ -1,0 +1,6 @@
+{
+  "title": "Control visibility of prices and cart based on hidePriceForEmptyPriceList checkbox",
+  "type": "feature",
+  "description": "The hidePriceForEmptyPriceList checkbox is added to the workspace configuration to control the visibility of prices and cart based on whether main partner of the user has a price list or not.",
+  "scope": ["shop"]
+}
