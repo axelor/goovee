@@ -177,6 +177,7 @@ export interface PortalAppConfig extends Model {
   homepageHeroOverlayColorSelect?: OverlayColor;
   homepageHeroBgImage?: {id: string};
   isFixedHeader?: boolean;
+  chatDisplayTypeSelect?: number;
 }
 
 export interface PortalApp extends Model {

@@ -24,7 +24,9 @@ import {changePassword} from './action';
 
 const formSchema = z.object({
   oldPassword: z.string(),
-  newPassword: z.string(),
+  newPassword: z
+    .string()
+    .min(8, {message: i18n.t('Password must be at least 8 characters')}),
   confirmPassword: z.string(),
 });
 

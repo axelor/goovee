@@ -2,31 +2,21 @@ import axios from 'axios';
 import {USERS_API_ENDPOINT} from './path-helpers';
 import {getHOST} from '../utils';
 
-export const getAuthToken = async (
-  login: string | undefined,
-  password: string | undefined,
+export const getMmuser = async (
+  email: string | undefined,
+  token: string | undefined,
 ) => {
   try {
-    const {data, headers} = await axios.post(
-      `${getHOST()}${USERS_API_ENDPOINT}/login`,
-      {
-        login_id: login,
-        password: password,
-      },
+    const {data} = await axios.get(
+      `${getHOST()}${USERS_API_ENDPOINT}/email/${email}`,
       {
         headers: {
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       },
     );
 
-    const token = headers.token;
-
-    if (!token) {
-      throw new Error('Token not found');
-    }
-
-    return {data, token};
+    return {data};
   } catch (error) {
     console.error("Erreur lors de l'authentification: ", error);
     throw error;

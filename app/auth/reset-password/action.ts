@@ -2,11 +2,13 @@
 
 import {hash} from '@/auth/utils';
 import {getTranslation} from '@/locale/server';
-import {create as createOTP, findOne, isValid, markUsed} from '@/otp/orm';
+import {create as createOTP, findOne, isValid} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
-import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
+import {findGooveeUserByEmail} from '@/orm/partner';
+import {shouldCreateMattermostUser} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
-import {type Tenant} from '@/tenant';
+import {manager, type Tenant} from '@/tenant';
+import {syncMattermostPassword} from '@/lib/core/mattermost';
 
 function error(message: string) {
   return {
@@ -185,6 +187,15 @@ export async function resetPassword({
     );
   }
 
+  if (password.length < 8) {
+    return error(
+      await getTranslation(
+        {tenant: tenantId},
+        'Password must be at least 8 characters',
+      ),
+    );
+  }
+
   const user = await findGooveeUserByEmail(email, tenantId);
 
   if (!user) {
@@ -212,22 +223,85 @@ export async function resetPassword({
 
     const hashedPassword = await hash(password);
 
-    const updatedPartner = await updatePartner({
-      data: {
-        id: user.id,
-        version: user.version,
-        password: hashedPassword,
-      },
+    const shouldSyncMattermost = await shouldCreateMattermostUser(
+      user.id,
       tenantId,
-    });
+    );
 
-    await markUsed({id: result.id, tenantId});
+    if (shouldSyncMattermost) {
+      const mattermostResult = await syncMattermostPassword(
+        user.emailAddress?.address || email,
+        password,
+      );
+
+      if (mattermostResult.success) {
+        if (mattermostResult.synced) {
+          console.log({
+            email: user.emailAddress?.address || email,
+            partnerId: user.id,
+          });
+        }
+      } else {
+        console.error(
+          '[MATTERMOST] Password sync failed during password reset:',
+          {
+            email: user.emailAddress?.address || email,
+            partnerId: user.id,
+            error: mattermostResult.error,
+            message: mattermostResult.message,
+          },
+        );
+        return error(
+          await getTranslation(
+            {tenant: tenantId},
+            'Error resetting password. Try again.',
+          ),
+        );
+      }
+    }
+
+    const client = await manager.getClient(tenantId);
+
+    if (!client) {
+      return error(
+        await getTranslation(
+          {tenant: tenantId},
+          'Error resetting password. Try again.',
+        ),
+      );
+    }
+
+    await client.$transaction(async txClient => {
+      const updatePartnerResult = await txClient.aOSPartner.update({
+        data: {
+          id: String(user.id),
+          version: user.version,
+          password: hashedPassword,
+        },
+        select: {id: true},
+      });
+
+      const markOtpResult = await txClient.otp.update({
+        data: {
+          id: result.id,
+          version: result.version,
+          used: true,
+        },
+        select: {id: true},
+      });
+    });
 
     return {
       success: true,
       message: await getTranslation({}, 'Password reset successfully.'),
     };
-  } catch (err) {
+  } catch (err: any) {
+    console.error('[RESET_PASSWORD] ERROR caught:', {
+      message: err?.message,
+      stack: err?.sstack,
+      name: err?.name,
+      cause: err?.cause,
+    });
     return error(
       await getTranslation(
         {tenant: tenantId},

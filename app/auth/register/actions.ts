@@ -433,6 +433,15 @@ export async function registerByEmail(data: RegisterDTO) {
     );
   }
 
+  if (password.length < 8) {
+    return error(
+      await getTranslation(
+        {tenant: tenantId},
+        'Password must be at least 8 characters',
+      ),
+    );
+  }
+
   if (!otp) {
     return error(await getTranslation({tenant: tenantId}, 'OTP is required'));
   }
@@ -628,6 +637,16 @@ async function registerAosContactAsAdmin({
     });
 
     if (!contactConfig?.id) return registrationError;
+
+    if (password && password.length < 8) {
+      return {
+        success: false,
+        error: await getTranslation(
+          {tenant: tenantId},
+          'Password must be at least 8 characters',
+        ),
+      };
+    }
 
     let result;
 

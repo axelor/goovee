@@ -24,6 +24,13 @@ export async function changePassword({
     };
   }
 
+  if (newPassword.length < 8) {
+    return {
+      error: true,
+      message: await t('Password must be at least 8 characters'),
+    };
+  }
+
   const session = await getSession();
   const user = session?.user;
 
