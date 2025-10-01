@@ -143,6 +143,7 @@ import {portfolio8Demos, portfolio8Schema} from './portfolio-8/meta';
 import {portfolio9Demos, portfolio9Schema} from './portfolio-9/meta';
 import {portfolio10Demos, portfolio10Schema} from './portfolio-10/meta';
 import {portfolio11Demos, portfolio11Schema} from './portfolio-11/meta';
+import {portfolio12Demos, portfolio12Schema} from './portfolio-12/meta';
 import {process1Demos, process1Schema} from './process-1/meta';
 import {process2Demos, process2Schema} from './process-2/meta';
 import {process3Demos, process3Schema} from './process-3/meta';
@@ -392,6 +393,7 @@ export const metas = [
   {schema: portfolio9Schema, demos: portfolio9Demos},
   {schema: portfolio10Schema, demos: portfolio10Demos},
   {schema: portfolio11Schema, demos: portfolio11Demos},
+  {schema: portfolio12Schema, demos: portfolio12Demos},
   {schema: contact1Schema, demos: contact1Demos},
   {schema: contact2Schema, demos: contact2Demos},
   {schema: contact3Schema, demos: contact3Demos},

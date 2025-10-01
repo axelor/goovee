@@ -50,7 +50,7 @@ export const facts13Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container py-15 py-md-17 pb-md-19',
+      defaultValue: 'container py-15 py-md-17 pb-md-19 mb-13',
     },
   ],
   models: [],

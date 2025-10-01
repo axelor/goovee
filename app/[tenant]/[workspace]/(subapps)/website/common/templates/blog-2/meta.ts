@@ -41,7 +41,7 @@ export const blog2Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-gray',
+      defaultValue: 'wrapper bg-gray mt-md-n21 pt-md-21',
     },
     {
       name: 'containerClassName',

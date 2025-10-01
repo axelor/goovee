@@ -20,7 +20,7 @@ export const testimonial14Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-light',
+      defaultValue: 'wrapper',
     },
     {
       name: 'containerClassName',

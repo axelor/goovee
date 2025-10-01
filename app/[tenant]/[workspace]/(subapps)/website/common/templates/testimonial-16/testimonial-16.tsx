@@ -31,7 +31,7 @@ export function Testimonial16(props: TemplateProps<Testimonial16Data>) {
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div className="card shadow-lg mt-n21 mt-md-n23">
+        <div className="card shadow-lg">
           <div className="row gx-0">
             <div
               className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start"

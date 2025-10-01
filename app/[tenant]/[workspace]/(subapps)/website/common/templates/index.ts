@@ -148,6 +148,7 @@ import {Portfolio8, portfolio8Schema} from './portfolio-8';
 import {Portfolio9, portfolio9Schema} from './portfolio-9';
 import {Portfolio10, portfolio10Schema} from './portfolio-10';
 import {Portfolio11, portfolio11Schema} from './portfolio-11';
+import {Portfolio12, portfolio12Schema} from './portfolio-12';
 import {Process1, process1Schema} from './process-1';
 import {Process2, process2Schema} from './process-2';
 import {Process3, process3Schema} from './process-3';
@@ -398,6 +399,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [portfolio9Schema.code]: Portfolio9,
   [portfolio10Schema.code]: Portfolio10,
   [portfolio11Schema.code]: Portfolio11,
+  [portfolio12Schema.code]: Portfolio12,
   [contact1Schema.code]: Contact1,
   [contact2Schema.code]: Contact2,
   [contact3Schema.code]: Contact3,

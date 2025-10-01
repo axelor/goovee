@@ -51,7 +51,7 @@ export const service15Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container pb-14 pb-md-17',
+      defaultValue: 'container pb-14 pb-md-17 mb-md-15',
     },
   ],
   models: [bulletListModel],

@@ -21,13 +21,13 @@ export const testimonial12Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-light',
+      defaultValue: 'wrapper',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container py-14 py-md-16 mb-14 mb-md-18 mt-3',
+      defaultValue: 'container py-14 py-md-16 mb-8 mb-md-12 mt-n18 mt-md-n21',
     },
   ],
   models: [

@@ -26,7 +26,7 @@ export const testimonial15Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container mb-18',
+      defaultValue: 'container mb-18 mt-n18',
     },
   ],
   models: [

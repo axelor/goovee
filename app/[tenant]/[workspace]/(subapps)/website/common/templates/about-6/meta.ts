@@ -58,7 +58,7 @@ export const about6Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container py-14 py-md-16 mb-14 mb-md-17',
+      defaultValue: 'container py-14 py-md-16',
     },
   ],
   models: [bulletListModel],

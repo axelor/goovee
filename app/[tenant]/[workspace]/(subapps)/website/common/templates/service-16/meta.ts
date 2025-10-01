@@ -21,13 +21,13 @@ export const service16Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-light',
+      defaultValue: 'wrapper',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container py-14 py-md-16 mt-n18 mt-md-n21 mb-14 mb-md-17',
+      defaultValue: 'container py-14 py-md-16 mt-n18 mt-md-n21',
     },
   ],
   models: [

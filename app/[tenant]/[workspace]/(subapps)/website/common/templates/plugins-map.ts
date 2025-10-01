@@ -13,6 +13,8 @@ import {hero3Schema} from './hero-3/meta';
 import {hero11Schema} from './hero-11/meta';
 import {hero13Schema} from './hero-13/meta';
 import {hero15Schema} from './hero-15/meta';
+import {hero20Schema} from './hero-20/meta';
+import {hero21Schema} from './hero-21/meta';
 import {hero22Schema} from './hero-22/meta';
 import {hero24Schema} from './hero-24/meta';
 import {portfolio5Schema} from './portfolio-5/meta';
@@ -39,6 +41,8 @@ const pluginsMap = {
   [hero11Schema.code]: ['lightbox'],
   [hero13Schema.code]: ['lightbox'],
   [hero15Schema.code]: ['lightbox'],
+  [hero20Schema.code]: ['replace-me'],
+  [hero21Schema.code]: ['replace-me'],
   [hero22Schema.code]: ['lightbox'],
   [hero24Schema.code]: ['lightbox'],
   [portfolio5Schema.code]: ['lightbox'],

@@ -35,13 +35,25 @@ export const facts9Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-light angled upper-end mt-n20',
+      defaultValue: 'wrapper bg-light angled upper-end',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
       defaultValue: 'container',
+    },
+    {
+      name: 'rowClassName',
+      title: 'Row Class Name',
+      type: 'string',
+      defaultValue: 'row',
+    },
+    {
+      name: 'columnClassName',
+      title: 'Column Class Name',
+      type: 'string',
+      defaultValue: 'col-12 mt-n20',
     },
   ],
   models: [

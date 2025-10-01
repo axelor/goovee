@@ -800,7 +800,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
     sequence: 7,
     data: {
       clientlist1WrapperClassName: 'wrapper bg-light',
-      clientlist1ContainerClassName: 'container px-lg-5',
+      clientlist1ContainerClassName: 'container px-lg-5 pb-16 pb-md-18',
       clientlist1Clients: [
         {
           id: '1',
