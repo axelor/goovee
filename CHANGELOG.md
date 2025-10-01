@@ -70,7 +70,6 @@
 - Improve Shop App styling for visual consistency and responsiveness – #98635
 - Refactor routing by replacing router.push with Next.js <Link> component – #98637
 - Replace native <textarea> with cire <Textarea/> component – #98638
-- feat: update partner price list and partner fiscal position when creating default address - #101466
 
 ## Security
 

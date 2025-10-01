@@ -1,0 +1,5 @@
+{
+  "title": "update partner price list and partner fiscal position when creating default address",
+  "type": "feature",
+  "scope": ["shop"]
+}

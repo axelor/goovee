@@ -512,8 +512,6 @@ export async function getFiscalPositionAndPriceListFromCountry({
       fiscalPosition: country?.fiscalPosition || null,
       partnerPriceList: country?.partnerPriceList || null,
     };
-
-    return {fiscalPosition: null, partnerPriceList: null};
   } catch (error) {
     console.error(
       'Error fetching fiscal position and price list from country:',
@@ -581,32 +579,28 @@ async function updatePartnerFiscal({
   tenantId,
   isDeliveryAddr,
   isDefaultAddr,
-  existingAddressesCount,
 }: {
   partnerId: Partner['id'];
   countryId: any;
   tenantId: Tenant['id'];
   isDeliveryAddr: boolean;
   isDefaultAddr?: boolean;
-  existingAddressesCount?: number;
 }) {
   if (!isDeliveryAddr || !countryId) return;
 
   try {
     const client = await manager.getClient(tenantId);
 
-    let addressesCount = existingAddressesCount;
-    if (addressesCount === undefined) {
-      const existingAddresses = await client.aOSPartnerAddress.find({
-        where: {
-          partner: {
-            id: partnerId,
-          },
+    let addressesCount = 0;
+    const existingAddresses = await client.aOSPartnerAddress.find({
+      where: {
+        partner: {
+          id: partnerId,
         },
-        select: {id: true},
-      });
-      addressesCount = existingAddresses.length;
-    }
+      },
+      select: {id: true},
+    });
+    addressesCount = existingAddresses.length;
 
     if (addressesCount === 1 || isDefaultAddr) {
       const {fiscalPosition, partnerPriceList} =
