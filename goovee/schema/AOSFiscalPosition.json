@@ -1,0 +1,6 @@
+{
+  "name": "AOSFiscalPosition",
+  "table": "account_fiscal_position",
+  "synchronize": false,
+  "fields": []
+}

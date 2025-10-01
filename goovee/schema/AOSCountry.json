@@ -6,6 +6,16 @@
     {
       "type": "String",
       "name": "name"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "partnerPriceList",
+      "target": "AOSPartnerPriceList"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "fiscalPosition",
+      "target": "AOSFiscalPosition"
     }
   ]
 }

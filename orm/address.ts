@@ -81,6 +81,16 @@ export async function createPartnerAddress(
     },
   });
 
+  if (values.isDeliveryAddr && values?.address?.country) {
+    await updatePartnerFiscal({
+      partnerId,
+      countryId: values.address.country,
+      tenantId,
+      isDeliveryAddr: values.isDeliveryAddr,
+      isDefaultAddr: values.isDefaultAddr,
+    });
+  }
+
   return address;
 }
 
@@ -123,6 +133,16 @@ export async function updatePartnerAddress(
       isDefaultAddr: values.isDefaultAddr,
     },
   });
+
+  if (values.isDeliveryAddr && values?.address?.country) {
+    await updatePartnerFiscal({
+      partnerId,
+      countryId: values.address.country,
+      tenantId,
+      isDeliveryAddr: address?.isDeliveryAddr,
+      isDefaultAddr: address?.isDefaultAddr,
+    });
+  }
 
   return address;
 }
@@ -311,6 +331,16 @@ export async function updateDefaultDeliveryAddress(
       },
     });
 
+    if (isDefault && result.address?.country) {
+      await updatePartnerFiscal({
+        partnerId,
+        countryId: result.address.country.id,
+        tenantId,
+        isDeliveryAddr: true,
+        isDefaultAddr: isDefault,
+      });
+    }
+
     return updatedDefault;
   } catch (err) {
     console.log(err);
@@ -452,5 +482,152 @@ export async function findCities({
   } catch (error) {
     console.error('Error fetching cities:', error);
     return [];
+  }
+}
+
+export async function getFiscalPositionAndPriceListFromCountry({
+  countryId,
+  tenantId,
+}: {
+  countryId: ID;
+  tenantId: Tenant['id'];
+}) {
+  if (!countryId || !tenantId)
+    return {fiscalPosition: null, partnerPriceList: null};
+
+  try {
+    const client = await manager.getClient(tenantId);
+
+    const country = await client.aOSCountry.findOne({
+      where: {
+        id: countryId,
+      },
+      select: {
+        fiscalPosition: true,
+        partnerPriceList: true,
+      },
+    });
+
+    return {
+      fiscalPosition: country?.fiscalPosition || null,
+      partnerPriceList: country?.partnerPriceList || null,
+    };
+
+    return {fiscalPosition: null, partnerPriceList: null};
+  } catch (error) {
+    console.error(
+      'Error fetching fiscal position and price list from country:',
+      error,
+    );
+    return {fiscalPosition: null, partnerPriceList: null};
+  }
+}
+
+export async function updatePartnerFiscalAndPriceList({
+  partnerId,
+  fiscalPositionId,
+  partnerPriceListId,
+  tenantId,
+}: {
+  partnerId: Partner['id'];
+  fiscalPositionId?: ID | null;
+  partnerPriceListId?: ID | null;
+  tenantId: Tenant['id'];
+}) {
+  if (!partnerId || !tenantId) return null;
+
+  try {
+    const client = await manager.getClient(tenantId);
+
+    const currentPartner = await client.aOSPartner.findOne({
+      where: {id: partnerId},
+      select: {id: true, version: true},
+    });
+
+    if (!currentPartner) return null;
+
+    const updateData: any = {
+      id: partnerId,
+      version: currentPartner.version,
+    };
+
+    if (fiscalPositionId) {
+      updateData.fiscalPosition = {select: {id: fiscalPositionId}};
+    }
+
+    if (partnerPriceListId) {
+      updateData.salePartnerPriceList = {select: {id: partnerPriceListId}};
+    }
+
+    if (Object.keys(updateData).length === 2) return null;
+
+    const updatedPartner = await client.aOSPartner.update({
+      data: updateData,
+    });
+
+    return updatedPartner;
+  } catch (error) {
+    console.error(
+      'Error updating partner fiscal position and price list:',
+      error,
+    );
+    return null;
+  }
+}
+
+async function updatePartnerFiscal({
+  partnerId,
+  countryId,
+  tenantId,
+  isDeliveryAddr,
+  isDefaultAddr,
+  existingAddressesCount,
+}: {
+  partnerId: Partner['id'];
+  countryId: any;
+  tenantId: Tenant['id'];
+  isDeliveryAddr: boolean;
+  isDefaultAddr?: boolean;
+  existingAddressesCount?: number;
+}) {
+  if (!isDeliveryAddr || !countryId) return;
+
+  try {
+    const client = await manager.getClient(tenantId);
+
+    let addressesCount = existingAddressesCount;
+    if (addressesCount === undefined) {
+      const existingAddresses = await client.aOSPartnerAddress.find({
+        where: {
+          partner: {
+            id: partnerId,
+          },
+        },
+        select: {id: true},
+      });
+      addressesCount = existingAddresses.length;
+    }
+
+    if (addressesCount === 1 || isDefaultAddr) {
+      const {fiscalPosition, partnerPriceList} =
+        await getFiscalPositionAndPriceListFromCountry({
+          countryId,
+          tenantId,
+        });
+
+      if (fiscalPosition || partnerPriceList) {
+        await updatePartnerFiscalAndPriceList({
+          partnerId,
+          fiscalPositionId: fiscalPosition?.id,
+          partnerPriceListId: partnerPriceList?.id,
+          tenantId,
+        });
+      }
+    }
+  } catch (error) {
+    console.error(
+      'Error updating partner fiscal position and price list:',
+      error,
+    );
   }
 }
