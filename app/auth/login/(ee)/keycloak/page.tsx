@@ -104,13 +104,13 @@ export default async function Page({
           });
 
           await registerPartner({
-            type: UserType.individual,
+            type: UserType.company,
             email: user.email,
-            name: user.name || user.email,
+            companyName: user.name || user.email,
             workspaceURL,
             tenantId,
             localizationId: localization?.id,
-          });
+          } as any);
 
           partner = await findGooveeUserByEmail(user.email, tenantId);
 
