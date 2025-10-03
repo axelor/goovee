@@ -12,8 +12,8 @@ dependencies:
     specifier: ^0.18.0
     version: 0.18.0(@types/react-dom@18.3.1)(@types/react@18.3.12)(react-dom@18.3.1)(react@18.3.1)
   '@goovee/orm':
-    specifier: ^0.0.4
-    version: 0.0.4(@swc/core@1.12.11)(@swc/types@0.1.23)(graphql@16.9.0)(pg@8.13.1)(reflect-metadata@0.2.2)(typescript@5.6.3)
+    specifier: ^0.0.5
+    version: 0.0.5(graphql@16.9.0)(pg@8.13.1)(reflect-metadata@0.2.2)
   '@hookform/resolvers':
     specifier: ^3.9.1
     version: 3.9.1(react-hook-form@7.53.1)
@@ -1699,6 +1699,7 @@ packages:
     dependencies:
       '@emnapi/wasi-threads': 1.0.3
       tslib: 2.8.1
+    dev: true
     optional: true
 
   /@emnapi/runtime@1.4.4:
@@ -1706,6 +1707,7 @@ packages:
     requiresBuild: true
     dependencies:
       tslib: 2.8.1
+    dev: true
     optional: true
 
   /@emnapi/wasi-threads@1.0.3:
@@ -1713,6 +1715,7 @@ packages:
     requiresBuild: true
     dependencies:
       tslib: 2.8.1
+    dev: true
     optional: true
 
   /@emotion/babel-plugin@11.12.0:
@@ -1956,14 +1959,13 @@ packages:
     resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
     dev: false
 
-  /@goovee/orm@0.0.4(@swc/core@1.12.11)(@swc/types@0.1.23)(graphql@16.9.0)(pg@8.13.1)(reflect-metadata@0.2.2)(typescript@5.6.3):
-    resolution: {integrity: sha512-RDwsttBW0WoVOqugiMA8qUFoc5cIBjX/jm35h5iHxfbFu/sePsUcKmEdybQoZE8KF10iBYYAR5skdXPxkYszPQ==}
+  /@goovee/orm@0.0.5(graphql@16.9.0)(pg@8.13.1)(reflect-metadata@0.2.2):
+    resolution: {integrity: sha512-hft1Pqe6gBx3Bq6LcMyrpM10B1XhPfIE6PB49Qjtonr2szlY/g3hZJY/dncipfTIOVSmsI927g824K8JojV3rQ==}
     hasBin: true
     peerDependencies:
       graphql: ^16.8.1
       pg: ^8.11.5
     dependencies:
-      '@swc-node/register': 1.10.10(@swc/core@1.12.11)(@swc/types@0.1.23)(typescript@5.6.3)
       commander: 14.0.0
       glob: 11.0.3
       graphql: 16.9.0
@@ -1972,8 +1974,6 @@ packages:
     transitivePeerDependencies:
       - '@google-cloud/spanner'
       - '@sap/hana-client'
-      - '@swc/core'
-      - '@swc/types'
       - babel-plugin-macros
       - better-sqlite3
       - hdb-pool
@@ -1991,7 +1991,6 @@ packages:
       - supports-color
       - ts-node
       - typeorm-aurora-data-api-driver
-      - typescript
     dev: false
 
   /@hookform/resolvers@3.9.1(react-hook-form@7.53.1):
@@ -2473,6 +2472,7 @@ packages:
       '@emnapi/core': 1.4.4
       '@emnapi/runtime': 1.4.4
       '@tybys/wasm-util': 0.10.0
+    dev: true
     optional: true
 
   /@next/bundle-analyzer@15.5.4:
@@ -2603,6 +2603,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-darwin-x64@5.3.0:
@@ -2610,6 +2611,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-freebsd-x64@5.3.0:
@@ -2617,6 +2619,7 @@ packages:
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-linux-arm-gnueabihf@5.3.0:
@@ -2624,6 +2627,7 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-linux-arm64-gnu@5.3.0:
@@ -2631,6 +2635,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-linux-arm64-musl@5.3.0:
@@ -2638,6 +2643,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-linux-riscv64-gnu@5.3.0:
@@ -2645,6 +2651,7 @@ packages:
     cpu: [riscv64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-linux-s390x-gnu@5.3.0:
@@ -2652,6 +2659,7 @@ packages:
     cpu: [s390x]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-linux-x64-gnu@5.3.0:
@@ -2659,6 +2667,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-linux-x64-musl@5.3.0:
@@ -2666,6 +2675,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-wasm32-wasi@5.3.0:
@@ -2675,6 +2685,7 @@ packages:
     requiresBuild: true
     dependencies:
       '@napi-rs/wasm-runtime': 0.2.12
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-win32-arm64-msvc@5.3.0:
@@ -2682,6 +2693,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@oxc-resolver/binding-win32-x64-msvc@5.3.0:
@@ -2689,6 +2701,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@panva/hkdf@1.2.1:
@@ -4454,6 +4467,7 @@ packages:
     dependencies:
       '@swc/core': 1.12.11
       '@swc/types': 0.1.23
+    dev: true
 
   /@swc-node/register@1.10.10(@swc/core@1.12.11)(@swc/types@0.1.23)(typescript@5.6.3):
     resolution: {integrity: sha512-jYWaI2WNEKz8KZL3sExd2KVL1JMma1/J7z+9iTpv0+fRN7LGMF8VTGGuHI2bug/ztpdZU1G44FG/Kk6ElXL9CQ==}
@@ -4473,12 +4487,14 @@ packages:
     transitivePeerDependencies:
       - '@swc/types'
       - supports-color
+    dev: true
 
   /@swc-node/sourcemap-support@0.5.1:
     resolution: {integrity: sha512-JxIvIo/Hrpv0JCHSyRpetAdQ6lB27oFYhv0PKCNf1g2gUXOjpeR1exrXccRxLMuAV5WAmGFBwRnNOJqN38+qtg==}
     dependencies:
       source-map-support: 0.5.21
       tslib: 2.8.1
+    dev: true
 
   /@swc/cli@0.7.8(@swc/core@1.12.11):
     resolution: {integrity: sha512-27Ov4rm0s2C6LLX+NDXfDVB69LGs8K94sXtFhgeUyQ4DBywZuCgTBu2loCNHRr8JhT9DeQvJM5j9FAu/THbo4w==}
@@ -4652,6 +4668,7 @@ packages:
     requiresBuild: true
     dependencies:
       tslib: 2.8.1
+    dev: true
     optional: true
 
   /@types/bcrypt@5.0.2:
@@ -6009,6 +6026,7 @@ packages:
 
   /colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
+    dev: true
 
   /combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -10330,6 +10348,7 @@ packages:
       '@oxc-resolver/binding-wasm32-wasi': 5.3.0
       '@oxc-resolver/binding-win32-arm64-msvc': 5.3.0
       '@oxc-resolver/binding-win32-x64-msvc': 5.3.0
+    dev: true
 
   /p-cancelable@3.0.0:
     resolution: {integrity: sha512-mlVgR3PGuzlo0MmTdk4cXqXWlwQDLnONTAg6sm62XkMJEiRxN3GL3SffkYvqwonbkJBcrI7Uvv5Zh9yjvn2iUw==}

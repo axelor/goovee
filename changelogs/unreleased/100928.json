@@ -1,0 +1,6 @@
+{
+  "title": "Upgrade Goovee ORM to 0.0.5",
+  "type": "fix",
+  "description": "This Goovee ORM release resolves a regression that caused duplicate records to be returned in relational fields",
+  "scope": ["core"]
+}
