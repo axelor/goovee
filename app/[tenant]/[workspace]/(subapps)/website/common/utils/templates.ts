@@ -20,8 +20,9 @@ import {
   createMetaSelect,
   getCommnonSelectionName,
   deleteMetaSelects,
+  createCMSPage,
 } from '@/subapps/website/common/orm/templates';
-import {camelCase} from 'lodash-es';
+import {camelCase, startCase} from 'lodash-es';
 import {metas} from '@/subapps/website/common/templates/metas';
 import {
   ArrayField,
@@ -47,6 +48,10 @@ import {
 } from './helper';
 
 const CUSTOM_MODEL_PREFIX = 'GooveeTemplate';
+
+function getPageTitle({page, language}: {page: string; language: string}) {
+  return `Goovee CMS ${startCase(page)} - ${language}`;
+}
 
 function capitalCase(str: string) {
   str = camelCase(str);
@@ -413,6 +418,48 @@ export async function seedContents(tenantId: Tenant['id']) {
       schema: formatSchema(schema),
       demos: demos as Demo<TemplateSchema>[],
       fileCache,
+    });
+  });
+  return res;
+}
+
+export async function seedPages(tenantId: Tenant['id']) {
+  const _schemas = metas.map(meta => meta.schema);
+  if (!validateSchemas(_schemas)) {
+    throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
+  }
+
+  const demos = metas.map(meta => meta.demos).flat() as Demo<TemplateSchema>[];
+
+  const pages = demos.reduce<Map<string, Demo<TemplateSchema>[]>>(
+    (acc, demo) => {
+      const page = demo.page;
+      const language = demo.language;
+
+      if (!acc.has(`${page}-${language}`)) {
+        acc.set(`${page}-${language}`, [demo]);
+      } else {
+        acc.get(`${page}-${language}`)?.push(demo);
+      }
+
+      return acc;
+    },
+    new Map(),
+  );
+
+  pages.forEach(lines => {
+    lines.sort((a, b) => a.sequence - b.sequence);
+  });
+
+  const res = await processBatch(Array.from(pages.values()), async demos => {
+    const page = demos[0].page;
+    const language = demos[0].language;
+    return await createCMSPage({
+      tenantId,
+      page,
+      language,
+      demos,
+      title: getPageTitle({page, language}),
     });
   });
   return res;

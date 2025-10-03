@@ -13,6 +13,8 @@ import type {
   AOSMetaView,
   AOSPortalCmsComponent,
   AOSPortalCmsContent,
+  AOSPortalCmsContentLine,
+  AOSPortalCmsPage,
 } from '@/goovee/.generated/models';
 import {manager, type Tenant} from '@/lib/core/tenant';
 import {getFileSizeText} from '@/utils/files';
@@ -53,13 +55,16 @@ function getContentTitle({
   language,
   page,
   sequence,
+  skipCasingCode,
 }: {
   code: string;
   language: string;
   page: string;
   sequence: number;
+  skipCasingCode?: boolean;
 }) {
-  return `Demo - ${startCase(code)} - ${language} - ${page} - ${sequence}`;
+  const _code = skipCasingCode ? code : startCase(code);
+  return `Demo - ${_code} - ${language} - ${page} - ${sequence}`;
 }
 
 export function getCommnonSelectionName(name: string) {
@@ -907,4 +912,84 @@ async function createAttrs(props: {
     }),
   );
   return attrs;
+}
+
+export async function createCMSPage(props: {
+  tenantId: Tenant['id'];
+  page: string;
+  language: string;
+  demos: Demo<TemplateSchema>[];
+  title: string;
+}) {
+  const {tenantId, page, language, demos, title} = props;
+  const client = await manager.getClient(tenantId);
+  const timeStamp = new Date();
+  const _cmsPage = await client.aOSPortalCmsPage.findOne({
+    where: {
+      slug: page,
+      title: title,
+      language: {code: language},
+    },
+    select: {id: true, title: true, contentLines: {select: {id: true}}},
+  });
+
+  const contentLines: CreateArgs<AOSPortalCmsContentLine>[] = demos.map(
+    demo => ({
+      sequence: demo.sequence,
+      language: {select: {code: language}},
+      content: {
+        select: {
+          title: {
+            like: getContentTitle({
+              code: '%',
+              language,
+              page,
+              sequence: demo.sequence,
+              skipCasingCode: true,
+            }),
+          },
+        },
+      },
+    }),
+  );
+
+  const pageData: CreateArgs<AOSPortalCmsPage> = {
+    language: {select: {code: language}},
+    title,
+    slug: page,
+    updatedOn: timeStamp,
+  };
+
+  if (_cmsPage) {
+    if (disableUpdates) {
+      console.log(`\x1b[33m⚠️ Skipped page: ${_cmsPage.title}\x1b[0m `);
+      return _cmsPage;
+    }
+    const existingContentLines = _cmsPage.contentLines?.map(line => line.id);
+    const cmsPage = await client.aOSPortalCmsPage.update({
+      data: {
+        ...pageData,
+        contentLines: {
+          create: contentLines,
+          ...(existingContentLines && {remove: existingContentLines}),
+        },
+        id: _cmsPage.id,
+        version: _cmsPage.version,
+      },
+      select: {id: true, title: true},
+    });
+    console.log(`\x1b[33m⚠️ Updated page: ${_cmsPage.title}\x1b[0m `);
+    return cmsPage;
+  }
+
+  const cmsPage = await client.aOSPortalCmsPage.create({
+    data: {
+      ...pageData,
+      contentLines: {create: contentLines},
+      createdOn: timeStamp,
+    },
+    select: {id: true, title: true},
+  });
+  console.log(`\x1b[32m✅ Created page: ${cmsPage.title}\x1b[0m `);
+  return cmsPage;
 }
