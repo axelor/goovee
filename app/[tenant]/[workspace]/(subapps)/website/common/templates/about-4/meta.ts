@@ -73,6 +73,7 @@ export type About4Data = Data<typeof about4Schema>;
 export const about4Demos: Demo<typeof about4Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-4',
     sequence: 4,
     data: {
@@ -139,6 +140,7 @@ export const about4Demos: Demo<typeof about4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-4',
     sequence: 4,
     data: {

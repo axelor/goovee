@@ -87,6 +87,7 @@ export type Contact3Data = Data<typeof contact3Schema>;
 export const contact3Demos: Demo<typeof contact3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'others',
     sequence: 4,
     data: {
@@ -118,6 +119,7 @@ export const contact3Demos: Demo<typeof contact3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'others',
     sequence: 4,
     data: {

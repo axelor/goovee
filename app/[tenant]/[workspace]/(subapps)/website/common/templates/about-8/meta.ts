@@ -63,6 +63,7 @@ export type About8Data = Data<typeof about8Schema>;
 export const about8Demos: Demo<typeof about8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-7',
     sequence: 5,
     data: {
@@ -112,6 +113,7 @@ export const about8Demos: Demo<typeof about8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-7',
     sequence: 5,
     data: {

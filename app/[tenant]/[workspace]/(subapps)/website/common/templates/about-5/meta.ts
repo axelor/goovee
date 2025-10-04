@@ -52,6 +52,7 @@ export type About5Data = Data<typeof about5Schema>;
 export const about5Demos: Demo<typeof about5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'others',
     sequence: 1,
     data: {
@@ -106,6 +107,7 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'others',
     sequence: 1,
     data: {

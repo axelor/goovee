@@ -68,6 +68,7 @@ export type About15Data = Data<typeof about15Schema>;
 export const about15Demos: Demo<typeof about15Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-14',
     sequence: 8,
     data: {
@@ -117,6 +118,7 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-14',
     sequence: 8,
     data: {

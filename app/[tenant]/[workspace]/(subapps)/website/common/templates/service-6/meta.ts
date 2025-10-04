@@ -72,6 +72,7 @@ export type Service6Data = Data<typeof service6Schema>;
 export const service6Demos: Demo<typeof service6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-5',
     sequence: 2,
     data: {
@@ -142,6 +143,7 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-5',
     sequence: 2,
     data: {
@@ -212,6 +214,7 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-10',
     sequence: 3,
     data: {
@@ -283,6 +286,7 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-10',
     sequence: 3,
     data: {

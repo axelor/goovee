@@ -21,13 +21,16 @@ import {
   getCommnonSelectionName,
   deleteMetaSelects,
   createCMSPage,
+  createCMSWebsite,
+  updateHomepage,
+  replacePageSet,
 } from '@/subapps/website/common/orm/templates';
 import {camelCase, startCase} from 'lodash-es';
 import {metas} from '@/subapps/website/common/templates/metas';
+import {website} from '@/subapps/website/common/templates/site';
 import {
   ArrayField,
   CustomField,
-  Demo,
   Field,
   JsonRelationalField,
   TemplateSchema,
@@ -35,6 +38,7 @@ import {
   ObjectField,
   RelationalField,
   MetaSelection,
+  DemoLite,
 } from '../types/templates';
 import {
   processBatch,
@@ -416,30 +420,38 @@ export async function seedContents(tenantId: Tenant['id']) {
     return await createCMSContent({
       tenantId,
       schema: formatSchema(schema),
-      demos: demos as Demo<TemplateSchema>[],
+      demos: demos,
       fileCache,
     });
   });
   return res;
 }
 
-export async function seedPages(tenantId: Tenant['id']) {
+export async function seedWebsite(tenantId: Tenant['id']) {
   const _schemas = metas.map(meta => meta.schema);
   if (!validateSchemas(_schemas)) {
     throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
   }
 
-  const demos = metas.map(meta => meta.demos).flat() as Demo<TemplateSchema>[];
+  const {sites} = await createCMSWebsite({
+    tenantId,
+    website,
+  });
 
-  const pages = demos.reduce<Map<string, Demo<TemplateSchema>[]>>(
+  const demos = metas
+    .map(meta => meta.demos)
+    .flat() as DemoLite<TemplateSchema>[];
+
+  const pages = demos.reduce<Map<string, DemoLite<TemplateSchema>[]>>(
     (acc, demo) => {
       const page = demo.page;
       const language = demo.language;
+      const site = demo.site;
 
-      if (!acc.has(`${page}-${language}`)) {
-        acc.set(`${page}-${language}`, [demo]);
+      if (!acc.has(`${page}-${language}-${site}`)) {
+        acc.set(`${page}-${language}-${site}`, [demo]);
       } else {
-        acc.get(`${page}-${language}`)?.push(demo);
+        acc.get(`${page}-${language}-${site}`)?.push(demo);
       }
 
       return acc;
@@ -451,16 +463,67 @@ export async function seedPages(tenantId: Tenant['id']) {
     lines.sort((a, b) => a.sequence - b.sequence);
   });
 
-  const res = await processBatch(Array.from(pages.values()), async demos => {
-    const page = demos[0].page;
-    const language = demos[0].language;
-    return await createCMSPage({
-      tenantId,
-      page,
-      language,
-      demos,
-      title: getPageTitle({page, language}),
-    });
+  const cmsPagesSettled = await processBatch(
+    Array.from(pages.values()),
+    async demos => {
+      const page = demos[0].page;
+      const language = demos[0].language;
+      const siteId = sites.find(site => site.slug === demos[0].site)?.id;
+      if (!siteId) {
+        throw new Error(`Site ${demos[0].site} not found`);
+      }
+      return await createCMSPage({
+        tenantId,
+        siteId,
+        page,
+        language,
+        demos,
+        title: getPageTitle({page, language}),
+      });
+    },
+  );
+  const cmsPages = cmsPagesSettled
+    .filter(res => res.status === 'fulfilled')
+    .map(res => res.value);
+
+  const failedPages = cmsPagesSettled.filter(res => res.status === 'rejected');
+  if (failedPages.length) {
+    console.log('\x1b[31m🔥 Failed:\x1b[0m');
+    console.dir(failedPages, {depth: null});
+  }
+
+  await Promise.allSettled(
+    sites.map(async site => {
+      const homepageSlug = website.sites.find(s => s.website.slug === site.slug)
+        ?.website?.homepage;
+      if (homepageSlug) {
+        const homePageId = cmsPages.find(
+          p => p.slug === homepageSlug && p.website!.id === site.id,
+        )?.id;
+        if (!homePageId) {
+          throw new Error(`Homepage ${homepageSlug} not found`);
+        }
+        await updateHomepage({
+          tenantId,
+          siteId: site.id,
+          siteVersion: site.version,
+          pageId: homePageId,
+        });
+      }
+    }),
+  );
+
+  await processBatch(cmsPages, async page => {
+    const otherLanguagePages = cmsPages.filter(
+      p => p.slug === page.slug && p.language!.code !== page.language!.code,
+    );
+    if (otherLanguagePages.length) {
+      await replacePageSet({
+        tenantId,
+        pageId: page.id,
+        pageVersion: page.version,
+        pageSetIds: otherLanguagePages.map(p => p.id),
+      });
+    }
   });
-  return res;
 }

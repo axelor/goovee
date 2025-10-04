@@ -86,6 +86,7 @@ export type Process3Data = Data<typeof process3Schema>;
 export const process3Demos: Demo<typeof process3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-3',
     sequence: 3,
     data: {
@@ -136,6 +137,7 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-3',
     sequence: 3,
     data: {

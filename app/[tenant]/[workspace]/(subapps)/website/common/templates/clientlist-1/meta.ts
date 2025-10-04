@@ -40,6 +40,7 @@ export type Clientlist1Data = Data<typeof clientlist1Schema>;
 export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-1',
     sequence: 11,
     data: {
@@ -133,6 +134,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-1',
     sequence: 11,
     data: {
@@ -226,6 +228,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-2',
     sequence: 2,
     data: {
@@ -321,6 +324,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-2',
     sequence: 2,
     data: {
@@ -416,6 +420,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-4',
     sequence: 10,
     data: {
@@ -511,6 +516,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-4',
     sequence: 10,
     data: {
@@ -606,6 +612,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-5',
     sequence: 5,
     data: {
@@ -701,6 +708,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-5',
     sequence: 5,
     data: {
@@ -796,6 +804,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-10',
     sequence: 7,
     data: {
@@ -891,6 +900,7 @@ export const clientlist1Demos: Demo<typeof clientlist1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-10',
     sequence: 7,
     data: {

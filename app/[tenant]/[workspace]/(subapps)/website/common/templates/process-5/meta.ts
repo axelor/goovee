@@ -88,6 +88,7 @@ export type Process5Data = Data<typeof process5Schema>;
 export const process5Demos: Demo<typeof process5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-6',
     sequence: 3,
     data: {
@@ -136,6 +137,7 @@ export const process5Demos: Demo<typeof process5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-6',
     sequence: 3,
     data: {

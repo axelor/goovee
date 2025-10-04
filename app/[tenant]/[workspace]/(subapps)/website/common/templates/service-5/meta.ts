@@ -98,6 +98,7 @@ export type Service5Data = Data<typeof service5Schema>;
 export const service5Demos: Demo<typeof service5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-4',
     sequence: 2,
     data: {
@@ -216,6 +217,7 @@ export const service5Demos: Demo<typeof service5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-4',
     sequence: 2,
     data: {

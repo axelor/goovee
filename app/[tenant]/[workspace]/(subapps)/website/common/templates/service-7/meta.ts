@@ -74,6 +74,7 @@ export type Service7Data = Data<typeof service7Schema>;
 export const service7Demos: Demo<typeof service7Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-6',
     sequence: 2,
     data: {
@@ -146,6 +147,7 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-6',
     sequence: 2,
     data: {

@@ -78,6 +78,7 @@ export type Hero23Data = Data<typeof hero23Schema>;
 export const hero23Demos: Demo<typeof hero23Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-23',
     sequence: 1,
     data: {
@@ -152,6 +153,7 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-23',
     sequence: 1,
     data: {

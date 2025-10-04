@@ -63,6 +63,7 @@ export type Service15Data = Data<typeof service15Schema>;
 export const service15Demos: Demo<typeof service15Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 4,
     data: {
@@ -111,6 +112,7 @@ export const service15Demos: Demo<typeof service15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 4,
     data: {

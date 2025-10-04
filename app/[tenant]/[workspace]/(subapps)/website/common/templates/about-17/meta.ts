@@ -63,6 +63,7 @@ export type About17Data = Data<typeof about17Schema>;
 export const about17Demos: Demo<typeof about17Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-18',
     sequence: 3,
     data: {
@@ -112,6 +113,7 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-18',
     sequence: 3,
     data: {

@@ -80,6 +80,7 @@ export type Process2Data = Data<typeof process2Schema>;
 export const process2Demos: Demo<typeof process2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-2',
     sequence: 4,
     data: {
@@ -129,6 +130,7 @@ export const process2Demos: Demo<typeof process2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-2',
     sequence: 4,
     data: {

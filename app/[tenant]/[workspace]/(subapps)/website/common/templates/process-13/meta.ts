@@ -82,6 +82,7 @@ export type Process13Data = Data<typeof process13Schema>;
 export const process13Demos: Demo<typeof process13Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-20',
     sequence: 3,
     data: {
@@ -130,6 +131,7 @@ export const process13Demos: Demo<typeof process13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-20',
     sequence: 3,
     data: {

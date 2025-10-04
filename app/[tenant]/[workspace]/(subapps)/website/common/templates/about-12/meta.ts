@@ -57,6 +57,7 @@ export type About12Data = Data<typeof about12Schema>;
 export const about12Demos: Demo<typeof about12Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 3,
     data: {
@@ -100,6 +101,7 @@ export const about12Demos: Demo<typeof about12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 3,
     data: {

@@ -69,6 +69,7 @@ export type Hero2Data = Data<typeof hero2Schema>;
 export const hero2Demos: Demo<typeof hero2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-2',
     sequence: 1,
     data: {
@@ -90,6 +91,7 @@ export const hero2Demos: Demo<typeof hero2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-2',
     sequence: 1,
     data: {

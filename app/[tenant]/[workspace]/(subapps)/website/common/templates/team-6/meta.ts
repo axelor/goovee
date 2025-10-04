@@ -75,6 +75,7 @@ export type Team6Data = Data<typeof team6Schema>;
 export const team6Demos: Demo<typeof team6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 8,
     data: {
@@ -147,6 +148,7 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 8,
     data: {

@@ -113,6 +113,7 @@ export type Footer6Data = Data<typeof footer6Schema>;
 export const footer6Demos: Demo<typeof footer6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-5',
     sequence: 8,
     data: {
@@ -191,6 +192,7 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-5',
     sequence: 8,
     data: {

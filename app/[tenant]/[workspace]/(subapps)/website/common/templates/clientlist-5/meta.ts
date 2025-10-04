@@ -55,6 +55,7 @@ export type Clientlist5Data = Data<typeof clientlist5Schema>;
 export const clientlist5Demos: Demo<typeof clientlist5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-20',
     sequence: 5,
     data: {
@@ -180,6 +181,7 @@ export const clientlist5Demos: Demo<typeof clientlist5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-20',
     sequence: 5,
     data: {

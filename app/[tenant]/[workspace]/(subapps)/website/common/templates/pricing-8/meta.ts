@@ -64,6 +64,7 @@ export type Pricing8Data = Data<typeof pricing8Schema>;
 export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-22',
     sequence: 7,
     data: {
@@ -169,6 +170,7 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-22',
     sequence: 7,
     data: {

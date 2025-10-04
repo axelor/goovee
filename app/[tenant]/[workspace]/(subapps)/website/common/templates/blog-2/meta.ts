@@ -95,6 +95,7 @@ export type Blog2Data = Data<typeof blog2Schema>;
 export const blog2Demos: Demo<typeof blog2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 6,
     data: {
@@ -181,6 +182,7 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 6,
     data: {

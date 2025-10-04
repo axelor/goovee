@@ -181,6 +181,7 @@ export type Portfolio9Data = Data<typeof portfolio9Schema>;
 export const portfolio9Demos: Demo<typeof portfolio9Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-16',
     sequence: 3,
     data: {
@@ -245,6 +246,7 @@ export const portfolio9Demos: Demo<typeof portfolio9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-16',
     sequence: 3,
     data: {

@@ -65,6 +65,7 @@ export type Faq1Data = Data<typeof faq1Schema>;
 export const faq1Demos: Demo<typeof faq1Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-6',
     sequence: 4,
     data: {
@@ -145,6 +146,7 @@ export const faq1Demos: Demo<typeof faq1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-6',
     sequence: 4,
     data: {

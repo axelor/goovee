@@ -87,6 +87,7 @@ export type Contact5Data = Data<typeof contact5Schema>;
 export const contact5Demos: Demo<typeof contact5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-10',
     sequence: 6,
     data: {
@@ -118,6 +119,7 @@ export const contact5Demos: Demo<typeof contact5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-10',
     sequence: 6,
     data: {

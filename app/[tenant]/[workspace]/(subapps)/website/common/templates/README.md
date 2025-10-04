@@ -78,6 +78,9 @@ To add a new template, follow these steps:
     export const myNewTemplateDemos: Demo<typeof myNewTemplateSchema>[] = [
       {
         language: 'en_US',
+        site: 'en', // The site slug
+        page: 'home', // The page slug
+        sequence: 1,
         data: {
           myNewTemplateTitle: 'Hello World',
           myNewTemplateSubTitle: 'A subtitle example',
@@ -556,9 +559,57 @@ As a workaround, run the reset script before seeding again to ensure a clean imp
 pnpm website:seed:contents
 ```
 
+**Prerequisites:** This script must be run **after** `website:seed:templates`.
+
 Creates `AOSPortalCmsContent` records using the demo data defined in each template’s `meta.ts` file.
 
 ⚠️ **Known Issue:** Re-running this command creates duplicate `meta-json` records and overwrites existing metafiles (images, etc.), potentially losing manual changes.
+
+```bash
+# Seed website structure and pages
+pnpm website:seed:website
+```
+
+<details>
+<summary>Website Configuration (`site.ts`)</summary>
+
+The `website:seed:website` script is configured by the `website` object in `app/[tenant]/[workspace]/(subapps)/website/common/templates/site.ts`. It defines the website's name and its language-specific sites.
+
+**Example:**
+```ts
+export const website = {
+  name: 'Lighthouse',
+  sites: [
+    {
+      language: 'en_US',
+      website: {
+        // The resulting URL for a page is /[tenant]/[workspace]/website/[slug]/[page-slug]
+        // e.g., /[tenant]/[workspace]/website/en/demo-1
+        name: 'English',
+        slug: 'en',
+        homepage: 'demo-1',
+      },
+    },
+    {
+      language: 'fr_FR',
+      website: { name: 'Français', slug: 'fr', homepage: 'demo-1' },
+    },
+  ],
+};
+```
+> **Note:** Before adding a new site, you must first update the `Language` and `Site` types in `.../types/templates.ts`.
+
+</details>
+
+**Prerequisites:** This script must be run **after** `website:seed:contents`, as it uses the content records created by that script.
+
+**What it does:**
+
+- Creates the main website and its language-specific sites (e.g., English and French sites).
+- Creates individual pages (e.g., `/home`, `/about`) for each site by grouping demos by their `site` and `page` slugs.
+- Populates pages by linking the appropriate content records in the correct order (using the `sequence` property from the demo data).
+- Sets the homepage for each site based on a central configuration.
+- Links translated pages together.
 
 ```bash
 # Reset all templates and content (clean slate)

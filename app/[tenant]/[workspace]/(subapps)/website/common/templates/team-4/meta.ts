@@ -78,6 +78,7 @@ export type Team4Data = Data<typeof team4Schema>;
 export const team4Demos: Demo<typeof team4Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-4',
     sequence: 7,
     data: {
@@ -267,6 +268,7 @@ export const team4Demos: Demo<typeof team4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-4',
     sequence: 7,
     data: {
@@ -460,6 +462,7 @@ export const team4Demos: Demo<typeof team4Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-21',
     sequence: 6,
     data: {
@@ -651,6 +654,7 @@ export const team4Demos: Demo<typeof team4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-21',
     sequence: 6,
     data: {

@@ -57,6 +57,7 @@ export type About22Data = Data<typeof about22Schema>;
 export const about22Demos: Demo<typeof about22Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-21',
     sequence: 4,
     data: {
@@ -100,6 +101,7 @@ export const about22Demos: Demo<typeof about22Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-21',
     sequence: 4,
     data: {

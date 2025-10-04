@@ -139,6 +139,7 @@ export type Portfolio6Data = Data<typeof portfolio6Schema>;
 export const portfolio6Demos: Demo<typeof portfolio6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-12',
     sequence: 7,
     data: {
@@ -184,6 +185,7 @@ export const portfolio6Demos: Demo<typeof portfolio6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-12',
     sequence: 7,
     data: {

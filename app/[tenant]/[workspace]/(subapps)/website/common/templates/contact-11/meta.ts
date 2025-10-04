@@ -58,6 +58,7 @@ export type Contact11Data = Data<typeof contact11Schema>;
 export const contact11Demos: Demo<typeof contact11Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-18',
     sequence: 9,
     data: {
@@ -87,6 +88,7 @@ export const contact11Demos: Demo<typeof contact11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-18',
     sequence: 9,
     data: {

@@ -72,6 +72,7 @@ export type Testimonial2Data = Data<typeof testimonial2Schema>;
 export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-3',
     sequence: 8,
     data: {
@@ -124,6 +125,7 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-3',
     sequence: 8,
     data: {
