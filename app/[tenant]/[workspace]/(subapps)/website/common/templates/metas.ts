@@ -1,3 +1,5 @@
+import type {TemplateSchema, DemoLite} from '../types/templates';
+
 import {about1Demos, about1Schema} from './about-1/meta';
 import {about2Demos, about2Schema} from './about-2/meta';
 import {about3Demos, about3Schema} from './about-3/meta';
@@ -214,7 +216,10 @@ import {testimonial18Demos, testimonial18Schema} from './testimonial-18/meta';
 import {testimonial19Demos, testimonial19Schema} from './testimonial-19/meta';
 import {wiki1Demos, wiki1Schema} from './wiki-1/meta';
 
-export const metas = [
+export const metas: {
+  schema: TemplateSchema;
+  demos: DemoLite<TemplateSchema>[];
+}[] = [
   {schema: about1Schema, demos: about1Demos},
   {schema: about2Schema, demos: about2Demos},
   {schema: about3Schema, demos: about3Demos},

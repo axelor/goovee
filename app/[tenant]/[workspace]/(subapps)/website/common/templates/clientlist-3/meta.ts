@@ -45,6 +45,7 @@ export type Clientlist3Data = Data<typeof clientlist3Schema>;
 export const clientlist3Demos: Demo<typeof clientlist3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-9',
     sequence: 2,
     data: {
@@ -139,6 +140,7 @@ export const clientlist3Demos: Demo<typeof clientlist3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-9',
     sequence: 2,
     data: {

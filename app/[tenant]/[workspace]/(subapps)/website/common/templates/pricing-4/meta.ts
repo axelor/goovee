@@ -77,6 +77,7 @@ export type Pricing4Data = Data<typeof pricing4Schema>;
 export const pricing4Demos: Demo<typeof pricing4Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-5',
     sequence: 6,
     data: {
@@ -143,6 +144,7 @@ export const pricing4Demos: Demo<typeof pricing4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-5',
     sequence: 6,
     data: {
@@ -208,6 +210,7 @@ export const pricing4Demos: Demo<typeof pricing4Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 10,
     data: {
@@ -277,6 +280,7 @@ export const pricing4Demos: Demo<typeof pricing4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 10,
     data: {

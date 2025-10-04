@@ -99,6 +99,7 @@ export type Facts12Data = Data<typeof facts12Schema>;
 export const facts12Demos: Demo<typeof facts12Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-18',
     sequence: 5,
     data: {
@@ -145,6 +146,7 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-18',
     sequence: 5,
     data: {

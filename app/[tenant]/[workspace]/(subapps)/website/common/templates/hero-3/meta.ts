@@ -88,6 +88,7 @@ export type Hero3Data = Data<typeof hero3Schema>;
 export const hero3Demos: Demo<typeof hero3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-3',
     sequence: 1,
     data: {
@@ -119,6 +120,7 @@ export const hero3Demos: Demo<typeof hero3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-3',
     sequence: 1,
     data: {

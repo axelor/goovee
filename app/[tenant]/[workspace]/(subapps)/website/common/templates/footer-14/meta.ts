@@ -135,6 +135,7 @@ export type Footer14Data = Data<typeof footer14Schema>;
 export const footer14Demos: Demo<typeof footer14Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-22',
     sequence: 8,
     data: {
@@ -224,6 +225,7 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-22',
     sequence: 8,
     data: {

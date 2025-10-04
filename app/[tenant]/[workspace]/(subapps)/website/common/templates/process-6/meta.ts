@@ -71,6 +71,7 @@ export type Process6Data = Data<typeof process6Schema>;
 export const process6Demos: Demo<typeof process6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-13',
     sequence: 4,
     data: {
@@ -123,6 +124,7 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-13',
     sequence: 4,
     data: {

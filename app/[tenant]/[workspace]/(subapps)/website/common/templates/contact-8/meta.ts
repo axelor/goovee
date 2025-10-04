@@ -87,6 +87,7 @@ export type Contact8Data = Data<typeof contact8Schema>;
 export const contact8Demos: Demo<typeof contact8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-13',
     sequence: 9,
     data: {
@@ -118,6 +119,7 @@ export const contact8Demos: Demo<typeof contact8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-13',
     sequence: 9,
     data: {

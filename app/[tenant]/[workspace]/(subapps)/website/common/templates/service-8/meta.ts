@@ -109,6 +109,7 @@ export type Service8Data = Data<typeof service8Schema>;
 export const service8Demos: Demo<typeof service8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-13',
     sequence: 3,
     data: {
@@ -189,6 +190,7 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-13',
     sequence: 3,
     data: {

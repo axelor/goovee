@@ -88,6 +88,7 @@ export type About18Data = Data<typeof about18Schema>;
 export const about18Demos: Demo<typeof about18Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-18',
     sequence: 4,
     data: {
@@ -137,6 +138,7 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-18',
     sequence: 4,
     data: {

@@ -84,6 +84,7 @@ export type About2Data = Data<typeof about2Schema>;
 export const about2Demos: Demo<typeof about2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-2',
     sequence: 6,
     data: {
@@ -141,6 +142,7 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-2',
     sequence: 6,
     data: {

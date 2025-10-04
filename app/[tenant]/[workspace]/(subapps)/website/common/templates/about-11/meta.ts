@@ -103,6 +103,7 @@ export type About11Data = Data<typeof about11Schema>;
 export const about11Demos: Demo<typeof about11Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-10',
     sequence: 5,
     data: {
@@ -195,6 +196,7 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-10',
     sequence: 5,
     data: {

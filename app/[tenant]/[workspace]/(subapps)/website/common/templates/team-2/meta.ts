@@ -108,6 +108,7 @@ export type Team2Data = Data<typeof team2Schema>;
 export const team2Demos: Demo<typeof team2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-2',
     sequence: 7,
     data: {
@@ -305,6 +306,7 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-2',
     sequence: 7,
     data: {

@@ -104,6 +104,7 @@ export type Process12Data = Data<typeof process12Schema>;
 export const process12Demos: Demo<typeof process12Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-17',
     sequence: 3,
     data: {
@@ -158,6 +159,7 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-17',
     sequence: 3,
     data: {

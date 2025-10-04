@@ -448,9 +448,18 @@ export type Data<TSchema extends TemplateSchema> = ExpandRecursively<
   }
 >;
 
+export type Language = 'en_US' | 'fr_FR';
+export type Site = 'en' | 'fr';
+
 export type Demo<TSchema extends TemplateSchema> = {
-  language: 'en_US' | 'fr_FR';
-  data: Data<TSchema>;
+  language: Language;
+  site: Site;
   page: string;
   sequence: number;
+  data: Data<TSchema>;
 };
+
+export type DemoLite<TSchema extends TemplateSchema> = Omit<
+  Demo<TSchema>,
+  'data'
+> & {data: Record<string, unknown>};

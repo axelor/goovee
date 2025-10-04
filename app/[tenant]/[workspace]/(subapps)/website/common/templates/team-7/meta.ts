@@ -63,6 +63,7 @@ export type Team7Data = Data<typeof team7Schema>;
 export const team7Demos: Demo<typeof team7Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-17',
     sequence: 6,
     data: {
@@ -111,6 +112,7 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-17',
     sequence: 6,
     data: {

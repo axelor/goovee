@@ -37,6 +37,7 @@ export type Wiki1Data = Data<typeof wiki1Schema>;
 export const wiki1Demos: Demo<typeof wiki1Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'wiki',
     sequence: 1,
     data: {
@@ -45,6 +46,7 @@ export const wiki1Demos: Demo<typeof wiki1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'wiki',
     sequence: 1,
     data: {

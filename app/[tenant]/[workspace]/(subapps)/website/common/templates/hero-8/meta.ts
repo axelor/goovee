@@ -97,6 +97,7 @@ export type Hero8Data = Data<typeof hero8Schema>;
 export const hero8Demos: Demo<typeof hero8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-8',
     sequence: 1,
     data: {
@@ -121,6 +122,7 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-8',
     sequence: 1,
     data: {

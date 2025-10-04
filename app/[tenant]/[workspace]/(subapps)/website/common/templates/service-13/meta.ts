@@ -88,6 +88,7 @@ export type Service13Data = Data<typeof service13Schema>;
 export const service13Demos: Demo<typeof service13Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-10',
     sequence: 2,
     data: {
@@ -153,6 +154,7 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-10',
     sequence: 2,
     data: {

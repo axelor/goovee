@@ -113,6 +113,7 @@ export type Footer11Data = Data<typeof footer11Schema>;
 export const footer11Demos: Demo<typeof footer11Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-19',
     sequence: 9,
     data: {
@@ -191,6 +192,7 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-19',
     sequence: 9,
     data: {
@@ -277,6 +279,7 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-18',
     sequence: 11,
     data: {
@@ -355,6 +358,7 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-18',
     sequence: 11,
     data: {

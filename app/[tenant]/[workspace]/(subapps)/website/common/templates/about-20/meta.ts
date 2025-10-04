@@ -71,6 +71,7 @@ export type About20Data = Data<typeof about20Schema>;
 export const about20Demos: Demo<typeof about20Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-19',
     sequence: 7,
     data: {
@@ -140,6 +141,7 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-19',
     sequence: 7,
     data: {

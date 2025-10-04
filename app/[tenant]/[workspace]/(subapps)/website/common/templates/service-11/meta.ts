@@ -83,6 +83,7 @@ export type Service11Data = Data<typeof service11Schema>;
 export const service11Demos: Demo<typeof service11Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-8',
     sequence: 4,
     data: {
@@ -142,6 +143,7 @@ export const service11Demos: Demo<typeof service11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-8',
     sequence: 4,
     data: {

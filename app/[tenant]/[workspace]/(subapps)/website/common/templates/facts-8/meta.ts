@@ -71,6 +71,7 @@ export type Facts8Data = Data<typeof facts8Schema>;
 export const facts8Demos: Demo<typeof facts8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-12',
     sequence: 5,
     data: {
@@ -110,6 +111,7 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-12',
     sequence: 5,
     data: {

@@ -65,6 +65,7 @@ export type Faq4Data = Data<typeof faq4Schema>;
 export const faq4Demos: Demo<typeof faq4Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 5,
     data: {
@@ -113,6 +114,7 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 5,
     data: {

@@ -79,6 +79,7 @@ export type Facts2Data = Data<typeof facts2Schema>;
 export const facts2Demos: Demo<typeof facts2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-4',
     sequence: 6,
     data: {
@@ -121,6 +122,7 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-4',
     sequence: 6,
     data: {
@@ -163,6 +165,7 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-8',
     sequence: 6,
     data: {
@@ -207,6 +210,7 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-8',
     sequence: 6,
     data: {

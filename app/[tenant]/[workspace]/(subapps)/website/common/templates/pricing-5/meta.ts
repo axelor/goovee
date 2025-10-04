@@ -73,6 +73,7 @@ export type Pricing5Data = Data<typeof pricing5Schema>;
 export const pricing5Demos: Demo<typeof pricing5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-8',
     sequence: 9,
     data: {
@@ -126,6 +127,7 @@ export const pricing5Demos: Demo<typeof pricing5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-8',
     sequence: 9,
     data: {

@@ -60,6 +60,7 @@ export type Hero14Data = Data<typeof hero14Schema>;
 export const hero14Demos: Demo<typeof hero14Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-14',
     sequence: 1,
     data: {
@@ -79,6 +80,7 @@ export const hero14Demos: Demo<typeof hero14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-14',
     sequence: 1,
     data: {

@@ -75,6 +75,7 @@ export type Testimonial18Data = Data<typeof testimonial18Schema>;
 export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-23',
     sequence: 3,
     data: {
@@ -120,6 +121,7 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-23',
     sequence: 3,
     data: {

@@ -70,6 +70,7 @@ export type Hero4Data = Data<typeof hero4Schema>;
 export const hero4Demos: Demo<typeof hero4Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-4',
     sequence: 1,
     data: {
@@ -92,6 +93,7 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-4',
     sequence: 1,
     data: {

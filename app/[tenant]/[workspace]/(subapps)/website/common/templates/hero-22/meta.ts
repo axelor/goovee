@@ -58,6 +58,7 @@ export type Hero22Data = Data<typeof hero22Schema>;
 export const hero22Demos: Demo<typeof hero22Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-22',
     sequence: 1,
     data: {
@@ -81,6 +82,7 @@ export const hero22Demos: Demo<typeof hero22Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-22',
     sequence: 1,
     data: {

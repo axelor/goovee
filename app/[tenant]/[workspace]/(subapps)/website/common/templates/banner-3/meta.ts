@@ -53,6 +53,7 @@ export type Banner3Data = Data<typeof banner3Schema>;
 export const banner3Demos: Demo<typeof banner3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-4',
     sequence: 5,
     data: {
@@ -76,6 +77,7 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-4',
     sequence: 5,
     data: {

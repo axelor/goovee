@@ -132,6 +132,7 @@ export type Footer1Data = Data<typeof footer1Schema>;
 export const footer1Demos: Demo<typeof footer1Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-14',
     sequence: 9,
     data: {
@@ -214,6 +215,7 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-14',
     sequence: 9,
     data: {
@@ -304,6 +306,7 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-1',
     sequence: 12,
     data: {
@@ -386,6 +389,7 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-1',
     sequence: 12,
     data: {
@@ -476,6 +480,7 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
   },
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 12,
     data: {
@@ -558,6 +563,7 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 12,
     data: {

@@ -88,6 +88,7 @@ export type Portfolio8Data = Data<typeof portfolio8Schema>;
 export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-14',
     sequence: 4,
     data: {
@@ -202,6 +203,7 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-14',
     sequence: 4,
     data: {

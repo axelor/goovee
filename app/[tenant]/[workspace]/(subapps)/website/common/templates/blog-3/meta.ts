@@ -85,6 +85,7 @@ export type Blog3Data = Data<typeof blog3Schema>;
 export const blog3Demos: Demo<typeof blog3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-17',
     sequence: 5,
     data: {
@@ -162,6 +163,7 @@ export const blog3Demos: Demo<typeof blog3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-17',
     sequence: 5,
     data: {

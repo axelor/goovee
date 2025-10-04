@@ -69,6 +69,7 @@ export type Hero6Data = Data<typeof hero6Schema>;
 export const hero6Demos: Demo<typeof hero6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-6',
     sequence: 1,
     data: {
@@ -91,6 +92,7 @@ export const hero6Demos: Demo<typeof hero6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-6',
     sequence: 1,
     data: {

@@ -103,6 +103,7 @@ export type Hero11Data = Data<typeof hero11Schema>;
 export const hero11Demos: Demo<typeof hero11Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-11',
     sequence: 1,
     data: {
@@ -169,6 +170,7 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-11',
     sequence: 1,
     data: {

@@ -84,6 +84,7 @@ export type Service3Data = Data<typeof service3Schema>;
 export const service3Demos: Demo<typeof service3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
     page: 'demo-2',
     sequence: 3,
     data: {
@@ -144,6 +145,7 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
     page: 'demo-2',
     sequence: 3,
     data: {
