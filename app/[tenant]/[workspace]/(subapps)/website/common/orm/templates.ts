@@ -280,34 +280,21 @@ export async function createMetaSelect({
     },
   });
   if (_metaSelect) {
-    const existingItemsLength = _metaSelect.items?.length || 0;
-    const currentItemsLength = metaSelectItemsData.length;
+    if (_metaSelect.items?.length) {
+      await client.aOSMetaSelectItem.deleteAll({
+        where: {select: {id: _metaSelect.id}},
+      });
+    }
     try {
       metaSelect = await client.aOSMetaSelect.update({
         data: {
           id: _metaSelect.id,
           version: _metaSelect.version,
           items: {
-            update: existingItemsLength
-              ? _metaSelect.items?.map((item, i) => ({
-                  ...metaSelectItemsData[i],
-                  id: item.id,
-                  version: item.version,
-                }))
-              : undefined,
-            create:
-              existingItemsLength < currentItemsLength
-                ? metaSelectItemsData.slice(existingItemsLength).map(item => ({
-                    ...item,
-                    createdOn: item.updatedOn,
-                  }))
-                : undefined,
-            remove:
-              existingItemsLength > currentItemsLength
-                ? _metaSelect.items
-                    ?.slice(currentItemsLength)
-                    .map(item => item.id)
-                : undefined,
+            create: metaSelectItemsData.map(item => ({
+              ...item,
+              createdOn: item.updatedOn,
+            })),
           },
         },
         select: {id: true, name: true},
@@ -335,7 +322,7 @@ export async function createMetaSelect({
         select: {id: true, name: true},
       });
       console.log(
-        `\x1b[32m✔ Created metaSelect: ${metaSelectData.name}\x1b[0m`,
+        `\x1b[32m✅ Created metaSelect: ${metaSelectData.name}\x1b[0m`,
       );
     } catch (error) {
       console.log(
@@ -528,7 +515,7 @@ export async function deleteCustomFields({
   tenantId: Tenant['id'];
 }) {
   const client = await manager.getClient(tenantId);
-  const fields = await client.aOSMetaJsonField.find({
+  await client.aOSMetaJsonField.deleteAll({
     where: {
       model,
       modelField,
@@ -536,20 +523,16 @@ export async function deleteCustomFields({
         jsonModel: {name: {like: jsonModelPrefix + '%'}},
       }),
     },
-    select: {id: true, name: true, selection: true, jsonModel: {name: true}},
   });
-
-  await Promise.all(
-    fields.map(async field => {
-      await client.aOSMetaJsonField.delete({
-        id: field.id,
-        version: field.version,
-      });
-      console.log(
-        `\x1b[31m✖ field:${field.name} | ${field.jsonModel?.name || model}.\x1b[0m`,
-      );
-    }),
-  );
+  if (jsonModelPrefix) {
+    console.log(
+      `\x1b[32m✅ Deleted fields for the models with prefix: ${jsonModelPrefix} in the modelField: ${modelField}.\x1b[0m`,
+    );
+  } else {
+    console.log(
+      `\x1b[32m✅ Deleted all fields for the model: ${model} in the modelField: ${modelField}.\x1b[0m`,
+    );
+  }
 }
 
 export async function deleteMetaJsonModels({
@@ -572,38 +555,25 @@ export async function deleteMetaJsonModels({
     },
   });
 
-  await Promise.all(
-    models.map(async model => {
-      await client.aOSMetaJsonModel.delete({
-        id: model.id,
-        version: model.version,
-      });
-      console.log(`\x1b[31m✖ model:${model.name}.\x1b[0m`);
-    }),
-  );
+  await client.aOSMetaJsonModel.deleteAll({
+    where: {
+      name: {like: jsonModelPrefix + '%'},
+    },
+  });
 
-  await Promise.all(
-    models.map(async model => {
-      let formView, gridView;
-      if (model.formView) {
-        formView = client.aOSMetaView.delete({
-          id: model.formView.id,
-          version: model.formView.version,
-        });
-      }
-      if (model.gridView) {
-        gridView = client.aOSMetaView.delete({
-          id: model.gridView.id,
-          version: model.gridView.version,
-        });
-      }
-      await formView;
-      await gridView;
+  const views = models
+    .flatMap(model => [model.formView, model.gridView])
+    .filter(Boolean);
+  if (views.length) {
+    await client.aOSMetaView.deleteAll({
+      where: {
+        id: {in: views.map(view => view!.id)},
+      },
+    });
+  }
 
-      console.log(
-        `\x1b[31m✖ view:${model.formView?.name} | ${model.gridView?.name}.\x1b[0m`,
-      );
-    }),
+  console.log(
+    `\x1b[32m✅  Deleted all models with the prefix ${jsonModelPrefix} and their views.\x1b[0m`,
   );
 }
 
@@ -613,9 +583,12 @@ export async function deleteMetaSelects(props: {tenantId: Tenant['id']}) {
   await client.aOSMetaSelectItem.deleteAll({
     where: {select: {name: {like: `${SELECT_PREFIX}%`}}},
   });
-  return await client.aOSMetaSelect.deleteAll({
+  await client.aOSMetaSelect.deleteAll({
     where: {name: {like: `${SELECT_PREFIX}%`}},
   });
+  console.log(
+    `\x1b[32m✅  Deleted all selects and their items with the prefix ${SELECT_PREFIX}.\x1b[0m`,
+  );
 }
 
 export async function createCMSContent(props: {
