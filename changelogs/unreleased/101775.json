@@ -1,0 +1,5 @@
+{
+  "title": "Remove support for case insensitive and unaccent search",
+  "type": "fix",
+  "scope": ["core"]
+}
