@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Cta3Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -22,10 +23,13 @@ export function CTA3(props: TemplateProps<Cta3Data>) {
   });
 
   return (
-    <section
-      className={wrapperClassName}
-      data-code={props.code}
-      style={{backgroundImage: `url(${image.url})`}}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <Image
+        src={image.url}
+        alt={image.alt || 'CTA background'}
+        fill
+        className="object-cover"
+      />
       <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-7 col-xl-7 mx-auto">

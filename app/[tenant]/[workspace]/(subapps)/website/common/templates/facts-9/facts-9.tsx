@@ -46,10 +46,19 @@ export function Facts9(props: TemplateProps<Facts9Data>) {
             </figure>
 
             <div className="col-xl-10 mx-auto">
-              <div
-                style={{backgroundImage: `url(${backgroundImage.url})`}}
-                className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-300 text-white mt-n5 mt-lg-0 mt-lg-n50p mb-lg-n50p border-radius-lg-top">
-                <div className="card-body p-9 p-xl-10">
+              <div className="card image-wrapper bg-full text-white mt-n5 mt-lg-0 mt-lg-n50p mb-lg-n50p border-radius-lg-top overflow-hidden position-relative">
+                <Image
+                  src={backgroundImage.url}
+                  alt={backgroundImage.alt || 'Facts background'}
+                  fill
+                  className="object-fit-cover"
+                />
+                <div
+                  className="position-absolute top-0 left-0 w-100 h-100 bg-dark opacity-30"
+                  style={{zIndex: 1}}></div>
+                <div
+                  className="card-body p-9 p-xl-10 position-relative"
+                  style={{zIndex: 2}}>
                   <div className="row align-items-center counter-wrapper gy-4 text-center">
                     {facts?.map(({id, attrs: item}) => (
                       <Counter2

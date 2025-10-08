@@ -28,11 +28,19 @@ function Carousel2(props: {
           swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
         }}>
         {slides.map(({image, thumb}, i) => (
-          <SwiperSlide
-            key={i}
-            style={{backgroundImage: `url(${image?.url})`}}
-            className="bg-overlay bg-overlay-400 bg-dark bg-image"
-          />
+          <SwiperSlide key={i} className="position-relative">
+            {image?.url && (
+              <Image
+                src={image.url}
+                alt={image.alt || 'Carousel image'}
+                fill
+                className="object-cover"
+              />
+            )}
+            <div
+              className="position-absolute w-100 h-100 top-0 start-0 "
+              style={{background: 'rgba(30, 34, 40, .4)'}}></div>
+          </SwiperSlide>
         ))}
       </SwiperCarousel>
 

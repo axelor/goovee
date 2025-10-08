@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Testimonial11Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
@@ -33,10 +34,19 @@ export function Testimonial11(props: TemplateProps<Testimonial11Data>) {
       <div className={containerClassName}>
         <div className="row text-white text-center">
           <div className="col-xl-10 mx-auto">
-            <div
-              className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400"
-              style={{backgroundImage: `url(${image.url})`}}>
-              <div className="card-body p-9 p-xl-12">
+            <div className="card image-wrapper bg-full overflow-hidden position-relative">
+              <Image
+                src={image.url}
+                alt={image.alt || 'Testimonial background'}
+                fill
+                className="object-fit-cover"
+              />
+              <div
+                className="position-absolute top-0 left-0 w-100 h-100 bg-dark opacity-40"
+                style={{zIndex: 1}}></div>
+              <div
+                className="card-body p-9 p-xl-12 position-relative"
+                style={{zIndex: 2}}>
                 <div className="row gx-0">
                   <div className="col-xxl-9 mx-auto">
                     <div className="swiper-container dots-light dots-closer mb-6">

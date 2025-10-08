@@ -49,10 +49,19 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
   return (
     <footer className={footerClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div
-          className="card image-wrapper bg-full bg-image bg-overlay mt-n50p mx-md-5"
-          style={{backgroundImage: `url(${backgroundImage.url})`}}>
-          <div className="card-body p-6 p-md-11 d-lg-flex flex-row align-items-lg-center justify-content-md-between text-center text-lg-start">
+        <div className="card image-wrapper bg-full mt-n50p mx-md-5 overflow-hidden position-relative">
+          <Image
+            src={backgroundImage.url}
+            alt={backgroundImage.alt || 'Footer background'}
+            fill
+            className="object-fit-cover"
+          />
+          <div
+            className="position-absolute top-0 left-0 w-100 h-100 bg-dark opacity-50"
+            style={{zIndex: 1}}></div>
+          <div
+            className="card-body p-6 p-md-11 d-lg-flex flex-row align-items-lg-center justify-content-md-between text-center text-lg-start position-relative"
+            style={{zIndex: 2}}>
             <h3 className="display-4 mb-6 mb-lg-0 pe-lg-10 pe-xl-5 pe-xxl-15 text-white">
               {title}
             </h3>

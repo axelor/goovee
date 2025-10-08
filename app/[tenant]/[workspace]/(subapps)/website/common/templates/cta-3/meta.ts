@@ -42,13 +42,13 @@ export const cta3Schema = {
       title: 'Wrapper Class Name',
       type: 'string',
       defaultValue:
-        'wrapper image-wrapper bg-auto no-overlay bg-image bg-map text-center mb-14 mb-md-16',
+        'wrapper image-wrapper bg-auto bg-map text-center mb-14 mb-md-16',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container py-md-18',
+      defaultValue: 'container py-md-18 position-relative',
     },
   ],
   models: [imageModel],

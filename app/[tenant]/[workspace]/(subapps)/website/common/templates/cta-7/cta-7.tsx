@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Cta7Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -27,10 +28,17 @@ export function CTA7(props: TemplateProps<Cta7Data>) {
   return (
     <section className={sectionClassName} data-code={props.code}>
       <div className={containerCardClassName}>
-        <div
-          className={cardClassName}
-          style={{backgroundImage: `url(${image.url})`}}>
-          <div className={cardBodyClassName}>
+        <div className={cardClassName}>
+          <Image
+            src={image.url}
+            alt={image.alt || 'CTA background'}
+            fill
+            className="object-fit-cover"
+          />
+          <div
+            className="position-absolute top-0 left-0 w-100 h-100 bg-white opacity-50"
+            style={{zIndex: 1}}></div>
+          <div className={cardBodyClassName} style={{zIndex: 2}}>
             <div className={containerClassName}>
               <div className="row text-center">
                 <div className="col-md-7 col-lg-9 col-xl-8 col-xxl-7 mx-auto">

@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Footer3Data} from './meta';
 import {getImage} from '../../utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -59,10 +60,19 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
   return (
     <footer className={footerClassName} data-code={props.code}>
       <div className={containerClassName}>
-        <div
-          className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400 mb-13"
-          style={{backgroundImage: `url(${image.url})`}}>
-          <div className="card-body p-9 p-xl-11">
+        <div className="card image-wrapper bg-full mb-13 overflow-hidden position-relative">
+          <Image
+            src={image.url}
+            alt={image.alt || 'Footer background'}
+            fill
+            className="object-fit-cover"
+          />
+          <div
+            className="position-absolute top-0 left-0 w-100 h-100 bg-dark opacity-40"
+            style={{zIndex: 1}}></div>
+          <div
+            className="card-body p-9 p-xl-11 position-relative"
+            style={{zIndex: 2}}>
             <div className="row align-items-center gy-6">
               <div className="col-lg-7">
                 <h3 className="display-5 text-white">{newsletterTitle}</h3>

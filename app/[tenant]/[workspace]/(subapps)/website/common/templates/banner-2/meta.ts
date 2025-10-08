@@ -26,14 +26,13 @@ export const banner2Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue:
-        'wrapper mobile image-wrapper bg-image bg-overlay text-white',
+      defaultValue: 'wrapper mobile image-wrapper text-white',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container py-16 py-md-19 text-center',
+      defaultValue: 'container py-16 py-md-19 text-center position-relative',
     },
   ],
   models: [imageModel],

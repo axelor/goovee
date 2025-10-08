@@ -49,14 +49,13 @@ export const facts12Schema = {
       name: 'cardClassName',
       title: 'Card Class Name',
       type: 'string',
-      defaultValue:
-        'card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 pb-15',
+      defaultValue: 'card image-wrapper bg-full pb-15',
     },
     {
       name: 'cardBodyClassName',
       title: 'Card Body Class Name',
       type: 'string',
-      defaultValue: 'card-body py-14 px-0',
+      defaultValue: 'card-body py-14 px-0 relative',
     },
     {
       name: 'containerClassName',

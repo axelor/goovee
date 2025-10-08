@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Footer2Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
@@ -45,10 +46,14 @@ export function Footer2(props: TemplateProps<Footer2Data>) {
       <div className="container position-relative z-10">
         <div className="card shadow-lg mx-auto position-relative">
           <div className="row gx-0">
-            <div
-              className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start d-none d-md-block"
-              style={{backgroundImage: `url(${contactImage.url})`}}
-            />
+            <div className="col-lg-6 image-wrapper rounded-top rounded-lg-start d-none d-md-block overflow-hidden">
+              <Image
+                src={contactImage.url}
+                alt={contactImage.alt || 'Footer background'}
+                fill
+                className="object-cover"
+              />
+            </div>
             <div className="col-lg-6">
               <div className="p-10 p-md-11 p-lg-13">
                 <h2 className="display-4 mb-3">{contactTitle}</h2>

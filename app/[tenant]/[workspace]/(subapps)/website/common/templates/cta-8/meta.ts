@@ -47,8 +47,7 @@ export const cta8Schema = {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue:
-        'container card image-wrapper bg-full bg-image bg-overlay bg-overlay-300',
+      defaultValue: 'container card image-wrapper overflow-hidden',
     },
   ],
   models: [imageModel],

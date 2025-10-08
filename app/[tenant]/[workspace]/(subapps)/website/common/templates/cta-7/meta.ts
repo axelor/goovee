@@ -53,14 +53,13 @@ export const cta7Schema = {
       name: 'cardClassName',
       title: 'Card Class Name',
       type: 'string',
-      defaultValue:
-        'card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 mb-14',
+      defaultValue: 'card image-wrapper mb-14 overflow-hidden',
     },
     {
       name: 'cardBodyClassName',
       title: 'Card Body Class Name',
       type: 'string',
-      defaultValue: 'card-body py-14 px-0',
+      defaultValue: 'card-body py-14 px-0 position-relative',
     },
     {
       name: 'containerClassName',
