@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const cta6Schema = {
   title: 'CTA 6',
@@ -29,9 +29,8 @@ export const cta6Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -47,8 +46,7 @@ export const cta6Schema = {
       defaultValue: 'container py-md-16 py-lg-18',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Cta6Data = Data<typeof cta6Schema>;
@@ -65,10 +63,19 @@ export const cta6Demos: Demo<typeof cta6Schema>[] = [
       cta6LinkHref: '#',
       cta6Image: {
         id: '1',
-        version: 1,
-        fileName: 'map.png',
-        fileType: 'image/png',
-        filePath: '/img/map.png',
+        version: 0,
+        attrs: {
+          alt: 'World map background',
+          width: 800,
+          height: 484,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'map.png',
+            fileType: 'image/png',
+            filePath: '/img/map.png',
+          },
+        },
       },
     },
   },
@@ -84,10 +91,19 @@ export const cta6Demos: Demo<typeof cta6Schema>[] = [
       cta6LinkHref: '#',
       cta6Image: {
         id: '1',
-        version: 1,
-        fileName: 'map.png',
-        fileType: 'image/png',
-        filePath: '/img/map.png',
+        version: 0,
+        attrs: {
+          alt: 'Fond de carte du monde',
+          width: 800,
+          height: 484,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'map.png',
+            fileType: 'image/png',
+            filePath: '/img/map.png',
+          },
+        },
       },
     },
   },

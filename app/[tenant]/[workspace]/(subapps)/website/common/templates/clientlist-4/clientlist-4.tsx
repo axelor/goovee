@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Clientlist4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import FigureImage from '@/subapps/website/common/components/reuseable/FigureImage';
 
 export function Clientlist4(props: TemplateProps<Clientlist4Data>) {
@@ -24,20 +24,21 @@ export function Clientlist4(props: TemplateProps<Clientlist4Data>) {
 
           <div className="col-lg-8">
             <div className="row row-cols-2 row-cols-md-4 gx-0 gx-md-8 gx-xl-12 gy-12">
-              {clients?.map(({id, attrs: item}, i) => (
-                <div className="col" key={id}>
-                  <FigureImage
-                    width={450}
-                    height={301}
-                    src={getMetaFileURL({
-                      metaFile: item.image,
-                      path: `clientlist4Clients[${i}].attrs.image`,
-                      ...props,
-                    })}
-                    className="px-3 px-md-0 px-xxl-2"
-                  />
-                </div>
-              ))}
+              {clients?.map(({id, attrs: item}, i) => {
+                const image = getImage({
+                  image: item.image,
+                  path: `clientlist4Clients[${i}].attrs.image`,
+                  ...props,
+                });
+                return (
+                  <div className="col" key={id}>
+                    <FigureImage
+                      image={image}
+                      className="px-3 px-md-0 px-xxl-2"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -2,17 +2,25 @@ import {SUBAPP_CODES} from '@/constants';
 import type {MountType, TemplateProps} from '../types';
 import {MOUNT_TYPE} from '../constants';
 import {camelCase} from 'lodash-es';
-import {TemplateSchema, Model, MetaSelection} from '../types/templates';
+import {
+  TemplateSchema,
+  Model,
+  MetaSelection,
+  ImageType,
+} from '../types/templates';
 
-export function getMetaFileURL(props: {
-  metaFile: {id: string | number} | undefined;
+type FileURLProps = {
   websiteSlug: string;
   websitePageSlug?: string;
   path: string;
   workspaceURI: string;
   contentId?: string | number;
   mountType: MountType;
-}) {
+};
+
+export function getMetaFileURL(
+  props: FileURLProps & {metaFile: {id: string | number} | undefined},
+) {
   const {workspaceURI, metaFile} = props;
   if (!metaFile?.id || !props.contentId) return '';
 
@@ -27,6 +35,48 @@ export function getMetaFileURL(props: {
   const mountType = encodeURIComponent(props.mountType);
 
   return `${workspaceURI}/${SUBAPP_CODES.website}/api/templates/${mountType}/${websiteSlug}/${websitePageSlug}/${contentId}/${path}/${metaFile.id}`;
+}
+
+export function getPaddingBottom(image?: ImageType): string {
+  if (!image || !image.width || !image.height || image.width === 0) {
+    return '0%';
+  }
+  return `${(image.height / image.width) * 100}%`;
+}
+
+export function getImage(
+  props: FileURLProps & {
+    image:
+      | {
+          id: string;
+          version: number;
+          attrs: {
+            alt: string;
+            height: number;
+            width: number;
+            image: {
+              id: string;
+              version: number;
+              fileName?: string;
+              filePath?: string;
+              fileType?: string;
+            };
+          };
+        }
+      | undefined;
+  },
+): ImageType {
+  const {image: imageObj, path, ...rest} = props;
+  if (!imageObj?.attrs) {
+    return {url: '', alt: '', width: 0, height: 0, metaFile: null};
+  }
+  const {image, alt, width, height} = imageObj.attrs;
+  const url = getMetaFileURL({
+    ...rest,
+    metaFile: image,
+    path: `${path}.attrs.image`,
+  });
+  return {url, alt, width, height, metaFile: image};
 }
 
 const BATCH_SIZE = 10;

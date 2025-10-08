@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial16Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 
 export function Testimonial16(props: TemplateProps<Testimonial16Data>) {
@@ -14,8 +14,8 @@ export function Testimonial16(props: TemplateProps<Testimonial16Data>) {
     testimonial16ContainerClassName: containerClassName,
   } = data || {};
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: testimonial16BackgroundImage,
+  const backgroundImage = getImage({
+    image: testimonial16BackgroundImage,
     path: 'testimonial16BackgroundImage',
     ...props,
   });
@@ -35,7 +35,7 @@ export function Testimonial16(props: TemplateProps<Testimonial16Data>) {
           <div className="row gx-0">
             <div
               className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start"
-              style={{backgroundImage: `url(${backgroundImage})`}}
+              style={{backgroundImage: `url(${backgroundImage.url})`}}
             />
 
             <div className="col-lg-6">

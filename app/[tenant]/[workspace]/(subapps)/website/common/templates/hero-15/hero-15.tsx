@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero15Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
@@ -23,11 +23,13 @@ export function Hero15(props: TemplateProps<Hero15Data>) {
               key={id}
               className="swiper-slide bg-overlay bg-overlay-400 bg-dark bg-image"
               style={{
-                backgroundImage: `url(${getMetaFileURL({
-                  metaFile: item.image,
-                  path: `hero15Slides[${i}].attrs.image`,
-                  ...props,
-                })})`,
+                backgroundImage: `url(${
+                  getImage({
+                    image: item.image,
+                    path: `hero15Slides[${i}].attrs.image`,
+                    ...props,
+                  }).url
+                })`,
               }}>
               <div className={containerClassName}>
                 <div className="row h-100">

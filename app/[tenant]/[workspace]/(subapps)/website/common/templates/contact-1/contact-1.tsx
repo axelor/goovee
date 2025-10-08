@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact1Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 export function Contact1(props: TemplateProps<Contact1Data>) {
   const {data} = props;
@@ -13,8 +14,8 @@ export function Contact1(props: TemplateProps<Contact1Data>) {
     contact1ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact1Image,
+  const image = getImage({
+    image: contact1Image,
     path: 'contact1Image',
     ...props,
   });
@@ -39,7 +40,12 @@ export function Contact1(props: TemplateProps<Contact1Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

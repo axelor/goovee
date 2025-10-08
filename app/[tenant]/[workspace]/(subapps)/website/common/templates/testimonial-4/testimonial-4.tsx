@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
 import {TestimonialCard3} from '@/subapps/website/common/components/reuseable/testimonial-cards';
@@ -40,8 +40,8 @@ export function Testimonial4(props: TemplateProps<Testimonial4Data>) {
                   review={item.review}
                   designation={item.designation}
                   rating={item.rating}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
+                  image={getImage({
+                    image: item.image,
                     path: `testimonial4Testimonials[${i}].attrs.image`,
                     ...props,
                   })}

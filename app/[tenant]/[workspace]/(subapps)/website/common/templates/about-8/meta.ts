@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const about8Schema = {
   title: 'About 8',
@@ -30,9 +29,8 @@ export const about8Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'aboutList',
@@ -54,8 +52,7 @@ export const about8Schema = {
       defaultValue: 'container mb-15 mb-md-18',
     },
   ],
-  models: [bulletListModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About8Data = Data<typeof about8Schema>;
@@ -69,10 +66,19 @@ export const about8Demos: Demo<typeof about8Schema>[] = [
     data: {
       about8Image: {
         id: '1',
-        version: 1,
-        fileName: 'i9.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i9.png',
+        version: 0,
+        attrs: {
+          alt: 'Mastery of control',
+          width: 676,
+          height: 514,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i9.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i9.png',
+          },
+        },
       },
       about8Caption: 'Mastery of Control',
       about8Title:
@@ -119,10 +125,19 @@ export const about8Demos: Demo<typeof about8Schema>[] = [
     data: {
       about8Image: {
         id: '1',
-        version: 1,
-        fileName: 'i9.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i9.png',
+        version: 0,
+        attrs: {
+          alt: 'Maîtrise du contrôle',
+          width: 676,
+          height: 514,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i9.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i9.png',
+          },
+        },
       },
       about8Caption: 'Maîtrise du contrôle',
       about8Title:

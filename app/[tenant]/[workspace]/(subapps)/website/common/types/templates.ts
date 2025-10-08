@@ -463,3 +463,11 @@ export type DemoLite<TSchema extends TemplateSchema> = Omit<
   Demo<TSchema>,
   'data'
 > & {data: Record<string, unknown>};
+
+export type ImageType = {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+  metaFile: any;
+};

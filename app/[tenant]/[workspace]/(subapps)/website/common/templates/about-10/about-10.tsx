@@ -1,7 +1,7 @@
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ProgressList from '@/subapps/website/common/components/common/ProgressList';
 import type {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import {type About10Data} from './meta';
 
 export function About10(props: TemplateProps<About10Data>) {
@@ -18,8 +18,8 @@ export function About10(props: TemplateProps<About10Data>) {
     about10ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about10Image,
+  const image = getImage({
+    image: about10Image,
     path: 'about10Image',
     ...props,
   });

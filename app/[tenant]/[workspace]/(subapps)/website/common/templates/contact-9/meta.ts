@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const contact9Schema = {
   title: 'Contact 9',
@@ -34,9 +34,8 @@ export const contact9Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -51,8 +50,7 @@ export const contact9Schema = {
       defaultValue: 'container py-18',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact9Data = Data<typeof contact9Schema>;
@@ -70,10 +68,19 @@ export const contact9Demos: Demo<typeof contact9Schema>[] = [
       contact9LinkHref: '#',
       contact9Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg10.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Join our community',
+          width: 1440,
+          height: 541,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg10.jpg',
+          },
+        },
       },
     },
   },
@@ -90,10 +97,19 @@ export const contact9Demos: Demo<typeof contact9Schema>[] = [
       contact9LinkHref: '#',
       contact9Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg10.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Rejoignez notre communauté',
+          width: 1440,
+          height: 541,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg10.jpg',
+          },
+        },
       },
     },
   },

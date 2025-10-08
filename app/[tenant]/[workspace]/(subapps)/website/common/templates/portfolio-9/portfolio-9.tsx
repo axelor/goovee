@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
   const {data} = props;
@@ -38,26 +39,26 @@ export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
     portfolio9ContainerClassName: containerClassName,
   } = data || {};
 
-  const image1 = getMetaFileURL({
-    metaFile: portfolio9Image1,
+  const image1 = getImage({
+    image: portfolio9Image1,
     path: 'portfolio9Image1',
     ...props,
   });
 
-  const image2 = getMetaFileURL({
-    metaFile: portfolio9Image2,
+  const image2 = getImage({
+    image: portfolio9Image2,
     path: 'portfolio9Image2',
     ...props,
   });
 
-  const image3 = getMetaFileURL({
-    metaFile: portfolio9Image3,
+  const image3 = getImage({
+    image: portfolio9Image3,
     path: 'portfolio9Image3',
     ...props,
   });
 
-  const image4 = getMetaFileURL({
-    metaFile: portfolio9Image4,
+  const image4 = getImage({
+    image: portfolio9Image4,
     path: 'portfolio9Image4',
     ...props,
   });
@@ -98,7 +99,13 @@ export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
 
               <div className="col-lg-7 offset-lg-1 align-self-end">
                 <figure>
-                  <img className="img-fluid" src={image1} alt="" />
+                  <Image
+                    className="img-fluid"
+                    src={image1.url}
+                    alt={image1.alt || ''}
+                    width={image1.width}
+                    height={image1.height}
+                  />
                 </figure>
               </div>
             </div>
@@ -123,7 +130,13 @@ export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
 
               <div className="col-lg-7">
                 <figure>
-                  <img className="img-fluid" src={image2} alt="" />
+                  <Image
+                    className="img-fluid"
+                    src={image2.url}
+                    alt={image2.alt || ''}
+                    width={image2.width}
+                    height={image2.height}
+                  />
                 </figure>
               </div>
             </div>
@@ -146,7 +159,13 @@ export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
                 />
               </div>
 
-              <img className="card-img-bottom" src={image3} alt="" />
+              <Image
+                className="card-img-bottom"
+                src={image3.url}
+                alt={image3.alt || ''}
+                width={image3.width}
+                height={image3.height}
+              />
             </div>
           </div>
 
@@ -165,7 +184,13 @@ export function Portfolio9(props: TemplateProps<Portfolio9Data>) {
                 />
               </div>
 
-              <img className="card-img-bottom" src={image4} alt="" />
+              <Image
+                className="card-img-bottom"
+                src={image4.url}
+                alt={image4.alt || ''}
+                width={image4.width}
+                height={image4.height}
+              />
             </div>
           </div>
         </div>

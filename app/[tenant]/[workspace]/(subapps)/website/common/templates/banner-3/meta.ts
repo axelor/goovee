@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const banner3Schema = {
@@ -19,9 +20,8 @@ export const banner3Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'video',
@@ -44,7 +44,7 @@ export const banner3Schema = {
       defaultValue: 'container py-18 text-center',
     },
   ],
-  models: [],
+  models: [imageModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -61,10 +61,19 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
         'Discover all the essential information you need to create a business process model.',
       banner3Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Business process model',
+          width: 1440,
+          height: 523,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg1.jpg',
+          },
+        },
       },
       banner3Video: {
         id: '1',
@@ -85,10 +94,19 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
         'Découvrez toutes les informations essentielles dont vous avez besoin pour créer un modèle de processus métier.',
       banner3Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Modèle de processus métier',
+          width: 1440,
+          height: 523,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg1.jpg',
+          },
+        },
       },
       banner3Video: {
         id: '1',

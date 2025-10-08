@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '../../utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 
@@ -28,8 +28,8 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
     footer3ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: footer3Image,
+  const image = getImage({
+    image: footer3Image,
     path: 'footer3Image',
     ...props,
   });
@@ -61,7 +61,7 @@ export function Footer3(props: TemplateProps<Footer3Data>) {
       <div className={containerClassName}>
         <div
           className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400 mb-13"
-          style={{backgroundImage: `url(${image})`}}>
+          style={{backgroundImage: `url(${image.url})`}}>
           <div className="card-body p-9 p-xl-11">
             <div className="row align-items-center gy-6">
               <div className="col-lg-7">

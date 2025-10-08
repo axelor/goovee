@@ -576,6 +576,7 @@ pnpm website:seed:website
 The `website:seed:website` script is configured by the `website` object in `app/[tenant]/[workspace]/(subapps)/website/common/templates/site.ts`. It defines the website's name and its language-specific sites.
 
 **Example:**
+
 ```ts
 export const website = {
   name: 'Lighthouse',
@@ -592,11 +593,12 @@ export const website = {
     },
     {
       language: 'fr_FR',
-      website: { name: 'Français', slug: 'fr', homepage: 'demo-1' },
+      website: {name: 'Français', slug: 'fr', homepage: 'demo-1'},
     },
   ],
 };
 ```
+
 > **Note:** Before adding a new site, you must first update the `Language` and `Site` types in `.../types/templates.ts`.
 
 </details>

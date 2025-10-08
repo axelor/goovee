@@ -1,7 +1,8 @@
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 // -------- data -------- //
 import {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 import type {Services2Data} from './meta';
 
@@ -17,8 +18,8 @@ export function Service2(props: TemplateProps<Services2Data>) {
     service2ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: service2Image,
+  const image = getImage({
+    image: service2Image,
     path: `service2Image`,
     ...props,
   });
@@ -29,7 +30,13 @@ export function Service2(props: TemplateProps<Services2Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <figure className="text-center">
-              <img className="w-auto" alt="our solutions" src={image} />
+              <Image
+                className="w-auto"
+                alt={image.alt}
+                src={image.url}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

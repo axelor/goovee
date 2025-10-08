@@ -1,8 +1,12 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import Link from 'next/link';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
+import Image from 'next/image';
 
 export function Portfolio4(props: TemplateProps<Portfolio4Data>) {
   const {data} = props;
@@ -33,36 +37,43 @@ export function Portfolio4(props: TemplateProps<Portfolio4Data>) {
               pagination={pagination}
               className="overflow-visible pb-2"
               breakpoints={{0: {slidesPerView: 1}, 768: {slidesPerView: 2}}}>
-              {portfolioList?.map(({id, attrs: item}, i) => (
-                <div className="card shadow-lg" key={id}>
-                  <figure className="card-img-top overlay overlay-1">
-                    <Link href={item.linkUrl || '#'}>
-                      <img
-                        className="img-fluid"
-                        src={getMetaFileURL({
-                          metaFile: item.image,
-                          path: `portfolio4PortfolioList[${i}].attrs.image`,
-                          ...props,
-                        })}
-                        alt=""
-                      />
-                      <span className="bg" />
-                    </Link>
+              {portfolioList?.map(({id, attrs: item}, i) => {
+                const img = getImage({
+                  image: item.image,
+                  path: `portfolio4PortfolioList[${i}].attrs.image`,
+                  ...props,
+                });
+                return (
+                  <div className="card shadow-lg" key={id}>
+                    <figure className="card-img-top overlay overlay-1">
+                      <Link
+                        href={item.linkUrl || '#'}
+                        className="position-relative"
+                        style={{paddingBottom: getPaddingBottom(img)}}>
+                        <Image
+                          className="img-fluid object-fit-cover"
+                          src={img.url}
+                          alt={img.alt || ''}
+                          fill
+                        />
+                        <span className="bg" />
+                      </Link>
 
-                    <figcaption>
-                      <h5 className="from-top mb-0">{figCaption}</h5>
-                    </figcaption>
-                  </figure>
+                      <figcaption>
+                        <h5 className="from-top mb-0">{figCaption}</h5>
+                      </figcaption>
+                    </figure>
 
-                  <div className="card-body p-6">
-                    <h3 className="fs-21 mb-1">{item.name}</h3>
-                    <ul className="post-meta fs-16 mb-0">
-                      <li>{item.stat}</li>
-                      <li>{item.category}</li>
-                    </ul>
+                    <div className="card-body p-6">
+                      <h3 className="fs-21 mb-1">{item.name}</h3>
+                      <ul className="post-meta fs-16 mb-0">
+                        <li>{item.stat}</li>
+                        <li>{item.category}</li>
+                      </ul>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </Carousel>
           </div>
         </div>

@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {contactInfoModel} from '../json-models';
+import {contactInfoModel, imageModel} from '../json-models';
 
 export const contact11Schema = {
   title: 'Contact 11',
@@ -25,9 +24,8 @@ export const contact11Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'contactInfo',
@@ -49,8 +47,7 @@ export const contact11Schema = {
       defaultValue: 'container mb-15 mb-md-18',
     },
   ],
-  models: [contactInfoModel],
-  metaModels: [metaFileModel],
+  models: [contactInfoModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact11Data = Data<typeof contact11Schema>;
@@ -64,10 +61,19 @@ export const contact11Demos: Demo<typeof contact11Schema>[] = [
     data: {
       contact11Image: {
         id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        version: 0,
+        attrs: {
+          alt: 'Contact us',
+          width: 548,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       contact11Caption: 'Contact Us',
       contact11Title: "Got any questions? Don't hesitate to get in touch.",
@@ -94,10 +100,19 @@ export const contact11Demos: Demo<typeof contact11Schema>[] = [
     data: {
       contact11Image: {
         id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        version: 0,
+        attrs: {
+          alt: 'Contactez-nous',
+          width: 548,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       contact11Caption: 'Contactez-nous',
       contact11Title:

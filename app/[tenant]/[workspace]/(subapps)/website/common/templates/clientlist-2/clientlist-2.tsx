@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Clientlist2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 export function Clientlist2(props: TemplateProps<Clientlist2Data>) {
   const {data} = props;
@@ -23,20 +24,27 @@ export function Clientlist2(props: TemplateProps<Clientlist2Data>) {
 
           <div className="col-lg-8">
             <div className="row row-cols-2 row-cols-md-4 gx-0 gx-md-8 gx-xl-12 gy-11 mt-n10">
-              {clients?.map(({id, attrs: item}, i) => (
-                <div className="col" key={id}>
-                  <figure className="px-4 px-lg-3 px-xxl-5">
-                    <img
-                      src={getMetaFileURL({
-                        metaFile: item.image,
-                        path: `clientlist2Clients[${i}].attrs.image`,
-                        ...props,
-                      })}
-                      alt="brand"
-                    />
-                  </figure>
-                </div>
-              ))}
+              {clients?.map(({id, attrs: item}, i) => {
+                const image = getImage({
+                  image: item.image,
+                  path: `clientlist2Clients[${i}].attrs.image`,
+                  ...props,
+                });
+                return (
+                  <div className="col" key={id}>
+                    <figure className="px-4 px-lg-3 px-xxl-5">
+                      {image?.url && (
+                        <Image
+                          src={image.url}
+                          alt={image.alt}
+                          width={image.width}
+                          height={image.height}
+                        />
+                      )}
+                    </figure>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial18Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 
 export function Testimonial18(props: TemplateProps<Testimonial18Data>) {
@@ -14,8 +14,8 @@ export function Testimonial18(props: TemplateProps<Testimonial18Data>) {
     testimonial18ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: testimonial18Image,
+  const image = getImage({
+    image: testimonial18Image,
     path: 'testimonial18Image',
     ...props,
   });
@@ -24,7 +24,7 @@ export function Testimonial18(props: TemplateProps<Testimonial18Data>) {
     <section
       className={wrapperClassName}
       data-code={props.code}
-      style={{backgroundImage: `url(${image})`}}>
+      style={{backgroundImage: `url(${image.url})`}}>
       <div className={containerClassName}>
         <i className="icn-flower text-white fs-30 opacity-50" />
         <div className="row mt-3">

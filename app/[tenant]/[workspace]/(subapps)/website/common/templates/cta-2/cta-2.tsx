@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Cta2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function CTA2(props: TemplateProps<Cta2Data>) {
@@ -16,16 +16,16 @@ export function CTA2(props: TemplateProps<Cta2Data>) {
     cta2ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: cta2Image,
+  const image = getImage({
+    image: cta2Image,
     path: 'cta2Image',
     ...props,
   });
 
   return (
     <section
-      style={{backgroundImage: `url(${image})`}}
       className={wrapperClassName}
+      style={{backgroundImage: `url(${image.url})`}}
       data-code={props.code}>
       <div className={containerClassName}>
         <div className="row">

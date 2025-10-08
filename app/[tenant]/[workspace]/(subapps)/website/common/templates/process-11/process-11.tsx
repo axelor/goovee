@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
 import {Fragment} from 'react';
+import Image from 'next/image';
 
 export function Process11(props: TemplateProps<Process11Data>) {
   const {data} = props;
@@ -16,8 +17,8 @@ export function Process11(props: TemplateProps<Process11Data>) {
     process11ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: process11Image,
+  const image = getImage({
+    image: process11Image,
     path: 'process11Image',
     ...props,
   });
@@ -43,7 +44,12 @@ export function Process11(props: TemplateProps<Process11Data>) {
               />
 
               <figure className="rounded">
-                <img src={image} alt="" />
+                <Image
+                  src={image.url}
+                  alt={image.alt}
+                  width={image.width}
+                  height={image.height}
+                />
               </figure>
             </div>
 

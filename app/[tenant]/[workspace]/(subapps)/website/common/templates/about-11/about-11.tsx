@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
-import {Tiles10} from '@/subapps/website/common/components/elements/tiles';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Tiles10 from '@/subapps/website/common/components/elements/tiles/Tiles10';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 import {Fragment} from 'react';
 
@@ -20,20 +20,20 @@ export function About11(props: TemplateProps<About11Data>) {
     about11ContainerClassName: containerClassName,
   } = data || {};
 
-  const tileImage1 = getMetaFileURL({
-    metaFile: about11TileImage1,
+  const tileImage1 = getImage({
+    image: about11TileImage1,
     path: 'about11TileImage1',
     ...props,
   });
 
-  const tileImage2 = getMetaFileURL({
-    metaFile: about11TileImage2,
+  const tileImage2 = getImage({
+    image: about11TileImage2,
     path: 'about11TileImage2',
     ...props,
   });
 
-  const tileImage3 = getMetaFileURL({
-    metaFile: about11TileImage3,
+  const tileImage3 = getImage({
+    image: about11TileImage3,
     path: 'about11TileImage3',
     ...props,
   });

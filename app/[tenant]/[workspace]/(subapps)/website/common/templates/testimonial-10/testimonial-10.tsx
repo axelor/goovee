@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial10Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {TestimonialCard3} from '@/subapps/website/common/components/reuseable/testimonial-cards';
 
 export function Testimonial10(props: TemplateProps<Testimonial10Data>) {
@@ -34,8 +34,8 @@ export function Testimonial10(props: TemplateProps<Testimonial10Data>) {
                   name={item.name}
                   review={item.review}
                   designation={item.designation}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
+                  image={getImage({
+                    image: item.image,
                     path: `testimonial10Testimonials[${i}].attrs.image`,
                     ...props,
                   })}

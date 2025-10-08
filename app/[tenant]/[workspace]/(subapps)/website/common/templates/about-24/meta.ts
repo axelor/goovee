@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const about24Schema = {
   title: 'About 24',
@@ -24,9 +24,8 @@ export const about24Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'heading1',
@@ -168,8 +167,8 @@ export const about24Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type About24Data = Data<typeof about24Schema>;
@@ -183,10 +182,19 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
     data: {
       about24Image: {
         id: '1',
-        version: 1,
-        fileName: 'about29.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about29.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Professional photographer at work',
+          width: 610,
+          height: 610,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about29.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about29.jpg',
+          },
+        },
       },
       about24Title:
         "Hi, I'm Jhon, and I'm a film bridal and individual photography located in United Kingdom.",
@@ -341,10 +349,19 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
     data: {
       about24Image: {
         id: '1',
-        version: 1,
-        fileName: 'about29.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about29.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Photographe professionnel au travail',
+          width: 610,
+          height: 610,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about29.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about29.jpg',
+          },
+        },
       },
       about24Title:
         "Bonjour, je m'appelle Jhon et je suis une photographie de mariage et individuelle située au Royaume-Uni.",

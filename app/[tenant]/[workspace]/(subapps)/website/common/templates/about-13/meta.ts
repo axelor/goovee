@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
 import {buttonColorSelection} from '../meta-selections';
 
 export const about13Schema = {
@@ -31,9 +31,8 @@ export const about13Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'btnColor',
@@ -74,7 +73,7 @@ export const about13Schema = {
       defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-18',
     },
   ],
-  models: [bulletListModel],
+  models: [bulletListModel, imageModel],
   metaModels: [metaFileModel],
   selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
@@ -90,10 +89,19 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
     data: {
       about13Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company strategies and achievement',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about13Caption: 'Who Are We?',
       about13Title:
@@ -149,10 +157,19 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
     data: {
       about13Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: "Stratégies et réalisation de l'entreprise",
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about13Caption: 'Qui sommes-nous ?',
       about13Title: 'L’organisation qui pense à l’efficacité des stratégies.',

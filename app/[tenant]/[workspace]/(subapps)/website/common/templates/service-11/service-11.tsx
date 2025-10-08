@@ -1,9 +1,10 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
 import IconProps from '../../types/icons';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
 function getIcon(icon: string) {
   if (!icon) return (props: IconProps) => null;
@@ -20,8 +21,8 @@ export function Service11(props: TemplateProps<Service11Data>) {
     service11ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: service11Image,
+  const image = getImage({
+    image: service11Image,
     path: 'service11Image',
     ...props,
   });
@@ -37,7 +38,12 @@ export function Service11(props: TemplateProps<Service11Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts14Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import {Fragment} from 'react';
+import Image from 'next/image';
 
 export function Facts14(props: TemplateProps<Facts14Data>) {
   const {data} = props;
@@ -15,8 +16,8 @@ export function Facts14(props: TemplateProps<Facts14Data>) {
     facts14ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: facts14Image,
+  const image = getImage({
+    image: facts14Image,
     path: 'facts14Image',
     ...props,
   });
@@ -54,7 +55,12 @@ export function Facts14(props: TemplateProps<Facts14Data>) {
           </div>
 
           <figure>
-            <img src={image} alt="" />
+            <Image
+              src={image.url}
+              alt={image.alt}
+              width={image.width}
+              height={image.height}
+            />
           </figure>
         </Fragment>
       </div>

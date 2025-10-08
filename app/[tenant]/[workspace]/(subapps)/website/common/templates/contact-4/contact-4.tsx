@@ -1,6 +1,7 @@
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 import type {Contact4Data} from './meta.ts';
 
@@ -17,8 +18,8 @@ export function Contact4(props: TemplateProps<Contact4Data>) {
     contact4ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact4Image,
+  const image = getImage({
+    image: contact4Image,
     path: `contact4Image`,
     ...props,
   });
@@ -29,7 +30,13 @@ export function Contact4(props: TemplateProps<Contact4Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-10 mb-md-14 align-items-center">
           <div className="col-lg-6">
             <figure>
-              <img alt="contact" className="w-auto" src={image} />
+              <Image
+                alt={image.alt}
+                className="w-auto"
+                src={image.url}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

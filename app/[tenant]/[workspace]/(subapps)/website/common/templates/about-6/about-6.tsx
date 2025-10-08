@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About6Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 import {Tiles5} from '@/subapps/website/common/components/elements/tiles';
 
@@ -17,14 +17,14 @@ export function About6(props: TemplateProps<About6Data>) {
     about6ContainerClassName: containerClassName,
   } = data || {};
 
-  const image1 = getMetaFileURL({
-    metaFile: about6Image1,
+  const image1 = getImage({
+    image: about6Image1,
     path: 'about6Image1',
     ...props,
   });
 
-  const image2 = getMetaFileURL({
-    metaFile: about6Image2,
+  const image2 = getImage({
+    image: about6Image2,
     path: 'about6Image2',
     ...props,
   });

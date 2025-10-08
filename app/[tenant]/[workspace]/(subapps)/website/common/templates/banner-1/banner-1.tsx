@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Banner1Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import GoogleAppBtn from '@/subapps/website/common/components/common/GoogleAppBtn';
+import Image from 'next/image';
 
 export function Banner1(props: TemplateProps<Banner1Data>) {
   const {data} = props;
@@ -15,8 +16,8 @@ export function Banner1(props: TemplateProps<Banner1Data>) {
     banner1ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: banner1Image,
+  const image = getImage({
+    image: banner1Image,
     path: 'banner1Image',
     ...props,
   });
@@ -26,7 +27,13 @@ export function Banner1(props: TemplateProps<Banner1Data>) {
       <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 align-items-center">
           <div className="col-lg-6">
-            <img alt="" src={image} className="w-100" />
+            <Image
+              alt={image.alt}
+              src={image.url}
+              width={image.width}
+              height={image.height}
+              className="w-100"
+            />
           </div>
 
           <div className="col-md-10 offset-md-1 offset-lg-0 col-lg-6 mt-md-n9 text-center text-lg-start">

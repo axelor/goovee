@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact8Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {Tiles3} from '@/subapps/website/common/components/elements/tiles';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
@@ -21,14 +21,14 @@ export function Contact8(props: TemplateProps<Contact8Data>) {
     contact8ContainerClassName: containerClassName,
   } = data || {};
 
-  const tileImage1 = getMetaFileURL({
-    metaFile: contact8TileImage1,
+  const tileImage1 = getImage({
+    image: contact8TileImage1,
     path: 'contact8TileImage1',
     ...props,
   });
 
-  const tileImage2 = getMetaFileURL({
-    metaFile: contact8TileImage2,
+  const tileImage2 = getImage({
+    image: contact8TileImage2,
     path: 'contact8TileImage2',
     ...props,
   });

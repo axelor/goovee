@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Cta8Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function CTA8(props: TemplateProps<Cta8Data>) {
@@ -15,8 +15,8 @@ export function CTA8(props: TemplateProps<Cta8Data>) {
     cta8ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: cta8Image,
+  const image = getImage({
+    image: cta8Image,
     path: 'cta8Image',
     ...props,
   });
@@ -25,7 +25,7 @@ export function CTA8(props: TemplateProps<Cta8Data>) {
     <section className={wrapperClassName} data-code={props.code}>
       <div
         className={containerClassName}
-        style={{backgroundImage: `url(${image})`}}>
+        style={{backgroundImage: `url(${image.url})`}}>
         <div className="card-body p-10 p-xl-12">
           <div className="row text-center">
             <div className="col-lg-9 col-xl-8 col-xxl-7 mx-auto">

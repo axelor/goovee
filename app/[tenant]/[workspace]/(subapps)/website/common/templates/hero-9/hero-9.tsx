@@ -1,12 +1,13 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {Typewriter} from '@/subapps/website/common/components/reuseable/typewriter';
 import {
   slideInDownAnimate,
   zoomInAnimate,
 } from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero9(props: TemplateProps<Hero9Data>) {
   const {data} = props;
@@ -23,8 +24,8 @@ export function Hero9(props: TemplateProps<Hero9Data>) {
     hero9ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero9Image,
+  const image = getImage({
+    image: hero9Image,
     path: 'hero9Image',
     ...props,
   });
@@ -73,12 +74,16 @@ export function Hero9(props: TemplateProps<Hero9Data>) {
           </div>
 
           <div className="col-lg-7">
-            <img
-              className="w-100 img-fluid"
-              src={image}
-              alt="demo"
-              style={zoomInAnimate('0ms')}
-            />
+            {image?.url && (
+              <Image
+                className="w-100 img-fluid"
+                src={image.url}
+                alt={image.alt}
+                height={image.height}
+                width={image.width}
+                style={zoomInAnimate('0ms')}
+              />
+            )}
           </div>
         </div>
       </div>

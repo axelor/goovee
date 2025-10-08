@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
 
 export const footer14Schema = {
   title: 'Footer 14',
@@ -15,16 +14,14 @@ export const footer14Schema = {
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'title',
@@ -126,8 +123,8 @@ export const footer14Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer14Data = Data<typeof footer14Schema>;
@@ -141,17 +138,35 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
     data: {
       footer14Logo: {
         id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer14BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg27.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg27.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Call to action background',
+          width: 1153,
+          height: 202,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg27.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg27.jpg',
+          },
+        },
       },
       footer14Title:
         'Over 5K+ customers have put faith in us. Join them by utilize our offer to help your company develop.',
@@ -231,17 +246,35 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
     data: {
       footer14Logo: {
         id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer14BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg27.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg27.jpg',
+        version: 0,
+        attrs: {
+          alt: "Arrière-plan de l'appel à l'action",
+          width: 1153,
+          height: 202,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg27.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg27.jpg',
+          },
+        },
       },
       footer14Title:
         'Plus de 5 000 clients nous ont fait confiance. Rejoignez-les en utilisant notre offre pour aider votre entreprise à se développer.',

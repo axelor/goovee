@@ -1,7 +1,11 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service24Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Service24(props: TemplateProps<Service24Data>) {
   const {data} = props;
@@ -29,17 +33,25 @@ export function Service24(props: TemplateProps<Service24Data>) {
           {services?.map(({id, attrs: item}, i) => (
             <div className="col-lg-4" key={id}>
               <div className="px-md-15 px-lg-3">
-                <figure className="mb-6">
-                  <img
-                    className="img-fluid"
-                    src={getMetaFileURL({
-                      metaFile: item.image,
-                      path: `service24Services[${i}].attrs.image`,
-                      ...props,
-                    })}
-                    alt=""
-                  />
-                </figure>
+                {(() => {
+                  const img = getImage({
+                    image: item.image,
+                    path: `service24Services[${i}].attrs.image`,
+                    ...props,
+                  });
+                  return (
+                    <figure
+                      className="mb-6 position-relative"
+                      style={{paddingBottom: getPaddingBottom(img)}}>
+                      <Image
+                        className="img-fluid object-fit-cover"
+                        src={img.url}
+                        alt={img.alt}
+                        fill
+                      />
+                    </figure>
+                  );
+                })()}
                 <h3>{item.title}</h3>
                 <p className="mb-2">{item.description}</p>
                 <NextLink

@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const testimonial7Schema = {
   title: 'Testimonial 7',
@@ -14,16 +14,14 @@ export const testimonial7Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'heading',
@@ -93,8 +91,8 @@ export const testimonial7Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial7Data = Data<typeof testimonial7Schema>;
@@ -108,17 +106,35 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
     data: {
       testimonial7TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'g5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g5.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Testimonial',
+          width: 325,
+          height: 325,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial7TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'g6.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g6.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Testimonial',
+          width: 324,
+          height: 217,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial7Heading: 'Satisfied Clients',
       testimonial7CountUp: 25,
@@ -177,17 +193,35 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
     data: {
       testimonial7TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'g5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g5.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Témoignage',
+          width: 325,
+          height: 325,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial7TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'g6.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g6.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Témoignage',
+          width: 324,
+          height: 217,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial7Heading: 'Clients satisfaits',
       testimonial7CountUp: 25,

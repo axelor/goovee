@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const facts4Schema = {
   title: 'Facts 4',
@@ -24,9 +24,8 @@ export const facts4Schema = {
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'facts',
@@ -72,8 +71,8 @@ export const facts4Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Facts4Data = Data<typeof facts4Schema>;
@@ -89,10 +88,19 @@ export const facts4Demos: Demo<typeof facts4Schema>[] = [
       facts4Caption: 'Join Our Community',
       facts4BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'map.png',
-        fileType: 'image/png',
-        filePath: '/img/map.png',
+        version: 0,
+        attrs: {
+          alt: 'World map background',
+          width: 800,
+          height: 484,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'map.png',
+            fileType: 'image/png',
+            filePath: '/img/map.png',
+          },
+        },
       },
       facts4Facts: [
         {
@@ -136,10 +144,19 @@ export const facts4Demos: Demo<typeof facts4Schema>[] = [
       facts4Caption: 'Rejoignez notre communauté',
       facts4BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'map.png',
-        fileType: 'image/png',
-        filePath: '/img/map.png',
+        version: 0,
+        attrs: {
+          alt: 'Fond de carte du monde',
+          width: 800,
+          height: 484,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'map.png',
+            fileType: 'image/png',
+            filePath: '/img/map.png',
+          },
+        },
       },
       facts4Facts: [
         {

@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero8Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import animation, {
   fadeInAnimate,
@@ -8,6 +8,7 @@ import animation, {
 } from '@/subapps/website/common/utils/animation';
 import IconBox from '@/subapps/website/common/components/reuseable/IconBox';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero8(props: TemplateProps<Hero8Data>) {
   const {data} = props;
@@ -28,8 +29,8 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
     hero8CardBodyClassName: cardBodyClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero8Image,
+  const image = getImage({
+    image: hero8Image,
     path: 'hero8Image',
     ...props,
   });
@@ -41,12 +42,16 @@ export function Hero8(props: TemplateProps<Hero8Data>) {
           <div className={cardBodyClassName}>
             <div className="row gx-lg-8 gx-xl-0 gy-10 align-items-center">
               <div className="col-lg-6 order-lg-2 d-flex position-relative">
-                <img
-                  alt="demo"
-                  src={image}
-                  className="img-fluid ms-auto mx-auto me-lg-8"
-                  style={fadeInAnimate('0ms')}
-                />
+                {image?.url && (
+                  <Image
+                    alt={image.alt}
+                    src={image.url}
+                    className="img-fluid ms-auto mx-auto me-lg-8"
+                    style={fadeInAnimate('0ms')}
+                    width={image.width}
+                    height={image.height}
+                  />
+                )}
 
                 <div style={animation({name: 'slideInRight', delay: '600ms'})}>
                   <div

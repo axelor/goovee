@@ -1,10 +1,13 @@
 import {FC} from 'react';
+import Image from 'next/image';
+import {ImageType} from '@/subapps/website/common/types/templates';
+import {getPaddingBottom} from '@/subapps/website/common/utils/helper';
 
 // ==========================================================
 type TeamCard3Props = {
   name?: string;
   designation?: string;
-  image?: string;
+  image?: ImageType;
 };
 // ==========================================================
 const TeamCard3: FC<TeamCard3Props> = ({name, image, designation}) => {
@@ -22,9 +25,20 @@ const TeamCard3: FC<TeamCard3Props> = ({name, image, designation}) => {
       />
 
       <div className="card shadow-lg">
-        <figure className="card-img-top">
-          <img className="img-fluid" src={image} alt="" />
-        </figure>
+        {image?.url && (
+          <figure
+            className="card-img-top position-relative"
+            style={{
+              paddingBottom: getPaddingBottom(image),
+            }}>
+            <Image
+              className="img-fluid object-fit-cover"
+              src={image.url}
+              alt={image.alt}
+              fill
+            />
+          </figure>
+        )}
 
         <div className="card-body px-6 py-5">
           <h4 className="mb-1">{name}</h4>

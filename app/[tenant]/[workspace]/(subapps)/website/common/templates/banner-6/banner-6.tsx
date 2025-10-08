@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Banner6Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 
 export function Banner6(props: TemplateProps<Banner6Data>) {
   const {data} = props;
@@ -11,8 +11,8 @@ export function Banner6(props: TemplateProps<Banner6Data>) {
     banner6ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: banner6Image,
+  const image = getImage({
+    image: banner6Image,
     path: 'banner6Image',
     ...props,
   });
@@ -27,7 +27,7 @@ export function Banner6(props: TemplateProps<Banner6Data>) {
     <section
       className={wrapperClassName}
       data-code={props.code}
-      style={{backgroundImage: `url(${image})`}}>
+      style={{backgroundImage: `url(${image.url})`}}>
       <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-10 col-xl-10 col-xxl-8 mx-auto">

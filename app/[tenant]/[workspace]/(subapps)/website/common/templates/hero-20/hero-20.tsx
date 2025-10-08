@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero20Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 
 export function Hero20(props: TemplateProps<Hero20Data>) {
   const {data} = props;
@@ -13,8 +13,8 @@ export function Hero20(props: TemplateProps<Hero20Data>) {
     hero20ContainerClassName: containerClassName,
   } = data || {};
 
-  const poster = getMetaFileURL({
-    metaFile: hero20Poster,
+  const poster = getImage({
+    image: hero20Poster,
     path: 'hero20Poster',
     ...props,
   });
@@ -27,7 +27,14 @@ export function Hero20(props: TemplateProps<Hero20Data>) {
 
   return (
     <section className={wrapperClassName} data-code={props.code}>
-      <video loop muted autoPlay playsInline src={videoSrc} poster={poster} />
+      <video
+        loop
+        muted
+        autoPlay
+        playsInline
+        src={videoSrc}
+        poster={poster.url}
+      />
 
       <div className="video-content">
         <div className={containerClassName}>

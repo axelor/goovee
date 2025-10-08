@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const hero3Schema = {
@@ -34,9 +35,8 @@ export const hero3Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'video',
@@ -79,7 +79,9 @@ export const hero3Schema = {
         },
       ],
     },
+    imageModel,
   ],
+
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -100,9 +102,18 @@ export const hero3Demos: Demo<typeof hero3Schema>[] = [
       hero3Image: {
         id: '1',
         version: 1,
-        fileName: 'about13.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/about13.png',
+        attrs: {
+          alt: 'Specialized in',
+          width: 500,
+          height: 552,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about13.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/about13.png',
+          },
+        },
       },
       hero3Video: {
         id: '1',
@@ -132,9 +143,18 @@ export const hero3Demos: Demo<typeof hero3Schema>[] = [
       hero3Image: {
         id: '1',
         version: 1,
-        fileName: 'about13.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/about13.png',
+        attrs: {
+          alt: 'Specialized in',
+          width: 500,
+          height: 552,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about13.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/about13.png',
+          },
+        },
       },
       hero3Video: {
         id: '1',

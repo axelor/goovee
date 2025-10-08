@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const team7Schema = {
   title: 'Team 7',
@@ -30,9 +29,8 @@ export const team7Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'list',
@@ -54,8 +52,7 @@ export const team7Schema = {
       defaultValue: 'container',
     },
   ],
-  models: [bulletListModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Team7Data = Data<typeof team7Schema>;
@@ -73,10 +70,19 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Communities can be found in various forms.',
       team7Image: {
         id: '1',
-        version: 1,
-        fileName: 'about24.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about24.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Our team',
+          width: 496,
+          height: 424,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about24.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about24.jpg',
+          },
+        },
       },
       team7List: {
         id: '1',
@@ -122,10 +128,19 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et qui interagissent les unes avec les autres dans un lieu ou un espace virtuel partagé. Les communautés peuvent prendre diverses formes.',
       team7Image: {
         id: '1',
-        version: 1,
-        fileName: 'about24.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about24.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Notre équipe',
+          width: 496,
+          height: 424,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about24.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about24.jpg',
+          },
+        },
       },
       team7List: {
         id: '1',

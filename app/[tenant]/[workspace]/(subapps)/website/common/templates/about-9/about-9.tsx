@@ -1,9 +1,10 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
 import Design from '@/subapps/website/common/icons/solid/Design';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
 function getIcon(icon: string) {
   return icon
@@ -27,8 +28,8 @@ export function About9(props: TemplateProps<About9Data>) {
     about9ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about9Image,
+  const image = getImage({
+    image: about9Image,
     path: 'about9Image',
     ...props,
   });
@@ -44,7 +45,12 @@ export function About9(props: TemplateProps<About9Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

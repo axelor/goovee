@@ -1,8 +1,10 @@
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
+import Image from 'next/image';
+import {ImageType} from '../../../types/templates';
 
 function Tiles3(props: {
-  image1?: string;
-  image2?: string;
+  image1?: ImageType;
+  image2?: ImageType;
   heading?: string;
   countUp?: number;
   suffix?: string;
@@ -12,7 +14,14 @@ function Tiles3(props: {
     <div className="row gx-md-5 gy-5">
       <div className="col-md-6">
         <figure className="rounded mt-md-10 position-relative">
-          <img src={image1} alt="" />
+          {image1?.url && (
+            <Image
+              src={image1.url}
+              alt={image1.alt}
+              width={image1.width}
+              height={image1.height}
+            />
+          )}
         </figure>
       </div>
 
@@ -20,7 +29,14 @@ function Tiles3(props: {
         <div className="row gx-md-5 gy-5">
           <div className="col-md-12 order-md-2">
             <figure className="rounded">
-              <img src={image2} alt="" />
+              {image2?.url && (
+                <Image
+                  src={image2.url}
+                  alt={image2.alt}
+                  width={image2.width}
+                  height={image2.height}
+                />
+              )}
             </figure>
           </div>
 

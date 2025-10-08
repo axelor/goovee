@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const cta7Schema = {
   title: 'CTA 7',
@@ -34,9 +34,8 @@ export const cta7Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'sectionClassName',
@@ -70,8 +69,7 @@ export const cta7Schema = {
       defaultValue: 'container',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Cta7Data = Data<typeof cta7Schema>;
@@ -89,10 +87,19 @@ export const cta7Demos: Demo<typeof cta7Schema>[] = [
       cta7LinkHref: '#',
       cta7Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg22.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg22.png',
+        version: 0,
+        attrs: {
+          alt: 'Join our community',
+          width: 1372,
+          height: 596,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg22.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg22.png',
+          },
+        },
       },
     },
   },
@@ -109,10 +116,19 @@ export const cta7Demos: Demo<typeof cta7Schema>[] = [
       cta7LinkHref: '#',
       cta7Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg22.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg22.png',
+        version: 0,
+        attrs: {
+          alt: 'Rejoignez notre communauté',
+          width: 1372,
+          height: 596,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg22.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg22.png',
+          },
+        },
       },
     },
   },

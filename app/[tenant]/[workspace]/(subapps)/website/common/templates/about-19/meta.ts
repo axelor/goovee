@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const about19Schema = {
   title: 'About 19',
@@ -30,23 +29,20 @@ export const about19Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage3',
       title: 'Tile Image 3',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'aboutList1',
@@ -76,6 +72,7 @@ export const about19Schema = {
   ],
   models: [
     bulletListModel,
+    imageModel,
     {
       name: 'About19AboutList2',
       title: 'About List 2',
@@ -95,7 +92,6 @@ export const about19Schema = {
       ],
     },
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type About19Data = Data<typeof about19Schema>;
@@ -109,24 +105,51 @@ export const about19Demos: Demo<typeof about19Schema>[] = [
     data: {
       about19TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'g12.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g12.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Creative advertising firm',
+          width: 272,
+          height: 239,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g12.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g12.jpg',
+          },
+        },
       },
       about19TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'g13.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g13.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Creative advertising firm',
+          width: 272,
+          height: 218,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g13.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g13.jpg',
+          },
+        },
       },
       about19TileImage3: {
         id: '1',
-        version: 1,
-        fileName: 'g11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Creative advertising firm',
+          width: 545,
+          height: 267,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g11.jpg',
+          },
+        },
       },
       about19Caption: 'Who Are We?',
       about19Title:
@@ -206,24 +229,51 @@ export const about19Demos: Demo<typeof about19Schema>[] = [
     data: {
       about19TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'g12.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g12.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Entreprise de publicité créative',
+          width: 272,
+          height: 239,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g12.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g12.jpg',
+          },
+        },
       },
       about19TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'g13.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g13.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Entreprise de publicité créative',
+          width: 272,
+          height: 218,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g13.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g13.jpg',
+          },
+        },
       },
       about19TileImage3: {
         id: '1',
-        version: 1,
-        fileName: 'g11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Entreprise de publicité créative',
+          width: 545,
+          height: 267,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g11.jpg',
+          },
+        },
       },
       about19Caption: 'Qui sommes-nous ?',
       about19Title:

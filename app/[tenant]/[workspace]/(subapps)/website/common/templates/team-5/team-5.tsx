@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team5Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {TeamCard3} from '@/subapps/website/common/components/reuseable/team-cards';
 
 export function Team5(props: TemplateProps<Team5Data>) {
@@ -20,8 +20,8 @@ export function Team5(props: TemplateProps<Team5Data>) {
               <TeamCard3
                 name={item.name}
                 designation={item.designation}
-                image={getMetaFileURL({
-                  metaFile: item.image,
+                image={getImage({
+                  image: item.image,
                   path: `team5Members[${i}].attrs.image`,
                   ...props,
                 })}

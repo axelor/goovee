@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio10Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import {ProjectCard3} from '@/subapps/website/common/components/reuseable/project-cards';
 import {Fragment} from 'react';
@@ -46,13 +46,13 @@ export function Portfolio10(props: TemplateProps<Portfolio10Data>) {
                   title={item.title}
                   category={item.category}
                   link={item.link}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
+                  image={getImage({
+                    image: item.image,
                     path: `portfolio10PortfolioList[${i}].attrs.image`,
                     ...props,
                   })}
-                  fullImage={getMetaFileURL({
-                    metaFile: item.fullImage,
+                  fullImage={getImage({
+                    image: item.fullImage,
                     path: `portfolio10PortfolioList[${i}].attrs.fullImage`,
                     ...props,
                   })}

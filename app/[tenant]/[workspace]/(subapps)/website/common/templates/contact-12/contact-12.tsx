@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact12Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 
 export function Contact12(props: TemplateProps<Contact12Data>) {
   const {data} = props;
@@ -25,8 +25,8 @@ export function Contact12(props: TemplateProps<Contact12Data>) {
     contact12ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact12Image,
+  const image = getImage({
+    image: contact12Image,
     path: 'contact12Image',
     ...props,
   });
@@ -34,7 +34,7 @@ export function Contact12(props: TemplateProps<Contact12Data>) {
   return (
     <section
       className={wrapperClassName}
-      style={{backgroundImage: `url(${image})`}}
+      style={{backgroundImage: `url(${image.url})`}}
       data-code={props.code}>
       <div className={containerClassName}>
         <div className="row">

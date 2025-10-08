@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const contact2Schema = {
   title: 'Contacts 2',
@@ -39,9 +39,8 @@ export const contact2Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -56,8 +55,7 @@ export const contact2Schema = {
       defaultValue: 'container',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact2Data = Data<typeof contact2Schema>;
@@ -78,10 +76,19 @@ export const contact2Demos: Demo<typeof contact2Schema>[] = [
       contact2LinkHref: '#',
       contact2Image: {
         id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        version: 0,
+        attrs: {
+          alt: "Let's talk",
+          width: 598,
+          height: 432,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
     },
   },
@@ -100,10 +107,19 @@ export const contact2Demos: Demo<typeof contact2Schema>[] = [
       contact2LinkHref: '#',
       contact2Image: {
         id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Parlons',
+          width: 598,
+          height: 432,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
     },
   },

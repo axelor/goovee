@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Blog4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import {BlogCard1} from '@/subapps/website/common/components/reuseable/blog-cards';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
@@ -37,8 +37,8 @@ export function Blog4(props: TemplateProps<Blog4Data>) {
               <BlogCard1
                 key={id}
                 {...item}
-                image={getMetaFileURL({
-                  metaFile: item.image,
+                image={getImage({
+                  image: item.image,
                   path: `blog4BlogList[${i}].attrs.image`,
                   ...props,
                 })}

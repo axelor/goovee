@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About5Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import ProgressList from '@/subapps/website/common/components/common/ProgressList';
+import Image from 'next/image';
 
 export function About5(props: TemplateProps<About5Data>) {
   const {data} = props;
@@ -13,8 +14,8 @@ export function About5(props: TemplateProps<About5Data>) {
     about5ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about5Image,
+  const image = getImage({
+    image: about5Image,
     path: 'about5Image',
     ...props,
   });
@@ -33,7 +34,13 @@ export function About5(props: TemplateProps<About5Data>) {
         <div className="row gy-10 gy-sm-13 gx-lg-8 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

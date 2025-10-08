@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const banner1Schema = {
   title: 'Banner 1',
@@ -24,9 +24,8 @@ export const banner1Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'button1',
@@ -51,8 +50,7 @@ export const banner1Schema = {
       defaultValue: 'container pt-5 pb-15 pt-lg-10 pb-lg-2',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Banner1Data = Data<typeof banner1Schema>;
@@ -70,10 +68,19 @@ export const banner1Demos: Demo<typeof banner1Schema>[] = [
         'Lighthouse is currently accessible to download from the App Store as well as the Google Play Store.',
       banner1Image: {
         id: '1',
-        version: 1,
-        fileName: 'devices2.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/devices2.png',
+        version: 0,
+        attrs: {
+          alt: 'Lighthouse app on mobile devices',
+          width: 740,
+          height: 726,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'devices2.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/devices2.png',
+          },
+        },
       },
       banner1Button1: 'Google Play',
       banner1Button2: 'App Store',
@@ -91,10 +98,19 @@ export const banner1Demos: Demo<typeof banner1Schema>[] = [
         'Lighthouse est actuellement accessible au téléchargement sur l’App Store ainsi que sur le Google Play Store.',
       banner1Image: {
         id: '1',
-        version: 1,
-        fileName: 'devices2.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/devices2.png',
+        version: 0,
+        attrs: {
+          alt: 'Application Lighthouse sur appareils mobiles',
+          width: 740,
+          height: 726,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'devices2.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/devices2.png',
+          },
+        },
       },
       banner1Button1: 'Google Play',
       banner1Button2: 'App Store',

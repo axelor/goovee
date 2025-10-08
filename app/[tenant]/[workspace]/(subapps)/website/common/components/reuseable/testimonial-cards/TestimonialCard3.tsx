@@ -1,10 +1,11 @@
 import {FC} from 'react';
 import Image from 'next/image';
+import {ImageType} from '../../../types/templates';
 
 // =================================================
 type TestimonialCard3Props = {
   name?: string;
-  image?: string;
+  image?: ImageType;
   review?: string;
   rating?: number;
   shadow?: boolean;
@@ -35,13 +36,15 @@ const TestimonialCard3: FC<TestimonialCard3Props> = props => {
 
           <div className="blockquote-details">
             <figure className="rounded-circle w-12 overflow-hidden">
-              <Image
-                width={100}
-                height={100}
-                src={image}
-                alt="team"
-                style={{width: '100%', height: 'auto'}}
-              />
+              {image?.url && (
+                <Image
+                  width={image?.width}
+                  height={image?.height}
+                  src={image?.url}
+                  alt="team"
+                  style={{width: '100%', height: 'auto'}}
+                />
+              )}
             </figure>
 
             <div className="info">

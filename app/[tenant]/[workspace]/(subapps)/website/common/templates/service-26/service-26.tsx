@@ -1,7 +1,11 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service26Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Service26(props: TemplateProps<Service26Data>) {
   const {data} = props;
@@ -27,18 +31,27 @@ export function Service26(props: TemplateProps<Service26Data>) {
             <div className="col-sm-8 col-md-6 col-lg-4 mx-auto" key={id}>
               <div className="card shadow-lg">
                 <figure className="card-img-top overlay overlay-1">
-                  <Link href={item.url || '#'}>
-                    <img
-                      className="img-fluid"
-                      src={getMetaFileURL({
-                        metaFile: item.image,
-                        path: `service26Services[${i}].attrs.image`,
-                        ...props,
-                      })}
-                      alt=""
-                    />
-                    <span className="bg" />
-                  </Link>
+                  {(() => {
+                    const img = getImage({
+                      image: item.image,
+                      path: `service26Services[${i}].attrs.image`,
+                      ...props,
+                    });
+                    return (
+                      <Link
+                        href={item.url || '#'}
+                        className="position-relative"
+                        style={{paddingBottom: getPaddingBottom(img)}}>
+                        <Image
+                          className="img-fluid object-fit-cover"
+                          src={img.url}
+                          alt={img.alt}
+                          fill
+                        />
+                        <span className="bg" />
+                      </Link>
+                    );
+                  })()}
 
                   <figcaption>
                     <h5 className="from-top mb-0">{item.figcaption}</h5>

@@ -1,5 +1,6 @@
 import {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 import type {Cta1Data} from './meta.ts';
 
@@ -14,8 +15,8 @@ export function CTA1(props: TemplateProps<Cta1Data>) {
     cta1ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: cta1Image,
+  const image = getImage({
+    image: cta1Image,
     path: `cta1Image`,
     ...props,
   });
@@ -26,7 +27,13 @@ export function CTA1(props: TemplateProps<Cta1Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-8 align-items-center">
           <div className="col-lg-6 order-lg-2">
             <figure>
-              <img alt="analyze now" className="w-auto" src={image} />
+              <Image
+                alt={image.alt}
+                className="w-auto"
+                src={image.url}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

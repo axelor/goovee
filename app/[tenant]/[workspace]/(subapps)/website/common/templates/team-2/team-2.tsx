@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -55,8 +55,8 @@ export function Team2(props: TemplateProps<Team2Data>) {
                       description={item.description}
                       designation={item.designation}
                       socialLinks={socialLinks || []}
-                      image={getMetaFileURL({
-                        metaFile: item.image,
+                      image={getImage({
+                        image: item.image,
                         path: `team2Members[${i}].attrs.image`,
                         ...props,
                       })}

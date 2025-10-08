@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About12Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import AccordionList from '@/subapps/website/common/components/common/AccordionList';
+import Image from 'next/image';
 
 export function About12(props: TemplateProps<About12Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function About12(props: TemplateProps<About12Data>) {
     about12ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about12Image,
+  const image = getImage({
+    image: about12Image,
     path: 'about12Image',
     ...props,
   });
@@ -34,7 +35,13 @@ export function About12(props: TemplateProps<About12Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {TeamCard1} from '@/subapps/website/common/components/reuseable/team-cards';
 
 export function Team4(props: TemplateProps<Team4Data>) {
@@ -29,8 +29,8 @@ export function Team4(props: TemplateProps<Team4Data>) {
                   description={item.description}
                   designation={item.designation}
                   socialLinks={socialLinks || []}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
+                  image={getImage({
+                    image: item.image,
                     path: `team4Members[${i}].attrs.image`,
                     ...props,
                   })}

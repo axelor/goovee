@@ -1,7 +1,8 @@
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 import type {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {type About8Data} from './meta';
+import Image from 'next/image';
 
 export function About8(props: TemplateProps<About8Data>) {
   const {data} = props;
@@ -15,8 +16,8 @@ export function About8(props: TemplateProps<About8Data>) {
     about8ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about8Image,
+  const image = getImage({
+    image: about8Image,
     path: 'about8Image',
     ...props,
   });
@@ -27,7 +28,13 @@ export function About8(props: TemplateProps<About8Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

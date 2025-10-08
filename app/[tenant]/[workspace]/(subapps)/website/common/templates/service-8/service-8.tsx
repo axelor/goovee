@@ -1,9 +1,10 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service8Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import IconBox from '@/subapps/website/common/components/reuseable/IconBox';
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
 import {fadeInAnimate} from '../../utils/animation';
+import Image from 'next/image';
 
 export function Service8(props: TemplateProps<Service8Data>) {
   const {data} = props;
@@ -19,26 +20,26 @@ export function Service8(props: TemplateProps<Service8Data>) {
     service8ContainerClassName: containerClassName,
   } = data || {};
 
-  const tileImage1 = getMetaFileURL({
-    metaFile: service8TileImage1,
+  const tileImage1 = getImage({
+    image: service8TileImage1,
     path: 'service8TileImage1',
     ...props,
   });
 
-  const tileImage2 = getMetaFileURL({
-    metaFile: service8TileImage2,
+  const tileImage2 = getImage({
+    image: service8TileImage2,
     path: 'service8TileImage2',
     ...props,
   });
 
-  const tileImage3 = getMetaFileURL({
-    metaFile: service8TileImage3,
+  const tileImage3 = getImage({
+    image: service8TileImage3,
     path: 'service8TileImage3',
     ...props,
   });
 
-  const tileImage4 = getMetaFileURL({
-    metaFile: service8TileImage4,
+  const tileImage4 = getImage({
+    image: service8TileImage4,
     path: 'service8TileImage4',
     ...props,
   });
@@ -50,30 +51,38 @@ export function Service8(props: TemplateProps<Service8Data>) {
           <div className="col-lg-6 position-relative order-lg-2">
             <div className="row gx-md-5 gy-5 position-relative">
               <div className="col-5">
-                <img
-                  alt="demo"
-                  src={tileImage1}
+                <Image
+                  alt={tileImage1.alt}
+                  src={tileImage1.url}
+                  width={tileImage1.width}
+                  height={tileImage1.height}
                   className="img-fluid rounded shadow-lg my-5 d-flex ms-auto"
                   style={fadeInAnimate('300ms')}
                 />
-                <img
-                  alt="demo"
-                  src={tileImage2}
+                <Image
+                  alt={tileImage2.alt}
+                  src={tileImage2.url}
+                  width={tileImage2.width}
+                  height={tileImage2.height}
                   className="img-fluid rounded shadow-lg d-flex col-10 ms-auto"
                   style={fadeInAnimate('600ms')}
                 />
               </div>
 
               <div className="col-7">
-                <img
-                  alt="demo"
-                  src={tileImage3}
+                <Image
+                  alt={tileImage3.alt}
+                  src={tileImage3.url}
+                  width={tileImage3.width}
+                  height={tileImage3.height}
                   className="img-fluid rounded shadow-lg mb-5"
                   style={fadeInAnimate('900ms')}
                 />
-                <img
-                  alt="demo"
-                  src={tileImage4}
+                <Image
+                  alt={tileImage4.alt}
+                  src={tileImage4.url}
+                  width={tileImage4.width}
+                  height={tileImage4.height}
                   style={fadeInAnimate('1200ms')}
                 />
               </div>

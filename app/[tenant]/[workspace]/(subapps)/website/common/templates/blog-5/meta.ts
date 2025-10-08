@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const blog5Schema = {
   title: 'Blog 5',
@@ -80,14 +80,13 @@ export const blog5Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Blog5Data = Data<typeof blog5Schema>;
@@ -115,9 +114,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b12.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b12.jpg',
+              attrs: {
+                alt: 'Happy Married Life Belong',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b12.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b12.jpg',
+                },
+              },
             },
           },
         },
@@ -134,9 +142,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b13.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b13.jpg',
+              attrs: {
+                alt: 'Engagement of Lina Anna',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b13.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b13.jpg',
+                },
+              },
             },
           },
         },
@@ -153,9 +170,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b14.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b14.jpg',
+              attrs: {
+                alt: 'Ultricies fusce porta elit',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b14.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b14.jpg',
+                },
+              },
             },
           },
         },
@@ -172,9 +198,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b15.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b15.jpg',
+              attrs: {
+                alt: 'Morbi leo risus porta eget',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b15.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b15.jpg',
+                },
+              },
             },
           },
         },
@@ -191,9 +226,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b16.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b16.jpg',
+              attrs: {
+                alt: 'Pharetra augue elit sem',
+                width: 410,
+                height: 290,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b16.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b16.jpg',
+                },
+              },
             },
           },
         },
@@ -210,9 +254,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b17.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b17.jpg',
+              attrs: {
+                alt: 'Nulla vitae elit libero',
+                width: 410,
+                height: 290,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b17.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b17.jpg',
+                },
+              },
             },
           },
         },
@@ -241,9 +294,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b12.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b12.jpg',
+              attrs: {
+                alt: 'Une vie de couple heureuse',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b12.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b12.jpg',
+                },
+              },
             },
           },
         },
@@ -260,9 +322,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b13.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b13.jpg',
+              attrs: {
+                alt: 'Fiançailles de Lina Anna',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b13.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b13.jpg',
+                },
+              },
             },
           },
         },
@@ -279,9 +350,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b14.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b14.jpg',
+              attrs: {
+                alt: 'Morbi leo risus porta eget',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b14.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b14.jpg',
+                },
+              },
             },
           },
         },
@@ -298,9 +378,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b15.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b15.jpg',
+              attrs: {
+                alt: 'Morbi leo risus porta eget',
+                width: 380,
+                height: 269,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b15.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b15.jpg',
+                },
+              },
             },
           },
         },
@@ -317,9 +406,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b16.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b16.jpg',
+              attrs: {
+                alt: 'Pharetra augue elit sem',
+                width: 410,
+                height: 290,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b16.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b16.jpg',
+                },
+              },
             },
           },
         },
@@ -336,9 +434,18 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
             image: {
               id: '1',
               version: 1,
-              fileName: 'b17.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b17.jpg',
+              attrs: {
+                alt: 'Nulla vitae elit libero',
+                width: 410,
+                height: 290,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'b17.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b17.jpg',
+                },
+              },
             },
           },
         },

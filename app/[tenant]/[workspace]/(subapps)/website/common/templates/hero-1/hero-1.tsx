@@ -1,5 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 import type {Hero1Data} from './meta.ts';
 
@@ -15,8 +16,8 @@ export function Hero1(props: TemplateProps<Hero1Data>) {
     hero1ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero1Image,
+  const image = getImage({
+    image: hero1Image,
     path: `hero1Image`,
     ...props,
   });
@@ -40,7 +41,13 @@ export function Hero1(props: TemplateProps<Hero1Data>) {
           <div className="col-lg-6">
             {image && (
               <figure>
-                <img alt="hero" className="w-auto" src={image} />
+                <Image
+                  alt={image.alt}
+                  className="w-auto"
+                  src={image.url}
+                  width={image.width}
+                  height={image.height}
+                />
               </figure>
             )}
           </div>

@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 import {solidIconsSelection} from '../meta-selections';
 
 export const process5Schema = {
@@ -30,9 +30,8 @@ export const process5Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'processes',
@@ -78,8 +77,8 @@ export const process5Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
   selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
@@ -99,10 +98,19 @@ export const process5Demos: Demo<typeof process5Schema>[] = [
         'Individual health-related objectives may vary depending on factors such as age, gender, medical history, and personal preferences. Additionally, it’s important to set realistic and achievable goals that are specific, measurable, and time-bound.',
       process5Image: {
         id: '1',
-        version: 1,
-        fileName: 'device.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/device.png',
+        version: 0,
+        attrs: {
+          alt: 'how it work',
+          width: 747,
+          height: 786,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'device.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/device.png',
+          },
+        },
       },
       process5Processes: [
         {
@@ -148,10 +156,19 @@ export const process5Demos: Demo<typeof process5Schema>[] = [
         'Les objectifs individuels liés à la santé peuvent varier en fonction de facteurs tels que l’âge, le sexe, les antécédents médicaux et les préférences personnelles. De plus, il est important de se fixer des objectifs réalistes et réalisables, spécifiques, mesurables et limités dans le temps.',
       process5Image: {
         id: '1',
-        version: 1,
-        fileName: 'device.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/device.png',
+        version: 0,
+        attrs: {
+          alt: 'comment ça marche',
+          width: 747,
+          height: 786,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'device.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/device.png',
+          },
+        },
       },
       process5Processes: [
         {

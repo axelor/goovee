@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {contactInfoModel} from '../json-models';
+import {contactInfoModel, imageModel} from '../json-models';
 
 export const contact1Schema = {
   title: 'Contact 1',
@@ -25,9 +24,8 @@ export const contact1Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'contactInfo',
@@ -49,8 +47,7 @@ export const contact1Schema = {
       defaultValue: 'container pb-8 pb-md-9',
     },
   ],
-  models: [contactInfoModel],
-  metaModels: [metaFileModel],
+  models: [contactInfoModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact1Data = Data<typeof contact1Schema>;
@@ -64,10 +61,19 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
     data: {
       contact1Image: {
         id: '1',
-        version: 1,
-        fileName: 'about14.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about14.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Get in touch',
+          width: 593,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about14.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about14.jpg',
+          },
+        },
       },
       contact1Caption: 'Get In Touch',
       contact1Title:
@@ -95,10 +101,19 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
     data: {
       contact1Image: {
         id: '1',
-        version: 1,
-        fileName: 'about14.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about14.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Entrer en contact',
+          width: 593,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about14.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about14.jpg',
+          },
+        },
       },
       contact1Caption: 'Entrer en contact',
       contact1Title:

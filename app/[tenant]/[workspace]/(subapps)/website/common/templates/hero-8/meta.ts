@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero8Schema = {
   title: 'Hero 8',
@@ -44,9 +44,8 @@ export const hero8Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'countUp',
@@ -89,7 +88,7 @@ export const hero8Schema = {
       defaultValue: 'card-body p-md-10 py-xl-11 px-xl-15',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero8Data = Data<typeof hero8Schema>;
@@ -111,9 +110,18 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
       hero8Image: {
         id: '1',
         version: 1,
-        fileName: 'co3.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co3.png',
+        attrs: {
+          alt: 'Business process model',
+          width: 369,
+          height: 471,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'co3.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co3.png',
+          },
+        },
       },
       hero8CountUp: 20,
       hero8Suffix: 'K+',
@@ -136,9 +144,18 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
       hero8Image: {
         id: '1',
         version: 1,
-        fileName: 'co3.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co3.png',
+        attrs: {
+          alt: 'Modèle de processus métier',
+          width: 369,
+          height: 471,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'co3.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co3.png',
+          },
+        },
       },
       hero8CountUp: 20,
       hero8Suffix: 'K+',

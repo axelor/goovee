@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {serviceList3Model} from '../json-models';
+import {serviceList3Model, imageModel} from '../json-models';
 import {buttonColorSelection} from '../meta-selections';
 
 export const about21Schema = {
@@ -26,9 +26,8 @@ export const about21Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'btnColor',
@@ -68,7 +67,7 @@ export const about21Schema = {
       defaultValue: 'container pt-15 pt-md-17 mb-15 mb-md-17',
     },
   ],
-  models: [serviceList3Model],
+  models: [serviceList3Model, imageModel],
   metaModels: [metaFileModel],
   selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
@@ -84,10 +83,19 @@ export const about21Demos: Demo<typeof about21Schema>[] = [
     data: {
       about21Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'What makes us different',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about21Caption: 'What Makes Us Different?',
       about21Description:
@@ -149,10 +157,19 @@ export const about21Demos: Demo<typeof about21Schema>[] = [
     data: {
       about21Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Ce qui nous rend différents',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about21Caption: 'Qu’est-ce qui nous rend différents ?',
       about21Description:

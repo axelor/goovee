@@ -1,9 +1,13 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About18Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import CloudGroup from '@/subapps/website/common/icons/solid-duo/CloudGroup';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
+import Image from 'next/image';
 
 export function About18(props: TemplateProps<About18Data>) {
   const {data} = props;
@@ -22,8 +26,8 @@ export function About18(props: TemplateProps<About18Data>) {
     about18ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about18Image,
+  const image = getImage({
+    image: about18Image,
     path: 'about18Image',
     ...props,
   });
@@ -33,8 +37,15 @@ export function About18(props: TemplateProps<About18Data>) {
       <div className={containerClassName}>
         <div className="row gx-md-8 gy-10 align-items-center">
           <div className="col-lg-6 offset-lg-1 order-lg-2 position-relative">
-            <figure className="rounded">
-              <img className="img-fluid" src={image} alt="" />
+            <figure
+              className="rounded position-relative"
+              style={{paddingBottom: getPaddingBottom(image)}}>
+              <Image
+                className="img-fluid object-fit-cover"
+                src={image.url}
+                fill
+                alt={image.alt}
+              />
             </figure>
 
             <div

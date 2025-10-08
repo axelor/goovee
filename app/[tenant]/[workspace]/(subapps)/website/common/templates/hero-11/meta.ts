@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero11Schema = {
   title: 'Hero 11',
@@ -44,9 +44,8 @@ export const hero11Schema = {
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'videoHref',
@@ -88,14 +87,13 @@ export const hero11Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Hero11Data = Data<typeof hero11Schema>;
@@ -116,10 +114,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
       hero11ButtonLink2: '#',
       hero11BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Project solutions background',
+          width: 3000,
+          height: 2000,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg4.jpg',
+          },
+        },
       },
       hero11VideoHref: '/media/movie.mp4',
       hero11CarouselImages: [
@@ -130,10 +137,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
             name: 'about21',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'about21.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/about21.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Project solution',
+                width: 503,
+                height: 482,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'about21.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/about21.jpg',
+                },
+              },
             },
           },
         },
@@ -144,10 +160,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
             name: 'about22',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'about22.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/about22.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Project solution',
+                width: 575,
+                height: 550,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'about22.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/about22.jpg',
+                },
+              },
             },
           },
         },
@@ -158,10 +183,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
             name: 'about23',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'about23.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/about23.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Project solution',
+                width: 575,
+                height: 550,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'about23.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/about23.jpg',
+                },
+              },
             },
           },
         },
@@ -184,10 +218,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
       hero11ButtonLink2: '#',
       hero11BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Arrière-plan des solutions de projet',
+          width: 3000,
+          height: 2000,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg4.jpg',
+          },
+        },
       },
       hero11VideoHref: '/media/movie.mp4',
       hero11CarouselImages: [
@@ -198,10 +241,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
             name: 'about21',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'about21.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/about21.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Solution de projet',
+                width: 503,
+                height: 482,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'about21.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/about21.jpg',
+                },
+              },
             },
           },
         },
@@ -212,10 +264,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
             name: 'about22',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'about22.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/about22.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Solution de projet',
+                width: 575,
+                height: 550,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'about22.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/about22.jpg',
+                },
+              },
             },
           },
         },
@@ -226,10 +287,19 @@ export const hero11Demos: Demo<typeof hero11Schema>[] = [
             name: 'about23',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'about23.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/about23.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Solution de projet',
+                width: 575,
+                height: 550,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'about23.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/about23.jpg',
+                },
+              },
             },
           },
         },

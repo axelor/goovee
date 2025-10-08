@@ -1,13 +1,11 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service22Data} from './meta';
-import {
-  getMetaFileURL,
-  getTemplateId,
-} from '@/subapps/website/common/utils/helper';
+import {getImage, getTemplateId} from '@/subapps/website/common/utils/helper';
 import {Fragment} from 'react';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import dynamic from 'next/dynamic';
 import IconProps from '../../types/icons';
+import Image from 'next/image';
 
 function getIcon(icon: string) {
   if (!icon) return (props: IconProps) => null;
@@ -30,7 +28,7 @@ export function Service22(props: TemplateProps<Service22Data>) {
         <Fragment>
           <div className="row">
             <div className="col-md-10 offset-md-1 col-lg-8 offset-lg-2 mx-auto text-center">
-              <h2 className="fs-16 text-uppercase text-muted mb-3">
+              <h2 className="fs-15 text-uppercase text-muted mb-3">
                 {caption}
               </h2>
               <h3 className="display-4 mb-10 px-xl-10">{title}</h3>
@@ -74,14 +72,21 @@ export function Service22(props: TemplateProps<Service22Data>) {
                 <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
                   <div className="col-lg-6">
                     <figure className="rounded shadow-lg">
-                      <img
-                        src={getMetaFileURL({
-                          metaFile: item.image,
+                      {(() => {
+                        const img = getImage({
+                          image: item.image,
                           path: `service22Tabs[${i}].attrs.image`,
                           ...props,
-                        })}
-                        alt=""
-                      />
+                        });
+                        return (
+                          <Image
+                            src={img.url}
+                            alt={img.alt}
+                            width={img.width}
+                            height={img.height}
+                          />
+                        );
+                      })()}
                     </figure>
                   </div>
 

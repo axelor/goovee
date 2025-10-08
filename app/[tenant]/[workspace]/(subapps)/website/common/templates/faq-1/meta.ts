@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {accordionModel} from '../json-models';
+import {accordionModel, imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const faq1Schema = {
@@ -23,9 +23,8 @@ export const faq1Schema = {
     {
       name: 'thumbnail',
       title: 'Thumbnail',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'title',
@@ -56,7 +55,7 @@ export const faq1Schema = {
       defaultValue: 'container py-14 pt-md-16 pt-lg-0 pb-md-16',
     },
   ],
-  models: [accordionModel],
+  models: [accordionModel, imageModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -78,10 +77,19 @@ export const faq1Demos: Demo<typeof faq1Schema>[] = [
       },
       faq1Thumbnail: {
         id: '1',
-        version: 1,
-        fileName: 'v1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/v1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'FAQ video thumbnail',
+          width: 995,
+          height: 604,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'v1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/v1.jpg',
+          },
+        },
       },
       faq1Title:
         'If you are unable to locate the answer to your query, you may send us an email using our contact page.',
@@ -159,10 +167,19 @@ export const faq1Demos: Demo<typeof faq1Schema>[] = [
       },
       faq1Thumbnail: {
         id: '1',
-        version: 1,
-        fileName: 'v1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/v1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Vignette vidéo FAQ',
+          width: 995,
+          height: 604,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'v1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/v1.jpg',
+          },
+        },
       },
       faq1Title:
         'Si vous ne parvenez pas à trouver la réponse à votre question, vous pouvez nous envoyer un e-mail via notre page de contact.',

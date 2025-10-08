@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service13Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import {ServiceCard2} from '@/subapps/website/common/components/reuseable/service-cards';
+import Image from 'next/image';
 
 export function Service13(props: TemplateProps<Service13Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function Service13(props: TemplateProps<Service13Data>) {
     service13ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: service13Image,
+  const image = getImage({
+    image: service13Image,
     path: 'service13Image',
     ...props,
   });
@@ -26,7 +27,12 @@ export function Service13(props: TemplateProps<Service13Data>) {
         <figure
           className="rounded mt-md-n21 mt-lg-n23 mb-14"
           style={slideInDownAnimate('900ms')}>
-          <img src={image} alt="" />
+          <Image
+            src={image.url}
+            alt={image.alt}
+            width={image.width}
+            height={image.height}
+          />
         </figure>
 
         <div className="row">

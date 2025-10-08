@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process5Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
 function getIcon(icon: string) {
   return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
@@ -19,8 +20,8 @@ export function Process5(props: TemplateProps<Process5Data>) {
     process5ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: process5Image,
+  const image = getImage({
+    image: process5Image,
     path: 'process5Image',
     ...props,
   });
@@ -31,7 +32,12 @@ export function Process5(props: TemplateProps<Process5Data>) {
         <div className="row gx-lg-8 gx-xl-10 align-items-center">
           <div className="col-lg-6">
             <figure>
-              <img alt="how it work" src={image} />
+              <Image
+                alt={image.alt}
+                src={image.url}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
+import Image from 'next/image';
 
 export function Process2(props: TemplateProps<Process2Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function Process2(props: TemplateProps<Process2Data>) {
     process2ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: process2Image,
+  const image = getImage({
+    image: process2Image,
     path: 'process2Image',
     ...props,
   });
@@ -41,7 +42,12 @@ export function Process2(props: TemplateProps<Process2Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="how-work" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

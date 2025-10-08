@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const testimonial18Schema = {
   title: 'Testimonial 18',
@@ -14,9 +14,8 @@ export const testimonial18Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'slidesPerView',
@@ -66,8 +65,8 @@ export const testimonial18Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial18Data = Data<typeof testimonial18Schema>;
@@ -81,10 +80,19 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
     data: {
       testimonial18Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg32.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg32.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Testimonial background',
+          width: 1440,
+          height: 510,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg32.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg32.jpg',
+          },
+        },
       },
       testimonial18SlidesPerView: 1,
       testimonial18Navigation: false,
@@ -127,10 +135,19 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
     data: {
       testimonial18Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg32.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg32.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Arrière-plan de témoignage',
+          width: 1440,
+          height: 510,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg32.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg32.jpg',
+          },
+        },
       },
       testimonial18SlidesPerView: 1,
       testimonial18Navigation: false,

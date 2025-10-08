@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const hero20Schema = {
@@ -32,9 +33,8 @@ export const hero20Schema = {
     {
       name: 'poster',
       title: 'Poster',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -50,7 +50,7 @@ export const hero20Schema = {
       defaultValue: 'container text-center',
     },
   ],
-  models: [],
+  models: [imageModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -75,10 +75,19 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
       },
       hero20Poster: {
         id: '1',
-        version: 1,
-        fileName: 'movie2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/movie2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Video poster',
+          width: 2792,
+          height: 1872,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'movie2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/movie2.jpg',
+          },
+        },
       },
     },
   },
@@ -101,10 +110,19 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
       },
       hero20Poster: {
         id: '1',
-        version: 1,
-        fileName: 'movie2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/movie2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Affiche de la vidéo',
+          width: 2792,
+          height: 1872,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'movie2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/movie2.jpg',
+          },
+        },
       },
     },
   },

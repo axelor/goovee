@@ -1,11 +1,12 @@
 import {FC} from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import {ImageType} from '../../../types/templates';
 
 // ==============================================================
 type Props = {
   id: number;
-  image: string;
+  image: ImageType;
   title: string;
   color: string;
   category: string;
@@ -17,7 +18,14 @@ const ProjectCard4: FC<Props> = ({image, title, color, category}) => {
     <div className="card shadow-lg">
       <figure className="card-img-top" title="Click to see the project">
         <Link href="#">
-          <Image src={image} width={1300} height={1132} alt="" />
+          {image?.url && (
+            <Image
+              width={image.width}
+              height={image.height}
+              src={image.url}
+              alt={image.alt}
+            />
+          )}
         </Link>
       </figure>
 

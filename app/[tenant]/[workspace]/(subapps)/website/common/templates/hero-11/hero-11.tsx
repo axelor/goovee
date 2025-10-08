@@ -1,9 +1,10 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero11(props: TemplateProps<Hero11Data>) {
   const {data} = props;
@@ -21,24 +22,29 @@ export function Hero11(props: TemplateProps<Hero11Data>) {
     hero11ContainerClassName: containerClassName,
   } = data || {};
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: hero11BackgroundImage,
+  const backgroundImage = getImage({
+    image: hero11BackgroundImage,
     path: 'hero11BackgroundImage',
     ...props,
   });
 
-  const courouselElements = carouselImages?.map(({id, attrs: item}, i) => (
-    <img
-      key={id}
-      alt=""
-      className="rounded"
-      src={getMetaFileURL({
-        metaFile: item.image,
-        path: `hero11CarouselImages[${i}].attrs.image`,
-        ...props,
-      })}
-    />
-  ));
+  const courouselElements = carouselImages.map((c, i) => {
+    const image = getImage({
+      image: c.attrs.image,
+      path: `hero11CarouselImages[${i}].attrs.image`,
+      ...props,
+    });
+    return (
+      <Image
+        key={i}
+        alt={image.alt}
+        className="rounded"
+        src={image.url}
+        width={image.width}
+        height={image.height}
+      />
+    );
+  });
 
   if (videoHref) {
     courouselElements.push(
@@ -65,7 +71,7 @@ export function Hero11(props: TemplateProps<Hero11Data>) {
     <section
       className={wrapperClassName}
       data-code={props.code}
-      style={{backgroundImage: `url(${backgroundImage})`}}>
+      style={{backgroundImage: `url(${backgroundImage.url})`}}>
       <div className={containerClassName}>
         <div className="row gx-0 gy-12 align-items-center">
           <div className="col-md-10 offset-md-1 offset-lg-0 col-lg-6 content text-center text-lg-start">

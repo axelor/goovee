@@ -2,12 +2,13 @@ import {FC} from 'react';
 import Link from 'next/link';
 import NextLink from '../links/NextLink';
 import FigureImage from '@/subapps/website/common/components/reuseable/FigureImage';
+import {ImageType} from '@/subapps/website/common/types/templates';
 
 // ========================================================
 type BlogCard3Props = {
   link: string;
   title: string;
-  image: string;
+  image: ImageType;
   category: string;
   description: string;
 };
@@ -21,7 +22,7 @@ const BlogCard3: FC<BlogCard3Props> = props => {
       <div className="card">
         <figure className="card-img-top overlay overlay-1 hover-scale">
           <Link href="#">
-            <FigureImage width={560} height={350} src={image} />
+            <FigureImage image={image} />
             <span className="bg" />
           </Link>
 

@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio7Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function Portfolio7(props: TemplateProps<Portfolio7Data>) {
   const {data} = props;
@@ -24,20 +25,20 @@ export function Portfolio7(props: TemplateProps<Portfolio7Data>) {
     portfolio7ContainerClassName: containerClassName,
   } = data || {};
 
-  const image1 = getMetaFileURL({
-    metaFile: portfolio7Image1,
+  const image1 = getImage({
+    image: portfolio7Image1,
     path: 'portfolio7Image1',
     ...props,
   });
 
-  const image2 = getMetaFileURL({
-    metaFile: portfolio7Image2,
+  const image2 = getImage({
+    image: portfolio7Image2,
     path: 'portfolio7Image2',
     ...props,
   });
 
-  const image3 = getMetaFileURL({
-    metaFile: portfolio7Image3,
+  const image3 = getImage({
+    image: portfolio7Image3,
     path: 'portfolio7Image3',
     ...props,
   });
@@ -52,7 +53,12 @@ export function Portfolio7(props: TemplateProps<Portfolio7Data>) {
                 <div className="item">
                   <Link href={portfolio7Image1Link || '#'} passHref>
                     <figure className="lift rounded mb-6">
-                      <img src={image1} alt="" />
+                      <Image
+                        src={image1.url}
+                        alt={image1.alt || ''}
+                        width={image1.width}
+                        height={image1.height}
+                      />
                     </figure>
                   </Link>
 
@@ -65,7 +71,12 @@ export function Portfolio7(props: TemplateProps<Portfolio7Data>) {
                 <div className="item mt-12">
                   <Link href={portfolio7Image3Link || '#'} passHref>
                     <figure className="lift rounded mb-6">
-                      <img src={image3} alt="" />
+                      <Image
+                        src={image3.url}
+                        alt={image3.alt || ''}
+                        width={image3.width}
+                        height={image3.height}
+                      />
                     </figure>
                   </Link>
 
@@ -88,7 +99,12 @@ export function Portfolio7(props: TemplateProps<Portfolio7Data>) {
                 <div className="item mt-12">
                   <Link href={portfolio7Image2Link || '#'} passHref>
                     <figure className="lift rounded mb-6">
-                      <img src={image2} alt="demo" />
+                      <Image
+                        src={image2.url}
+                        alt={image2.alt || ''}
+                        width={image2.width}
+                        height={image2.height}
+                      />
                     </figure>
                   </Link>
 

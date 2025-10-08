@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 export function Testimonial9(props: TemplateProps<Testimonial9Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function Testimonial9(props: TemplateProps<Testimonial9Data>) {
     testimonial9ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: testimonial9Image,
+  const image = getImage({
+    image: testimonial9Image,
     path: 'testimonial9Image',
     ...props,
   });
@@ -37,7 +38,12 @@ export function Testimonial9(props: TemplateProps<Testimonial9Data>) {
               className="position-absolute d-none d-lg-block"
               style={{bottom: 0, left: '5%', width: '35%', zIndex: 2}}>
               <figure>
-                <img src={image} alt="" />
+                <Image
+                  src={image.url}
+                  alt={image.alt}
+                  width={image.width}
+                  height={image.height}
+                />
               </figure>
             </div>
 

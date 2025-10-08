@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero23Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel2 from '@/subapps/website/common/components/reuseable/Carousel2';
 
 export function Hero23(props: TemplateProps<Hero23Data>) {
@@ -14,13 +14,13 @@ export function Hero23(props: TemplateProps<Hero23Data>) {
   } = data || {};
 
   const slides = slideImages?.map((item, i) => ({
-    image: getMetaFileURL({
-      metaFile: item.attrs.image,
+    image: getImage({
+      image: item.attrs.image,
       path: `hero23SlideImages[${i}].attrs.image`,
       ...props,
     }),
-    thumb: getMetaFileURL({
-      metaFile: item.attrs.thumb,
+    thumb: getImage({
+      image: item.attrs.thumb,
       path: `hero23SlideImages[${i}].attrs.thumb`,
       ...props,
     }),

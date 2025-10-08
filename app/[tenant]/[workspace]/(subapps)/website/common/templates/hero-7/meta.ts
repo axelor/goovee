@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero7Schema = {
   title: 'Hero 7',
@@ -44,9 +44,8 @@ export const hero7Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -61,7 +60,7 @@ export const hero7Schema = {
       defaultValue: 'container py-14 pt-md-15 pb-md-18',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero7Data = Data<typeof hero7Schema>;
@@ -82,10 +81,19 @@ export const hero7Demos: Demo<typeof hero7Schema>[] = [
       hero7ButtonLink2: '#',
       hero7Image: {
         id: '1',
-        version: 1,
-        fileName: 'i12.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i12.png',
+        version: 0,
+        attrs: {
+          alt: 'Benefits of choosing us',
+          width: 793,
+          height: 509,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i12.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i12.png',
+          },
+        },
       },
     },
   },
@@ -104,10 +112,19 @@ export const hero7Demos: Demo<typeof hero7Schema>[] = [
       hero7ButtonLink2: '#',
       hero7Image: {
         id: '1',
-        version: 1,
-        fileName: 'i12.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i12.png',
+        version: 0,
+        attrs: {
+          alt: 'Benefits of choosing us',
+          width: 793,
+          height: 509,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i12.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i12.png',
+          },
+        },
       },
     },
   },
