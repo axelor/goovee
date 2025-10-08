@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process10Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
+import Image from 'next/image';
 
 export function Process10(props: TemplateProps<Process10Data>) {
   const {data} = props;
@@ -13,8 +14,8 @@ export function Process10(props: TemplateProps<Process10Data>) {
     process10ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: process10Image,
+  const image = getImage({
+    image: process10Image,
     path: 'process10Image',
     ...props,
   });
@@ -25,7 +26,13 @@ export function Process10(props: TemplateProps<Process10Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

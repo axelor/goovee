@@ -6,6 +6,42 @@ import {
   solidIconsSelection,
 } from './meta-selections';
 
+export const imageModel = {
+  name: 'Image',
+  title: 'Image',
+  fields: [
+    {
+      name: 'alt',
+      title: 'Alt Text',
+      type: 'string',
+      nameField: true,
+      visibleInGrid: true,
+      required: true,
+    },
+    {
+      name: 'image',
+      title: 'Image',
+      type: 'many-to-one',
+      target: 'com.axelor.meta.db.MetaFile',
+      widget: 'Image',
+      required: true,
+    },
+    {
+      name: 'height',
+      title: 'Height',
+      type: 'integer',
+      required: true,
+    },
+    {
+      name: 'width',
+      title: 'Width',
+      type: 'integer',
+      required: true,
+    },
+  ],
+  metaModels: [metaFileModel],
+} as const satisfies Model;
+
 export const accordionModel = {
   name: 'Accordion',
   title: 'Accordions',
@@ -143,12 +179,12 @@ export const clientsModel = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
+      type: 'json-many-to-one',
+      target: 'Image',
       widget: 'Image',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies Model;
 
 export const socialLinksModel = {

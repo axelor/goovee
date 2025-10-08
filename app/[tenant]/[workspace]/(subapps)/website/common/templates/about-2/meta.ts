@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 import {buttonColorSelection} from '../meta-selections';
 
@@ -31,9 +31,8 @@ export const about2Schema = {
     {
       name: 'thumbnail',
       title: 'Thumbnail',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'hideShape',
@@ -74,7 +73,7 @@ export const about2Schema = {
       defaultValue: 'container mb-14 mb-md-17 mb-lg-19',
     },
   ],
-  models: [bulletListModel],
+  models: [bulletListModel, imageModel],
   metaModels: [metaFileModel],
   selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
@@ -94,10 +93,19 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         'We take great pride in our ability to develop custom solutions that exceed our clients’ expectations and push the boundaries of design. If you are looking for inspiration or want to see what is possible',
       about2Thumbnail: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About 2 Thumbnail',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about2HideShape: false,
       about2BtnColor: 'white',
@@ -153,10 +161,19 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         'Nous sommes très fiers de notre capacité à développer des solutions personnalisées qui dépassent les attentes de nos clients et repoussent les limites du design. Si vous cherchez l’inspiration ou si vous voulez voir ce qui est possible',
       about2Thumbnail: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About 2 Thumbnail',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about2HideShape: false,
       about2BtnColor: 'white',

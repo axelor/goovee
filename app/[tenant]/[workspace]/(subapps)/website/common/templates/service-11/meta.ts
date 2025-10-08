@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 import {solidIconsSelection} from '../meta-selections';
 
 export const service11Schema = {
@@ -25,9 +25,8 @@ export const service11Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'services',
@@ -73,8 +72,8 @@ export const service11Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
   selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
@@ -92,10 +91,19 @@ export const service11Demos: Demo<typeof service11Schema>[] = [
         'The comprehensive service we provide is specifically tailored to your company’s requirements.',
       service11Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Our services',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       service11Services: [
         {
@@ -152,10 +160,19 @@ export const service11Demos: Demo<typeof service11Schema>[] = [
         'Le service complet que nous fournissons est spécialement adapté aux besoins de votre entreprise.',
       service11Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Nos services',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       service11Services: [
         {

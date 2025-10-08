@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer2Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
-import {getMetaFileURL} from '../../utils/helper';
+import {getImage} from '../../utils/helper';
 
 export function Footer2(props: TemplateProps<Footer2Data>) {
   const {data} = props;
@@ -28,8 +28,8 @@ export function Footer2(props: TemplateProps<Footer2Data>) {
     footer2SectionClassName: sectionClassName,
   } = data || {};
 
-  const contactImage = getMetaFileURL({
-    metaFile: footer2ContactImage,
+  const contactImage = getImage({
+    image: footer2ContactImage,
     path: 'footer2ContactImage',
     ...props,
   });
@@ -47,7 +47,7 @@ export function Footer2(props: TemplateProps<Footer2Data>) {
           <div className="row gx-0">
             <div
               className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start d-none d-md-block"
-              style={{backgroundImage: `url(${contactImage})`}}
+              style={{backgroundImage: `url(${contactImage.url})`}}
             />
             <div className="col-lg-6">
               <div className="p-10 p-md-11 p-lg-13">

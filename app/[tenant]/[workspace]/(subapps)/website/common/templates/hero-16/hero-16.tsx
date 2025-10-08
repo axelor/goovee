@@ -1,10 +1,11 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero16Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import Check from '@/subapps/website/common/icons/lineal/Check';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero16(props: TemplateProps<Hero16Data>) {
   const {data} = props;
@@ -23,8 +24,8 @@ export function Hero16(props: TemplateProps<Hero16Data>) {
     hero16ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero16Image,
+  const image = getImage({
+    image: hero16Image,
     path: 'hero16Image',
     ...props,
   });
@@ -35,7 +36,12 @@ export function Hero16(props: TemplateProps<Hero16Data>) {
         <div className="row gy-10 gy-md-13 gy-lg-0 align-items-center">
           <div className="col-md-8 col-lg-5 d-flex position-relative mx-auto">
             <div className="img-mask mask-1" style={slideInDownAnimate('0ms')}>
-              <img src={image} alt="" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </div>
 
             <div

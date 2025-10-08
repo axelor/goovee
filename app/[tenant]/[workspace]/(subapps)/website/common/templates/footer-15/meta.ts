@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
 
 export const footer15Schema = {
   title: 'Footer 15',
@@ -15,9 +14,8 @@ export const footer15Schema = {
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'title',
@@ -73,8 +71,7 @@ export const footer15Schema = {
       defaultValue: 'container pt-13 pb-7',
     },
   ],
-  models: [socialLinksModel],
-  metaModels: [metaFileModel],
+  models: [socialLinksModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Footer15Data = Data<typeof footer15Schema>;
@@ -88,10 +85,19 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
     data: {
       footer15Logo: {
         id: '1',
-        version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer15Title:
         "I'm Caitlyn Lighthouse, a photographer specializing in food, drink and product photography.",
@@ -159,10 +165,19 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
     data: {
       footer15Logo: {
         id: '1',
-        version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer15Title:
         'Je suis Caitlyn Lighthouse, une photographe spécialisée dans la photographie de nourriture, de boissons et de produits.',

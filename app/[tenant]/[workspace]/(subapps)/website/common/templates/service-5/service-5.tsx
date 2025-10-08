@@ -6,6 +6,7 @@ import {Tiles1} from '@/subapps/website/common/components/elements/tiles';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
 import dynamic from 'next/dynamic';
+import {getImage} from '../../utils/helper';
 
 const getIcon = (icon: string) => {
   return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
@@ -23,7 +24,28 @@ export function Service5(props: TemplateProps<Service5Data>) {
     service5Features: features,
     service5WrapperClassName: wrapperClassName,
     service5ContainerClassName: containerClassName,
+    service5Image1,
+    service5Image2,
+    service5Image3,
   } = data || {};
+
+  const image1 = getImage({
+    image: service5Image1,
+    path: 'service5Image1',
+    ...props,
+  });
+
+  const image2 = getImage({
+    image: service5Image2,
+    path: 'service5Image2',
+    ...props,
+  });
+
+  const image3 = getImage({
+    image: service5Image3,
+    path: 'service5Image3',
+    ...props,
+  });
 
   return (
     <section className={wrapperClassName} data-code={props.code}>
@@ -50,7 +72,7 @@ export function Service5(props: TemplateProps<Service5Data>) {
                 <p>{experienceDescription}</p>
               </div>
 
-              <Tiles1 />
+              <Tiles1 image1={image1} image2={image2} image3={image3} />
             </div>
 
             <div className="col-lg-6">

@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero12Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero12(props: TemplateProps<Hero12Data>) {
   const {data} = props;
@@ -18,8 +19,8 @@ export function Hero12(props: TemplateProps<Hero12Data>) {
     hero12ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero12Image,
+  const image = getImage({
+    image: hero12Image,
     path: 'hero12Image',
     ...props,
   });
@@ -60,7 +61,13 @@ export function Hero12(props: TemplateProps<Hero12Data>) {
 
           <div className="col-lg-7" style={slideInDownAnimate('0ms')}>
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
         </div>

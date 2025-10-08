@@ -2,10 +2,13 @@ import dayjs from 'dayjs';
 import {FC} from 'react';
 import Link from 'next/link';
 import NextLink from '../links/NextLink';
+import Image from 'next/image';
+import {ImageType} from '@/subapps/website/common/types/templates';
+import {getPaddingBottom} from '@/subapps/website/common/utils/helper';
 
 // ======================================================
 type BlogCard5Props = {
-  image?: string;
+  image?: ImageType;
   title?: string;
   author?: string;
   category?: string;
@@ -19,8 +22,18 @@ const BlogCard5: FC<BlogCard5Props> = props => {
 
   return (
     <figure className="overlay caption caption-overlay rounded mb-0">
-      <Link href="#">
-        <img src={image} alt="" />
+      <Link
+        href="#"
+        className="position-relative"
+        style={{paddingBottom: getPaddingBottom(image)}}>
+        {image?.url && (
+          <Image
+            src={image.url}
+            fill
+            alt={image.alt}
+            className="object-fit-cover"
+          />
+        )}
         <span className="bg" />
       </Link>
 

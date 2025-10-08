@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {accordionModel} from '../json-models';
+import {accordionModel, imageModel} from '../json-models';
 
 export const about23Schema = {
   title: 'About 23',
@@ -25,9 +24,8 @@ export const about23Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'accordions',
@@ -48,8 +46,7 @@ export const about23Schema = {
       defaultValue: 'container pb-15 pb-md-17',
     },
   ],
-  models: [accordionModel],
-  metaModels: [metaFileModel],
+  models: [accordionModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About23Data = Data<typeof about23Schema>;
@@ -63,10 +60,19 @@ export const about23Demos: Demo<typeof about23Schema>[] = [
     data: {
       about23Image: {
         id: '1',
-        version: 1,
-        fileName: 'i12.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i12.png',
+        version: 0,
+        attrs: {
+          alt: 'Benefits of choosing us',
+          width: 793,
+          height: 509,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i12.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i12.png',
+          },
+        },
       },
       about23Caption: 'Why Choose Us?',
       about23Title: 'Discover the Benefits of Choosing Us',
@@ -107,10 +113,19 @@ export const about23Demos: Demo<typeof about23Schema>[] = [
     data: {
       about23Image: {
         id: '1',
-        version: 1,
-        fileName: 'i12.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i12.png',
+        version: 0,
+        attrs: {
+          alt: 'Avantages de nous choisir',
+          width: 793,
+          height: 509,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i12.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i12.png',
+          },
+        },
       },
       about23Caption: 'Pourquoi nous choisir ?',
       about23Title: 'Découvrez les avantages de nous choisir',

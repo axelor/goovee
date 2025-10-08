@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero17Schema = {
   title: 'Hero 17',
@@ -44,9 +44,8 @@ export const hero17Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -61,7 +60,7 @@ export const hero17Schema = {
       defaultValue: 'container pt-12 pt-md-16 text-center',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero17Data = Data<typeof hero17Schema>;
@@ -81,10 +80,19 @@ export const hero17Demos: Demo<typeof hero17Schema>[] = [
       hero17ButtonLink2: '#',
       hero17Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg11.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg11.png',
+        version: 0,
+        attrs: {
+          alt: 'Quick solutions',
+          width: 1440,
+          height: 710,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg11.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg11.png',
+          },
+        },
       },
     },
   },
@@ -103,10 +111,19 @@ export const hero17Demos: Demo<typeof hero17Schema>[] = [
       hero17ButtonLink2: '#',
       hero17Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg11.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg11.png',
+        version: 0,
+        attrs: {
+          alt: 'Solutions rapides',
+          width: 1440,
+          height: 710,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg11.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg11.png',
+          },
+        },
       },
     },
   },

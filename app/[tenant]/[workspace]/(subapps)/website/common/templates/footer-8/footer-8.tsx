@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer8Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer8(props: TemplateProps<Footer8Data>) {
   const {data} = props;
@@ -22,8 +23,8 @@ export function Footer8(props: TemplateProps<Footer8Data>) {
     footer8ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer8Logo,
+  const logo = getImage({
+    image: footer8Logo,
     path: 'footer8Logo',
     ...props,
   });
@@ -41,7 +42,13 @@ export function Footer8(props: TemplateProps<Footer8Data>) {
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="" />
+              <Image
+                className="mb-4"
+                src={logo.url}
+                alt={logo.alt}
+                width={logo.width}
+                height={logo.height}
+              />
 
               <p className="mb-4">{copyright}</p>
 

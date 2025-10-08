@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {bulletListModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const about15Schema = {
   title: 'About 15',
@@ -25,9 +24,8 @@ export const about15Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'linkTitle',
@@ -59,8 +57,7 @@ export const about15Schema = {
       defaultValue: 'container pb-16 pb-md-17',
     },
   ],
-  models: [bulletListModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About15Data = Data<typeof about15Schema>;
@@ -75,9 +72,18 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
       about15Image: {
         id: '1',
         version: 1,
-        fileName: 'about19.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about19.jpg',
+        attrs: {
+          alt: 'Why Choose Us?',
+          width: 566,
+          height: 458,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about19.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about19.jpg',
+          },
+        },
       },
       about15Caption: 'Why Choose Us?',
       about15Description:
@@ -125,9 +131,18 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
       about15Image: {
         id: '1',
         version: 1,
-        fileName: 'about19.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about19.jpg',
+        attrs: {
+          alt: 'Pourquoi nous choisir ?',
+          width: 566,
+          height: 458,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about19.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about19.jpg',
+          },
+        },
       },
       about15Caption: 'Pourquoi nous choisir ?',
       about15Description:

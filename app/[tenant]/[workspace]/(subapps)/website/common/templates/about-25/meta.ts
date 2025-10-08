@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {serviceList3Model} from '../json-models';
+import {serviceList3Model, imageModel} from '../json-models';
 
 export const about25Schema = {
   title: 'About 25',
@@ -30,9 +29,8 @@ export const about25Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'linkTitle',
@@ -73,8 +71,7 @@ export const about25Schema = {
       defaultValue: 'container py-14 py-md-16',
     },
   ],
-  models: [serviceList3Model],
-  metaModels: [metaFileModel],
+  models: [serviceList3Model, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About25Data = Data<typeof about25Schema>;
@@ -88,10 +85,19 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
     data: {
       about25Image: {
         id: '1',
-        version: 1,
-        fileName: 'about30.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about30.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Caitlyn, a food and product photographer',
+          width: 512,
+          height: 512,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about30.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about30.jpg',
+          },
+        },
       },
       about25Caption: 'About Me',
       about25Para1:
@@ -151,10 +157,19 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
     data: {
       about25Image: {
         id: '1',
-        version: 1,
-        fileName: 'about30.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about30.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Caitlyn, photographe culinaire et de produits',
+          width: 512,
+          height: 512,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about30.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about30.jpg',
+          },
+        },
       },
       about25Caption: 'À propos de moi',
       about25Para1:

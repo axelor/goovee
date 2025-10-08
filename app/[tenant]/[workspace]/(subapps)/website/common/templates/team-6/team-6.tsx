@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team6Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {TeamCard3} from '@/subapps/website/common/components/reuseable/team-cards';
 import {Fragment} from 'react';
 
@@ -33,12 +33,12 @@ export function Team6(props: TemplateProps<Team6Data>) {
                 <TeamCard3
                   name={item.name}
                   designation={item.designation}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
+                  image={getImage({
+                    image: item.image,
                     path: `team6Members[${i}].attrs.image`,
                     ...props,
                   })}
-                />
+                />{' '}
               </div>
             ))}
           </div>

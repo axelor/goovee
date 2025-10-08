@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 
@@ -19,8 +19,8 @@ export function About2(props: TemplateProps<About2Data>) {
     about2ContainerClassName: containerClassName,
   } = data || {};
 
-  const thumbnail = getMetaFileURL({
-    metaFile: about2Thumbnail,
+  const thumbnail = getImage({
+    image: about2Thumbnail,
     path: 'about2Thumbnail',
     ...props,
   });

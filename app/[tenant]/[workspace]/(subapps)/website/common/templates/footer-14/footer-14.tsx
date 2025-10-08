@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer14Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '../../utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer14(props: TemplateProps<Footer14Data>) {
   const {data} = props;
@@ -26,14 +27,14 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
     footer14ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer14Logo,
+  const logo = getImage({
+    image: footer14Logo,
     path: 'footer14Logo',
     ...props,
   });
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: footer14BackgroundImage,
+  const backgroundImage = getImage({
+    image: footer14BackgroundImage,
     path: 'footer14BackgroundImage',
     ...props,
   });
@@ -50,7 +51,7 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
       <div className={containerClassName}>
         <div
           className="card image-wrapper bg-full bg-image bg-overlay mt-n50p mx-md-5"
-          style={{backgroundImage: `url(${backgroundImage})`}}>
+          style={{backgroundImage: `url(${backgroundImage.url})`}}>
           <div className="card-body p-6 p-md-11 d-lg-flex flex-row align-items-lg-center justify-content-md-between text-center text-lg-start">
             <h3 className="display-4 mb-6 mb-lg-0 pe-lg-10 pe-xl-5 pe-xxl-15 text-white">
               {title}
@@ -67,7 +68,13 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
           <div className="row gy-6 gy-lg-0">
             <div className="col-md-4 col-lg-3">
               <div className="widget">
-                <img className="mb-4" src={logo} alt="" />
+                <Image
+                  className="mb-4"
+                  src={logo.url}
+                  alt={logo.alt}
+                  width={logo.width}
+                  height={logo.height}
+                />
 
                 <p className="mb-4">{copyright}</p>
 

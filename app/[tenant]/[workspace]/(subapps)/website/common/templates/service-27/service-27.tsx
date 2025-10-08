@@ -1,8 +1,13 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service27Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import Link from 'next/link';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
+import {ImageType} from '@/subapps/website/common/types/templates';
 
 export function Service27(props: TemplateProps<Service27Data>) {
   const {data} = props;
@@ -34,8 +39,8 @@ export function Service27(props: TemplateProps<Service27Data>) {
                     title={service?.attrs.title}
                     figCaption={service?.attrs.figcaption}
                     imageLink={service?.attrs.url}
-                    image={getMetaFileURL({
-                      metaFile: service?.attrs.image,
+                    image={getImage({
+                      image: service?.attrs.image,
                       path: `service27Services[${index}].attrs.image`,
                       ...props,
                     })}
@@ -60,8 +65,8 @@ export function Service27(props: TemplateProps<Service27Data>) {
                       figCaption={service?.attrs.figcaption}
                       imageLink={service?.attrs.url}
                       title={service?.attrs.title}
-                      image={getMetaFileURL({
-                        metaFile: service?.attrs.image,
+                      image={getImage({
+                        image: service?.attrs.image,
                         path: `service27Services[${middleIndex + index}].attrs.image`,
                         ...props,
                       })}
@@ -91,7 +96,7 @@ export function Service27(props: TemplateProps<Service27Data>) {
 
 // ------------------------------------------------------------------------------------------
 type CardProps = {
-  image?: string;
+  image?: ImageType;
   title?: string;
   className?: string;
   figCaption?: string;
@@ -107,8 +112,19 @@ const Card = ({
 }: CardProps) => (
   <div className={`card shadow-lg ${className}`}>
     <figure className="card-img-top overlay overlay-1">
-      <Link href={imageLink || '#'} passHref>
-        <img className="img-fluid" src={image} alt="" />
+      <Link
+        href={imageLink || '#'}
+        passHref
+        className="position-relative"
+        style={{paddingBottom: getPaddingBottom(image)}}>
+        {image?.url && (
+          <Image
+            src={image.url}
+            fill
+            alt={image.alt}
+            className="img-fluid object-fit-cover"
+          />
+        )}
         <span className="bg" />
       </Link>
 

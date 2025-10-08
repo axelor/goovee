@@ -1,8 +1,10 @@
+import Image from 'next/image';
 import {FC, Fragment} from 'react';
+import {ImageType} from '@/subapps/website/common/types/templates';
 
 // ======================================================
 type Banner4Props = {
-  thumbnail?: string;
+  thumbnail?: ImageType;
   media?: string;
   mediaType?: string;
   hideShape?: boolean;
@@ -55,7 +57,14 @@ const Banner4: FC<Banner4Props> = ({
       )}
 
       <figure className="rounded">
-        <img src={thumbnail} alt="video thumbnail" />
+        {thumbnail?.url && (
+          <Image
+            src={thumbnail.url}
+            alt={thumbnail.alt}
+            width={thumbnail.width}
+            height={thumbnail.height}
+          />
+        )}
       </figure>
     </Fragment>
   );

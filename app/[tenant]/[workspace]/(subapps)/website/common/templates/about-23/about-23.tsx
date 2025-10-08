@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About23Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import AccordionList from '@/subapps/website/common/components/common/AccordionList';
+import Image from 'next/image';
 
 export function About23(props: TemplateProps<About23Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function About23(props: TemplateProps<About23Data>) {
     about23ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about23Image,
+  const image = getImage({
+    image: about23Image,
     path: 'about23Image',
     ...props,
   });
@@ -34,7 +35,13 @@ export function About23(props: TemplateProps<About23Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10">
           <div className="col-lg-7 order-lg-2">
             <figure>
-              <img alt="choose-us" className="w-auto" src={image} />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

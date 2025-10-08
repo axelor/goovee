@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service10Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import {ServiceCard5} from '@/subapps/website/common/components/reuseable/service-cards';
+import Image from 'next/image';
 
 export function Service10(props: TemplateProps<Service10Data>) {
   const {data} = props;
@@ -28,14 +29,14 @@ export function Service10(props: TemplateProps<Service10Data>) {
     service10ContainerClassName: containerClassName,
   } = data || {};
 
-  const image1 = getMetaFileURL({
-    metaFile: service10Image1,
+  const image1 = getImage({
+    image: service10Image1,
     path: 'service10Image1',
     ...props,
   });
 
-  const image2 = getMetaFileURL({
-    metaFile: service10Image2,
+  const image2 = getImage({
+    image: service10Image2,
     path: 'service10Image2',
     ...props,
   });
@@ -50,7 +51,12 @@ export function Service10(props: TemplateProps<Service10Data>) {
                 <div className="row">
                   <div className="col-lg-12">
                     <figure className="rounded mb-6">
-                      <img src={image2} alt="" />
+                      <Image
+                        src={image2.url}
+                        alt={image2.alt}
+                        width={image2.width}
+                        height={image2.height}
+                      />
                     </figure>
                   </div>
 
@@ -71,7 +77,12 @@ export function Service10(props: TemplateProps<Service10Data>) {
                 <div className="row">
                   <div className="col-lg-12 order-md-2">
                     <figure className="rounded mb-6 mb-md-0">
-                      <img src={image1} alt="" />
+                      <Image
+                        src={image1.url}
+                        alt={image1.alt}
+                        width={image1.width}
+                        height={image1.height}
+                      />
                     </figure>
                   </div>
 

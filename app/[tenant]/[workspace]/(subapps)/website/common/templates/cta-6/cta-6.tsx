@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Cta6Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function CTA6(props: TemplateProps<Cta6Data>) {
@@ -14,8 +14,8 @@ export function CTA6(props: TemplateProps<Cta6Data>) {
     cta6ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: cta6Image,
+  const image = getImage({
+    image: cta6Image,
     path: 'cta6Image',
     ...props,
   });
@@ -24,7 +24,7 @@ export function CTA6(props: TemplateProps<Cta6Data>) {
     <section
       className={wrapperClassName}
       data-code={props.code}
-      style={{backgroundImage: `url(${image})`}}>
+      style={{backgroundImage: `url(${image.url})`}}>
       <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-9 col-xl-8 col-xxl-7 mx-auto">

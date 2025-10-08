@@ -1,9 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio8Data} from './meta';
-import {
-  getMetaFileURL,
-  getTemplateId,
-} from '@/subapps/website/common/utils/helper';
+import {getImage, getTemplateId} from '@/subapps/website/common/utils/helper';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -36,17 +33,22 @@ export function Portfolio8(props: TemplateProps<Portfolio8Data>) {
               <div className="project item col-md-6 col-xl-4 product" key={id}>
                 <figure className="lift rounded mb-6">
                   <Link href={item.linkUrl || '#'}>
-                    <Image
-                      src={getMetaFileURL({
-                        metaFile: item.image,
+                    {(() => {
+                      const img = getImage({
+                        image: item.image,
                         path: `portfolio8PortfolioList[${i}].attrs.image`,
                         ...props,
-                      })}
-                      alt={item.title}
-                      width={1300}
-                      height={1132}
-                      style={{width: '100%', height: 'auto'}}
-                    />
+                      });
+                      return (
+                        <Image
+                          src={img.url}
+                          alt={img.alt}
+                          width={img.width}
+                          height={img.height}
+                          style={{width: '100%', height: 'auto'}}
+                        />
+                      );
+                    })()}
                   </Link>
                 </figure>
 

@@ -4,8 +4,7 @@ import {
   Template,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
 
 export const footer1Schema = {
   title: 'Footer 1',
@@ -15,9 +14,8 @@ export const footer1Schema = {
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'title',
@@ -102,6 +100,7 @@ export const footer1Schema = {
   ],
   models: [
     socialLinksModel,
+    imageModel,
     {
       name: 'Footer1NavLinks',
       title: 'Footer 1 NavLinks',
@@ -124,7 +123,6 @@ export const footer1Schema = {
       ],
     },
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer1Data = Data<typeof footer1Schema>;
@@ -143,11 +141,20 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
       footer1CopyrightText:
         '© 2022 Lighthouse. <br className="d-none d-lg-block" /> All rights reserved.',
       footer1Logo: {
-        id: '5',
-        version: 1,
-        fileName: 'logo-light.png',
-        filePath: '/img/logo-light.png',
-        fileType: 'image/png',
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer1AddressTitle: 'Get in Touch',
       footer1Address: 'Moonshine St. 14/05 Light City, London, United Kingdom',
@@ -226,11 +233,20 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
       footer1CopyrightText:
         '© 2022 Lighthouse. <br className="d-none d-lg-block" /> Tous droits réservés.',
       footer1Logo: {
-        id: '5',
-        version: 1,
-        fileName: 'logo-light.png',
-        filePath: '/img/logo-light.png',
-        fileType: 'image/png',
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer1AddressTitle: 'Contactez-nous',
       footer1Address: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
@@ -317,11 +333,20 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
       footer1CopyrightText:
         '© 2022 Lighthouse. <br className="d-none d-lg-block" /> All rights reserved.',
       footer1Logo: {
-        id: '5',
-        version: 1,
-        fileName: 'logo-light.png',
-        filePath: '/img/logo-light.png',
-        fileType: 'image/png',
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer1AddressTitle: 'Get in Touch',
       footer1Address: 'Moonshine St. 14/05 Light City, London, United Kingdom',
@@ -400,11 +425,20 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
       footer1CopyrightText:
         '© 2022 Lighthouse. <br className="d-none d-lg-block" /> Tous droits réservés.',
       footer1Logo: {
-        id: '5',
-        version: 1,
-        fileName: 'logo-light.png',
-        filePath: '/img/logo-light.png',
-        fileType: 'image/png',
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer1AddressTitle: 'Contactez-nous',
       footer1Address: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',
@@ -491,11 +525,20 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
       footer1CopyrightText:
         '© 2022 Lighthouse. <br className="d-none d-lg-block" /> All rights reserved.',
       footer1Logo: {
-        id: '5',
-        version: 1,
-        fileName: 'logo-light.png',
-        filePath: '/img/logo-light.png',
-        fileType: 'image/png',
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer1AddressTitle: 'Get in Touch',
       footer1Address: 'Moonshine St. 14/05 Light City, London, United Kingdom',
@@ -574,11 +617,20 @@ export const footer1Demos: Demo<typeof footer1Schema>[] = [
       footer1CopyrightText:
         '© 2022 Lighthouse. <br className="d-none d-lg-block" /> Tous droits réservés.',
       footer1Logo: {
-        id: '5',
-        version: 1,
-        fileName: 'logo-light.png',
-        filePath: '/img/logo-light.png',
-        fileType: 'image/png',
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer1AddressTitle: 'Contactez-nous',
       footer1Address: 'Moonshine St. 14/05 Light City, Londres, Royaume-Uni',

@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const contact12Schema = {
   title: 'Contact 12',
@@ -24,9 +24,8 @@ export const contact12Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'inputLabel1',
@@ -106,8 +105,7 @@ export const contact12Schema = {
       defaultValue: 'container py-15 py-md-17',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact12Data = Data<typeof contact12Schema>;
@@ -124,10 +122,19 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
         'For more information please get in touch using the form below:',
       contact12Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg36.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg36.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Photography pricing request form background',
+          width: 1440,
+          height: 816,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg36.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg36.jpg',
+          },
+        },
       },
       contact12InputLabel1: 'Name *',
       contact12InputLabel2: 'Email *',
@@ -155,10 +162,19 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
         'Pour plus d’informations, veuillez nous contacter en utilisant le formulaire ci-dessous :',
       contact12Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg36.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg36.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Arrière-plan du formulaire de demande de prix de photographie',
+          width: 1440,
+          height: 816,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg36.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg36.jpg',
+          },
+        },
       },
       contact12InputLabel1: 'Nom *',
       contact12InputLabel2: 'E-mail *',

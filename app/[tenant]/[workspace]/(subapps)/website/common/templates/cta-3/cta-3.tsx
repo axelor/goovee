@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Cta3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function CTA3(props: TemplateProps<Cta3Data>) {
@@ -15,8 +15,8 @@ export function CTA3(props: TemplateProps<Cta3Data>) {
     cta3ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: cta3Image,
+  const image = getImage({
+    image: cta3Image,
     path: 'cta3Image',
     ...props,
   });
@@ -25,7 +25,7 @@ export function CTA3(props: TemplateProps<Cta3Data>) {
     <section
       className={wrapperClassName}
       data-code={props.code}
-      style={{backgroundImage: `url(${image})`}}>
+      style={{backgroundImage: `url(${image.url})`}}>
       <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-7 col-xl-7 mx-auto">

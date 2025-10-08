@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team7Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
+import Image from 'next/image';
 
 export function Team7(props: TemplateProps<Team7Data>) {
   const {data} = props;
@@ -15,8 +16,8 @@ export function Team7(props: TemplateProps<Team7Data>) {
     team7ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: team7Image,
+  const image = getImage({
+    image: team7Image,
     path: 'team7Image',
     ...props,
   });
@@ -27,7 +28,12 @@ export function Team7(props: TemplateProps<Team7Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
           <div className="col-md-8 col-lg-6 order-lg-2">
             <figure className="rounded">
-              <img src={image} alt="" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

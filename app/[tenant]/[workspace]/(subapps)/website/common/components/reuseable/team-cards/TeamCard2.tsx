@@ -1,11 +1,12 @@
 import {FC} from 'react';
 import Image from 'next/image';
 import SocialLinks from '../SocialLinks';
+import {ImageType} from '../../../types/templates';
 
 // ==========================================================
 type TeamCard2Props = {
   name?: string;
-  image?: string;
+  image?: ImageType;
   designation?: string;
   description?: string;
   socialLinks?: {id: string; icon: string; url: string}[];
@@ -18,13 +19,15 @@ const TeamCard2: FC<TeamCard2Props> = props => {
   return (
     <div className="text-center">
       <div className="rounded-circle w-20 mx-auto mb-4 overflow-hidden">
-        <Image
-          width={500}
-          height={500}
-          alt="Team Member"
-          src={image}
-          style={{width: '100%', height: 'auto'}}
-        />
+        {image?.url && (
+          <Image
+            src={image?.url}
+            alt={image?.alt}
+            width={image?.width}
+            height={image?.height}
+            style={{width: '100%', height: 'auto'}}
+          />
+        )}
       </div>
 
       <h4 className="mb-1">{name}</h4>

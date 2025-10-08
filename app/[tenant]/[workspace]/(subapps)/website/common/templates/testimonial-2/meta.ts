@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const testimonial2Schema = {
   title: 'Testimonial 2',
@@ -14,9 +14,8 @@ export const testimonial2Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'testimonials',
@@ -63,8 +62,8 @@ export const testimonial2Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial2Data = Data<typeof testimonial2Schema>;
@@ -78,10 +77,19 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
     data: {
       testimonial2Image: {
         id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Testimonial',
+          width: 598,
+          height: 432,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
       testimonial2Testimonials: [
         {
@@ -131,10 +139,19 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
     data: {
       testimonial2Image: {
         id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Témoignage',
+          width: 598,
+          height: 432,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
       testimonial2Testimonials: [
         {

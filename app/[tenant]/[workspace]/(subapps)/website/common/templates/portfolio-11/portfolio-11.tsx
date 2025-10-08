@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ProjectCard3} from '@/subapps/website/common/components/reuseable/project-cards';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
@@ -36,13 +36,13 @@ export function Portfolio11(props: TemplateProps<Portfolio11Data>) {
               <div className="project item col-md-6 col-xl-4" key={id}>
                 <ProjectCard3
                   {...item}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
+                  image={getImage({
+                    image: item.image,
                     path: `portfolio11PortfolioList[${i}].attrs.image`,
                     ...props,
                   })}
-                  fullImage={getMetaFileURL({
-                    metaFile: item.fullImage,
+                  fullImage={getImage({
+                    image: item.fullImage,
                     path: `portfolio11PortfolioList[${i}].attrs.fullImage`,
                     ...props,
                   })}

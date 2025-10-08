@@ -2,7 +2,8 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Faq1Data} from './meta';
 import Accordion from '@/subapps/website/common/components/reuseable/accordion';
 import {Fragment} from 'react';
-import {getMetaFileURL, getTemplateId} from '../../utils/helper';
+import {getImage, getMetaFileURL, getTemplateId} from '../../utils/helper';
+import Image from 'next/image';
 
 export function FAQ1(props: TemplateProps<Faq1Data>) {
   const {data} = props;
@@ -28,8 +29,8 @@ export function FAQ1(props: TemplateProps<Faq1Data>) {
     ...props,
   });
 
-  const thumbnail = getMetaFileURL({
-    metaFile: faq1Thumbnail,
+  const thumbnail = getImage({
+    image: faq1Thumbnail,
     path: 'faq1Thumbnail',
     ...props,
   });
@@ -54,7 +55,12 @@ export function FAQ1(props: TemplateProps<Faq1Data>) {
                 <i className="icn-caret-right" />
               </a>
               <figure className="rounded shadow">
-                <img src={thumbnail} alt="" />
+                <Image
+                  src={thumbnail.url}
+                  alt={thumbnail.alt}
+                  width={thumbnail.width}
+                  height={thumbnail.height}
+                />
               </figure>
             </div>
             <h2 className="fs-15 text-uppercase text-muted mb-3 text-center">

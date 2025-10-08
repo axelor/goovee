@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Faq4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
-import {Counter2} from '@/subapps/website/common/components/reuseable/counter';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Counter2 from '@/subapps/website/common/components/reuseable/counter/Counter2';
 
 export function FAQ4(props: TemplateProps<Faq4Data>) {
   const {data} = props;
@@ -12,8 +12,8 @@ export function FAQ4(props: TemplateProps<Faq4Data>) {
     faq4ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: faq4Image,
+  const image = getImage({
+    image: faq4Image,
     path: 'faq4Image',
     ...props,
   });
@@ -25,14 +25,14 @@ export function FAQ4(props: TemplateProps<Faq4Data>) {
           <div className="col-xl-10 mx-auto">
             <div
               className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400"
-              style={{backgroundImage: `url(${image})`}}>
+              style={{backgroundImage: `url(${image.url})`}}>
               <div className="card-body p-9 p-xl-11">
                 <div className="row align-items-center counter-wrapper gy-8 text-center text-white">
-                  {facts?.map(item => (
+                  {facts?.map(({id, attrs: item}) => (
                     <Counter2
-                      key={item.id}
-                      amount={item.attrs.amount || 0}
-                      title={item.attrs.title || ''}
+                      key={id}
+                      amount={item.amount || 0}
+                      title={item.title || ''}
                     />
                   ))}
                 </div>

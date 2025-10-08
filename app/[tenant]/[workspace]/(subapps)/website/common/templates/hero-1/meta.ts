@@ -4,7 +4,7 @@ import {
   Template,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero1Schema = {
   title: 'Hero 1',
@@ -34,9 +34,8 @@ export const hero1Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -51,7 +50,7 @@ export const hero1Schema = {
       defaultValue: 'container pt-10 pt-md-14 pb-8 text-center',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero1Data = Data<typeof hero1Schema>;
@@ -70,10 +69,19 @@ export const hero1Demos: Demo<typeof hero1Schema>[] = [
       hero1ButtonLink: '#',
       hero1Image: {
         id: '1',
-        version: 1,
-        fileName: 'i2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i2.png',
+        version: 0,
+        attrs: {
+          alt: 'hero',
+          width: 628,
+          height: 426,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i2.png',
+          },
+        },
       },
     },
   },
@@ -90,10 +98,19 @@ export const hero1Demos: Demo<typeof hero1Schema>[] = [
       hero1ButtonLink: '#',
       hero1Image: {
         id: '1',
-        version: 1,
-        fileName: 'i2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i2.png',
+        version: 0,
+        attrs: {
+          alt: 'héro',
+          width: 628,
+          height: 426,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i2.png',
+          },
+        },
       },
     },
   },

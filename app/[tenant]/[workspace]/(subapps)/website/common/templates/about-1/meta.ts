@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {accordionModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {accordionModel, imageModel} from '../json-models';
 
 export const about1Schema = {
   title: 'About 1',
@@ -25,9 +24,8 @@ export const about1Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'accordions',
@@ -48,8 +46,7 @@ export const about1Schema = {
       defaultValue: 'container pb-14 pb-md-15',
     },
   ],
-  models: [accordionModel],
-  metaModels: [metaFileModel],
+  models: [accordionModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About1Data = Data<typeof about1Schema>;
@@ -63,10 +60,19 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
     data: {
       about1Image: {
         id: '1',
-        version: 1,
-        fileName: 'i6.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i6.png',
+        version: 0,
+        attrs: {
+          alt: 'Why Choose Us Image',
+          width: 660,
+          height: 496,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i6.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i6.png',
+          },
+        },
       },
       about1Caption: 'Why Choose Us?',
       about1Title: 'We provide solutions that make our clients live easier.',
@@ -107,10 +113,19 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
     data: {
       about1Image: {
         id: '1',
-        version: 1,
-        fileName: 'i6.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i6.png',
+        version: 0,
+        attrs: {
+          alt: 'Why Choose Us Image',
+          width: 660,
+          height: 496,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i6.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i6.png',
+          },
+        },
       },
       about1Caption: 'Pourquoi nous choisir ?',
       about1Title:

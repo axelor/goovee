@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 import {socialLinksModel} from '../json-models';
 
 export const footer11Schema = {
@@ -15,9 +15,8 @@ export const footer11Schema = {
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'copyright',
@@ -86,6 +85,7 @@ export const footer11Schema = {
   ],
   models: [
     socialLinksModel,
+    imageModel,
     {
       name: 'Footer11Links',
       title: 'Links',
@@ -105,7 +105,6 @@ export const footer11Schema = {
       ],
     },
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer11Data = Data<typeof footer11Schema>;
@@ -120,9 +119,18 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
       footer11Logo: {
         id: '1',
         version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        attrs: {
+          alt: 'Company logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer11Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer11AddressTitle: 'Get in Touch',
@@ -199,9 +207,18 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
       footer11Logo: {
         id: '1',
         version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        attrs: {
+          alt: "Logo de l'entreprise",
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer11Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer11AddressTitle: 'Contactez-nous',
@@ -286,9 +303,18 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
       footer11Logo: {
         id: '1',
         version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        attrs: {
+          alt: 'Company logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer11Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer11AddressTitle: 'Get in Touch',
@@ -365,9 +391,18 @@ export const footer11Demos: Demo<typeof footer11Schema>[] = [
       footer11Logo: {
         id: '1',
         version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        attrs: {
+          alt: "Logo de l'entreprise",
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer11Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer11AddressTitle: 'Contactez-nous',

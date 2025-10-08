@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import {TeamCard1} from '@/subapps/website/common/components/reuseable/team-cards';
 
@@ -61,8 +61,8 @@ export function Team3(props: TemplateProps<Team3Data>) {
                       description={item.description}
                       designation={item.designation}
                       socialLinks={socialLinks || []}
-                      image={getMetaFileURL({
-                        metaFile: item.image,
+                      image={getImage({
+                        image: item.image,
                         path: `team3Members[${i}].attrs.image`,
                         ...props,
                       })}

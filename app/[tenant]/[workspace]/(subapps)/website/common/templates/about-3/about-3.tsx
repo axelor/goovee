@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getTemplateId} from '@/subapps/website/common/utils/helper';
 import AccordionList from '@/subapps/website/common/components/common/AccordionList';
+import Image from 'next/image';
 
 export function About3(props: TemplateProps<About3Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function About3(props: TemplateProps<About3Data>) {
     about3ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about3Image,
+  const image = getImage({
+    image: about3Image,
     path: 'about3Image',
     ...props,
   });
@@ -28,6 +29,7 @@ export function About3(props: TemplateProps<About3Data>) {
       body: item.body,
     })) ?? [];
 
+  const uniqueId = getTemplateId(props);
   return (
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
@@ -49,7 +51,12 @@ export function About3(props: TemplateProps<About3Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="about" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 
@@ -59,7 +66,7 @@ export function About3(props: TemplateProps<About3Data>) {
             </h2>
             <h3 className="display-5 mb-7">{title}</h3>
             <div className="accordion accordion-wrapper">
-              <AccordionList id="about3" accordions={accordions} />
+              <AccordionList accordions={accordions} id={uniqueId} />
             </div>
           </div>
         </div>

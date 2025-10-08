@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero2Schema = {
   title: 'Hero 2',
@@ -44,9 +44,8 @@ export const hero2Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -61,7 +60,7 @@ export const hero2Schema = {
       defaultValue: 'container',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero2Data = Data<typeof hero2Schema>;
@@ -82,10 +81,19 @@ export const hero2Demos: Demo<typeof hero2Schema>[] = [
       hero2ButtonLink2: '#',
       hero2Image: {
         id: '1',
-        version: 1,
-        fileName: 'about7.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about7.jpg',
+        version: 0,
+        attrs: {
+          alt: 'hero',
+          width: 593,
+          height: 570,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about7.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about7.jpg',
+          },
+        },
       },
     },
   },
@@ -105,10 +113,19 @@ export const hero2Demos: Demo<typeof hero2Schema>[] = [
       hero2ButtonLink2: '#',
       hero2Image: {
         id: '1',
-        version: 1,
-        fileName: 'about7.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about7.jpg',
+        version: 0,
+        attrs: {
+          alt: 'héro',
+          width: 593,
+          height: 570,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about7.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about7.jpg',
+          },
+        },
       },
     },
   },

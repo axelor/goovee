@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About13Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 
@@ -19,8 +19,8 @@ export function About13(props: TemplateProps<About13Data>) {
     about13ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about13Image,
+  const image = getImage({
+    image: about13Image,
     path: 'about13Image',
     ...props,
   });

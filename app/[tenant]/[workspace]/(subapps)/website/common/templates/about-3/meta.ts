@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {accordionModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {accordionModel, imageModel} from '../json-models';
 
 export const about3Schema = {
   title: 'About 3',
@@ -25,9 +24,8 @@ export const about3Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'accordions',
@@ -48,8 +46,7 @@ export const about3Schema = {
       defaultValue: 'container pb-16 pb-md-18',
     },
   ],
-  models: [accordionModel],
-  metaModels: [metaFileModel],
+  models: [accordionModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About3Data = Data<typeof about3Schema>;
@@ -66,10 +63,19 @@ export const about3Demos: Demo<typeof about3Schema>[] = [
       about3Caption: 'Why Choose Us?',
       about3Image: {
         id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About US',
+          width: 594,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about9.jpg',
+          },
+        },
       },
       about3Accordions: [
         {
@@ -113,10 +119,19 @@ export const about3Demos: Demo<typeof about3Schema>[] = [
       about3Caption: 'Pourquoi nous choisir ?',
       about3Image: {
         id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About US',
+          width: 594,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about9.jpg',
+          },
+        },
       },
       about3Accordions: [
         {

@@ -1,7 +1,8 @@
 import AccordionList from '@/subapps/website/common/components/common/AccordionList';
 import type {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {type About7Data} from './meta';
+import Image from 'next/image';
 
 export function About7(props: TemplateProps<About7Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function About7(props: TemplateProps<About7Data>) {
     about7ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about7Image,
+  const image = getImage({
+    image: about7Image,
     path: 'about7Image',
     ...props,
   });
@@ -34,7 +35,13 @@ export function About7(props: TemplateProps<About7Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

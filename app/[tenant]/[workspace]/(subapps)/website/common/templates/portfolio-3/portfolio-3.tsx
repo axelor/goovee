@@ -1,9 +1,10 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import {Fragment} from 'react';
+import Image from 'next/image';
 
 export function Portfolio3(props: TemplateProps<Portfolio3Data>) {
   const {data} = props;
@@ -39,14 +40,21 @@ export function Portfolio3(props: TemplateProps<Portfolio3Data>) {
             {portfolioList?.map(({id, attrs: item}, i) => (
               <Fragment key={id}>
                 <figure className="rounded mb-7">
-                  <img
-                    src={getMetaFileURL({
-                      metaFile: item.image,
+                  {(() => {
+                    const img = getImage({
+                      image: item.image,
                       path: `portfolio3PortfolioList[${i}].attrs.image`,
                       ...props,
-                    })}
-                    alt=""
-                  />
+                    });
+                    return (
+                      <Image
+                        src={img.url}
+                        alt={img.alt || ''}
+                        width={img.width}
+                        height={img.height}
+                      />
+                    );
+                  })()}
                 </figure>
 
                 <div className="project-details d-flex justify-content-center flex-column">

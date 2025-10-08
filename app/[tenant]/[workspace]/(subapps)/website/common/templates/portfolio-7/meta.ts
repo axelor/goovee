@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const portfolio7Schema = {
   title: 'Portfolio 7',
@@ -24,9 +24,8 @@ export const portfolio7Schema = {
     {
       name: 'image1',
       title: 'Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image1Link',
@@ -46,9 +45,8 @@ export const portfolio7Schema = {
     {
       name: 'image2',
       title: 'Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image2Link',
@@ -68,9 +66,8 @@ export const portfolio7Schema = {
     {
       name: 'image3',
       title: 'Image 3',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image3Link',
@@ -100,8 +97,7 @@ export const portfolio7Schema = {
       defaultValue: 'container py-14 py-md-16',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Portfolio7Data = Data<typeof portfolio7Schema>;
@@ -116,31 +112,58 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Title: 'Check out some of our recent projects below.',
       portfolio7Description: 'We love to turn ideas into beautiful things.',
       portfolio7Image1: {
-        id: '1',
-        version: 1,
-        fileName: 'rp1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp1.jpg',
+        id: 'img-1',
+        version: 0,
+        attrs: {
+          alt: 'Ipsum Ultricies Cursus',
+          width: 568,
+          height: 455,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'rp1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp1.jpg',
+          },
+        },
       },
       portfolio7Image1Link: '#',
       portfolio7Caption1: 'Stationary',
       portfolio7Title1: 'Ipsum Ultricies Cursus',
       portfolio7Image2: {
-        id: '1',
-        version: 1,
-        fileName: 'rp2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp2.jpg',
+        id: 'img-2',
+        version: 0,
+        attrs: {
+          alt: 'Mollis Ipsum Mattis',
+          width: 568,
+          height: 531,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'rp2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp2.jpg',
+          },
+        },
       },
       portfolio7Image2Link: '#',
       portfolio7Caption2: 'Invitation',
       portfolio7Title2: 'Mollis Ipsum Mattis',
       portfolio7Image3: {
-        id: '1',
-        version: 1,
-        fileName: 'rp3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp3.jpg',
+        id: 'img-3',
+        version: 0,
+        attrs: {
+          alt: 'Magna Tristique Inceptos',
+          width: 568,
+          height: 382,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'rp3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp3.jpg',
+          },
+        },
       },
       portfolio7Image3Link: '#',
       portfolio7Caption3: 'Notebook',
@@ -158,31 +181,58 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Description:
         'Nous aimons transformer les idées en de belles choses.',
       portfolio7Image1: {
-        id: '1',
-        version: 1,
-        fileName: 'rp1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp1.jpg',
+        id: 'img-1',
+        version: 0,
+        attrs: {
+          alt: 'Ipsum Ultricies Cursus',
+          width: 568,
+          height: 455,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'rp1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp1.jpg',
+          },
+        },
       },
       portfolio7Image1Link: '#',
       portfolio7Caption1: 'Papeterie',
       portfolio7Title1: 'Ipsum Ultricies Cursus',
       portfolio7Image2: {
-        id: '1',
-        version: 1,
-        fileName: 'rp2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp2.jpg',
+        id: 'img-2',
+        version: 0,
+        attrs: {
+          alt: 'Mollis Ipsum Mattis',
+          width: 568,
+          height: 531,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'rp2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp2.jpg',
+          },
+        },
       },
       portfolio7Image2Link: '#',
       portfolio7Caption2: 'Invitation',
       portfolio7Title2: 'Mollis Ipsum Mattis',
       portfolio7Image3: {
-        id: '1',
-        version: 1,
-        fileName: 'rp3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp3.jpg',
+        id: 'img-3',
+        version: 0,
+        attrs: {
+          alt: 'Magna Tristique Inceptos',
+          width: 568,
+          height: 382,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'rp3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp3.jpg',
+          },
+        },
       },
       portfolio7Image3Link: '#',
       portfolio7Caption3: 'Carnet',

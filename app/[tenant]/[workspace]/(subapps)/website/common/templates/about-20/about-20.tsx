@@ -1,9 +1,10 @@
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
 import Design from '@/subapps/website/common/icons/solid/Design';
 import type {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import dynamic from 'next/dynamic';
 import {type About20Data} from './meta';
+import Image from 'next/image';
 
 function getIcon(icon: string) {
   return icon
@@ -28,20 +29,20 @@ export function About20(props: TemplateProps<About20Data>) {
     about20ContainerClassName: containerClassName,
   } = data || {};
 
-  const image1 = getMetaFileURL({
-    metaFile: about20Image1,
+  const image1 = getImage({
+    image: about20Image1,
     path: 'about20Image1',
     ...props,
   });
 
-  const image2 = getMetaFileURL({
-    metaFile: about20Image2,
+  const image2 = getImage({
+    image: about20Image2,
     path: 'about20Image2',
     ...props,
   });
 
-  const image3 = getMetaFileURL({
-    metaFile: about20Image3,
+  const image3 = getImage({
+    image: about20Image3,
     path: 'about20Image3',
     ...props,
   });
@@ -54,19 +55,34 @@ export function About20(props: TemplateProps<About20Data>) {
             <div className="row gx-md-5 gy-5">
               <div className="col-12">
                 <figure className="rounded mx-md-5">
-                  <img src={image1} alt="" />
+                  <Image
+                    src={image1.url}
+                    alt={image1.alt}
+                    width={image1.width}
+                    height={image1.height}
+                  />
                 </figure>
               </div>
 
               <div className="col-md-6">
                 <figure className="rounded">
-                  <img src={image2} alt="" />
+                  <Image
+                    src={image2.url}
+                    alt={image2.alt}
+                    width={image2.width}
+                    height={image2.height}
+                  />
                 </figure>
               </div>
 
               <div className="col-md-6">
                 <figure className="rounded">
-                  <img src={image3} alt="" />
+                  <Image
+                    src={image3.url}
+                    alt={image3.alt}
+                    width={image3.width}
+                    height={image3.height}
+                  />
                 </figure>
               </div>
             </div>

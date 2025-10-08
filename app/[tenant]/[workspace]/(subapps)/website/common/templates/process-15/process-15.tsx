@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process15Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 export function Process15(props: TemplateProps<Process15Data>) {
   const {data} = props;
@@ -13,8 +14,8 @@ export function Process15(props: TemplateProps<Process15Data>) {
     process15ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: process15Image,
+  const image = getImage({
+    image: process15Image,
     path: 'process15Image',
     ...props,
   });
@@ -25,8 +26,13 @@ export function Process15(props: TemplateProps<Process15Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-15 mb-md-17 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img className="w-auto" src={image} alt="process" />
-            </figure>
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
+            </figure>{' '}
           </div>
 
           <div className="col-lg-5">

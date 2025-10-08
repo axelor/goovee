@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const service15Schema = {
   title: 'Service 15',
@@ -30,9 +29,8 @@ export const service15Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'services',
@@ -54,8 +52,7 @@ export const service15Schema = {
       defaultValue: 'container pb-14 pb-md-17 mb-md-15',
     },
   ],
-  models: [bulletListModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Service15Data = Data<typeof service15Schema>;
@@ -74,10 +71,19 @@ export const service15Demos: Demo<typeof service15Schema>[] = [
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space.',
       service15Image: {
         id: '1',
-        version: 1,
-        fileName: 'i9.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i9.png',
+        version: 0,
+        attrs: {
+          alt: 'Our solutions',
+          width: 676,
+          height: 514,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i9.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i9.png',
+          },
+        },
       },
       service15Services: {
         id: '1',
@@ -123,10 +129,19 @@ export const service15Demos: Demo<typeof service15Schema>[] = [
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et qui interagissent les unes avec les autres dans un lieu ou un espace virtuel partagé.',
       service15Image: {
         id: '1',
-        version: 1,
-        fileName: 'i9.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i9.png',
+        version: 0,
+        attrs: {
+          alt: 'Nos solutions',
+          width: 676,
+          height: 514,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i9.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i9.png',
+          },
+        },
       },
       service15Services: {
         id: '1',

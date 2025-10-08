@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero21Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero21(props: TemplateProps<Hero21Data>) {
   const {data} = props;
@@ -18,8 +19,8 @@ export function Hero21(props: TemplateProps<Hero21Data>) {
     hero21ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero21Image,
+  const image = getImage({
+    image: hero21Image,
     path: 'hero21Image',
     ...props,
   });
@@ -30,7 +31,13 @@ export function Hero21(props: TemplateProps<Hero21Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 gy-xl-0 mb-14 align-items-center">
           <div className="col-lg-7 order-lg-2">
             <figure>
-              <img alt="demo" className="img-auto" src={image} />
+              <Image
+                alt={image.alt}
+                className="img-auto"
+                src={image.url}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 
@@ -56,15 +63,22 @@ export function Hero21(props: TemplateProps<Hero21Data>) {
         <div className="row row-cols-4 row-cols-md-4 row-cols-lg-7 row-cols-xl-7 gy-10 mb-2 d-flex align-items-center justify-content-center">
           {clients?.map(({id, attrs: item}, i) => (
             <div className="col" key={id}>
-              <img
-                className="img-fluid px-md-3 px-lg-0 px-xl-2 px-xxl-5"
-                src={getMetaFileURL({
-                  metaFile: item.image,
+              {(() => {
+                const img = getImage({
+                  image: item.image,
                   path: `hero21Clients[${i}].attrs.image`,
                   ...props,
-                })}
-                alt="client"
-              />
+                });
+                return (
+                  <Image
+                    className="img-fluid px-md-3 px-lg-0 px-xl-2 px-xxl-5"
+                    src={img.url}
+                    alt={img.alt || 'client'}
+                    width={img.width}
+                    height={img.height}
+                  />
+                );
+              })()}
             </div>
           ))}
         </div>

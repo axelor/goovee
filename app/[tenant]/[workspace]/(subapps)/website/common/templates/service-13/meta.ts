@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 import {uniconsSelection} from '../meta-selections';
 
 export const service13Schema = {
@@ -20,9 +20,8 @@ export const service13Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'services',
@@ -78,8 +77,8 @@ export const service13Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
   selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
@@ -95,10 +94,19 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
       service13Title: 'Our service is customized to the unique needs of you.',
       service13Image: {
         id: '1',
-        version: 1,
-        fileName: 'about15.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about15.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Our service',
+          width: 1200,
+          height: 582,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about15.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about15.jpg',
+          },
+        },
       },
       service13Services: [
         {
@@ -162,10 +170,19 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
         'Notre service est personnalisé pour répondre à vos besoins uniques.',
       service13Image: {
         id: '1',
-        version: 1,
-        fileName: 'about15.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about15.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Notre service',
+          width: 1200,
+          height: 582,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about15.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about15.jpg',
+          },
+        },
       },
       service13Services: [
         {

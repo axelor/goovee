@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About15Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function About15(props: TemplateProps<About15Data>) {
   const {data} = props;
@@ -17,8 +18,8 @@ export function About15(props: TemplateProps<About15Data>) {
     about15ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about15Image,
+  const image = getImage({
+    image: about15Image,
     path: 'about15Image',
     ...props,
   });
@@ -34,7 +35,12 @@ export function About15(props: TemplateProps<About15Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import IconBox from '@/subapps/website/common/components/reuseable/IconBox';
+import Image from 'next/image';
 
 export function Contact11(props: TemplateProps<Contact11Data>) {
   const {data} = props;
@@ -14,8 +15,8 @@ export function Contact11(props: TemplateProps<Contact11Data>) {
     contact11ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact11Image,
+  const image = getImage({
+    image: contact11Image,
     path: 'contact11Image',
     ...props,
   });
@@ -26,7 +27,13 @@ export function Contact11(props: TemplateProps<Contact11Data>) {
         <div className="row gx-3 gy-10 align-items-center">
           <div className="col-lg-6">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

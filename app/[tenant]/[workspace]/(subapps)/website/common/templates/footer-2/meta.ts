@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {socialLinksModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {imageModel, socialLinksModel} from '../json-models';
 
 export const footer2Schema = {
   title: 'Footer 2',
@@ -40,9 +39,8 @@ export const footer2Schema = {
     {
       name: 'contactImage',
       title: 'Contact Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'addressTitle',
@@ -113,8 +111,7 @@ export const footer2Schema = {
       defaultValue: 'position-relative',
     },
   ],
-  models: [socialLinksModel],
-  metaModels: [metaFileModel],
+  models: [socialLinksModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Footer2Data = Data<typeof footer2Schema>;
@@ -135,10 +132,19 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
       footer2ContactLinkHref: '#',
       footer2ContactImage: {
         id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        version: 0,
+        attrs: {
+          alt: "Let's talk",
+          width: 598,
+          height: 432,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
       footer2AddressTitle: 'Address',
       footer2AddressLine1: 'Moonshine St. 14/05',
@@ -214,10 +220,19 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
       footer2ContactLinkHref: '#',
       footer2ContactImage: {
         id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Parlons',
+          width: 598,
+          height: 432,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
       footer2AddressTitle: 'Adresse',
       footer2AddressLine1: 'Moonshine St. 14/05',

@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio1Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Image from 'next/image';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 
@@ -33,17 +33,22 @@ export function Portfolio1(props: TemplateProps<Portfolio1Data>) {
           <Carousel grabCursor breakpoints={carouselBreakpoints}>
             {images?.map(({id, attrs: item}, i) => (
               <figure className="rounded" key={id}>
-                <Image
-                  width={380}
-                  height={320}
-                  src={getMetaFileURL({
-                    metaFile: item.image,
+                {(() => {
+                  const img = getImage({
+                    image: item.image,
                     path: `portfolio1Images[${i}].attrs.image`,
                     ...props,
-                  })}
-                  alt="project"
-                  style={{width: '100%', height: 'auto'}}
-                />
+                  });
+                  return (
+                    <Image
+                      src={img.url}
+                      alt={img.alt || 'project'}
+                      width={img.width}
+                      height={img.height}
+                      style={{width: '100%', height: 'auto'}}
+                    />
+                  );
+                })()}
               </figure>
             ))}
           </Carousel>

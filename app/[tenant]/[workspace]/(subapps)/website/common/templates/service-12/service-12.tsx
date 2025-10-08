@@ -1,13 +1,11 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service12Data} from './meta';
-import {
-  getMetaFileURL,
-  getTemplateId,
-} from '@/subapps/website/common/utils/helper';
+import {getImage, getTemplateId} from '@/subapps/website/common/utils/helper';
 import {Fragment} from 'react';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import IconProps from '../../types/icons';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 
 function getIcon(icon: string) {
   if (!icon) return (props: IconProps) => null;
@@ -75,19 +73,24 @@ export function Service12(props: TemplateProps<Service12Data>) {
                 <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
                   <div className="col-lg-6">
                     <div className="row gx-md-5 gy-5 align-items-center">
-                      {item.images?.map(({id, attrs: image}, j) => (
-                        <div className="col-6" key={id}>
-                          <img
-                            alt={image.alt}
-                            src={getMetaFileURL({
-                              metaFile: image.image,
-                              path: `service12Tabs[${i}].attrs.images[${j}].attrs.image`,
-                              ...props,
-                            })}
-                            className="img-fluid rounded shadow-lg d-flex ms-auto"
-                          />
-                        </div>
-                      ))}
+                      {item.images?.map((image, j) => {
+                        const img = getImage({
+                          image,
+                          path: `service12Tabs[${i}].attrs.images[${j}]`,
+                          ...props,
+                        });
+                        return (
+                          <div className="col-6" key={image.id}>
+                            <Image
+                              height={img.height}
+                              width={img.width}
+                              src={img.url}
+                              alt={img.alt}
+                              className="img-fluid rounded shadow-lg d-flex ms-auto"
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 

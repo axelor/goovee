@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero19Schema = {
   title: 'Hero 19',
@@ -39,9 +39,8 @@ export const hero19Schema = {
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -57,8 +56,7 @@ export const hero19Schema = {
       defaultValue: 'container pt-17 pb-19 pt-md-18 pb-md-17 text-center',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero19Data = Data<typeof hero19Schema>;
@@ -78,10 +76,19 @@ export const hero19Demos: Demo<typeof hero19Schema>[] = [
       hero19ButtonLink: '#',
       hero19BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg16.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg16.png',
+        version: 0,
+        attrs: {
+          alt: 'Quick solutions background',
+          width: 1440,
+          height: 674,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg16.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg16.png',
+          },
+        },
       },
     },
   },
@@ -99,10 +106,19 @@ export const hero19Demos: Demo<typeof hero19Schema>[] = [
       hero19ButtonLink: '#',
       hero19BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg16.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg16.png',
+        version: 0,
+        attrs: {
+          alt: 'Arrière-plan des solutions rapides',
+          width: 1440,
+          height: 674,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg16.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg16.png',
+          },
+        },
       },
     },
   },

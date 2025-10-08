@@ -1,12 +1,16 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero7Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import {
   fadeInAnimate,
   slideInDownAnimate,
   zoomInAnimate,
 } from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero7(props: TemplateProps<Hero7Data>) {
   const {data} = props;
@@ -22,8 +26,8 @@ export function Hero7(props: TemplateProps<Hero7Data>) {
     hero7ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero7Image,
+  const image = getImage({
+    image: hero7Image,
     path: 'hero7Image',
     ...props,
   });
@@ -65,8 +69,15 @@ export function Hero7(props: TemplateProps<Hero7Data>) {
 
         <div className="row mt-12" style={fadeInAnimate('1600ms')}>
           <div className="col-lg-8 mx-auto">
-            <figure>
-              <img alt="" className="img-fluid" src={image} />
+            <figure
+              className="position-relative"
+              style={{paddingBottom: getPaddingBottom(image)}}>
+              <Image
+                alt={image.alt}
+                className="img-fluid object-fit-cover"
+                src={image.url}
+                fill
+              />
             </figure>
           </div>
         </div>

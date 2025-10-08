@@ -1,8 +1,12 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About24Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
+import Image from 'next/image';
 
 export function About24(props: TemplateProps<About24Data>) {
   const {data} = props;
@@ -23,8 +27,8 @@ export function About24(props: TemplateProps<About24Data>) {
     about24ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about24Image,
+  const image = getImage({
+    image: about24Image,
     path: 'about24Image',
     ...props,
   });
@@ -34,8 +38,15 @@ export function About24(props: TemplateProps<About24Data>) {
       <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-6 align-items-center">
           <div className="col-md-8 col-lg-6 mx-auto">
-            <div className="img-mask mask-1">
-              <img src={image} alt="" />
+            <div
+              className="img-mask mask-1 position-relative"
+              style={{paddingBottom: getPaddingBottom(image)}}>
+              <Image
+                src={image.url}
+                alt={image.alt}
+                fill
+                className="object-fit-cover"
+              />
             </div>
           </div>
 

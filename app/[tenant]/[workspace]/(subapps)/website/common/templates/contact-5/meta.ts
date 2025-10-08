@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const contact5Schema = {
   title: 'Contact 5',
@@ -39,16 +39,14 @@ export const contact5Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'heading',
@@ -78,8 +76,7 @@ export const contact5Schema = {
       defaultValue: 'container pb-16 pb-md-18',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact5Data = Data<typeof contact5Schema>;
@@ -100,17 +97,35 @@ export const contact5Demos: Demo<typeof contact5Schema>[] = [
       contact5ButtonLink: '#',
       contact5TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'about4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Get in touch',
+          width: 465,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about4.jpg',
+          },
+        },
       },
       contact5TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'about5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about5.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Get in touch',
+          width: 1200,
+          height: 650,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about5.jpg',
+          },
+        },
       },
       contact5Heading: 'Satisfied Clients',
       contact5CountUp: 5000,
@@ -132,17 +147,35 @@ export const contact5Demos: Demo<typeof contact5Schema>[] = [
       contact5ButtonLink: '#',
       contact5TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'about4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Entrer en contact',
+          width: 465,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about4.jpg',
+          },
+        },
       },
       contact5TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'about5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about5.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Entrer en contact',
+          width: 1200,
+          height: 650,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about5.jpg',
+          },
+        },
       },
       contact5Heading: 'Clients satisfaits',
       contact5CountUp: 5000,

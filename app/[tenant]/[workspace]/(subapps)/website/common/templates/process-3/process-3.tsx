@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
+import Image from 'next/image';
 
 export function Process3(props: TemplateProps<Process3Data>) {
   const {data} = props;
@@ -15,8 +16,8 @@ export function Process3(props: TemplateProps<Process3Data>) {
     process3ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: process3Image,
+  const image = getImage({
+    image: process3Image,
     path: 'process3Image',
     ...props,
   });
@@ -42,7 +43,12 @@ export function Process3(props: TemplateProps<Process3Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="process" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

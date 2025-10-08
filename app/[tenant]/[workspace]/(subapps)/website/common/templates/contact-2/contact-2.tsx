@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function Contact2(props: TemplateProps<Contact2Data>) {
@@ -16,8 +16,8 @@ export function Contact2(props: TemplateProps<Contact2Data>) {
     contact2ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact2Image,
+  const image = getImage({
+    image: contact2Image,
     path: 'contact2Image',
     ...props,
   });
@@ -28,7 +28,7 @@ export function Contact2(props: TemplateProps<Contact2Data>) {
         <div className="row gx-0">
           <div
             className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start d-none d-md-block"
-            style={{backgroundImage: `url(${image})`}}
+            style={{backgroundImage: `url(${image.url})`}}
           />
 
           <div className="col-lg-6">

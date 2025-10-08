@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const faq4Schema = {
   title: 'FAQ 4',
@@ -14,9 +14,8 @@ export const faq4Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'facts',
@@ -56,8 +55,8 @@ export const faq4Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Faq4Data = Data<typeof faq4Schema>;
@@ -71,10 +70,19 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
     data: {
       faq4Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company facts background',
+          width: 1440,
+          height: 680,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       faq4Facts: [
         {
@@ -120,10 +128,19 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
     data: {
       faq4Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        version: 0,
+        attrs: {
+          alt: "Arrière-plan des faits sur l'entreprise",
+          width: 1440,
+          height: 680,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       faq4Facts: [
         {

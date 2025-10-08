@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const facts9Schema = {
   title: 'Facts 9',
@@ -14,16 +14,14 @@ export const facts9Schema = {
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'facts',
@@ -75,8 +73,8 @@ export const facts9Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Facts9Data = Data<typeof facts9Schema>;
@@ -90,17 +88,35 @@ export const facts9Demos: Demo<typeof facts9Schema>[] = [
     data: {
       facts9BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company achievements background',
+          width: 1440,
+          height: 680,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       facts9Image: {
         id: '1',
-        version: 1,
-        fileName: 'about5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about5.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company achievements',
+          width: 1200,
+          height: 650,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about5.jpg',
+          },
+        },
       },
       facts9Facts: [
         {
@@ -146,17 +162,35 @@ export const facts9Demos: Demo<typeof facts9Schema>[] = [
     data: {
       facts9BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        version: 0,
+        attrs: {
+          alt: "Arrière-plan des réalisations de l'entreprise",
+          width: 1440,
+          height: 680,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       facts9Image: {
         id: '1',
-        version: 1,
-        fileName: 'about5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about5.jpg',
+        version: 0,
+        attrs: {
+          alt: "Réalisations de l'entreprise",
+          width: 1200,
+          height: 650,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about5.jpg',
+          },
+        },
       },
       facts9Facts: [
         {

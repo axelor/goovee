@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const about17Schema = {
   title: 'About 17',
@@ -30,9 +29,8 @@ export const about17Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'aboutList',
@@ -54,8 +52,7 @@ export const about17Schema = {
       defaultValue: 'container mb-15 mb-md-18',
     },
   ],
-  models: [bulletListModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About17Data = Data<typeof about17Schema>;
@@ -69,10 +66,19 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
     data: {
       about17Image: {
         id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        version: 0,
+        attrs: {
+          alt: 'Our solution',
+          width: 548,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       about17Caption: 'Our Solution',
       about17Title:
@@ -119,10 +125,19 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
     data: {
       about17Image: {
         id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        version: 0,
+        attrs: {
+          alt: 'Notre solution',
+          width: 548,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       about17Caption: 'Notre solution',
       about17Title:

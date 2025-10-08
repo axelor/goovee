@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {Fragment} from 'react';
 import {Tiles3} from '@/subapps/website/common/components/elements/tiles';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
@@ -23,14 +23,14 @@ export function Testimonial3(props: TemplateProps<Testimonial3Data>) {
     testimonial3ContainerClassName: containerClassName,
   } = data || {};
 
-  const tileImage1 = getMetaFileURL({
-    metaFile: testimonial3TileImage1,
+  const tileImage1 = getImage({
+    image: testimonial3TileImage1,
     path: 'testimonial3TileImage1',
     ...props,
   });
 
-  const tileImage2 = getMetaFileURL({
-    metaFile: testimonial3TileImage2,
+  const tileImage2 = getImage({
+    image: testimonial3TileImage2,
     path: 'testimonial3TileImage2',
     ...props,
   });

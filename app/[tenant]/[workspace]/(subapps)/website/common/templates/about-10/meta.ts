@@ -4,8 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {progressListModel, imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
-import {progressListModel} from '../json-models';
 import {buttonColorSelection} from '../meta-selections';
 
 export const about10Schema = {
@@ -26,9 +26,8 @@ export const about10Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'btnColor',
@@ -68,7 +67,7 @@ export const about10Schema = {
       defaultValue: 'container mb-14 mb-md-18',
     },
   ],
-  models: [progressListModel],
+  models: [progressListModel, imageModel],
   metaModels: [metaFileModel],
   selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
@@ -84,10 +83,19 @@ export const about10Demos: Demo<typeof about10Schema>[] = [
     data: {
       about10Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Strategies for achievement',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about10Caption: 'The Lighthouse is Fabulous',
       about10Title:
@@ -140,10 +148,19 @@ export const about10Demos: Demo<typeof about10Schema>[] = [
     data: {
       about10Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Stratégies de réussite',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about10Caption: 'Le phare est fabuleux',
       about10Title:

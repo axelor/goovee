@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const facts14Schema = {
   title: 'Facts 14',
@@ -24,9 +24,8 @@ export const facts14Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'facts',
@@ -71,8 +70,8 @@ export const facts14Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Facts14Data = Data<typeof facts14Schema>;
@@ -88,10 +87,19 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
       facts14Caption: 'Join Our Community',
       facts14Image: {
         id: '1',
-        version: 1,
-        fileName: 'about26.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/about26.png',
+        version: 0,
+        attrs: {
+          alt: 'Company achievements',
+          width: 952,
+          height: 471,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about26.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/about26.png',
+          },
+        },
       },
       facts14Facts: [
         {
@@ -135,10 +143,19 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
       facts14Caption: 'Rejoignez notre communauté',
       facts14Image: {
         id: '1',
-        version: 1,
-        fileName: 'about26.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/about26.png',
+        version: 0,
+        attrs: {
+          alt: "Réalisations de l'entreprise",
+          width: 952,
+          height: 471,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about26.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/about26.png',
+          },
+        },
       },
       facts14Facts: [
         {

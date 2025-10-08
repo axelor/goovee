@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 
 export function Testimonial11(props: TemplateProps<Testimonial11Data>) {
@@ -14,8 +14,8 @@ export function Testimonial11(props: TemplateProps<Testimonial11Data>) {
     testimonial11ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: testimonial11Image,
+  const image = getImage({
+    image: testimonial11Image,
     path: 'testimonial11Image',
     ...props,
   });
@@ -35,7 +35,7 @@ export function Testimonial11(props: TemplateProps<Testimonial11Data>) {
           <div className="col-xl-10 mx-auto">
             <div
               className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-400"
-              style={{backgroundImage: `url(${image})`}}>
+              style={{backgroundImage: `url(${image.url})`}}>
               <div className="card-body p-9 p-xl-12">
                 <div className="row gx-0">
                   <div className="col-xxl-9 mx-auto">

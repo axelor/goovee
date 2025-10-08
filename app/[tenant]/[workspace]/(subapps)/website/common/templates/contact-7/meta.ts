@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {contactInfoModel} from '../json-models';
+import {contactInfoModel, imageModel} from '../json-models';
 
 export const contact7Schema = {
   title: 'Contact 7',
@@ -20,9 +19,8 @@ export const contact7Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'contactInfo',
@@ -44,8 +42,7 @@ export const contact7Schema = {
       defaultValue: 'container pt-18 pb-14 pt-md-19 pb-md-16',
     },
   ],
-  models: [contactInfoModel],
-  metaModels: [metaFileModel],
+  models: [contactInfoModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact7Data = Data<typeof contact7Schema>;
@@ -59,10 +56,19 @@ export const contact7Demos: Demo<typeof contact7Schema>[] = [
     data: {
       contact7Image: {
         id: '1',
-        version: 1,
-        fileName: 'about4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Great things together',
+          width: 465,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about4.jpg',
+          },
+        },
       },
       contact7Title:
         'Are you ready to start creating something great together?',
@@ -89,10 +95,19 @@ export const contact7Demos: Demo<typeof contact7Schema>[] = [
     data: {
       contact7Image: {
         id: '1',
-        version: 1,
-        fileName: 'about4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'De grandes choses ensemble',
+          width: 465,
+          height: 533,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about4.jpg',
+          },
+        },
       },
       contact7Title:
         'Êtes-vous prêt à commencer à créer quelque chose de grand ensemble ?',

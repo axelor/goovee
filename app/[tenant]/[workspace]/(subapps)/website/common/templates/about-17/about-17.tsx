@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About17Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
+import Image from 'next/image';
 
 export function About17(props: TemplateProps<About17Data>) {
   const {data} = props;
@@ -15,8 +16,8 @@ export function About17(props: TemplateProps<About17Data>) {
     about17ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about17Image,
+  const image = getImage({
+    image: about17Image,
     path: 'about17Image',
     ...props,
   });
@@ -27,7 +28,13 @@ export function About17(props: TemplateProps<About17Data>) {
         <div className="row gx-3 gy-10 align-items-center">
           <div className="col-lg-5 offset-lg-1">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

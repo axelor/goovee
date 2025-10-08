@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const facts3Schema = {
   title: 'Facts 3',
@@ -14,9 +14,8 @@ export const facts3Schema = {
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'facts',
@@ -56,8 +55,8 @@ export const facts3Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Facts3Data = Data<typeof facts3Schema>;
@@ -71,10 +70,19 @@ export const facts3Demos: Demo<typeof facts3Schema>[] = [
     data: {
       facts3BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg3.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company achievements background',
+          width: 1440,
+          height: 512,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg3.jpg',
+          },
+        },
       },
       facts3Facts: [
         {
@@ -120,10 +128,19 @@ export const facts3Demos: Demo<typeof facts3Schema>[] = [
     data: {
       facts3BackgroundImage: {
         id: '1',
-        version: 1,
-        fileName: 'bg3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg3.jpg',
+        version: 0,
+        attrs: {
+          alt: "Arrière-plan des réalisations de l'entreprise",
+          width: 1440,
+          height: 512,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg3.jpg',
+          },
+        },
       },
       facts3Facts: [
         {

@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const testimonial3Schema = {
   title: 'Testimonial 3',
@@ -24,16 +24,14 @@ export const testimonial3Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'heading',
@@ -103,8 +101,8 @@ export const testimonial3Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial3Data = Data<typeof testimonial3Schema>;
@@ -121,17 +119,35 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
         'Read our customer reviews to see what they are saying about our services and expertise.',
       testimonial3TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'g5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g5.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Testimonial',
+          width: 325,
+          height: 325,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial3TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'g6.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g6.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Testimonial',
+          width: 324,
+          height: 217,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial3Heading: 'Satisfied Clients',
       testimonial3CountUp: 5000,
@@ -189,17 +205,35 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
         'Lisez les avis de nos clients pour voir ce qu’ils disent de nos services et de notre expertise.',
       testimonial3TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'g5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g5.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Témoignage',
+          width: 325,
+          height: 325,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial3TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'g6.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g6.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Témoignage',
+          width: 324,
+          height: 217,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial3Heading: 'Clients satisfaits',
       testimonial3CountUp: 5000,

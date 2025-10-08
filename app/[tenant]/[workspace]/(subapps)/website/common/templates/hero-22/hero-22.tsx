@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero22Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import {zoomInAnimate} from '@/subapps/website/common/utils/animation';
 
 export function Hero22(props: TemplateProps<Hero22Data>) {
@@ -14,8 +14,8 @@ export function Hero22(props: TemplateProps<Hero22Data>) {
     hero22ContainerClassName: containerClassName,
   } = data || {};
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: hero22BackgroundImage,
+  const backgroundImage = getImage({
+    image: hero22BackgroundImage,
     path: 'hero22BackgroundImage',
     ...props,
   });
@@ -29,7 +29,7 @@ export function Hero22(props: TemplateProps<Hero22Data>) {
     <section className={wrapperClassName} data-code={props.code}>
       <div
         className={`wrapper image-wrapper bg-cover bg-image bg-overlay bg-overlay-500`}
-        style={{backgroundImage: `url(${backgroundImage})`}}>
+        style={{backgroundImage: `url(${backgroundImage.url})`}}>
         <div className={containerClassName}>
           <div className="row">
             <div className="col-md-9 col-lg-8 col-xl-7 col-xxl-7 mx-auto">

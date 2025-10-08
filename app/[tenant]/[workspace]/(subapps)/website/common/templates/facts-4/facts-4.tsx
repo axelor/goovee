@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 
 export function Facts4(props: TemplateProps<Facts4Data>) {
@@ -14,8 +14,8 @@ export function Facts4(props: TemplateProps<Facts4Data>) {
     facts4ContainerClassName: containerClassName,
   } = data || {};
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: facts4BackgroundImage,
+  const backgroundImage = getImage({
+    image: facts4BackgroundImage,
     path: 'facts4BackgroundImage',
     ...props,
   });
@@ -24,7 +24,7 @@ export function Facts4(props: TemplateProps<Facts4Data>) {
     <section
       className={wrapperClassName}
       data-code={props.code}
-      style={{backgroundImage: `url(${backgroundImage})`}}>
+      style={{backgroundImage: `url(${backgroundImage.url})`}}>
       <div className={containerClassName}>
         <div className="row">
           <div className="col-md-8 col-xl-7 col-xxl-6 mx-auto">

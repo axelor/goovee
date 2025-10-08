@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function Contact9(props: TemplateProps<Contact9Data>) {
@@ -15,8 +15,8 @@ export function Contact9(props: TemplateProps<Contact9Data>) {
     contact9ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact9Image,
+  const image = getImage({
+    image: contact9Image,
     path: 'contact9Image',
     ...props,
   });
@@ -25,7 +25,7 @@ export function Contact9(props: TemplateProps<Contact9Data>) {
     <section
       className={wrapperClassName}
       data-code={props.code}
-      style={{backgroundImage: `url(${image})`}}>
+      style={{backgroundImage: `url(${image.url})`}}>
       <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-md-8 col-lg-7 col-xl-5 mx-auto">

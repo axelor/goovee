@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
 import dynamic from 'next/dynamic';
@@ -26,8 +26,8 @@ export function Process9(props: TemplateProps<Process9Data>) {
     process9ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: process9Image,
+  const image = getImage({
+    image: process9Image,
     path: 'process9Image',
     ...props,
   });

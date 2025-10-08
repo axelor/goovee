@@ -1,8 +1,12 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About25Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import Image from 'next/image';
 
 export function About25(props: TemplateProps<About25Data>) {
   const {data} = props;
@@ -20,8 +24,8 @@ export function About25(props: TemplateProps<About25Data>) {
     about25ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about25Image,
+  const image = getImage({
+    image: about25Image,
     path: 'about25Image',
     ...props,
   });
@@ -31,8 +35,15 @@ export function About25(props: TemplateProps<About25Data>) {
       <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-6 align-items-center">
           <div className="col-md-8 col-lg-6 order-lg-2 mx-auto">
-            <div className="img-mask mask-2">
-              <img src={image} alt="" style={{width: '100%', height: 'auto'}} />
+            <div
+              className="img-mask mask-2 position-relative"
+              style={{paddingBottom: getPaddingBottom(image)}}>
+              <Image
+                src={image.url}
+                alt={image.alt}
+                fill
+                className="object-fit-cover"
+              />
             </div>
           </div>
 

@@ -1,9 +1,10 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import {Typewriter} from '@/subapps/website/common/components/reuseable/typewriter';
+import Image from 'next/image';
 
 export function Hero3(props: TemplateProps<Hero3Data>) {
   const {data} = props;
@@ -19,8 +20,8 @@ export function Hero3(props: TemplateProps<Hero3Data>) {
     hero3ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero3Image,
+  const image = getImage({
+    image: hero3Image,
     path: 'hero3Image',
     ...props,
   });
@@ -84,7 +85,14 @@ export function Hero3(props: TemplateProps<Hero3Data>) {
               </a>
 
               <figure className="rounded shadow-lg">
-                <img src={image} alt="hero" />
+                {image?.url && (
+                  <Image
+                    src={image.url}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                  />
+                )}
               </figure>
             </div>
           </div>

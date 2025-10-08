@@ -1,13 +1,15 @@
 'use client';
-import {FC, Fragment, useState} from 'react';
+import Image from 'next/image';
+import {Fragment, useState} from 'react';
 import type Swiper from 'swiper';
 import {FreeMode, Navigation, Thumbs} from 'swiper/modules';
 import {Swiper as SwiperCarousel, SwiperSlide} from 'swiper/react';
+import type {ImageType} from '../../types/templates';
 
 function Carousel2(props: {
   slides: {
-    image?: string;
-    thumb?: string;
+    image?: ImageType;
+    thumb?: ImageType;
   }[];
 }) {
   const {slides} = props;
@@ -28,7 +30,7 @@ function Carousel2(props: {
         {slides.map(({image, thumb}, i) => (
           <SwiperSlide
             key={i}
-            style={{backgroundImage: `url(${image})`}}
+            style={{backgroundImage: `url(${image?.url})`}}
             className="bg-overlay bg-overlay-400 bg-dark bg-image"
           />
         ))}
@@ -60,7 +62,14 @@ function Carousel2(props: {
         modules={[FreeMode, Navigation, Thumbs]}>
         {slides.map(({thumb, image}, i) => (
           <SwiperSlide key={i}>
-            <img src={thumb} alt="product" />
+            {thumb?.url && (
+              <Image
+                src={thumb.url}
+                alt={thumb.alt}
+                width={thumb.width}
+                height={thumb.height}
+              />
+            )}
           </SwiperSlide>
         ))}
       </SwiperCarousel>

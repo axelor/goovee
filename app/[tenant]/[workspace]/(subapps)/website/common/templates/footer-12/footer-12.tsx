@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer12Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '../../utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer12(props: TemplateProps<Footer12Data>) {
   const {data} = props;
@@ -22,8 +23,8 @@ export function Footer12(props: TemplateProps<Footer12Data>) {
     footer12ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer12Logo,
+  const logo = getImage({
+    image: footer12Logo,
     path: 'footer12Logo',
     ...props,
   });
@@ -41,7 +42,13 @@ export function Footer12(props: TemplateProps<Footer12Data>) {
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="" />
+              <Image
+                className="mb-4"
+                src={logo.url}
+                alt={logo.alt}
+                width={logo.width}
+                height={logo.height}
+              />
 
               <p className="mb-4">{copyright}</p>
 

@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 import {bulletListModel} from '../json-models';
 
 export const about11Schema = {
@@ -30,23 +30,20 @@ export const about11Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage3',
       title: 'Tile Image 3',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'aboutList1',
@@ -76,6 +73,7 @@ export const about11Schema = {
   ],
   models: [
     bulletListModel,
+    imageModel,
     {
       name: 'About11AboutList2',
       title: 'About List 2',
@@ -95,7 +93,6 @@ export const about11Schema = {
       ],
     },
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type About11Data = Data<typeof about11Schema>;
@@ -109,24 +106,51 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
     data: {
       about11TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'ab1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 240,
+          height: 245,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab1.jpg',
+          },
+        },
       },
       about11TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'ab2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 290,
+          height: 225,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab2.jpg',
+          },
+        },
       },
       about11TileImage3: {
         id: '1',
-        version: 1,
-        fileName: 'ab3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab3.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 290,
+          height: 440,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab3.jpg',
+          },
+        },
       },
       about11Caption: 'Discover our company',
       about11Title:
@@ -202,24 +226,51 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
     data: {
       about11TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'ab1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab1.jpg',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 240,
+          height: 245,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab1.jpg',
+          },
+        },
       },
       about11TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'ab2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab2.jpg',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 290,
+          height: 225,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab2.jpg',
+          },
+        },
       },
       about11TileImage3: {
         id: '1',
-        version: 1,
-        fileName: 'ab3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab3.jpg',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 290,
+          height: 440,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab3.jpg',
+          },
+        },
       },
       about11Caption: 'Découvrez notre entreprise',
       about11Title:

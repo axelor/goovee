@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact6Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import IconBox from '@/subapps/website/common/components/reuseable/IconBox';
+import Image from 'next/image';
 
 export function Contact6(props: TemplateProps<Contact6Data>) {
   const {data} = props;
@@ -13,8 +14,8 @@ export function Contact6(props: TemplateProps<Contact6Data>) {
     contact6ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact6Image,
+  const image = getImage({
+    image: contact6Image,
     path: 'contact6Image',
     ...props,
   });
@@ -25,7 +26,13 @@ export function Contact6(props: TemplateProps<Contact6Data>) {
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img className="w-auto" src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

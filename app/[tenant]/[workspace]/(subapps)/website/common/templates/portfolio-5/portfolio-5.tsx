@@ -1,10 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio5Data} from './meta';
-import {
-  getMetaFileURL,
-  getTemplateId,
-} from '@/subapps/website/common/utils/helper';
+import {getImage, getTemplateId} from '@/subapps/website/common/utils/helper';
 import {Filter} from './filter';
+import Image from 'next/image';
 
 export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
   const {data} = props;
@@ -42,23 +40,30 @@ export function Portfolio5(props: TemplateProps<Portfolio5Data>) {
                 key={id}>
                 <figure className="overlay overlay-1 rounded">
                   <a
-                    href={getMetaFileURL({
-                      metaFile: item.fullImage,
-                      path: `portfolio5FilterList[${i}].attrs.fullImage`,
-                      ...props,
-                    })}
+                    href={
+                      getImage({
+                        image: item.fullImage,
+                        path: `portfolio5FilterList[${i}].attrs.fullImage`,
+                        ...props,
+                      }).url
+                    }
                     data-glightbox
                     data-gallery="shots-group">
-                    <img
-                      width={item.imageWidth}
-                      height={item.imageHeight}
-                      src={getMetaFileURL({
-                        metaFile: item.image,
+                    {(() => {
+                      const img = getImage({
+                        image: item.image,
                         path: `portfolio5FilterList[${i}].attrs.image`,
                         ...props,
-                      })}
-                      alt={item.title}
-                    />
+                      });
+                      return (
+                        <Image
+                          width={img.width}
+                          height={img.height}
+                          src={img.url}
+                          alt={img.alt}
+                        />
+                      );
+                    })()}
                     <span className="bg" />
                   </a>
                   <figcaption>

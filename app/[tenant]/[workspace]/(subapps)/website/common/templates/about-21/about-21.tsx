@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About21Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
 import Design from '@/subapps/website/common/icons/solid/Design';
@@ -30,8 +30,8 @@ export function About21(props: TemplateProps<About21Data>) {
     about21ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about21Image,
+  const image = getImage({
+    image: about21Image,
     path: 'about21Image',
     ...props,
   });

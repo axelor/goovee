@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial5Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import {TestimonialCard2} from '@/subapps/website/common/components/reuseable/testimonial-cards';
+import Image from 'next/image';
 
 export function Testimonial5(props: TemplateProps<Testimonial5Data>) {
   const {data} = props;
@@ -15,8 +16,8 @@ export function Testimonial5(props: TemplateProps<Testimonial5Data>) {
     testimonial5ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: testimonial5Image,
+  const image = getImage({
+    image: testimonial5Image,
     path: 'testimonial5Image',
     ...props,
   });
@@ -32,7 +33,12 @@ export function Testimonial5(props: TemplateProps<Testimonial5Data>) {
             />
 
             <figure>
-              <img src={image} alt="" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

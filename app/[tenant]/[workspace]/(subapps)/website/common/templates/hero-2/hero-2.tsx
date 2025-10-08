@@ -1,11 +1,12 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {
   slideInDownAnimate,
   zoomInAnimate,
 } from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero2(props: TemplateProps<Hero2Data>) {
   const {data} = props;
@@ -21,8 +22,8 @@ export function Hero2(props: TemplateProps<Hero2Data>) {
     hero2ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero2Image,
+  const image = getImage({
+    image: hero2Image,
     path: 'hero2Image',
     ...props,
   });
@@ -49,7 +50,12 @@ export function Hero2(props: TemplateProps<Hero2Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="hero" />
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

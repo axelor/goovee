@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 import {solidIconsSelection} from '../meta-selections';
 
 export const service22Schema = {
@@ -93,9 +93,8 @@ export const service22Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
@@ -112,8 +111,8 @@ export const service22Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
   selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
@@ -169,10 +168,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se5.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tab image',
+                width: 567,
+                height: 381,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se5.jpg',
+                },
+              },
             },
           },
         },
@@ -214,10 +222,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se6.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tab image',
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se6.jpg',
+                },
+              },
             },
           },
         },
@@ -259,10 +276,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se7.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tab image',
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se7.jpg',
+                },
+              },
             },
           },
         },
@@ -317,10 +343,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se5.jpg',
+              version: 0,
+              attrs: {
+                alt: "Image de l'onglet",
+                width: 567,
+                height: 381,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se5.jpg',
+                },
+              },
             },
           },
         },
@@ -362,10 +397,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se6.jpg',
+              version: 0,
+              attrs: {
+                alt: "Image de l'onglet",
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se6.jpg',
+                },
+              },
             },
           },
         },
@@ -407,10 +451,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se7.jpg',
+              version: 0,
+              attrs: {
+                alt: "Image de l'onglet",
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se7.jpg',
+                },
+              },
             },
           },
         },
