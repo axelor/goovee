@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Contact2Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -26,10 +27,14 @@ export function Contact2(props: TemplateProps<Contact2Data>) {
     <section className={wrapperClassName} data-code={props.code}>
       <div className={containerClassName}>
         <div className="row gx-0">
-          <div
-            className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start d-none d-md-block"
-            style={{backgroundImage: `url(${image.url})`}}
-          />
+          <div className="col-lg-6 image-wrapper rounded-top rounded-lg-start d-none d-md-block overflow-hidden">
+            <Image
+              src={image.url}
+              alt={image.alt || 'contact background'}
+              fill
+              className="object-cover"
+            />
+          </div>
 
           <div className="col-lg-6">
             <div className="p-10 p-md-11 p-lg-13">

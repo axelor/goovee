@@ -46,14 +46,13 @@ export const cta2Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue:
-        'wrapper image-wrapper bg-auto no-overlay bg-image bg-map text-center',
+      defaultValue: 'wrapper image-wrapper bg-auto bg-map text-center',
     },
     {
       name: 'containerClassName',
       title: 'Container Class Name',
       type: 'string',
-      defaultValue: 'container pt-0 pb-14 pt-md-18 pb-md-18',
+      defaultValue: 'container pt-0 pb-14 pt-md-18 pb-md-18 position-relative',
     },
   ],
   models: [imageModel],

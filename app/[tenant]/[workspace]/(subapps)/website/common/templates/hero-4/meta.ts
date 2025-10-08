@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero4Schema = {
   title: 'Hero 4',
@@ -44,9 +44,8 @@ export const hero4Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'wrapperClassName',
@@ -62,7 +61,7 @@ export const hero4Schema = {
       defaultValue: 'container',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero4Data = Data<typeof hero4Schema>;
@@ -85,9 +84,18 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
       hero4Image: {
         id: '1',
         version: 1,
-        fileName: 'about16.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about16.jpg',
+        attrs: {
+          alt: 'About us',
+          width: 720,
+          height: 784,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about16.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about16.jpg',
+          },
+        },
       },
     },
   },
@@ -107,9 +115,18 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
       hero4Image: {
         id: '1',
         version: 1,
-        fileName: 'about16.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about16.jpg',
+        attrs: {
+          alt: 'About us',
+          width: 720,
+          height: 784,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about16.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about16.jpg',
+          },
+        },
       },
     },
   },

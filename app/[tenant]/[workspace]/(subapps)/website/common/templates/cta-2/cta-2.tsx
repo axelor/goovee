@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Cta2Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -23,10 +24,13 @@ export function CTA2(props: TemplateProps<Cta2Data>) {
   });
 
   return (
-    <section
-      className={wrapperClassName}
-      style={{backgroundImage: `url(${image.url})`}}
-      data-code={props.code}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <Image
+        src={image.url}
+        alt={image.alt || 'CTA background'}
+        fill
+        className="object-fit-contain"
+      />
       <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-10 col-xl-9 col-xxl-8 mx-auto">

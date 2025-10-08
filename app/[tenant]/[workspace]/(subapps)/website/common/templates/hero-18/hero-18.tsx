@@ -40,10 +40,17 @@ export function Hero18(props: TemplateProps<Hero18Data>) {
   return (
     <section className={sectionClassName} data-code={props.code}>
       <div className={containerCardClassName}>
-        <div
-          className={cardClassName}
-          style={{backgroundImage: `url(${backgroundImage.url})`}}>
-          <div className={cardBodyClassName}>
+        <div className={cardClassName}>
+          <Image
+            src={backgroundImage.url}
+            alt={backgroundImage.alt || 'Hero background'}
+            fill
+            className="object-fit-cover"
+          />
+          <div
+            className="position-absolute top-0 left-0 w-100 h-100 bg-white opacity-50"
+            style={{zIndex: 1}}></div>
+          <div className={cardBodyClassName} style={{zIndex: 2}}>
             <div className={containerClassName}>
               <div className="row gx-md-8 gx-xl-12 gy-10 align-items-center text-center text-lg-start">
                 <div className="col-lg-6">

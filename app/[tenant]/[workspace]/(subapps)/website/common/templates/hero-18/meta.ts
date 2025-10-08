@@ -64,14 +64,13 @@ export const hero18Schema = {
       name: 'cardClassName',
       title: 'Card Class Name',
       type: 'string',
-      defaultValue:
-        'card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 mt-2 mb-5',
+      defaultValue: 'card image-wrapper mt-2 mb-5 overflow-hidden',
     },
     {
       name: 'cardBodyClassName',
       title: 'Card Body Class Name',
       type: 'string',
-      defaultValue: 'card-body py-14 px-0',
+      defaultValue: 'card-body py-14 px-0 position-relative',
     },
     {
       name: 'containerClassName',

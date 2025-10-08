@@ -1,4 +1,5 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Testimonial16Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
@@ -33,10 +34,14 @@ export function Testimonial16(props: TemplateProps<Testimonial16Data>) {
       <div className={containerClassName}>
         <div className="card shadow-lg">
           <div className="row gx-0">
-            <div
-              className="col-lg-6 image-wrapper bg-image bg-cover rounded-top rounded-lg-start"
-              style={{backgroundImage: `url(${backgroundImage.url})`}}
-            />
+            <div className="col-lg-6 image-wrapper rounded-top rounded-lg-start overflow-hidden">
+              <Image
+                src={backgroundImage.url}
+                alt={backgroundImage.alt || 'testimonial background'}
+                fill
+                className="object-cover"
+              />
+            </div>
 
             <div className="col-lg-6">
               <div className="p-10 p-md-11 px-lg-13 py-lg-14">

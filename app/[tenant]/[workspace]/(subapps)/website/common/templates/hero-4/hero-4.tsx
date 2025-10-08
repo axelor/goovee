@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Hero4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
@@ -18,18 +19,22 @@ export function Hero4(props: TemplateProps<Hero4Data>) {
     hero4ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero4Image,
+  const image = getImage({
+    image: hero4Image,
     path: 'hero4Image',
     ...props,
   });
 
   return (
     <section className={wrapperClassName} data-code={props.code}>
-      <div
-        style={{backgroundImage: `url(${image})`}}
-        className="rounded-4-lg-start col-lg-6 order-lg-2 position-lg-absolute top-0 end-0 image-wrapper bg-image bg-cover h-100 min-vh-50"
-      />
+      <div className="rounded-4-lg-start col-lg-6 order-lg-2 position-lg-absolute top-0 end-0 image-wrapper h-100 min-vh-50 overflow-hidden">
+        <Image
+          src={image.url}
+          alt={image.alt || 'Hero background'}
+          fill
+          className="object-cover"
+        />
+      </div>
 
       <div className={containerClassName}>
         <div className="row">
