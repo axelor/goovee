@@ -1,0 +1,6 @@
+{
+  "title": "Implement website seeding and enhance performance",
+  "type": "feature",
+  "description": "Implement website and page seeding to populate initial content. Optimize performance by replacing standard `<img>` tags with Next.js's `Image` component for better image handling and for background images. Fix UI bugs related to content overlapping and dynamic blog cards.",
+  "scope": ["website"]
+}
