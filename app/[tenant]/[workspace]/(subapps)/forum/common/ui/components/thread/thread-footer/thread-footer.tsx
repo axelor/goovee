@@ -35,7 +35,7 @@ export const ThreadFooter = ({
 
   const enableComment = isCommentEnabled({
     subapp: SUBAPP_CODES.forum,
-    workspace,
+    workspace: workspace!,
   });
 
   return enableComment ? (

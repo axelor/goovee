@@ -1,0 +1,6 @@
+{
+  "title": "Improve forum app with skeletons and loading handlers",
+  "type": "feature",
+  "description": "Added skeleton components and loading state handlers to enhance user experience and perceived performance while forum data is loading.",
+  "scope": ["forum"]
+}

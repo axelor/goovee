@@ -1,6 +1,7 @@
 'use client';
 
 import {useRouter} from 'next/navigation';
+import {useState} from 'react';
 import {
   MdOutlinePushPin,
   MdMoreVert,
@@ -27,6 +28,7 @@ import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -62,6 +64,7 @@ export const GroupActionList = ({
   const router = useRouter();
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
   const {toast} = useToast();
+  const [loadingGroups, setLoadingGroups] = useState<Set<string>>(new Set());
 
   const handlePinGroup = async (isPin: boolean, group: any) => {
     const {id, forumGroup} = group;
@@ -85,11 +88,21 @@ export const GroupActionList = ({
 
   const handleExit = async (group: Group) => {
     const {id, forumGroup} = group;
+    const groupId = forumGroup.id;
+    if (loadingGroups.has(groupId)) return;
+
+    setLoadingGroups(prev => new Set(prev).add(groupId));
     const response = await exitGroup({
       id,
       groupID: forumGroup.id,
       workspaceURL,
     });
+    setLoadingGroups(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(groupId);
+      return newSet;
+    });
+
     if (response.success) {
       router.push(`${workspaceURI}/${SUBAPP_CODES.forum}`);
       router.refresh();
@@ -103,7 +116,15 @@ export const GroupActionList = ({
 
   const handleJoinGroup = async (group: Group, userId: string) => {
     const {id} = group;
+    if (loadingGroups.has(id)) return;
+
+    setLoadingGroups(prev => new Set(prev).add(id));
     const response = await joinGroup({groupID: id, userId, workspaceURL});
+    setLoadingGroups(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(id);
+      return newSet;
+    });
 
     if (response.success) {
       router.push(`${workspaceURI}/${SUBAPP_CODES.forum}`);
@@ -155,6 +176,7 @@ export const GroupActionList = ({
           const groupImage = imageId
             ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${id}/image`
             : NO_IMAGE_URL;
+          const isLoading = loadingGroups.has(id);
 
           return (
             <Collapsible key={group?.id}>
@@ -237,19 +259,31 @@ export const GroupActionList = ({
                   )}
                   {isMember ? (
                     <div
-                      className="flex items-center gap-[0.625rem] px-2"
-                      onClick={() => handleExit(group)}>
+                      className={cn(
+                        'flex items-center gap-[0.625rem] px-2',
+                        isLoading
+                          ? 'opacity-50 pointer-events-none'
+                          : 'cursor-pointer',
+                      )}
+                      onClick={() => !isLoading && handleExit(group)}>
                       <MdExitToApp className="w-4 h-4" />
-                      <span className="w-full text-xs leading-[1.125rem] font-normal cursor-pointer">
+                      <span className="w-full text-xs leading-[1.125rem] font-normal">
                         {i18n.t(LEAVE_THIS_GROUP)}
                       </span>
                     </div>
                   ) : (
                     <div
-                      className="flex items-center gap-[0.625rem] px-2"
-                      onClick={() => handleJoinGroup(group, userId)}>
+                      className={cn(
+                        'flex items-center gap-[0.625rem] px-2',
+                        isLoading
+                          ? 'opacity-50 pointer-events-none'
+                          : 'cursor-pointer',
+                      )}
+                      onClick={() =>
+                        !isLoading && handleJoinGroup(group, userId)
+                      }>
                       <MdOutlineGroupAdd className="w-4 h-4" />
-                      <span className="w-full text-xs leading-[1.125rem] font-normal cursor-pointer">
+                      <span className="w-full text-xs leading-[1.125rem] font-normal">
                         {i18n.t(ASK_TO_JOIN)}
                       </span>
                     </div>

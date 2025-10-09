@@ -1,24 +1,38 @@
 import {notFound} from 'next/navigation';
+import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {User} from '@/types';
 import {clone} from '@/utils';
-import {workspacePathname} from '@/utils/workspace';
+import {getSession} from '@/auth';
 import {findWorkspace} from '@/orm/workspace';
-import {DEFAULT_LIMIT} from '@/constants';
+import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {
   findGroupById,
-  findPostsByGroupId,
   findUser,
   findGroupsByMembers,
   findGroups,
 } from '@/subapps/forum/common/orm/forum';
-import Content from './content';
-import {GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
+import {
+  FORUM_CONTENT,
+  GROUPS_ORDER_BY,
+  MENU,
+} from '@/subapps/forum/common/constants';
+import {ForumSkeleton} from '@/subapps/forum/common/ui/components/skeletons';
+import ForumContextProvider from '@/subapps/forum/common/ui/context';
+import {
+  NavMenu,
+  Tabs,
+  GroupControls,
+  Hero,
+} from '@/subapps/forum/common/ui/components';
+import {ComposePost} from '@/app/[tenant]/[workspace]/(subapps)/forum/common/ui/components';
+import {ThreadListSkeleton} from '@/subapps/forum/common/ui/components';
+import {GroupPostsContent} from './group-post-content';
 
-export default async function Page({
+async function ForumGroup({
   params,
   searchParams,
 }: {
@@ -30,8 +44,9 @@ export default async function Page({
   searchParams: {[key: string]: string | undefined};
 }) {
   const session = await getSession();
-  const user = session?.user;
+  const user = session?.user as User;
   const userId = user?.id as string;
+  const type = searchParams?.type ?? FORUM_CONTENT.POSTS;
 
   const {workspaceURL, tenant} = workspacePathname(params);
 
@@ -44,8 +59,6 @@ export default async function Page({
   if (!workspace) {
     return notFound();
   }
-
-  const {sort, limit, search} = searchParams;
 
   const groupId = params.id as string;
 
@@ -78,32 +91,62 @@ export default async function Page({
     user,
   ).then(clone);
 
-  const {posts, pageInfo} = await findPostsByGroupId({
-    id: groupId,
-    workspaceID: workspace?.id,
-    sort,
-    limit: limit ? Number(limit) : DEFAULT_LIMIT,
-    search,
-    tenantId: tenant,
-    user,
-    memberGroupIDs,
-  }).then(clone);
-
-  const $user = await findUser({userId, tenantId: tenant}).then(clone);
+  const $user = (await findUser({userId, tenantId: tenant}).then(
+    clone,
+  )) as User;
 
   if (!selectedGroup) {
     return notFound();
   }
 
   return (
-    <Content
-      memberGroups={memberGroups}
-      nonMemberGroups={nonMemberGroups}
-      user={$user}
-      posts={posts}
-      selectedGroup={selectedGroup}
-      pageInfo={pageInfo}
-      workspace={workspace}
-    />
+    <ForumContextProvider
+      value={{
+        memberGroups,
+        nonMemberGroups,
+        selectedGroup,
+        user: $user,
+        workspace,
+      }}>
+      <div className="flex flex-col h-full flex-1">
+        <div className="hidden lg:block">
+          <NavMenu items={MENU} />
+        </div>
+        <Hero />
+        <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-[17.563rem_1fr] gap-5">
+          <GroupControls />
+          <div>
+            <ComposePost />
+            <Tabs activeTab={type} />
+            <Suspense fallback={<ThreadListSkeleton />}>
+              {type === FORUM_CONTENT.POSTS && (
+                <GroupPostsContent
+                  memberGroupIDs={memberGroupIDs}
+                  params={params}
+                  searchParams={searchParams}
+                  tenant={tenant}
+                  user={user}
+                  workspace={workspace}
+                />
+              )}
+            </Suspense>
+          </div>
+        </div>
+      </div>
+    </ForumContextProvider>
+  );
+}
+
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: {id: string; type: string; tenant: string; workspace: string};
+  searchParams: {[key: string]: string | undefined};
+}) {
+  return (
+    <Suspense fallback={<ForumSkeleton />}>
+      <ForumGroup params={params} searchParams={searchParams} />
+    </Suspense>
   );
 }

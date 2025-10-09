@@ -8,7 +8,8 @@ import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
-import {findGroupById, findPosts} from '@/subapps/forum/common/orm/forum';
+import {findPosts} from '@/subapps/forum/common/orm/forum';
+
 export async function GET(
   request: NextRequest,
   {

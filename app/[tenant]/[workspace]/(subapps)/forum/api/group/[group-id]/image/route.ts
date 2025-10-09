@@ -9,6 +9,7 @@ import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findGroupById} from '@/subapps/forum/common/orm/forum';
+
 export async function GET(
   request: NextRequest,
   {params}: {params: {tenant: string; workspace: string; 'group-id': string}},

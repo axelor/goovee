@@ -7,12 +7,12 @@ import Image from 'next/image';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatNumber} from '@/locale/formatters';
 import {i18n} from '@/locale';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {MAX_IMAGES_BEFORE_OVERLAY} from '@/subapps/forum/common/constants';
 import type {Post} from '@/subapps/forum/common/types/forum';
 import {ThreadPopup} from '@/subapps/forum/common/ui/components';
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 export const ImageGallery = ({images, post}: {images: any; post?: Post}) => {
   const showOverlay = images.length > MAX_IMAGES_BEFORE_OVERLAY;

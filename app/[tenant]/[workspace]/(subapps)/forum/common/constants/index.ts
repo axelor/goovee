@@ -1,27 +1,16 @@
-import {lazy} from 'react';
-import {MdOutlineArticle} from 'react-icons/md';
 import {
   CiTextAlignCenter,
   CiTextAlignJustify,
   CiTextAlignLeft,
   CiTextAlignRight,
 } from 'react-icons/ci';
+import {MdOutlineArticle} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {ORDER_BY} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
-import type {
-  Level,
-  MediaContentProps,
-  PostsContentProps,
-  Tab,
-} from '@/subapps/forum/common/types/forum';
-
-const PostsContent = lazy(
-  () =>
-    import('@/subapps/forum/common/ui/components/posts-content/posts-content'),
-);
+import type {Level} from '@/subapps/forum/common/types/forum';
 
 export const GROUPS = 'Groups';
 export const MEMBER = 'Member';
@@ -71,6 +60,11 @@ export const GROUP_SORT_BY = [
   },
 ];
 
+export const FORUM_CONTENT = {
+  POSTS: 'posts',
+  MEDIA: 'media',
+};
+
 export const MENU = [
   {id: 1, name: 'Homepage', link: ''},
   {
@@ -81,15 +75,12 @@ export const MENU = [
   // {id: 3, name: 'My profile', link: '/profile'},
 ];
 
-export const TAB_TITLES: Array<
-  Tab<PostsContentProps> | Tab<MediaContentProps>
-> = [
+export const TAB_TITLES = [
   {
     id: 1,
-    key: 'posts',
+    key: FORUM_CONTENT.POSTS,
     title: 'Posts',
     icon: MdOutlineArticle,
-    component: PostsContent,
   },
   // Commenting this cause it is not needed in V1
   // {

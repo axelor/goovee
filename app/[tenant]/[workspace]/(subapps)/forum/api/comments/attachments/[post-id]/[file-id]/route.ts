@@ -8,7 +8,8 @@ import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
-import {findPosts} from '../../../../../common/orm/forum';
+// ---- LOCAL IMPORTS ---- //
+import {findPosts} from '@/subapps/forum/common/orm/forum';
 
 export async function GET(
   request: NextRequest,

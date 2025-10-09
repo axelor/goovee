@@ -8,11 +8,12 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components';
 import {i18n} from '@/locale';
 import Image from 'next/image';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {Thread} from '@/subapps/forum/common/ui/components';
 import {Image as ImageType, Post} from '@/subapps/forum/common/types/forum';
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+
 import styles from './styles.module.scss';
 
 export const ThreadPopup = ({

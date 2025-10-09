@@ -1,7 +1,14 @@
 'use client';
 
+import {useRouter} from 'next/navigation';
+
 // ---- CORE IMPORTS ---- //
+import {SUBAPP_CODES} from '@/constants';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
+
+// ---- LOCAL IMPORTS ---- //
+import {TAB_TITLES} from '@/subapps/forum/common/constants';
 
 export const Tab = ({
   tab,
@@ -30,38 +37,28 @@ export const Tab = ({
   );
 };
 
-export const Tabs = ({
-  activeTab,
-  tabs,
+export const Tabs = ({activeTab}: {activeTab: string}) => {
+  const router = useRouter();
+  const {workspaceURI} = useWorkspace();
 
-  onClick,
-}: {
-  activeTab: string;
-  tabs: any[];
-
-  onClick: (value: string) => void;
-}) => {
-  const findTabComponent = (tabKey: string) => {
-    const tab = tabs.find(t => t.key === tabKey);
-    return tab ? tab.component : null;
+  const handleClick = (type: string) => {
+    router.push(`${workspaceURI}/${SUBAPP_CODES.forum}?type=${type}`);
   };
-  const TabComponent = findTabComponent(activeTab);
 
   return (
     <>
       <div className="bg-white px-4 pb-4 pt-1 rounded-b-lg border-none hidden">
         <div className="grid grid-cols-2 gap-2 ">
-          {tabs.map(tab => (
+          {TAB_TITLES.map(tab => (
             <Tab
               key={tab.id}
               tab={tab}
-              onClick={onClick}
+              onClick={handleClick}
               isActive={activeTab === tab.key}
             />
           ))}
         </div>
       </div>
-      {TabComponent && <TabComponent />}
     </>
   );
 };
