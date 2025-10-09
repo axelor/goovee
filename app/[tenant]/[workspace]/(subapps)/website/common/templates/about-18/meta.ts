@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const about18Schema = {
   title: 'About 18',
@@ -30,9 +29,8 @@ export const about18Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'heading1',
@@ -66,9 +64,20 @@ export const about18Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-18',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About18Data = Data<typeof about18Schema>;
@@ -76,13 +85,25 @@ export type About18Data = Data<typeof about18Schema>;
 export const about18Demos: Demo<typeof about18Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-18',
+    sequence: 4,
     data: {
       about18Image: {
         id: '1',
-        version: 1,
-        fileName: 'about27.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about27.jpg',
+        version: 0,
+        attrs: {
+          alt: 'What makes us different',
+          width: 583,
+          height: 550,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about27.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about27.jpg',
+          },
+        },
       },
       about18Caption: 'What Makes Us Different?',
       about18Title:
@@ -123,13 +144,25 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-18',
+    sequence: 4,
     data: {
       about18Image: {
         id: '1',
-        version: 1,
-        fileName: 'about27.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about27.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Ce qui nous rend différents',
+          width: 583,
+          height: 550,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about27.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about27.jpg',
+          },
+        },
       },
       about18Caption: 'Qu’est-ce qui nous rend différents ?',
       about18Title:

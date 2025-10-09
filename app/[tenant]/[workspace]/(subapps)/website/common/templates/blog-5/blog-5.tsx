@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Blog5Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import {BlogCard5} from '@/subapps/website/common/components/reuseable/blog-cards';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
@@ -11,12 +11,14 @@ export function Blog5(props: TemplateProps<Blog5Data>) {
     blog5Title: title,
     blog5Pagination: pagination,
     blog5BlogList: blogList = [],
+    blog5WrapperClassName: wrapperClassName,
+    blog5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
+    <section className={wrapperClassName} data-code={props.code}>
       <div className="overflow-hidden">
-        <div className="container py-14 py-md-16">
+        <div className={containerClassName}>
           <div className="row">
             <div className="col-xl-7 col-xxl-6 mx-auto text-center">
               <i className="icn-flower text-leaf fs-30 opacity-25"></i>
@@ -34,8 +36,8 @@ export function Blog5(props: TemplateProps<Blog5Data>) {
                 <article key={id}>
                   <BlogCard5
                     {...item}
-                    image={getMetaFileURL({
-                      metaFile: item.image,
+                    image={getImage({
+                      image: item.image,
                       path: `blog5BlogList[${i}].attrs.image`,
                       ...props,
                     })}

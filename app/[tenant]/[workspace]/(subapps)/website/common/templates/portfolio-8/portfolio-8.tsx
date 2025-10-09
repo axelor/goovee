@@ -1,9 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio8Data} from './meta';
-import {
-  getMetaFileURL,
-  getTemplateId,
-} from '@/subapps/website/common/utils/helper';
+import {getImage, getTemplateId} from '@/subapps/website/common/utils/helper';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -13,12 +10,14 @@ export function Portfolio8(props: TemplateProps<Portfolio8Data>) {
     portfolio8Caption: caption,
     portfolio8Description: description,
     portfolio8PortfolioList: portfolioList,
+    portfolio8WrapperClassName: wrapperClassName,
+    portfolio8ContainerClassName: containerClassName,
   } = data || {};
 
   const isotopeId = getTemplateId(props);
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-14 py-md-17">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mb-8 text-center">
           <div className="col-lg-10 col-xl-9 col-xxl-8 mx-auto">
             <h2 className="fs-16 text-uppercase text-primary mb-3">
@@ -34,17 +33,22 @@ export function Portfolio8(props: TemplateProps<Portfolio8Data>) {
               <div className="project item col-md-6 col-xl-4 product" key={id}>
                 <figure className="lift rounded mb-6">
                   <Link href={item.linkUrl || '#'}>
-                    <Image
-                      src={getMetaFileURL({
-                        metaFile: item.image,
+                    {(() => {
+                      const img = getImage({
+                        image: item.image,
                         path: `portfolio8PortfolioList[${i}].attrs.image`,
                         ...props,
-                      })}
-                      alt={item.title}
-                      width={1300}
-                      height={1132}
-                      style={{width: '100%', height: 'auto'}}
-                    />
+                      });
+                      return (
+                        <Image
+                          src={img.url}
+                          alt={img.alt}
+                          width={img.width}
+                          height={img.height}
+                          style={{width: '100%', height: 'auto'}}
+                        />
+                      );
+                    })()}
                   </Link>
                 </figure>
 

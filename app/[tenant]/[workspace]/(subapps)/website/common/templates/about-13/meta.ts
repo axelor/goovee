@@ -5,7 +5,8 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about13Schema = {
   title: 'About 13',
@@ -30,24 +31,14 @@ export const about13Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -69,9 +60,22 @@ export const about13Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-18',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel, imageModel],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About13Data = Data<typeof about13Schema>;
@@ -79,13 +83,25 @@ export type About13Data = Data<typeof about13Schema>;
 export const about13Demos: Demo<typeof about13Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-11',
+    sequence: 7,
     data: {
       about13Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company strategies and achievement',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about13Caption: 'Who Are We?',
       about13Title:
@@ -135,13 +151,25 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-11',
+    sequence: 7,
     data: {
       about13Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: "Stratégies et réalisation de l'entreprise",
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about13Caption: 'Qui sommes-nous ?',
       about13Title: 'L’organisation qui pense à l’efficacité des stratégies.',

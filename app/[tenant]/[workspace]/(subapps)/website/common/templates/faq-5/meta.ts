@@ -17,6 +17,18 @@ export const faq5Schema = {
       type: 'json-one-to-many',
       target: 'Faq5Questions',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
+    },
   ],
   models: [faq5QuestionsModel],
 } as const satisfies TemplateSchema;
@@ -26,6 +38,9 @@ export type Faq5Data = Data<typeof faq5Schema>;
 export const faq5Demos: Demo<typeof faq5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-11',
+    sequence: 11,
     data: {
       faq5Questions: [
         {
@@ -69,6 +84,9 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-11',
+    sequence: 11,
     data: {
       faq5Questions: [
         {

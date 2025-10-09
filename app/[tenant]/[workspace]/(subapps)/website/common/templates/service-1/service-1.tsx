@@ -22,11 +22,13 @@ export function Service1(props: TemplateProps<Service1Data>) {
     service1Title: title,
     service1Caption: caption,
     service1Services: services,
+    service1WrapperClassName: wrapperClassName,
+    service1ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container pt-14 pt-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
             <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>

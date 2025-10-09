@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const service23Schema = {
   title: 'Service 23',
@@ -44,9 +44,8 @@ export const service23Schema = {
     {
       name: 'section1Image',
       title: 'Section 1 Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'section1Services',
@@ -77,9 +76,8 @@ export const service23Schema = {
     {
       name: 'section2Image',
       title: 'Section 2 Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'section2Services',
@@ -110,15 +108,26 @@ export const service23Schema = {
     {
       name: 'section3Image',
       title: 'Section 3 Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'section3Services',
       title: 'Section 3 Services',
       type: 'json-one-to-many',
       target: 'Service23Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-15 py-md-17',
     },
   ],
   models: [
@@ -135,8 +144,8 @@ export const service23Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Service23Data = Data<typeof service23Schema>;
@@ -144,6 +153,9 @@ export type Service23Data = Data<typeof service23Schema>;
 export const service23Demos: Demo<typeof service23Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-20',
+    sequence: 2,
     data: {
       service23Caption: 'What We Do?',
       service23Title:
@@ -155,10 +167,19 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section1LinkHref: '#',
       service23Section1Image: {
         id: '1',
-        version: 1,
-        fileName: 'ui4.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/ui4.png',
+        version: 0,
+        attrs: {
+          alt: 'Service',
+          width: 586,
+          height: 283,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ui4.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/ui4.png',
+          },
+        },
       },
       service23Section1Services: [
         {
@@ -184,10 +205,19 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section2LinkHref: '#',
       service23Section2Image: {
         id: '1',
-        version: 1,
-        fileName: 'ui1.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/ui1.png',
+        version: 0,
+        attrs: {
+          alt: 'Service',
+          width: 460,
+          height: 456,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ui1.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/ui1.png',
+          },
+        },
       },
       service23Section2Services: [
         {
@@ -213,10 +243,19 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section3LinkHref: '#',
       service23Section3Image: {
         id: '1',
-        version: 1,
-        fileName: 'ui5.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/ui5.png',
+        version: 0,
+        attrs: {
+          alt: 'Service',
+          width: 514,
+          height: 477,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ui5.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/ui5.png',
+          },
+        },
       },
       service23Section3Services: [
         {
@@ -239,6 +278,9 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-20',
+    sequence: 2,
     data: {
       service23Caption: 'Que faisons-nous ?',
       service23Title:
@@ -250,10 +292,19 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section1LinkHref: '#',
       service23Section1Image: {
         id: '1',
-        version: 1,
-        fileName: 'ui4.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/ui4.png',
+        version: 0,
+        attrs: {
+          alt: 'Service',
+          width: 586,
+          height: 283,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ui4.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/ui4.png',
+          },
+        },
       },
       service23Section1Services: [
         {
@@ -279,10 +330,19 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section2LinkHref: '#',
       service23Section2Image: {
         id: '1',
-        version: 1,
-        fileName: 'ui1.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/ui1.png',
+        version: 0,
+        attrs: {
+          alt: 'Service',
+          width: 460,
+          height: 456,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ui1.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/ui1.png',
+          },
+        },
       },
       service23Section2Services: [
         {
@@ -308,10 +368,19 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section3LinkHref: '#',
       service23Section3Image: {
         id: '1',
-        version: 1,
-        fileName: 'ui5.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/ui5.png',
+        version: 0,
+        attrs: {
+          alt: 'Service',
+          width: 514,
+          height: 477,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ui5.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/ui5.png',
+          },
+        },
       },
       service23Section3Services: [
         {

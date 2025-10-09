@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {type Contact7Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import IconBox from '@/subapps/website/common/components/reuseable/IconBox';
+import Image from 'next/image';
 
 export function Contact7(props: TemplateProps<Contact7Data>) {
   const {data} = props;
@@ -9,17 +10,19 @@ export function Contact7(props: TemplateProps<Contact7Data>) {
     contact7Title: title,
     contact7Image,
     contact7ContactInfo: contactInfo,
+    contact7WrapperClassName: wrapperClassName,
+    contact7ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact7Image,
+  const image = getImage({
+    image: contact7Image,
     path: 'contact7Image',
     ...props,
   });
 
   return (
-    <section className="wrapper bg-light angled upper-end lower-end">
-      <div className="container pt-18 pb-14 pt-md-19 pb-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-md-8 col-lg-6 offset-lg-0 col-xl-5 offset-xl-1 position-relative">
             <div
@@ -28,7 +31,13 @@ export function Contact7(props: TemplateProps<Contact7Data>) {
             />
 
             <figure className="rounded">
-              <img src={image} alt="" />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

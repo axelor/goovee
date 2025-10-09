@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial19Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
 
@@ -12,10 +12,12 @@ export function Testimonial19(props: TemplateProps<Testimonial19Data>) {
     testimonial19Navigation: navigation,
     testimonial19SpaceBetween: spaceBetween,
     testimonial19Testimonials: testimonials = [],
+    testimonial19WrapperClassName: wrapperClassName,
+    testimonial19ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: testimonial19Image,
+  const image = getImage({
+    image: testimonial19Image,
     path: 'testimonial19Image',
     ...props,
   });
@@ -29,43 +31,41 @@ export function Testimonial19(props: TemplateProps<Testimonial19Data>) {
   };
 
   return (
-    <section id="testimonials">
-      <div
-        className="wrapper image-wrapper bg-image bg-overlay"
-        style={{backgroundImage: `url(${image})`}}>
-        <div className="container pt-15 pb-13">
-          <h2 className="display-5 mb-4 text-center text-white">{caption}</h2>
+    <section
+      className={wrapperClassName}
+      style={{backgroundImage: `url(${image.url})`}}>
+      <div className={containerClassName}>
+        <h2 className="display-5 mb-4 text-center text-white">{caption}</h2>
 
-          <div className="swiper-container dots-closer dots-light dots-light-75">
-            <Carousel
-              grabCursor
-              spaceBetween={spaceBetween || 0}
-              navigation={navigation}
-              breakpoints={carouselBreakpoints}>
-              {testimonials?.map(({id, attrs: item}) => (
-                <div className="item-inner" key={id}>
-                  <div className="card border-0 bg-white-900">
-                    <div className="card-body">
-                      {item.rating && ratingMap[item.rating] && (
-                        <span
-                          className={`ratings ${ratingMap[item.rating]} mb-3`}
-                        />
-                      )}
-                      <blockquote className="border-0 mb-0">
-                        <p>“{item.review}”</p>
-                        <div className="blockquote-details">
-                          <div className="info p-0">
-                            <h5 className="mb-0">{item.name}</h5>
-                            <p className="mb-0">{item.designation}</p>
-                          </div>
+        <div className="swiper-container dots-closer dots-light dots-light-75">
+          <Carousel
+            grabCursor
+            spaceBetween={spaceBetween || 0}
+            navigation={navigation}
+            breakpoints={carouselBreakpoints}>
+            {testimonials?.map(({id, attrs: item}) => (
+              <div className="item-inner" key={id}>
+                <div className="card border-0 bg-white-900">
+                  <div className="card-body">
+                    {item.rating && ratingMap[item.rating] && (
+                      <span
+                        className={`ratings ${ratingMap[item.rating]} mb-3`}
+                      />
+                    )}
+                    <blockquote className="border-0 mb-0">
+                      <p>“{item.review}”</p>
+                      <div className="blockquote-details">
+                        <div className="info p-0">
+                          <h5 className="mb-0">{item.name}</h5>
+                          <p className="mb-0">{item.designation}</p>
                         </div>
-                      </blockquote>
-                    </div>
+                      </div>
+                    </blockquote>
                   </div>
                 </div>
-              ))}
-            </Carousel>
-          </div>
+              </div>
+            ))}
+          </Carousel>
         </div>
       </div>
     </section>

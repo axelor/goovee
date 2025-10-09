@@ -26,6 +26,18 @@ export const process6Schema = {
       type: 'json-one-to-many',
       target: 'Process6Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled lower-end',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
+    },
   ],
   models: [
     {
@@ -59,6 +71,9 @@ export type Process6Data = Data<typeof process6Schema>;
 export const process6Demos: Demo<typeof process6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-13',
+    sequence: 4,
     data: {
       process6Title: 'Our Working Process',
       process6Caption:
@@ -109,6 +124,9 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-13',
+    sequence: 4,
     data: {
       process6Title: 'Notre processus de travail',
       process6Caption:

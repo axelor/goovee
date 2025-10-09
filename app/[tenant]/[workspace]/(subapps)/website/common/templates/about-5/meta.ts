@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {progressListModel} from '../json-models';
+import {progressListModel, imageModel} from '../json-models';
 
 export const about5Schema = {
   title: 'About 5',
@@ -20,9 +19,8 @@ export const about5Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'progressList',
@@ -30,9 +28,20 @@ export const about5Schema = {
       target: 'ProgressList',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
-  models: [progressListModel],
-  metaModels: [metaFileModel],
+  models: [progressListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About5Data = Data<typeof about5Schema>;
@@ -40,15 +49,27 @@ export type About5Data = Data<typeof about5Schema>;
 export const about5Demos: Demo<typeof about5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'others',
+    sequence: 1,
     data: {
       about5Title:
         'We bring rapid solutions to make the life of our customers easier.',
       about5Image: {
         id: '1',
-        version: 1,
-        fileName: 'i8.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i8.png',
+        version: 0,
+        attrs: {
+          alt: 'Rapid solutions for customers',
+          width: 600,
+          height: 428,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i8.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i8.png',
+          },
+        },
       },
       about5ProgressList: [
         {
@@ -65,8 +86,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           version: 0,
           attrs: {
             percent: 80,
-            title: 'Strategy',
             color: 'yellow',
+            title: 'Strategy',
           },
         },
         {
@@ -74,8 +95,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           version: 0,
           attrs: {
             percent: 85,
-            title: 'Development',
             color: 'orange',
+            title: 'Development',
           },
         },
         {
@@ -83,8 +104,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           version: 0,
           attrs: {
             percent: 90,
-            title: 'Data Analysis',
             color: 'green',
+            title: 'Data Analysis',
           },
         },
       ],
@@ -92,15 +113,27 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'others',
+    sequence: 1,
     data: {
       about5Title:
         'Nous apportons des solutions rapides pour faciliter la vie de nos clients.',
       about5Image: {
         id: '1',
-        version: 1,
-        fileName: 'i8.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i8.png',
+        version: 0,
+        attrs: {
+          alt: 'Solutions rapides pour les clients',
+          width: 600,
+          height: 428,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i8.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i8.png',
+          },
+        },
       },
       about5ProgressList: [
         {
@@ -108,8 +141,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           version: 0,
           attrs: {
             percent: 100,
-            title: 'Marketing',
             color: 'blue',
+            title: 'Marketing',
           },
         },
         {
@@ -117,8 +150,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           version: 0,
           attrs: {
             percent: 80,
-            title: 'Stratégie',
             color: 'yellow',
+            title: 'Stratégie',
           },
         },
         {
@@ -126,8 +159,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           version: 0,
           attrs: {
             percent: 85,
-            title: 'Développement',
             color: 'orange',
+            title: 'Développement',
           },
         },
         {
@@ -135,8 +168,8 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           version: 0,
           attrs: {
             percent: 90,
-            title: 'Analyse de données',
             color: 'green',
+            title: 'Analyse de données',
           },
         },
       ],

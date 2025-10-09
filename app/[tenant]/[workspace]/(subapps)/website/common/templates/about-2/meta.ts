@@ -4,8 +4,9 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about2Schema = {
   title: 'About 2',
@@ -30,9 +31,8 @@ export const about2Schema = {
     {
       name: 'thumbnail',
       title: 'Thumbnail',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'hideShape',
@@ -43,16 +43,7 @@ export const about2Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -69,9 +60,22 @@ export const about2Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-17 mb-lg-19',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel, imageModel],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About2Data = Data<typeof about2Schema>;
@@ -79,6 +83,9 @@ export type About2Data = Data<typeof about2Schema>;
 export const about2Demos: Demo<typeof about2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-2',
+    sequence: 6,
     data: {
       about2Caption: 'Who Are We?',
       about2Title: 'We value the creativity of techniques in our company.',
@@ -86,10 +93,19 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         'We take great pride in our ability to develop custom solutions that exceed our clients’ expectations and push the boundaries of design. If you are looking for inspiration or want to see what is possible',
       about2Thumbnail: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About 2 Thumbnail',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about2HideShape: false,
       about2BtnColor: 'white',
@@ -134,6 +150,9 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-2',
+    sequence: 6,
     data: {
       about2Caption: 'Qui sommes-nous ?',
       about2Title:
@@ -142,10 +161,19 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
         'Nous sommes très fiers de notre capacité à développer des solutions personnalisées qui dépassent les attentes de nos clients et repoussent les limites du design. Si vous cherchez l’inspiration ou si vous voulez voir ce qui est possible',
       about2Thumbnail: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About 2 Thumbnail',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about2HideShape: false,
       about2BtnColor: 'white',

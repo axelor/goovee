@@ -51,6 +51,18 @@ export const process7Schema = {
       type: 'json-one-to-many',
       target: 'Process7Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled lower-end',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
+    },
   ],
   models: [
     {
@@ -89,6 +101,9 @@ export type Process7Data = Data<typeof process7Schema>;
 export const process7Demos: Demo<typeof process7Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-15',
+    sequence: 3,
     data: {
       process7Title:
         'These 3 practical measure will help us organize our company projects.',
@@ -137,6 +152,9 @@ export const process7Demos: Demo<typeof process7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-15',
+    sequence: 3,
     data: {
       process7Title:
         'Ces 3 mesures pratiques nous aideront à organiser les projets de notre entreprise.',

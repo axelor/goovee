@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import {TeamCard1} from '@/subapps/website/common/components/reuseable/team-cards';
 
@@ -11,6 +11,8 @@ export function Team3(props: TemplateProps<Team3Data>) {
     team3SpaceBetween: spaceBetween,
     team3Navigation: navigation,
     team3Members: members = [],
+    team3WrapperClassName: wrapperClassName,
+    team3ContainerClassName: containerClassName,
   } = data || {};
 
   const carouselBreakpoints = {
@@ -21,8 +23,8 @@ export function Team3(props: TemplateProps<Team3Data>) {
   };
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-14 py-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mb-3">
           <div className="col-md-10 col-xl-9 col-xxl-7 mx-auto text-center">
             <h2 className="display-4 mb-3">{title}</h2>
@@ -59,8 +61,8 @@ export function Team3(props: TemplateProps<Team3Data>) {
                       description={item.description}
                       designation={item.designation}
                       socialLinks={socialLinks || []}
-                      image={getMetaFileURL({
-                        metaFile: item.image,
+                      image={getImage({
+                        image: item.image,
                         path: `team3Members[${i}].attrs.image`,
                         ...props,
                       })}

@@ -1,28 +1,26 @@
 import Image from 'next/image';
-import {DetailedHTMLProps, FC, HTMLAttributes} from 'react';
+import {FC} from 'react';
+import {ImageType} from '@/subapps/website/common/types/templates';
 
-// ====================================================
-interface FigureImageProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> {
-  src: string;
-  width: number;
-  height: number;
+// ==================================================
+type FigureImageProps = {
+  image?: ImageType;
   className?: string;
-}
-// ====================================================
+};
+// ==================================================
 
-const FigureImage: FC<FigureImageProps> = props => {
-  const {className, src, width, height, ...others} = props;
-
+const FigureImage: FC<FigureImageProps> = ({image, className = ''}) => {
   return (
-    <figure className={className} {...others}>
-      <Image
-        width={width}
-        height={height}
-        src={src}
-        alt="demo"
-        style={{width: '100%', height: 'auto'}}
-      />
+    <figure className={className}>
+      {image?.url && (
+        <Image
+          src={image.url}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          style={{width: '100%', height: 'auto'}}
+        />
+      )}
     </figure>
   );
 };

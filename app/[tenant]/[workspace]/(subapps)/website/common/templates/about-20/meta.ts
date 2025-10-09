@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {serviceList3Model} from '../json-models';
+import {serviceList3Model, imageModel} from '../json-models';
 
 export const about20Schema = {
   title: 'About 20',
@@ -25,23 +24,20 @@ export const about20Schema = {
     {
       name: 'image1',
       title: 'Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image2',
       title: 'Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image3',
       title: 'Image 3',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'aboutList',
@@ -49,9 +45,20 @@ export const about20Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mt-15 pb-16 pb-md-18',
+    },
   ],
-  models: [serviceList3Model],
-  metaModels: [metaFileModel],
+  models: [serviceList3Model, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About20Data = Data<typeof about20Schema>;
@@ -59,27 +66,57 @@ export type About20Data = Data<typeof about20Schema>;
 export const about20Demos: Demo<typeof about20Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-19',
+    sequence: 7,
     data: {
       about20Image1: {
         id: '1',
-        version: 1,
-        fileName: 'g8.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g8.jpg',
+        version: 0,
+        attrs: {
+          alt: 'What makes us different',
+          width: 523,
+          height: 268,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g8.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g8.jpg',
+          },
+        },
       },
       about20Image2: {
         id: '1',
-        version: 1,
-        fileName: 'g9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'What makes us different',
+          width: 271,
+          height: 242,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g9.jpg',
+          },
+        },
       },
       about20Image3: {
         id: '1',
-        version: 1,
-        fileName: 'g10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g10.jpg',
+        version: 0,
+        attrs: {
+          alt: 'What makes us different',
+          width: 271,
+          height: 218,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g10.jpg',
+          },
+        },
       },
       about20Caption: 'What Makes Us Different?',
       about20Description:
@@ -126,27 +163,57 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-19',
+    sequence: 7,
     data: {
       about20Image1: {
         id: '1',
-        version: 1,
-        fileName: 'g8.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g8.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Ce qui nous rend différents',
+          width: 523,
+          height: 268,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g8.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g8.jpg',
+          },
+        },
       },
       about20Image2: {
         id: '1',
-        version: 1,
-        fileName: 'g9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Ce qui nous rend différents',
+          width: 271,
+          height: 242,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g9.jpg',
+          },
+        },
       },
       about20Image3: {
         id: '1',
-        version: 1,
-        fileName: 'g10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/g10.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Ce qui nous rend différents',
+          width: 271,
+          height: 218,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'g10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g10.jpg',
+          },
+        },
       },
       about20Caption: 'Qu’est-ce qui nous rend différents ?',
       about20Description:

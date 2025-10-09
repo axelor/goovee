@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {imageModel} from '../json-models';
+import {solidIconsSelection, buttonColorSelection} from '../meta-selections';
 
 export const process9Schema = {
   title: 'Process 9',
@@ -31,24 +30,14 @@ export const process9Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'video',
@@ -69,6 +58,18 @@ export const process9Schema = {
       type: 'json-one-to-many',
       target: 'Process9Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-19',
+    },
   ],
   models: [
     {
@@ -84,10 +85,7 @@ export const process9Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -103,8 +101,9 @@ export const process9Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [buttonColorSelection, solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process9Data = Data<typeof process9Schema>;
@@ -112,6 +111,9 @@ export type Process9Data = Data<typeof process9Schema>;
 export const process9Demos: Demo<typeof process9Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-9',
+    sequence: 5,
     data: {
       process9Title: 'Our Working Process',
       process9Caption: 'How It Works?',
@@ -119,10 +121,19 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
         'Find out why our happy customers choose us by following these steps',
       process9Image: {
         id: '1',
-        version: 1,
-        fileName: 'about8.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about8.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About us',
+          width: 596,
+          height: 565,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about8.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about8.jpg',
+          },
+        },
       },
       process9BtnColor: 'white',
       process9Video: {
@@ -172,6 +183,9 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-9',
+    sequence: 5,
     data: {
       process9Title: 'Notre processus de travail',
       process9Caption: 'Comment ça marche ?',
@@ -179,10 +193,19 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
         'Découvrez pourquoi nos clients satisfaits nous choisissent en suivant ces étapes',
       process9Image: {
         id: '1',
-        version: 1,
-        fileName: 'about8.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about8.jpg',
+        version: 0,
+        attrs: {
+          alt: 'À propos de nous',
+          width: 596,
+          height: 565,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about8.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about8.jpg',
+          },
+        },
       },
       process9BtnColor: 'white',
       process9Video: {

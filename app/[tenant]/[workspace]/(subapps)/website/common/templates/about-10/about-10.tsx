@@ -1,7 +1,7 @@
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ProgressList from '@/subapps/website/common/components/common/ProgressList';
 import type {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import {type About10Data} from './meta';
 
 export function About10(props: TemplateProps<About10Data>) {
@@ -14,10 +14,12 @@ export function About10(props: TemplateProps<About10Data>) {
     about10Media: media,
     about10HideShape: hideShape,
     about10ProgressList: progressList,
+    about10WrapperClassName: wrapperClassName,
+    about10ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about10Image,
+  const image = getImage({
+    image: about10Image,
     path: 'about10Image',
     ...props,
   });
@@ -37,25 +39,27 @@ export function About10(props: TemplateProps<About10Data>) {
     })) ?? [];
 
   return (
-    <div className="container">
-      <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center mb-14 mb-md-18">
-        <div className="col-md-8 col-lg-6 position-relative">
-          <Banner4
-            thumbnail={image}
-            hideShape={hideShape}
-            btnColor={btnColor}
-            media={mediaFile}
-            mediaType={media?.fileType}
-          />
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gy-10 gy-sm-13 gx-lg-3 align-items-center">
+          <div className="col-md-8 col-lg-6 position-relative">
+            <Banner4
+              thumbnail={image}
+              hideShape={hideShape}
+              btnColor={btnColor}
+              media={mediaFile}
+              mediaType={media?.fileType}
+            />
+          </div>
 
-        <div className="col-lg-5 col-xl-4 offset-lg-1">
-          <h3 className="display-4 mb-3">{caption}</h3>
-          <p className="lead fs-lg mb-6">{title}</p>
+          <div className="col-lg-5 col-xl-4 offset-lg-1">
+            <h3 className="display-4 mb-3">{caption}</h3>
+            <p className="lead fs-lg mb-6">{title}</p>
 
-          <ProgressList items={list} />
+            <ProgressList items={list} />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

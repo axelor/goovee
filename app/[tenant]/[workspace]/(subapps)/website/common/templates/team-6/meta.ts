@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const team6Schema = {
   title: 'Team 6',
@@ -27,6 +27,18 @@ export const team6Schema = {
       type: 'json-one-to-many',
       target: 'Team6Member',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17 mb-md-20',
+    },
   ],
   models: [
     {
@@ -48,14 +60,13 @@ export const team6Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Team6Data = Data<typeof team6Schema>;
@@ -63,6 +74,9 @@ export type Team6Data = Data<typeof team6Schema>;
 export const team6Demos: Demo<typeof team6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-11',
+    sequence: 8,
     data: {
       team6Caption: 'Our Team',
       team6Title:
@@ -76,10 +90,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Financial Analyst',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t1.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Coriss Ambady',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t1.jpg',
+                },
+              },
             },
           },
         },
@@ -91,10 +114,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Marketing Specialist',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t2.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Cory Zamora',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t2.jpg',
+                },
+              },
             },
           },
         },
@@ -106,10 +138,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Sales Manager',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t3.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Nikolas Brooten',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t3.jpg',
+                },
+              },
             },
           },
         },
@@ -121,10 +162,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Investment Planner',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t4.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Jackie Sanders',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t4.jpg',
+                },
+              },
             },
           },
         },
@@ -133,6 +183,9 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-11',
+    sequence: 8,
     data: {
       team6Caption: 'Notre équipe',
       team6Title:
@@ -146,10 +199,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Analyste financier',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t1.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Coriss Ambady',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t1.jpg',
+                },
+              },
             },
           },
         },
@@ -161,10 +223,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Spécialiste du marketing',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t2.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Cory Zamora',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t2.jpg',
+                },
+              },
             },
           },
         },
@@ -176,10 +247,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Directeur des ventes',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t3.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Nikolas Brooten',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t3.jpg',
+                },
+              },
             },
           },
         },
@@ -191,10 +271,19 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
             designation: 'Planificateur d’investissement',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t4.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Jackie Sanders',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t4.jpg',
+                },
+              },
             },
           },
         },

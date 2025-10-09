@@ -1,10 +1,10 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio3Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
-import Image from 'next/image';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import {Fragment} from 'react';
+import Image from 'next/image';
 
 export function Portfolio3(props: TemplateProps<Portfolio3Data>) {
   const {data} = props;
@@ -14,11 +14,13 @@ export function Portfolio3(props: TemplateProps<Portfolio3Data>) {
     portfolio3SlidesPerView: slidesPerView,
     portfolio3Pagination: pagination,
     portfolio3PortfolioList: portfolioList = [],
+    portfolio3WrapperClassName: wrapperClassName,
+    portfolio3ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <div className="overflow-hidden">
-      <div className="container pt-12 pt-lg-7 pb-14 pb-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-10 col-xl-9 col-xxl-8 mx-auto text-center">
             <h2 className="fs-16 text-uppercase text-primary mb-3">
@@ -38,14 +40,21 @@ export function Portfolio3(props: TemplateProps<Portfolio3Data>) {
             {portfolioList?.map(({id, attrs: item}, i) => (
               <Fragment key={id}>
                 <figure className="rounded mb-7">
-                  <img
-                    src={getMetaFileURL({
-                      metaFile: item.image,
+                  {(() => {
+                    const img = getImage({
+                      image: item.image,
                       path: `portfolio3PortfolioList[${i}].attrs.image`,
                       ...props,
-                    })}
-                    alt=""
-                  />
+                    });
+                    return (
+                      <Image
+                        src={img.url}
+                        alt={img.alt || ''}
+                        width={img.width}
+                        height={img.height}
+                      />
+                    );
+                  })()}
                 </figure>
 
                 <div className="project-details d-flex justify-content-center flex-column">
@@ -76,6 +85,6 @@ export function Portfolio3(props: TemplateProps<Portfolio3Data>) {
           />
         </svg>
       </div>
-    </div>
+    </section>
   );
 }

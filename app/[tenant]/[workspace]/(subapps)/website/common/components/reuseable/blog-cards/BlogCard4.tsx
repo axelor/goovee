@@ -3,11 +3,12 @@ import {FC} from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import NextLink from '../links/NextLink';
+import {ImageType} from '@/subapps/website/common/types/templates';
 
 // ======================================================
 type BlogCard4Props = {
   date?: string;
-  image?: string;
+  image?: ImageType;
   title?: string;
   category?: string;
   className?: string;
@@ -23,13 +24,15 @@ const BlogCard4: FC<BlogCard4Props> = props => {
       <div className={className}>
         <figure className="card-img-top overlay overlay-1 hover-scale">
           <Link href="#">
-            <Image
-              width={560}
-              height={350}
-              src={image}
-              alt={title}
-              style={{width: '100%', height: 'auto'}}
-            />
+            {image?.url && (
+              <Image
+                height={image.height}
+                width={image.width}
+                src={image.url}
+                alt={image.alt}
+                style={{width: '100%', height: 'auto'}}
+              />
+            )}
             <span className="bg" />
           </Link>
 

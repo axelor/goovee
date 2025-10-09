@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero14Schema = {
   title: 'Hero 14',
@@ -34,13 +34,23 @@ export const hero14Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pt-md-14 pb-14 pb-md-0',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero14Data = Data<typeof hero14Schema>;
@@ -48,6 +58,9 @@ export type Hero14Data = Data<typeof hero14Schema>;
 export const hero14Demos: Demo<typeof hero14Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-14',
+    sequence: 1,
     data: {
       hero14Title: 'We provide rapid solutions for your company.',
       hero14Description:
@@ -56,15 +69,27 @@ export const hero14Demos: Demo<typeof hero14Schema>[] = [
       hero14LinkHref: '#',
       hero14Image: {
         id: '1',
-        version: 1,
-        fileName: 'about18.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about18.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Rapid solutions',
+          width: 1200,
+          height: 650,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about18.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about18.jpg',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-14',
+    sequence: 1,
     data: {
       hero14Title:
         'Nous apportons des solutions rapides pour votre entreprise.',
@@ -74,10 +99,19 @@ export const hero14Demos: Demo<typeof hero14Schema>[] = [
       hero14LinkHref: '#',
       hero14Image: {
         id: '1',
-        version: 1,
-        fileName: 'about18.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about18.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Solutions rapides',
+          width: 1200,
+          height: 650,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about18.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about18.jpg',
+          },
+        },
       },
     },
   },

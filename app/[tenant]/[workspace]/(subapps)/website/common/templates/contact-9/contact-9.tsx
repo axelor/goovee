@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function Contact9(props: TemplateProps<Contact9Data>) {
@@ -11,19 +11,22 @@ export function Contact9(props: TemplateProps<Contact9Data>) {
     contact9LinkTitle: linkTitle,
     contact9LinkHref: linkHref,
     contact9Image,
+    contact9WrapperClassName: wrapperClassName,
+    contact9ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: contact9Image,
+  const image = getImage({
+    image: contact9Image,
     path: 'contact9Image',
     ...props,
   });
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay"
-      style={{backgroundImage: `url(${image})`}}>
-      <div className="container py-18">
+      className={wrapperClassName}
+      data-code={props.code}
+      style={{backgroundImage: `url(${image.url})`}}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-md-8 col-lg-7 col-xl-5 mx-auto">
             <h2 className="fs-16 text-uppercase text-white mb-3">{caption}</h2>

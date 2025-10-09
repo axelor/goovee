@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Facts17Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 
 export function Facts17(props: TemplateProps<Facts17Data>) {
@@ -11,19 +12,25 @@ export function Facts17(props: TemplateProps<Facts17Data>) {
     facts17Description: description,
     facts17Image,
     facts17Facts: facts,
+    facts17WrapperClassName: wrapperClassName,
+    facts17ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: facts17Image,
+  const image = getImage({
+    image: facts17Image,
     path: 'facts17Image',
     ...props,
   });
 
   return (
-    <section className="wrapper bg-gray position-relative min-vh-60 d-lg-flex align-items-center">
-      <div
-        className="col-lg-6 position-lg-absolute top-0 end-0 image-wrapper bg-image bg-cover h-100"
-        style={{backgroundImage: `url(${image})`}}>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className="col-lg-6 position-lg-absolute top-0 end-0 image-wrapper h-100 overflow-hidden">
+        <Image
+          src={image.url}
+          alt={image.alt || 'Facts background'}
+          fill
+          className="object-cover"
+        />
         <div className="divider text-gray divider-v-start d-none d-lg-block">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 1200">
             <g />
@@ -39,7 +46,7 @@ export function Facts17(props: TemplateProps<Facts17Data>) {
         </div>
       </div>
 
-      <div className="container">
+      <div className={containerClassName}>
         <div className="row gx-0">
           <div className="col-lg-6">
             <div className="pt-13 pb-15 pb-md-17 py-lg-16 pe-lg-15">

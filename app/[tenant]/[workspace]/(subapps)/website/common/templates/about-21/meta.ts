@@ -5,7 +5,8 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {serviceList3Model} from '../json-models';
+import {serviceList3Model, imageModel} from '../json-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about21Schema = {
   title: 'About 21',
@@ -25,24 +26,14 @@ export const about21Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -63,9 +54,22 @@ export const about21Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-15 pt-md-17 mb-15 mb-md-17',
+    },
   ],
-  models: [serviceList3Model],
+  models: [serviceList3Model, imageModel],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About21Data = Data<typeof about21Schema>;
@@ -73,13 +77,25 @@ export type About21Data = Data<typeof about21Schema>;
 export const about21Demos: Demo<typeof about21Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-20',
+    sequence: 6,
     data: {
       about21Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'What makes us different',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about21Caption: 'What Makes Us Different?',
       about21Description:
@@ -135,13 +151,25 @@ export const about21Demos: Demo<typeof about21Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-20',
+    sequence: 6,
     data: {
       about21Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Ce qui nous rend différents',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       about21Caption: 'Qu’est-ce qui nous rend différents ?',
       about21Description:

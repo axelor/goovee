@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const facts17Schema = {
   title: 'Facts 17',
@@ -29,15 +29,27 @@ export const facts17Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'facts',
       title: 'Facts',
       type: 'json-one-to-many',
       target: 'Facts17Facts',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper position-relative d-lg-flex align-items-center bg-gray min-vh-60 ',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
   models: [
@@ -64,8 +76,8 @@ export const facts17Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Facts17Data = Data<typeof facts17Schema>;
@@ -73,6 +85,9 @@ export type Facts17Data = Data<typeof facts17Schema>;
 export const facts17Demos: Demo<typeof facts17Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'others',
+    sequence: 8,
     data: {
       facts17Title:
         'Just sit & relax while we take care of your business needs.',
@@ -81,10 +96,19 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
         'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Praesent commodo cursus. Maecenas sed diam eget risus varius blandit sit amet non magna. Praesent commodo cursus magna.',
       facts17Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg39.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg39.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Business needs solution',
+          width: 2000,
+          height: 1400,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg39.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg39.jpg',
+          },
+        },
       },
       facts17Facts: [
         {
@@ -110,6 +134,9 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'others',
+    sequence: 8,
     data: {
       facts17Title:
         'Asseyez-vous et détendez-vous pendant que nous nous occupons des besoins de votre entreprise.',
@@ -118,10 +145,19 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
         'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Praesent commodo cursus. Maecenas sed diam eget risus varius blandit sit amet non magna. Praesent commodo cursus magna.',
       facts17Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg39.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg39.jpg',
+        version: 0,
+        attrs: {
+          alt: "Solution aux besoins de l'entreprise",
+          width: 2000,
+          height: 1400,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg39.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg39.jpg',
+          },
+        },
       },
       facts17Facts: [
         {

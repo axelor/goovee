@@ -1,14 +1,15 @@
 import {FC} from 'react';
 import Image from 'next/image';
 import NextLink from '../links/NextLink';
+import {ImageType} from '../../../types/templates';
 
 // ==============================================================================
 type ProjectCard3Props = {
   link?: string;
   title?: string;
-  image?: string;
+  image?: ImageType;
   category?: string;
-  fullImage?: string;
+  fullImage?: ImageType;
 };
 // ==============================================================================
 
@@ -22,16 +23,18 @@ const ProjectCard3: FC<ProjectCard3Props> = ({
   return (
     <>
       <figure className="rounded mb-6">
-        <Image
-          width={410}
-          height={440}
-          src={image}
-          alt={title}
-          style={{width: '100%', height: 'auto'}}
-        />
+        {image?.url && (
+          <Image
+            width={image.width}
+            height={image.height}
+            src={image.url}
+            alt={image.alt}
+            style={{width: '100%', height: 'auto'}}
+          />
+        )}
         <a
           className="item-link"
-          href={fullImage}
+          href={fullImage?.url}
           data-type="image"
           data-glightbox
           data-gallery="projects-group">

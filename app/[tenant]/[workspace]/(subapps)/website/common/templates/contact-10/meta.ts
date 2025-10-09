@@ -92,6 +92,18 @@ export const contact10Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [socialLinksModel],
 } as const satisfies TemplateSchema;
@@ -101,6 +113,9 @@ export type Contact10Data = Data<typeof contact10Schema>;
 export const contact10Demos: Demo<typeof contact10Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-16',
+    sequence: 4,
     data: {
       contact10Title: "Let's collaborate in case you love the things you see.",
       contact10Description:
@@ -169,6 +184,9 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-16',
+    sequence: 4,
     data: {
       contact10Title:
         'Collaborons au cas où vous aimez les choses que vous voyez.',

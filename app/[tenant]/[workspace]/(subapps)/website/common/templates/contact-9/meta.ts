@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const contact9Schema = {
   title: 'Contact 9',
@@ -34,13 +34,23 @@ export const contact9Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-18',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact9Data = Data<typeof contact9Schema>;
@@ -48,6 +58,9 @@ export type Contact9Data = Data<typeof contact9Schema>;
 export const contact9Demos: Demo<typeof contact9Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-14',
+    sequence: 3,
     data: {
       contact9Title: 'Trust us, join 10K+ clients to grow your business.',
       contact9Caption: 'Join Our Community',
@@ -55,15 +68,27 @@ export const contact9Demos: Demo<typeof contact9Schema>[] = [
       contact9LinkHref: '#',
       contact9Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg10.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Join our community',
+          width: 1440,
+          height: 541,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg10.jpg',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-14',
+    sequence: 3,
     data: {
       contact9Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',
@@ -72,10 +97,19 @@ export const contact9Demos: Demo<typeof contact9Schema>[] = [
       contact9LinkHref: '#',
       contact9Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg10.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Rejoignez notre communauté',
+          width: 1440,
+          height: 541,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg10.jpg',
+          },
+        },
       },
     },
   },

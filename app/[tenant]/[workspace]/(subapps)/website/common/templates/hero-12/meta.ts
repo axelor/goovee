@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero12Schema = {
   title: 'Hero 12',
@@ -44,12 +44,23 @@ export const hero12Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pb-15 pt-md-14 pb-md-20',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero12Data = Data<typeof hero12Schema>;
@@ -57,6 +68,9 @@ export type Hero12Data = Data<typeof hero12Schema>;
 export const hero12Demos: Demo<typeof hero12Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-12',
+    sequence: 1,
     data: {
       hero12Title: 'Inventive, Sharp, Magnificent.',
       hero12Description:
@@ -67,15 +81,27 @@ export const hero12Demos: Demo<typeof hero12Schema>[] = [
       hero12ButtonLink2: '#',
       hero12Image: {
         id: '1',
-        version: 1,
-        fileName: 'i6.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i6.png',
+        version: 0,
+        attrs: {
+          alt: 'hero',
+          width: 660,
+          height: 496,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i6.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i6.png',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-12',
+    sequence: 1,
     data: {
       hero12Title: 'Inventif, pointu, magnifique.',
       hero12Description:
@@ -86,10 +112,19 @@ export const hero12Demos: Demo<typeof hero12Schema>[] = [
       hero12ButtonLink2: '#',
       hero12Image: {
         id: '1',
-        version: 1,
-        fileName: 'i6.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i6.png',
+        version: 0,
+        attrs: {
+          alt: 'héro',
+          width: 660,
+          height: 496,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i6.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i6.png',
+          },
+        },
       },
     },
   },

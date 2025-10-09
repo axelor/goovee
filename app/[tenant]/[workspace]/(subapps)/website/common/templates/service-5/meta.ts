@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service5Schema = {
   title: 'Service 5',
@@ -39,6 +38,24 @@ export const service5Schema = {
       type: 'string',
     },
     {
+      name: 'image1',
+      title: 'Image 1',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'image2',
+      title: 'Image 2',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'image3',
+      title: 'Image 3',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
       name: 'services',
       title: 'Services',
       type: 'json-one-to-many',
@@ -50,6 +67,18 @@ export const service5Schema = {
       target: 'BulletList',
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-18 mb-14 mb-md-17',
     },
   ],
   models: [
@@ -73,16 +102,14 @@ export const service5Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
       ],
     },
     bulletListModel,
-    bulletPointModel,
+    imageModel,
   ],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service5Data = Data<typeof service5Schema>;
@@ -90,6 +117,9 @@ export type Service5Data = Data<typeof service5Schema>;
 export const service5Demos: Demo<typeof service5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-4',
+    sequence: 2,
     data: {
       service5Title:
         "Our goal is to develop solutions that make our clients' life easier.",
@@ -98,6 +128,54 @@ export const service5Demos: Demo<typeof service5Schema>[] = [
       service5Experience: 20,
       service5ExperienceSuffix: '+',
       service5ExperienceDescription: 'Year Experience',
+      service5Image1: {
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 240,
+          height: 245,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab1.jpg',
+          },
+        },
+      },
+      service5Image2: {
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 290,
+          height: 225,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab2.jpg',
+          },
+        },
+      },
+      service5Image3: {
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 290,
+          height: 440,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab3.jpg',
+          },
+        },
+      },
       service5Services: [
         {
           id: '1',
@@ -206,6 +284,9 @@ export const service5Demos: Demo<typeof service5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-4',
+    sequence: 2,
     data: {
       service5Title:
         'Notre objectif est de développer des solutions qui facilitent la vie de nos clients.',
@@ -214,6 +295,54 @@ export const service5Demos: Demo<typeof service5Schema>[] = [
       service5Experience: 20,
       service5ExperienceSuffix: '+',
       service5ExperienceDescription: 'Année d’expérience',
+      service5Image1: {
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 240,
+          height: 245,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab1.jpg',
+          },
+        },
+      },
+      service5Image2: {
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 290,
+          height: 225,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab2.jpg',
+          },
+        },
+      },
+      service5Image3: {
+        id: '1',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 290,
+          height: 440,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab3.jpg',
+          },
+        },
+      },
       service5Services: [
         {
           id: '1',

@@ -16,6 +16,18 @@ export const testimonial14Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial14Testimonial',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-16 pt-md-17 mt-n19 mt-md-n22 mb-14 mb-md-17',
+    },
   ],
   models: [
     {
@@ -54,6 +66,9 @@ export type Testimonial14Data = Data<typeof testimonial14Schema>;
 export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-14',
+    sequence: 6,
     data: {
       testimonial14Testimonials: [
         {
@@ -105,6 +120,9 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-14',
+    sequence: 6,
     data: {
       testimonial14Testimonials: [
         {

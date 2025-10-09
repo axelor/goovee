@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const hero20Schema = {
@@ -32,12 +33,24 @@ export const hero20Schema = {
     {
       name: 'poster',
       title: 'Poster',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper video-wrapper bg-overlay bg-overlay-gradient px-0 mt-0 min-vh-80',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container text-center',
     },
   ],
-  models: [],
+  models: [imageModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -46,6 +59,9 @@ export type Hero20Data = Data<typeof hero20Schema>;
 export const hero20Demos: Demo<typeof hero20Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-20',
+    sequence: 1,
     data: {
       hero20Title: 'Swift Responses,Creative Thinking,Top-Notch Support',
       hero20Description:
@@ -59,15 +75,27 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
       },
       hero20Poster: {
         id: '1',
-        version: 1,
-        fileName: 'movie2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/movie2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Video poster',
+          width: 2792,
+          height: 1872,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'movie2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/movie2.jpg',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-20',
+    sequence: 1,
     data: {
       hero20Title:
         'Réponses rapides, pensée créative, support de premier ordre',
@@ -82,10 +110,19 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
       },
       hero20Poster: {
         id: '1',
-        version: 1,
-        fileName: 'movie2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/movie2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Affiche de la vidéo',
+          width: 2792,
+          height: 1872,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'movie2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/movie2.jpg',
+          },
+        },
       },
     },
   },

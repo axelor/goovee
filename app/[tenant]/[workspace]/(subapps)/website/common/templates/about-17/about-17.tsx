@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About17Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
+import Image from 'next/image';
 
 export function About17(props: TemplateProps<About17Data>) {
   const {data} = props;
@@ -11,37 +12,47 @@ export function About17(props: TemplateProps<About17Data>) {
     about17Description: description,
     about17Image,
     about17AboutList: aboutList,
+    about17WrapperClassName: wrapperClassName,
+    about17ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about17Image,
+  const image = getImage({
+    image: about17Image,
     path: 'about17Image',
     ...props,
   });
 
   return (
-    <div className="container">
-      <div className="row gx-3 gy-10 mb-15 mb-md-18 align-items-center">
-        <div className="col-lg-5 offset-lg-1">
-          <figure>
-            <img className="w-auto" src={image} alt="" />
-          </figure>
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-3 gy-10 align-items-center">
+          <div className="col-lg-5 offset-lg-1">
+            <figure>
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
+            </figure>
+          </div>
 
-        <div className="col-lg-5 offset-lg-1">
-          <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
-            {caption}
-          </h2>
-          <h3 className="display-5 mb-4">{title}</h3>
-          <p className="mb-6">{description}</p>
+          <div className="col-lg-5 offset-lg-1">
+            <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
+              {caption}
+            </h2>
+            <h3 className="display-5 mb-4">{title}</h3>
+            <p className="mb-6">{description}</p>
 
-          <ListColumn
-            list={aboutList?.attrs.list ?? []}
-            rowClass={aboutList?.attrs.rowClass}
-            bulletColor={aboutList?.attrs.bulletColor}
-          />
+            <ListColumn
+              list={aboutList?.attrs.list ?? []}
+              rowClass={aboutList?.attrs.rowClass}
+              bulletColor={aboutList?.attrs.bulletColor}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

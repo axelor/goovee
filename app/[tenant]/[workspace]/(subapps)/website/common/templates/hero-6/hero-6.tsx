@@ -1,11 +1,12 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero6Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {
   fadeInAnimate,
   slideInDownAnimate,
 } from '@/subapps/website/common/utils/animation';
 import GoogleAppBtn from '@/subapps/website/common/components/common/GoogleAppBtn';
+import Image from 'next/image';
 
 export function Hero6(props: TemplateProps<Hero6Data>) {
   const {data} = props;
@@ -17,25 +18,31 @@ export function Hero6(props: TemplateProps<Hero6Data>) {
     hero6GooglePlayTitle: googlePlayTitle,
     hero6GooglePlayUrl: googlePlayUrl,
     hero6Image,
+    hero6WrapperClassName: wrapperClassName,
+    hero6ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero6Image,
+  const image = getImage({
+    image: hero6Image,
     path: 'hero6Image',
     ...props,
   });
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-10 ">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row align-items-center">
           <div className="col-lg-6 col-md-6 offset-md-3 offset-lg-0">
-            <img
-              alt="hero"
-              src={image}
-              style={{...fadeInAnimate('0ms')}}
-              className="img-fluid"
-            />
+            {image?.url && (
+              <Image
+                alt={image.alt}
+                src={image.url}
+                height={image.height}
+                width={image.width}
+                style={{...fadeInAnimate('0ms')}}
+                className="img-fluid"
+              />
+            )}
           </div>
 
           <div className="col-lg-5 text-center text-lg-start mt-md-10 mt-lg-0">

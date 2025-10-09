@@ -1,6 +1,6 @@
 import {TeamCard1} from '@/subapps/website/common/components/reuseable/team-cards';
 import {TemplateProps} from '@/subapps/website/common/types';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 
 import type {Team1Data} from './meta';
 
@@ -10,10 +10,12 @@ export function Team1(props: TemplateProps<Team1Data>) {
     team1Title: title,
     team1Caption: caption,
     team1Teams: teams,
+    team1WrapperClassName: wrapperClassName,
+    team1ContainerClassName: containerClassName,
   } = data || {};
   return (
-    <section className="wrapper bg-gradient-primary">
-      <div className="container py-14 pt-md-16 pb-md-18">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="position-relative mt-8 mt-lg-n23 mt-xl-n25">
           <div className="row text-center">
             <div className="col-lg-8 col-xl-7 mx-auto">
@@ -46,8 +48,8 @@ export function Team1(props: TemplateProps<Team1Data>) {
                   <div className="col-md-6 col-xl-3" key={item.id}>
                     <TeamCard1
                       name={item.attrs.name}
-                      image={getMetaFileURL({
-                        metaFile: item.attrs.image,
+                      image={getImage({
+                        image: item.attrs.image,
                         path: `team1Teams[${i}].attrs.image`,
                         ...props,
                       })}

@@ -21,6 +21,8 @@ export function Contact10(props: TemplateProps<Contact10Data>) {
     contact10Placeholder2: placeholder2,
     contact10Placeholder3: placeholder3,
     contact10SocialLinks,
+    contact10WrapperClassName: wrapperClassName,
+    contact10ContainerClassName: containerClassName,
   } = data || {};
 
   const socialLinks = contact10SocialLinks?.map(socialLink => ({
@@ -29,8 +31,8 @@ export function Contact10(props: TemplateProps<Contact10Data>) {
     url: socialLink.attrs.url || '#',
   }));
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-14 py-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="card bg-soft-primary mb-8">
           <div className="card-body p-12">
             <div className="row align-items-center gx-md-8 gx-xl-12 gy-10">

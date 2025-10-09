@@ -1,12 +1,11 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+import {colorsSelection} from '../meta-selections';
 
 export const portfolio8Schema = {
   title: 'Portfolio 8',
@@ -29,6 +28,18 @@ export const portfolio8Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio8PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-17',
+    },
   ],
   models: [
     {
@@ -39,10 +50,7 @@ export const portfolio8Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
         {
           name: 'title',
@@ -59,9 +67,8 @@ export const portfolio8Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
         {
           name: 'linkUrl',
@@ -70,8 +77,9 @@ export const portfolio8Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Portfolio8Data = Data<typeof portfolio8Schema>;
@@ -79,6 +87,9 @@ export type Portfolio8Data = Data<typeof portfolio8Schema>;
 export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-14',
+    sequence: 4,
     data: {
       portfolio8Caption: 'Our Projects',
       portfolio8Description:
@@ -92,11 +103,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Coffee',
             title: 'Cras Fermentum Sem',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd1.jpg',
+              id: 'img-1',
+              version: 0,
+              attrs: {
+                alt: 'Cras Fermentum Sem',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd1.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -109,11 +129,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Stationary',
             title: 'Mollis Ipsum Mattis',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd2.jpg',
+              id: 'img-2',
+              version: 0,
+              attrs: {
+                alt: 'Mollis Ipsum Mattis',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd2.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -126,11 +155,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Branding',
             title: 'Ipsum Ultricies Cursus',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd3.jpg',
+              id: 'img-3',
+              version: 0,
+              attrs: {
+                alt: 'Ipsum Ultricies Cursus',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd3.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -143,11 +181,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Product',
             title: 'Inceptos Euismod Egestas',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd4.jpg',
+              id: 'img-4',
+              version: 0,
+              attrs: {
+                alt: 'Inceptos Euismod Egestas',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd4.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -160,11 +207,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Print',
             title: 'Sollicitudin Ornare Porta',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd5.jpg',
+              id: 'img-5',
+              version: 0,
+              attrs: {
+                alt: 'Sollicitudin Ornare Porta',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd5.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -177,11 +233,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Workshop',
             title: 'Ipsum Mollis Vulputate',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd6.jpg',
+              id: 'img-6',
+              version: 0,
+              attrs: {
+                alt: 'Ipsum Mollis Vulputate',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd6.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -191,6 +256,9 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-14',
+    sequence: 4,
     data: {
       portfolio8Caption: 'Nos projets',
       portfolio8Description:
@@ -204,11 +272,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Café',
             title: 'Cras Fermentum Sem',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd1.jpg',
+              id: 'img-1',
+              version: 0,
+              attrs: {
+                alt: 'Cras Fermentum Sem',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd1.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -221,11 +298,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Papeterie',
             title: 'Mollis Ipsum Mattis',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd2.jpg',
+              id: 'img-2',
+              version: 0,
+              attrs: {
+                alt: 'Mollis Ipsum Mattis',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd2.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -238,11 +324,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Marque',
             title: 'Ipsum Ultricies Cursus',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd3.jpg',
+              id: 'img-3',
+              version: 0,
+              attrs: {
+                alt: 'Ipsum Ultricies Cursus',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd3.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -255,11 +350,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Produit',
             title: 'Inceptos Euismod Egestas',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd4.jpg',
+              id: 'img-4',
+              version: 0,
+              attrs: {
+                alt: 'Inceptos Euismod Egestas',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd4.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -272,11 +376,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Imprimer',
             title: 'Sollicitudin Ornare Porta',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd5.jpg',
+              id: 'img-5',
+              version: 0,
+              attrs: {
+                alt: 'Sollicitudin Ornare Porta',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd5.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },
@@ -289,11 +402,20 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
             category: 'Atelier',
             title: 'Ipsum Mollis Vulputate',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'pd6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/pd6.jpg',
+              id: 'img-6',
+              version: 0,
+              attrs: {
+                alt: 'Ipsum Mollis Vulputate',
+                width: 380,
+                height: 331,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'pd6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/pd6.jpg',
+                },
+              },
             },
             linkUrl: '#',
           },

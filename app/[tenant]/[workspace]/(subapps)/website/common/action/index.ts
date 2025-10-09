@@ -19,7 +19,10 @@ import {
   findWebsiteBySlug,
   findWebsitePageBySlug,
 } from '../orm/website';
-import {getWiki1ContentFieldName} from '../templates/wiki-1';
+import {
+  getWiki1ContentFieldName,
+  getWikiComponentCode,
+} from '../templates/wiki-1';
 
 export async function getLocaleRedirectionURL({
   workspaceURL,
@@ -214,6 +217,7 @@ export async function updateWikiContent({
     workspaceURL,
     user,
     tenantId,
+    contentId: String(contentId),
   });
 
   if (!websitePage) {
@@ -223,18 +227,18 @@ export async function updateWikiContent({
     };
   }
 
-  const contentLine = websitePage.contentLines.find(
+  const contentLine = websitePage.contentLines?.find(
     line => line?.content?.id === contentId,
   );
 
-  if (!contentLine) {
+  if (contentLine?.content?.component?.code !== getWikiComponentCode()) {
     return {
       error: true,
       message: await t('Bad request'),
     };
   }
 
-  const attributes = contentLine.content?.attrs;
+  const attributes = await contentLine.content?.attrs;
 
   const client = await manager.getClient(tenantId);
   const fieldName = getWiki1ContentFieldName();

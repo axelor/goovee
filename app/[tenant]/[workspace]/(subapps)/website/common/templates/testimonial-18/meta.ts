@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const testimonial18Schema = {
   title: 'Testimonial 18',
@@ -14,9 +14,8 @@ export const testimonial18Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'slidesPerView',
@@ -33,6 +32,18 @@ export const testimonial18Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial18Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay text-white',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-17',
     },
   ],
   models: [
@@ -54,8 +65,8 @@ export const testimonial18Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial18Data = Data<typeof testimonial18Schema>;
@@ -63,13 +74,25 @@ export type Testimonial18Data = Data<typeof testimonial18Schema>;
 export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-23',
+    sequence: 3,
     data: {
       testimonial18Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg32.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg32.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Testimonial background',
+          width: 1440,
+          height: 510,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg32.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg32.jpg',
+          },
+        },
       },
       testimonial18SlidesPerView: 1,
       testimonial18Navigation: false,
@@ -106,13 +129,25 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-23',
+    sequence: 3,
     data: {
       testimonial18Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg32.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg32.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Arrière-plan de témoignage',
+          width: 1440,
+          height: 510,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg32.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg32.jpg',
+          },
+        },
       },
       testimonial18SlidesPerView: 1,
       testimonial18Navigation: false,

@@ -16,6 +16,7 @@
     "website:seed:templates": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-templates.ts",
     "website:reset:templates": "npm run website:run $npm_package_scripts_website_common_dir/scripts/reset-templates.ts",
     "website:seed:contents": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-contents.ts",
+    "website:seed:website": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-website.ts",
     "changelogs:validate": "node ./changelogs/validate",
     "changelogs:generate": "node ./changelogs/generate"
   },

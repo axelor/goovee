@@ -26,6 +26,24 @@ export const facts16Schema = {
       type: 'json-one-to-many',
       target: 'Facts16Facts',
     },
+    {
+      name: 'sectionClassName',
+      title: 'Section Class Name',
+      type: 'string',
+      defaultValue: 'section-frame overflow-hidden',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary rounded-4',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-17',
+    },
   ],
   models: [
     {
@@ -64,6 +82,9 @@ export type Facts16Data = Data<typeof facts16Schema>;
 export const facts16Demos: Demo<typeof facts16Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-22',
+    sequence: 5,
     data: {
       facts16Title:
         'Saving both time and cash by working with our qualified team.',
@@ -114,6 +135,9 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-22',
+    sequence: 5,
     data: {
       facts16Title:
         'Économiser du temps et de l’argent en travaillant avec notre équipe qualifiée.',

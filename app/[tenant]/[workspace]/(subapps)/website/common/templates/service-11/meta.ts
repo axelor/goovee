@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {imageModel} from '../json-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service11Schema = {
   title: 'Service 11',
@@ -26,15 +25,26 @@ export const service11Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'services',
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service11Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-20',
     },
   ],
   models: [
@@ -46,10 +56,7 @@ export const service11Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -65,8 +72,9 @@ export const service11Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service11Data = Data<typeof service11Schema>;
@@ -74,16 +82,28 @@ export type Service11Data = Data<typeof service11Schema>;
 export const service11Demos: Demo<typeof service11Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-8',
+    sequence: 4,
     data: {
       service11Caption: 'What We Provide?',
       service11Title:
         'The comprehensive service we provide is specifically tailored to your company’s requirements.',
       service11Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Our services',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       service11Services: [
         {
@@ -131,16 +151,28 @@ export const service11Demos: Demo<typeof service11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-8',
+    sequence: 4,
     data: {
       service11Caption: 'Ce que nous offrons ?',
       service11Title:
         'Le service complet que nous fournissons est spécialement adapté aux besoins de votre entreprise.',
       service11Image: {
         id: '1',
-        version: 1,
-        fileName: 'about11.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about11.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Nos services',
+          width: 585,
+          height: 425,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about11.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about11.jpg',
+          },
+        },
       },
       service11Services: [
         {

@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Image from 'next/image';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
@@ -12,11 +12,13 @@ export function Portfolio2(props: TemplateProps<Portfolio2Data>) {
     portfolio2SlidesPerView: slidesPerView,
     portfolio2Pagination: pagination,
     portfolio2CarouselImages: carouselImages = [],
+    portfolio2WrapperClassName: wrapperClassName,
+    portfolio2ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <div className="overflow-hidden">
-      <div className="container pb-9 pb-md-14">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-9 col-xl-8 col-xxl-7 mx-auto text-center">
             <h3 className="display-4 mb-8">{caption}</h3>
@@ -32,17 +34,22 @@ export function Portfolio2(props: TemplateProps<Portfolio2Data>) {
             breakpoints={{768: {slidesPerView: 2}, 0: {slidesPerView: 1}}}>
             {carouselImages?.map(({id, attrs: item}, i) => (
               <figure className="rounded" key={id}>
-                <Image
-                  width={1100}
-                  height={770}
-                  src={getMetaFileURL({
-                    metaFile: item.image,
+                {(() => {
+                  const img = getImage({
+                    image: item.image,
                     path: `portfolio2CarouselImages[${i}].attrs.image`,
                     ...props,
-                  })}
-                  alt=""
-                  style={{width: '100%', height: 'auto'}}
-                />
+                  });
+                  return (
+                    <Image
+                      width={img.width}
+                      height={img.height}
+                      src={img.url}
+                      alt={img.alt || ''}
+                      style={{width: '100%', height: 'auto'}}
+                    />
+                  );
+                })()}
                 <NextLink
                   title={<i className="uil uil-link" />}
                   className="item-link"
@@ -53,6 +60,6 @@ export function Portfolio2(props: TemplateProps<Portfolio2Data>) {
           </Carousel>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

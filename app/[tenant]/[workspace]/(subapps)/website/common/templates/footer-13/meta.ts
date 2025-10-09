@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
 
 export const footer13Schema = {
   title: 'Footer 13',
@@ -15,9 +14,8 @@ export const footer13Schema = {
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'title',
@@ -86,6 +84,18 @@ export const footer13Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-navy text-inverse',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-lg-6 pb-13 pb-md-15',
+    },
   ],
   models: [
     socialLinksModel,
@@ -107,8 +117,8 @@ export const footer13Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer13Data = Data<typeof footer13Schema>;
@@ -116,13 +126,25 @@ export type Footer13Data = Data<typeof footer13Schema>;
 export const footer13Demos: Demo<typeof footer13Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-21',
+    sequence: 10,
     data: {
       footer13Logo: {
         id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer13Title:
         'Join our community by utilizing our services to help your business.',
@@ -196,13 +218,25 @@ export const footer13Demos: Demo<typeof footer13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-21',
+    sequence: 10,
     data: {
       footer13Logo: {
         id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        version: 0,
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer13Title:
         'Rejoignez notre communauté en utilisant nos services pour aider votre entreprise.',

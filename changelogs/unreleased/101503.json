@@ -1,0 +1,6 @@
+{
+  "title": "Prepare templates for demo",
+  "type": "feature",
+  "description": "Prepares templates for the demo by implementing performance improvements like chunk loading and separate SEO content fetching. Adds support for nested model/selection declarations, common meta selects, default field values, and selection validation. Also includes template documentation and various fixes.",
+  "scope": ["website"]
+}

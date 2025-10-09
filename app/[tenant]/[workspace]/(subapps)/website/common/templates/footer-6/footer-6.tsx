@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer6Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer6(props: TemplateProps<Footer6Data>) {
   const {data} = props;
@@ -18,10 +19,12 @@ export function Footer6(props: TemplateProps<Footer6Data>) {
     footer6NewsletterDescription: newsletterDescription,
     footer6Links: links,
     footer6SocialLinks,
+    footer6FooterClassName: footerClassName,
+    footer6ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer6Logo,
+  const logo = getImage({
+    image: footer6Logo,
     path: 'footer6Logo',
     ...props,
   });
@@ -34,12 +37,18 @@ export function Footer6(props: TemplateProps<Footer6Data>) {
     })) ?? [];
 
   return (
-    <footer className="bg-dark text-inverse mt-5 mt-md-16">
-      <div className="container py-13 py-md-15">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="" />
+              <Image
+                className="mb-4"
+                src={logo.url}
+                alt={logo.alt}
+                width={logo.width}
+                height={logo.height}
+              />
 
               <p className="mb-4">{copyright}</p>
 

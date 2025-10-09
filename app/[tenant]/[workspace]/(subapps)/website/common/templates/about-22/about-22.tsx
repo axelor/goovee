@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About22Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import AccordionList from '@/subapps/website/common/components/common/AccordionList';
+import Image from 'next/image';
 
 export function About22(props: TemplateProps<About22Data>) {
   const {data} = props;
@@ -10,10 +11,12 @@ export function About22(props: TemplateProps<About22Data>) {
     about22Caption: caption,
     about22Image,
     about22Accordions: accordionsList,
+    about22WrapperClassName: wrapperClassName,
+    about22ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about22Image,
+  const image = getImage({
+    image: about22Image,
     path: 'about22Image',
     ...props,
   });
@@ -27,12 +30,18 @@ export function About22(props: TemplateProps<About22Data>) {
     })) ?? [];
 
   return (
-    <section className="wrapper bg-gradient-reverse-primary">
-      <div className="container pb-14 pb-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img alt="" className="img-auto" src={image} />
+              <Image
+                className="w-auto"
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

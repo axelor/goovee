@@ -1,10 +1,10 @@
-// -------- custom component -------- //
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 // -------- data -------- //
 import type {TemplateProps} from '../../types';
 import type {Footer1Data} from './meta';
-import {getMetaFileURL} from '../../utils/helper';
+import {getImage} from '../../utils/helper';
+import Image from 'next/image';
 
 export function Footer1(props: TemplateProps<Footer1Data>) {
   const {data} = props;
@@ -23,10 +23,12 @@ export function Footer1(props: TemplateProps<Footer1Data>) {
     footer1NavLinks: navLinks,
     footer1FormTitle: formTitle,
     footer1FormDescription: formDescription,
+    footer1FooterClassName: footerClassName,
+    footer1ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer1Logo,
+  const logo = getImage({
+    image: footer1Logo,
     path: 'footer1Logo',
     ...props,
   });
@@ -38,8 +40,8 @@ export function Footer1(props: TemplateProps<Footer1Data>) {
   }));
 
   return (
-    <footer className="bg-navy text-inverse">
-      <div className="container pt-15 pt-md-17 pb-13 pb-md-15">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="d-lg-flex flex-row align-items-lg-center">
           <h3 className="display-4 mb-6 mb-lg-0 pe-lg-20 pe-xl-22 pe-xxl-25 text-white">
             {title}
@@ -47,7 +49,7 @@ export function Footer1(props: TemplateProps<Footer1Data>) {
 
           <NextLink
             href={buttonLink || '#'}
-            title={buttonText || 'Try It For Free'}
+            title={buttonText}
             className="btn btn-primary rounded-pill mb-0 text-nowrap"
           />
         </div>
@@ -57,8 +59,15 @@ export function Footer1(props: TemplateProps<Footer1Data>) {
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="logo" />
-
+              {logo?.url && (
+                <Image
+                  className="mb-4"
+                  src={logo.url}
+                  alt={logo.alt}
+                  width={logo.width}
+                  height={logo.height}
+                />
+              )}
               <p
                 className="mb-4"
                 dangerouslySetInnerHTML={{__html: copyrightText || ''}}

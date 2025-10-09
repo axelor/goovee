@@ -15,7 +15,7 @@
     {
       "type": "ManyToOne",
       "name": "page",
-      "target": "AOSPortalCmsSite"
+      "target": "AOSPortalCmsPage"
     },
     {
       "type": "ManyToOne",

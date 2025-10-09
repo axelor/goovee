@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Hero22Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import {zoomInAnimate} from '@/subapps/website/common/utils/animation';
 
 export function Hero22(props: TemplateProps<Hero22Data>) {
@@ -10,10 +11,12 @@ export function Hero22(props: TemplateProps<Hero22Data>) {
     hero22Caption: caption,
     hero22Video,
     hero22BackgroundImage,
+    hero22WrapperClassName: wrapperClassName,
+    hero22ContainerClassName: containerClassName,
   } = data || {};
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: hero22BackgroundImage,
+  const backgroundImage = getImage({
+    image: hero22BackgroundImage,
     path: 'hero22BackgroundImage',
     ...props,
   });
@@ -24,11 +27,20 @@ export function Hero22(props: TemplateProps<Hero22Data>) {
     ...props,
   });
   return (
-    <section className="section-frame br-fix overflow-hidden">
-      <div
-        className="wrapper image-wrapper bg-cover bg-image bg-overlay bg-overlay-500"
-        style={{backgroundImage: `url(${backgroundImage})`}}>
-        <div className="container pt-18 pt-lg-21 pb-17 pb-lg-19 text-center">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className="wrapper image-wrapper bg-cover overflow-hidden position-relative">
+        <Image
+          src={backgroundImage.url}
+          alt={backgroundImage.alt || 'Hero background'}
+          fill
+          className="object-fit-cover"
+        />
+        <div
+          className="position-absolute top-0 left-0 w-100 h-100 bg-dark opacity-50"
+          style={{zIndex: 1}}></div>
+        <div
+          className="container pt-18 pt-lg-21 pb-17 pb-lg-19 text-center position-relative"
+          style={{zIndex: 2}}>
           <div className="row">
             <div className="col-md-9 col-lg-8 col-xl-7 col-xxl-7 mx-auto">
               <h2

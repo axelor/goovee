@@ -1,6 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import Image from 'next/image';
 import {type Cta2Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function CTA2(props: TemplateProps<Cta2Data>) {
@@ -12,19 +13,25 @@ export function CTA2(props: TemplateProps<Cta2Data>) {
     cta2LinkHref1: linkHref1,
     cta2LinkHref2: linkHref2,
     cta2Image,
+    cta2WrapperClassName: wrapperClassName,
+    cta2ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: cta2Image,
+  const image = getImage({
+    image: cta2Image,
     path: 'cta2Image',
     ...props,
   });
 
   return (
-    <section
-      style={{backgroundImage: `url(${image})`}}
-      className="wrapper image-wrapper bg-auto no-overlay bg-image text-center bg-map">
-      <div className="container pt-0 pb-14 pt-md-18 pb-md-18">
+    <section className={wrapperClassName} data-code={props.code}>
+      <Image
+        src={image.url}
+        alt={image.alt || 'CTA background'}
+        fill
+        className="object-fit-contain"
+      />
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-10 col-xl-9 col-xxl-8 mx-auto">
             <h3 className="display-4 mb-8 px-lg-17">{title}</h3>

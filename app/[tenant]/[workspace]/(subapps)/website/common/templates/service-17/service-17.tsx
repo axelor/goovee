@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service17Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Service17(props: TemplateProps<Service17Data>) {
   const {data} = props;
@@ -21,23 +22,25 @@ export function Service17(props: TemplateProps<Service17Data>) {
     service17Image2,
     service17Service1: list1,
     service17Service2: list2,
+    service17WrapperClassName: wrapperClassName,
+    service17ContainerClassName: containerClassName,
   } = data || {};
 
-  const image1 = getMetaFileURL({
-    metaFile: service17Image1,
+  const image1 = getImage({
+    image: service17Image1,
     path: 'service17Image1',
     ...props,
   });
 
-  const image2 = getMetaFileURL({
-    metaFile: service17Image2,
+  const image2 = getImage({
+    image: service17Image2,
     path: 'service17Image2',
     ...props,
   });
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container pt-14 pt-md-23 pb-14 pb-md-17">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mb-8 text-center">
           <div className="col-lg-8 col-xl-7 mx-auto">
             <h2 className="fs-16 text-uppercase text-primary mb-3">
@@ -55,7 +58,12 @@ export function Service17(props: TemplateProps<Service17Data>) {
             />
 
             <figure className="rounded mb-0">
-              <img src={image1} alt="" />
+              <Image
+                src={image1.url}
+                alt={image1.alt}
+                width={image1.width}
+                height={image1.height}
+              />
             </figure>
           </div>
 
@@ -85,7 +93,12 @@ export function Service17(props: TemplateProps<Service17Data>) {
             />
 
             <figure className="rounded mb-0">
-              <img src={image2} alt="" />
+              <Image
+                src={image2.url}
+                alt={image2.alt}
+                width={image2.width}
+                height={image2.height}
+              />
             </figure>
           </div>
 

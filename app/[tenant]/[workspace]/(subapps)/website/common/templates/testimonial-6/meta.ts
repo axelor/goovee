@@ -4,8 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {imageModel} from '../json-models';
+import {ratingsSelection} from '../meta-selections';
 
 export const testimonial6Schema = {
   title: 'Testimonial 6',
@@ -31,18 +31,29 @@ export const testimonial6Schema = {
       name: 'rating',
       title: 'Rating',
       type: 'integer',
-      selection: ratings,
+      selection: 'ratings',
     },
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial6Data = Data<typeof testimonial6Schema>;
@@ -50,6 +61,9 @@ export type Testimonial6Data = Data<typeof testimonial6Schema>;
 export const testimonial6Demos: Demo<typeof testimonial6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-2',
+    sequence: 8,
     data: {
       testimonial6Name: 'Ethan Johnson',
       testimonial6Designation: 'MARKETING MANAGER',
@@ -58,15 +72,27 @@ export const testimonial6Demos: Demo<typeof testimonial6Schema>[] = [
       testimonial6Rating: 5,
       testimonial6Image: {
         id: '1',
-        version: 1,
-        fileName: 'co4.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co4.png',
+        version: 0,
+        attrs: {
+          alt: 'coriss',
+          width: 408,
+          height: 601,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'co4.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co4.png',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-2',
+    sequence: 8,
     data: {
       testimonial6Name: 'Ethan Johnson',
       testimonial6Designation: 'RESPONSABLE MARKETING',
@@ -75,10 +101,19 @@ export const testimonial6Demos: Demo<typeof testimonial6Schema>[] = [
       testimonial6Rating: 5,
       testimonial6Image: {
         id: '1',
-        version: 1,
-        fileName: 'co4.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co4.png',
+        version: 0,
+        attrs: {
+          alt: 'coriss',
+          width: 408,
+          height: 601,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'co4.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co4.png',
+          },
+        },
       },
     },
   },

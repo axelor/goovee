@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Cta4Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export function CTA4(props: TemplateProps<Cta4Data>) {
@@ -11,19 +11,22 @@ export function CTA4(props: TemplateProps<Cta4Data>) {
     cta4LinkTitle: linkTitle,
     cta4LinkHref: linkHref,
     cta4Image,
+    cta4WrapperClassName: wrapperClassName,
+    cta4ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: cta4Image,
+  const image = getImage({
+    image: cta4Image,
     path: 'cta4Image',
     ...props,
   });
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay"
-      style={{backgroundImage: `url(${image})`}}>
-      <div className="container py-18">
+      className={wrapperClassName}
+      data-code={props.code}
+      style={{backgroundImage: `url(${image.url})`}}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-8">
             <h2 className="fs-16 text-uppercase text-white mb-3 text-line">

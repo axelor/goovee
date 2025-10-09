@@ -5,7 +5,6 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {clientsModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
 
 export const clientlist4Schema = {
   title: 'Client List 4',
@@ -28,9 +27,20 @@ export const clientlist4Schema = {
       type: 'json-one-to-many',
       target: 'Clients',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [clientsModel],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Clientlist4Data = Data<typeof clientlist4Schema>;
@@ -38,6 +48,9 @@ export type Clientlist4Data = Data<typeof clientlist4Schema>;
 export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-13',
+    sequence: 7,
     data: {
       clientlist4Title: '300+ customers have given faith in us.',
       clientlist4Caption:
@@ -49,11 +62,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 1',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z1.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z1.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 1',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z1.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z1.png',
+                },
+              },
             },
           },
         },
@@ -63,11 +85,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 2',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z2.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z2.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 2',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z2.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z2.png',
+                },
+              },
             },
           },
         },
@@ -77,11 +108,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 3',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z3.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z3.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 3',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z3.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z3.png',
+                },
+              },
             },
           },
         },
@@ -91,11 +131,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 4',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z4.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z4.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 4',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z4.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z4.png',
+                },
+              },
             },
           },
         },
@@ -105,11 +154,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 5',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z5.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z5.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 5',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z5.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z5.png',
+                },
+              },
             },
           },
         },
@@ -119,11 +177,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 6',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z6.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z6.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 6',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z6.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z6.png',
+                },
+              },
             },
           },
         },
@@ -133,11 +200,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 7',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z7.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z7.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 7',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z7.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z7.png',
+                },
+              },
             },
           },
         },
@@ -147,11 +223,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 8',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z8.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z8.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 8',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z8.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z8.png',
+                },
+              },
             },
           },
         },
@@ -160,6 +245,9 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-13',
+    sequence: 7,
     data: {
       clientlist4Title: 'Plus de 300 clients nous ont fait confiance.',
       clientlist4Caption:
@@ -171,11 +259,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 1',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z1.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z1.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 1',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z1.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z1.png',
+                },
+              },
             },
           },
         },
@@ -185,11 +282,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 2',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z2.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z2.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 2',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z2.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z2.png',
+                },
+              },
             },
           },
         },
@@ -199,11 +305,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 3',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z3.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z3.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 3',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z3.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z3.png',
+                },
+              },
             },
           },
         },
@@ -213,11 +328,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 4',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z4.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z4.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 4',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z4.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z4.png',
+                },
+              },
             },
           },
         },
@@ -227,11 +351,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 5',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z5.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z5.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 5',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z5.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z5.png',
+                },
+              },
             },
           },
         },
@@ -241,11 +374,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 6',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z6.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z6.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 6',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z6.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z6.png',
+                },
+              },
             },
           },
         },
@@ -255,11 +397,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 7',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z7.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z7.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 7',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z7.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z7.png',
+                },
+              },
             },
           },
         },
@@ -269,11 +420,20 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
           attrs: {
             name: 'Client 8',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'z8.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/z8.png',
+              id: 'l',
+              version: 0,
+              attrs: {
+                alt: 'Client 8',
+                width: 450,
+                height: 301,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'z8.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/z8.png',
+                },
+              },
             },
           },
         },

@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero17Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero17(props: TemplateProps<Hero17Data>) {
   const {data} = props;
@@ -14,17 +15,19 @@ export function Hero17(props: TemplateProps<Hero17Data>) {
     hero17ButtonLink1: buttonLink1,
     hero17ButtonLink2: buttonLink2,
     hero17Image,
+    hero17WrapperClassName: wrapperClassName,
+    hero17ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero17Image,
+  const image = getImage({
+    image: hero17Image,
     path: 'hero17Image',
     ...props,
   });
 
   return (
-    <section className="wrapper bg-gray">
-      <div className="container pt-12 pt-md-16 text-center">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-8 col-xxl-7 mx-auto text-center">
             <h2
@@ -63,7 +66,12 @@ export function Hero17(props: TemplateProps<Hero17Data>) {
       <figure
         className="position-absoute"
         style={{bottom: 0, left: 0, zIndex: 2}}>
-        <img src={image} alt="" />
+        <Image
+          src={image.url}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+        />
       </figure>
     </section>
   );

@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {imageModel} from '../json-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service12Schema = {
   title: 'Service 12',
@@ -29,6 +28,18 @@ export const service12Schema = {
       type: 'json-one-to-many',
       target: 'Service12Tab',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-25',
+    },
   ],
   models: [
     {
@@ -39,10 +50,7 @@ export const service12Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -86,7 +94,7 @@ export const service12Schema = {
           name: 'images',
           title: 'Images',
           type: 'json-one-to-many',
-          target: 'Service12Image',
+          target: 'Image',
         },
       ],
     },
@@ -103,28 +111,9 @@ export const service12Schema = {
         },
       ],
     },
-    {
-      name: 'Service12Image',
-      title: 'Image',
-      fields: [
-        {
-          name: 'alt',
-          title: 'Alt',
-          type: 'string',
-          visibleInGrid: true,
-          nameField: true,
-        },
-        {
-          name: 'image',
-          title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
-        },
-      ],
-    },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service12Data = Data<typeof service12Schema>;
@@ -132,6 +121,9 @@ export type Service12Data = Data<typeof service12Schema>;
 export const service12Demos: Demo<typeof service12Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-9',
+    sequence: 3,
     data: {
       service12Caption: 'Why Choose us?',
       service12Title:
@@ -173,6 +165,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 1',
+                  width: 280,
+                  height: 338,
                   image: {
                     id: '1',
                     version: 1,
@@ -187,6 +181,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 2',
+                  width: 270,
+                  height: 165,
                   image: {
                     id: '1',
                     version: 1,
@@ -201,6 +197,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 3',
+                  width: 225,
+                  height: 271,
                   image: {
                     id: '1',
                     version: 1,
@@ -249,6 +247,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 1',
+                  width: 223,
+                  height: 187,
                   image: {
                     id: '1',
                     version: 1,
@@ -263,6 +263,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 2',
+                  width: 187,
+                  height: 217,
                   image: {
                     id: '1',
                     version: 1,
@@ -277,6 +279,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 3',
+                  width: 321,
+                  height: 116,
                   image: {
                     id: '1',
                     version: 1,
@@ -291,6 +295,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 4',
+                  width: 294,
+                  height: 383,
                   image: {
                     id: '1',
                     version: 1,
@@ -339,6 +345,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 1',
+                  width: 272,
+                  height: 163,
                   image: {
                     id: '1',
                     version: 1,
@@ -353,6 +361,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 2',
+                  width: 250,
+                  height: 277,
                   image: {
                     id: '1',
                     version: 1,
@@ -367,6 +377,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 3',
+                  width: 300,
+                  height: 181,
                   image: {
                     id: '1',
                     version: 1,
@@ -381,6 +393,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 4',
+                  width: 229,
+                  height: 297,
                   image: {
                     id: '1',
                     version: 1,
@@ -398,6 +412,9 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-9',
+    sequence: 3,
     data: {
       service12Caption: 'Pourquoi nous choisir ?',
       service12Title:
@@ -439,6 +456,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 1',
+                  width: 280,
+                  height: 338,
                   image: {
                     id: '1',
                     version: 1,
@@ -453,6 +472,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 2',
+                  width: 270,
+                  height: 165,
                   image: {
                     id: '1',
                     version: 1,
@@ -467,6 +488,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 3',
+                  width: 225,
+                  height: 271,
                   image: {
                     id: '1',
                     version: 1,
@@ -515,6 +538,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 1',
+                  width: 223,
+                  height: 187,
                   image: {
                     id: '1',
                     version: 1,
@@ -529,6 +554,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 2',
+                  width: 187,
+                  height: 217,
                   image: {
                     id: '1',
                     version: 1,
@@ -543,6 +570,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 3',
+                  width: 321,
+                  height: 116,
                   image: {
                     id: '1',
                     version: 1,
@@ -557,6 +586,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 4',
+                  width: 294,
+                  height: 383,
                   image: {
                     id: '1',
                     version: 1,
@@ -605,6 +636,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 1',
+                  width: 272,
+                  height: 163,
                   image: {
                     id: '1',
                     version: 1,
@@ -619,6 +652,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 2',
+                  width: 250,
+                  height: 277,
                   image: {
                     id: '1',
                     version: 1,
@@ -633,6 +668,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 3',
+                  width: 300,
+                  height: 181,
                   image: {
                     id: '1',
                     version: 1,
@@ -647,6 +684,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 version: 0,
                 attrs: {
                   alt: 'Slide 4',
+                  width: 229,
+                  height: 297,
                   image: {
                     id: '1',
                     version: 1,

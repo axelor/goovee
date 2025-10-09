@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
 
 export const footer3Schema = {
   title: 'Footer 3',
@@ -15,9 +14,8 @@ export const footer3Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'newsletterTitle',
@@ -102,6 +100,18 @@ export const footer3Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-gradient-reverse-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-13 pt-md-15 pb-7',
+    },
   ],
   models: [
     socialLinksModel,
@@ -141,8 +151,8 @@ export const footer3Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer3Data = Data<typeof footer3Schema>;
@@ -150,13 +160,25 @@ export type Footer3Data = Data<typeof footer3Schema>;
 export const footer3Demos: Demo<typeof footer3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-7',
+    sequence: 8,
     data: {
       footer3Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Newsletter background',
+          width: 1440,
+          height: 680,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       footer3NewsletterTitle: 'Subscribe to our newsletter',
       footer3NewsletterDescription:
@@ -238,13 +260,25 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-7',
+    sequence: 8,
     data: {
       footer3Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Arrière-plan de la newsletter',
+          width: 1440,
+          height: 680,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       footer3NewsletterTitle: 'Abonnez-vous à notre newsletter',
       footer3NewsletterDescription:

@@ -1,12 +1,16 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero7Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import {
   fadeInAnimate,
   slideInDownAnimate,
   zoomInAnimate,
 } from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero7(props: TemplateProps<Hero7Data>) {
   const {data} = props;
@@ -18,17 +22,19 @@ export function Hero7(props: TemplateProps<Hero7Data>) {
     hero7ButtonLink1: buttonLink1,
     hero7ButtonLink2: buttonLink2,
     hero7Image,
+    hero7WrapperClassName: wrapperClassName,
+    hero7ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero7Image,
+  const image = getImage({
+    image: hero7Image,
     path: 'hero7Image',
     ...props,
   });
 
   return (
-    <section className="wrapper bg-gradient-primary">
-      <div className="container py-14 pt-md-15 pb-md-18">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-lg-9 col-xxl-8 mx-auto">
             <h2 className="display-1 mb-4" style={zoomInAnimate('0ms')}>
@@ -63,8 +69,15 @@ export function Hero7(props: TemplateProps<Hero7Data>) {
 
         <div className="row mt-12" style={fadeInAnimate('1600ms')}>
           <div className="col-lg-8 mx-auto">
-            <figure>
-              <img alt="" className="img-fluid" src={image} />
+            <figure
+              className="position-relative"
+              style={{paddingBottom: getPaddingBottom(image)}}>
+              <Image
+                alt={image.alt}
+                className="img-fluid object-fit-cover"
+                src={image.url}
+                fill
+              />
             </figure>
           </div>
         </div>

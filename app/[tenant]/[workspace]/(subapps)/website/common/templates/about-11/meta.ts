@@ -4,8 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {imageModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 
 export const about11Schema = {
   title: 'About 11',
@@ -30,23 +30,20 @@ export const about11Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'tileImage3',
       title: 'Tile Image 3',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'aboutList1',
@@ -61,10 +58,22 @@ export const about11Schema = {
       type: 'json-one-to-many',
       target: 'About11AboutList2',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-16 pt-md-18 mb-14 mb-md-18',
+    },
   ],
   models: [
     bulletListModel,
-    bulletPointModel,
+    imageModel,
     {
       name: 'About11AboutList2',
       title: 'About List 2',
@@ -84,7 +93,6 @@ export const about11Schema = {
       ],
     },
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type About11Data = Data<typeof about11Schema>;
@@ -92,27 +100,57 @@ export type About11Data = Data<typeof about11Schema>;
 export const about11Demos: Demo<typeof about11Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-10',
+    sequence: 5,
     data: {
       about11TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'ab1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab1.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 240,
+          height: 245,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab1.jpg',
+          },
+        },
       },
       about11TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'ab2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 290,
+          height: 225,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab2.jpg',
+          },
+        },
       },
       about11TileImage3: {
         id: '1',
-        version: 1,
-        fileName: 'ab3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab3.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Company value proposition',
+          width: 290,
+          height: 440,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab3.jpg',
+          },
+        },
       },
       about11Caption: 'Discover our company',
       about11Title:
@@ -182,27 +220,57 @@ export const about11Demos: Demo<typeof about11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-10',
+    sequence: 5,
     data: {
       about11TileImage1: {
         id: '1',
-        version: 1,
-        fileName: 'ab1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab1.jpg',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 240,
+          height: 245,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab1.jpg',
+          },
+        },
       },
       about11TileImage2: {
         id: '1',
-        version: 1,
-        fileName: 'ab2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab2.jpg',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 290,
+          height: 225,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab2.jpg',
+          },
+        },
       },
       about11TileImage3: {
         id: '1',
-        version: 1,
-        fileName: 'ab3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/ab3.jpg',
+        version: 0,
+        attrs: {
+          alt: "Proposition de valeur de l'entreprise",
+          width: 290,
+          height: 440,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'ab3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/ab3.jpg',
+          },
+        },
       },
       about11Caption: 'Découvrez notre entreprise',
       about11Title:

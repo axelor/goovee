@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {imageModel} from '../json-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const process5Schema = {
   title: 'Process 5',
@@ -31,15 +30,26 @@ export const process5Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'processes',
       title: 'Processes',
       type: 'json-one-to-many',
       target: 'Process5Processes',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17 mb-lg-19 mb-xl-22',
     },
   ],
   models: [
@@ -51,10 +61,7 @@ export const process5Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -70,8 +77,9 @@ export const process5Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process5Data = Data<typeof process5Schema>;
@@ -79,6 +87,9 @@ export type Process5Data = Data<typeof process5Schema>;
 export const process5Demos: Demo<typeof process5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-6',
+    sequence: 3,
     data: {
       process5Title:
         "Download the app, create your profile, and you're ready to go!",
@@ -87,10 +98,19 @@ export const process5Demos: Demo<typeof process5Schema>[] = [
         'Individual health-related objectives may vary depending on factors such as age, gender, medical history, and personal preferences. Additionally, it’s important to set realistic and achievable goals that are specific, measurable, and time-bound.',
       process5Image: {
         id: '1',
-        version: 1,
-        fileName: 'device.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/device.png',
+        version: 0,
+        attrs: {
+          alt: 'how it work',
+          width: 747,
+          height: 786,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'device.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/device.png',
+          },
+        },
       },
       process5Processes: [
         {
@@ -125,6 +145,9 @@ export const process5Demos: Demo<typeof process5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-6',
+    sequence: 3,
     data: {
       process5Title:
         'Téléchargez l’application, créez votre profil et vous êtes prêt à partir !',
@@ -133,10 +156,19 @@ export const process5Demos: Demo<typeof process5Schema>[] = [
         'Les objectifs individuels liés à la santé peuvent varier en fonction de facteurs tels que l’âge, le sexe, les antécédents médicaux et les préférences personnelles. De plus, il est important de se fixer des objectifs réalistes et réalisables, spécifiques, mesurables et limités dans le temps.',
       process5Image: {
         id: '1',
-        version: 1,
-        fileName: 'device.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/device.png',
+        version: 0,
+        attrs: {
+          alt: 'comment ça marche',
+          width: 747,
+          height: 786,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'device.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/device.png',
+          },
+        },
       },
       process5Processes: [
         {

@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer14Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '../../utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer14(props: TemplateProps<Footer14Data>) {
   const {data} = props;
@@ -22,16 +23,18 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
     footer14NewsletterDescription: newsletterDescription,
     footer14Links: links,
     footer14SocialLinks,
+    footer14FooterClassName: footerClassName,
+    footer14ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer14Logo,
+  const logo = getImage({
+    image: footer14Logo,
     path: 'footer14Logo',
     ...props,
   });
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: footer14BackgroundImage,
+  const backgroundImage = getImage({
+    image: footer14BackgroundImage,
     path: 'footer14BackgroundImage',
     ...props,
   });
@@ -44,12 +47,21 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
     })) ?? [];
 
   return (
-    <footer className="bg-dark section-frame mt-15">
-      <div className="container pb-13 pb-md-15">
-        <div
-          className="card image-wrapper bg-full bg-image bg-overlay mt-n50p mx-md-5"
-          style={{backgroundImage: `url(${backgroundImage})`}}>
-          <div className="card-body p-6 p-md-11 d-lg-flex flex-row align-items-lg-center justify-content-md-between text-center text-lg-start">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="card image-wrapper bg-full mt-n50p mx-md-5 overflow-hidden position-relative">
+          <Image
+            src={backgroundImage.url}
+            alt={backgroundImage.alt || 'Footer background'}
+            fill
+            className="object-fit-cover"
+          />
+          <div
+            className="position-absolute top-0 left-0 w-100 h-100 bg-dark opacity-50"
+            style={{zIndex: 1}}></div>
+          <div
+            className="card-body p-6 p-md-11 d-lg-flex flex-row align-items-lg-center justify-content-md-between text-center text-lg-start position-relative"
+            style={{zIndex: 2}}>
             <h3 className="display-4 mb-6 mb-lg-0 pe-lg-10 pe-xl-5 pe-xxl-15 text-white">
               {title}
             </h3>
@@ -65,7 +77,13 @@ export function Footer14(props: TemplateProps<Footer14Data>) {
           <div className="row gy-6 gy-lg-0">
             <div className="col-md-4 col-lg-3">
               <div className="widget">
-                <img className="mb-4" src={logo} alt="" />
+                <Image
+                  className="mb-4"
+                  src={logo.url}
+                  alt={logo.alt}
+                  width={logo.width}
+                  height={logo.height}
+                />
 
                 <p className="mb-4">{copyright}</p>
 

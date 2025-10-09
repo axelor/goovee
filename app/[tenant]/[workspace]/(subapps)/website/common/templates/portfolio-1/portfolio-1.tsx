@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio1Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import Image from 'next/image';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 
@@ -10,6 +10,8 @@ export function Portfolio1(props: TemplateProps<Portfolio1Data>) {
     portfolio1Caption: caption,
     portfolio1Description: description,
     portfolio1Images: images = [],
+    portfolio1WrapperClassName: wrapperClassName,
+    portfolio1ContainerClassName: containerClassName,
   } = data || {};
 
   const carouselBreakpoints = {
@@ -19,8 +21,8 @@ export function Portfolio1(props: TemplateProps<Portfolio1Data>) {
   };
 
   return (
-    <>
-      <div className="row container pt-8 pt-md-14 mx-auto">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="col-lg-9 col-xl-8 mx-auto text-center">
           <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
           <h3 className="display-4 mb-10">{description}</h3>
@@ -31,22 +33,27 @@ export function Portfolio1(props: TemplateProps<Portfolio1Data>) {
           <Carousel grabCursor breakpoints={carouselBreakpoints}>
             {images?.map(({id, attrs: item}, i) => (
               <figure className="rounded" key={id}>
-                <Image
-                  width={380}
-                  height={320}
-                  src={getMetaFileURL({
-                    metaFile: item.image,
+                {(() => {
+                  const img = getImage({
+                    image: item.image,
                     path: `portfolio1Images[${i}].attrs.image`,
                     ...props,
-                  })}
-                  alt="project"
-                  style={{width: '100%', height: 'auto'}}
-                />
+                  });
+                  return (
+                    <Image
+                      src={img.url}
+                      alt={img.alt || 'project'}
+                      width={img.width}
+                      height={img.height}
+                      style={{width: '100%', height: 'auto'}}
+                    />
+                  );
+                })()}
               </figure>
             ))}
           </Carousel>
         </div>
       </div>
-    </>
+    </section>
   );
 }

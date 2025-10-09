@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
 
 export const team3Schema = {
   title: 'Team 3',
@@ -33,6 +32,18 @@ export const team3Schema = {
       type: 'json-one-to-many',
       target: 'Team3Member',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [
     {
@@ -59,9 +70,8 @@ export const team3Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
         {
           name: 'socialLinks',
@@ -72,8 +82,8 @@ export const team3Schema = {
       ],
     },
     socialLinksModel,
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Team3Data = Data<typeof team3Schema>;
@@ -81,6 +91,9 @@ export type Team3Data = Data<typeof team3Schema>;
 export const team3Demos: Demo<typeof team3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-15',
+    sequence: 5,
     data: {
       team3Title:
         'Choose our team to enjoy the benefits of efficient & cost-effective solutions',
@@ -94,10 +107,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Tom Accor',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't8.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t8.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tom Accor',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't8.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t8.jpg',
+                },
+              },
             },
             designation: 'Developer',
             description: "I'm passionate about creating elegant theme.",
@@ -139,10 +161,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Selina Anteree',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't9.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t9.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Selina Anteree',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't9.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t9.jpg',
+                },
+              },
             },
             designation: 'Developer',
             description: "I'm passionate about creating elegant theme.",
@@ -184,10 +215,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Olocks Pree',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't10.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t10.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Olocks Pree',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't10.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t10.jpg',
+                },
+              },
             },
             designation: 'Designer',
             description: "I'm passionate about creating elegant theme.",
@@ -229,10 +269,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Andree Buie',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't11.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t11.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Andree Buie',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't11.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t11.jpg',
+                },
+              },
             },
             designation: 'Manager',
             description: "I'm passionate about creating elegant theme.",
@@ -274,10 +323,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Cory Smith',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t5.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Cory Smith',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t5.jpg',
+                },
+              },
             },
             designation: 'Project Manager',
             description: "I'm passionate about creating elegant theme.",
@@ -317,6 +375,9 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-15',
+    sequence: 5,
     data: {
       team3Title:
         'Choisissez notre équipe pour profiter des avantages de solutions efficaces et rentables',
@@ -330,10 +391,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Tom Accor',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't8.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t8.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tom Accor',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't8.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t8.jpg',
+                },
+              },
             },
             designation: 'Développeur',
             description:
@@ -376,10 +446,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Selina Anteree',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't9.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t9.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Selina Anteree',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't9.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t9.jpg',
+                },
+              },
             },
             designation: 'Développeur',
             description:
@@ -422,10 +501,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Olocks Pree',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't10.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t10.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Olocks Pree',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't10.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t10.jpg',
+                },
+              },
             },
             designation: 'Designer',
             description:
@@ -468,10 +556,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Andree Buie',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't11.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t11.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Andree Buie',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't11.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t11.jpg',
+                },
+              },
             },
             designation: 'Manager',
             description:
@@ -514,10 +611,19 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
             name: 'Cory Smith',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t5.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Cory Smith',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t5.jpg',
+                },
+              },
             },
             designation: 'Chef de projet',
             description:

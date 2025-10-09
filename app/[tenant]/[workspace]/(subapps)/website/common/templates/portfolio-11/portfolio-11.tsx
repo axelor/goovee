@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio11Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {ProjectCard3} from '@/subapps/website/common/components/reuseable/project-cards';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
@@ -12,11 +12,13 @@ export function Portfolio11(props: TemplateProps<Portfolio11Data>) {
     portfolio11LinkTitle: linkTitle,
     portfolio11LinkHref: linkHref,
     portfolio11PortfolioList: portfolioList,
+    portfolio11WrapperClassName: wrapperClassName,
+    portfolio11ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-15 py-md-17">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-11 col-xl-10 mx-auto mb-10">
             <h2 className="fs-16 text-uppercase text-muted text-center mb-3">
@@ -34,13 +36,13 @@ export function Portfolio11(props: TemplateProps<Portfolio11Data>) {
               <div className="project item col-md-6 col-xl-4" key={id}>
                 <ProjectCard3
                   {...item}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
+                  image={getImage({
+                    image: item.image,
                     path: `portfolio11PortfolioList[${i}].attrs.image`,
                     ...props,
                   })}
-                  fullImage={getMetaFileURL({
-                    metaFile: item.fullImage,
+                  fullImage={getImage({
+                    image: item.fullImage,
                     path: `portfolio11PortfolioList[${i}].attrs.fullImage`,
                     ...props,
                   })}

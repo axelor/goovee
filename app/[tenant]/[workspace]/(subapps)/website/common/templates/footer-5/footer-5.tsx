@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer5Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer5(props: TemplateProps<Footer5Data>) {
   const {data} = props;
@@ -18,10 +19,12 @@ export function Footer5(props: TemplateProps<Footer5Data>) {
     footer5NewsletterDescription: newsletterDescription,
     footer5Links: links,
     footer5SocialLinks,
+    footer5FooterClassName: footerClassName,
+    footer5ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer5Logo,
+  const logo = getImage({
+    image: footer5Logo,
     path: 'footer5Logo',
     ...props,
   });
@@ -34,12 +37,18 @@ export function Footer5(props: TemplateProps<Footer5Data>) {
     })) ?? [];
 
   return (
-    <footer className="bg-dark text-inverse">
-      <div className="container pt-15 pt-md-17 pb-13 pb-md-15">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="" />
+              <Image
+                className="mb-4"
+                src={logo.url}
+                alt={logo.alt}
+                width={logo.width}
+                height={logo.height}
+              />
 
               <p className="mb-4">{copyright}</p>
 

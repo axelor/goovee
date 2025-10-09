@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const service26Schema = {
   title: 'Service 26',
@@ -22,6 +22,18 @@ export const service26Schema = {
       type: 'json-one-to-many',
       target: 'Service26Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [
     {
@@ -38,9 +50,8 @@ export const service26Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
         {
           name: 'url',
@@ -54,8 +65,8 @@ export const service26Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Service26Data = Data<typeof service26Schema>;
@@ -63,6 +74,9 @@ export type Service26Data = Data<typeof service26Schema>;
 export const service26Demos: Demo<typeof service26Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-23',
+    sequence: 2,
     data: {
       service26Description:
         'I adore photographing brides and individuals there are so many emotions to capture.',
@@ -74,10 +88,19 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
             title: 'Wedding',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'fs1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/fs1.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Wedding',
+                width: 380,
+                height: 399,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'fs1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/fs1.jpg',
+                },
+              },
             },
             url: '#',
             figcaption: 'View Gallery',
@@ -90,10 +113,19 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
             title: 'Couples',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'fs2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/fs2.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Couples',
+                width: 380,
+                height: 399,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'fs2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/fs2.jpg',
+                },
+              },
             },
             url: '#',
             figcaption: 'View Gallery',
@@ -106,10 +138,19 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
             title: 'Engagement',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'fs3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/fs3.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Engagement',
+                width: 380,
+                height: 399,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'fs3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/fs3.jpg',
+                },
+              },
             },
             url: '#',
             figcaption: 'View Gallery',
@@ -120,6 +161,9 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-23',
+    sequence: 2,
     data: {
       service26Description:
         'J’adore photographier les mariées et les personnes, il y a tellement d’émotions à capturer.',
@@ -131,10 +175,19 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
             title: 'Mariage',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'fs1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/fs1.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Mariage',
+                width: 380,
+                height: 399,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'fs1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/fs1.jpg',
+                },
+              },
             },
             url: '#',
             figcaption: 'Voir la galerie',
@@ -147,10 +200,19 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
             title: 'Couples',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'fs2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/fs2.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Couples',
+                width: 380,
+                height: 399,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'fs2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/fs2.jpg',
+                },
+              },
             },
             url: '#',
             figcaption: 'Voir la galerie',
@@ -163,10 +225,19 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
             title: 'Fiançailles',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'fs3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/fs3.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Fiançailles',
+                width: 380,
+                height: 399,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'fs3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/fs3.jpg',
+                },
+              },
             },
             url: '#',
             figcaption: 'Voir la galerie',

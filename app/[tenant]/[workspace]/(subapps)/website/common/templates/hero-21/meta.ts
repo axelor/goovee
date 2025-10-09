@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {clientsModel} from '../json-models';
+import {clientsModel, imageModel} from '../json-models';
 
 export const hero21Schema = {
   title: 'Hero 21',
@@ -40,9 +39,8 @@ export const hero21Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'listTitle',
@@ -55,9 +53,20 @@ export const hero21Schema = {
       type: 'json-one-to-many',
       target: 'Clients',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pt-md-14 pb-14 pb-md-16 text-center',
+    },
   ],
-  models: [clientsModel],
-  metaModels: [metaFileModel],
+  models: [clientsModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero21Data = Data<typeof hero21Schema>;
@@ -65,6 +74,9 @@ export type Hero21Data = Data<typeof hero21Schema>;
 export const hero21Demos: Demo<typeof hero21Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-21',
+    sequence: 1,
     data: {
       hero21Title: 'A tech company that focuses on',
       hero21RotatingTitle: 'mobile design,web design,3D animation',
@@ -74,10 +86,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
       hero21ButtonLink: '#',
       hero21Image: {
         id: '1',
-        version: 1,
-        fileName: 'i21.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i21.png',
+        version: 0,
+        attrs: {
+          alt: 'Tech company',
+          width: 671,
+          height: 492,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i21.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i21.png',
+          },
+        },
       },
       hero21ListTitle: 'Our Core Partners',
       hero21Clients: [
@@ -88,10 +109,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 1',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c1.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c1.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 272,
+                height: 80,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c1.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c1.png',
+                },
+              },
             },
           },
         },
@@ -102,10 +132,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 2',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c2.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c2.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 252,
+                height: 88,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c2.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c2.png',
+                },
+              },
             },
           },
         },
@@ -116,10 +155,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 3',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c3.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c3.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 250,
+                height: 70,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c3.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c3.png',
+                },
+              },
             },
           },
         },
@@ -130,10 +178,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 4',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c4.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c4.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 268,
+                height: 72,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c4.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c4.png',
+                },
+              },
             },
           },
         },
@@ -144,10 +201,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 5',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c5.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c5.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 194,
+                height: 62,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c5.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c5.png',
+                },
+              },
             },
           },
         },
@@ -158,10 +224,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 6',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c6.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c6.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 258,
+                height: 60,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c6.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c6.png',
+                },
+              },
             },
           },
         },
@@ -170,6 +245,9 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-21',
+    sequence: 1,
     data: {
       hero21Title: 'Une entreprise technologique qui se concentre sur',
       hero21RotatingTitle: 'le design mobile, le design web, l’animation 3D',
@@ -179,10 +257,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
       hero21ButtonLink: '#',
       hero21Image: {
         id: '1',
-        version: 1,
-        fileName: 'i21.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i21.png',
+        version: 0,
+        attrs: {
+          alt: 'Entreprise technologique',
+          width: 671,
+          height: 492,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'i21.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i21.png',
+          },
+        },
       },
       hero21ListTitle: 'Nos principaux partenaires',
       hero21Clients: [
@@ -193,10 +280,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 1',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c1.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c1.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 272,
+                height: 80,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c1.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c1.png',
+                },
+              },
             },
           },
         },
@@ -207,10 +303,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 2',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c2.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c2.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 252,
+                height: 88,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c2.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c2.png',
+                },
+              },
             },
           },
         },
@@ -221,10 +326,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 3',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c3.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c3.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 250,
+                height: 70,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c3.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c3.png',
+                },
+              },
             },
           },
         },
@@ -235,10 +349,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 4',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c4.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c4.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 268,
+                height: 72,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c4.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c4.png',
+                },
+              },
             },
           },
         },
@@ -249,10 +372,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 5',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c5.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c5.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 194,
+                height: 62,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c5.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c5.png',
+                },
+              },
             },
           },
         },
@@ -263,10 +395,19 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
             name: 'Client 6',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'c6.png',
-              fileType: 'image/png',
-              filePath: '/img/brands/c6.png',
+              version: 0,
+              attrs: {
+                alt: 'client',
+                width: 258,
+                height: 60,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'c6.png',
+                  fileType: 'image/png',
+                  filePath: '/img/brands/c6.png',
+                },
+              },
             },
           },
         },

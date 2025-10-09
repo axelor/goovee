@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer9Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer9(props: TemplateProps<Footer9Data>) {
   const {data} = props;
@@ -18,10 +19,12 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
     footer9Helps: helps,
     footer9FooterNav: footerNav,
     footer9SocialLinks,
+    footer9FooterClassName: footerClassName,
+    footer9ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer9Logo,
+  const logo = getImage({
+    image: footer9Logo,
     path: 'footer9Logo',
     ...props,
   });
@@ -40,7 +43,7 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
         <ul className="list-unstyled text-reset mb-0">
           {list.map(({id, attrs: {title, url}}) => (
             <li key={id}>
-              <NextLink title={title} href={url} />
+              <NextLink href={url} title={title} />
             </li>
           ))}
         </ul>
@@ -49,12 +52,18 @@ export function Footer9(props: TemplateProps<Footer9Data>) {
   };
 
   return (
-    <footer className="bg-dark text-inverse">
-      <div className="container py-13 py-md-15">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gy-6 gy-lg-0">
           <div className="col-lg-4">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="" />
+              <Image
+                className="mb-4"
+                src={logo.url}
+                alt={logo.alt}
+                width={logo.width}
+                height={logo.height}
+              />
 
               <p className="mb-4">{copyright}</p>
 

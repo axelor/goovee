@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const hero2Schema = {
   title: 'Hero 2',
@@ -44,12 +44,23 @@ export const hero2Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero2Data = Data<typeof hero2Schema>;
@@ -57,6 +68,9 @@ export type Hero2Data = Data<typeof hero2Schema>;
 export const hero2Demos: Demo<typeof hero2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-2',
+    sequence: 1,
     data: {
       hero2Title: 'We create solutions that make our customers lives easier.',
       hero2Description:
@@ -67,15 +81,27 @@ export const hero2Demos: Demo<typeof hero2Schema>[] = [
       hero2ButtonLink2: '#',
       hero2Image: {
         id: '1',
-        version: 1,
-        fileName: 'about7.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about7.jpg',
+        version: 0,
+        attrs: {
+          alt: 'hero',
+          width: 593,
+          height: 570,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about7.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about7.jpg',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-2',
+    sequence: 1,
     data: {
       hero2Title:
         'Nous créons des solutions qui facilitent la vie de nos clients.',
@@ -87,10 +113,19 @@ export const hero2Demos: Demo<typeof hero2Schema>[] = [
       hero2ButtonLink2: '#',
       hero2Image: {
         id: '1',
-        version: 1,
-        fileName: 'about7.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about7.jpg',
+        version: 0,
+        attrs: {
+          alt: 'héro',
+          width: 593,
+          height: 570,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about7.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about7.jpg',
+          },
+        },
       },
     },
   },

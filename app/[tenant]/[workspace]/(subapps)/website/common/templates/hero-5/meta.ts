@@ -40,6 +40,18 @@ export const hero5Schema = {
       title: 'Button Link 2',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pb-15 pt-md-14 pb-md-20 text-center',
+    },
   ],
   models: [],
 } as const satisfies TemplateSchema;
@@ -49,6 +61,9 @@ export type Hero5Data = Data<typeof hero5Schema>;
 export const hero5Demos: Demo<typeof hero5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-5',
+    sequence: 1,
     data: {
       hero5Title: 'Keeping track of your expenses is now even simpler.',
       hero5Description:
@@ -61,6 +76,9 @@ export const hero5Demos: Demo<typeof hero5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-5',
+    sequence: 1,
     data: {
       hero5Title: 'Le suivi de vos dépenses est désormais encore plus simple.',
       hero5Description:

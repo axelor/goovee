@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const service24Schema = {
   title: 'Service 24',
@@ -26,6 +26,18 @@ export const service24Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service24Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-lg-8 pb-14 pb-md-17',
     },
   ],
   models: [
@@ -58,14 +70,13 @@ export const service24Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Service24Data = Data<typeof service24Schema>;
@@ -73,6 +84,9 @@ export type Service24Data = Data<typeof service24Schema>;
 export const service24Demos: Demo<typeof service24Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'What We Do?',
       service24Title:
@@ -89,10 +103,19 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'i24.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i24.png',
+              version: 0,
+              attrs: {
+                alt: 'Web Design',
+                width: 274,
+                height: 206,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'i24.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i24.png',
+                },
+              },
             },
           },
         },
@@ -107,10 +130,19 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'i19.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i19.png',
+              version: 0,
+              attrs: {
+                alt: 'Digital Marketing',
+                width: 276,
+                height: 194,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'i19.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i19.png',
+                },
+              },
             },
           },
         },
@@ -125,10 +157,19 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'i18.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i18.png',
+              version: 0,
+              attrs: {
+                alt: 'Motion Graphics',
+                width: 276,
+                height: 212,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'i18.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i18.png',
+                },
+              },
             },
           },
         },
@@ -137,6 +178,9 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'Que faisons-nous ?',
       service24Title:
@@ -153,10 +197,19 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'i24.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i24.png',
+              version: 0,
+              attrs: {
+                alt: 'Conception de sites Web',
+                width: 274,
+                height: 206,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'i24.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i24.png',
+                },
+              },
             },
           },
         },
@@ -171,10 +224,19 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'i19.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i19.png',
+              version: 0,
+              attrs: {
+                alt: 'Marketing numérique',
+                width: 276,
+                height: 194,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'i19.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i19.png',
+                },
+              },
             },
           },
         },
@@ -189,10 +251,19 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'i18.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i18.png',
+              version: 0,
+              attrs: {
+                alt: 'Graphiques animés',
+                width: 276,
+                height: 212,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'i18.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i18.png',
+                },
+              },
             },
           },
         },

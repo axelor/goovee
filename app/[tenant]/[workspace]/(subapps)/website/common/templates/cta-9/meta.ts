@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const cta9Schema = {
   title: 'CTA 9',
@@ -29,13 +29,23 @@ export const cta9Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay text-white',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-17 text-center',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Cta9Data = Data<typeof cta9Schema>;
@@ -43,6 +53,9 @@ export type Cta9Data = Data<typeof cta9Schema>;
 export const cta9Demos: Demo<typeof cta9Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-23',
+    sequence: 6,
     data: {
       cta9Title:
         "I'm here to document your special moments. Searching for a professional photographer?",
@@ -50,15 +63,27 @@ export const cta9Demos: Demo<typeof cta9Schema>[] = [
       cta9LinkHref: '#',
       cta9Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg33.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg33.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Professional photographer',
+          width: 2000,
+          height: 1333,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg33.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg33.jpg',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-23',
+    sequence: 6,
     data: {
       cta9Title:
         'Je suis là pour documenter vos moments privilégiés. Vous recherchez un photographe professionnel ?',
@@ -66,10 +91,19 @@ export const cta9Demos: Demo<typeof cta9Schema>[] = [
       cta9LinkHref: '#',
       cta9Image: {
         id: '1',
-        version: 1,
-        fileName: 'bg33.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg33.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Photographe professionnel',
+          width: 2000,
+          height: 1333,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'bg33.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg33.jpg',
+          },
+        },
       },
     },
   },

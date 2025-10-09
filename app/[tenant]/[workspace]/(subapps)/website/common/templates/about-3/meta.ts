@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {accordionModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {accordionModel, imageModel} from '../json-models';
 
 export const about3Schema = {
   title: 'About 3',
@@ -25,9 +24,8 @@ export const about3Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'accordions',
@@ -35,9 +33,20 @@ export const about3Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-16 pb-md-18',
+    },
   ],
-  models: [accordionModel],
-  metaModels: [metaFileModel],
+  models: [accordionModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About3Data = Data<typeof about3Schema>;
@@ -45,16 +54,28 @@ export type About3Data = Data<typeof about3Schema>;
 export const about3Demos: Demo<typeof about3Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-3',
+    sequence: 4,
     data: {
       about3Title:
         'There are some of the factors why the people we serve find us.',
       about3Caption: 'Why Choose Us?',
       about3Image: {
         id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About US',
+          width: 594,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about9.jpg',
+          },
+        },
       },
       about3Accordions: [
         {
@@ -89,16 +110,28 @@ export const about3Demos: Demo<typeof about3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-3',
+    sequence: 4,
     data: {
       about3Title:
         'Voici quelques-uns des facteurs pour lesquels les personnes que nous servons nous trouvent.',
       about3Caption: 'Pourquoi nous choisir ?',
       about3Image: {
         id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'About US',
+          width: 594,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about9.jpg',
+          },
+        },
       },
       about3Accordions: [
         {

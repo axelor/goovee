@@ -1,7 +1,8 @@
 import AccordionList from '@/subapps/website/common/components/common/AccordionList';
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About1Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import Image from 'next/image';
 
 export function About1(props: TemplateProps<About1Data>) {
   const {data} = props;
@@ -10,10 +11,12 @@ export function About1(props: TemplateProps<About1Data>) {
     about1Caption: caption,
     about1Image,
     about1Accordions: accordionsList,
+    about1WrapperClassName: wrapperClassName,
+    about1ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: about1Image,
+  const image = getImage({
+    image: about1Image,
     path: 'about1Image',
     ...props,
   });
@@ -27,12 +30,18 @@ export function About1(props: TemplateProps<About1Data>) {
     })) ?? [];
 
   return (
-    <section className="wrapper bg-light angled upper-start lower-start">
-      <div className="container pb-14 pb-md-15">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-lg-22 mb-xl-24 align-items-center">
           <div className="col-lg-7">
             <figure>
-              <img alt="choose us" className="w-auto" src={image} />
+              <Image
+                alt={image.alt}
+                className="w-auto"
+                src={image.url}
+                width={image.width}
+                height={image.height}
+              />
             </figure>
           </div>
 

@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {imageModel} from '../json-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service22Schema = {
   title: 'Service 22',
@@ -29,6 +28,18 @@ export const service22Schema = {
       type: 'json-one-to-many',
       target: 'Service22Tab',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-15 pb-md-17',
+    },
   ],
   models: [
     {
@@ -39,10 +50,7 @@ export const service22Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -85,9 +93,8 @@ export const service22Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
@@ -104,8 +111,9 @@ export const service22Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service22Data = Data<typeof service22Schema>;
@@ -113,6 +121,9 @@ export type Service22Data = Data<typeof service22Schema>;
 export const service22Demos: Demo<typeof service22Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-19',
+    sequence: 3,
     data: {
       service22Caption: 'Why Choose us?',
       service22Title:
@@ -157,10 +168,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se5.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tab image',
+                width: 567,
+                height: 381,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se5.jpg',
+                },
+              },
             },
           },
         },
@@ -202,10 +222,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se6.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tab image',
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se6.jpg',
+                },
+              },
             },
           },
         },
@@ -247,10 +276,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se7.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tab image',
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se7.jpg',
+                },
+              },
             },
           },
         },
@@ -259,6 +297,9 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-19',
+    sequence: 3,
     data: {
       service22Caption: 'Pourquoi nous choisir ?',
       service22Title:
@@ -302,10 +343,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se5.jpg',
+              version: 0,
+              attrs: {
+                alt: "Image de l'onglet",
+                width: 567,
+                height: 381,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se5.jpg',
+                },
+              },
             },
           },
         },
@@ -347,10 +397,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se6.jpg',
+              version: 0,
+              attrs: {
+                alt: "Image de l'onglet",
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se6.jpg',
+                },
+              },
             },
           },
         },
@@ -392,10 +451,19 @@ export const service22Demos: Demo<typeof service22Schema>[] = [
             linkHref: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'se7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/se7.jpg',
+              version: 0,
+              attrs: {
+                alt: "Image de l'onglet",
+                width: 610,
+                height: 410,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'se7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/se7.jpg',
+                },
+              },
             },
           },
         },

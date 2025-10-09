@@ -4,6 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const hero15Schema = {
@@ -16,6 +17,18 @@ export const hero15Schema = {
       title: 'Slides',
       type: 'json-one-to-many',
       target: 'Hero15Slides',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-dark',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container h-100',
     },
   ],
   models: [
@@ -56,12 +69,12 @@ export const hero15Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -71,6 +84,9 @@ export type Hero15Data = Data<typeof hero15Schema>;
 export const hero15Demos: Demo<typeof hero15Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-15',
+    sequence: 1,
     data: {
       hero15Slides: [
         {
@@ -84,10 +100,19 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
             buttonLink: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'bg7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/bg7.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Hero background',
+                width: 1440,
+                height: 700,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'bg7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/bg7.jpg',
+                },
+              },
             },
           },
         },
@@ -106,10 +131,19 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
             },
             image: {
               id: '1',
-              version: 1,
-              fileName: 'bg8.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/bg8.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Hero background',
+                width: 2800,
+                height: 1150,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'bg8.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/bg8.jpg',
+                },
+              },
             },
           },
         },
@@ -124,10 +158,19 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
             buttonLink: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'bg9.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/bg9.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Hero background',
+                width: 1500,
+                height: 1000,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'bg9.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/bg9.jpg',
+                },
+              },
             },
           },
         },
@@ -136,6 +179,9 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-15',
+    sequence: 1,
     data: {
       hero15Slides: [
         {
@@ -149,10 +195,19 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
             buttonLink: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'bg7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/bg7.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Fond de héros',
+                width: 1440,
+                height: 700,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'bg7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/bg7.jpg',
+                },
+              },
             },
           },
         },
@@ -172,10 +227,19 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
             },
             image: {
               id: '1',
-              version: 1,
-              fileName: 'bg8.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/bg8.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Fond de héros',
+                width: 2800,
+                height: 1150,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'bg8.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/bg8.jpg',
+                },
+              },
             },
           },
         },
@@ -190,10 +254,19 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
             buttonLink: '#',
             image: {
               id: '1',
-              version: 1,
-              fileName: 'bg9.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/bg9.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Fond de héros',
+                width: 1500,
+                height: 1000,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 'bg9.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/bg9.jpg',
+                },
+              },
             },
           },
         },

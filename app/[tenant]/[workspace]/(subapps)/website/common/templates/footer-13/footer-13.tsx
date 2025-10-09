@@ -1,8 +1,9 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer13Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '../../utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Footer13(props: TemplateProps<Footer13Data>) {
   const {data} = props;
@@ -21,10 +22,12 @@ export function Footer13(props: TemplateProps<Footer13Data>) {
     footer13NewsletterDescription: newsletterDescription,
     footer13Links: links,
     footer13SocialLinks,
+    footer13FooterClassName: footerClassName,
+    footer13ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer13Logo,
+  const logo = getImage({
+    image: footer13Logo,
     path: 'footer13Logo',
     ...props,
   });
@@ -37,8 +40,8 @@ export function Footer13(props: TemplateProps<Footer13Data>) {
     })) ?? [];
 
   return (
-    <footer className="bg-navy text-inverse">
-      <div className="container pt-12 pt-lg-6 pb-13 pb-md-15">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="d-lg-flex flex-row align-items-lg-center">
           <h3 className="display-3 mb-6 mb-lg-0 pe-lg-20 pe-xl-22 pe-xxl-25 text-white">
             {title}
@@ -56,7 +59,13 @@ export function Footer13(props: TemplateProps<Footer13Data>) {
         <div className="row gy-6 gy-lg-0">
           <div className="col-md-4 col-lg-3">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="" />
+              <Image
+                className="mb-4"
+                src={logo.url}
+                alt={logo.alt}
+                width={logo.width}
+                height={logo.height}
+              />
 
               <p className="mb-4">{copyright}</p>
 

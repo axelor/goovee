@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const process2Schema = {
   title: 'Process 2',
@@ -24,15 +24,26 @@ export const process2Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'processes',
       title: 'Processes',
       type: 'json-one-to-many',
       target: 'Process2Processes',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
   models: [
@@ -59,8 +70,8 @@ export const process2Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Process2Data = Data<typeof process2Schema>;
@@ -68,16 +79,28 @@ export type Process2Data = Data<typeof process2Schema>;
 export const process2Demos: Demo<typeof process2Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-2',
+    sequence: 4,
     data: {
       process2Title: 'Our Working Process',
       process2Caption:
         'Find out why our happy customers choose us by following these steps',
       process2Image: {
         id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'how-work',
+          width: 594,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about9.jpg',
+          },
+        },
       },
       process2Processes: [
         {
@@ -115,16 +138,28 @@ export const process2Demos: Demo<typeof process2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-2',
+    sequence: 4,
     data: {
       process2Title: 'Notre processus de travail',
       process2Caption:
         'Découvrez pourquoi nos clients satisfaits nous choisissent en suivant ces étapes',
       process2Image: {
         id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        version: 0,
+        attrs: {
+          alt: 'comment-travailler',
+          width: 594,
+          height: 568,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about9.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about9.jpg',
+          },
+        },
       },
       process2Processes: [
         {

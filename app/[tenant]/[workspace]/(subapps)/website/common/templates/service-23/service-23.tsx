@@ -1,7 +1,11 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service23Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {
+  getImage,
+  getPaddingBottom,
+} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Service23(props: TemplateProps<Service23Data>) {
   const {data} = props;
@@ -26,22 +30,24 @@ export function Service23(props: TemplateProps<Service23Data>) {
     service23Section3LinkHref,
     service23Section3Image,
     service23Section3Services,
+    service23WrapperClassName: wrapperClassName,
+    service23ContainerClassName: containerClassName,
   } = data || {};
 
-  const image1 = getMetaFileURL({
-    metaFile: service23Section1Image,
+  const image1 = getImage({
+    image: service23Section1Image,
     path: 'service23Section1Image',
     ...props,
   });
 
-  const image2 = getMetaFileURL({
-    metaFile: service23Section2Image,
+  const image2 = getImage({
+    image: service23Section2Image,
     path: 'service23Section2Image',
     ...props,
   });
 
-  const image3 = getMetaFileURL({
-    metaFile: service23Section3Image,
+  const image3 = getImage({
+    image: service23Section3Image,
     path: 'service23Section3Image',
     ...props,
   });
@@ -51,8 +57,8 @@ export function Service23(props: TemplateProps<Service23Data>) {
   const list3 = service23Section3Services?.map(item => item.attrs.title) || [];
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container py-15 py-md-17">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center mb-10">
           <div className="col-md-10 col-lg-9 col-xxl-8 mx-auto">
             <h2 className="fs-16 text-uppercase text-muted mb-3">{caption}</h2>
@@ -62,8 +68,15 @@ export function Service23(props: TemplateProps<Service23Data>) {
 
         <div className="row gx-lg-0 gy-10 mb-15 mb-md-17 align-items-center">
           <div className="col-lg-6">
-            <figure className="rounded mb-0">
-              <img className="img-fluid" src={image1} alt="" />
+            <figure
+              className="rounded mb-0 position-relative"
+              style={{paddingBottom: getPaddingBottom(image1)}}>
+              <Image
+                className="img-fluid object-fit-cover"
+                src={image1.url}
+                alt={image1.alt}
+                fill
+              />
             </figure>
           </div>
 
@@ -79,8 +92,15 @@ export function Service23(props: TemplateProps<Service23Data>) {
 
         <div className="row gx-lg-0 gy-10 mb-15 mb-md-17 align-items-center">
           <div className="col-lg-6 order-lg-2 ms-auto">
-            <figure className="rounded mb-0">
-              <img className="img-fluid" src={image2} alt="" />
+            <figure
+              className="rounded mb-0 position-relative"
+              style={{paddingBottom: getPaddingBottom(image2)}}>
+              <Image
+                className="img-fluid object-fit-cover"
+                src={image2.url}
+                alt={image2.alt}
+                fill
+              />
             </figure>
           </div>
 
@@ -95,8 +115,15 @@ export function Service23(props: TemplateProps<Service23Data>) {
 
         <div className="row gx-lg-0 gy-10 align-items-center">
           <div className="col-lg-6">
-            <figure className="rounded mb-0">
-              <img className="img-fluid" src={image3} alt="" />
+            <figure
+              className="rounded mb-0 position-relative"
+              style={{paddingBottom: getPaddingBottom(image3)}}>
+              <Image
+                className="img-fluid object-fit-cover"
+                src={image3.url}
+                alt={image3.alt}
+                fill
+              />
             </figure>
           </div>
 
@@ -139,7 +166,7 @@ const ColumnTwo = ({
       <NextLink
         title={linkTitle}
         href={linkHref}
-        className="btn btn-soft-primary rounded-pill mt-2 mb-0"
+        className="btn btn-soft-primary rounded-pill mt-2"
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero19Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
@@ -13,19 +13,22 @@ export function Hero19(props: TemplateProps<Hero19Data>) {
     hero19ButtonLabel: buttonLabel,
     hero19ButtonLink: buttonLink,
     hero19BackgroundImage,
+    hero19WrapperClassName: wrapperClassName,
+    hero19ContainerClassName: containerClassName,
   } = data || {};
 
-  const backgroundImage = getMetaFileURL({
-    metaFile: hero19BackgroundImage,
+  const backgroundImage = getImage({
+    image: hero19BackgroundImage,
     path: 'hero19BackgroundImage',
     ...props,
   });
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay bg-overlay-300"
-      style={{backgroundImage: `url(${backgroundImage})`}}>
-      <div className="container pt-17 pb-19 pt-md-18 pb-md-17 text-center">
+      className={wrapperClassName}
+      data-code={props.code}
+      style={{backgroundImage: `url(${backgroundImage.url})`}}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-8 col-xl-7 mx-auto">
             <h1

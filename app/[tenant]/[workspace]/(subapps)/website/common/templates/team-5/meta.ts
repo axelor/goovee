@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
 
 export const team5Schema = {
   title: 'Team 5',
@@ -16,6 +16,18 @@ export const team5Schema = {
       title: 'Members',
       type: 'json-one-to-many',
       target: 'Team5Member',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-16 mb-md-19',
     },
   ],
   models: [
@@ -38,14 +50,13 @@ export const team5Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Team5Data = Data<typeof team5Schema>;
@@ -53,6 +64,9 @@ export type Team5Data = Data<typeof team5Schema>;
 export const team5Demos: Demo<typeof team5Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-8',
+    sequence: 7,
     data: {
       team5Members: [
         {
@@ -63,10 +77,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'Developer',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t1.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tom Accor',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t1.jpg',
+                },
+              },
             },
           },
         },
@@ -78,10 +101,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'UI and UX Designer',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t2.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Anna Trois',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t2.jpg',
+                },
+              },
             },
           },
         },
@@ -93,10 +125,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'Sr. Marketing Manager',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t3.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Sonal Ocer',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t3.jpg',
+                },
+              },
             },
           },
         },
@@ -108,10 +149,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'Advisor',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t4.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Inan Rocketich',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t4.jpg',
+                },
+              },
             },
           },
         },
@@ -120,6 +170,9 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-8',
+    sequence: 7,
     data: {
       team5Members: [
         {
@@ -130,10 +183,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'Développeur',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t1.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Tom Accor',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t1.jpg',
+                },
+              },
             },
           },
         },
@@ -145,10 +207,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'Concepteur UI et UX',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t2.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Anna Trois',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t2.jpg',
+                },
+              },
             },
           },
         },
@@ -160,10 +231,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'Responsable marketing senior',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t3.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Sonal Ocer',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t3.jpg',
+                },
+              },
             },
           },
         },
@@ -175,10 +255,19 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
             designation: 'Conseiller',
             image: {
               id: '1',
-              version: 1,
-              fileName: 't4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/t4.jpg',
+              version: 0,
+              attrs: {
+                alt: 'Inan Rocketich',
+                width: 300,
+                height: 300,
+                image: {
+                  id: '1',
+                  version: 1,
+                  fileName: 't4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/t4.jpg',
+                },
+              },
             },
           },
         },

@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const service17Schema = {
   title: 'Service 17',
@@ -65,16 +64,14 @@ export const service17Schema = {
     {
       name: 'image1',
       title: 'Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image2',
       title: 'Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'service1',
@@ -90,9 +87,20 @@ export const service17Schema = {
       target: 'BulletList',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-23 pb-14 pb-md-17',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Service17Data = Data<typeof service17Schema>;
@@ -100,6 +108,9 @@ export type Service17Data = Data<typeof service17Schema>;
 export const service17Demos: Demo<typeof service17Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-14',
+    sequence: 2,
     data: {
       service17Caption: 'What We Do',
       service17Title:
@@ -116,17 +127,35 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
       service17Section2LinkHref: '#',
       service17Image1: {
         id: '1',
-        version: 1,
-        fileName: 'se3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/se3.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Our services',
+          width: 566,
+          height: 482,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'se3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/se3.jpg',
+          },
+        },
       },
       service17Image2: {
         id: '1',
-        version: 1,
-        fileName: 'se4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/se4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Our services',
+          width: 567,
+          height: 483,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'se4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/se4.jpg',
+          },
+        },
       },
       service17Service1: {
         id: '1',
@@ -192,6 +221,9 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-14',
+    sequence: 2,
     data: {
       service17Caption: 'Ce que nous faisons',
       service17Title:
@@ -208,17 +240,35 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
       service17Section2LinkHref: '#',
       service17Image1: {
         id: '1',
-        version: 1,
-        fileName: 'se3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/se3.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Nos services',
+          width: 566,
+          height: 482,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'se3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/se3.jpg',
+          },
+        },
       },
       service17Image2: {
         id: '1',
-        version: 1,
-        fileName: 'se4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/se4.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Nos services',
+          width: 567,
+          height: 483,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'se4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/se4.jpg',
+          },
+        },
       },
       service17Service1: {
         id: '1',

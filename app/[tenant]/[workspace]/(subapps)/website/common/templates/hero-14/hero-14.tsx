@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Hero14Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+import Image from 'next/image';
 
 export function Hero14(props: TemplateProps<Hero14Data>) {
   const {data} = props;
@@ -11,17 +12,19 @@ export function Hero14(props: TemplateProps<Hero14Data>) {
     hero14LinkTitle: linkTitle,
     hero14LinkHref: linkHref,
     hero14Image,
+    hero14WrapperClassName: wrapperClassName,
+    hero14ContainerClassName: containerClassName,
   } = data || {};
 
-  const image = getMetaFileURL({
-    metaFile: hero14Image,
+  const image = getImage({
+    image: hero14Image,
     path: 'hero14Image',
     ...props,
   });
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container pt-10 pt-md-14 pb-14 pb-md-0">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-lg-12 gy-3 gy-lg-0 mb-13">
           <div className="col-lg-6">
             <h1 className="display-1 fs-66 lh-xxs mb-0">{title}</h1>
@@ -45,7 +48,12 @@ export function Hero14(props: TemplateProps<Hero14Data>) {
           />
 
           <figure className="rounded mb-md-n20">
-            <img src={image} alt="" />
+            <Image
+              src={image.url}
+              alt={image.alt}
+              width={image.width}
+              height={image.height}
+            />
           </figure>
         </div>
       </div>

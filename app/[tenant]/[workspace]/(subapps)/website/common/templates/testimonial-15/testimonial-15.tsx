@@ -4,23 +4,29 @@ import {TestimonialCard6} from '@/subapps/website/common/components/reuseable/te
 
 export function Testimonial15(props: TemplateProps<Testimonial15Data>) {
   const {data} = props;
-  const {testimonial15Testimonials: testimonials} = data || {};
+  const {
+    testimonial15Testimonials: testimonials,
+    testimonial15WrapperClassName: wrapperClassName,
+    testimonial15ContainerClassName: containerClassName,
+  } = data || {};
 
   return (
-    <div className="container">
-      <div className="grid mb-18">
-        <div className="row isotope gy-6 mt-n18">
-          {testimonials?.map(({id, attrs: item}) => (
-            <div className="item col-md-6 col-xl-3" key={id}>
-              <TestimonialCard6
-                name={item.name}
-                review={item.review}
-                designation={item.designation}
-              />
-            </div>
-          ))}
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="grid">
+          <div className="row isotope gy-6">
+            {testimonials?.map(({id, attrs: item}) => (
+              <div className="item col-md-6 col-xl-3" key={id}>
+                <TestimonialCard6
+                  name={item.name}
+                  review={item.review}
+                  designation={item.designation}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

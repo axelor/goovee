@@ -1,7 +1,7 @@
 import {ComponentType} from 'react';
 
 import type {TemplateProps} from '../types';
-import {formatComponentCode} from '../utils/templates';
+import {formatComponentCode} from '../utils/helper';
 
 import {About1, about1Schema} from './about-1';
 import {About2, about2Schema} from './about-2';
@@ -126,6 +126,7 @@ import {Hero21, hero21Schema} from './hero-21';
 import {Hero22, hero22Schema} from './hero-22';
 import {Hero23, hero23Schema} from './hero-23';
 import {Hero24, hero24Schema} from './hero-24';
+import {HR1, hr1Schema} from './hr-1';
 import {Navbar1, navbar1Schema} from './navbar-1';
 import {PageProgress1, pageProgress1Schema} from './page-progress-1';
 import {Pricing1, pricing1Schema} from './pricing-1';
@@ -147,6 +148,7 @@ import {Portfolio8, portfolio8Schema} from './portfolio-8';
 import {Portfolio9, portfolio9Schema} from './portfolio-9';
 import {Portfolio10, portfolio10Schema} from './portfolio-10';
 import {Portfolio11, portfolio11Schema} from './portfolio-11';
+import {Portfolio12, portfolio12Schema} from './portfolio-12';
 import {Process1, process1Schema} from './process-1';
 import {Process2, process2Schema} from './process-2';
 import {Process3, process3Schema} from './process-3';
@@ -277,6 +279,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [hero22Schema.code]: Hero22,
   [hero23Schema.code]: Hero23,
   [hero24Schema.code]: Hero24,
+  [hr1Schema.code]: HR1,
   [pageProgress1Schema.code]: PageProgress1,
   [cta1Schema.code]: CTA1,
   [cta2Schema.code]: CTA2,
@@ -396,6 +399,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [portfolio9Schema.code]: Portfolio9,
   [portfolio10Schema.code]: Portfolio10,
   [portfolio11Schema.code]: Portfolio11,
+  [portfolio12Schema.code]: Portfolio12,
   [contact1Schema.code]: Contact1,
   [contact2Schema.code]: Contact2,
   [contact3Schema.code]: Contact3,

@@ -1,7 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Footer15Data} from './meta';
-import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
+import {getImage} from '../../utils/helper';
 import SocialLinks from '@/subapps/website/common/components/reuseable/SocialLinks';
+import Image from 'next/image';
 
 export function Footer15(props: TemplateProps<Footer15Data>) {
   const {data} = props;
@@ -15,10 +16,12 @@ export function Footer15(props: TemplateProps<Footer15Data>) {
     footer15Phone1: phone1,
     footer15Phone2: phone2,
     footer15SocialLinks,
+    footer15FooterClassName: footerClassName,
+    footer15ContainerClassName: containerClassName,
   } = data || {};
 
-  const logo = getMetaFileURL({
-    metaFile: footer15Logo,
+  const logo = getImage({
+    image: footer15Logo,
     path: 'footer15Logo',
     ...props,
   });
@@ -31,12 +34,18 @@ export function Footer15(props: TemplateProps<Footer15Data>) {
     })) ?? [];
 
   return (
-    <footer className="bg-gray">
-      <div className="container pt-13 pb-7">
+    <footer className={footerClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-0 gy-6">
           <div className="col-lg-4">
             <div className="widget">
-              <img className="mb-4" src={logo} alt="" />
+              <Image
+                className="mb-4"
+                src={logo.url}
+                alt={logo.alt}
+                width={logo.width}
+                height={logo.height}
+              />
               <p className="lead mb-0">{title}</p>
             </div>
           </div>

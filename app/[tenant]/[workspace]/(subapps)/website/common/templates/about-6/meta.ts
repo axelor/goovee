@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {bulletListModel, imageModel} from '../json-models';
 
 export const about6Schema = {
   title: 'About 6',
@@ -30,16 +29,14 @@ export const about6Schema = {
     {
       name: 'image1',
       title: 'Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'image2',
       title: 'Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      target: 'Image',
     },
     {
       name: 'list',
@@ -48,9 +45,20 @@ export const about6Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About6Data = Data<typeof about6Schema>;
@@ -58,6 +66,9 @@ export type About6Data = Data<typeof about6Schema>;
 export const about6Demos: Demo<typeof about6Schema>[] = [
   {
     language: 'en_US',
+    site: 'en',
+    page: 'demo-15',
+    sequence: 2,
     data: {
       about6Title: 'Why Choose Us?',
       about6LeadParagraph:
@@ -66,17 +77,35 @@ export const about6Demos: Demo<typeof about6Schema>[] = [
         'Customers may choose your company because you provide excellent customer service that makes them feel valued and appreciated. This can include fast response times, personalized attention. Customers may choose your company because you provide excellent customer service.',
       about6Image1: {
         id: '1',
-        version: 1,
-        fileName: 'about2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Creative advertising firm',
+          width: 396,
+          height: 399,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about2.jpg',
+          },
+        },
       },
       about6Image2: {
         id: '2',
-        version: 1,
-        fileName: 'about3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about3.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Creative advertising firm',
+          width: 311,
+          height: 311,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about3.jpg',
+          },
+        },
       },
       about6List: {
         id: '1',
@@ -120,6 +149,9 @@ export const about6Demos: Demo<typeof about6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'fr',
+    page: 'demo-15',
+    sequence: 2,
     data: {
       about6Title: 'Pourquoi nous choisir ?',
       about6LeadParagraph:
@@ -128,17 +160,35 @@ export const about6Demos: Demo<typeof about6Schema>[] = [
         'Les clients peuvent choisir votre entreprise parce que vous offrez un excellent service client qui leur permet de se sentir valorisés et appréciés. Cela peut inclure des temps de réponse rapides, une attention personnalisée. Les clients peuvent choisir votre entreprise parce que vous offrez un excellent service client.',
       about6Image1: {
         id: '1',
-        version: 1,
-        fileName: 'about2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about2.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Agence de publicité créative',
+          width: 396,
+          height: 399,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about2.jpg',
+          },
+        },
       },
       about6Image2: {
         id: '2',
-        version: 1,
-        fileName: 'about3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about3.jpg',
+        version: 0,
+        attrs: {
+          alt: 'Agence de publicité créative',
+          width: 311,
+          height: 311,
+          image: {
+            id: '1',
+            version: 1,
+            fileName: 'about3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about3.jpg',
+          },
+        },
       },
       about6List: {
         id: '1',
