@@ -30,7 +30,7 @@ export const facts1Schema = {
       name: 'wrapperClassName',
       title: 'Wrapper Class Name',
       type: 'string',
-      defaultValue: 'wrapper bg-soft-primary',
+      defaultValue: 'wrapper bg-soft-primary angled lower-start',
     },
     {
       name: 'containerClassName',
