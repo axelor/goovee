@@ -41,6 +41,18 @@ export const testimonial1Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial1TestimonialList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-reverse-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-18',
+    },
   ],
   models: [
     {
@@ -80,9 +92,11 @@ export type Testimonial1Data = Data<typeof testimonial1Schema>;
 export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 8,
     data: {
       testimonial1Link: '#',
-      testimonial1Title: 'Testimonial 1',
+      testimonial1Title: 'Our Community',
       testimonial1Caption:
         "Don't believe anything we say. Check out what our clients are saying about us.",
       testimonial1LinkText: 'All Testimonials',
@@ -137,9 +151,11 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 8,
     data: {
       testimonial1Link: '#',
-      testimonial1Title: 'Témoignage 1',
+      testimonial1Title: 'Notre communauté',
       testimonial1Caption:
         'Ne croyez rien de ce que nous disons. Découvrez ce que nos clients disent de nous.',
       testimonial1LinkText: 'Tous les témoignages',

@@ -1,5 +1,3 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
@@ -7,6 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
+import {uniconsSelection} from '../meta-selections';
 
 export const service8Schema = {
   title: 'Service 8',
@@ -57,6 +56,18 @@ export const service8Schema = {
       type: 'json-one-to-many',
       target: 'Service8Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mt-5 mt-md-12 mt-lg-0 mb-15',
+    },
   ],
   models: [
     {
@@ -74,10 +85,7 @@ export const service8Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'description',
@@ -93,6 +101,7 @@ export const service8Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service8Data = Data<typeof service8Schema>;
@@ -100,6 +109,8 @@ export type Service8Data = Data<typeof service8Schema>;
 export const service8Demos: Demo<typeof service8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 3,
     data: {
       service8Title: 'What We Provide?',
       service8Description:
@@ -178,6 +189,8 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 3,
     data: {
       service8Title: 'Ce que nous offrons ?',
       service8Description:

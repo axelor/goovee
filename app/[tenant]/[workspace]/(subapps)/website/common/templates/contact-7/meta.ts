@@ -31,6 +31,18 @@ export const contact7Schema = {
       target: 'ContactInfo',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled upper-end lower-end',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-18 pb-14 pt-md-19 pb-md-16',
+    },
   ],
   models: [contactInfoModel],
   metaModels: [metaFileModel],
@@ -41,6 +53,8 @@ export type Contact7Data = Data<typeof contact7Schema>;
 export const contact7Demos: Demo<typeof contact7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 7,
     data: {
       contact7Image: {
         id: '1',
@@ -68,6 +82,8 @@ export const contact7Demos: Demo<typeof contact7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 7,
     data: {
       contact7Image: {
         id: '1',

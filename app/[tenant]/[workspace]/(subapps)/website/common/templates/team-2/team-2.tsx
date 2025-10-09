@@ -16,54 +16,58 @@ export function Team2(props: TemplateProps<Team2Data>) {
     team2ButtonLabel: buttonLabel,
     team2ButtonLink: buttonLink,
     team2Members: members = [],
+    team2WrapperClassName: wrapperClassName,
+    team2ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-12 gy-10 mb-16 mb-md-17 mb-xl-20 align-items-center">
-        <div className="col-lg-4">
-          <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
-          <h3 className="display-6 mb-5">{title}</h3>
-          <p className="fs-15">{para}</p>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
+          <div className="col-lg-4">
+            <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
+            <h3 className="display-6 mb-5">{title}</h3>
+            <p className="fs-15">{para}</p>
 
-          <NextLink
-            href={buttonLink}
-            title={buttonLabel}
-            className="btn btn-primary rounded-pill mt-3"
-          />
-        </div>
+            <NextLink
+              href={buttonLink}
+              title={buttonLabel}
+              className="btn btn-primary rounded-pill mt-3"
+            />
+          </div>
 
-        <div className="col-lg-8">
-          <div className="swiper-container text-center mb-6">
-            <Carousel
-              grabCursor
-              navigation={navigation}
-              breakpoints={carouselBreakpoints}>
-              {members?.map(({id, attrs: item}, i) => {
-                const socialLinks = item.socialLinks?.map(socialLink => ({
-                  id: socialLink.id,
-                  icon: `uil uil-${socialLink.attrs.icon || ''}`,
-                  url: socialLink.attrs.url || '#',
-                }));
-                return (
-                  <TeamCard2
-                    key={id}
-                    name={item.name}
-                    description={item.description}
-                    designation={item.designation}
-                    socialLinks={socialLinks || []}
-                    image={getMetaFileURL({
-                      metaFile: item.image,
-                      path: `team2Members[${i}].attrs.image`,
-                      ...props,
-                    })}
-                  />
-                );
-              })}
-            </Carousel>
+          <div className="col-lg-8">
+            <div className="swiper-container text-center mb-6">
+              <Carousel
+                grabCursor
+                navigation={navigation}
+                breakpoints={carouselBreakpoints}>
+                {members?.map(({id, attrs: item}, i) => {
+                  const socialLinks = item.socialLinks?.map(socialLink => ({
+                    id: socialLink.id,
+                    icon: `uil uil-${socialLink.attrs.icon || ''}`,
+                    url: socialLink.attrs.url || '#',
+                  }));
+                  return (
+                    <TeamCard2
+                      key={id}
+                      name={item.name}
+                      description={item.description}
+                      designation={item.designation}
+                      socialLinks={socialLinks || []}
+                      image={getMetaFileURL({
+                        metaFile: item.image,
+                        path: `team2Members[${i}].attrs.image`,
+                        ...props,
+                      })}
+                    />
+                  );
+                })}
+              </Carousel>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

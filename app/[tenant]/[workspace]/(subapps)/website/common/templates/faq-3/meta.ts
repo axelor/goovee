@@ -27,6 +27,18 @@ export const faq3Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [accordionModel],
 } as const satisfies TemplateSchema;
@@ -36,6 +48,8 @@ export type Faq3Data = Data<typeof faq3Schema>;
 export const faq3Demos: Demo<typeof faq3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 10,
     data: {
       faq3Title: 'Frequently Asked Questions',
       faq3Caption:
@@ -82,6 +96,8 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 10,
     data: {
       faq3Title: 'Foire aux questions',
       faq3Caption:

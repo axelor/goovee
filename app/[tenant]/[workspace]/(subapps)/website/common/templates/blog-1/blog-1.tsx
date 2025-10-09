@@ -11,11 +11,13 @@ export function Blog1(props: TemplateProps<Blog1Data>) {
     blog1Caption: caption,
     blog1Title: title,
     blog1BlogList: blogList,
+    blog1WrapperClassName: wrapperClassName,
+    blog1ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-light angled upper-end">
-      <div className="container py-14 py-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-9 col-xl-8">
             <h2 className="fs-16 text-uppercase text-line text-primary mb-3">

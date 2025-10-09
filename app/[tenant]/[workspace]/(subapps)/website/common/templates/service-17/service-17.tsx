@@ -21,6 +21,8 @@ export function Service17(props: TemplateProps<Service17Data>) {
     service17Image2,
     service17Service1: list1,
     service17Service2: list2,
+    service17WrapperClassName: wrapperClassName,
+    service17ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -36,8 +38,8 @@ export function Service17(props: TemplateProps<Service17Data>) {
   });
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container pt-14 pt-md-23 pb-14 pb-md-17">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mb-8 text-center">
           <div className="col-lg-8 col-xl-7 mx-auto">
             <h2 className="fs-16 text-uppercase text-primary mb-3">

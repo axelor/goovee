@@ -10,6 +10,8 @@ export function CTA9(props: TemplateProps<Cta9Data>) {
     cta9LinkTitle: linkTitle,
     cta9LinkHref: linkHref,
     cta9Image,
+    cta9WrapperClassName: wrapperClassName,
+    cta9ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -20,9 +22,10 @@ export function CTA9(props: TemplateProps<Cta9Data>) {
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay text-white"
+      className={wrapperClassName}
+      data-code={props.code}
       style={{backgroundImage: `url(${image})`}}>
-      <div className="container py-14 py-md-17 text-center">
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-xl-10 col-xxl-8 mx-auto text-center">
             <i className="icn-flower text-white fs-30 opacity-50" />

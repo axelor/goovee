@@ -14,11 +14,13 @@ export function Testimonial1(props: TemplateProps<Testimonial1Data>) {
     testimonial1LinkText: linkText,
     testimonial1Link: link,
     testimonial1TestimonialList: testimonialList,
+    testimonial1WrapperClassName: wrapperClassName,
+    testimonial1ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-gradient-reverse-primary">
-      <div className="container py-14 py-md-18">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
           <div className="col-lg-7">
             <div className="row gx-md-5 gy-5">

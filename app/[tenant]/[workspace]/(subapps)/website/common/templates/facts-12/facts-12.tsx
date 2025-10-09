@@ -10,6 +10,11 @@ export function Facts12(props: TemplateProps<Facts12Data>) {
     facts12Caption: caption,
     facts12Image,
     facts12Facts: facts,
+    facts12SectionClassName: sectionClassName,
+    facts12ContainerCardClassName: containerCardClassName,
+    facts12CardClassName: cardClassName,
+    facts12CardBodyClassName: cardBodyClassName,
+    facts12ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -19,34 +24,39 @@ export function Facts12(props: TemplateProps<Facts12Data>) {
   });
 
   return (
-    <div className="container-card">
-      <div
-        className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 pb-15"
-        style={{backgroundImage: `url(${image})`}}>
-        <div className="card-body py-14 px-0">
-          <div className="container">
-            <div className="row align-items-center gx-lg-8 gx-xl-12 gy-10 gy-lg-0">
-              <div className="col-lg-4 text-center text-lg-start">
-                <h3 className="display-4 mb-3">{title}</h3>
-                <p className="lead fs-lg mb-0">{caption}</p>
-              </div>
+    <section className={sectionClassName} data-code={props.code}>
+      <div className={containerCardClassName}>
+        <div
+          className={cardClassName}
+          style={{backgroundImage: `url(${image})`}}>
+          <div className={cardBodyClassName}>
+            <div className={containerClassName}>
+              <div className="row align-items-center gx-lg-8 gx-xl-12 gy-10 gy-lg-0">
+                <div className="col-lg-4 text-center text-lg-start">
+                  <h3 className="display-4 mb-3">{title}</h3>
+                  <p className="lead fs-lg mb-0">{caption}</p>
+                </div>
 
-              <div className="col-lg-8 mt-lg-2">
-                <div className="row align-items-center counter-wrapper gy-6 text-center">
-                  {facts?.map(({id, attrs: item}) => (
-                    <div className="col-md-4" key={id}>
-                      <h3 className="counter">
-                        <CountUp end={item.countUp || 0} suffix={item.suffix} />
-                      </h3>
-                      <p className="mb-0">{item.title}</p>
-                    </div>
-                  ))}
+                <div className="col-lg-8 mt-lg-2">
+                  <div className="row align-items-center counter-wrapper gy-6 text-center">
+                    {facts?.map(({id, attrs: item}) => (
+                      <div className="col-md-4" key={id}>
+                        <h3 className="counter">
+                          <CountUp
+                            end={item.countUp || 0}
+                            suffix={item.suffix}
+                          />
+                        </h3>
+                        <p className="mb-0">{item.title}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

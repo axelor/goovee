@@ -17,6 +17,9 @@ import {
   createCMSComponent,
   deleteCustomFields,
   deleteMetaJsonModels,
+  createMetaSelect,
+  getCommnonSelectionName,
+  deleteMetaSelects,
 } from '@/subapps/website/common/orm/templates';
 import {camelCase} from 'lodash-es';
 import {metas} from '@/subapps/website/common/templates/metas';
@@ -30,8 +33,18 @@ import {
   Model,
   ObjectField,
   RelationalField,
+  MetaSelection,
 } from '../types/templates';
-import {processBatch, Cache, formatCustomFieldName} from './helper';
+import {
+  processBatch,
+  Cache,
+  formatCustomFieldName,
+  collectModels,
+  collectSelections,
+  collectUniqueModels,
+  collectUniqueSelections,
+  formatComponentCode,
+} from './helper';
 
 const CUSTOM_MODEL_PREFIX = 'GooveeTemplate';
 
@@ -42,10 +55,6 @@ function capitalCase(str: string) {
 
 export function formatCustomModelName(modelName: string) {
   return CUSTOM_MODEL_PREFIX + capitalCase(modelName);
-}
-
-export function formatComponentCode(name: string) {
-  return camelCase(name);
 }
 
 export function isRelationalField(field: Field): field is RelationalField {
@@ -71,19 +80,29 @@ export function isObjectField(field: Field): field is ObjectField {
  * 2. model should have only one nameField
  * 3. model should have at least one visibleInGrid field
  * 4. json target model should have a model declaration within the same schema
- * 5. model names should be unique if models are not referencially equal
+ * 5. selection should have a selection declaration within the same schema
+ * 6. model names should be unique if models are not referencially equal
+ * 7. selection names should be unique if selections are not referencially equal
+ * 8. selections should have at least one option
  */
 function validateSchemas(schemas: TemplateSchema[]) {
   let isValid = true;
   const jsonModelMap = new Map<string, Model>();
+  const selectionMap = new Map<string, MetaSelection>();
   schemas.forEach(schema => {
     const targetModels = new Set();
+    const targetSelections = new Set();
     schema.fields?.forEach(field => {
       if (isJsonRelationalField(field)) {
         targetModels.add(field.target);
       }
+      if ('selection' in field && typeof field.selection === 'string') {
+        targetSelections.add(field.selection);
+      }
     });
-    schema.models?.forEach(model => {
+
+    const models = collectModels(schema);
+    models?.forEach(model => {
       if (
         jsonModelMap.has(model.name) &&
         model !== jsonModelMap.get(model.name) // check reference equality
@@ -105,6 +124,9 @@ function validateSchemas(schemas: TemplateSchema[]) {
       for (const field of model.fields) {
         if (isJsonRelationalField(field)) {
           targetModels.add(field.target);
+        }
+        if ('selection' in field && typeof field.selection === 'string') {
+          targetSelections.add(field.selection);
         }
         if (field.visibleInGrid) visibleInGridCount++;
         if (field.nameField) nameFieldCount++;
@@ -131,20 +153,55 @@ function validateSchemas(schemas: TemplateSchema[]) {
         `\x1b[31m✖ model:${[...targetModels].join(', ')} in ${schema.code} does not have a model declaration .\x1b[0m`,
       );
     }
+
+    const selections = collectSelections(schema);
+    selections?.forEach(selection => {
+      if (!selection.options?.length) {
+        isValid = false;
+        console.log(
+          `\x1b[31m✖ selection:${selection.name} in ${schema.code} should have at least 1 option.\x1b[0m`,
+        );
+      }
+      if (
+        selectionMap.has(selection.name) &&
+        selection !== selectionMap.get(selection.name) // check reference equality
+      ) {
+        isValid = false;
+        console.log(
+          `\x1b[31m✖ selection:${selection.name} in ${schema.code} is duplicated.\x1b[0m`,
+        );
+      }
+      selectionMap.set(selection.name, selection);
+      targetSelections.delete(selection.name);
+    });
+
+    if (targetSelections.size) {
+      isValid = false;
+      console.log(
+        `\x1b[31m✖ selection:${[...targetSelections].join(', ')} in ${schema.code} does not have a selection declaration .\x1b[0m`,
+      );
+    }
   });
+
   return isValid;
 }
 
 function getModels(schemas: TemplateSchema[]): Model[] {
   const models = new Map<string, Model>();
+
   for (const schema of schemas) {
-    if (schema.models?.length) {
-      for (const model of schema.models) {
-        models.set(model.name, model);
-      }
-    }
+    collectUniqueModels(schema, models);
   }
   return Array.from(models.values());
+}
+
+function getSelections(schemas: TemplateSchema[]): Map<string, MetaSelection> {
+  const selections = new Map<string, MetaSelection>();
+
+  for (const schema of schemas) {
+    collectUniqueSelections(schema, selections);
+  }
+  return selections;
 }
 
 function getContentFields(
@@ -171,6 +228,24 @@ function getContentFields(
   return fields;
 }
 
+function formatModels(models: Model[]): Model[] {
+  return models?.map(model => ({
+    ...model,
+    name: formatCustomModelName(model.name),
+    fields: model.fields.map(field => {
+      if (isJsonRelationalField(field)) {
+        return {
+          ...field,
+          name: formatCustomFieldName(field.name),
+          target: formatCustomModelName(field.target),
+        };
+      }
+      return field;
+    }),
+    ...(model.models && {models: formatModels(model.models)}),
+  }));
+}
+
 function formatSchema<T extends TemplateSchema>(schema: T): T {
   const code = formatComponentCode(schema.code);
   return {
@@ -183,20 +258,7 @@ function formatSchema<T extends TemplateSchema>(schema: T): T {
         target: formatCustomModelName(field.target),
       }),
     })),
-    models: schema.models?.map(model => ({
-      ...model,
-      name: formatCustomModelName(model.name),
-      fields: model.fields.map(field => {
-        if (isJsonRelationalField(field)) {
-          return {
-            ...field,
-            name: formatCustomFieldName(field.name),
-            target: formatCustomModelName(field.target),
-          };
-        }
-        return field;
-      }),
-    })),
+    ...(schema.models && {models: formatModels(schema.models)}),
   };
 }
 
@@ -240,6 +302,42 @@ export async function seedComponents(tenantId: Tenant['id']) {
     console.dir(failedJsonModels, {depth: null});
   }
 
+  const selections = getSelections(schemas);
+  const selectionsSettled = await processBatch(
+    Array.from(selections.values()),
+    async selection => {
+      const timeStamp = new Date();
+      const name = getCommnonSelectionName(selection.name);
+      return createMetaSelect({
+        tenantId,
+        metaSelectData: {
+          isCustom: true,
+          priority: 20,
+          name: name,
+          xmlId: name,
+          updatedOn: timeStamp,
+        },
+        metaSelectItemsData: selection.options.map((option, i) => ({
+          title: option.title,
+          value: String(option.value),
+          color: option.color,
+          icon: option.icon,
+          order: i + 1,
+          updatedOn: timeStamp,
+        })),
+      });
+    },
+  );
+
+  const failedSelections = selectionsSettled.filter(
+    res => res.status === 'rejected',
+  );
+
+  if (failedSelections.length) {
+    console.log('\x1b[31m🔥 Failed:\x1b[0m');
+    console.dir(failedSelections, {depth: null});
+  }
+
   const customModels = await processBatch(models, async model => {
     const jsonModel = jsonModels.find(m => m.name === model.name);
     if (!jsonModel) {
@@ -254,6 +352,7 @@ export async function seedComponents(tenantId: Tenant['id']) {
       jsonModel,
       tenantId,
       addPanel: true,
+      selections,
     });
     return {...jsonModel, fields};
   });
@@ -267,9 +366,15 @@ export async function seedComponents(tenantId: Tenant['id']) {
     fields,
     tenantId,
     addPanel: true,
+    selections,
   });
 
-  return {components: componentsSettled, contentFields, customModels};
+  return {
+    components: componentsSettled,
+    contentFields,
+    customModels,
+    selections: selectionsSettled,
+  };
 }
 
 export async function resetFields(tenantId: Tenant['id']) {
@@ -291,6 +396,8 @@ export async function resetFields(tenantId: Tenant['id']) {
     jsonModelPrefix: CUSTOM_MODEL_PREFIX,
     tenantId,
   });
+
+  await deleteMetaSelects({tenantId});
 }
 
 export async function seedContents(tenantId: Tenant['id']) {

@@ -33,6 +33,18 @@ export const cta1Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-reverse-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-16 py-md-18',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -42,6 +54,8 @@ export type Cta1Data = Data<typeof cta1Schema>;
 export const cta1Demos: Demo<typeof cta1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 3,
     data: {
       cta1Image: {
         id: '1',
@@ -59,6 +73,8 @@ export const cta1Demos: Demo<typeof cta1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 3,
     data: {
       cta1Image: {
         id: '1',

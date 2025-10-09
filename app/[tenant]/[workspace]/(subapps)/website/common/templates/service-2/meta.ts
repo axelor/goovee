@@ -5,7 +5,7 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 
 export const service2Schema = {
   title: 'Service 2',
@@ -41,8 +41,20 @@ export const service2Schema = {
       target: 'BulletList',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -51,6 +63,8 @@ export type Services2Data = Data<typeof service2Schema>;
 export const service2Demos: Demo<typeof service2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 7,
     data: {
       service2Image: {
         id: '1',
@@ -98,6 +112,8 @@ export const service2Demos: Demo<typeof service2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 7,
     data: {
       service2Image: {
         id: '1',

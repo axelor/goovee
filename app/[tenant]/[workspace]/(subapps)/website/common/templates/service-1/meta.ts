@@ -4,9 +4,7 @@ import {
   Demo,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {linkColors} from '../../constants/colors';
+import {solidIconsSelection, linkColorsSelection} from '../meta-selections';
 
 export const service1Schema = {
   title: 'Service 1',
@@ -28,6 +26,18 @@ export const service1Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service1Services',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-16',
     },
   ],
   models: [
@@ -51,10 +61,7 @@ export const service1Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'link',
@@ -67,14 +74,12 @@ export const service1Schema = {
           title: 'Link Type',
           type: 'string',
           visibleInGrid: true,
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
       ],
     },
   ],
+  selections: [solidIconsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service1Data = Data<typeof service1Schema>;
@@ -82,9 +87,11 @@ export type Service1Data = Data<typeof service1Schema>;
 export const service1Demos: Demo<typeof service1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-1',
+    sequence: 2,
     data: {
-      service1Title: 'What We Do?',
-      service1Caption:
+      service1Caption: 'What We Do?',
+      service1Title:
         'We have designed our services with your specific needs in mind.',
       service1Services: [
         {
@@ -139,9 +146,11 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-1',
+    sequence: 2,
     data: {
-      service1Title: 'Que faisons-nous ?',
-      service1Caption:
+      service1Caption: 'Que faisons-nous ?',
+      service1Title:
         'Nous avons conçu nos services en pensant à vos besoins spécifiques.',
       service1Services: [
         {

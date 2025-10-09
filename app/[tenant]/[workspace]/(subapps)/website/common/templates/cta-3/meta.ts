@@ -38,6 +38,19 @@ export const cta3Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-auto no-overlay bg-image bg-map text-center mb-14 mb-md-16',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-md-18',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -48,6 +61,8 @@ export type Cta3Data = Data<typeof cta3Schema>;
 export const cta3Demos: Demo<typeof cta3Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 5,
     data: {
       cta3Title: 'Explore Our Community',
       cta3Description:
@@ -65,6 +80,8 @@ export const cta3Demos: Demo<typeof cta3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 5,
     data: {
       cta3Title: 'Découvrez notre communauté',
       cta3Description:

@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const team7Schema = {
@@ -41,8 +41,20 @@ export const team7Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -51,6 +63,8 @@ export type Team7Data = Data<typeof team7Schema>;
 export const team7Demos: Demo<typeof team7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-17',
+    sequence: 6,
     data: {
       team7Caption: 'Our Team',
       team7Title: 'Choose our team of experts to save time.',
@@ -97,6 +111,8 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-17',
+    sequence: 6,
     data: {
       team7Caption: 'Notre équipe',
       team7Title: 'Choisissez notre équipe d’experts pour gagner du temps.',

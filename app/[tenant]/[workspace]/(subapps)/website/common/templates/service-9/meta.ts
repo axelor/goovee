@@ -4,9 +4,12 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {fullColors} from '../../constants/colors';
+import {metaFileModel} from '../meta-models';
+import {
+  solidIconsSelection,
+  fullColorsSelection,
+  colorsSelection,
+} from '../meta-selections';
 
 export const service9Schema = {
   title: 'Service 9',
@@ -44,6 +47,18 @@ export const service9Schema = {
       type: 'json-one-to-many',
       target: 'Service9ServiceList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [
     {
@@ -54,19 +69,13 @@ export const service9Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'iconColor',
           title: 'Icon Color',
           type: 'string',
-          selection: fullColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'full-colors',
         },
         {
           name: 'title',
@@ -89,21 +98,22 @@ export const service9Schema = {
           name: 'cardColor',
           title: 'Card Color',
           type: 'string',
-          selection: fullColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'full-colors',
         },
       ],
     },
   ],
+  metaModels: [metaFileModel],
+  selections: [solidIconsSelection, fullColorsSelection, colorsSelection],
 } as const satisfies TemplateSchema;
 
-export type Service9Data = Data<typeof service9Schema>;
+export type Process9Data = Data<typeof service9Schema>;
 
 export const service9Demos: Demo<typeof service9Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 11,
     data: {
       service9Title:
         'Our service is customized to your individual requirements.',
@@ -170,6 +180,8 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 11,
     data: {
       service9Title:
         'Notre service est personnalisé pour répondre à vos besoins individuels.',

@@ -19,6 +19,8 @@ export function About24(props: TemplateProps<About24Data>) {
     about24SkillList: skillList,
     about24List: list,
     about24ProcessList: processList,
+    about24WrapperClassName: wrapperClassName,
+    about24ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -28,8 +30,8 @@ export function About24(props: TemplateProps<About24Data>) {
   });
 
   return (
-    <section className="wrapper bg-light">
-      <div className="container pt-12 pt-md-14 pb-14 pb-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-md-8 gx-xl-12 gy-6 align-items-center">
           <div className="col-md-8 col-lg-6 mx-auto">
             <div className="img-mask mask-1">

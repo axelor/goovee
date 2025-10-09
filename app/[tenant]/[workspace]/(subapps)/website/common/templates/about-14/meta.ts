@@ -30,6 +30,18 @@ export const about14Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],
@@ -40,6 +52,8 @@ export type About14Data = Data<typeof about14Schema>;
 export const about14Demos: Demo<typeof about14Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 4,
     data: {
       about14Image: {
         id: '1',
@@ -80,6 +94,8 @@ export const about14Demos: Demo<typeof about14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 4,
     data: {
       about14Image: {
         id: '1',

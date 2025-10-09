@@ -37,6 +37,18 @@ export const portfolio3Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio3PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper overflow-hidden',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-lg-7 pb-14 pb-md-16',
+    },
   ],
   models: [
     {
@@ -78,6 +90,8 @@ export type Portfolio3Data = Data<typeof portfolio3Schema>;
 export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 7,
     data: {
       portfolio3Caption: 'Latest Projects',
       portfolio3Description:
@@ -186,6 +200,8 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 7,
     data: {
       portfolio3Caption: 'Derniers projets',
       portfolio3Description:

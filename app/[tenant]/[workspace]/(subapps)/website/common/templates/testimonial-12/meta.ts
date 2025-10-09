@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {ratings} from '../../constants/ratings';
+import {ratingsSelection} from '../meta-selections';
 
 export const testimonial12Schema = {
   title: 'Testimonial 12',
@@ -16,6 +16,18 @@ export const testimonial12Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial12Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16 mb-8 mb-md-12 mt-n18 mt-md-n21',
     },
   ],
   models: [
@@ -44,11 +56,12 @@ export const testimonial12Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
       ],
     },
   ],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial12Data = Data<typeof testimonial12Schema>;
@@ -56,6 +69,8 @@ export type Testimonial12Data = Data<typeof testimonial12Schema>;
 export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 6,
     data: {
       testimonial12Testimonials: [
         {
@@ -107,6 +122,8 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 6,
     data: {
       testimonial12Testimonials: [
         {

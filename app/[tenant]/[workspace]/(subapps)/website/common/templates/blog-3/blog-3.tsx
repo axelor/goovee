@@ -12,35 +12,39 @@ export function Blog3(props: TemplateProps<Blog3Data>) {
     blog3Caption: caption,
     blog3Navigation: navigation,
     blog3BlogList: blogList = [],
+    blog3WrapperClassName: wrapperClassName,
+    blog3ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <div className="container">
-      <div className="row text-center">
-        <div className="col-xxl-9 mx-auto">
-          <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
-          <h3 className="display-4 mb-9">{title}</h3>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row text-center">
+          <div className="col-xxl-9 mx-auto">
+            <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
+            <h3 className="display-4 mb-9">{title}</h3>
+          </div>
+        </div>
+
+        <div className="swiper-container blog grid-view mb-18">
+          <Carousel
+            grabCursor
+            navigation={navigation}
+            breakpoints={carouselBreakpoints}>
+            {blogList?.map(({id, attrs: item}, i) => (
+              <BlogCard1
+                key={id}
+                {...item}
+                image={getMetaFileURL({
+                  metaFile: item.image,
+                  path: `blog3BlogList[${i}].attrs.image`,
+                  ...props,
+                })}
+              />
+            ))}
+          </Carousel>
         </div>
       </div>
-
-      <div className="swiper-container blog grid-view mb-18">
-        <Carousel
-          grabCursor
-          navigation={navigation}
-          breakpoints={carouselBreakpoints}>
-          {blogList?.map(({id, attrs: item}, i) => (
-            <BlogCard1
-              key={id}
-              {...item}
-              image={getMetaFileURL({
-                metaFile: item.image,
-                path: `blog3BlogList[${i}].attrs.image`,
-                ...props,
-              })}
-            />
-          ))}
-        </Carousel>
-      </div>
-    </div>
+    </section>
   );
 }

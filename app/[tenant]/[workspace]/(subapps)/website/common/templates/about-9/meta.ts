@@ -40,6 +40,18 @@ export const about9Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-18',
+    },
   ],
   models: [serviceList3Model],
   metaModels: [metaFileModel],
@@ -50,6 +62,8 @@ export type About9Data = Data<typeof about9Schema>;
 export const about9Demos: Demo<typeof about9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-8',
+    sequence: 3,
     data: {
       about9Image: {
         id: '1',
@@ -87,6 +101,8 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-8',
+    sequence: 3,
     data: {
       about9Image: {
         id: '1',

@@ -51,6 +51,18 @@ export const about4Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-18',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],
@@ -61,6 +73,8 @@ export type About4Data = Data<typeof about4Schema>;
 export const about4Demos: Demo<typeof about4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 4,
     data: {
       about4Title:
         'There are some of the factors why the people we serve find us.',
@@ -125,6 +139,8 @@ export const about4Demos: Demo<typeof about4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 4,
     data: {
       about4Title:
         'Voici quelques-uns des facteurs pour lesquels les personnes que nous servons nous trouvent.',

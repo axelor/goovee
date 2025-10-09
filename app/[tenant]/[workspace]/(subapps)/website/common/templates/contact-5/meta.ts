@@ -65,6 +65,18 @@ export const contact5Schema = {
       title: 'Suffix',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-16 pb-md-18',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -75,6 +87,8 @@ export type Contact5Data = Data<typeof contact5Schema>;
 export const contact5Demos: Demo<typeof contact5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-10',
+    sequence: 6,
     data: {
       contact5Title: 'Get in Touch',
       contact5Description:
@@ -104,6 +118,8 @@ export const contact5Demos: Demo<typeof contact5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-10',
+    sequence: 6,
     data: {
       contact5Title: 'Entrer en contact',
       contact5Description:

@@ -65,6 +65,18 @@ export const contact8Schema = {
       title: 'Suffix',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled lower-end',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -75,6 +87,8 @@ export type Contact8Data = Data<typeof contact8Schema>;
 export const contact8Demos: Demo<typeof contact8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 9,
     data: {
       contact8Title: 'Get in Touch',
       contact8Description:
@@ -104,6 +118,8 @@ export const contact8Demos: Demo<typeof contact8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 9,
     data: {
       contact8Title: 'Entrer en contact',
       contact8Description:

@@ -12,6 +12,8 @@ export function Blog2(props: TemplateProps<Blog2Data>) {
     blog2Navigation: navigation,
     blog2SpaceBetween: spaceBetween,
     blog2BlogList: blogList = [],
+    blog2WrapperClassName: wrapperClassName,
+    blog2ContainerClassName: containerClassName,
   } = data || {};
 
   const carouselBreakpoints = {
@@ -21,41 +23,45 @@ export function Blog2(props: TemplateProps<Blog2Data>) {
   };
 
   return (
-    <div className="container">
-      <div className="row text-center">
-        <div className="col-lg-9 col-xl-8 col-xxl-8 mx-auto">
-          <h2 className="fs-15 text-uppercase text-primary mb-3">{caption}</h2>
-          <h3 className="display-4 mb-6">{title}</h3>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row text-center">
+          <div className="col-lg-9 col-xl-8 col-xxl-8 mx-auto">
+            <h2 className="fs-15 text-uppercase text-primary mb-3">
+              {caption}
+            </h2>
+            <h3 className="display-4 mb-6">{title}</h3>
+          </div>
+        </div>
+
+        <div className="position-relative">
+          <div
+            className="shape bg-dot primary rellax w-17 h-20"
+            style={{top: 0, left: '-1.7rem'}}
+          />
+
+          <div className="swiper-container dots-closer blog grid-view mb-6">
+            <Carousel
+              grabCursor
+              spaceBetween={spaceBetween}
+              navigation={navigation}
+              breakpoints={carouselBreakpoints}>
+              {blogList?.map(({id, attrs: item}, i) => (
+                <div className="item-inner" key={id}>
+                  <BlogCard4
+                    {...item}
+                    image={getMetaFileURL({
+                      metaFile: item.image,
+                      path: `blog2BlogList[${i}].attrs.image`,
+                      ...props,
+                    })}
+                  />
+                </div>
+              ))}
+            </Carousel>
+          </div>
         </div>
       </div>
-
-      <div className="position-relative">
-        <div
-          className="shape bg-dot primary rellax w-17 h-20"
-          style={{top: 0, left: '-1.7rem'}}
-        />
-
-        <div className="swiper-container dots-closer blog grid-view mb-6">
-          <Carousel
-            grabCursor
-            spaceBetween={spaceBetween}
-            navigation={navigation}
-            breakpoints={carouselBreakpoints}>
-            {blogList?.map(({id, attrs: item}, i) => (
-              <div className="item-inner" key={id}>
-                <BlogCard4
-                  {...item}
-                  image={getMetaFileURL({
-                    metaFile: item.image,
-                    path: `blog2BlogList[${i}].attrs.image`,
-                    ...props,
-                  })}
-                />
-              </div>
-            ))}
-          </Carousel>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }

@@ -10,6 +10,8 @@ export function CTA1(props: TemplateProps<Cta1Data>) {
     cta1Caption: caption,
     cta1Description: description,
     cta1Image,
+    cta1WrapperClassName: wrapperClassName,
+    cta1ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -19,8 +21,8 @@ export function CTA1(props: TemplateProps<Cta1Data>) {
   });
 
   return (
-    <section className="wrapper bg-gradient-reverse-primary">
-      <div className="container py-16 py-md-18">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row gx-lg-8 gx-xl-12 gy-10 mb-8 align-items-center">
           <div className="col-lg-6 order-lg-2">
             <figure>

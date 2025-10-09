@@ -17,6 +17,18 @@ export const hero15Schema = {
       type: 'json-one-to-many',
       target: 'Hero15Slides',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-dark',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container h-100',
+    },
   ],
   models: [
     {
@@ -71,6 +83,8 @@ export type Hero15Data = Data<typeof hero15Schema>;
 export const hero15Demos: Demo<typeof hero15Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 1,
     data: {
       hero15Slides: [
         {
@@ -136,6 +150,8 @@ export const hero15Demos: Demo<typeof hero15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 1,
     data: {
       hero15Slides: [
         {

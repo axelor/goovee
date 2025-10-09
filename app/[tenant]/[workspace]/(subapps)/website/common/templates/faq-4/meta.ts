@@ -24,6 +24,18 @@ export const faq4Schema = {
       type: 'json-one-to-many',
       target: 'Faq4Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper mt-md-n50p',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-0 mb-14 mb-md-7',
+    },
   ],
   models: [
     {
@@ -53,6 +65,8 @@ export type Faq4Data = Data<typeof faq4Schema>;
 export const faq4Demos: Demo<typeof faq4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 5,
     data: {
       faq4Image: {
         id: '1',
@@ -99,6 +113,8 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 5,
     data: {
       faq4Image: {
         id: '1',

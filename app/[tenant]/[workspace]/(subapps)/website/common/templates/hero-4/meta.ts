@@ -48,6 +48,19 @@ export const hero4Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper position-relative min-vh-70 d-lg-flex align-items-center bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -57,6 +70,8 @@ export type Hero4Data = Data<typeof hero4Schema>;
 export const hero4Demos: Demo<typeof hero4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 1,
     data: {
       hero4Title:
         "Simple get down & calm down and we're control your requirements.",
@@ -77,6 +92,8 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 1,
     data: {
       hero4Title: 'Calmez-vous et nous contrôlons vos besoins.',
       hero4Description:

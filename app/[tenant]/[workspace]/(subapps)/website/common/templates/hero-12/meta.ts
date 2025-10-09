@@ -48,6 +48,18 @@ export const hero12Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pb-15 pt-md-14 pb-md-20',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -57,6 +69,8 @@ export type Hero12Data = Data<typeof hero12Schema>;
 export const hero12Demos: Demo<typeof hero12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 1,
     data: {
       hero12Title: 'Inventive, Sharp, Magnificent.',
       hero12Description:
@@ -76,6 +90,8 @@ export const hero12Demos: Demo<typeof hero12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 1,
     data: {
       hero12Title: 'Inventif, pointu, magnifique.',
       hero12Description:

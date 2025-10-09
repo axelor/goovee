@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection} from '../meta-selections';
 
 export const process13Schema = {
   title: 'Process 13',
@@ -36,6 +35,18 @@ export const process13Schema = {
       type: 'json-one-to-many',
       target: 'Process13Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-15 py-md-17',
+    },
   ],
   models: [
     {
@@ -46,10 +57,7 @@ export const process13Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -66,6 +74,7 @@ export const process13Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process13Data = Data<typeof process13Schema>;
@@ -73,6 +82,8 @@ export type Process13Data = Data<typeof process13Schema>;
 export const process13Demos: Demo<typeof process13Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 3,
     data: {
       process13Caption: 'Our Working Process',
       process13Heading: 'Here are the 3 working steps on success.',
@@ -119,6 +130,8 @@ export const process13Demos: Demo<typeof process13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 3,
     data: {
       process13Caption: 'Notre processus de travail',
       process13Heading: 'Voici les 3 étapes de travail vers le succès.',

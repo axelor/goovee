@@ -54,6 +54,18 @@ export const hero9Schema = {
       type: 'json-one-to-many',
       target: 'Hero9Typewriter',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pb-14 pb-lg-0',
+    },
   ],
   models: [
     {
@@ -78,6 +90,8 @@ export type Hero9Data = Data<typeof hero9Schema>;
 export const hero9Demos: Demo<typeof hero9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 1,
     data: {
       hero9Title: 'Lighthouse is simple and strong, with',
       hero9Description:
@@ -102,6 +116,8 @@ export const hero9Demos: Demo<typeof hero9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 1,
     data: {
       hero9Title: 'Lighthouse est simple et solide, avec',
       hero9Description:

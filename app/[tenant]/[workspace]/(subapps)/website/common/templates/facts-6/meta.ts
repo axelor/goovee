@@ -1,12 +1,10 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {colors} from '../../constants/colors';
+import {uniconsSelection, colorsSelection} from '../meta-selections';
 
 export const facts6Schema = {
   title: 'Facts 6',
@@ -34,6 +32,18 @@ export const facts6Schema = {
       type: 'json-one-to-many',
       target: 'Facts6Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-15 mb-lg-18',
+    },
   ],
   models: [
     {
@@ -56,23 +66,18 @@ export const facts6Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
         {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
       ],
     },
   ],
+  selections: [uniconsSelection, colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Facts6Data = Data<typeof facts6Schema>;
@@ -80,6 +85,8 @@ export type Facts6Data = Data<typeof facts6Schema>;
 export const facts6Demos: Demo<typeof facts6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 3,
     data: {
       facts6Title: 'Connect with Our Community',
       facts6Caption:
@@ -132,6 +139,8 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 3,
     data: {
       facts6Title: 'Connectez-vous avec notre communauté',
       facts6Caption:

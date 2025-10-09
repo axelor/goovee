@@ -35,6 +35,18 @@ export const about12Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-17',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],
@@ -45,6 +57,8 @@ export type About12Data = Data<typeof about12Schema>;
 export const about12Demos: Demo<typeof about12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 3,
     data: {
       about12Image: {
         id: '1',
@@ -86,6 +100,8 @@ export const about12Demos: Demo<typeof about12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 3,
     data: {
       about12Image: {
         id: '1',

@@ -19,6 +19,8 @@ export function Testimonial3(props: TemplateProps<Testimonial3Data>) {
     testimonial3SlidesPerView: slidesPerView,
     testimonial3Navigation: navigation,
     testimonial3Testimonials: testimonials = [],
+    testimonial3WrapperClassName: wrapperClassName,
+    testimonial3ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -34,41 +36,43 @@ export function Testimonial3(props: TemplateProps<Testimonial3Data>) {
   });
 
   return (
-    <div className="container">
-      <Fragment>
-        <h3 className="display-4 mb-3 text-center">{title}</h3>
-        <p className="lead fs-lg mb-10 text-center">{description}</p>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <Fragment>
+          <h3 className="display-4 mb-3 text-center">{title}</h3>
+          <p className="lead fs-lg mb-10 text-center">{description}</p>
 
-        <div className="row gx-lg-8 gx-xl-12 gy-6 mb-14 align-items-center">
-          <div className="col-lg-7">
-            <Tiles3
-              image1={tileImage1}
-              image2={tileImage2}
-              heading={heading}
-              countUp={countUp}
-              suffix={suffix}
-            />
-          </div>
+          <div className="row gx-lg-8 gx-xl-12 gy-6 mb-14 align-items-center">
+            <div className="col-lg-7">
+              <Tiles3
+                image1={tileImage1}
+                image2={tileImage2}
+                heading={heading}
+                countUp={countUp}
+                suffix={suffix}
+              />
+            </div>
 
-          <div className="col-lg-5 mt-5">
-            <div className="swiper-container dots-closer mb-6">
-              <Carousel
-                grabCursor
-                slidesPerView={slidesPerView}
-                navigation={navigation}>
-                {testimonials?.map(({id, attrs: item}) => (
-                  <TestimonialCard2
-                    key={id}
-                    name={item.name}
-                    review={item.review}
-                    designation={item.designation}
-                  />
-                ))}
-              </Carousel>
+            <div className="col-lg-5 mt-5">
+              <div className="swiper-container dots-closer mb-6">
+                <Carousel
+                  grabCursor
+                  slidesPerView={slidesPerView}
+                  navigation={navigation}>
+                  {testimonials?.map(({id, attrs: item}) => (
+                    <TestimonialCard2
+                      key={id}
+                      name={item.name}
+                      review={item.review}
+                      designation={item.designation}
+                    />
+                  ))}
+                </Carousel>
+              </div>
             </div>
           </div>
-        </div>
-      </Fragment>
-    </div>
+        </Fragment>
+      </div>
+    </section>
   );
 }

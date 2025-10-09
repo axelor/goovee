@@ -18,6 +18,8 @@ export function Hero7(props: TemplateProps<Hero7Data>) {
     hero7ButtonLink1: buttonLink1,
     hero7ButtonLink2: buttonLink2,
     hero7Image,
+    hero7WrapperClassName: wrapperClassName,
+    hero7ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -27,8 +29,8 @@ export function Hero7(props: TemplateProps<Hero7Data>) {
   });
 
   return (
-    <section className="wrapper bg-gradient-primary">
-      <div className="container py-14 pt-md-15 pb-md-18">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row text-center">
           <div className="col-lg-9 col-xxl-8 mx-auto">
             <h2 className="display-1 mb-4" style={zoomInAnimate('0ms')}>

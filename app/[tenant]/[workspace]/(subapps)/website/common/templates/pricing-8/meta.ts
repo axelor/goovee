@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {faq5QuestionsModel, planFeatureModel, planModel} from '../json-models';
+import {faq5QuestionsModel, planModel} from '../json-models';
 
 export const pricing8Schema = {
   title: 'Pricing 8',
@@ -43,8 +43,20 @@ export const pricing8Schema = {
       type: 'json-one-to-many',
       target: 'Faq5Questions',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-15 pb-md-17',
+    },
   ],
-  models: [planModel, planFeatureModel, faq5QuestionsModel],
+  models: [planModel, faq5QuestionsModel],
 } as const satisfies TemplateSchema;
 
 export type Pricing8Data = Data<typeof pricing8Schema>;
@@ -52,6 +64,8 @@ export type Pricing8Data = Data<typeof pricing8Schema>;
 export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 7,
     data: {
       pricing8Title: 'Our Pricing',
       pricing8Caption: 'We provide perfect and competitive prices.',
@@ -155,6 +169,8 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 7,
     data: {
       pricing8Title: 'Nos tarifs',
       pricing8Caption: 'Nous offrons des prix parfaits et compétitifs.',

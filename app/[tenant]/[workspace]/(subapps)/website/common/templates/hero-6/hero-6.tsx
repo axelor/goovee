@@ -17,6 +17,8 @@ export function Hero6(props: TemplateProps<Hero6Data>) {
     hero6GooglePlayTitle: googlePlayTitle,
     hero6GooglePlayUrl: googlePlayUrl,
     hero6Image,
+    hero6WrapperClassName: wrapperClassName,
+    hero6ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -26,8 +28,8 @@ export function Hero6(props: TemplateProps<Hero6Data>) {
   });
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-10 ">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row align-items-center">
           <div className="col-lg-6 col-md-6 offset-md-3 offset-lg-0">
             <img

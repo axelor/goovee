@@ -11,6 +11,11 @@ export function CTA7(props: TemplateProps<Cta7Data>) {
     cta7LinkTitle: linkTitle,
     cta7LinkHref: linkHref,
     cta7Image,
+    cta7SectionClassName: sectionClassName,
+    cta7ContainerCardClassName: containerCardClassName,
+    cta7CardClassName: cardClassName,
+    cta7CardBodyClassName: cardBodyClassName,
+    cta7ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -20,33 +25,35 @@ export function CTA7(props: TemplateProps<Cta7Data>) {
   });
 
   return (
-    <div className="container-card">
-      <div
-        className="card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 mb-14"
-        style={{backgroundImage: `url(${image})`}}>
-        <div className="card-body py-14 px-0">
-          <div className="container">
-            <div className="row text-center">
-              <div className="col-md-7 col-lg-9 col-xl-8 col-xxl-7 mx-auto">
-                <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
-                  {caption}
-                </h2>
-                <h3 className="display-4 mb-7 px-lg-17">{title}</h3>
+    <section className={sectionClassName} data-code={props.code}>
+      <div className={containerCardClassName}>
+        <div
+          className={cardClassName}
+          style={{backgroundImage: `url(${image})`}}>
+          <div className={cardBodyClassName}>
+            <div className={containerClassName}>
+              <div className="row text-center">
+                <div className="col-md-7 col-lg-9 col-xl-8 col-xxl-7 mx-auto">
+                  <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
+                    {caption}
+                  </h2>
+                  <h3 className="display-4 mb-7 px-lg-17">{title}</h3>
+                </div>
               </div>
-            </div>
 
-            <div className="d-flex justify-content-center">
-              <span>
-                <NextLink
-                  href={linkHref}
-                  title={linkTitle}
-                  className="btn btn-lg btn-gradient gradient-1 rounded"
-                />
-              </span>
+              <div className="d-flex justify-content-center">
+                <span>
+                  <NextLink
+                    href={linkHref}
+                    title={linkTitle}
+                    className="btn btn-lg btn-gradient gradient-1 rounded"
+                  />
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

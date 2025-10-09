@@ -39,6 +39,18 @@ export const process11Schema = {
       type: 'json-one-to-many',
       target: 'Process11Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-17',
+    },
   ],
   models: [
     {
@@ -73,6 +85,8 @@ export type Process11Data = Data<typeof process11Schema>;
 export const process11Demos: Demo<typeof process11Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 7,
     data: {
       process11Title:
         "Simply relax and enjoy as we manage your company's requirements.",
@@ -121,6 +135,8 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 7,
     data: {
       process11Title:
         'Détendez-vous simplement et profitez pendant que nous gérons les exigences de votre entreprise.',

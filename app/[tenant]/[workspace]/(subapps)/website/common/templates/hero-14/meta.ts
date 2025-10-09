@@ -38,6 +38,18 @@ export const hero14Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pt-md-14 pb-14 pb-md-0',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -48,6 +60,8 @@ export type Hero14Data = Data<typeof hero14Schema>;
 export const hero14Demos: Demo<typeof hero14Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 1,
     data: {
       hero14Title: 'We provide rapid solutions for your company.',
       hero14Description:
@@ -65,6 +79,8 @@ export const hero14Demos: Demo<typeof hero14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 1,
     data: {
       hero14Title:
         'Nous apportons des solutions rapides pour votre entreprise.',

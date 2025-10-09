@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
 import {metaFileModel} from '../meta-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const process4Schema = {
   title: 'Process 4',
@@ -37,6 +36,18 @@ export const process4Schema = {
       type: 'json-one-to-many',
       target: 'Process4Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-16 pt-lg-0 pb-md-16',
+    },
   ],
   models: [
     {
@@ -47,10 +58,7 @@ export const process4Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -68,6 +76,7 @@ export const process4Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process4Data = Data<typeof process4Schema>;
@@ -75,6 +84,8 @@ export type Process4Data = Data<typeof process4Schema>;
 export const process4Demos: Demo<typeof process4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-5',
+    sequence: 3,
     data: {
       process4Video: {
         id: '1',
@@ -119,6 +130,8 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-5',
+    sequence: 3,
     data: {
       process4Video: {
         id: '1',

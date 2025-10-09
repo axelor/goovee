@@ -48,6 +48,18 @@ export const team2Schema = {
       type: 'json-one-to-many',
       target: 'Team2Member',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-16 mb-md-17 mb-xl-20',
+    },
   ],
   models: [
     {
@@ -96,6 +108,8 @@ export type Team2Data = Data<typeof team2Schema>;
 export const team2Demos: Demo<typeof team2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-2',
+    sequence: 7,
     data: {
       team2Caption: 'Meet the Team',
       team2Title:
@@ -291,6 +305,8 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-2',
+    sequence: 7,
     data: {
       team2Caption: 'Rencontrez l’équipe',
       team2Title:

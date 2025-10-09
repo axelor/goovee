@@ -27,6 +27,18 @@ export const team6Schema = {
       type: 'json-one-to-many',
       target: 'Team6Member',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17 mb-md-20',
+    },
   ],
   models: [
     {
@@ -63,6 +75,8 @@ export type Team6Data = Data<typeof team6Schema>;
 export const team6Demos: Demo<typeof team6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 8,
     data: {
       team6Caption: 'Our Team',
       team6Title:
@@ -133,6 +147,8 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 8,
     data: {
       team6Caption: 'Notre équipe',
       team6Title:

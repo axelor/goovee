@@ -9,11 +9,13 @@ export function Testimonial10(props: TemplateProps<Testimonial10Data>) {
     testimonial10Caption: caption,
     testimonial10Description: description,
     testimonial10Testimonials: testimonials,
+    testimonial10WrapperClassName: wrapperClassName,
+    testimonial10ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-14 py-md-17">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row mt-md-n25">
           <div className="col-md-10 offset-md-1 col-lg-8 offset-lg-2 mx-auto text-center">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>

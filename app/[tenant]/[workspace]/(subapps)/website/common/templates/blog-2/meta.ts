@@ -37,6 +37,18 @@ export const blog2Schema = {
       type: 'json-one-to-many',
       target: 'Blog2BlogList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray mt-md-n21 pt-md-21',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
+    },
   ],
   models: [
     {
@@ -83,6 +95,8 @@ export type Blog2Data = Data<typeof blog2Schema>;
 export const blog2Demos: Demo<typeof blog2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-11',
+    sequence: 6,
     data: {
       blog2Caption: 'Case Studies',
       blog2Title:
@@ -167,6 +181,8 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-11',
+    sequence: 6,
     data: {
       blog2Caption: 'Études de cas',
       blog2Title:

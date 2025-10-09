@@ -4,7 +4,13 @@ import {getMetaFileURL} from '@/subapps/website/common/utils/helper';
 
 export function Banner3(props: TemplateProps<Banner3Data>) {
   const {data} = props;
-  const {banner3Heading: heading, banner3Image, banner3Video} = data || {};
+  const {
+    banner3Heading: heading,
+    banner3Image,
+    banner3Video,
+    banner3WrapperClassName: wrapperClassName,
+    banner3ContainerClassName: containerClassName,
+  } = data || {};
 
   const image = getMetaFileURL({
     metaFile: banner3Image,
@@ -20,9 +26,10 @@ export function Banner3(props: TemplateProps<Banner3Data>) {
 
   return (
     <section
-      className="wrapper image-wrapper bg-image bg-overlay"
+      className={wrapperClassName}
+      data-code={props.code}
       style={{backgroundImage: `url(${image})`}}>
-      <div className="container py-18 text-center">
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-lg-10 col-xl-10 col-xxl-8 mx-auto">
             <a

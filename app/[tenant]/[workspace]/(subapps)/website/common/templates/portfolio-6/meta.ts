@@ -117,6 +117,18 @@ export const portfolio6Schema = {
       title: 'Title 3',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -127,6 +139,8 @@ export type Portfolio6Data = Data<typeof portfolio6Schema>;
 export const portfolio6Demos: Demo<typeof portfolio6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 7,
     data: {
       portfolio6Title: 'Check out some of our recent projects below.',
       portfolio6Description: 'We love to turn ideas into beautiful things.',
@@ -170,6 +184,8 @@ export const portfolio6Demos: Demo<typeof portfolio6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 7,
     data: {
       portfolio6Title:
         'Découvrez quelques-uns de nos projets récents ci-dessous.',

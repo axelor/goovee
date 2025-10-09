@@ -16,6 +16,8 @@ export function About19(props: TemplateProps<About19Data>) {
     about19TileImage3,
     about19AboutList1: aboutList1,
     about19AboutList2: aboutList2,
+    about19WrapperClassName: wrapperClassName,
+    about19ContainerClassName: containerClassName,
   } = data || {};
 
   const tileImage1 = getMetaFileURL({
@@ -37,51 +39,53 @@ export function About19(props: TemplateProps<About19Data>) {
   });
 
   return (
-    <div className="container">
-      <Fragment>
-        <div className="row gy-10 gy-sm-13 gx-md-8 gx-xl-12 align-items-center mb-10 mb-md-12">
-          <div className="col-lg-6">
-            <Tiles11
-              image1={tileImage1}
-              image2={tileImage2}
-              image3={tileImage3}
-            />
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <Fragment>
+          <div className="row gy-10 gy-sm-13 gx-md-8 gx-xl-12 align-items-center mb-10 mb-md-12">
+            <div className="col-lg-6">
+              <Tiles11
+                image1={tileImage1}
+                image2={tileImage2}
+                image3={tileImage3}
+              />
+            </div>
+
+            <div className="col-lg-6">
+              <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
+                {caption}
+              </h2>
+              <h3 className="display-4 mb-4">{title}</h3>
+              <p className="mb-6">{description}</p>
+
+              <ListColumn
+                list={aboutList1?.attrs.list ?? []}
+                rowClass={aboutList1?.attrs.rowClass}
+                bulletColor={aboutList1?.attrs.bulletColor}
+              />
+            </div>
           </div>
 
-          <div className="col-lg-6">
-            <h2 className="fs-16 text-uppercase text-gradient gradient-1 mb-3">
-              {caption}
-            </h2>
-            <h3 className="display-4 mb-4">{title}</h3>
-            <p className="mb-6">{description}</p>
+          <div className="row gx-lg-8 gx-xl-12 gy-6">
+            {aboutList2?.map(({id, attrs: item}, i) => (
+              <div className="col-lg-4" key={id}>
+                <div className="d-flex flex-row">
+                  <div>
+                    <div className="icon btn btn-circle pe-none btn-soft-primary me-4">
+                      <span className="number fs-18">{i + 1}</span>
+                    </div>
+                  </div>
 
-            <ListColumn
-              list={aboutList1?.attrs.list ?? []}
-              rowClass={aboutList1?.attrs.rowClass}
-              bulletColor={aboutList1?.attrs.bulletColor}
-            />
-          </div>
-        </div>
-
-        <div className="row gx-lg-8 gx-xl-12 gy-6 mb-14 mb-md-18">
-          {aboutList2?.map(({id, attrs: item}, i) => (
-            <div className="col-lg-4" key={id}>
-              <div className="d-flex flex-row">
-                <div>
-                  <div className="icon btn btn-circle pe-none btn-soft-primary me-4">
-                    <span className="number fs-18">{i + 1}</span>
+                  <div>
+                    <h4>{item.title}</h4>
+                    <p className="mb-2">{item.description}</p>
                   </div>
                 </div>
-
-                <div>
-                  <h4>{item.title}</h4>
-                  <p className="mb-2">{item.description}</p>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </Fragment>
-    </div>
+            ))}
+          </div>
+        </Fragment>
+      </div>
+    </section>
   );
 }

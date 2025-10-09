@@ -5,8 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service12Schema = {
   title: 'Service 12',
@@ -29,6 +28,18 @@ export const service12Schema = {
       type: 'json-one-to-many',
       target: 'Service12Tab',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-25',
+    },
   ],
   models: [
     {
@@ -39,10 +50,7 @@ export const service12Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -125,6 +133,7 @@ export const service12Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service12Data = Data<typeof service12Schema>;
@@ -132,6 +141,8 @@ export type Service12Data = Data<typeof service12Schema>;
 export const service12Demos: Demo<typeof service12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-9',
+    sequence: 3,
     data: {
       service12Caption: 'Why Choose us?',
       service12Title:
@@ -398,6 +409,8 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-9',
+    sequence: 3,
     data: {
       service12Caption: 'Pourquoi nous choisir ?',
       service12Title:

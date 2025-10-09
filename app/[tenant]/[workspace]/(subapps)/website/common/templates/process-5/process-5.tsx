@@ -15,6 +15,8 @@ export function Process5(props: TemplateProps<Process5Data>) {
     process5Description: description,
     process5Image,
     process5Processes: processes,
+    process5WrapperClassName: wrapperClassName,
+    process5ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -24,33 +26,35 @@ export function Process5(props: TemplateProps<Process5Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-10 mb-lg-19 mb-xl-22 align-items-center">
-        <div className="col-lg-6">
-          <figure>
-            <img alt="how it work" src={image} />
-          </figure>
-        </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-10 align-items-center">
+          <div className="col-lg-6">
+            <figure>
+              <img alt="how it work" src={image} />
+            </figure>
+          </div>
 
-        <div className="col-lg-6">
-          <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
-          <h3 className="display-4 mb-5">{title}</h3>
-          <p className="mb-8">{description}</p>
+          <div className="col-lg-6">
+            <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
+            <h3 className="display-4 mb-5">{title}</h3>
+            <p className="mb-8">{description}</p>
 
-          <div className="row gy-6 gx-xxl-8 process-wrapper">
-            {processes?.map(({id, attrs: item}) => {
-              const Icon = item.icon && getIcon(item.icon);
-              return (
-                <div className="col-md-4" key={id}>
-                  {Icon && <Icon />}
-                  <h4 className="mb-1">{item.title}</h4>
-                  <p className="mb-0">{item.description}</p>
-                </div>
-              );
-            })}
+            <div className="row gy-6 gx-xxl-8 process-wrapper">
+              {processes?.map(({id, attrs: item}) => {
+                const Icon = item.icon && getIcon(item.icon);
+                return (
+                  <div className="col-md-4" key={id}>
+                    {Icon && <Icon />}
+                    <h4 className="mb-1">{item.title}</h4>
+                    <p className="mb-0">{item.description}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

@@ -4,9 +4,8 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
+import {solidIconsSelection} from '../meta-selections';
 
 export const service5Schema = {
   title: 'Service 5',
@@ -51,6 +50,18 @@ export const service5Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-18 mb-14 mb-md-17',
+    },
   ],
   models: [
     {
@@ -73,16 +84,13 @@ export const service5Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
       ],
     },
     bulletListModel,
-    bulletPointModel,
   ],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service5Data = Data<typeof service5Schema>;
@@ -90,6 +98,8 @@ export type Service5Data = Data<typeof service5Schema>;
 export const service5Demos: Demo<typeof service5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-4',
+    sequence: 2,
     data: {
       service5Title:
         "Our goal is to develop solutions that make our clients' life easier.",
@@ -206,6 +216,8 @@ export const service5Demos: Demo<typeof service5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-4',
+    sequence: 2,
     data: {
       service5Title:
         'Notre objectif est de développer des solutions qui facilitent la vie de nos clients.',

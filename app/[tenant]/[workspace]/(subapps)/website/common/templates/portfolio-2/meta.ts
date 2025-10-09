@@ -32,6 +32,18 @@ export const portfolio2Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio2CarouselImages',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper overflow-hidden',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-9 pb-md-14',
+    },
   ],
   models: [
     {
@@ -68,6 +80,8 @@ export type Portfolio2Data = Data<typeof portfolio2Schema>;
 export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 4,
     data: {
       portfolio2Caption: 'Our Recent Portfolio',
       portfolio2SlidesPerView: 2,
@@ -168,6 +182,8 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 4,
     data: {
       portfolio2Caption: 'Notre portefeuille récent',
       portfolio2SlidesPerView: 2,

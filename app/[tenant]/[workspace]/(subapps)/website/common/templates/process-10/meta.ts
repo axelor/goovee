@@ -29,6 +29,18 @@ export const process10Schema = {
       type: 'json-one-to-many',
       target: 'Process10Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-17',
+    },
   ],
   models: [
     {
@@ -63,6 +75,8 @@ export type Process10Data = Data<typeof process10Schema>;
 export const process10Demos: Demo<typeof process10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-12',
+    sequence: 3,
     data: {
       process10Title: 'Our three process steps on creating awesome projects.',
       process10Image: {
@@ -108,6 +122,8 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-12',
+    sequence: 3,
     data: {
       process10Title:
         'Nos trois étapes de processus pour créer des projets impressionnants.',

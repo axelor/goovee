@@ -9,11 +9,13 @@ export function CTA5(props: TemplateProps<Cta5Data>) {
     cta5Caption: caption,
     cta5InputLabel: inputLabel,
     cta5InputValue: inputValue,
+    cta5WrapperClassName: wrapperClassName,
+    cta5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container py-14 py-md-16 text-center">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-md-9 col-lg-7 col-xl-7 mx-auto text-center">
             <Puzzle />

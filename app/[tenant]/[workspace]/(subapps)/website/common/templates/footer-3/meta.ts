@@ -102,6 +102,18 @@ export const footer3Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-gradient-reverse-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-13 pt-md-15 pb-7',
+    },
   ],
   models: [
     socialLinksModel,
@@ -150,6 +162,8 @@ export type Footer3Data = Data<typeof footer3Schema>;
 export const footer3Demos: Demo<typeof footer3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 8,
     data: {
       footer3Image: {
         id: '1',
@@ -238,6 +252,8 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 8,
     data: {
       footer3Image: {
         id: '1',

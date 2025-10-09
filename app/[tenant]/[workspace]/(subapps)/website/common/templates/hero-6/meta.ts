@@ -48,6 +48,18 @@ export const hero6Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-10',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -57,6 +69,8 @@ export type Hero6Data = Data<typeof hero6Schema>;
 export const hero6Demos: Demo<typeof hero6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 1,
     data: {
       hero6Title:
         'Put your physical activity, rest, and medicine routine into one place.',
@@ -77,6 +91,8 @@ export const hero6Demos: Demo<typeof hero6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 1,
     data: {
       hero6Title:
         'Regroupez votre activité physique, votre repos et votre routine médicale en un seul endroit.',

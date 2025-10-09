@@ -49,6 +49,18 @@ export const about20Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mt-15 pb-16 pb-md-18',
+    },
   ],
   models: [serviceList3Model],
   metaModels: [metaFileModel],
@@ -59,6 +71,8 @@ export type About20Data = Data<typeof about20Schema>;
 export const about20Demos: Demo<typeof about20Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 7,
     data: {
       about20Image1: {
         id: '1',
@@ -126,6 +140,8 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 7,
     data: {
       about20Image1: {
         id: '1',

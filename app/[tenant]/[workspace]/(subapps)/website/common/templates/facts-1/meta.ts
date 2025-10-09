@@ -26,6 +26,18 @@ export const facts1Schema = {
       type: 'json-one-to-many',
       target: 'Facts1Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-17 pb-md-21',
+    },
   ],
   models: [
     {
@@ -54,6 +66,8 @@ export type Facts1Data = Data<typeof facts1Schema>;
 export const facts1Demos: Demo<typeof facts1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 7,
     data: {
       facts1Title: 'We feel proud of our achievements.',
       facts1Caption: 'Company Facts',
@@ -87,6 +101,8 @@ export const facts1Demos: Demo<typeof facts1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 7,
     data: {
       facts1Title: 'Nous sommes fiers de nos réalisations.',
       facts1Caption: 'Faits sur l’entreprise',

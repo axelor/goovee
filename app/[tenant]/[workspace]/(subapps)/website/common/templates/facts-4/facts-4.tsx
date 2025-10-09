@@ -10,6 +10,8 @@ export function Facts4(props: TemplateProps<Facts4Data>) {
     facts4Caption: caption,
     facts4BackgroundImage,
     facts4Facts: facts,
+    facts4WrapperClassName: wrapperClassName,
+    facts4ContainerClassName: containerClassName,
   } = data || {};
 
   const backgroundImage = getMetaFileURL({
@@ -20,9 +22,10 @@ export function Facts4(props: TemplateProps<Facts4Data>) {
 
   return (
     <section
-      className="wrapper image-wrapper bg-auto no-overlay bg-image text-center bg-map"
+      className={wrapperClassName}
+      data-code={props.code}
       style={{backgroundImage: `url(${backgroundImage})`}}>
-      <div className="container pt-0 pb-14 pt-md-16 pb-md-18">
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-md-8 col-xl-7 col-xxl-6 mx-auto">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>

@@ -4,8 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {linealIcons} from '@/subapps/website/common/icons/lineal';
-import {startCase} from 'lodash-es';
+import {linealIconsSelection} from '../meta-selections';
 
 export const facts5Schema = {
   title: 'Facts 5',
@@ -17,6 +16,18 @@ export const facts5Schema = {
       title: 'Facts',
       type: 'json-one-to-many',
       target: 'Facts5Facts',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
     },
   ],
   models: [
@@ -40,14 +51,12 @@ export const facts5Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: linealIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'lineal-icons',
         },
       ],
     },
   ],
+  selections: [linealIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Facts5Data = Data<typeof facts5Schema>;
@@ -55,6 +64,8 @@ export type Facts5Data = Data<typeof facts5Schema>;
 export const facts5Demos: Demo<typeof facts5Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 6,
     data: {
       facts5Facts: [
         {
@@ -98,6 +109,8 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 6,
     data: {
       facts5Facts: [
         {

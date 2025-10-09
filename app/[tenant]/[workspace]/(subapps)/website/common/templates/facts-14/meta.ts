@@ -34,6 +34,18 @@ export const facts14Schema = {
       type: 'json-one-to-many',
       target: 'Facts14Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [
     {
@@ -68,6 +80,8 @@ export type Facts14Data = Data<typeof facts14Schema>;
 export const facts14Demos: Demo<typeof facts14Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 7,
     data: {
       facts14Title: 'Trust us, join 10K+ clients to grow your business.',
       facts14Caption: 'Join Our Community',
@@ -111,6 +125,8 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 7,
     data: {
       facts14Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',

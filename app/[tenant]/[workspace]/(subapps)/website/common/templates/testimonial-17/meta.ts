@@ -5,7 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {ratingsSelection} from '../meta-selections';
 
 export const testimonial17Schema = {
   title: 'Testimonial 17',
@@ -27,6 +27,18 @@ export const testimonial17Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial17Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-lg-8 pb-14 pb-md-17',
     },
   ],
   models: [
@@ -55,7 +67,7 @@ export const testimonial17Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
         {
           name: 'image',
@@ -68,6 +80,7 @@ export const testimonial17Schema = {
     },
   ],
   metaModels: [metaFileModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial17Data = Data<typeof testimonial17Schema>;
@@ -75,6 +88,8 @@ export type Testimonial17Data = Data<typeof testimonial17Schema>;
 export const testimonial17Demos: Demo<typeof testimonial17Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-21',
+    sequence: 8,
     data: {
       testimonial17Caption: 'Happy Customers',
       testimonial17Description:
@@ -193,6 +208,8 @@ export const testimonial17Demos: Demo<typeof testimonial17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-21',
+    sequence: 8,
     data: {
       testimonial17Caption: 'Clients satisfaits',
       testimonial17Description:

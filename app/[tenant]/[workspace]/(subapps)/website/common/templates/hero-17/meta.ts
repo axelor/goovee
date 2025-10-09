@@ -48,6 +48,18 @@ export const hero17Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-md-16 text-center',
+    },
   ],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
@@ -57,6 +69,8 @@ export type Hero17Data = Data<typeof hero17Schema>;
 export const hero17Demos: Demo<typeof hero17Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-17',
+    sequence: 1,
     data: {
       hero17Title: 'We provide quick solutions for your company.',
       hero17Caption: 'Hello! This is Lighthouse',
@@ -75,6 +89,8 @@ export const hero17Demos: Demo<typeof hero17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-17',
+    sequence: 1,
     data: {
       hero17Title:
         'Nous apportons des solutions rapides pour votre entreprise.',

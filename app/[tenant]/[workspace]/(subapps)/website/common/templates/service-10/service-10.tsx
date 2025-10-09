@@ -24,6 +24,8 @@ export function Service10(props: TemplateProps<Service10Data>) {
     service10CardUrl2,
     service10CardButtonText1,
     service10CardButtonText2,
+    service10WrapperClassName: wrapperClassName,
+    service10ContainerClassName: containerClassName,
   } = data || {};
 
   const image1 = getMetaFileURL({
@@ -39,67 +41,69 @@ export function Service10(props: TemplateProps<Service10Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gx-lg-0 gy-10 mb-15 mb-md-18 align-items-center">
-        <div className="col-lg-6">
-          <div className="row g-6 text-center">
-            <div className="col-md-6">
-              <div className="row">
-                <div className="col-lg-12">
-                  <figure className="rounded mb-6">
-                    <img src={image2} alt="" />
-                  </figure>
-                </div>
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-0 gy-10 align-items-center">
+          <div className="col-lg-6">
+            <div className="row g-6 text-center">
+              <div className="col-md-6">
+                <div className="row">
+                  <div className="col-lg-12">
+                    <figure className="rounded mb-6">
+                      <img src={image2} alt="" />
+                    </figure>
+                  </div>
 
-                <div className="col-lg-12">
-                  <ServiceCard5
-                    url={service10CardUrl1}
-                    title={service10CardTitle1}
-                    icon={service10CardIcon1}
-                    className="card shadow-lg mb-md-6 mt-lg-6"
-                    description={service10CardDescription1}
-                    buttonText={service10CardButtonText1}
-                  />
+                  <div className="col-lg-12">
+                    <ServiceCard5
+                      url={service10CardUrl1}
+                      title={service10CardTitle1}
+                      icon={service10CardIcon1}
+                      className="card shadow-lg mb-md-6 mt-lg-6"
+                      description={service10CardDescription1}
+                      buttonText={service10CardButtonText1}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="col-md-6">
-              <div className="row">
-                <div className="col-lg-12 order-md-2">
-                  <figure className="rounded mb-6 mb-md-0">
-                    <img src={image1} alt="" />
-                  </figure>
-                </div>
+              <div className="col-md-6">
+                <div className="row">
+                  <div className="col-lg-12 order-md-2">
+                    <figure className="rounded mb-6 mb-md-0">
+                      <img src={image1} alt="" />
+                    </figure>
+                  </div>
 
-                <div className="col-lg-12">
-                  <ServiceCard5
-                    url={service10CardUrl2}
-                    icon={service10CardIcon2}
-                    title={service10CardTitle2}
-                    description={service10CardDescription2}
-                    buttonText={service10CardButtonText2}
-                  />
+                  <div className="col-lg-12">
+                    <ServiceCard5
+                      url={service10CardUrl2}
+                      icon={service10CardIcon2}
+                      title={service10CardTitle2}
+                      description={service10CardDescription2}
+                      buttonText={service10CardButtonText2}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-lg-5 offset-lg-1">
-          <h2 className="display-4 mb-3">{title}</h2>
+          <div className="col-lg-5 offset-lg-1">
+            <h2 className="display-4 mb-3">{title}</h2>
 
-          <p className="lead fs-lg lh-sm">{caption}</p>
+            <p className="lead fs-lg lh-sm">{caption}</p>
 
-          <p>{description}</p>
+            <p>{description}</p>
 
-          <NextLink
-            href={linkHref}
-            title={linkTitle}
-            className="btn btn-primary rounded-pill mt-3"
-          />
+            <NextLink
+              href={linkHref}
+              title={linkTitle}
+              className="btn btn-primary rounded-pill mt-3"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

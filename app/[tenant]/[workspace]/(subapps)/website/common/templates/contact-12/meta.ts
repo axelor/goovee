@@ -93,6 +93,18 @@ export const contact12Schema = {
       title: 'Placeholder 3',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-15 py-md-17',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -103,6 +115,8 @@ export type Contact12Data = Data<typeof contact12Schema>;
 export const contact12Demos: Demo<typeof contact12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 7,
     data: {
       contact12Title: 'Request Photography Pricing',
       contact12Description:
@@ -131,6 +145,8 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 7,
     data: {
       contact12Title: 'Demander un devis de photographie',
       contact12Description:

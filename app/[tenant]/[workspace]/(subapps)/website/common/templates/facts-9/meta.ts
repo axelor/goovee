@@ -31,6 +31,30 @@ export const facts9Schema = {
       type: 'json-one-to-many',
       target: 'Facts9Facts',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled upper-end',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
+    {
+      name: 'rowClassName',
+      title: 'Row Class Name',
+      type: 'string',
+      defaultValue: 'row',
+    },
+    {
+      name: 'columnClassName',
+      title: 'Column Class Name',
+      type: 'string',
+      defaultValue: 'col-12 mt-n20',
+    },
   ],
   models: [
     {
@@ -60,6 +84,8 @@ export type Facts9Data = Data<typeof facts9Schema>;
 export const facts9Demos: Demo<typeof facts9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 2,
     data: {
       facts9BackgroundImage: {
         id: '1',
@@ -113,6 +139,8 @@ export const facts9Demos: Demo<typeof facts9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 2,
     data: {
       facts9BackgroundImage: {
         id: '1',

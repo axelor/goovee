@@ -38,6 +38,18 @@ export const contact9Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-18',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -48,6 +60,8 @@ export type Contact9Data = Data<typeof contact9Schema>;
 export const contact9Demos: Demo<typeof contact9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 3,
     data: {
       contact9Title: 'Trust us, join 10K+ clients to grow your business.',
       contact9Caption: 'Join Our Community',
@@ -64,6 +78,8 @@ export const contact9Demos: Demo<typeof contact9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 3,
     data: {
       contact9Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',

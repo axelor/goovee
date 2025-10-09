@@ -71,6 +71,18 @@ export const footer12Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-dark text-inverse',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-13 py-md-15',
+    },
   ],
   models: [
     socialLinksModel,
@@ -101,6 +113,8 @@ export type Footer12Data = Data<typeof footer12Schema>;
 export const footer12Demos: Demo<typeof footer12Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 8,
     data: {
       footer12Logo: {
         id: '1',
@@ -177,6 +191,8 @@ export const footer12Demos: Demo<typeof footer12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 8,
     data: {
       footer12Logo: {
         id: '1',

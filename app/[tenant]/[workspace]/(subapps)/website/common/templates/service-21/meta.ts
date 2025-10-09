@@ -4,9 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {linkColors} from '../../constants/colors';
+import {solidIconsSelection, linkColorsSelection} from '../meta-selections';
 
 export const service21Schema = {
   title: 'Service 21',
@@ -18,6 +16,18 @@ export const service21Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service21Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mt-n19 mb-14 mb-md-17',
     },
   ],
   models: [
@@ -41,19 +51,13 @@ export const service21Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'linkType',
           title: 'Link Type',
           type: 'string',
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
         {
           name: 'iconClassName',
@@ -68,6 +72,7 @@ export const service21Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service21Data = Data<typeof service21Schema>;
@@ -75,6 +80,8 @@ export type Service21Data = Data<typeof service21Schema>;
 export const service21Demos: Demo<typeof service21Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 2,
     data: {
       service21Services: [
         {
@@ -134,6 +141,8 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 2,
     data: {
       service21Services: [
         {

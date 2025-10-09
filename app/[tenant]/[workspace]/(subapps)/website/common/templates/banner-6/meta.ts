@@ -26,6 +26,18 @@ export const banner6Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-18 text-center',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -36,6 +48,8 @@ export type Banner6Data = Data<typeof banner6Schema>;
 export const banner6Demos: Demo<typeof banner6Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 2,
     data: {
       banner6Video: {
         id: '1',
@@ -55,6 +69,8 @@ export const banner6Demos: Demo<typeof banner6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 2,
     data: {
       banner6Video: {
         id: '1',

@@ -10,25 +10,31 @@ function getIcon(icon?: string) {
 }
 export function Service21(props: TemplateProps<Service21Data>) {
   const {data} = props;
-  const {service21Services: services} = data || {};
+  const {
+    service21Services: services,
+    service21WrapperClassName: wrapperClassName,
+    service21ContainerClassName: containerClassName,
+  } = data || {};
 
   return (
-    <div className="container">
-      <div className="row gx-md-5 gy-5 mt-n19 mb-14 mb-md-17">
-        {services?.map(({id, attrs: item}) => {
-          return (
-            <ServiceCard1
-              key={id}
-              linkUrl={item.link}
-              title={item.title}
-              Icon={getIcon(item.icon)}
-              linkType={item.linkType}
-              iconClassName={item.iconClassName}
-              description={item.description}
-            />
-          );
-        })}
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-md-5 gy-5 mt-n19 mb-14 mb-md-17">
+          {services?.map(({id, attrs: item}) => {
+            return (
+              <ServiceCard1
+                key={id}
+                linkUrl={item.link}
+                title={item.title}
+                Icon={getIcon(item.icon)}
+                linkType={item.linkType}
+                iconClassName={item.iconClassName}
+                description={item.description}
+              />
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

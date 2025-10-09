@@ -38,6 +38,37 @@ export const cta7Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'sectionClassName',
+      title: 'Section Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerCardClassName',
+      title: 'Container Card Class Name',
+      type: 'string',
+      defaultValue: 'container-card',
+    },
+    {
+      name: 'cardClassName',
+      title: 'Card Class Name',
+      type: 'string',
+      defaultValue:
+        'card image-wrapper bg-full bg-image bg-overlay bg-overlay-light-500 mb-14',
+    },
+    {
+      name: 'cardBodyClassName',
+      title: 'Card Body Class Name',
+      type: 'string',
+      defaultValue: 'card-body py-14 px-0',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -48,6 +79,8 @@ export type Cta7Data = Data<typeof cta7Schema>;
 export const cta7Demos: Demo<typeof cta7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-18',
+    sequence: 10,
     data: {
       cta7Title: 'Trust us, join 10K+ clients to grow your business.',
       cta7Caption: 'Join Our Community',
@@ -64,6 +97,8 @@ export const cta7Demos: Demo<typeof cta7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-18',
+    sequence: 10,
     data: {
       cta7Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',

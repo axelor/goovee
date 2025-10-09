@@ -60,6 +60,18 @@ export const about25Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [serviceList3Model],
   metaModels: [metaFileModel],
@@ -70,6 +82,8 @@ export type About25Data = Data<typeof about25Schema>;
 export const about25Demos: Demo<typeof about25Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-24',
+    sequence: 6,
     data: {
       about25Image: {
         id: '1',
@@ -130,6 +144,8 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-24',
+    sequence: 6,
     data: {
       about25Image: {
         id: '1',

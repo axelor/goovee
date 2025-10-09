@@ -23,6 +23,8 @@ export function About9(props: TemplateProps<About9Data>) {
     about9Description: description,
     about9Image,
     about9AboutList: aboutList,
+    about9WrapperClassName: wrapperClassName,
+    about9ContainerClassName: containerClassName,
   } = data || {};
 
   const image = getMetaFileURL({
@@ -32,44 +34,46 @@ export function About9(props: TemplateProps<About9Data>) {
   });
 
   return (
-    <div className="container">
-      <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-18 align-items-center">
-        <div className="col-md-8 col-lg-6 position-relative">
-          <div
-            className="shape bg-soft-primary rounded-circle rellax w-20 h-20"
-            style={{top: '-2rem', left: '-1.9rem'}}
-          />
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 align-items-center">
+          <div className="col-md-8 col-lg-6 position-relative">
+            <div
+              className="shape bg-soft-primary rounded-circle rellax w-20 h-20"
+              style={{top: '-2rem', left: '-1.9rem'}}
+            />
 
-          <figure className="rounded">
-            <img src={image} alt="" />
-          </figure>
-        </div>
+            <figure className="rounded">
+              <img src={image} alt="" />
+            </figure>
+          </div>
 
-        <div className="col-lg-6">
-          <h2 className="display-4 mb-3">{caption}</h2>
-          <p className="lead fs-lg">{title}</p>
-          <p className="mb-6">{description}</p>
+          <div className="col-lg-6">
+            <h2 className="display-4 mb-3">{caption}</h2>
+            <p className="lead fs-lg">{title}</p>
+            <p className="mb-6">{description}</p>
 
-          <div className="row gx-xl-10 gy-6">
-            {aboutList?.map(({id, attrs: item}) => {
-              const Icon = getIcon(item.icon ?? '');
-              return (
-                <div className="col-md-6" key={id}>
-                  <ServiceCard3
-                    title={item.title}
-                    description={item.description}
-                    Icon={
-                      Icon ? (
-                        <Icon className="solid icon-svg-sm text-aqua me-4" />
-                      ) : null
-                    }
-                  />
-                </div>
-              );
-            })}
+            <div className="row gx-xl-10 gy-6">
+              {aboutList?.map(({id, attrs: item}) => {
+                const Icon = getIcon(item.icon ?? '');
+                return (
+                  <div className="col-md-6" key={id}>
+                    <ServiceCard3
+                      title={item.title}
+                      description={item.description}
+                      Icon={
+                        Icon ? (
+                          <Icon className="solid icon-svg-sm text-aqua me-4" />
+                        ) : null
+                      }
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

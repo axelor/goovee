@@ -28,6 +28,18 @@ export const clientlist4Schema = {
       type: 'json-one-to-many',
       target: 'Clients',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [clientsModel],
   metaModels: [metaFileModel],
@@ -38,6 +50,8 @@ export type Clientlist4Data = Data<typeof clientlist4Schema>;
 export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-13',
+    sequence: 7,
     data: {
       clientlist4Title: '300+ customers have given faith in us.',
       clientlist4Caption:
@@ -160,6 +174,8 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-13',
+    sequence: 7,
     data: {
       clientlist4Title: 'Plus de 300 clients nous ont fait confiance.',
       clientlist4Caption:

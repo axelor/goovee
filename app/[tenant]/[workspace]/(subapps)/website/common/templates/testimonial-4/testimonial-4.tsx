@@ -13,11 +13,13 @@ export function Testimonial4(props: TemplateProps<Testimonial4Data>) {
     testimonial4SpaceBetween: spaceBetween,
     testimonial4Navigation: navigation,
     testimonial4Testimonials: testimonials = [],
+    testimonial4WrapperClassName: wrapperClassName,
+    testimonial4ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <div className="wrapper bg-light">
-      <div className="container py-14 py-md-16">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-md-10 offset-md-1 col-lg-8 offset-lg-2 mx-auto text-center">
             <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
@@ -49,6 +51,6 @@ export function Testimonial4(props: TemplateProps<Testimonial4Data>) {
           </Carousel>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

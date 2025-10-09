@@ -52,6 +52,18 @@ export const hero3Schema = {
       type: 'json-one-to-many',
       target: 'Hero3Typewriter',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-dark angled lower-start',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-7 pt-md-11 pb-8',
+    },
   ],
   models: [
     {
@@ -76,6 +88,8 @@ export type Hero3Data = Data<typeof hero3Schema>;
 export const hero3Demos: Demo<typeof hero3Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-3',
+    sequence: 1,
     data: {
       hero3Title: 'We specialize in',
       hero3Description:
@@ -105,6 +119,8 @@ export const hero3Demos: Demo<typeof hero3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-3',
+    sequence: 1,
     data: {
       hero3Title: 'Nous sommes spécialisés dans',
       hero3Description:

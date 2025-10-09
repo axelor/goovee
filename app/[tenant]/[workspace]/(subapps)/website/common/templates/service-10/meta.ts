@@ -1,5 +1,3 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
@@ -7,6 +5,7 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
+import {uniconsSelection} from '../meta-selections';
 
 export const service10Schema = {
   title: 'Service 10',
@@ -66,19 +65,13 @@ export const service10Schema = {
       name: 'cardIcon1',
       title: 'Card Icon 1',
       type: 'string',
-      selection: unicons.map(icon => ({
-        title: startCase(icon),
-        value: icon,
-      })),
+      selection: 'unicons',
     },
     {
       name: 'cardIcon2',
       title: 'Card Icon 2',
       type: 'string',
-      selection: unicons.map(icon => ({
-        title: startCase(icon),
-        value: icon,
-      })),
+      selection: 'unicons',
     },
     {
       name: 'cardDescription1',
@@ -110,9 +103,22 @@ export const service10Schema = {
       title: 'Card Button Text 2',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-15 mb-md-18',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service10Data = Data<typeof service10Schema>;
@@ -120,6 +126,8 @@ export type Service10Data = Data<typeof service10Schema>;
 export const service10Demos: Demo<typeof service10Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 2,
     data: {
       service10Title: 'What We Provide?',
       service10Description:
@@ -158,6 +166,8 @@ export const service10Demos: Demo<typeof service10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 2,
     data: {
       service10Title: 'Ce que nous offrons ?',
       service10Description:

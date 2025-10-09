@@ -38,6 +38,18 @@ export const banner1Schema = {
       title: 'Button 2',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-5 pb-15 pt-lg-10 pb-lg-2',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -48,6 +60,8 @@ export type Banner1Data = Data<typeof banner1Schema>;
 export const banner1Demos: Demo<typeof banner1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 6,
     data: {
       banner1Heading:
         'Put your physical activity, rest, & medicine routine into one place.',
@@ -66,6 +80,8 @@ export const banner1Demos: Demo<typeof banner1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 6,
     data: {
       banner1Heading:
         'Mettez votre activité physique, votre repos et votre routine médicale en un seul endroit.',

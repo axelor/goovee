@@ -12,11 +12,13 @@ export function Hero5(props: TemplateProps<Hero5Data>) {
     hero5ButtonLabel2: buttonLabel2,
     hero5ButtonLink1: buttonLink1,
     hero5ButtonLink2: buttonLink2,
+    hero5WrapperClassName: wrapperClassName,
+    hero5ContainerClassName: containerClassName,
   } = data || {};
 
   return (
-    <section className="wrapper bg-soft-primary">
-      <div className="container pt-10 pb-15 pt-md-14 pb-md-20 text-center">
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
         <div className="row">
           <div className="col-md-10 col-lg-8 col-xl-8 col-xxl-7 mx-auto mb-13">
             <h1 className="display-1 mb-4" style={slideInDownAnimate('0ms')}>

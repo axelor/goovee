@@ -1,12 +1,14 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {colors, linkColors} from '../../constants/colors';
+import {
+  uniconsSelection,
+  colorsSelection,
+  linkColorsSelection,
+} from '../meta-selections';
 
 export const service25Schema = {
   title: 'Service 25',
@@ -28,6 +30,18 @@ export const service25Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service25Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-16',
     },
   ],
   models: [
@@ -51,19 +65,13 @@ export const service25Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'iconColor',
           title: 'Icon Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
         {
           name: 'linkUrl',
@@ -74,14 +82,12 @@ export const service25Schema = {
           name: 'linkColor',
           title: 'Link Color',
           type: 'string',
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
       ],
     },
   ],
+  selections: [uniconsSelection, colorsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service25Data = Data<typeof service25Schema>;
@@ -89,6 +95,8 @@ export type Service25Data = Data<typeof service25Schema>;
 export const service25Demos: Demo<typeof service25Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-22',
+    sequence: 2,
     data: {
       service25Caption: 'What We Do?',
       service25Title:
@@ -138,6 +146,8 @@ export const service25Demos: Demo<typeof service25Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-22',
+    sequence: 2,
     data: {
       service25Caption: 'Que faisons-nous ?',
       service25Title:

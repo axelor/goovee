@@ -6,6 +6,7 @@ import {
 } from '../../types/templates';
 import {metaFileModel} from '../meta-models';
 import {serviceList3Model} from '../json-models';
+import {buttonColorSelection} from '../meta-selections';
 
 export const about21Schema = {
   title: 'About 21',
@@ -33,16 +34,7 @@ export const about21Schema = {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'media',
@@ -63,9 +55,22 @@ export const about21Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-15 pt-md-17 mb-15 mb-md-17',
+    },
   ],
   models: [serviceList3Model],
   metaModels: [metaFileModel],
+  selections: [buttonColorSelection],
 } as const satisfies TemplateSchema;
 
 export type About21Data = Data<typeof about21Schema>;
@@ -73,6 +78,8 @@ export type About21Data = Data<typeof about21Schema>;
 export const about21Demos: Demo<typeof about21Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-20',
+    sequence: 6,
     data: {
       about21Image: {
         id: '1',
@@ -135,6 +142,8 @@ export const about21Demos: Demo<typeof about21Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-20',
+    sequence: 6,
     data: {
       about21Image: {
         id: '1',

@@ -38,6 +38,19 @@ export const cta8Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper mb-14',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue:
+        'container card image-wrapper bg-full bg-image bg-overlay bg-overlay-300',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -48,6 +61,8 @@ export type Cta8Data = Data<typeof cta8Schema>;
 export const cta8Demos: Demo<typeof cta8Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-19',
+    sequence: 8,
     data: {
       cta8Title: 'Trust us, join 10K+ clients to grow your business.',
       cta8Caption: 'Join Our Community',
@@ -64,6 +79,8 @@ export const cta8Demos: Demo<typeof cta8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-19',
+    sequence: 8,
     data: {
       cta8Title:
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',

@@ -35,6 +35,18 @@ export const about7Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-15 mb-md-18',
+    },
   ],
   models: [accordionModel],
   metaModels: [metaFileModel],
@@ -45,6 +57,8 @@ export type About7Data = Data<typeof about7Schema>;
 export const about7Demos: Demo<typeof about7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-7',
+    sequence: 6,
     data: {
       about7Title: 'Discover the Benefits of Choosing Us',
       about7LeadParagraph:
@@ -89,6 +103,8 @@ export const about7Demos: Demo<typeof about7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-7',
+    sequence: 6,
     data: {
       about7Title: 'Découvrez les avantages de nous choisir',
       about7LeadParagraph:

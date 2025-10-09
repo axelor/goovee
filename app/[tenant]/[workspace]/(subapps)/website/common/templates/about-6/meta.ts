@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const about6Schema = {
@@ -48,8 +48,20 @@ export const about6Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -58,6 +70,8 @@ export type About6Data = Data<typeof about6Schema>;
 export const about6Demos: Demo<typeof about6Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-15',
+    sequence: 2,
     data: {
       about6Title: 'Why Choose Us?',
       about6LeadParagraph:
@@ -120,6 +134,8 @@ export const about6Demos: Demo<typeof about6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-15',
+    sequence: 2,
     data: {
       about6Title: 'Pourquoi nous choisir ?',
       about6LeadParagraph:

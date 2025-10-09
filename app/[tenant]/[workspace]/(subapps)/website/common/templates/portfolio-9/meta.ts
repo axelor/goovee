@@ -159,6 +159,18 @@ export const portfolio9Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light wrapper-border',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-18 pb-md-16',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -169,6 +181,8 @@ export type Portfolio9Data = Data<typeof portfolio9Schema>;
 export const portfolio9Demos: Demo<typeof portfolio9Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-16',
+    sequence: 3,
     data: {
       portfolio9Title: 'Latest Projects',
       portfolio9Description:
@@ -231,6 +245,8 @@ export const portfolio9Demos: Demo<typeof portfolio9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-16',
+    sequence: 3,
     data: {
       portfolio9Title: 'Derniers projets',
       portfolio9Description:

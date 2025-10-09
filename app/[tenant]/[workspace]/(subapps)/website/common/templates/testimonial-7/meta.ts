@@ -56,6 +56,18 @@ export const testimonial7Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial7Testimonial',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14',
+    },
   ],
   models: [
     {
@@ -90,20 +102,22 @@ export type Testimonial7Data = Data<typeof testimonial7Schema>;
 export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-5',
+    sequence: 4,
     data: {
       testimonial7TileImage1: {
         id: '1',
         version: 1,
-        fileName: 'sa13.jpg',
+        fileName: 'g5.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/sa13.jpg',
+        filePath: '/img/photos/g5.jpg',
       },
       testimonial7TileImage2: {
         id: '1',
         version: 1,
-        fileName: 'sa14.jpg',
+        fileName: 'g6.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/sa14.jpg',
+        filePath: '/img/photos/g6.jpg',
       },
       testimonial7Heading: 'Satisfied Clients',
       testimonial7CountUp: 25,
@@ -156,20 +170,22 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-5',
+    sequence: 4,
     data: {
       testimonial7TileImage1: {
         id: '1',
         version: 1,
-        fileName: 'sa13.jpg',
+        fileName: 'g5.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/sa13.jpg',
+        filePath: '/img/photos/g5.jpg',
       },
       testimonial7TileImage2: {
         id: '1',
         version: 1,
-        fileName: 'sa14.jpg',
+        fileName: 'g6.jpg',
         fileType: 'image/jpeg',
-        filePath: '/img/photos/sa14.jpg',
+        filePath: '/img/photos/g6.jpg',
       },
       testimonial7Heading: 'Clients satisfaits',
       testimonial7CountUp: 25,

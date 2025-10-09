@@ -5,12 +5,28 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 import {accordionModel} from '../json-models';
+import {metaFileModel} from '../meta-models';
 
 export const faq1Schema = {
   title: 'FAQ 1',
   code: 'faq1',
   type: Template.block,
   fields: [
+    {
+      name: 'media',
+      title: 'Media',
+      type: 'many-to-one',
+      target: 'com.axelor.meta.db.MetaFile',
+      widget: 'binary-link',
+      widgetAttrs: {'x-accept': 'video/*'},
+    },
+    {
+      name: 'thumbnail',
+      title: 'Thumbnail',
+      type: 'many-to-one',
+      target: 'com.axelor.meta.db.MetaFile',
+      widget: 'Image',
+    },
     {
       name: 'title',
       title: 'Title',
@@ -27,8 +43,21 @@ export const faq1Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-16 pt-lg-0 pb-md-16',
+    },
   ],
   models: [accordionModel],
+  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Faq1Data = Data<typeof faq1Schema>;
@@ -36,7 +65,23 @@ export type Faq1Data = Data<typeof faq1Schema>;
 export const faq1Demos: Demo<typeof faq1Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-6',
+    sequence: 4,
     data: {
+      faq1Media: {
+        id: '1',
+        version: 1,
+        fileName: 'movie.mp4',
+        fileType: 'video/mp4',
+        filePath: '/media/movie.mp4',
+      },
+      faq1Thumbnail: {
+        id: '1',
+        version: 1,
+        fileName: 'v1.jpg',
+        fileType: 'image/jpeg',
+        filePath: '/img/photos/v1.jpg',
+      },
       faq1Title:
         'If you are unable to locate the answer to your query, you may send us an email using our contact page.',
       faq1Caption: 'FAQ',
@@ -100,7 +145,23 @@ export const faq1Demos: Demo<typeof faq1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-6',
+    sequence: 4,
     data: {
+      faq1Media: {
+        id: '1',
+        version: 1,
+        fileName: 'movie.mp4',
+        fileType: 'video/mp4',
+        filePath: '/media/movie.mp4',
+      },
+      faq1Thumbnail: {
+        id: '1',
+        version: 1,
+        fileName: 'v1.jpg',
+        fileType: 'image/jpeg',
+        filePath: '/img/photos/v1.jpg',
+      },
       faq1Title:
         'Si vous ne parvenez pas à trouver la réponse à votre question, vous pouvez nous envoyer un e-mail via notre page de contact.',
       faq1Caption: 'FAQ',

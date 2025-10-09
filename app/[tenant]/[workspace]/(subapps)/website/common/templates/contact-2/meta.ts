@@ -43,6 +43,18 @@ export const contact2Schema = {
       target: 'com.axelor.meta.db.MetaFile',
       widget: 'Image',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [],
   metaModels: [metaFileModel],
@@ -53,6 +65,8 @@ export type Contact2Data = Data<typeof contact2Schema>;
 export const contact2Demos: Demo<typeof contact2Schema>[] = [
   {
     language: 'en_US',
+    page: 'others',
+    sequence: 3,
     data: {
       contact2Title: 'Let’s Talk',
       contact2Description1:
@@ -72,6 +86,8 @@ export const contact2Demos: Demo<typeof contact2Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'others',
+    sequence: 3,
     data: {
       contact2Title: 'Parlons',
       contact2Description1:

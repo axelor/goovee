@@ -4,7 +4,7 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
 export const service17Schema = {
@@ -90,8 +90,20 @@ export const service17Schema = {
       target: 'BulletList',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-23 pb-14 pb-md-17',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
+  models: [bulletListModel],
   metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
@@ -100,6 +112,8 @@ export type Service17Data = Data<typeof service17Schema>;
 export const service17Demos: Demo<typeof service17Schema>[] = [
   {
     language: 'en_US',
+    page: 'demo-14',
+    sequence: 2,
     data: {
       service17Caption: 'What We Do',
       service17Title:
@@ -192,6 +206,8 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    page: 'demo-14',
+    sequence: 2,
     data: {
       service17Caption: 'Ce que nous faisons',
       service17Title:
