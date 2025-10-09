@@ -12,18 +12,33 @@ type BlogCard5Props = {
   title?: string;
   author?: string;
   category?: string;
-  comments?: number;
+  comments?: string;
   createdAt?: string;
+  imageLink?: string;
+  authorLink?: string;
+  commentsLink?: string;
+  titleLink?: string;
 };
 // ======================================================
 
 const BlogCard5: FC<BlogCard5Props> = props => {
-  const {image, title, author, category, createdAt, comments} = props;
+  const {
+    image,
+    title,
+    titleLink,
+    author,
+    category,
+    createdAt,
+    comments,
+    commentsLink,
+    imageLink,
+    authorLink,
+  } = props;
 
   return (
     <figure className="overlay caption caption-overlay rounded mb-0">
       <Link
-        href="#"
+        href={imageLink || '#'}
         className="position-relative"
         style={{paddingBottom: getPaddingBottom(image)}}>
         {image?.url && (
@@ -42,7 +57,7 @@ const BlogCard5: FC<BlogCard5Props> = props => {
           {category}
         </span>
         <h2 className="post-title h3 mt-1 mb-3">
-          <NextLink title={title} href="#" />
+          <NextLink title={title} href={titleLink || '#'} />
         </h2>
 
         <ul className="post-meta text-white mb-0">
@@ -52,16 +67,16 @@ const BlogCard5: FC<BlogCard5Props> = props => {
           </li>
 
           <li className="post-author">
-            <Link href="#">
+            <Link href={authorLink || '#'}>
               <i className="uil uil-user" />
-              <span>By {author}</span>
+              <span>{author}</span>
             </Link>
           </li>
 
           <li className="post-comments">
-            <Link href="#">
+            <Link href={commentsLink || '#'}>
               <i className="uil uil-comment" />
-              {comments} <span>Comments</span>
+              {comments}
             </Link>
           </li>
         </ul>
