@@ -53,6 +53,11 @@ export const blog5Schema = {
           visibleInGrid: true,
         },
         {
+          name: 'titleLink',
+          title: 'Title Link',
+          type: 'string',
+        },
+        {
           name: 'category',
           title: 'Category',
           type: 'string',
@@ -60,7 +65,12 @@ export const blog5Schema = {
         {
           name: 'comments',
           title: 'Comments',
-          type: 'integer',
+          type: 'string',
+        },
+        {
+          name: 'commentsLink',
+          title: 'Comments Link',
+          type: 'string',
         },
         {
           name: 'createdAt',
@@ -68,13 +78,13 @@ export const blog5Schema = {
           type: 'date',
         },
         {
-          name: 'link',
-          title: 'Link',
+          name: 'author',
+          title: 'Author',
           type: 'string',
         },
         {
-          name: 'figCaption',
-          title: 'Fig Caption',
+          name: 'authorLink',
+          title: 'Author Link',
           type: 'string',
         },
         {
@@ -82,6 +92,11 @@ export const blog5Schema = {
           title: 'Image',
           type: 'json-many-to-one',
           target: 'Image',
+        },
+        {
+          name: 'imageLink',
+          title: 'Image Link',
+          type: 'string',
         },
       ],
     },
@@ -107,10 +122,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Happy Married Life Belong',
             category: 'Wedding',
-            comments: 4,
+            comments: '4 Comments',
             createdAt: '2022-04-14',
-            link: '#',
-            figCaption: 'Read More',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'By Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -135,10 +152,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Engagement of Lina Anna',
             category: 'Engagement',
-            comments: 3,
+            comments: '3 Comments',
             createdAt: '2022-03-29',
-            link: '#',
-            figCaption: 'Read More',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'By Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -163,10 +182,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Ultricies fusce porta elit',
             category: 'Couples',
-            comments: 6,
+            comments: '6 Comments',
             createdAt: '2022-02-26',
-            link: '#',
-            figCaption: 'Read More',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'By Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -191,10 +212,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Morbi leo risus porta eget',
             category: 'Engagement',
-            comments: 3,
+            comments: '3 Comments',
             createdAt: '2022-01-17',
-            link: '#',
-            figCaption: 'Read More',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'By Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -219,10 +242,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Nulla vitae elit libero',
             category: 'Couples',
-            comments: 1,
+            comments: '1 Comment',
             createdAt: '2022-01-07',
-            link: '#',
-            figCaption: 'Read More',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'By Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -247,10 +272,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Pharetra augue elit sem',
             category: 'Wedding',
-            comments: 2,
+            comments: '2 Comments',
             createdAt: '2022-01-02',
-            link: '#',
-            figCaption: 'Read More',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'By Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -287,10 +314,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Une vie de couple heureuse',
             category: 'Mariage',
-            comments: 4,
+            comments: '4 Commentaires',
             createdAt: '2022-04-14',
-            link: '#',
-            figCaption: 'Lire la suite',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'par Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -315,10 +344,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Fiançailles de Lina Anna',
             category: 'Fiançailles',
-            comments: 3,
+            comments: '3 Commentaires',
             createdAt: '2022-03-29',
-            link: '#',
-            figCaption: 'Lire la suite',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'par Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -343,10 +374,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Ultricies fusce porta elit',
             category: 'Couples',
-            comments: 6,
+            comments: '6 Commentaires',
             createdAt: '2022-02-26',
-            link: '#',
-            figCaption: 'Lire la suite',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'par Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -371,10 +404,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Morbi leo risus porta eget',
             category: 'Fiançailles',
-            comments: 3,
+            comments: '3 Commentaires',
             createdAt: '2022-01-17',
-            link: '#',
-            figCaption: 'Lire la suite',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'par Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -399,10 +434,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Nulla vitae elit libero',
             category: 'Couples',
-            comments: 1,
+            comments: '1 Commentaire',
             createdAt: '2022-01-07',
-            link: '#',
-            figCaption: 'Lire la suite',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'par Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
@@ -427,10 +464,12 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
           attrs: {
             title: 'Pharetra augue elit sem',
             category: 'Mariage',
-            comments: 2,
+            comments: '2 Commentaires',
             createdAt: '2022-01-02',
-            link: '#',
-            figCaption: 'Lire la suite',
+            imageLink: '#',
+            commentsLink: '#',
+            author: 'par Jhon Doe',
+            authorLink: '#',
             image: {
               id: '1',
               version: 1,
