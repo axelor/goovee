@@ -18,7 +18,8 @@
     "website:seed:contents": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-contents.ts",
     "website:seed:website": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-website.ts",
     "changelogs:validate": "node ./changelogs/validate",
-    "changelogs:generate": "node ./changelogs/generate"
+    "changelogs:generate": "node ./changelogs/generate",
+    "analyze": "ANALYZE=true pnpm build"
   },
   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.17.0",
@@ -146,6 +147,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.5.4",
     "@swc-node/register": "^1.10.10",
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.12.11",
