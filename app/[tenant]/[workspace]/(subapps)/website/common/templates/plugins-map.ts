@@ -1,58 +1,58 @@
 import {formatComponentCode} from '../utils/helper';
-import {about10Schema} from './about-10/meta';
-import {about13Schema} from './about-13/meta';
-import {about18Schema} from './about-18/meta';
-import {about2Schema} from './about-2/meta';
-import {about5Schema} from './about-5/meta';
-import {about21Schema} from './about-21/meta';
-import {about24Schema} from './about-24/meta';
-import {facts13Schema} from './facts-13/meta';
-import {facts16Schema} from './facts-16/meta';
-import {faq1Schema} from './faq-1/meta';
-import {hero3Schema} from './hero-3/meta';
-import {hero11Schema} from './hero-11/meta';
-import {hero13Schema} from './hero-13/meta';
-import {hero15Schema} from './hero-15/meta';
-import {hero20Schema} from './hero-20/meta';
-import {hero21Schema} from './hero-21/meta';
-import {hero22Schema} from './hero-22/meta';
-import {hero24Schema} from './hero-24/meta';
-import {portfolio5Schema} from './portfolio-5/meta';
-import {portfolio10Schema} from './portfolio-10/meta';
-import {portfolio11Schema} from './portfolio-11/meta';
-import {portfolio12Schema} from './portfolio-12/meta';
-import {process9Schema} from './process-9/meta';
-import {service18Schema} from './service-18/meta';
-import {banner3Schema} from './banner-3/meta';
-import {banner6Schema} from './banner-6/meta';
+import {about10Code} from './about-10/meta';
+import {about13Code} from './about-13/meta';
+import {about18Code} from './about-18/meta';
+import {about2Code} from './about-2/meta';
+import {about5Code} from './about-5/meta';
+import {about21Code} from './about-21/meta';
+import {about24Code} from './about-24/meta';
+import {facts13Code} from './facts-13/meta';
+import {facts16Code} from './facts-16/meta';
+import {faq1Code} from './faq-1/meta';
+import {hero3Code} from './hero-3/meta';
+import {hero11Code} from './hero-11/meta';
+import {hero13Code} from './hero-13/meta';
+import {hero15Code} from './hero-15/meta';
+import {hero20Code} from './hero-20/meta';
+import {hero21Code} from './hero-21/meta';
+import {hero22Code} from './hero-22/meta';
+import {hero24Code} from './hero-24/meta';
+import {portfolio5Code} from './portfolio-5/meta';
+import {portfolio10Code} from './portfolio-10/meta';
+import {portfolio11Code} from './portfolio-11/meta';
+import {portfolio12Code} from './portfolio-12/meta';
+import {process9Code} from './process-9/meta';
+import {service18Code} from './service-18/meta';
+import {banner3Code} from './banner-3/meta';
+import {banner6Code} from './banner-6/meta';
 
 const pluginsMap = {
-  [about2Schema.code]: ['lightbox'],
-  [about5Schema.code]: ['progress-bar'],
-  [about10Schema.code]: ['progress-bar', 'lightbox'],
-  [about13Schema.code]: ['lightbox'],
-  [about18Schema.code]: ['progress-bar'],
-  [about21Schema.code]: ['lightbox'],
-  [about24Schema.code]: ['progress-bar'],
-  [facts13Schema.code]: ['progress-bar'],
-  [facts16Schema.code]: ['progress-bar'],
-  [faq1Schema.code]: ['lightbox'],
-  [hero3Schema.code]: ['lightbox'],
-  [hero11Schema.code]: ['lightbox'],
-  [hero13Schema.code]: ['lightbox'],
-  [hero15Schema.code]: ['lightbox'],
-  [hero20Schema.code]: ['replace-me'],
-  [hero21Schema.code]: ['replace-me'],
-  [hero22Schema.code]: ['lightbox'],
-  [hero24Schema.code]: ['lightbox'],
-  [portfolio5Schema.code]: ['lightbox'],
-  [portfolio10Schema.code]: ['lightbox'],
-  [portfolio11Schema.code]: ['lightbox'],
-  [portfolio12Schema.code]: ['lightbox'],
-  [process9Schema.code]: ['lightbox'],
-  [service18Schema.code]: ['progress-bar'],
-  [banner3Schema.code]: ['lightbox'],
-  [banner6Schema.code]: ['lightbox'],
+  [about2Code]: ['lightbox'],
+  [about5Code]: ['progress-bar'],
+  [about10Code]: ['progress-bar', 'lightbox'],
+  [about13Code]: ['lightbox'],
+  [about18Code]: ['progress-bar'],
+  [about21Code]: ['lightbox'],
+  [about24Code]: ['progress-bar'],
+  [facts13Code]: ['progress-bar'],
+  [facts16Code]: ['progress-bar'],
+  [faq1Code]: ['lightbox'],
+  [hero3Code]: ['lightbox'],
+  [hero11Code]: ['lightbox'],
+  [hero13Code]: ['lightbox'],
+  [hero15Code]: ['lightbox'],
+  [hero20Code]: ['replace-me'],
+  [hero21Code]: ['replace-me'],
+  [hero22Code]: ['lightbox'],
+  [hero24Code]: ['lightbox'],
+  [portfolio5Code]: ['lightbox'],
+  [portfolio10Code]: ['lightbox'],
+  [portfolio11Code]: ['lightbox'],
+  [portfolio12Code]: ['lightbox'],
+  [process9Code]: ['lightbox'],
+  [service18Code]: ['progress-bar'],
+  [banner3Code]: ['lightbox'],
+  [banner6Code]: ['lightbox'],
 };
 
 export const PluginsMap = Object.fromEntries(

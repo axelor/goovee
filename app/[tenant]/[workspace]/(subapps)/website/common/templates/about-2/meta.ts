@@ -8,9 +8,11 @@ import {bulletListModel, imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 import {buttonColorSelection} from '../meta-selections';
 
+export const about2Code = 'about2';
+
 export const about2Schema = {
   title: 'About 2',
-  code: 'about2',
+  code: about2Code,
   type: Template.block,
   fields: [
     {

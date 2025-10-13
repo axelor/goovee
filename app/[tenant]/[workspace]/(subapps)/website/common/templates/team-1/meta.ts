@@ -6,9 +6,11 @@ import {
 } from '@/subapps/website/common/types/templates';
 import {imageModel, socialLinksModel} from '../json-models';
 
+export const team1Code = 'team1';
+
 export const team1Schema = {
   title: 'Team 1',
-  code: 'team1',
+  code: team1Code,
   type: Template.block,
   fields: [
     {

@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {contactInfoModel, imageModel} from '../json-models';
 
+export const contact6Code = 'contact6';
+
 export const contact6Schema = {
   title: 'Contact 6',
-  code: 'contact6',
+  code: contact6Code,
   type: Template.block,
   fields: [
     {

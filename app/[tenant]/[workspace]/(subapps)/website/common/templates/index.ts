@@ -4,792 +4,438 @@ import dynamic from 'next/dynamic';
 import type {TemplateProps} from '../types';
 import {formatComponentCode} from '../utils/helper';
 
-import {about1Schema} from './about-1';
-import {about2Schema} from './about-2';
-import {about3Schema} from './about-3';
-import {about4Schema} from './about-4';
-import {about5Schema} from './about-5';
-import {about6Schema} from './about-6';
-import {about7Schema} from './about-7';
-import {about8Schema} from './about-8';
-import {about9Schema} from './about-9';
-import {about10Schema} from './about-10';
-import {about11Schema} from './about-11';
-import {about12Schema} from './about-12';
-import {about13Schema} from './about-13';
-import {about14Schema} from './about-14';
-import {about15Schema} from './about-15';
-import {about16Schema} from './about-16';
-import {about17Schema} from './about-17';
-import {about18Schema} from './about-18';
-import {about19Schema} from './about-19';
-import {about20Schema} from './about-20';
-import {about21Schema} from './about-21';
-import {about22Schema} from './about-22';
-import {about23Schema} from './about-23';
-import {about24Schema} from './about-24';
-import {about25Schema} from './about-25';
-import {blog1Schema} from './blog-1';
-import {blog2Schema} from './blog-2';
-import {blog3Schema} from './blog-3';
-import {blog4Schema} from './blog-4';
-import {blog5Schema} from './blog-5';
-import {banner1Schema} from './banner-1';
-import {banner2Schema} from './banner-2';
-import {banner3Schema} from './banner-3';
-import {banner5Schema} from './banner-5';
-import {banner6Schema} from './banner-6';
-import {clientlist1Schema} from './clientlist-1';
-import {clientlist2Schema} from './clientlist-2';
-import {clientlist3Schema} from './clientlist-3';
-import {clientlist4Schema} from './clientlist-4';
-import {clientlist5Schema} from './clientlist-5';
-import {contact1Schema} from './contact-1';
-import {contact2Schema} from './contact-2';
-import {contact3Schema} from './contact-3';
-import {contact4Schema} from './contact-4';
-import {contact5Schema} from './contact-5';
-import {contact6Schema} from './contact-6';
-import {contact7Schema} from './contact-7';
-import {contact8Schema} from './contact-8';
-import {contact9Schema} from './contact-9';
-import {contact10Schema} from './contact-10';
-import {contact11Schema} from './contact-11';
-import {contact12Schema} from './contact-12';
-import {cta1Schema} from './cta-1';
-import {cta2Schema} from './cta-2';
-import {cta3Schema} from './cta-3';
-import {cta4Schema} from './cta-4';
-import {cta5Schema} from './cta-5';
-import {cta6Schema} from './cta-6';
-import {cta7Schema} from './cta-7';
-import {cta8Schema} from './cta-8';
-import {cta9Schema} from './cta-9';
-import {facts1Schema} from './facts-1';
-import {facts2Schema} from './facts-2';
-import {facts3Schema} from './facts-3';
-import {facts4Schema} from './facts-4';
-import {facts5Schema} from './facts-5';
-import {facts6Schema} from './facts-6';
-import {facts7Schema} from './facts-7';
-import {facts8Schema} from './facts-8';
-import {facts9Schema} from './facts-9';
-import {facts10Schema} from './facts-10';
-import {facts11Schema} from './facts-11';
-import {facts12Schema} from './facts-12';
-import {facts13Schema} from './facts-13';
-import {facts14Schema} from './facts-14';
-import {facts15Schema} from './facts-15';
-import {facts16Schema} from './facts-16';
-import {facts17Schema} from './facts-17';
-import {faq1Schema} from './faq-1';
-import {faq2Schema} from './faq-2';
-import {faq3Schema} from './faq-3';
-import {faq4Schema} from './faq-4';
-import {faq5Schema} from './faq-5';
-import {faq6Schema} from './faq-6';
-import {footer1Schema} from './footer-1';
-import {footer2Schema} from './footer-2';
-import {footer3Schema} from './footer-3';
-import {footer4Schema} from './footer-4';
-import {footer5Schema} from './footer-5';
-import {footer6Schema} from './footer-6';
-import {footer7Schema} from './footer-7';
-import {footer8Schema} from './footer-8';
-import {footer9Schema} from './footer-9';
-import {footer10Schema} from './footer-10';
-import {footer11Schema} from './footer-11';
-import {footer12Schema} from './footer-12';
-import {footer13Schema} from './footer-13';
-import {footer14Schema} from './footer-14';
-import {footer15Schema} from './footer-15';
-import {hero1Schema} from './hero-1';
-import {hero2Schema} from './hero-2';
-import {hero3Schema} from './hero-3';
-import {hero4Schema} from './hero-4';
-import {hero5Schema} from './hero-5';
-import {hero6Schema} from './hero-6';
-import {hero7Schema} from './hero-7';
-import {hero8Schema} from './hero-8';
-import {hero9Schema} from './hero-9';
-import {hero10Schema} from './hero-10';
-import {hero11Schema} from './hero-11';
-import {hero12Schema} from './hero-12';
-import {hero13Schema} from './hero-13';
-import {hero14Schema} from './hero-14';
-import {hero15Schema} from './hero-15';
-import {hero16Schema} from './hero-16';
-import {hero17Schema} from './hero-17';
-import {hero18Schema} from './hero-18';
-import {hero19Schema} from './hero-19';
-import {hero20Schema} from './hero-20';
-import {hero21Schema} from './hero-21';
-import {hero22Schema} from './hero-22';
-import {hero23Schema} from './hero-23';
-import {hero24Schema} from './hero-24';
-import {hr1Schema} from './hr-1';
-import {navbar1Schema} from './navbar-1';
-import {pageProgress1Schema} from './page-progress-1';
-import {pricing1Schema} from './pricing-1';
-import {pricing2Schema} from './pricing-2';
-import {pricing3Schema} from './pricing-3';
-import {pricing4Schema} from './pricing-4';
-import {pricing5Schema} from './pricing-5';
-import {pricing6Schema} from './pricing-6';
-import {pricing7Schema} from './pricing-7';
-import {pricing8Schema} from './pricing-8';
-import {portfolio1Schema} from './portfolio-1';
-import {portfolio2Schema} from './portfolio-2';
-import {portfolio3Schema} from './portfolio-3';
-import {portfolio4Schema} from './portfolio-4';
-import {portfolio5Schema} from './portfolio-5';
-import {portfolio6Schema} from './portfolio-6';
-import {portfolio7Schema} from './portfolio-7';
-import {portfolio8Schema} from './portfolio-8';
-import {portfolio9Schema} from './portfolio-9';
-import {portfolio10Schema} from './portfolio-10';
-import {portfolio11Schema} from './portfolio-11';
-import {portfolio12Schema} from './portfolio-12';
-import {process1Schema} from './process-1';
-import {process2Schema} from './process-2';
-import {process3Schema} from './process-3';
-import {process4Schema} from './process-4';
-import {process5Schema} from './process-5';
-import {process6Schema} from './process-6';
-import {process7Schema} from './process-7';
-import {process9Schema} from './process-9';
-import {process10Schema} from './process-10';
-import {process11Schema} from './process-11';
-import {process12Schema} from './process-12';
-import {process13Schema} from './process-13';
-import {process14Schema} from './process-14';
-import {process15Schema} from './process-15';
-import {service1Schema} from './service-1';
-import {service2Schema} from './service-2';
-import {service3Schema} from './service-3';
-import {service4Schema} from './service-4';
-import {service5Schema} from './service-5';
-import {service6Schema} from './service-6';
-import {service7Schema} from './service-7';
-import {service8Schema} from './service-8';
-import {service9Schema} from './service-9';
-import {service10Schema} from './service-10';
-import {service11Schema} from './service-11';
-import {service12Schema} from './service-12';
-import {service13Schema} from './service-13';
-import {service14Schema} from './service-14';
-import {service15Schema} from './service-15';
-import {service16Schema} from './service-16';
-import {service17Schema} from './service-17';
-import {service18Schema} from './service-18';
-import {service19Schema} from './service-19';
-import {service20Schema} from './service-20';
-import {service21Schema} from './service-21';
-import {service22Schema} from './service-22';
-import {service23Schema} from './service-23';
-import {service24Schema} from './service-24';
-import {service25Schema} from './service-25';
-import {service26Schema} from './service-26';
-import {service27Schema} from './service-27';
-import {sidebarMenu1Schema} from './sidebar-menu-1';
-import {team1Schema} from './team-1';
-import {team2Schema} from './team-2';
-import {team3Schema} from './team-3';
-import {team4Schema} from './team-4';
-import {team5Schema} from './team-5';
-import {team6Schema} from './team-6';
-import {team7Schema} from './team-7';
-import {testimonial1Schema} from './testimonial-1';
-import {testimonial2Schema} from './testimonial-2';
-import {testimonial3Schema} from './testimonial-3';
-import {testimonial4Schema} from './testimonial-4';
-import {testimonial5Schema} from './testimonial-5';
-import {testimonial6Schema} from './testimonial-6';
-import {testimonial7Schema} from './testimonial-7';
-import {testimonial8Schema} from './testimonial-8';
-import {testimonial9Schema} from './testimonial-9';
-import {testimonial10Schema} from './testimonial-10';
-import {testimonial11Schema} from './testimonial-11';
-import {testimonial12Schema} from './testimonial-12';
-import {testimonial13Schema} from './testimonial-13';
-import {testimonial14Schema} from './testimonial-14';
-import {testimonial15Schema} from './testimonial-15';
-import {testimonial16Schema} from './testimonial-16';
-import {testimonial17Schema} from './testimonial-17';
-import {testimonial18Schema} from './testimonial-18';
-import {testimonial19Schema} from './testimonial-19';
-import {wiki1Schema} from './wiki-1';
+import {about1Code} from './about-1/meta';
+import {about2Code} from './about-2/meta';
+import {about3Code} from './about-3/meta';
+import {about4Code} from './about-4/meta';
+import {about5Code} from './about-5/meta';
+import {about6Code} from './about-6/meta';
+import {about7Code} from './about-7/meta';
+import {about8Code} from './about-8/meta';
+import {about9Code} from './about-9/meta';
+import {about10Code} from './about-10/meta';
+import {about11Code} from './about-11/meta';
+import {about12Code} from './about-12/meta';
+import {about13Code} from './about-13/meta';
+import {about14Code} from './about-14/meta';
+import {about15Code} from './about-15/meta';
+import {about16Code} from './about-16/meta';
+import {about17Code} from './about-17/meta';
+import {about18Code} from './about-18/meta';
+import {about19Code} from './about-19/meta';
+import {about20Code} from './about-20/meta';
+import {about21Code} from './about-21/meta';
+import {about22Code} from './about-22/meta';
+import {about23Code} from './about-23/meta';
+import {about24Code} from './about-24/meta';
+import {about25Code} from './about-25/meta';
+import {blog1Code} from './blog-1/meta';
+import {blog2Code} from './blog-2/meta';
+import {blog3Code} from './blog-3/meta';
+import {blog4Code} from './blog-4/meta';
+import {blog5Code} from './blog-5/meta';
+import {banner1Code} from './banner-1/meta';
+import {banner2Code} from './banner-2/meta';
+import {banner3Code} from './banner-3/meta';
+import {banner5Code} from './banner-5/meta';
+import {banner6Code} from './banner-6/meta';
+import {clientlist1Code} from './clientlist-1/meta';
+import {clientlist2Code} from './clientlist-2/meta';
+import {clientlist3Code} from './clientlist-3/meta';
+import {clientlist4Code} from './clientlist-4/meta';
+import {clientlist5Code} from './clientlist-5/meta';
+import {contact1Code} from './contact-1/meta';
+import {contact2Code} from './contact-2/meta';
+import {contact3Code} from './contact-3/meta';
+import {contact4Code} from './contact-4/meta';
+import {contact5Code} from './contact-5/meta';
+import {contact6Code} from './contact-6/meta';
+import {contact7Code} from './contact-7/meta';
+import {contact8Code} from './contact-8/meta';
+import {contact9Code} from './contact-9/meta';
+import {contact10Code} from './contact-10/meta';
+import {contact11Code} from './contact-11/meta';
+import {contact12Code} from './contact-12/meta';
+import {cta1Code} from './cta-1/meta';
+import {cta2Code} from './cta-2/meta';
+import {cta3Code} from './cta-3/meta';
+import {cta4Code} from './cta-4/meta';
+import {cta5Code} from './cta-5/meta';
+import {cta6Code} from './cta-6/meta';
+import {cta7Code} from './cta-7/meta';
+import {cta8Code} from './cta-8/meta';
+import {cta9Code} from './cta-9/meta';
+import {facts1Code} from './facts-1/meta';
+import {facts2Code} from './facts-2/meta';
+import {facts3Code} from './facts-3/meta';
+import {facts4Code} from './facts-4/meta';
+import {facts5Code} from './facts-5/meta';
+import {facts6Code} from './facts-6/meta';
+import {facts7Code} from './facts-7/meta';
+import {facts8Code} from './facts-8/meta';
+import {facts9Code} from './facts-9/meta';
+import {facts10Code} from './facts-10/meta';
+import {facts11Code} from './facts-11/meta';
+import {facts12Code} from './facts-12/meta';
+import {facts13Code} from './facts-13/meta';
+import {facts14Code} from './facts-14/meta';
+import {facts15Code} from './facts-15/meta';
+import {facts16Code} from './facts-16/meta';
+import {facts17Code} from './facts-17/meta';
+import {faq1Code} from './faq-1/meta';
+import {faq2Code} from './faq-2/meta';
+import {faq3Code} from './faq-3/meta';
+import {faq4Code} from './faq-4/meta';
+import {faq5Code} from './faq-5/meta';
+import {faq6Code} from './faq-6/meta';
+import {footer1Code} from './footer-1/meta';
+import {footer2Code} from './footer-2/meta';
+import {footer3Code} from './footer-3/meta';
+import {footer4Code} from './footer-4/meta';
+import {footer5Code} from './footer-5/meta';
+import {footer6Code} from './footer-6/meta';
+import {footer7Code} from './footer-7/meta';
+import {footer8Code} from './footer-8/meta';
+import {footer9Code} from './footer-9/meta';
+import {footer10Code} from './footer-10/meta';
+import {footer11Code} from './footer-11/meta';
+import {footer12Code} from './footer-12/meta';
+import {footer13Code} from './footer-13/meta';
+import {footer14Code} from './footer-14/meta';
+import {footer15Code} from './footer-15/meta';
+import {hero1Code} from './hero-1/meta';
+import {hero2Code} from './hero-2/meta';
+import {hero3Code} from './hero-3/meta';
+import {hero4Code} from './hero-4/meta';
+import {hero5Code} from './hero-5/meta';
+import {hero6Code} from './hero-6/meta';
+import {hero7Code} from './hero-7/meta';
+import {hero8Code} from './hero-8/meta';
+import {hero9Code} from './hero-9/meta';
+import {hero10Code} from './hero-10/meta';
+import {hero11Code} from './hero-11/meta';
+import {hero12Code} from './hero-12/meta';
+import {hero13Code} from './hero-13/meta';
+import {hero14Code} from './hero-14/meta';
+import {hero15Code} from './hero-15/meta';
+import {hero16Code} from './hero-16/meta';
+import {hero17Code} from './hero-17/meta';
+import {hero18Code} from './hero-18/meta';
+import {hero19Code} from './hero-19/meta';
+import {hero20Code} from './hero-20/meta';
+import {hero21Code} from './hero-21/meta';
+import {hero22Code} from './hero-22/meta';
+import {hero23Code} from './hero-23/meta';
+import {hero24Code} from './hero-24/meta';
+import {hr1Code} from './hr-1/meta';
+import {navbar1Code} from './navbar-1/meta';
+import {pageProgress1Code} from './page-progress-1/meta';
+import {pricing1Code} from './pricing-1/meta';
+import {pricing2Code} from './pricing-2/meta';
+import {pricing3Code} from './pricing-3/meta';
+import {pricing4Code} from './pricing-4/meta';
+import {pricing5Code} from './pricing-5/meta';
+import {pricing6Code} from './pricing-6/meta';
+import {pricing7Code} from './pricing-7/meta';
+import {pricing8Code} from './pricing-8/meta';
+import {portfolio1Code} from './portfolio-1/meta';
+import {portfolio2Code} from './portfolio-2/meta';
+import {portfolio3Code} from './portfolio-3/meta';
+import {portfolio4Code} from './portfolio-4/meta';
+import {portfolio5Code} from './portfolio-5/meta';
+import {portfolio6Code} from './portfolio-6/meta';
+import {portfolio7Code} from './portfolio-7/meta';
+import {portfolio8Code} from './portfolio-8/meta';
+import {portfolio9Code} from './portfolio-9/meta';
+import {portfolio10Code} from './portfolio-10/meta';
+import {portfolio11Code} from './portfolio-11/meta';
+import {portfolio12Code} from './portfolio-12/meta';
+import {process1Code} from './process-1/meta';
+import {process2Code} from './process-2/meta';
+import {process3Code} from './process-3/meta';
+import {process4Code} from './process-4/meta';
+import {process5Code} from './process-5/meta';
+import {process6Code} from './process-6/meta';
+import {process7Code} from './process-7/meta';
+import {process9Code} from './process-9/meta';
+import {process10Code} from './process-10/meta';
+import {process11Code} from './process-11/meta';
+import {process12Code} from './process-12/meta';
+import {process13Code} from './process-13/meta';
+import {process14Code} from './process-14/meta';
+import {process15Code} from './process-15/meta';
+import {service1Code} from './service-1/meta';
+import {service2Code} from './service-2/meta';
+import {service3Code} from './service-3/meta';
+import {service4Code} from './service-4/meta';
+import {service5Code} from './service-5/meta';
+import {service6Code} from './service-6/meta';
+import {service7Code} from './service-7/meta';
+import {service8Code} from './service-8/meta';
+import {service9Code} from './service-9/meta';
+import {service10Code} from './service-10/meta';
+import {service11Code} from './service-11/meta';
+import {service12Code} from './service-12/meta';
+import {service13Code} from './service-13/meta';
+import {service14Code} from './service-14/meta';
+import {service15Code} from './service-15/meta';
+import {service16Code} from './service-16/meta';
+import {service17Code} from './service-17/meta';
+import {service18Code} from './service-18/meta';
+import {service19Code} from './service-19/meta';
+import {service20Code} from './service-20/meta';
+import {service21Code} from './service-21/meta';
+import {service22Code} from './service-22/meta';
+import {service23Code} from './service-23/meta';
+import {service24Code} from './service-24/meta';
+import {service25Code} from './service-25/meta';
+import {service26Code} from './service-26/meta';
+import {service27Code} from './service-27/meta';
+import {sidebarMenu1Code} from './sidebar-menu-1/meta';
+import {team1Code} from './team-1/meta';
+import {team2Code} from './team-2/meta';
+import {team3Code} from './team-3/meta';
+import {team4Code} from './team-4/meta';
+import {team5Code} from './team-5/meta';
+import {team6Code} from './team-6/meta';
+import {team7Code} from './team-7/meta';
+import {testimonial1Code} from './testimonial-1/meta';
+import {testimonial2Code} from './testimonial-2/meta';
+import {testimonial3Code} from './testimonial-3/meta';
+import {testimonial4Code} from './testimonial-4/meta';
+import {testimonial5Code} from './testimonial-5/meta';
+import {testimonial6Code} from './testimonial-6/meta';
+import {testimonial7Code} from './testimonial-7/meta';
+import {testimonial8Code} from './testimonial-8/meta';
+import {testimonial9Code} from './testimonial-9/meta';
+import {testimonial10Code} from './testimonial-10/meta';
+import {testimonial11Code} from './testimonial-11/meta';
+import {testimonial12Code} from './testimonial-12/meta';
+import {testimonial13Code} from './testimonial-13/meta';
+import {testimonial14Code} from './testimonial-14/meta';
+import {testimonial15Code} from './testimonial-15/meta';
+import {testimonial16Code} from './testimonial-16/meta';
+import {testimonial17Code} from './testimonial-17/meta';
+import {testimonial18Code} from './testimonial-18/meta';
+import {testimonial19Code} from './testimonial-19/meta';
+import {wiki1Code} from './wiki-1/meta';
 
 const componentMap: Record<string, ComponentType<TemplateProps>> = {
-  [about1Schema.code]: dynamic(() =>
-    import('./about-1').then(mod => mod.About1),
-  ),
-  [about2Schema.code]: dynamic(() =>
-    import('./about-2').then(mod => mod.About2),
-  ),
-  [about3Schema.code]: dynamic(() =>
-    import('./about-3').then(mod => mod.About3),
-  ),
-  [about4Schema.code]: dynamic(() =>
-    import('./about-4').then(mod => mod.About4),
-  ),
-  [about5Schema.code]: dynamic(() =>
-    import('./about-5').then(mod => mod.About5),
-  ),
-  [about6Schema.code]: dynamic(() =>
-    import('./about-6').then(mod => mod.About6),
-  ),
-  [about7Schema.code]: dynamic(() =>
-    import('./about-7').then(mod => mod.About7),
-  ),
-  [about8Schema.code]: dynamic(() =>
-    import('./about-8').then(mod => mod.About8),
-  ),
-  [about9Schema.code]: dynamic(() =>
-    import('./about-9').then(mod => mod.About9),
-  ),
-  [about10Schema.code]: dynamic(() =>
-    import('./about-10').then(mod => mod.About10),
-  ),
-  [about11Schema.code]: dynamic(() =>
-    import('./about-11').then(mod => mod.About11),
-  ),
-  [about12Schema.code]: dynamic(() =>
-    import('./about-12').then(mod => mod.About12),
-  ),
-  [about13Schema.code]: dynamic(() =>
-    import('./about-13').then(mod => mod.About13),
-  ),
-  [about14Schema.code]: dynamic(() =>
-    import('./about-14').then(mod => mod.About14),
-  ),
-  [about15Schema.code]: dynamic(() =>
-    import('./about-15').then(mod => mod.About15),
-  ),
-  [about16Schema.code]: dynamic(() =>
-    import('./about-16').then(mod => mod.About16),
-  ),
-  [about17Schema.code]: dynamic(() =>
-    import('./about-17').then(mod => mod.About17),
-  ),
-  [about18Schema.code]: dynamic(() =>
-    import('./about-18').then(mod => mod.About18),
-  ),
-  [about19Schema.code]: dynamic(() =>
-    import('./about-19').then(mod => mod.About19),
-  ),
-  [about20Schema.code]: dynamic(() =>
-    import('./about-20').then(mod => mod.About20),
-  ),
-  [about21Schema.code]: dynamic(() =>
-    import('./about-21').then(mod => mod.About21),
-  ),
-  [about22Schema.code]: dynamic(() =>
-    import('./about-22').then(mod => mod.About22),
-  ),
-  [about23Schema.code]: dynamic(() =>
-    import('./about-23').then(mod => mod.About23),
-  ),
-  [about24Schema.code]: dynamic(() =>
-    import('./about-24').then(mod => mod.About24),
-  ),
-  [about25Schema.code]: dynamic(() =>
-    import('./about-25').then(mod => mod.About25),
-  ),
-  [blog1Schema.code]: dynamic(() => import('./blog-1').then(mod => mod.Blog1)),
-  [blog2Schema.code]: dynamic(() => import('./blog-2').then(mod => mod.Blog2)),
-  [blog3Schema.code]: dynamic(() => import('./blog-3').then(mod => mod.Blog3)),
-  [blog4Schema.code]: dynamic(() => import('./blog-4').then(mod => mod.Blog4)),
-  [blog5Schema.code]: dynamic(() => import('./blog-5').then(mod => mod.Blog5)),
-  [banner1Schema.code]: dynamic(() =>
-    import('./banner-1').then(mod => mod.Banner1),
-  ),
-  [banner2Schema.code]: dynamic(() =>
-    import('./banner-2').then(mod => mod.Banner2),
-  ),
-  [banner3Schema.code]: dynamic(() =>
-    import('./banner-3').then(mod => mod.Banner3),
-  ),
-  [banner5Schema.code]: dynamic(() =>
-    import('./banner-5').then(mod => mod.Banner5),
-  ),
-  [banner6Schema.code]: dynamic(() =>
-    import('./banner-6').then(mod => mod.Banner6),
-  ),
-  [hero1Schema.code]: dynamic(() => import('./hero-1').then(mod => mod.Hero1)),
-  [hero2Schema.code]: dynamic(() => import('./hero-2').then(mod => mod.Hero2)),
-  [hero3Schema.code]: dynamic(() => import('./hero-3').then(mod => mod.Hero3)),
-  [hero4Schema.code]: dynamic(() => import('./hero-4').then(mod => mod.Hero4)),
-  [hero5Schema.code]: dynamic(() => import('./hero-5').then(mod => mod.Hero5)),
-  [hero6Schema.code]: dynamic(() => import('./hero-6').then(mod => mod.Hero6)),
-  [hero7Schema.code]: dynamic(() => import('./hero-7').then(mod => mod.Hero7)),
-  [hero8Schema.code]: dynamic(() => import('./hero-8').then(mod => mod.Hero8)),
-  [hero9Schema.code]: dynamic(() => import('./hero-9').then(mod => mod.Hero9)),
-  [hero10Schema.code]: dynamic(() =>
-    import('./hero-10').then(mod => mod.Hero10),
-  ),
-  [hero11Schema.code]: dynamic(() =>
-    import('./hero-11').then(mod => mod.Hero11),
-  ),
-  [hero12Schema.code]: dynamic(() =>
-    import('./hero-12').then(mod => mod.Hero12),
-  ),
-  [hero13Schema.code]: dynamic(() =>
-    import('./hero-13').then(mod => mod.Hero13),
-  ),
-  [hero14Schema.code]: dynamic(() =>
-    import('./hero-14').then(mod => mod.Hero14),
-  ),
-  [hero15Schema.code]: dynamic(() =>
-    import('./hero-15').then(mod => mod.Hero15),
-  ),
-  [hero16Schema.code]: dynamic(() =>
-    import('./hero-16').then(mod => mod.Hero16),
-  ),
-  [hero17Schema.code]: dynamic(() =>
-    import('./hero-17').then(mod => mod.Hero17),
-  ),
-  [hero18Schema.code]: dynamic(() =>
-    import('./hero-18').then(mod => mod.Hero18),
-  ),
-  [hero19Schema.code]: dynamic(() =>
-    import('./hero-19').then(mod => mod.Hero19),
-  ),
-  [hero20Schema.code]: dynamic(() =>
-    import('./hero-20').then(mod => mod.Hero20),
-  ),
-  [hero21Schema.code]: dynamic(() =>
-    import('./hero-21').then(mod => mod.Hero21),
-  ),
-  [hero22Schema.code]: dynamic(() =>
-    import('./hero-22').then(mod => mod.Hero22),
-  ),
-  [hero23Schema.code]: dynamic(() =>
-    import('./hero-23').then(mod => mod.Hero23),
-  ),
-  [hero24Schema.code]: dynamic(() =>
-    import('./hero-24').then(mod => mod.Hero24),
-  ),
-  [hr1Schema.code]: dynamic(() => import('./hr-1').then(mod => mod.HR1)),
-  [pageProgress1Schema.code]: dynamic(() =>
-    import('./page-progress-1').then(mod => mod.PageProgress1),
-  ),
-  [cta1Schema.code]: dynamic(() => import('./cta-1').then(mod => mod.CTA1)),
-  [cta2Schema.code]: dynamic(() => import('./cta-2').then(mod => mod.CTA2)),
-  [cta3Schema.code]: dynamic(() => import('./cta-3').then(mod => mod.CTA3)),
-  [cta4Schema.code]: dynamic(() => import('./cta-4').then(mod => mod.CTA4)),
-  [cta5Schema.code]: dynamic(() => import('./cta-5').then(mod => mod.CTA5)),
-  [cta6Schema.code]: dynamic(() => import('./cta-6').then(mod => mod.CTA6)),
-  [cta7Schema.code]: dynamic(() => import('./cta-7').then(mod => mod.CTA7)),
-  [cta8Schema.code]: dynamic(() => import('./cta-8').then(mod => mod.CTA8)),
-  [cta9Schema.code]: dynamic(() => import('./cta-9').then(mod => mod.CTA9)),
-  [facts1Schema.code]: dynamic(() =>
-    import('./facts-1').then(mod => mod.Facts1),
-  ),
-  [facts2Schema.code]: dynamic(() =>
-    import('./facts-2').then(mod => mod.Facts2),
-  ),
-  [facts3Schema.code]: dynamic(() =>
-    import('./facts-3').then(mod => mod.Facts3),
-  ),
-  [facts4Schema.code]: dynamic(() =>
-    import('./facts-4').then(mod => mod.Facts4),
-  ),
-  [facts5Schema.code]: dynamic(() =>
-    import('./facts-5').then(mod => mod.Facts5),
-  ),
-  [facts6Schema.code]: dynamic(() =>
-    import('./facts-6').then(mod => mod.Facts6),
-  ),
-  [facts7Schema.code]: dynamic(() =>
-    import('./facts-7').then(mod => mod.Facts7),
-  ),
-  [facts8Schema.code]: dynamic(() =>
-    import('./facts-8').then(mod => mod.Facts8),
-  ),
-  [facts9Schema.code]: dynamic(() =>
-    import('./facts-9').then(mod => mod.Facts9),
-  ),
-  [facts10Schema.code]: dynamic(() =>
-    import('./facts-10').then(mod => mod.Facts10),
-  ),
-  [facts11Schema.code]: dynamic(() =>
-    import('./facts-11').then(mod => mod.Facts11),
-  ),
-  [facts12Schema.code]: dynamic(() =>
-    import('./facts-12').then(mod => mod.Facts12),
-  ),
-  [facts13Schema.code]: dynamic(() =>
-    import('./facts-13').then(mod => mod.Facts13),
-  ),
-  [facts14Schema.code]: dynamic(() =>
-    import('./facts-14').then(mod => mod.Facts14),
-  ),
-  [facts15Schema.code]: dynamic(() =>
-    import('./facts-15').then(mod => mod.Facts15),
-  ),
-  [facts16Schema.code]: dynamic(() =>
-    import('./facts-16').then(mod => mod.Facts16),
-  ),
-  [facts17Schema.code]: dynamic(() =>
-    import('./facts-17').then(mod => mod.Facts17),
-  ),
-  [faq1Schema.code]: dynamic(() => import('./faq-1').then(mod => mod.FAQ1)),
-  [faq2Schema.code]: dynamic(() => import('./faq-2').then(mod => mod.FAQ2)),
-  [faq3Schema.code]: dynamic(() => import('./faq-3').then(mod => mod.FAQ3)),
-  [faq4Schema.code]: dynamic(() => import('./faq-4').then(mod => mod.FAQ4)),
-  [faq5Schema.code]: dynamic(() => import('./faq-5').then(mod => mod.FAQ5)),
-  [faq6Schema.code]: dynamic(() => import('./faq-6').then(mod => mod.FAQ6)),
-  [process1Schema.code]: dynamic(() =>
-    import('./process-1').then(mod => mod.Process1),
-  ),
-  [process2Schema.code]: dynamic(() =>
-    import('./process-2').then(mod => mod.Process2),
-  ),
-  [process3Schema.code]: dynamic(() =>
-    import('./process-3').then(mod => mod.Process3),
-  ),
-  [process4Schema.code]: dynamic(() =>
-    import('./process-4').then(mod => mod.Process4),
-  ),
-  [process5Schema.code]: dynamic(() =>
-    import('./process-5').then(mod => mod.Process5),
-  ),
-  [process6Schema.code]: dynamic(() =>
-    import('./process-6').then(mod => mod.Process6),
-  ),
-  [process7Schema.code]: dynamic(() =>
-    import('./process-7').then(mod => mod.Process7),
-  ),
-  [process9Schema.code]: dynamic(() =>
-    import('./process-9').then(mod => mod.Process9),
-  ),
-  [process10Schema.code]: dynamic(() =>
-    import('./process-10').then(mod => mod.Process10),
-  ),
-  [process11Schema.code]: dynamic(() =>
-    import('./process-11').then(mod => mod.Process11),
-  ),
-  [process12Schema.code]: dynamic(() =>
-    import('./process-12').then(mod => mod.Process12),
-  ),
-  [process13Schema.code]: dynamic(() =>
-    import('./process-13').then(mod => mod.Process13),
-  ),
-  [process14Schema.code]: dynamic(() =>
-    import('./process-14').then(mod => mod.Process14),
-  ),
-  [process15Schema.code]: dynamic(() =>
-    import('./process-15').then(mod => mod.Process15),
-  ),
-  [team1Schema.code]: dynamic(() => import('./team-1').then(mod => mod.Team1)),
-  [team2Schema.code]: dynamic(() => import('./team-2').then(mod => mod.Team2)),
-  [team3Schema.code]: dynamic(() => import('./team-3').then(mod => mod.Team3)),
-  [team4Schema.code]: dynamic(() => import('./team-4').then(mod => mod.Team4)),
-  [team5Schema.code]: dynamic(() => import('./team-5').then(mod => mod.Team5)),
-  [team6Schema.code]: dynamic(() => import('./team-6').then(mod => mod.Team6)),
-  [team7Schema.code]: dynamic(() => import('./team-7').then(mod => mod.Team7)),
-  [service1Schema.code]: dynamic(() =>
-    import('./service-1').then(mod => mod.Service1),
-  ),
-  [service2Schema.code]: dynamic(() =>
-    import('./service-2').then(mod => mod.Service2),
-  ),
-  [service3Schema.code]: dynamic(() =>
-    import('./service-3').then(mod => mod.Service3),
-  ),
-  [service4Schema.code]: dynamic(() =>
-    import('./service-4').then(mod => mod.Service4),
-  ),
-  [service5Schema.code]: dynamic(() =>
-    import('./service-5').then(mod => mod.Service5),
-  ),
-  [service6Schema.code]: dynamic(() =>
-    import('./service-6').then(mod => mod.Service6),
-  ),
-  [service7Schema.code]: dynamic(() =>
-    import('./service-7').then(mod => mod.Service7),
-  ),
-  [service8Schema.code]: dynamic(() =>
-    import('./service-8').then(mod => mod.Service8),
-  ),
-  [service9Schema.code]: dynamic(() =>
-    import('./service-9').then(mod => mod.Service9),
-  ),
-  [service10Schema.code]: dynamic(() =>
-    import('./service-10').then(mod => mod.Service10),
-  ),
-  [service11Schema.code]: dynamic(() =>
-    import('./service-11').then(mod => mod.Service11),
-  ),
-  [service12Schema.code]: dynamic(() =>
-    import('./service-12').then(mod => mod.Service12),
-  ),
-  [service13Schema.code]: dynamic(() =>
-    import('./service-13').then(mod => mod.Service13),
-  ),
-  [service14Schema.code]: dynamic(() =>
-    import('./service-14').then(mod => mod.Service14),
-  ),
-  [service15Schema.code]: dynamic(() =>
-    import('./service-15').then(mod => mod.Service15),
-  ),
-  [service16Schema.code]: dynamic(() =>
-    import('./service-16').then(mod => mod.Service16),
-  ),
-  [service17Schema.code]: dynamic(() =>
-    import('./service-17').then(mod => mod.Service17),
-  ),
-  [service18Schema.code]: dynamic(() =>
-    import('./service-18').then(mod => mod.Service18),
-  ),
-  [service19Schema.code]: dynamic(() =>
-    import('./service-19').then(mod => mod.Service19),
-  ),
-  [service20Schema.code]: dynamic(() =>
-    import('./service-20').then(mod => mod.Service20),
-  ),
-  [service21Schema.code]: dynamic(() =>
-    import('./service-21').then(mod => mod.Service21),
-  ),
-  [service22Schema.code]: dynamic(() =>
-    import('./service-22').then(mod => mod.Service22),
-  ),
-  [service23Schema.code]: dynamic(() =>
-    import('./service-23').then(mod => mod.Service23),
-  ),
-  [service24Schema.code]: dynamic(() =>
-    import('./service-24').then(mod => mod.Service24),
-  ),
-  [service25Schema.code]: dynamic(() =>
-    import('./service-25').then(mod => mod.Service25),
-  ),
-  [service26Schema.code]: dynamic(() =>
-    import('./service-26').then(mod => mod.Service26),
-  ),
-  [service27Schema.code]: dynamic(() =>
-    import('./service-27').then(mod => mod.Service27),
-  ),
-  [testimonial1Schema.code]: dynamic(() =>
-    import('./testimonial-1').then(mod => mod.Testimonial1),
-  ),
-  [testimonial2Schema.code]: dynamic(() =>
-    import('./testimonial-2').then(mod => mod.Testimonial2),
-  ),
-  [testimonial3Schema.code]: dynamic(() =>
-    import('./testimonial-3').then(mod => mod.Testimonial3),
-  ),
-  [testimonial4Schema.code]: dynamic(() =>
-    import('./testimonial-4').then(mod => mod.Testimonial4),
-  ),
-  [testimonial5Schema.code]: dynamic(() =>
-    import('./testimonial-5').then(mod => mod.Testimonial5),
-  ),
-  [testimonial6Schema.code]: dynamic(() =>
-    import('./testimonial-6').then(mod => mod.Testimonial6),
-  ),
-  [testimonial7Schema.code]: dynamic(() =>
-    import('./testimonial-7').then(mod => mod.Testimonial7),
-  ),
-  [testimonial8Schema.code]: dynamic(() =>
-    import('./testimonial-8').then(mod => mod.Testimonial8),
-  ),
-  [testimonial9Schema.code]: dynamic(() =>
-    import('./testimonial-9').then(mod => mod.Testimonial9),
-  ),
-  [testimonial10Schema.code]: dynamic(() =>
-    import('./testimonial-10').then(mod => mod.Testimonial10),
-  ),
-  [testimonial11Schema.code]: dynamic(() =>
-    import('./testimonial-11').then(mod => mod.Testimonial11),
-  ),
-  [testimonial12Schema.code]: dynamic(() =>
-    import('./testimonial-12').then(mod => mod.Testimonial12),
-  ),
-  [testimonial13Schema.code]: dynamic(() =>
-    import('./testimonial-13').then(mod => mod.Testimonial13),
-  ),
-  [testimonial14Schema.code]: dynamic(() =>
-    import('./testimonial-14').then(mod => mod.Testimonial14),
-  ),
-  [testimonial15Schema.code]: dynamic(() =>
-    import('./testimonial-15').then(mod => mod.Testimonial15),
-  ),
-  [testimonial16Schema.code]: dynamic(() =>
-    import('./testimonial-16').then(mod => mod.Testimonial16),
-  ),
-  [testimonial17Schema.code]: dynamic(() =>
-    import('./testimonial-17').then(mod => mod.Testimonial17),
-  ),
-  [testimonial18Schema.code]: dynamic(() =>
-    import('./testimonial-18').then(mod => mod.Testimonial18),
-  ),
-  [testimonial19Schema.code]: dynamic(() =>
-    import('./testimonial-19').then(mod => mod.Testimonial19),
-  ),
-  [pricing1Schema.code]: dynamic(() =>
-    import('./pricing-1').then(mod => mod.Pricing1),
-  ),
-  [pricing2Schema.code]: dynamic(() =>
-    import('./pricing-2').then(mod => mod.Pricing2),
-  ),
-  [pricing3Schema.code]: dynamic(() =>
-    import('./pricing-3').then(mod => mod.Pricing3),
-  ),
-  [pricing4Schema.code]: dynamic(() =>
-    import('./pricing-4').then(mod => mod.Pricing4),
-  ),
-  [pricing5Schema.code]: dynamic(() =>
-    import('./pricing-5').then(mod => mod.Pricing5),
-  ),
-  [pricing6Schema.code]: dynamic(() =>
-    import('./pricing-6').then(mod => mod.Pricing6),
-  ),
-  [pricing7Schema.code]: dynamic(() =>
-    import('./pricing-7').then(mod => mod.Pricing7),
-  ),
-  [pricing8Schema.code]: dynamic(() =>
-    import('./pricing-8').then(mod => mod.Pricing8),
-  ),
-  [portfolio1Schema.code]: dynamic(() =>
-    import('./portfolio-1').then(mod => mod.Portfolio1),
-  ),
-  [portfolio2Schema.code]: dynamic(() =>
-    import('./portfolio-2').then(mod => mod.Portfolio2),
-  ),
-  [portfolio3Schema.code]: dynamic(() =>
-    import('./portfolio-3').then(mod => mod.Portfolio3),
-  ),
-  [portfolio4Schema.code]: dynamic(() =>
-    import('./portfolio-4').then(mod => mod.Portfolio4),
-  ),
-  [portfolio5Schema.code]: dynamic(() =>
-    import('./portfolio-5').then(mod => mod.Portfolio5),
-  ),
-  [portfolio6Schema.code]: dynamic(() =>
-    import('./portfolio-6').then(mod => mod.Portfolio6),
-  ),
-  [portfolio7Schema.code]: dynamic(() =>
-    import('./portfolio-7').then(mod => mod.Portfolio7),
-  ),
-  [portfolio8Schema.code]: dynamic(() =>
-    import('./portfolio-8').then(mod => mod.Portfolio8),
-  ),
-  [portfolio9Schema.code]: dynamic(() =>
-    import('./portfolio-9').then(mod => mod.Portfolio9),
-  ),
-  [portfolio10Schema.code]: dynamic(() =>
-    import('./portfolio-10').then(mod => mod.Portfolio10),
-  ),
-  [portfolio11Schema.code]: dynamic(() =>
-    import('./portfolio-11').then(mod => mod.Portfolio11),
-  ),
-  [portfolio12Schema.code]: dynamic(() =>
-    import('./portfolio-12').then(mod => mod.Portfolio12),
-  ),
-  [contact1Schema.code]: dynamic(() =>
-    import('./contact-1').then(mod => mod.Contact1),
-  ),
-  [contact2Schema.code]: dynamic(() =>
-    import('./contact-2').then(mod => mod.Contact2),
-  ),
-  [contact3Schema.code]: dynamic(() =>
-    import('./contact-3').then(mod => mod.Contact3),
-  ),
-  [contact4Schema.code]: dynamic(() =>
-    import('./contact-4').then(mod => mod.Contact4),
-  ),
-  [contact5Schema.code]: dynamic(() =>
-    import('./contact-5').then(mod => mod.Contact5),
-  ),
-  [contact6Schema.code]: dynamic(() =>
-    import('./contact-6').then(mod => mod.Contact6),
-  ),
-  [contact7Schema.code]: dynamic(() =>
-    import('./contact-7').then(mod => mod.Contact7),
-  ),
-  [contact8Schema.code]: dynamic(() =>
-    import('./contact-8').then(mod => mod.Contact8),
-  ),
-  [contact9Schema.code]: dynamic(() =>
-    import('./contact-9').then(mod => mod.Contact9),
-  ),
-  [contact10Schema.code]: dynamic(() =>
-    import('./contact-10').then(mod => mod.Contact10),
-  ),
-  [contact11Schema.code]: dynamic(() =>
-    import('./contact-11').then(mod => mod.Contact11),
-  ),
-  [contact12Schema.code]: dynamic(() =>
-    import('./contact-12').then(mod => mod.Contact12),
-  ),
-  [clientlist1Schema.code]: dynamic(() =>
-    import('./clientlist-1').then(mod => mod.Clientlist1),
-  ),
-  [clientlist2Schema.code]: dynamic(() =>
-    import('./clientlist-2').then(mod => mod.Clientlist2),
-  ),
-  [clientlist3Schema.code]: dynamic(() =>
-    import('./clientlist-3').then(mod => mod.Clientlist3),
-  ),
-  [clientlist4Schema.code]: dynamic(() =>
-    import('./clientlist-4').then(mod => mod.Clientlist4),
-  ),
-  [clientlist5Schema.code]: dynamic(() =>
-    import('./clientlist-5').then(mod => mod.Clientlist5),
-  ),
-  [navbar1Schema.code]: dynamic(() =>
-    import('./navbar-1').then(mod => mod.Navbar1),
-  ),
-  [footer1Schema.code]: dynamic(() =>
-    import('./footer-1').then(mod => mod.Footer1),
-  ),
-  [footer2Schema.code]: dynamic(() =>
-    import('./footer-2').then(mod => mod.Footer2),
-  ),
-  [footer3Schema.code]: dynamic(() =>
-    import('./footer-3').then(mod => mod.Footer3),
-  ),
-  [footer4Schema.code]: dynamic(() =>
-    import('./footer-4').then(mod => mod.Footer4),
-  ),
-  [footer5Schema.code]: dynamic(() =>
-    import('./footer-5').then(mod => mod.Footer5),
-  ),
-  [footer6Schema.code]: dynamic(() =>
-    import('./footer-6').then(mod => mod.Footer6),
-  ),
-  [footer7Schema.code]: dynamic(() =>
-    import('./footer-7').then(mod => mod.Footer7),
-  ),
-  [footer8Schema.code]: dynamic(() =>
-    import('./footer-8').then(mod => mod.Footer8),
-  ),
-  [footer9Schema.code]: dynamic(() =>
-    import('./footer-9').then(mod => mod.Footer9),
-  ),
-  [footer10Schema.code]: dynamic(() =>
-    import('./footer-10').then(mod => mod.Footer10),
-  ),
-  [footer11Schema.code]: dynamic(() =>
-    import('./footer-11').then(mod => mod.Footer11),
-  ),
-  [footer12Schema.code]: dynamic(() =>
-    import('./footer-12').then(mod => mod.Footer12),
-  ),
-  [footer13Schema.code]: dynamic(() =>
-    import('./footer-13').then(mod => mod.Footer13),
-  ),
-  [footer14Schema.code]: dynamic(() =>
-    import('./footer-14').then(mod => mod.Footer14),
-  ),
-  [footer15Schema.code]: dynamic(() =>
-    import('./footer-15').then(mod => mod.Footer15),
-  ),
-  [wiki1Schema.code]: dynamic(() => import('./wiki-1').then(mod => mod.Wiki1)),
-  [sidebarMenu1Schema.code]: dynamic(() =>
-    import('./sidebar-menu-1').then(mod => mod.SidebarMenu1),
-  ),
+  [about1Code]: dynamic(() => import('./about-1')),
+  [about2Code]: dynamic(() => import('./about-2')),
+  [about3Code]: dynamic(() => import('./about-3')),
+  [about4Code]: dynamic(() => import('./about-4')),
+  [about5Code]: dynamic(() => import('./about-5')),
+  [about6Code]: dynamic(() => import('./about-6')),
+  [about7Code]: dynamic(() => import('./about-7')),
+  [about8Code]: dynamic(() => import('./about-8')),
+  [about9Code]: dynamic(() => import('./about-9')),
+  [about10Code]: dynamic(() => import('./about-10')),
+  [about11Code]: dynamic(() => import('./about-11')),
+  [about12Code]: dynamic(() => import('./about-12')),
+  [about13Code]: dynamic(() => import('./about-13')),
+  [about14Code]: dynamic(() => import('./about-14')),
+  [about15Code]: dynamic(() => import('./about-15')),
+  [about16Code]: dynamic(() => import('./about-16')),
+  [about17Code]: dynamic(() => import('./about-17')),
+  [about18Code]: dynamic(() => import('./about-18')),
+  [about19Code]: dynamic(() => import('./about-19')),
+  [about20Code]: dynamic(() => import('./about-20')),
+  [about21Code]: dynamic(() => import('./about-21')),
+  [about22Code]: dynamic(() => import('./about-22')),
+  [about23Code]: dynamic(() => import('./about-23')),
+  [about24Code]: dynamic(() => import('./about-24')),
+  [about25Code]: dynamic(() => import('./about-25')),
+  [blog1Code]: dynamic(() => import('./blog-1')),
+  [blog2Code]: dynamic(() => import('./blog-2')),
+  [blog3Code]: dynamic(() => import('./blog-3')),
+  [blog4Code]: dynamic(() => import('./blog-4')),
+  [blog5Code]: dynamic(() => import('./blog-5')),
+  [banner1Code]: dynamic(() => import('./banner-1')),
+  [banner2Code]: dynamic(() => import('./banner-2')),
+  [banner3Code]: dynamic(() => import('./banner-3')),
+  [banner5Code]: dynamic(() => import('./banner-5')),
+  [banner6Code]: dynamic(() => import('./banner-6')),
+  [hero1Code]: dynamic(() => import('./hero-1')),
+  [hero2Code]: dynamic(() => import('./hero-2')),
+  [hero3Code]: dynamic(() => import('./hero-3')),
+  [hero4Code]: dynamic(() => import('./hero-4')),
+  [hero5Code]: dynamic(() => import('./hero-5')),
+  [hero6Code]: dynamic(() => import('./hero-6')),
+  [hero7Code]: dynamic(() => import('./hero-7')),
+  [hero8Code]: dynamic(() => import('./hero-8')),
+  [hero9Code]: dynamic(() => import('./hero-9')),
+  [hero10Code]: dynamic(() => import('./hero-10')),
+  [hero11Code]: dynamic(() => import('./hero-11')),
+  [hero12Code]: dynamic(() => import('./hero-12')),
+  [hero13Code]: dynamic(() => import('./hero-13')),
+  [hero14Code]: dynamic(() => import('./hero-14')),
+  [hero15Code]: dynamic(() => import('./hero-15')),
+  [hero16Code]: dynamic(() => import('./hero-16')),
+  [hero17Code]: dynamic(() => import('./hero-17')),
+  [hero18Code]: dynamic(() => import('./hero-18')),
+  [hero19Code]: dynamic(() => import('./hero-19')),
+  [hero20Code]: dynamic(() => import('./hero-20')),
+  [hero21Code]: dynamic(() => import('./hero-21')),
+  [hero22Code]: dynamic(() => import('./hero-22')),
+  [hero23Code]: dynamic(() => import('./hero-23')),
+  [hero24Code]: dynamic(() => import('./hero-24')),
+  [hr1Code]: dynamic(() => import('./hr-1')),
+  [pageProgress1Code]: dynamic(() => import('./page-progress-1')),
+  [cta1Code]: dynamic(() => import('./cta-1')),
+  [cta2Code]: dynamic(() => import('./cta-2')),
+  [cta3Code]: dynamic(() => import('./cta-3')),
+  [cta4Code]: dynamic(() => import('./cta-4')),
+  [cta5Code]: dynamic(() => import('./cta-5')),
+  [cta6Code]: dynamic(() => import('./cta-6')),
+  [cta7Code]: dynamic(() => import('./cta-7')),
+  [cta8Code]: dynamic(() => import('./cta-8')),
+  [cta9Code]: dynamic(() => import('./cta-9')),
+  [facts1Code]: dynamic(() => import('./facts-1')),
+  [facts2Code]: dynamic(() => import('./facts-2')),
+  [facts3Code]: dynamic(() => import('./facts-3')),
+  [facts4Code]: dynamic(() => import('./facts-4')),
+  [facts5Code]: dynamic(() => import('./facts-5')),
+  [facts6Code]: dynamic(() => import('./facts-6')),
+  [facts7Code]: dynamic(() => import('./facts-7')),
+  [facts8Code]: dynamic(() => import('./facts-8')),
+  [facts9Code]: dynamic(() => import('./facts-9')),
+  [facts10Code]: dynamic(() => import('./facts-10')),
+  [facts11Code]: dynamic(() => import('./facts-11')),
+  [facts12Code]: dynamic(() => import('./facts-12')),
+  [facts13Code]: dynamic(() => import('./facts-13')),
+  [facts14Code]: dynamic(() => import('./facts-14')),
+  [facts15Code]: dynamic(() => import('./facts-15')),
+  [facts16Code]: dynamic(() => import('./facts-16')),
+  [facts17Code]: dynamic(() => import('./facts-17')),
+  [faq1Code]: dynamic(() => import('./faq-1')),
+  [faq2Code]: dynamic(() => import('./faq-2')),
+  [faq3Code]: dynamic(() => import('./faq-3')),
+  [faq4Code]: dynamic(() => import('./faq-4')),
+  [faq5Code]: dynamic(() => import('./faq-5')),
+  [faq6Code]: dynamic(() => import('./faq-6')),
+  [process1Code]: dynamic(() => import('./process-1')),
+  [process2Code]: dynamic(() => import('./process-2')),
+  [process3Code]: dynamic(() => import('./process-3')),
+  [process4Code]: dynamic(() => import('./process-4')),
+  [process5Code]: dynamic(() => import('./process-5')),
+  [process6Code]: dynamic(() => import('./process-6')),
+  [process7Code]: dynamic(() => import('./process-7')),
+  [process9Code]: dynamic(() => import('./process-9')),
+  [process10Code]: dynamic(() => import('./process-10')),
+  [process11Code]: dynamic(() => import('./process-11')),
+  [process12Code]: dynamic(() => import('./process-12')),
+  [process13Code]: dynamic(() => import('./process-13')),
+  [process14Code]: dynamic(() => import('./process-14')),
+  [process15Code]: dynamic(() => import('./process-15')),
+  [team1Code]: dynamic(() => import('./team-1')),
+  [team2Code]: dynamic(() => import('./team-2')),
+  [team3Code]: dynamic(() => import('./team-3')),
+  [team4Code]: dynamic(() => import('./team-4')),
+  [team5Code]: dynamic(() => import('./team-5')),
+  [team6Code]: dynamic(() => import('./team-6')),
+  [team7Code]: dynamic(() => import('./team-7')),
+  [service1Code]: dynamic(() => import('./service-1')),
+  [service2Code]: dynamic(() => import('./service-2')),
+  [service3Code]: dynamic(() => import('./service-3')),
+  [service4Code]: dynamic(() => import('./service-4')),
+  [service5Code]: dynamic(() => import('./service-5')),
+  [service6Code]: dynamic(() => import('./service-6')),
+  [service7Code]: dynamic(() => import('./service-7')),
+  [service8Code]: dynamic(() => import('./service-8')),
+  [service9Code]: dynamic(() => import('./service-9')),
+  [service10Code]: dynamic(() => import('./service-10')),
+  [service11Code]: dynamic(() => import('./service-11')),
+  [service12Code]: dynamic(() => import('./service-12')),
+  [service13Code]: dynamic(() => import('./service-13')),
+  [service14Code]: dynamic(() => import('./service-14')),
+  [service15Code]: dynamic(() => import('./service-15')),
+  [service16Code]: dynamic(() => import('./service-16')),
+  [service17Code]: dynamic(() => import('./service-17')),
+  [service18Code]: dynamic(() => import('./service-18')),
+  [service19Code]: dynamic(() => import('./service-19')),
+  [service20Code]: dynamic(() => import('./service-20')),
+  [service21Code]: dynamic(() => import('./service-21')),
+  [service22Code]: dynamic(() => import('./service-22')),
+  [service23Code]: dynamic(() => import('./service-23')),
+  [service24Code]: dynamic(() => import('./service-24')),
+  [service25Code]: dynamic(() => import('./service-25')),
+  [service26Code]: dynamic(() => import('./service-26')),
+  [service27Code]: dynamic(() => import('./service-27')),
+  [testimonial1Code]: dynamic(() => import('./testimonial-1')),
+  [testimonial2Code]: dynamic(() => import('./testimonial-2')),
+  [testimonial3Code]: dynamic(() => import('./testimonial-3')),
+  [testimonial4Code]: dynamic(() => import('./testimonial-4')),
+  [testimonial5Code]: dynamic(() => import('./testimonial-5')),
+  [testimonial6Code]: dynamic(() => import('./testimonial-6')),
+  [testimonial7Code]: dynamic(() => import('./testimonial-7')),
+  [testimonial8Code]: dynamic(() => import('./testimonial-8')),
+  [testimonial9Code]: dynamic(() => import('./testimonial-9')),
+  [testimonial10Code]: dynamic(() => import('./testimonial-10')),
+  [testimonial11Code]: dynamic(() => import('./testimonial-11')),
+  [testimonial12Code]: dynamic(() => import('./testimonial-12')),
+  [testimonial13Code]: dynamic(() => import('./testimonial-13')),
+  [testimonial14Code]: dynamic(() => import('./testimonial-14')),
+  [testimonial15Code]: dynamic(() => import('./testimonial-15')),
+  [testimonial16Code]: dynamic(() => import('./testimonial-16')),
+  [testimonial17Code]: dynamic(() => import('./testimonial-17')),
+  [testimonial18Code]: dynamic(() => import('./testimonial-18')),
+  [testimonial19Code]: dynamic(() => import('./testimonial-19')),
+  [pricing1Code]: dynamic(() => import('./pricing-1')),
+  [pricing2Code]: dynamic(() => import('./pricing-2')),
+  [pricing3Code]: dynamic(() => import('./pricing-3')),
+  [pricing4Code]: dynamic(() => import('./pricing-4')),
+  [pricing5Code]: dynamic(() => import('./pricing-5')),
+  [pricing6Code]: dynamic(() => import('./pricing-6')),
+  [pricing7Code]: dynamic(() => import('./pricing-7')),
+  [pricing8Code]: dynamic(() => import('./pricing-8')),
+  [portfolio1Code]: dynamic(() => import('./portfolio-1')),
+  [portfolio2Code]: dynamic(() => import('./portfolio-2')),
+  [portfolio3Code]: dynamic(() => import('./portfolio-3')),
+  [portfolio4Code]: dynamic(() => import('./portfolio-4')),
+  [portfolio5Code]: dynamic(() => import('./portfolio-5')),
+  [portfolio6Code]: dynamic(() => import('./portfolio-6')),
+  [portfolio7Code]: dynamic(() => import('./portfolio-7')),
+  [portfolio8Code]: dynamic(() => import('./portfolio-8')),
+  [portfolio9Code]: dynamic(() => import('./portfolio-9')),
+  [portfolio10Code]: dynamic(() => import('./portfolio-10')),
+  [portfolio11Code]: dynamic(() => import('./portfolio-11')),
+  [portfolio12Code]: dynamic(() => import('./portfolio-12')),
+  [contact1Code]: dynamic(() => import('./contact-1')),
+  [contact2Code]: dynamic(() => import('./contact-2')),
+  [contact3Code]: dynamic(() => import('./contact-3')),
+  [contact4Code]: dynamic(() => import('./contact-4')),
+  [contact5Code]: dynamic(() => import('./contact-5')),
+  [contact6Code]: dynamic(() => import('./contact-6')),
+  [contact7Code]: dynamic(() => import('./contact-7')),
+  [contact8Code]: dynamic(() => import('./contact-8')),
+  [contact9Code]: dynamic(() => import('./contact-9')),
+  [contact10Code]: dynamic(() => import('./contact-10')),
+  [contact11Code]: dynamic(() => import('./contact-11')),
+  [contact12Code]: dynamic(() => import('./contact-12')),
+  [clientlist1Code]: dynamic(() => import('./clientlist-1')),
+  [clientlist2Code]: dynamic(() => import('./clientlist-2')),
+  [clientlist3Code]: dynamic(() => import('./clientlist-3')),
+  [clientlist4Code]: dynamic(() => import('./clientlist-4')),
+  [clientlist5Code]: dynamic(() => import('./clientlist-5')),
+  [navbar1Code]: dynamic(() => import('./navbar-1')),
+  [footer1Code]: dynamic(() => import('./footer-1')),
+  [footer2Code]: dynamic(() => import('./footer-2')),
+  [footer3Code]: dynamic(() => import('./footer-3')),
+  [footer4Code]: dynamic(() => import('./footer-4')),
+  [footer5Code]: dynamic(() => import('./footer-5')),
+  [footer6Code]: dynamic(() => import('./footer-6')),
+  [footer7Code]: dynamic(() => import('./footer-7')),
+  [footer8Code]: dynamic(() => import('./footer-8')),
+  [footer9Code]: dynamic(() => import('./footer-9')),
+  [footer10Code]: dynamic(() => import('./footer-10')),
+  [footer11Code]: dynamic(() => import('./footer-11')),
+  [footer12Code]: dynamic(() => import('./footer-12')),
+  [footer13Code]: dynamic(() => import('./footer-13')),
+  [footer14Code]: dynamic(() => import('./footer-14')),
+  [footer15Code]: dynamic(() => import('./footer-15')),
+  [wiki1Code]: dynamic(() => import('./wiki-1')),
+  [sidebarMenu1Code]: dynamic(() => import('./sidebar-menu-1')),
 };
 
 export const ComponentMap = Object.fromEntries(

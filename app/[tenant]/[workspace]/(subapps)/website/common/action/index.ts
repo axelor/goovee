@@ -22,7 +22,7 @@ import {
 import {
   getWiki1ContentFieldName,
   getWikiComponentCode,
-} from '../templates/wiki-1';
+} from '../templates/wiki-1/meta';
 
 export async function getLocaleRedirectionURL({
   workspaceURL,

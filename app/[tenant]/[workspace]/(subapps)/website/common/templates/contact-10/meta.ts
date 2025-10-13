@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {socialLinksModel} from '../json-models';
 
+export const contact10Code = 'contact10';
+
 export const contact10Schema = {
   title: 'Contact 10',
-  code: 'contact10',
+  code: contact10Code,
   type: Template.block,
   fields: [
     {

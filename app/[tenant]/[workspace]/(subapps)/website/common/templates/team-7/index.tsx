@@ -1,0 +1,55 @@
+import type {TemplateProps} from '@/subapps/website/common/types';
+import {type Team7Data} from './meta';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
+import Image from 'next/image';
+
+export default function Team7(props: TemplateProps<Team7Data>) {
+  const {data} = props;
+  const {
+    team7Caption: caption,
+    team7Title: title,
+    team7Description: description,
+    team7Image,
+    team7List: list,
+    team7WrapperClassName: wrapperClassName,
+    team7ContainerClassName: containerClassName,
+  } = data || {};
+
+  const image = getImage({
+    image: team7Image,
+    path: 'team7Image',
+    ...props,
+  });
+
+  return (
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row gx-lg-8 gx-xl-12 gy-10 mb-14 mb-md-17 align-items-center">
+          <div className="col-md-8 col-lg-6 order-lg-2">
+            <figure className="rounded">
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+              />
+            </figure>
+          </div>
+
+          <div className="col-lg-6">
+            <h2 className="fs-15 text-uppercase text-muted mb-3">{caption}</h2>
+            <h3 className="display-3 mb-5">{title}</h3>
+            <p className="mb-6">{description}</p>
+
+            <ListColumn
+              list={list?.attrs.list ?? []}
+              rowClass={list?.attrs.rowClass || 'gx-xl-8'}
+              bulletColor={list?.attrs.bulletColor}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

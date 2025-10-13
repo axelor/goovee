@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {uniconsSelection} from '../meta-selections';
 
+export const service14Code = 'service14';
+
 export const service14Schema = {
   title: 'Service 14',
-  code: 'service14',
+  code: service14Code,
   type: Template.block,
   fields: [
     {

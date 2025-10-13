@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const testimonial14Code = 'testimonial14';
+
 export const testimonial14Schema = {
   title: 'Testimonial 14',
-  code: 'testimonial14',
+  code: testimonial14Code,
   type: Template.block,
   fields: [
     {

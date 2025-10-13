@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {planModel} from '../json-models';
 
+export const pricing4Code = 'pricing4';
+
 export const pricing4Schema = {
   title: 'Pricing 4',
-  code: 'pricing4',
+  code: pricing4Code,
   type: Template.block,
   fields: [
     {

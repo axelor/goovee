@@ -11,9 +11,11 @@ import {
   colorsSelection,
 } from '../meta-selections';
 
+export const service9Code = 'service9';
+
 export const service9Schema = {
   title: 'Service 9',
-  code: 'service9',
+  code: service9Code,
   type: Template.block,
   fields: [
     {

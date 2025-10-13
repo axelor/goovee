@@ -7,9 +7,11 @@ import {
 import {accordionModel, imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
+export const faq1Code = 'faq1';
+
 export const faq1Schema = {
   title: 'FAQ 1',
-  code: 'faq1',
+  code: faq1Code,
   type: Template.block,
   fields: [
     {

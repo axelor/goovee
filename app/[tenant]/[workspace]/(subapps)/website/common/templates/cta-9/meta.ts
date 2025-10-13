@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {imageModel} from '../json-models';
 
+export const cta9Code = 'cta9';
+
 export const cta9Schema = {
   title: 'CTA 9',
-  code: 'cta9',
+  code: cta9Code,
   type: Template.block,
   fields: [
     {

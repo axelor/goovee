@@ -7,9 +7,11 @@ import {
 import {imageModel} from '../json-models';
 import {colorsSelection} from '../meta-selections';
 
+export const portfolio8Code = 'portfolio8';
+
 export const portfolio8Schema = {
   title: 'Portfolio 8',
-  code: 'portfolio8',
+  code: portfolio8Code,
   type: Template.block,
   fields: [
     {

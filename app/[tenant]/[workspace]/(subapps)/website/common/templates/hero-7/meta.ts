@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {imageModel} from '../json-models';
 
+export const hero7Code = 'hero7';
+
 export const hero7Schema = {
   title: 'Hero 7',
-  code: 'hero7',
+  code: hero7Code,
   type: Template.block,
   fields: [
     {

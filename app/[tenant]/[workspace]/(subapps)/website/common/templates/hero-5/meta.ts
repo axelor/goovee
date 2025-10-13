@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const hero5Code = 'hero5';
+
 export const hero5Schema = {
   title: 'Hero 5',
-  code: 'hero5',
+  code: hero5Code,
   type: Template.block,
   fields: [
     {

@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {imageModel} from '../json-models';
 
+export const portfolio11Code = 'portfolio11';
+
 export const portfolio11Schema = {
   title: 'Portfolio 11',
-  code: 'portfolio11',
+  code: portfolio11Code,
   type: Template.block,
   fields: [
     {

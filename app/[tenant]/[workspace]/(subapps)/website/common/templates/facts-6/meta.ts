@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {uniconsSelection, colorsSelection} from '../meta-selections';
 
+export const facts6Code = 'facts6';
+
 export const facts6Schema = {
   title: 'Facts 6',
-  code: 'facts6',
+  code: facts6Code,
   type: Template.block,
   fields: [
     {

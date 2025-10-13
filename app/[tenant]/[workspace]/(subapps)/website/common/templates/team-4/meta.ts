@@ -7,9 +7,11 @@ import {
 import {metaFileModel} from '../meta-models';
 import {imageModel, socialLinksModel} from '../json-models';
 
+export const team4Code = 'team4';
+
 export const team4Schema = {
   title: 'Team 4',
-  code: 'team4',
+  code: team4Code,
   type: Template.block,
   fields: [
     {

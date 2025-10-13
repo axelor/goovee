@@ -7,9 +7,11 @@ import {
 import {imageModel} from '../json-models';
 import {solidIconsSelection} from '../meta-selections';
 
+export const service11Code = 'service11';
+
 export const service11Schema = {
   title: 'Service 11',
-  code: 'service11',
+  code: service11Code,
   type: Template.block,
   fields: [
     {

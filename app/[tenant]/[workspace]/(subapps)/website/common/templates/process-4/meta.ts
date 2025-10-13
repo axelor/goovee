@@ -7,9 +7,11 @@ import {
 import {metaFileModel} from '../meta-models';
 import {solidIconsSelection} from '../meta-selections';
 
+export const process4Code = 'process4';
+
 export const process4Schema = {
   title: 'Process 4',
-  code: 'process4',
+  code: process4Code,
   type: Template.block,
   fields: [
     {

@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {imageModel, socialLinksModel} from '../json-models';
 
+export const footer3Code = 'footer3';
+
 export const footer3Schema = {
   title: 'Footer 3',
-  code: 'footer3',
+  code: footer3Code,
   type: Template.block,
   fields: [
     {

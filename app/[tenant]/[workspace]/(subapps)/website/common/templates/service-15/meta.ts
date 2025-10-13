@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {bulletListModel, imageModel} from '../json-models';
 
+export const service15Code = 'service15';
+
 export const service15Schema = {
   title: 'Service 15',
-  code: 'service15',
+  code: service15Code,
   type: Template.block,
   fields: [
     {

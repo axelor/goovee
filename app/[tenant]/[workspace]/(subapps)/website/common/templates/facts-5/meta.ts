@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {linealIconsSelection} from '../meta-selections';
 
+export const facts5Code = 'facts5';
+
 export const facts5Schema = {
   title: 'Facts 5',
-  code: 'facts5',
+  code: facts5Code,
   type: Template.block,
   fields: [
     {

@@ -7,9 +7,11 @@ import {
 import {imageModel} from '../json-models';
 import {ratingsSelection} from '../meta-selections';
 
+export const testimonial8Code = 'testimonial8';
+
 export const testimonial8Schema = {
   title: 'Testimonial 8',
-  code: 'testimonial8',
+  code: testimonial8Code,
   type: Template.block,
   fields: [
     {

@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const process6Code = 'process6';
+
 export const process6Schema = {
   title: 'Process 6',
-  code: 'process6',
+  code: process6Code,
   type: Template.block,
   fields: [
     {

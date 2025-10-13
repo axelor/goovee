@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {imageModel} from '../json-models';
 
+export const process15Code = 'process15';
+
 export const process15Schema = {
   title: 'Process 15',
-  code: 'process15',
+  code: process15Code,
   type: Template.block,
   fields: [
     {

@@ -8,9 +8,11 @@ import {progressListModel, imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 import {buttonColorSelection} from '../meta-selections';
 
+export const about10Code = 'about10';
+
 export const about10Schema = {
   title: 'About 10',
-  code: 'about10',
+  code: about10Code,
   type: Template.block,
   fields: [
     {

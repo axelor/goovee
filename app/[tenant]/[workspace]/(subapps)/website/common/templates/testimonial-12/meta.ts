@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {ratingsSelection} from '../meta-selections';
 
+export const testimonial12Code = 'testimonial12';
+
 export const testimonial12Schema = {
   title: 'Testimonial 12',
-  code: 'testimonial12',
+  code: testimonial12Code,
   type: Template.block,
   fields: [
     {

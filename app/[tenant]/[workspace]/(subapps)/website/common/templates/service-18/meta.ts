@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {solidIconsSelection, colorsSelection} from '../meta-selections';
 
+export const service18Code = 'service18';
+
 export const service18Schema = {
   title: 'Service 18',
-  code: 'service18',
+  code: service18Code,
   type: Template.block,
   fields: [
     {

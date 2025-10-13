@@ -13,14 +13,12 @@ Each template is located in its own directory within the `templates` folder. The
 ```
 /templates
 └── /about-1
-    ├── about-1.tsx  // The React component
-    ├── index.ts     // Exports the component and schema
+    ├── index.tsx    // The React component with a default export
     └── meta.ts      // Defines the schema and demos
 ```
 
-- **`about-1.tsx`**: The React component that renders the template. It receives a `data` prop containing the content.
+- **`index.tsx`**: The React component that renders the template. It receives a `data` prop containing the content and must be a **default export**.
 - **`meta.ts`**: Defines the `schema` for the template and provides `demos` (example data) for seeding.
-- **`index.ts`**: Exports the component from `about-1.tsx` and the schema from `meta.ts`.
 
 ## Adding a New Template
 
@@ -43,12 +41,14 @@ To add a new template, follow these steps:
       type TemplateSchema,
     } from '../../types/templates';
 
+    // Code should be camelCase
+    export const myNewTemplateCode = 'myNewTemplate';
+
     // Use 'as const satisfies TemplateSchema' for strict type-checking.
     export const myNewTemplateSchema = {
       // Title is the display name (Start Case)
       title: 'My New Template',
-      // Code should be camelCase
-      code: 'myNewTemplate',
+      code: myNewTemplateCode,
       type: Template.block,
       fields: [
         {
@@ -90,17 +90,18 @@ To add a new template, follow these steps:
     ];
     ```
 
-3.  **Create the React Component (`my-new-template.tsx`)**:
-    Next, create the `.tsx` file for your component. Use the `Data` type alias you just created to strongly type the component's props.
+3.  **Create the React Component (`index.tsx`)**:
+    Next, create the `index.tsx` file for your component. Use the `Data` type alias you just created to strongly type the component's props. The component must be a **default export**.
 
     ```tsx
-    // app/.../templates/my-new-template/my-new-template.tsx
+    // app/.../templates/my-new-template/index.tsx
     import {TemplateProps} from '../types';
     import type {MyNewTemplateData} from './meta'; // Import the data type
 
-    // Component name should be PascalCase
     // Use the data type alias for TemplateProps
-    export function MyNewTemplate({data}: TemplateProps<MyNewTemplateData>) {
+    export default function MyNewTemplate({
+      data,
+    }: TemplateProps<MyNewTemplateData>) {
       return (
         <div>
           {/* Demo data keys are camelCase(code) + Capitalize(camelCase(fieldName)) */}
@@ -112,27 +113,18 @@ To add a new template, follow these steps:
     }
     ```
 
-4.  **Create the Index File (`index.ts`)**:
-    Create an `index.ts` file to export the component and schema.
+4.  **Register the Template**:
 
-    ```ts
-    // app/.../templates/my-new-template/index.ts
-    export * from './my-new-template';
-    export * from './meta';
-    ```
-
-5.  **Register the Template**:
-
-    - In `app/[tenant]/[workspace]/(subapps)/website/common/templates/index.ts`, import your new template's exports and add the component and schema to the `componentMap`.
+    - In `app/[tenant]/[workspace]/(subapps)/website/common/templates/index.ts`, import your new template's `code` and add the component to the `componentMap`.
 
       ```ts
       // app/.../templates/index.ts
       // ... other imports
-      import {MyNewTemplate, myNewTemplateSchema} from './my-new-template';
+      import {myNewTemplateCode} from './my-new-template/meta';
 
       const componentMap: Record<string, ComponentType<TemplateProps>> = {
         // ... other templates
-        [myNewTemplateSchema.code]: MyNewTemplate,
+        [myNewTemplateCode]: dynamic(() => import('./my-new-template')),
       };
       ```
 
@@ -157,11 +149,11 @@ To add a new template, follow these steps:
       ```ts
       // app/.../templates/plugins-map.ts
       // ... other imports
-      import {myNewTemplateSchema} from './my-new-template/meta';
+      import {myNewTemplateCode} from './my-new-template/meta';
 
       const pluginsMap = {
         // ... other templates
-        [myNewTemplateSchema.code]: ['plugin-name'], // Replace 'plugin-name' with the actual plugin(s) your template uses
+        [myNewTemplateCode]: ['plugin-name'], // Replace 'plugin-name' with the actual plugin(s) your template uses
       };
       ```
 

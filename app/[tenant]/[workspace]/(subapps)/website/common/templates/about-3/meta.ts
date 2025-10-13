@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {accordionModel, imageModel} from '../json-models';
 
+export const about3Code = 'about3';
+
 export const about3Schema = {
   title: 'About 3',
-  code: 'about3',
+  code: about3Code,
   type: Template.block,
   fields: [
     {

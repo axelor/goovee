@@ -8,9 +8,11 @@ import {metaFileModel} from '../meta-models';
 import {serviceList3Model, imageModel} from '../json-models';
 import {buttonColorSelection} from '../meta-selections';
 
+export const about21Code = 'about21';
+
 export const about21Schema = {
   title: 'About 21',
-  code: 'about21',
+  code: about21Code,
   type: Template.block,
   fields: [
     {

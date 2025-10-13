@@ -5,9 +5,11 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 
+export const sidebarMenu1Code = 'sidebarMenu1';
+
 export const sidebarMenu1Schema = {
   title: 'Sidebar Menu 1',
-  code: 'sidebarMenu1',
+  code: sidebarMenu1Code,
   type: Template.leftRightMenu,
   fields: [],
 } as const satisfies TemplateSchema;

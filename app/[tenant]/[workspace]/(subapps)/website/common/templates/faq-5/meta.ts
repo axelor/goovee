@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {faq5QuestionsModel} from '../json-models';
 
+export const faq5Code = 'faq5';
+
 export const faq5Schema = {
   title: 'FAQ 5',
-  code: 'faq5',
+  code: faq5Code,
   type: Template.block,
   fields: [
     {

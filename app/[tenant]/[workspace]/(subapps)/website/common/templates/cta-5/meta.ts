@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const cta5Code = 'cta5';
+
 export const cta5Schema = {
   title: 'CTA 5',
-  code: 'cta5',
+  code: cta5Code,
   type: Template.block,
   fields: [
     {

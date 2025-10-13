@@ -5,9 +5,11 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 
+export const hr1Code = 'hr1';
+
 export const hr1Schema = {
   title: 'HR 1',
-  code: 'hr1',
+  code: hr1Code,
   type: Template.block,
   fields: [
     {

@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {colorsSelection} from '../meta-selections';
 
+export const process12Code = 'process12';
+
 export const process12Schema = {
   title: 'Process 12',
-  code: 'process12',
+  code: process12Code,
   type: Template.block,
   fields: [
     {

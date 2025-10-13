@@ -1,19 +1,19 @@
 import {
   Template,
   Data,
-  Demo,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 import {
   formatComponentCode,
   formatCustomFieldName,
 } from '@/subapps/website/common/utils/helper';
-import {englishDemo, frenchDemo} from './demo-data';
 
 const contentFieldName = 'content' as const;
+export const wiki1Code = 'wiki1';
+
 export const wiki1Schema = {
   title: 'Wiki 1',
-  code: 'wiki1',
+  code: wiki1Code,
   type: Template.block,
   fields: [
     {
@@ -29,28 +29,7 @@ export function getWiki1ContentFieldName() {
 }
 
 export function getWikiComponentCode() {
-  return formatComponentCode(wiki1Schema.code);
+  return formatComponentCode(wiki1Code);
 }
 
 export type Wiki1Data = Data<typeof wiki1Schema>;
-
-export const wiki1Demos: Demo<typeof wiki1Schema>[] = [
-  {
-    language: 'en_US',
-    site: 'en',
-    page: 'wiki',
-    sequence: 1,
-    data: {
-      wiki1Content: JSON.stringify(englishDemo),
-    },
-  },
-  {
-    language: 'fr_FR',
-    site: 'fr',
-    page: 'wiki',
-    sequence: 1,
-    data: {
-      wiki1Content: JSON.stringify(frenchDemo),
-    },
-  },
-];

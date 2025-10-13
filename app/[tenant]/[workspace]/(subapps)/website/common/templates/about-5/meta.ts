@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {progressListModel, imageModel} from '../json-models';
 
+export const about5Code = 'about5';
+
 export const about5Schema = {
   title: 'About 5',
-  code: 'about5',
+  code: about5Code,
   type: Template.block,
   fields: [
     {

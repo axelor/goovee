@@ -7,9 +7,11 @@ import {
 import {imageModel} from '../json-models';
 import {socialLinksModel} from '../json-models';
 
+export const footer11Code = 'footer11';
+
 export const footer11Schema = {
   title: 'Footer 11',
-  code: 'footer11',
+  code: footer11Code,
   type: Template.block,
   fields: [
     {

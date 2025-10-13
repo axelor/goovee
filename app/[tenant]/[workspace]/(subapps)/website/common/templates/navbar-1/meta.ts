@@ -5,9 +5,11 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 
+export const navbar1Code = 'navbar1';
+
 export const navbar1Schema = {
   title: 'Navbar 1',
-  code: 'navbar1',
+  code: navbar1Code,
   type: Template.topMenu,
   fields: [],
 } as const satisfies TemplateSchema;

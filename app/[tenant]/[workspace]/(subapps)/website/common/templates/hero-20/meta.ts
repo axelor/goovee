@@ -7,9 +7,11 @@ import {
 import {imageModel} from '../json-models';
 import {metaFileModel} from '../meta-models';
 
+export const hero20Code = 'hero20';
+
 export const hero20Schema = {
   title: 'Hero 20',
-  code: 'hero20',
+  code: hero20Code,
   type: Template.block,
   fields: [
     {

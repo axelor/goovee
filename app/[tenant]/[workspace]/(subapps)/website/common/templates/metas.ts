@@ -214,7 +214,8 @@ import {testimonial16Demos, testimonial16Schema} from './testimonial-16/meta';
 import {testimonial17Demos, testimonial17Schema} from './testimonial-17/meta';
 import {testimonial18Demos, testimonial18Schema} from './testimonial-18/meta';
 import {testimonial19Demos, testimonial19Schema} from './testimonial-19/meta';
-import {wiki1Demos, wiki1Schema} from './wiki-1/meta';
+import {wiki1Schema} from './wiki-1/meta';
+import {wiki1Demos} from './wiki-1/demo';
 
 export const metas: {
   schema: TemplateSchema;

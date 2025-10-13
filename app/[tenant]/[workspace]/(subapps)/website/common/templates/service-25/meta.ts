@@ -10,9 +10,11 @@ import {
   linkColorsSelection,
 } from '../meta-selections';
 
+export const service25Code = 'service25';
+
 export const service25Schema = {
   title: 'Service 25',
-  code: 'service25',
+  code: service25Code,
   type: Template.block,
   fields: [
     {
