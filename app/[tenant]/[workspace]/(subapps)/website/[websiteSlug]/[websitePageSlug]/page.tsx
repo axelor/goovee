@@ -1,9 +1,11 @@
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
+import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
+import {MOUNT_TYPE} from '@/subapps/website/common/constants';
 import {
   canEditWiki,
   findWebsitePageBySlug,
@@ -11,14 +13,9 @@ import {
   populateLinesByChunk,
   ReplacedContentLine,
 } from '@/subapps/website/common/orm/website';
-import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
-import {
-  getWebsiteComponent,
-  getWebsitePlugins,
-} from '@/subapps/website/common/utils/component';
-import {MOUNT_TYPE} from '@/subapps/website/common/constants';
 import {clone} from '@/utils';
 import {Suspense} from 'react';
+import {Plugins, Template} from '../client-wrapper';
 
 export async function generateMetadata({
   params,
@@ -136,9 +133,8 @@ async function ContentChunkRenderer({
 
   const components = lines.map(line => {
     if (!line?.content?.component) return null;
-    const Component = getWebsiteComponent(line.content.component);
     return (
-      <Component
+      <Template
         key={line.id}
         data={clone(line.content.attrs)}
         lineId={line.id}
@@ -172,9 +168,5 @@ async function PluginsRenderer({
     .map(line => line?.content?.component?.code)
     .filter(Boolean) as string[];
 
-  const plugins = getWebsitePlugins(codes).map((Plugin, i) => (
-    <Plugin key={i} />
-  ));
-
-  return plugins;
+  return <Plugins codes={codes} />;
 }
