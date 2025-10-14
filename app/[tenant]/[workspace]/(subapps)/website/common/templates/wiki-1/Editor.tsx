@@ -1,59 +1,38 @@
 import type {JSX} from 'react';
 
-import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
 import {CheckListPlugin} from '@lexical/react/LexicalCheckListPlugin';
-import {ClearEditorPlugin} from '@lexical/react/LexicalClearEditorPlugin';
 import {ClickableLinkPlugin} from '@lexical/react/LexicalClickableLinkPlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import {HashtagPlugin} from '@lexical/react/LexicalHashtagPlugin';
-import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
-import {HorizontalRulePlugin} from '@lexical/react/LexicalHorizontalRulePlugin';
 import {ListPlugin} from '@lexical/react/LexicalListPlugin';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
-import {TabIndentationPlugin} from '@lexical/react/LexicalTabIndentationPlugin';
 import {TablePlugin} from '@lexical/react/LexicalTablePlugin';
 import {useLexicalEditable} from '@lexical/react/useLexicalEditable';
 import {CAN_USE_DOM} from '@lexical/utils';
+import dynamic from 'next/dynamic';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 
 import {useSharedHistoryContext} from './context/SharedHistoryContext';
-import ActionsPlugin from './plugins/ActionsPlugin';
-import AutoEmbedPlugin from './plugins/AutoEmbedPlugin';
-import AutoLinkPlugin from './plugins/AutoLinkPlugin';
-import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
 import CollapsiblePlugin from './plugins/CollapsiblePlugin';
-import ComponentPickerPlugin from './plugins/ComponentPickerPlugin';
-import ContextMenuPlugin from './plugins/ContextMenuPlugin';
-import DragDropPaste from './plugins/DragDropPastePlugin';
-import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
-import EmojiPickerPlugin from './plugins/EmojiPickerPlugin';
 import EmojisPlugin from './plugins/EmojisPlugin';
-import EquationsPlugin from './plugins/EquationsPlugin';
-import ExcalidrawPlugin from './plugins/ExcalidrawPlugin';
-import FigmaPlugin from './plugins/FigmaPlugin';
-import FloatingLinkEditorPlugin from './plugins/FloatingLinkEditorPlugin';
-import FloatingTextFormatToolbarPlugin from './plugins/FloatingTextFormatToolbarPlugin';
-import ImagesPlugin from './plugins/ImagesPlugin';
-import InlineImagePlugin from './plugins/InlineImagePlugin';
 import KeywordsPlugin from './plugins/KeywordsPlugin';
-import {LayoutPlugin} from './plugins/LayoutPlugin/LayoutPlugin';
 import LinkPlugin from './plugins/LinkPlugin';
-import MarkdownShortcutPlugin from './plugins/MarkdownShortcutPlugin';
-import MentionsPlugin from './plugins/MentionsPlugin';
-import PageBreakPlugin from './plugins/PageBreakPlugin';
-import ShortcutsPlugin from './plugins/ShortcutsPlugin';
-import SpeechToTextPlugin from './plugins/SpeechToTextPlugin';
+import SpecialTextPlugin from './plugins/SpecialTextPlugin';
 import TabFocusPlugin from './plugins/TabFocusPlugin';
-import TableCellActionMenuPlugin from './plugins/TableActionMenuPlugin';
-import TableCellResizer from './plugins/TableCellResizer';
-import TableHoverActionsPlugin from './plugins/TableHoverActionsPlugin';
-import ToolbarPlugin from './plugins/ToolbarPlugin';
-import TwitterPlugin from './plugins/TwitterPlugin';
-import YouTubePlugin from './plugins/YouTubePlugin';
 import ContentEditable from './ui/ContentEditable';
+
+const EditingPlugins = dynamic(() => import('./plugins/EditingPlugins'), {
+  ssr: false,
+});
+const ToolbarPlugin = dynamic(() => import('./plugins/ToolbarPlugin'), {
+  ssr: false,
+});
+const ActionsPlugin = dynamic(() => import('./plugins/ActionsPlugin'), {
+  ssr: false,
+});
 
 export default function Editor(props: {
   contentId: string;
@@ -64,7 +43,9 @@ export default function Editor(props: {
   const {contentId, contentVersion, content, canEditWiki} = props;
   const {historyState} = useSharedHistoryContext();
   const isEditable = useLexicalEditable();
-  const placeholder = 'Enter some text...';
+  const placeholder = isEditable
+    ? 'Enter some text...'
+    : 'No content available';
   const [floatingAnchorElem, setFloatingAnchorElem] =
     useState<HTMLDivElement | null>(null);
   const [isSmallWidthViewport, setIsSmallWidthViewport] =
@@ -72,6 +53,15 @@ export default function Editor(props: {
   const [editor] = useLexicalComposerContext();
   const [activeEditor, setActiveEditor] = useState(editor);
   const [isLinkEditMode, setIsLinkEditMode] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (content) {
+      const editorState = editor.parseEditorState(content);
+      editor.update(() => {
+        editor.setEditorState(editorState);
+      });
+    }
+  }, [content, editor]);
 
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
     if (_floatingAnchorElem !== null) {
@@ -98,98 +88,57 @@ export default function Editor(props: {
 
   return (
     <>
-      <ToolbarPlugin
-        editor={editor}
-        activeEditor={activeEditor}
-        setActiveEditor={setActiveEditor}
-        setIsLinkEditMode={setIsLinkEditMode}
-      />
-      <ShortcutsPlugin
-        editor={activeEditor}
-        setIsLinkEditMode={setIsLinkEditMode}
-      />
+      {isEditable && (
+        <ToolbarPlugin
+          editor={editor}
+          activeEditor={activeEditor}
+          setActiveEditor={setActiveEditor}
+          setIsLinkEditMode={setIsLinkEditMode}
+        />
+      )}
       <div className="editor-container">
-        <DragDropPaste />
-        <AutoFocusPlugin />
-        <ClearEditorPlugin />
-        <ComponentPickerPlugin />
-        <EmojiPickerPlugin />
-        <AutoEmbedPlugin />
-        <MentionsPlugin />
         <EmojisPlugin />
         <HashtagPlugin />
         <KeywordsPlugin />
-        <SpeechToTextPlugin />
-        <AutoLinkPlugin />
-        <>
-          <HistoryPlugin externalHistoryState={historyState} />
-          <RichTextPlugin
-            contentEditable={
-              <div className="editor-scroller">
-                <div className="editor" ref={onRef}>
-                  <ContentEditable placeholder={placeholder} />
-                </div>
+        <SpecialTextPlugin />
+        <RichTextPlugin
+          contentEditable={
+            <div className="editor-scroller">
+              <div className="editor" ref={onRef}>
+                <ContentEditable placeholder={placeholder} />
               </div>
-            }
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <MarkdownShortcutPlugin />
-          <CodeHighlightPlugin />
-          <ListPlugin hasStrictIndent={false} />
-          <CheckListPlugin />
-          <TablePlugin
-            hasCellMerge={true}
-            hasCellBackgroundColor={true}
-            hasHorizontalScroll={true}
-          />
-          <TableCellResizer />
-          <ImagesPlugin />
-          <InlineImagePlugin />
-          <LinkPlugin hasLinkAttributes={true} />
-          <TwitterPlugin />
-          <YouTubePlugin />
-          <FigmaPlugin />
-          <ClickableLinkPlugin disabled={isEditable} />
-          <HorizontalRulePlugin />
-          <EquationsPlugin />
-          <ExcalidrawPlugin />
-          <TabFocusPlugin />
-          <TabIndentationPlugin maxIndent={7} />
-          <CollapsiblePlugin />
-          <PageBreakPlugin />
-          <LayoutPlugin />
-          {floatingAnchorElem && (
-            <>
-              <FloatingLinkEditorPlugin
-                anchorElem={floatingAnchorElem}
-                isLinkEditMode={isLinkEditMode}
-                setIsLinkEditMode={setIsLinkEditMode}
-              />
-              <TableCellActionMenuPlugin
-                anchorElem={floatingAnchorElem}
-                cellMerge={true}
-              />
-            </>
-          )}
-          {floatingAnchorElem && !isSmallWidthViewport && (
-            <>
-              <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-              <CodeActionMenuPlugin anchorElem={floatingAnchorElem} />
-              <TableHoverActionsPlugin anchorElem={floatingAnchorElem} />
-              <FloatingTextFormatToolbarPlugin
-                anchorElem={floatingAnchorElem}
-                setIsLinkEditMode={setIsLinkEditMode}
-              />
-            </>
-          )}
-        </>
-        <ContextMenuPlugin />
-        <ActionsPlugin
-          content={content}
-          contentId={contentId}
-          contentVersion={contentVersion}
-          canEditWiki={canEditWiki}
+            </div>
+          }
+          ErrorBoundary={LexicalErrorBoundary}
         />
+        <CodeHighlightPlugin />
+        <ListPlugin hasStrictIndent={false} />
+        <CheckListPlugin />
+        <TablePlugin
+          hasCellMerge={true}
+          hasCellBackgroundColor={true}
+          hasHorizontalScroll={true}
+        />
+        <LinkPlugin hasLinkAttributes={true} />
+        <ClickableLinkPlugin disabled={isEditable} />
+        <TabFocusPlugin />
+        <CollapsiblePlugin />
+        {isEditable && (
+          <EditingPlugins
+            historyState={historyState}
+            activeEditor={activeEditor}
+            isLinkEditMode={isLinkEditMode}
+            setIsLinkEditMode={setIsLinkEditMode}
+            floatingAnchorElem={floatingAnchorElem}
+            isSmallWidthViewport={isSmallWidthViewport}
+          />
+        )}
+        {canEditWiki && (
+          <ActionsPlugin
+            contentId={contentId}
+            contentVersion={contentVersion}
+          />
+        )}
       </div>
     </>
   );

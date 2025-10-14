@@ -43,13 +43,9 @@ async function shareDoc(doc: SerializedDocument): Promise<void> {
 export default function ActionsPlugin({
   contentId,
   contentVersion,
-  content,
-  canEditWiki,
 }: {
-  content: string | undefined;
   contentId: string;
   contentVersion: number;
-  canEditWiki: boolean;
 }): JSX.Element {
   const {workspaceURL} = useWorkspace();
 
@@ -63,15 +59,6 @@ export default function ActionsPlugin({
   const [isEditorEmpty, setIsEditorEmpty] = useState(true);
   const [modal, showModal] = useModal();
   const showFlashMessage = useFlashMessage();
-
-  useEffect(() => {
-    if (content) {
-      const editorState = editor.parseEditorState(content);
-      editor.update(() => {
-        editor.setEditorState(editorState);
-      });
-    }
-  }, [content, editor]);
 
   async function save() {
     if (saving) return;
@@ -222,17 +209,15 @@ export default function ActionsPlugin({
           </button>
         </>
       )}
-      {canEditWiki && (
-        <button
-          className={`action-button ${!isEditable ? 'unlock' : 'lock'}`}
-          onClick={() => {
-            editor.setEditable(!editor.isEditable());
-          }}
-          title={!isEditable ? 'Edit' : 'Lock'}
-          aria-label={!isEditable ? 'Edit' : 'Lock'}>
-          <i className={!isEditable ? 'edit' : 'lock'} />
-        </button>
-      )}
+      <button
+        className={`action-button ${!isEditable ? 'unlock' : 'lock'}`}
+        onClick={() => {
+          editor.setEditable(!editor.isEditable());
+        }}
+        title={!isEditable ? 'Edit' : 'Lock'}
+        aria-label={!isEditable ? 'Edit' : 'Lock'}>
+        <i className={!isEditable ? 'edit' : 'lock'} />
+      </button>
       {modal}
     </div>
   );

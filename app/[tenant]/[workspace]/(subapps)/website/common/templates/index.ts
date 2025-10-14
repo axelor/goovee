@@ -434,7 +434,7 @@ const componentMap: Record<string, ComponentType<TemplateProps>> = {
   [footer13Code]: dynamic(() => import('./footer-13')),
   [footer14Code]: dynamic(() => import('./footer-14')),
   [footer15Code]: dynamic(() => import('./footer-15')),
-  [wiki1Code]: dynamic(() => import('./wiki-1')),
+  [wiki1Code]: dynamic(() => import('./wiki-1'), {ssr: false}),
   [sidebarMenu1Code]: dynamic(() => import('./sidebar-menu-1')),
 };
 
