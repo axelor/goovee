@@ -32,8 +32,7 @@
     background-color: #eee;
   }
 
-  .link-editor .button i,
-  .actions i {
+  .link-editor .button i {
     background-size: contain;
     display: inline-block;
     height: 20px;
