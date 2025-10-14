@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio12Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
-import {ProjectCard3} from '@/subapps/website/common/components/reuseable/project-cards';
+import ProjectCard3 from '@/subapps/website/common/components/reuseable/project-cards/ProjectCard3';
 import {Fragment} from 'react';
 
 export default function Portfolio12(props: TemplateProps<Portfolio12Data>) {

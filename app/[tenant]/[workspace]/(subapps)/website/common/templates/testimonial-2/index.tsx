@@ -3,7 +3,7 @@ import Image from 'next/image';
 import {type Testimonial2Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
-import {TestimonialCard2} from '@/subapps/website/common/components/reuseable/testimonial-cards';
+import TestimonialCard2 from '@/subapps/website/common/components/reuseable/testimonial-cards/TestimonialCard2';
 
 export default function Testimonial2(props: TemplateProps<Testimonial2Data>) {
   const {data} = props;

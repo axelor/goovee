@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Contact5Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
-import {Tiles3} from '@/subapps/website/common/components/elements/tiles';
+import Tiles3 from '@/subapps/website/common/components/elements/tiles/Tiles3';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export default function Contact5(props: TemplateProps<Contact5Data>) {

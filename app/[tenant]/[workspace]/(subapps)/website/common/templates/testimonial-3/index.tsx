@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial3Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import {Fragment} from 'react';
-import {Tiles3} from '@/subapps/website/common/components/elements/tiles';
+import Tiles3 from '@/subapps/website/common/components/elements/tiles/Tiles3';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import TestimonialCard2 from '@/subapps/website/common/components/reuseable/testimonial-cards/TestimonialCard2';
 

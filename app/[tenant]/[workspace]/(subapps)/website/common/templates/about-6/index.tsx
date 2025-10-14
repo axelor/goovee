@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About6Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
-import {Tiles5} from '@/subapps/website/common/components/elements/tiles';
+import Tiles5 from '@/subapps/website/common/components/elements/tiles/Tiles5';
 
 export default function About6(props: TemplateProps<About6Data>) {
   const {data} = props;

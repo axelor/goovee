@@ -3,7 +3,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Pricing2Data} from './meta';
 import {useState} from 'react';
 import Switch from '@/subapps/website/common/components/reuseable/Switch';
-import {PricingCard2} from '@/subapps/website/common/components/reuseable/pricing-cards';
+import PricingCard2 from '@/subapps/website/common/components/reuseable/pricing-cards/PricingCard2';
 
 export default function Pricing2(props: TemplateProps<Pricing2Data>) {
   const {data} = props;

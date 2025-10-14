@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service4Data} from './meta';
-import {ServiceCard2} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard2 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard2';
 
 export default function Service4(props: TemplateProps<Service4Data>) {
   const {data} = props;

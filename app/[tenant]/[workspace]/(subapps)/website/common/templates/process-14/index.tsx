@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process14Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {ProcessList1} from '@/subapps/website/common/components/reuseable/process-list';
+import ProcessList1 from '@/subapps/website/common/components/reuseable/process-list/ProcessList1';
 
 export default function Process14(props: TemplateProps<Process14Data>) {
   const {data} = props;

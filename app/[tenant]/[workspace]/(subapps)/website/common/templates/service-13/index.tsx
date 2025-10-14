@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service13Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import {slideInDownAnimate} from '@/subapps/website/common/utils/animation';
-import {ServiceCard2} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard2 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard2';
 import Image from 'next/image';
 
 export default function Service13(props: TemplateProps<Service13Data>) {

@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team3Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
-import {TeamCard1} from '@/subapps/website/common/components/reuseable/team-cards';
+import TeamCard1 from '@/subapps/website/common/components/reuseable/team-cards/TeamCard1';
 
 export default function Team3(props: TemplateProps<Team3Data>) {
   const {data} = props;

@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial5Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
-import {TestimonialCard2} from '@/subapps/website/common/components/reuseable/testimonial-cards';
+import TestimonialCard2 from '@/subapps/website/common/components/reuseable/testimonial-cards/TestimonialCard2';
 import Image from 'next/image';
 
 export default function Testimonial5(props: TemplateProps<Testimonial5Data>) {

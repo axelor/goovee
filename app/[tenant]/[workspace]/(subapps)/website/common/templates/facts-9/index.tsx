@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts9Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import animation from '@/subapps/website/common/utils/animation';
-import {Counter2} from '@/subapps/website/common/components/reuseable/counter';
+import Counter2 from '@/subapps/website/common/components/reuseable/counter/Counter2';
 import Image from 'next/image';
 
 export default function Facts9(props: TemplateProps<Facts9Data>) {

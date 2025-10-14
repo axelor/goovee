@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Portfolio11Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
-import {ProjectCard3} from '@/subapps/website/common/components/reuseable/project-cards';
+import ProjectCard3 from '@/subapps/website/common/components/reuseable/project-cards/ProjectCard3';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 
 export default function Portfolio11(props: TemplateProps<Portfolio11Data>) {

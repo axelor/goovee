@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process9Data} from './meta';
 import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
-import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 import dynamic from 'next/dynamic';
 import IconProps from '../../types/icons';
 

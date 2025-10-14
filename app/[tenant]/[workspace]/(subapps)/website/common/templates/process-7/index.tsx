@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process7Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {ProcessList1} from '@/subapps/website/common/components/reuseable/process-list';
+import ProcessList1 from '@/subapps/website/common/components/reuseable/process-list/ProcessList1';
 import {Fragment} from 'react';
 
 export default function Process7(props: TemplateProps<Process7Data>) {

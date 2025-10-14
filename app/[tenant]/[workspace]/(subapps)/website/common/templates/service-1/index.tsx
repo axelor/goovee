@@ -1,4 +1,4 @@
-import {ServiceCard1} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard1 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard1';
 // -------- data -------- //
 import Design from '@/subapps/website/common/icons/solid/Design';
 import dynamic from 'next/dynamic';

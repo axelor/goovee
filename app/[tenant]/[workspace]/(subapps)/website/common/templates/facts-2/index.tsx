@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts2Data} from './meta';
-import {Counter3} from '@/subapps/website/common/components/reuseable/counter';
+import Counter3 from '@/subapps/website/common/components/reuseable/counter/Counter3';
 import dynamic from 'next/dynamic';
 
 function getIcon(icon: string) {

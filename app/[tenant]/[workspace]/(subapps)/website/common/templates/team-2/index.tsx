@@ -4,7 +4,7 @@ import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {TeamCard2} from '@/subapps/website/common/components/reuseable/team-cards';
+import TeamCard2 from '@/subapps/website/common/components/reuseable/team-cards/TeamCard2';
 
 export default function Team2(props: TemplateProps<Team2Data>) {
   const {data} = props;

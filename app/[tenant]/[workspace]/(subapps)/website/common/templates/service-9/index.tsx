@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service9Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {ServiceCard4} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard4 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard4';
 import dynamic from 'next/dynamic';
 import IconProps from '../../types/icons';
 

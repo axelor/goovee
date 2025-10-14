@@ -1,4 +1,4 @@
-import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 import Design from '@/subapps/website/common/icons/solid/Design';
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {getImage} from '@/subapps/website/common/utils/helper';

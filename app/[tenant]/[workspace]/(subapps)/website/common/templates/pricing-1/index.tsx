@@ -2,7 +2,7 @@
 import {useState} from 'react';
 import Switch from '@/subapps/website/common/components/reuseable/Switch';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {PricingCard1} from '@/subapps/website/common/components/reuseable/pricing-cards';
+import PricingCard1 from '@/subapps/website/common/components/reuseable/pricing-cards/PricingCard1';
 
 // -------- data -------- //
 import {TemplateProps} from '@/subapps/website/common/types';

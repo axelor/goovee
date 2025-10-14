@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service7Data} from './meta';
-import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 import {Fragment} from 'react';
 import IconProps from '../../types/icons';
 import dynamic from 'next/dynamic';

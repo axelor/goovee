@@ -1,5 +1,5 @@
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {TestimonialCard1} from '@/subapps/website/common/components/reuseable/testimonial-cards';
+import TestimonialCard1 from '@/subapps/website/common/components/reuseable/testimonial-cards/TestimonialCard1';
 // -------- data -------- //
 import {TemplateProps} from '@/subapps/website/common/types';
 

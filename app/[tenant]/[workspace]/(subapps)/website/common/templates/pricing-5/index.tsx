@@ -4,7 +4,7 @@ import {type Pricing5Data} from './meta';
 import {useState} from 'react';
 import Switch from '@/subapps/website/common/components/reuseable/Switch';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {PricingCard1} from '@/subapps/website/common/components/reuseable/pricing-cards';
+import PricingCard1 from '@/subapps/website/common/components/reuseable/pricing-cards/PricingCard1';
 
 export default function Pricing5(props: TemplateProps<Pricing5Data>) {
   const {data} = props;

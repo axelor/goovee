@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service21Data} from './meta';
-import {ServiceCard1} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard1 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard1';
 import dynamic from 'next/dynamic';
 import IconProps from '../../types/icons';
 

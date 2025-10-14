@@ -1,5 +1,5 @@
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {ProcessList1} from '@/subapps/website/common/components/reuseable/process-list';
+import ProcessList1 from '@/subapps/website/common/components/reuseable/process-list/ProcessList1';
 import type {TemplateProps} from '@/subapps/website/common/types';
 
 import type {Process1Data} from './meta';

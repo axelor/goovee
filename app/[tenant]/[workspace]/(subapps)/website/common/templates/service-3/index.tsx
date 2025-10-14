@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service3Data} from './meta';
-import {ServiceCard2} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard2 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard2';
 import {Fragment} from 'react';
 
 export default function Service3(props: TemplateProps<Service3Data>) {

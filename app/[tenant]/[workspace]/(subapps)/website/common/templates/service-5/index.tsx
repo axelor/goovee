@@ -2,9 +2,9 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service5Data} from './meta';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
 import {Fragment} from 'react';
-import {Tiles1} from '@/subapps/website/common/components/elements/tiles';
+import Tiles1 from '@/subapps/website/common/components/elements/tiles/Tiles1';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
-import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 import dynamic from 'next/dynamic';
 import {getImage} from '../../utils/helper';
 

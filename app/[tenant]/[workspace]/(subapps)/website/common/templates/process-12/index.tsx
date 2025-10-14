@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process12Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 
 export default function Process12(props: TemplateProps<Process12Data>) {
   const {data} = props;

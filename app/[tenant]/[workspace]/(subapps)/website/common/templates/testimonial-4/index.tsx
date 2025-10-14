@@ -3,7 +3,7 @@ import {type Testimonial4Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
-import {TestimonialCard3} from '@/subapps/website/common/components/reuseable/testimonial-cards';
+import TestimonialCard3 from '@/subapps/website/common/components/reuseable/testimonial-cards/TestimonialCard3';
 
 export default function Testimonial4(props: TemplateProps<Testimonial4Data>) {
   const {data} = props;

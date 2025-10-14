@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Team5Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
-import {TeamCard3} from '@/subapps/website/common/components/reuseable/team-cards';
+import TeamCard3 from '@/subapps/website/common/components/reuseable/team-cards/TeamCard3';
 
 export default function Team5(props: TemplateProps<Team5Data>) {
   const {data} = props;

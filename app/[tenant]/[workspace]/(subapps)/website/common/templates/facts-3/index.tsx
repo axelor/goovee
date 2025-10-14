@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts3Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
-import {Counter2} from '@/subapps/website/common/components/reuseable/counter';
+import Counter2 from '@/subapps/website/common/components/reuseable/counter/Counter2';
 
 export default function Facts3(props: TemplateProps<Facts3Data>) {
   const {data} = props;

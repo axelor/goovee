@@ -5,7 +5,7 @@ import {
   getPaddingBottom,
 } from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 import Image from 'next/image';
 
 export default function About25(props: TemplateProps<About25Data>) {

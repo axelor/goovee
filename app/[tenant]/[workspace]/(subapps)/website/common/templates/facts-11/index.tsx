@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts11Data} from './meta';
-import {Counter1} from '@/subapps/website/common/components/reuseable/counter';
+import Counter1 from '@/subapps/website/common/components/reuseable/counter/Counter1';
 
 export default function Facts11(props: TemplateProps<Facts11Data>) {
   const {data} = props;

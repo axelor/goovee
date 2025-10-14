@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts15Data} from './meta';
-import {Counter3} from '@/subapps/website/common/components/reuseable/counter';
+import Counter3 from '@/subapps/website/common/components/reuseable/counter/Counter3';
 import IconBox from '@/subapps/website/common/components/reuseable/IconBox';
 
 export default function Facts15(props: TemplateProps<Facts15Data>) {

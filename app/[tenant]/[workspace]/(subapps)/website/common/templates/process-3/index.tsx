@@ -1,7 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process3Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
-import {ProcessList2} from '@/subapps/website/common/components/reuseable/process-list';
+import ProcessList2 from '@/subapps/website/common/components/reuseable/process-list/ProcessList2';
 import Image from 'next/image';
 
 export default function Process3(props: TemplateProps<Process3Data>) {

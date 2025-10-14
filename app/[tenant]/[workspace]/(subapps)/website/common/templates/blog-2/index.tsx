@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Blog2Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
-import {BlogCard4} from '@/subapps/website/common/components/reuseable/blog-cards';
+import BlogCard4 from '@/subapps/website/common/components/reuseable/blog-cards/BlogCard4';
 
 export default function Blog2(props: TemplateProps<Blog2Data>) {
   const {data} = props;

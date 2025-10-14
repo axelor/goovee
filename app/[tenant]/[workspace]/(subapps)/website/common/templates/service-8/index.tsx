@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service8Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import IconBox from '@/subapps/website/common/components/reuseable/IconBox';
-import {ServiceCard3} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 import {fadeInAnimate} from '../../utils/animation';
 import Image from 'next/image';
 

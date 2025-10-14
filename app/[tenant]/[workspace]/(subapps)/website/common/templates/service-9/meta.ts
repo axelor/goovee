@@ -109,7 +109,7 @@ export const service9Schema = {
   selections: [solidIconsSelection, fullColorsSelection, colorsSelection],
 } as const satisfies TemplateSchema;
 
-export type Process9Data = Data<typeof service9Schema>;
+export type Service9Data = Data<typeof service9Schema>;
 
 export const service9Demos: Demo<typeof service9Schema>[] = [
   {

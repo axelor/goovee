@@ -3,7 +3,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Pricing8Data} from './meta';
 import {Fragment, useState} from 'react';
 import Switch from '@/subapps/website/common/components/reuseable/Switch';
-import {PricingCard1} from '@/subapps/website/common/components/reuseable/pricing-cards';
+import PricingCard1 from '@/subapps/website/common/components/reuseable/pricing-cards/PricingCard1';
 import FAQ5 from '@/subapps/website/common/templates/faq-5';
 
 export default function Pricing8(props: TemplateProps<Pricing8Data>) {

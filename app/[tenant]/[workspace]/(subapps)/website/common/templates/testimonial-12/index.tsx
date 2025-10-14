@@ -1,6 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Testimonial12Data} from './meta';
-import {TestimonialCard5} from '@/subapps/website/common/components/reuseable/testimonial-cards';
+import TestimonialCard5 from '@/subapps/website/common/components/reuseable/testimonial-cards/TestimonialCard5';
 
 export default function Testimonial12(props: TemplateProps<Testimonial12Data>) {
   const {data} = props;

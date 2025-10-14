@@ -1,4 +1,4 @@
-import {TeamCard1} from '@/subapps/website/common/components/reuseable/team-cards';
+import TeamCard1 from '@/subapps/website/common/components/reuseable/team-cards/TeamCard1';
 import {TemplateProps} from '@/subapps/website/common/types';
 import {getImage} from '@/subapps/website/common/utils/helper';
 

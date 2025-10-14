@@ -4,7 +4,7 @@ import {type Pricing6Data} from './meta';
 import {useState} from 'react';
 import Switch from '@/subapps/website/common/components/reuseable/Switch';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {PricingCard1} from '@/subapps/website/common/components/reuseable/pricing-cards';
+import PricingCard1 from '@/subapps/website/common/components/reuseable/pricing-cards/PricingCard1';
 
 export default function Pricing6(props: TemplateProps<Pricing6Data>) {
   const {data} = props;

@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service10Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import {ServiceCard5} from '@/subapps/website/common/components/reuseable/service-cards';
+import ServiceCard5 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard5';
 import Image from 'next/image';
 
 export default function Service10(props: TemplateProps<Service10Data>) {

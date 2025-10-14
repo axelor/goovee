@@ -2,7 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Blog5Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import Carousel from '@/subapps/website/common/components/reuseable/Carousel';
-import {BlogCard5} from '@/subapps/website/common/components/reuseable/blog-cards';
+import BlogCard5 from '@/subapps/website/common/components/reuseable/blog-cards/BlogCard5';
 import carouselBreakpoints from '@/subapps/website/common/utils/carouselBreakpoints';
 
 export default function Blog5(props: TemplateProps<Blog5Data>) {
