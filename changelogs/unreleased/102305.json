@@ -1,0 +1,5 @@
+{
+  "title": "Update icons for apps to align with goovee website",
+  "type": "fix",
+  "scope": ["core"]
+}
