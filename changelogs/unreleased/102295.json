@@ -1,0 +1,6 @@
+{
+  "title": "Refactor website for performance, add documentation, and fix various issues",
+  "type": "change",
+  "description": "Add user documentation for wiki editor. Improve website performance by lazy loading wiki components and enhancing code splitting. Remove unused dependencies and files. Add bundle analyzer. Fix count-up animation, wiki CSS, and dynamic template import issues.",
+  "scope": ["website"]
+}
