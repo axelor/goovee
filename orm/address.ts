@@ -323,6 +323,20 @@ export async function updateDefaultDeliveryAddress(
       });
     }
 
+    if (result.isInvoicingAddr && isDefault) {
+      const current = await findDefaultInvoicingAddress(partnerId, tenantId);
+
+      if (current && current.id !== result.id) {
+        await client.aOSPartnerAddress.update({
+          data: {
+            id: current.id,
+            version: current.version,
+            isDefaultAddr: false,
+          },
+        });
+      }
+    }
+
     const updatedDefault = await client.aOSPartnerAddress.update({
       data: {
         id: result.id,
@@ -403,6 +417,20 @@ export async function updateDefaultInvoicingAddress(
           isDefaultAddr: false,
         },
       });
+    }
+
+    if (result.isDeliveryAddr && isDefault) {
+      const current = await findDefaultDeliveryAddress(partnerId, tenantId);
+
+      if (current && current.id !== result.id) {
+        await client.aOSPartnerAddress.update({
+          data: {
+            id: current.id,
+            version: current.version,
+            isDefaultAddr: false,
+          },
+        });
+      }
     }
 
     const updatedDefault = await client.aOSPartnerAddress.update({
