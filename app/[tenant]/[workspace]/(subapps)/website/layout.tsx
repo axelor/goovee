@@ -6,7 +6,6 @@ import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {findSubappAccess} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
-import {TemplateRoot} from './template-root';
 
 export default async function Layout({
   params,
@@ -33,9 +32,5 @@ export default async function Layout({
 
   if (!subapp) return notFound();
 
-  return (
-    <div className="h-full mb-[72px] lg:mb-0">
-      <TemplateRoot>{children}</TemplateRoot>
-    </div>
-  );
+  return <div className="h-full mb-[72px] lg:mb-0">{children}</div>;
 }

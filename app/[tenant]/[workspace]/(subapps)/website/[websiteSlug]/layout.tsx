@@ -21,6 +21,7 @@ import {
 } from '@/subapps/website/common/orm/website';
 import {Template} from './client-wrapper';
 import {LanguageSelection} from './language-selection';
+import {TemplateRoot} from './template-root';
 
 export async function generateMetadata({
   params,
@@ -111,35 +112,37 @@ export default async function Layout({
         languageList={mainWebsiteLanguages}
         active={websiteSlug}
       />
-      {!isSideNav && menu}
-      <div className={`flex ${isSideNav ? 'flex-col lg:flex-row' : ''}`}>
-        {isSideNav && menu}
-        <div className="flex-1 min-w-0">
-          {website.header?.component && (
-            <Template
-              workspaceURI={workspaceURI}
-              websiteSlug={websiteSlug}
-              data={clone(website.header.attrs)}
-              code={website.header.component.code}
-              contentId={website.header.id}
-              contentVersion={website.header.version}
-              mountType={MOUNT_TYPE.HEADER}
-            />
-          )}
-          {children}
+      <TemplateRoot>
+        {!isSideNav && menu}
+        <div className={`flex ${isSideNav ? 'flex-col lg:flex-row' : ''}`}>
+          {isSideNav && menu}
+          <div className="flex-1 min-w-0">
+            {website.header?.component && (
+              <Template
+                workspaceURI={workspaceURI}
+                websiteSlug={websiteSlug}
+                data={clone(website.header.attrs)}
+                code={website.header.component.code}
+                contentId={website.header.id}
+                contentVersion={website.header.version}
+                mountType={MOUNT_TYPE.HEADER}
+              />
+            )}
+            {children}
+          </div>
         </div>
-      </div>
-      {website.footer?.component && (
-        <Template
-          workspaceURI={workspaceURI}
-          websiteSlug={websiteSlug}
-          data={clone(website.footer.attrs)}
-          code={website.footer.component.code}
-          contentId={website.footer.id}
-          contentVersion={website.footer.version}
-          mountType={MOUNT_TYPE.FOOTER}
-        />
-      )}
+        {website.footer?.component && (
+          <Template
+            workspaceURI={workspaceURI}
+            websiteSlug={websiteSlug}
+            data={clone(website.footer.attrs)}
+            code={website.footer.component.code}
+            contentId={website.footer.id}
+            contentVersion={website.footer.version}
+            mountType={MOUNT_TYPE.FOOTER}
+          />
+        )}
+      </TemplateRoot>
     </>
   );
 }
