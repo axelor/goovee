@@ -1,0 +1,5 @@
+{
+  "title": "Add keycloak documentation",
+  "type": "change",
+  "scope": ["core"]
+}
