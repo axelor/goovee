@@ -1,16 +1,19 @@
-import type {CreateArgs, SelectOptions} from '@goovee/orm';
+import type {CreateArgs, SelectOptions, WhereOptions} from '@goovee/orm';
 import {getSession} from '@/auth';
 import {UserType} from '@/auth/types';
 import {hash} from '@/auth/utils';
 import {manager, type Tenant} from '@/tenant';
 import {USER_CREATED_FROM} from '@/constants';
 import {clone} from '@/utils';
-import {ID, Localization, Partner, PortalWorkspace} from '@/types';
+import {ID, Localization, Partner, PortalWorkspace, User} from '@/types';
 import {
   findContactWorkspaceConfig,
   findDefaultPartnerWorkspaceConfig,
 } from './workspace';
 import type {AOSPartner} from '@/goovee/.generated/models';
+import {l10n} from '@/lib/core/locale/server/l10n';
+import {findRegistrationLocalization} from './localizations';
+import type {Client} from '@/goovee/.generated/client';
 
 const partnerFields = {
   firstName: true,
@@ -172,6 +175,7 @@ export async function findEmailAddress(email: string, tenantId: Tenant['id']) {
 export async function findGooveeUserByEmail(
   email: string,
   tenantId: Tenant['id'],
+  client?: Client,
 ) {
   return findPartnerByEmail(email, tenantId, {
     where: {
@@ -179,6 +183,7 @@ export async function findGooveeUserByEmail(
         eq: true,
       },
     },
+    client,
   });
 }
 
@@ -211,11 +216,14 @@ export async function findContactById(
 export async function findPartnerByEmail(
   email: string,
   tenantId: Tenant['id'],
-  params?: any,
+  params?: {
+    where?: WhereOptions<AOSPartner>;
+    client?: Client;
+  },
 ) {
   if (!(email && tenantId)) return null;
 
-  const client = await manager.getClient(tenantId);
+  const client = params?.client ?? (await manager.getClient(tenantId));
 
   if (!client) return null;
 
@@ -368,21 +376,23 @@ export async function registerPartner({
   tenantId,
   isContact,
   localizationId,
+  client,
 }: {
   type: UserType;
   companyName?: string;
   identificationNumber?: string;
   companyNumber?: string;
   firstName?: string;
-  name: string;
+  name?: string;
   password?: string;
   email: string;
   workspaceURL?: string;
   tenantId: Tenant['id'];
   isContact?: boolean;
   localizationId?: Localization['id'];
+  client?: Client;
 }) {
-  const client = await manager.getClient(tenantId);
+  client ??= await manager.getClient(tenantId);
 
   const hashedPassword = await hash(password);
 
@@ -416,7 +426,11 @@ export async function registerPartner({
 
   if (workspaceURL) {
     const defaultPartnerWorkspaceConfig =
-      await findDefaultPartnerWorkspaceConfig({url: workspaceURL, tenantId});
+      await findDefaultPartnerWorkspaceConfig({
+        url: workspaceURL,
+        tenantId,
+        client,
+      });
 
     const id = defaultPartnerWorkspaceConfig?.id;
 
@@ -426,7 +440,7 @@ export async function registerPartner({
     }
   }
 
-  const existingPartner = await findPartnerByEmail(email, tenantId);
+  const existingPartner = await findPartnerByEmail(email, tenantId, {client});
 
   if (existingPartner && !existingPartner.isActivatedOnPortal) {
     const {id, version} = existingPartner;
@@ -442,5 +456,50 @@ export async function registerPartner({
   }
 
   const partner = await client.aOSPartner.create({data}).then(clone);
+  return partner;
+}
+
+export async function safeRegisterPartner({
+  user,
+  tenantId,
+  workspaceURL,
+}: {
+  user: User;
+  tenantId: Tenant['id'];
+  workspaceURL: PortalWorkspace['url'];
+}) {
+  const client = await manager.getClient(tenantId);
+
+  const partner = await client.$transaction(async client => {
+    const existingUser = await findGooveeUserByEmail(
+      user.email,
+      tenantId,
+      client,
+    );
+
+    if (existingUser) {
+      return existingUser;
+    }
+    const locale = (await l10n()).getLocale();
+
+    const localization = await findRegistrationLocalization({
+      locale,
+      tenantId,
+      client,
+    });
+
+    await registerPartner({
+      type: UserType.company,
+      email: user.email,
+      companyName: user.name || user.email,
+      workspaceURL,
+      tenantId,
+      localizationId: localization?.id,
+      client,
+    });
+
+    return findGooveeUserByEmail(user.email, tenantId, client);
+  });
+
   return partner;
 }

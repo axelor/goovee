@@ -5,7 +5,11 @@ import {notFound} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {getTranslation} from '@/locale/server';
-import {findGooveeUserByEmail, registerPartner} from '@/orm/partner';
+import {
+  findGooveeUserByEmail,
+  registerPartner,
+  safeRegisterPartner,
+} from '@/orm/partner';
 import {findWorkspaceByURL} from '@/orm/workspace';
 import {l10n} from '@/locale/server/l10n';
 import {findRegistrationLocalization} from '@/orm/localizations';
@@ -90,34 +94,15 @@ export default async function Page({
             />
           );
         }
-
-        const existingUser = await findGooveeUserByEmail(user.email, tenantId);
-
-        if (existingUser) {
-          partner = existingUser;
-        } else {
-          const locale = (await l10n()).getLocale();
-
-          const localization = await findRegistrationLocalization({
-            locale,
-            tenantId,
-          });
-
-          await registerPartner({
-            type: UserType.company,
-            email: user.email,
-            companyName: user.name || user.email,
-            workspaceURL,
-            tenantId,
-            localizationId: localization?.id,
-          } as any);
-
-          partner = await findGooveeUserByEmail(user.email, tenantId);
-
-          if (!partner) {
-            throw new Error();
-          }
+        const res = await safeRegisterPartner({
+          user,
+          tenantId,
+          workspaceURL,
+        });
+        if (!res) {
+          throw new Error('Cannot register partner');
         }
+        partner = res;
       } catch (err) {
         return (
           <Description

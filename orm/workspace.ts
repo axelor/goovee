@@ -3,6 +3,7 @@ import {AOSPortalAppConfig} from '@/goovee/.generated/models';
 import {ID, Partner, PortalWorkspace, User} from '@/types';
 import {clone} from '@/utils';
 import {SelectOptions} from '@goovee/orm';
+import {Client} from '@/goovee/.generated/client';
 
 export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   name: true,
@@ -338,13 +339,15 @@ export async function findPartnerWorkspaceConfig({
 export async function findDefaultPartnerWorkspaceConfig({
   url,
   tenantId,
+  client,
 }: {
   url: string;
   tenantId: Tenant['id'];
+  client?: Client;
 }) {
   if (!url) return null;
 
-  const client = await manager.getClient(tenantId);
+  client ??= await manager.getClient(tenantId);
 
   const workspace: any = await client.aOSPortalWorkspace.findOne({
     where: {

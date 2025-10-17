@@ -1,0 +1,5 @@
+{
+  "title": "Use transaction for user creation during keycloak registration",
+  "type": "fix",
+  "scope": ["core"]
+}

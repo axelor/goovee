@@ -1,14 +1,21 @@
+import {Client} from '@/goovee/.generated/client';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findLocaleLanguage, inverseTransformLocale} from '@/locale/utils';
 import {Tenant, manager} from '@/tenant';
 import {clone} from '@/utils';
 
-export async function findLocalizations({tenantId}: {tenantId: Tenant['id']}) {
+export async function findLocalizations({
+  tenantId,
+  client,
+}: {
+  tenantId: Tenant['id'];
+  client?: Client;
+}) {
   if (!tenantId) {
     return [];
   }
 
-  const client = await manager.getClient(tenantId);
+  client ??= await manager.getClient(tenantId);
 
   if (!client) {
     return [];
@@ -32,11 +39,13 @@ export async function findLocalizations({tenantId}: {tenantId: Tenant['id']}) {
 export async function findRegistrationLocalization({
   tenantId,
   locale,
+  client,
 }: {
   locale?: string;
   tenantId: Tenant['id'];
+  client?: Client;
 }) {
-  const availableLocalization = await findLocalizations({tenantId});
+  const availableLocalization = await findLocalizations({tenantId, client});
 
   const language = locale && findLocaleLanguage(inverseTransformLocale(locale));
   const fallbackLanguages = [locale, language, DEFAULT_LOCALE];
