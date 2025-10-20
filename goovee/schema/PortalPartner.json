@@ -1,0 +1,13 @@
+{
+  "name": "PortalPartner",
+  "table": "portal_partner",
+  "synchronize": true,
+  "fields": [
+    {
+      "type": "String",
+      "name": "email",
+      "unique": true,
+      "required": true
+    }
+  ]
+}

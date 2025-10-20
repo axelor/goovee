@@ -488,6 +488,18 @@ export async function safeRegisterPartner({
       client,
     });
 
+    try {
+      // base_partner table does not have unique constraint on email
+      // portal_partner table has unique constraint on email
+      // so we create portal_partner record to ensure we are not creating duplicate records
+      await client.portalPartner.create({
+        data: {email: user.email},
+      });
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+
     await registerPartner({
       type: UserType.company,
       email: user.email,

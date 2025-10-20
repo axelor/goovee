@@ -100,7 +100,15 @@ export default async function Page({
           workspaceURL,
         });
         if (!res) {
-          throw new Error('Cannot register partner');
+          return (
+            <Description
+              title={await getTranslation({tenant: tenantId}, 'Log In')}
+              description={await getTranslation(
+                {tenant: tenantId},
+                'Registration failed',
+              )}
+            />
+          );
         }
         partner = res;
       } catch (err) {
