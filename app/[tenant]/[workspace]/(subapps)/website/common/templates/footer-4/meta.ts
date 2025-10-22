@@ -118,15 +118,11 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
     sequence: 9,
     data: {
       footer4Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-dark.png',
             fileType: 'image/png',
             filePath: '/img/logo-dark.png',
@@ -144,16 +140,14 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
       footer4NewsletterDescription:
         'Subscribe to our newsletter to get our news & deals delivered to you.',
       footer4Links: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer4SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -161,8 +155,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -170,8 +162,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -179,8 +169,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -188,8 +176,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -206,15 +192,11 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
     sequence: 9,
     data: {
       footer4Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-dark.png',
             fileType: 'image/png',
             filePath: '/img/logo-dark.png',
@@ -232,24 +214,18 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
       footer4NewsletterDescription:
         'Abonnez-vous à notre newsletter pour recevoir nos actualités et nos offres.',
       footer4Links: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
         {
-          id: '4',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer4SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -257,8 +233,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -266,8 +240,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -275,8 +247,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -284,8 +254,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -302,15 +270,11 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
     sequence: 7,
     data: {
       footer4Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-dark.png',
             fileType: 'image/png',
             filePath: '/img/logo-dark.png',
@@ -328,16 +292,14 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
       footer4NewsletterDescription:
         'Subscribe to our newsletter to get our news & deals delivered to you.',
       footer4Links: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer4SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -345,8 +307,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -354,8 +314,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -363,8 +321,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -372,8 +328,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -390,15 +344,11 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
     sequence: 7,
     data: {
       footer4Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-dark.png',
             fileType: 'image/png',
             filePath: '/img/logo-dark.png',
@@ -416,24 +366,18 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
       footer4NewsletterDescription:
         'Abonnez-vous à notre newsletter pour recevoir nos actualités et nos offres.',
       footer4Links: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
         {
-          id: '4',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer4SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -441,8 +385,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -450,8 +392,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -459,8 +399,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -468,8 +406,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -486,15 +422,11 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
     sequence: 9,
     data: {
       footer4Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-dark.png',
             fileType: 'image/png',
             filePath: '/img/logo-dark.png',
@@ -512,16 +444,14 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
       footer4NewsletterDescription:
         'Subscribe to our newsletter to get our news & deals delivered to you.',
       footer4Links: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer4SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -529,8 +459,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -538,8 +466,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -547,8 +473,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -556,8 +480,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -574,15 +496,11 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
     sequence: 9,
     data: {
       footer4Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-dark.png',
             fileType: 'image/png',
             filePath: '/img/logo-dark.png',
@@ -600,24 +518,18 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
       footer4NewsletterDescription:
         'Abonnez-vous à notre newsletter pour recevoir nos actualités et nos offres.',
       footer4Links: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
         {
-          id: '4',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer4SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -625,8 +537,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -634,8 +544,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -643,8 +551,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -652,8 +558,6 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',

@@ -87,15 +87,11 @@ export const cta7Demos: Demo<typeof cta7Schema>[] = [
       cta7LinkTitle: 'Get Started',
       cta7LinkHref: '#',
       cta7Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Join our community',
           width: 1372,
           height: 596,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg22.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg22.png',
@@ -116,15 +112,11 @@ export const cta7Demos: Demo<typeof cta7Schema>[] = [
       cta7LinkTitle: 'Commencer',
       cta7LinkHref: '#',
       cta7Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Rejoignez notre communauté',
           width: 1372,
           height: 596,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg22.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg22.png',

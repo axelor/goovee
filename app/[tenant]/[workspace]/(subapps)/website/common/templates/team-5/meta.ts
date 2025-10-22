@@ -72,21 +72,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
     data: {
       team5Members: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Tom Accor',
             designation: 'Developer',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Tom Accor',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t1.jpg',
@@ -96,21 +90,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Anna Trois',
             designation: 'UI and UX Designer',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Anna Trois',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t2.jpg',
@@ -120,21 +108,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Sonal Ocer',
             designation: 'Sr. Marketing Manager',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Sonal Ocer',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t3.jpg',
@@ -144,21 +126,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Inan Rocketich',
             designation: 'Advisor',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Inan Rocketich',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t4.jpg',
@@ -178,21 +154,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
     data: {
       team5Members: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Tom Accor',
             designation: 'Développeur',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Tom Accor',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t1.jpg',
@@ -202,21 +172,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Anna Trois',
             designation: 'Concepteur UI et UX',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Anna Trois',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t2.jpg',
@@ -226,21 +190,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Sonal Ocer',
             designation: 'Responsable marketing senior',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Sonal Ocer',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t3.jpg',
@@ -250,21 +208,15 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Inan Rocketich',
             designation: 'Conseiller',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Inan Rocketich',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t4.jpg',

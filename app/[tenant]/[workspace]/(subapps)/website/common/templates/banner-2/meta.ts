@@ -51,15 +51,11 @@ export const banner2Demos: Demo<typeof banner2Schema>[] = [
     data: {
       banner2Heading: 'I shoot with imagination, philosophy, and emotion.',
       banner2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Imagination, philosophy, and emotion in photography',
           width: 1440,
           height: 438,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg34.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg34.jpg',
@@ -77,15 +73,11 @@ export const banner2Demos: Demo<typeof banner2Schema>[] = [
       banner2Heading:
         'Je photographie avec imagination, philosophie et émotion.',
       banner2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Imagination, philosophie et émotion en photographie',
           width: 1440,
           height: 438,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg34.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg34.jpg',

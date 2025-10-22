@@ -85,8 +85,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
         'Sandbox is the only app you need to track your goals for better health.',
       service20Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'IoT Development',
@@ -95,8 +93,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'AI',
             title: 'Artificial Intelligence',
@@ -105,8 +101,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Software Maintenance',
@@ -115,8 +109,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Shield',
             title: 'Cybersecurity',
@@ -125,8 +117,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Rocket',
             title: 'IT Consulting',
@@ -135,8 +125,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'Cart',
             title: 'E-commerce Solutions',
@@ -158,8 +146,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
         'Sandbox est la seule application dont vous avez besoin pour suivre vos objectifs pour une meilleure santé.',
       service20Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'Développement IoT',
@@ -168,8 +154,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'AI',
             title: 'Intelligence artificielle',
@@ -178,8 +162,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Maintenance logicielle',
@@ -188,8 +170,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Shield',
             title: 'Cybersécurité',
@@ -198,8 +178,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Rocket',
             title: 'Conseil en informatique',
@@ -208,8 +186,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'Cart',
             title: 'Solutions de commerce électronique',

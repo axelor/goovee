@@ -61,15 +61,11 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
     sequence: 5,
     data: {
       about1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Why Choose Us Image',
           width: 660,
           height: 496,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i6.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i6.png',
@@ -80,8 +76,6 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
       about1Title: 'We provide solutions that make our clients live easier.',
       about1Accordions: [
         {
-          id: '11',
-          version: 0,
           attrs: {
             body: 'Customers may choose your company because you offer high-quality products or services that meet their needs and exceed their expectations. This can lead to customer satisfaction, loyalty, and positive word-of-mouth recommendations.',
             expand: true,
@@ -89,16 +83,12 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
           },
         },
         {
-          id: '12',
-          version: 0,
           attrs: {
             body: 'Customers may choose your company because you offer high-quality products or services that meet their needs and exceed their expectations. This can lead to customer satisfaction, loyalty, and positive word-of-mouth recommendations.',
             heading: 'Competitive Pricing',
           },
         },
         {
-          id: '13',
-          version: 0,
           attrs: {
             body: 'Customers may choose your company because you offer high-quality products or services that meet their needs and exceed their expectations. This can lead to customer satisfaction, loyalty, and positive word-of-mouth recommendations.',
             heading: 'Customer Service',
@@ -114,15 +104,11 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
     sequence: 5,
     data: {
       about1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Why Choose Us Image',
           width: 660,
           height: 496,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i6.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i6.png',
@@ -134,8 +120,6 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
         'Nous proposons des solutions qui facilitent la vie de nos clients.',
       about1Accordions: [
         {
-          id: '11',
-          version: 0,
           attrs: {
             body: 'Les clients peuvent choisir votre entreprise car vous proposez des produits ou services de haute qualité qui répondent à leurs besoins et dépassent leurs attentes. Cela peut conduire à la satisfaction des clients, à la fidélité et à des recommandations positives de bouche à oreille.',
             expand: true,
@@ -143,16 +127,12 @@ export const about1Demos: Demo<typeof about1Schema>[] = [
           },
         },
         {
-          id: '12',
-          version: 0,
           attrs: {
             body: 'Les clients peuvent choisir votre entreprise car vous proposez des produits ou services de haute qualité qui répondent à leurs besoins et dépassent leurs attentes. Cela peut conduire à la satisfaction des clients, à la fidélité et à des recommandations positives de bouche à oreille.',
             heading: 'Prix compétitifs',
           },
         },
         {
-          id: '13',
-          version: 0,
           attrs: {
             body: 'Les clients peuvent choisir votre entreprise car vous proposez des produits ou services de haute qualité qui répondent à leurs besoins et dépassent leurs attentes. Cela peut conduire à la satisfaction des clients, à la fidélité et à des recommandations positives de bouche à oreille.',
             heading: 'Service Clients',

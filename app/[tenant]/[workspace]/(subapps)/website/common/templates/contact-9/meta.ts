@@ -69,15 +69,11 @@ export const contact9Demos: Demo<typeof contact9Schema>[] = [
       contact9LinkTitle: 'Join Us',
       contact9LinkHref: '#',
       contact9Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Join our community',
           width: 1440,
           height: 541,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg10.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg10.jpg',
@@ -98,15 +94,11 @@ export const contact9Demos: Demo<typeof contact9Schema>[] = [
       contact9LinkTitle: 'Rejoignez-nous',
       contact9LinkHref: '#',
       contact9Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Rejoignez notre communauté',
           width: 1440,
           height: 541,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg10.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg10.jpg',

@@ -72,8 +72,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
     data: {
       facts5Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             value: 7518,
@@ -81,8 +79,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Satisfied Customers',
             value: 3472,
@@ -90,8 +86,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Expert Employees',
             value: 2184,
@@ -99,8 +93,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             value: 4523,
@@ -118,8 +110,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
     data: {
       facts5Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             value: 7518,
@@ -127,8 +117,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients satisfaits',
             value: 3472,
@@ -136,8 +124,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Employés experts',
             value: 2184,
@@ -145,8 +131,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             value: 4523,

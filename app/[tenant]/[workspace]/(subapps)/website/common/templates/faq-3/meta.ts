@@ -59,8 +59,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
         'Genuinely lack a response to your query, please use the form below to drop us a message.',
       faq3Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             heading: 'How often should I get a physical examination?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',
@@ -68,8 +66,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             heading: 'How can I access mental health services?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',
@@ -77,8 +73,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             heading: 'What should I do if I have a medical emergency?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',
@@ -86,8 +80,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             heading: 'What is telemedicine, and how does it work?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',
@@ -108,8 +100,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
         'Si vous n’avez vraiment pas de réponse à votre question, veuillez utiliser le formulaire ci-dessous pour nous envoyer un message.',
       faq3Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             heading: 'À quelle fréquence dois-je passer un examen physique ?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',
@@ -117,8 +107,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             heading: 'Comment puis-je accéder aux services de santé mentale ?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',
@@ -126,8 +114,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             heading: 'Que dois-je faire en cas d’urgence médicale ?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',
@@ -135,8 +121,6 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             heading: 'Qu’est-ce que la télémédecine et comment ça marche ?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel.',

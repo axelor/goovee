@@ -77,8 +77,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
     data: {
       testimonial12Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Developer',
@@ -88,8 +86,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Tomas Anlee',
             designation: 'UX Designer',
@@ -99,8 +95,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Alina Jeen',
             designation: 'Project Analyzer',
@@ -110,8 +104,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Fuppe Dup',
             designation: 'Software Engineer',
@@ -131,8 +123,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
     data: {
       testimonial12Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Développeur',
@@ -142,8 +132,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Tomas Anlee',
             designation: 'Concepteur UX',
@@ -153,8 +141,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Alina Jeen',
             designation: 'Analyseur de projet',
@@ -164,8 +150,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Fuppe Dup',
             designation: 'Ingénieur logiciel',

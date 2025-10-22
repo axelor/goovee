@@ -94,15 +94,11 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
     sequence: 9,
     data: {
       testimonial11Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Testimonial',
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',
@@ -113,8 +109,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
       testimonial11Navigation: false,
       testimonial11Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Lukmen Wisley',
             designation: 'Ui Designer',
@@ -124,8 +118,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Marketing Specialist',
@@ -135,8 +127,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Sales Specialist',
@@ -155,15 +145,11 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
     sequence: 9,
     data: {
       testimonial11Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Témoignage',
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',
@@ -174,8 +160,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
       testimonial11Navigation: false,
       testimonial11Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Lukmen Wisley',
             designation: 'Ui Designer',
@@ -185,8 +169,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Spécialiste en marketing',
@@ -196,8 +178,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Spécialiste des ventes',

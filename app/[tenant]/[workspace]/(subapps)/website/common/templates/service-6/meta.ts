@@ -78,15 +78,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
       service6Description:
         'We have a landscape-oriented flyer design that will help you reach a wider audience and increase your sales.',
       service6Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 280,
           height: 338,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa13.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa13.jpg',
@@ -94,15 +90,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 270,
           height: 165,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa14.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa14.jpg',
@@ -110,15 +102,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 225,
           height: 271,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa15.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa15.jpg',
@@ -126,36 +114,26 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6ServiceList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Aenean quam ornare curabitur blandit consectetur.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nullam quis risus eget urna mollis ornare aenean leo.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Etiam porta euismod malesuada mollis nisl ornare.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Vivamus sagittis lacus augue rutrum maecenas odio.',
               },
@@ -176,15 +154,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
       service6Description:
         'Nous avons un modèle de flyer orienté paysage qui vous aidera à toucher un public plus large et à augmenter vos ventes.',
       service6Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 280,
           height: 338,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa13.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa13.jpg',
@@ -192,15 +166,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 270,
           height: 165,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa14.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa14.jpg',
@@ -208,15 +178,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 225,
           height: 271,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa15.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa15.jpg',
@@ -224,36 +190,26 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6ServiceList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Aenean quam ornare curabitur blandit consectetur.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nullam quis risus eget urna mollis ornare aenean leo.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Etiam porta euismod malesuada mollis nisl ornare.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Vivamus sagittis lacus augue rutrum maecenas odio.',
               },
@@ -275,15 +231,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         'We have a landscape-oriented flyer design that will help you reach a wider audience and increase your sales.',
       service6ContainerClassName: 'container py-14 py-md-17',
       service6Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 280,
           height: 338,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa13.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa13.jpg',
@@ -291,15 +243,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 270,
           height: 165,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa14.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa14.jpg',
@@ -307,15 +255,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 225,
           height: 271,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa15.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa15.jpg',
@@ -323,36 +267,26 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6ServiceList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Aenean quam ornare curabitur blandit consectetur.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nullam quis risus eget urna mollis ornare aenean leo.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Etiam porta euismod malesuada mollis nisl ornare.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Vivamus sagittis lacus augue rutrum maecenas odio.',
               },
@@ -374,15 +308,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         'Nous avons un modèle de flyer orienté paysage qui vous aidera à toucher un public plus large et à augmenter vos ventes.',
       service6ContainerClassName: 'container py-14 py-md-17',
       service6Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 280,
           height: 338,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa13.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa13.jpg',
@@ -390,15 +320,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 270,
           height: 165,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa14.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa14.jpg',
@@ -406,15 +332,11 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6Image3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 225,
           height: 271,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa15.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa15.jpg',
@@ -422,36 +344,26 @@ export const service6Demos: Demo<typeof service6Schema>[] = [
         },
       },
       service6ServiceList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Aenean quam ornare curabitur blandit consectetur.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nullam quis risus eget urna mollis ornare aenean leo.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Etiam porta euismod malesuada mollis nisl ornare.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Vivamus sagittis lacus augue rutrum maecenas odio.',
               },

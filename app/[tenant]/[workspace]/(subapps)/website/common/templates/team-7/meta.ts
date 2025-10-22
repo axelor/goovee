@@ -71,15 +71,11 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
       team7Description:
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Communities can be found in various forms.',
       team7Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Our team',
           width: 496,
           height: 424,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about24.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about24.jpg',
@@ -87,30 +83,20 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
         },
       },
       team7List: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
           ],
@@ -129,15 +115,11 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
       team7Description:
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et qui interagissent les unes avec les autres dans un lieu ou un espace virtuel partagé. Les communautés peuvent prendre diverses formes.',
       team7Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Notre équipe',
           width: 496,
           height: 424,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about24.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about24.jpg',
@@ -145,36 +127,26 @@ export const team7Demos: Demo<typeof team7Schema>[] = [
         },
       },
       team7List: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },

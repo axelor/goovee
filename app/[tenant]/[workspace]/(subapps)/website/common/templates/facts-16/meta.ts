@@ -93,8 +93,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
       facts16Caption: 'Company Facts',
       facts16Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'New Users',
             value: 75,
@@ -103,8 +101,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Social Networks',
             value: 80,
@@ -113,8 +109,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Referrals',
             value: 60,
@@ -123,8 +117,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'New Domain',
             value: 90,
@@ -146,8 +138,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
       facts16Caption: 'Faits sur l’entreprise',
       facts16Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Nouveaux utilisateurs',
             value: 75,
@@ -156,8 +146,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Réseaux sociaux',
             value: 80,
@@ -166,8 +154,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Références',
             value: 60,
@@ -176,8 +162,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Nouveau domaine',
             value: 90,

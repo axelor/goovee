@@ -71,15 +71,11 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
     sequence: 5,
     data: {
       faq4Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Company facts background',
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',
@@ -88,32 +84,24 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
       },
       faq4Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             amount: 7518,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Satisfied Customers',
             amount: 3472,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Expert Employees',
             amount: 2184,
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             amount: 4523,
@@ -129,15 +117,11 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
     sequence: 5,
     data: {
       faq4Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Arrière-plan des faits sur l'entreprise",
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',
@@ -146,32 +130,24 @@ export const faq4Demos: Demo<typeof faq4Schema>[] = [
       },
       faq4Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             amount: 7518,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients satisfaits',
             amount: 3472,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Employés experts',
             amount: 2184,
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             amount: 4523,

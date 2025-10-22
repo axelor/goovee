@@ -132,8 +132,6 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
         'Here are a small number of the reasons why our customers use Lighthouse.',
       service12Tabs: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: 'Easy Usage',
@@ -144,18 +142,12 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
               'Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Nullam quis risus eget urna.',
             list: [
               {
-                id: '1',
-                version: 0,
                 attrs: {item: 'Aenean eu leo quam. Pellentesque ornare.'},
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {item: 'Nullam quis risus eget urna mollis ornare.'},
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {item: 'Donec id elit non mi porta gravida at eget.'},
               },
             ],
@@ -163,15 +155,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
             linkHref: '#',
             images: [
               {
-                id: '1',
-                version: 0,
                 attrs: {
                   alt: 'Slide 1',
                   width: 280,
                   height: 338,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa13.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa13.jpg',
@@ -179,15 +167,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {
                   alt: 'Slide 2',
                   width: 270,
                   height: 165,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa14.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa14.jpg',
@@ -195,15 +179,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {
                   alt: 'Slide 3',
                   width: 225,
                   height: 271,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa15.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa15.jpg',
@@ -214,8 +194,6 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: 'Fast Transactions',
@@ -226,18 +204,12 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
               'Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Nullam quis risus eget urna.',
             list: [
               {
-                id: '1',
-                version: 0,
                 attrs: {item: 'Aenean eu leo quam. Pellentesque ornare.'},
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {item: 'Nullam quis risus eget urna mollis ornare.'},
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {item: 'Donec id elit non mi porta gravida at eget.'},
               },
             ],
@@ -245,15 +217,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
             linkHref: '#',
             images: [
               {
-                id: '1',
-                version: 0,
                 attrs: {
                   alt: 'Slide 1',
                   width: 223,
                   height: 187,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa9.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa9.jpg',
@@ -261,15 +229,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {
                   alt: 'Slide 2',
                   width: 187,
                   height: 217,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa10.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa10.jpg',
@@ -277,15 +241,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {
                   alt: 'Slide 3',
                   width: 321,
                   height: 116,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa11.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa11.jpg',
@@ -293,15 +253,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '4',
-                version: 0,
                 attrs: {
                   alt: 'Slide 4',
                   width: 294,
                   height: 383,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa12.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa12.jpg',
@@ -312,8 +268,6 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: 'Secure Payments',
@@ -324,18 +278,12 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
               'Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Nullam quis risus eget urna.',
             list: [
               {
-                id: '1',
-                version: 0,
                 attrs: {item: 'Aenean eu leo quam. Pellentesque ornare.'},
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {item: 'Nullam quis risus eget urna mollis ornare.'},
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {item: 'Donec id elit non mi porta gravida at eget.'},
               },
             ],
@@ -343,15 +291,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
             linkHref: '#',
             images: [
               {
-                id: '1',
-                version: 0,
                 attrs: {
                   alt: 'Slide 1',
                   width: 272,
                   height: 163,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa5.png',
                     fileType: 'image/png',
                     filePath: '/img/photos/sa5.png',
@@ -359,15 +303,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {
                   alt: 'Slide 2',
                   width: 250,
                   height: 277,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa6.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa6.jpg',
@@ -375,15 +315,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {
                   alt: 'Slide 3',
                   width: 300,
                   height: 181,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa7.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa7.jpg',
@@ -391,15 +327,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '4',
-                version: 0,
                 attrs: {
                   alt: 'Slide 4',
                   width: 229,
                   height: 297,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa8.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa8.jpg',
@@ -423,8 +355,6 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
         'Voici quelques-unes des raisons pour lesquelles nos clients utilisent Lighthouse.',
       service12Tabs: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: 'Utilisation facile',
@@ -435,18 +365,12 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
               'Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Nullam quis risus eget urna.',
             list: [
               {
-                id: '1',
-                version: 0,
                 attrs: {item: 'Aenean eu leo quam. Pellentesque ornare.'},
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {item: 'Nullam quis risus eget urna mollis ornare.'},
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {item: 'Donec id elit non mi porta gravida at eget.'},
               },
             ],
@@ -454,15 +378,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
             linkHref: '#',
             images: [
               {
-                id: '1',
-                version: 0,
                 attrs: {
                   alt: 'Slide 1',
                   width: 280,
                   height: 338,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa13.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa13.jpg',
@@ -470,15 +390,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {
                   alt: 'Slide 2',
                   width: 270,
                   height: 165,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa14.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa14.jpg',
@@ -486,15 +402,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {
                   alt: 'Slide 3',
                   width: 225,
                   height: 271,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa15.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa15.jpg',
@@ -505,8 +417,6 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: 'Transactions rapides',
@@ -517,18 +427,12 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
               'Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Nullam quis risus eget urna.',
             list: [
               {
-                id: '1',
-                version: 0,
                 attrs: {item: 'Aenean eu leo quam. Pellentesque ornare.'},
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {item: 'Nullam quis risus eget urna mollis ornare.'},
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {item: 'Donec id elit non mi porta gravida at eget.'},
               },
             ],
@@ -536,15 +440,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
             linkHref: '#',
             images: [
               {
-                id: '1',
-                version: 0,
                 attrs: {
                   alt: 'Slide 1',
                   width: 223,
                   height: 187,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa9.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa9.jpg',
@@ -552,15 +452,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {
                   alt: 'Slide 2',
                   width: 187,
                   height: 217,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa10.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa10.jpg',
@@ -568,15 +464,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {
                   alt: 'Slide 3',
                   width: 321,
                   height: 116,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa11.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa11.jpg',
@@ -584,15 +476,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '4',
-                version: 0,
                 attrs: {
                   alt: 'Slide 4',
                   width: 294,
                   height: 383,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa12.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa12.jpg',
@@ -603,8 +491,6 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: 'Paiements sécurisés',
@@ -615,18 +501,12 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
               'Etiam porta sem malesuada magna mollis euismod. Donec ullamcorper nulla non metus auctor fringilla. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Nullam quis risus eget urna.',
             list: [
               {
-                id: '1',
-                version: 0,
                 attrs: {item: 'Aenean eu leo quam. Pellentesque ornare.'},
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {item: 'Nullam quis risus eget urna mollis ornare.'},
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {item: 'Donec id elit non mi porta gravida at eget.'},
               },
             ],
@@ -634,15 +514,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
             linkHref: '#',
             images: [
               {
-                id: '1',
-                version: 0,
                 attrs: {
                   alt: 'Slide 1',
                   width: 272,
                   height: 163,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa5.png',
                     fileType: 'image/png',
                     filePath: '/img/photos/sa5.png',
@@ -650,15 +526,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 0,
                 attrs: {
                   alt: 'Slide 2',
                   width: 250,
                   height: 277,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa6.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa6.jpg',
@@ -666,15 +538,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 0,
                 attrs: {
                   alt: 'Slide 3',
                   width: 300,
                   height: 181,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa7.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa7.jpg',
@@ -682,15 +550,11 @@ export const service12Demos: Demo<typeof service12Schema>[] = [
                 },
               },
               {
-                id: '4',
-                version: 0,
                 attrs: {
                   alt: 'Slide 4',
                   width: 229,
                   height: 297,
                   image: {
-                    id: '1',
-                    version: 1,
                     fileName: 'sa8.jpg',
                     fileType: 'image/jpeg',
                     filePath: '/img/photos/sa8.jpg',

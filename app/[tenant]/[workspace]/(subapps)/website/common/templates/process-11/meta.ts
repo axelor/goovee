@@ -95,15 +95,11 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
       process11Caption: 'Company Strategy',
       process11Heading: 'Our Working Process',
       process11Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Our working process',
           width: 650,
           height: 525,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about20.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about20.jpg',
@@ -112,8 +108,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
       },
       process11Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Personalized service',
@@ -122,8 +116,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Competitive pricing',
@@ -132,8 +124,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Timely delivery',
@@ -155,15 +145,11 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
       process11Caption: 'Stratégie d’entreprise',
       process11Heading: 'Notre processus de travail',
       process11Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Notre processus de travail',
           width: 650,
           height: 525,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about20.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about20.jpg',
@@ -172,8 +158,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
       },
       process11Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Service personnalisé',
@@ -182,8 +166,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Prix compétitifs',
@@ -192,8 +174,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Livraison à temps',

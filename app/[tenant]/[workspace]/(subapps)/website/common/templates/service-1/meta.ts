@@ -98,8 +98,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
         'We have designed our services with your specific needs in mind.',
       service1Services: [
         {
-          id: '5',
-          version: 1,
           attrs: {
             icon: 'Rocket',
             link: '#',
@@ -110,8 +108,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 1,
           attrs: {
             icon: 'Code',
             link: '#',
@@ -122,8 +118,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '7',
-          version: 0,
           attrs: {
             icon: 'DevicesTwo',
             link: '#',
@@ -134,8 +128,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '8',
-          version: 1,
           attrs: {
             link: '#',
             icon: 'Hand',
@@ -158,8 +150,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
         'Nous avons conçu nos services en pensant à vos besoins spécifiques.',
       service1Services: [
         {
-          id: '5',
-          version: 1,
           attrs: {
             icon: 'Rocket',
             link: '#',
@@ -170,8 +160,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 1,
           attrs: {
             icon: 'Code',
             link: '#',
@@ -182,8 +170,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '7',
-          version: 0,
           attrs: {
             icon: 'DevicesTwo',
             link: '#',
@@ -194,8 +180,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '8',
-          version: 1,
           attrs: {
             link: '#',
             icon: 'Hand',

@@ -102,22 +102,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
       portfolio3Pagination: false,
       portfolio3PortfolioList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Mobile Design',
             title: 'Cras Fermentum Sem',
             image: {
-              id: 'img-1',
-              version: 0,
               attrs: {
                 alt: 'Cras Fermentum Sem',
                 width: 585,
                 height: 384,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp1.jpg',
@@ -127,22 +121,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Web Design',
             title: 'Venenatis Euismod Vehicula',
             image: {
-              id: 'img-2',
-              version: 0,
               attrs: {
                 alt: 'Venenatis Euismod Vehicula',
                 width: 585,
                 height: 384,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp2.jpg',
@@ -152,22 +140,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Stationary',
             title: 'Tortor Tellus Cursus',
             image: {
-              id: 'img-3',
-              version: 0,
               attrs: {
                 alt: 'Tortor Tellus Cursus',
                 width: 585,
                 height: 384,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp3.jpg',
@@ -177,22 +159,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Web Application',
             title: 'Ridiculus Sem Parturient',
             image: {
-              id: 'img-4',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Sem Parturient',
                 width: 630,
                 height: 410,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp4.jpg',
@@ -202,22 +178,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Web Design',
             title: 'Cursus Sollicitudin Adipiscing',
             image: {
-              id: 'img-5',
-              version: 0,
               attrs: {
                 alt: 'Cursus Sollicitudin Adipiscing',
                 width: 630,
                 height: 410,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp5.jpg',
@@ -227,22 +197,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Stationary',
             title: 'Fringilla Quam Vulputate',
             image: {
-              id: 'img-6',
-              version: 0,
               attrs: {
                 alt: 'Fringilla Quam Vulputate',
                 width: 630,
                 height: 410,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp6.jpg',
@@ -267,22 +231,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
       portfolio3Pagination: false,
       portfolio3PortfolioList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Conception mobile',
             title: 'Cras Fermentum Sem',
             image: {
-              id: 'img-1',
-              version: 0,
               attrs: {
                 alt: 'Cras Fermentum Sem',
                 width: 585,
                 height: 384,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp1.jpg',
@@ -292,22 +250,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Conception de sites Web',
             title: 'Venenatis Euismod Vehicula',
             image: {
-              id: 'img-2',
-              version: 0,
               attrs: {
                 alt: 'Venenatis Euismod Vehicula',
                 width: 585,
                 height: 384,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp2.jpg',
@@ -317,22 +269,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Papeterie',
             title: 'Tortor Tellus Cursus',
             image: {
-              id: 'img-3',
-              version: 0,
               attrs: {
                 alt: 'Tortor Tellus Cursus',
                 width: 585,
                 height: 384,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp3.jpg',
@@ -342,22 +288,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Application Web',
             title: 'Ridiculus Sem Parturient',
             image: {
-              id: 'img-4',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Sem Parturient',
                 width: 630,
                 height: 410,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp4.jpg',
@@ -367,22 +307,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Conception de sites Web',
             title: 'Cursus Sollicitudin Adipiscing',
             image: {
-              id: 'img-5',
-              version: 0,
               attrs: {
                 alt: 'Cursus Sollicitudin Adipiscing',
                 width: 630,
                 height: 410,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp5.jpg',
@@ -392,22 +326,16 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Papeterie',
             title: 'Fringilla Quam Vulputate',
             image: {
-              id: 'img-6',
-              version: 0,
               attrs: {
                 alt: 'Fringilla Quam Vulputate',
                 width: 630,
                 height: 410,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'sp6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/sp6.jpg',

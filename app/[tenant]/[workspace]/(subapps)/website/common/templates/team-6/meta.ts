@@ -85,21 +85,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
         'Look beyond the box and get creative. Lighthouse can help you create an influence.',
       team6Members: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             designation: 'Financial Analyst',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Coriss Ambady',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t1.jpg',
@@ -109,21 +103,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Marketing Specialist',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Cory Zamora',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t2.jpg',
@@ -133,21 +121,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Sales Manager',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Nikolas Brooten',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t3.jpg',
@@ -157,21 +139,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Investment Planner',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Jackie Sanders',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t4.jpg',
@@ -194,21 +170,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
         'Sortez des sentiers battus et soyez créatif. Lighthouse peut vous aider à créer une influence.',
       team6Members: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             designation: 'Analyste financier',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Coriss Ambady',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t1.jpg',
@@ -218,21 +188,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Spécialiste du marketing',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Cory Zamora',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t2.jpg',
@@ -242,21 +206,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Directeur des ventes',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Nikolas Brooten',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t3.jpg',
@@ -266,21 +224,15 @@ export const team6Demos: Demo<typeof team6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Planificateur d’investissement',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Jackie Sanders',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t4.jpg',

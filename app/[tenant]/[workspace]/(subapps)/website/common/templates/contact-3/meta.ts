@@ -98,15 +98,11 @@ export const contact3Demos: Demo<typeof contact3Schema>[] = [
       contact3LinkTitle: 'Join Us',
       contact3LinkHref: '#',
       contact3TileImage1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Great things together',
           width: 465,
           height: 533,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about4.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about4.jpg',
@@ -114,15 +110,11 @@ export const contact3Demos: Demo<typeof contact3Schema>[] = [
         },
       },
       contact3TileImage2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Get in touch',
           width: 1200,
           height: 650,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about5.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about5.jpg',
@@ -148,15 +140,11 @@ export const contact3Demos: Demo<typeof contact3Schema>[] = [
       contact3LinkTitle: 'Rejoignez-nous',
       contact3LinkHref: '#',
       contact3TileImage1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Great things together',
           width: 465,
           height: 533,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about4.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about4.jpg',
@@ -164,15 +152,11 @@ export const contact3Demos: Demo<typeof contact3Schema>[] = [
         },
       },
       contact3TileImage2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Get in touch',
           width: 1200,
           height: 650,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about5.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about5.jpg',

@@ -91,8 +91,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
     sequence: 3,
     data: {
       process4Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
@@ -102,8 +100,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
         'Learn the whole thing you require to know in designing a company strategy method.',
       process4Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: '1. Secured Transactions',
@@ -111,8 +107,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: '2. Budget Planning',
@@ -120,8 +114,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: '3. Up to Date',
@@ -138,8 +130,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
     sequence: 3,
     data: {
       process4Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
@@ -149,8 +139,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
         'Apprenez tout ce que vous devez savoir sur la conception d’une méthode de stratégie d’entreprise.',
       process4Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: '1. Transactions sécurisées',
@@ -158,8 +146,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: '2. Planification budgétaire',
@@ -167,8 +153,6 @@ export const process4Demos: Demo<typeof process4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: '3. À jour',

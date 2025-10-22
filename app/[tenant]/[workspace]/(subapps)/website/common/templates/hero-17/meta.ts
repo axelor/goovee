@@ -81,15 +81,11 @@ export const hero17Demos: Demo<typeof hero17Schema>[] = [
       hero17ButtonLink1: '#',
       hero17ButtonLink2: '#',
       hero17Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Quick solutions',
           width: 1440,
           height: 710,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg11.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg11.png',
@@ -112,15 +108,11 @@ export const hero17Demos: Demo<typeof hero17Schema>[] = [
       hero17ButtonLink1: '#',
       hero17ButtonLink2: '#',
       hero17Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Solutions rapides',
           width: 1440,
           height: 710,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg11.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg11.png',

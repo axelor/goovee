@@ -93,8 +93,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
     data: {
       service16Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Megaphone',
@@ -107,8 +105,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'ThumbsUp',
@@ -121,8 +117,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'IdCard',
@@ -135,8 +129,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Box',
@@ -159,8 +151,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
     data: {
       service16Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Megaphone',
@@ -173,8 +163,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'ThumbsUp',
@@ -187,8 +175,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'IdCard',
@@ -201,8 +187,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Box',

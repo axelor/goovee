@@ -67,15 +67,11 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
     sequence: 3,
     data: {
       about17Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Our solution',
           width: 548,
           height: 533,
           image: {
-            id: '1',
-            version: 1,
             fileName: '3d2.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/3d2.png',
@@ -88,30 +84,20 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
       about17Description:
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Goals and interact with one another in a shared location or virtual space.',
       about17AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
           ],
@@ -126,15 +112,11 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
     sequence: 3,
     data: {
       about17Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Notre solution',
           width: 548,
           height: 533,
           image: {
-            id: '1',
-            version: 1,
             fileName: '3d2.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/3d2.png',
@@ -147,36 +129,26 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
       about17Description:
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel. Les objectifs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel.',
       about17AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },

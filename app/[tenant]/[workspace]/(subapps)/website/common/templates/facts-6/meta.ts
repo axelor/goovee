@@ -98,8 +98,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Communities can be found in various forms.',
       facts6Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projects Done',
             amount: 2564,
@@ -108,8 +106,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Happy Customers',
             amount: 1655,
@@ -118,8 +114,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Expert Employees',
             amount: 656,
@@ -128,8 +122,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             amount: 545,
@@ -153,8 +145,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel. Les communautés peuvent être trouvées sous diverses formes.',
       facts6Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets réalisés',
             amount: 2564,
@@ -163,8 +153,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             amount: 1655,
@@ -173,8 +161,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Employés experts',
             amount: 656,
@@ -183,8 +169,6 @@ export const facts6Demos: Demo<typeof facts6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             amount: 545,

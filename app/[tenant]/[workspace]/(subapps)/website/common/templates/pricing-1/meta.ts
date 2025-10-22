@@ -95,36 +95,24 @@ export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
       pricing1SwitchRightLabel: 'Yearly (Save 30%)',
       pricing1Plans: [
         {
-          id: '39',
-          version: 1,
           attrs: {
             plan: 'Corporate Plan',
             price1: 54.0,
             price2: 499.0,
             features: [
               {
-                id: '34',
-                version: 0,
                 attrs: {label: '20 Projects'},
               },
               {
-                id: '35',
-                version: 0,
                 attrs: {label: '300K API Access'},
               },
               {
-                id: '36',
-                version: 0,
                 attrs: {label: '500MB Storage'},
               },
               {
-                id: '37',
-                version: 0,
                 attrs: {label: 'Weekly Reports'},
               },
               {
-                id: '38',
-                version: 0,
                 attrs: {label: '7/24 Support'},
               },
             ],
@@ -133,8 +121,6 @@ export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
           },
         },
         {
-          id: '33',
-          version: 1,
           jsonModel: 'Pricing1Plans',
           attrs: {
             plan: 'Premium Plan',
@@ -143,28 +129,18 @@ export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
             bulletBg: true,
             features: [
               {
-                id: '28',
-                version: 0,
                 attrs: {label: '5 Projects'},
               },
               {
-                id: '29',
-                version: 0,
                 attrs: {label: '100K API Access'},
               },
               {
-                id: '30',
-                version: 0,
                 attrs: {label: '200MB Storage'},
               },
               {
-                id: '31',
-                version: 0,
                 attrs: {label: 'Weekly Reports'},
               },
               {
-                id: '32',
-                version: 0,
                 attrs: {label: '7/24 Support'},
               },
             ],
@@ -193,36 +169,24 @@ export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
       pricing1SwitchRightLabel: 'Annuel (Économisez 30%)',
       pricing1Plans: [
         {
-          id: '39',
-          version: 1,
           attrs: {
             plan: "Plan d'entreprise",
             price1: 54.0,
             price2: 499.0,
             features: [
               {
-                id: '34',
-                version: 0,
                 attrs: {label: '20 projets'},
               },
               {
-                id: '35',
-                version: 0,
                 attrs: {label: '300K accès API'},
               },
               {
-                id: '36',
-                version: 0,
                 attrs: {label: '500 Mo de stockage'},
               },
               {
-                id: '37',
-                version: 0,
                 attrs: {label: 'Rapports hebdomadaires'},
               },
               {
-                id: '38',
-                version: 0,
                 attrs: {label: 'Assistance 7j/24'},
               },
             ],
@@ -231,8 +195,6 @@ export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
           },
         },
         {
-          id: '33',
-          version: 1,
           jsonModel: 'Pricing1Plans',
           attrs: {
             plan: 'Plan Premium',
@@ -241,28 +203,18 @@ export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
             bulletBg: true,
             features: [
               {
-                id: '28',
-                version: 0,
                 attrs: {label: '5 projets'},
               },
               {
-                id: '29',
-                version: 0,
                 attrs: {label: '100K accès API'},
               },
               {
-                id: '30',
-                version: 0,
                 attrs: {label: '200 Mo de stockage'},
               },
               {
-                id: '31',
-                version: 0,
                 attrs: {label: 'Rapports hebdomadaires'},
               },
               {
-                id: '32',
-                version: 0,
                 attrs: {label: 'Assistance 7j/24'},
               },
             ],

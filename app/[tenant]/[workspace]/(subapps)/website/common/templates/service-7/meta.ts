@@ -85,8 +85,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
         'By using Lighthouse, you can monitor all of your health-related objectives in a single application.',
       service7Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'HandHoldingMedical',
             title: 'Primary Care',
@@ -95,8 +93,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'SuitcaseMdical',
             title: 'Maintain Health',
@@ -105,8 +101,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'BrainPlus',
             title: 'Pain Management',
@@ -115,8 +109,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'ScaleUnbalanced',
             title: 'Weight Management',
@@ -125,8 +117,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Stethoscope',
             title: 'Diagnostic Reports',
@@ -135,8 +125,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'TruckMedical',
             title: 'Emergency Care',
@@ -158,8 +146,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
         'En utilisant Lighthouse, vous pouvez surveiller tous vos objectifs liés à la santé dans une seule application.',
       service7Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'HandHoldingMedical',
             title: 'Soins primaires',
@@ -168,8 +154,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'SuitcaseMdical',
             title: 'Maintenir la santé',
@@ -178,8 +162,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'BrainPlus',
             title: 'Gestion de la douleur',
@@ -188,8 +170,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'ScaleUnbalanced',
             title: 'Gestion du poids',
@@ -198,8 +178,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Stethoscope',
             title: 'Rapports de diagnostic',
@@ -208,8 +186,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'TruckMedical',
             title: 'Soins d’urgence',

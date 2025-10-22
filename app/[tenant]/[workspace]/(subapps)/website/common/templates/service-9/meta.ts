@@ -127,8 +127,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
       service9LinkHref: '#',
       service9ServiceList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'DevicesThree',
             title: 'IoT Development',
@@ -140,8 +138,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'AI',
             title: 'Artificial Intelligence',
@@ -153,8 +149,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Software Maintenance',
@@ -166,8 +160,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Shield',
             title: 'Cybersecurity',
@@ -196,8 +188,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
       service9LinkHref: '#',
       service9ServiceList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'DevicesThree',
             title: 'Développement IoT',
@@ -209,8 +199,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'AI',
             title: 'Intelligence artificielle',
@@ -222,8 +210,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Maintenance logicielle',
@@ -235,8 +221,6 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Shield',
             title: 'Cybersécurité',

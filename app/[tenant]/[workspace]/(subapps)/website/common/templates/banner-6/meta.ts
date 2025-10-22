@@ -55,22 +55,16 @@ export const banner6Demos: Demo<typeof banner6Schema>[] = [
     sequence: 2,
     data: {
       banner6Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       banner6Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Video background',
           width: 1440,
           height: 523,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg1.jpg',
@@ -86,22 +80,16 @@ export const banner6Demos: Demo<typeof banner6Schema>[] = [
     sequence: 2,
     data: {
       banner6Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       banner6Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Arrière-plan vidéo',
           width: 1440,
           height: 523,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg1.jpg',

@@ -78,8 +78,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
       faq6LinkHref: '#',
       faq6Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             heading: 'How do I get my subscription receipt?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.',
@@ -87,8 +85,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             heading: 'Are there any discounts for people in need?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.',
@@ -96,8 +92,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             heading: 'Do you offer a free trial edit?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.',
@@ -105,8 +99,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             heading: 'How do I reset my Account password?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.',
@@ -131,8 +123,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
       faq6LinkHref: '#',
       faq6Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             heading: 'Comment puis-je obtenir mon reçu d’abonnement ?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.',
@@ -140,8 +130,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             heading:
               'Y a-t-il des réductions pour les personnes dans le besoin ?',
@@ -150,8 +138,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             heading: 'Proposez-vous une modification d’essai gratuite ?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.',
@@ -159,8 +145,6 @@ export const faq6Demos: Demo<typeof faq6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             heading: 'Comment réinitialiser le mot de passe de mon compte ?',
             body: 'Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cras mattis consectetur purus sit amet fermentum. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cras justo odio, dapibus ac facilisis.',

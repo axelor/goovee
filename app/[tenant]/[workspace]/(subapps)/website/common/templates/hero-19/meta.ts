@@ -77,15 +77,11 @@ export const hero19Demos: Demo<typeof hero19Schema>[] = [
       hero19ButtonLabel: 'Read More',
       hero19ButtonLink: '#',
       hero19BackgroundImage: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Quick solutions background',
           width: 1440,
           height: 674,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg16.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg16.png',
@@ -107,15 +103,11 @@ export const hero19Demos: Demo<typeof hero19Schema>[] = [
       hero19ButtonLabel: 'Lire la suite',
       hero19ButtonLink: '#',
       hero19BackgroundImage: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Arrière-plan des solutions rapides',
           width: 1440,
           height: 674,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg16.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg16.png',

@@ -84,20 +84,14 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
         'I adore photographing brides and individuals there are so many emotions to capture.',
       service26Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Wedding',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Wedding',
                 width: 380,
                 height: 399,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'fs1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/fs1.jpg',
@@ -109,20 +103,14 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Couples',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Couples',
                 width: 380,
                 height: 399,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'fs2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/fs2.jpg',
@@ -134,20 +122,14 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Engagement',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Engagement',
                 width: 380,
                 height: 399,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'fs3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/fs3.jpg',
@@ -171,20 +153,14 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
         'J’adore photographier les mariées et les personnes, il y a tellement d’émotions à capturer.',
       service26Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Mariage',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Mariage',
                 width: 380,
                 height: 399,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'fs1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/fs1.jpg',
@@ -196,20 +172,14 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Couples',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Couples',
                 width: 380,
                 height: 399,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'fs2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/fs2.jpg',
@@ -221,20 +191,14 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Fiançailles',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Fiançailles',
                 width: 380,
                 height: 399,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'fs3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/fs3.jpg',

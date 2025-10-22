@@ -183,15 +183,11 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
     sequence: 7,
     data: {
       about24Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Professional photographer at work',
           width: 610,
           height: 610,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about29.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about29.jpg',
@@ -211,8 +207,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       about24Heading3: 'My Process',
       about24FactList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Shots Taken',
             value: 100,
@@ -220,8 +214,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Happy Clients',
             value: 15,
@@ -229,8 +221,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             value: 75,
@@ -240,32 +230,24 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24SkillList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Photoshop',
             value: 100,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Lightroom',
             value: 80,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Premiere Pro',
             value: 85,
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: '#D',
             value: 75,
@@ -274,36 +256,26 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24List: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'One effective way to detail your skills.',
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Nullam quis risus eget urna mollis.',
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Donec id elit non mi porta gravida.',
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'One effective way to detail your skills.',
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             title: 'Cras justo odio dapibus ac facilisis in.',
           },
@@ -311,8 +283,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24ProcessList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Personalized service',
             subtitle:
@@ -321,8 +291,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Competitive pricing',
             subtitle:
@@ -331,8 +299,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Timely delivery',
             subtitle:
@@ -350,15 +316,11 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
     sequence: 7,
     data: {
       about24Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Photographe professionnel au travail',
           width: 610,
           height: 610,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about29.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about29.jpg',
@@ -378,8 +340,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       about24Heading3: 'Mon processus',
       about24FactList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Photos prises',
             value: 100,
@@ -387,8 +347,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             value: 15,
@@ -396,8 +354,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             value: 75,
@@ -407,32 +363,24 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24SkillList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Photoshop',
             value: 100,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Lightroom',
             value: 80,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Premiere Pro',
             value: 85,
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: '#D',
             value: 75,
@@ -441,36 +389,26 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24List: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Un moyen efficace de détailler vos compétences.',
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Nullam quis risus eget urna mollis.',
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Donec id elit non mi porta gravida.',
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Un moyen efficace de détailler vos compétences.',
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             title: 'Cras justo odio dapibus ac facilisis in.',
           },
@@ -478,8 +416,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24ProcessList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Service personnalisé',
             subtitle:
@@ -488,8 +424,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Prix compétitifs',
             subtitle:
@@ -498,8 +432,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Livraison à temps',
             subtitle:

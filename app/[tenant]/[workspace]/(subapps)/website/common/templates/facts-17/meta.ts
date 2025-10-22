@@ -97,15 +97,11 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
       facts17Description:
         'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Praesent commodo cursus. Maecenas sed diam eget risus varius blandit sit amet non magna. Praesent commodo cursus magna.',
       facts17Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Business needs solution',
           width: 2000,
           height: 1400,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg39.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg39.jpg',
@@ -114,8 +110,6 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
       },
       facts17Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Customer Satisfaction',
             countUp: 99,
@@ -123,8 +117,6 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'New Visitors',
             countUp: 4,
@@ -146,15 +138,11 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
       facts17Description:
         'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Praesent commodo cursus. Maecenas sed diam eget risus varius blandit sit amet non magna. Praesent commodo cursus magna.',
       facts17Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Solution aux besoins de l'entreprise",
           width: 2000,
           height: 1400,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg39.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg39.jpg',
@@ -163,8 +151,6 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
       },
       facts17Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Satisfaction du client',
             countUp: 99,
@@ -172,8 +158,6 @@ export const facts17Demos: Demo<typeof facts17Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Nouveaux visiteurs',
             countUp: 4,

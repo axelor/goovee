@@ -76,24 +76,18 @@ export const facts1Demos: Demo<typeof facts1Schema>[] = [
       facts1Caption: 'Company Facts',
       facts1Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             number: 10000,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Happy Clients',
             number: 5000,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             number: 265,
@@ -112,24 +106,18 @@ export const facts1Demos: Demo<typeof facts1Schema>[] = [
       facts1Caption: 'Faits sur l’entreprise',
       facts1Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             number: 10000,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             number: 5000,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             number: 265,

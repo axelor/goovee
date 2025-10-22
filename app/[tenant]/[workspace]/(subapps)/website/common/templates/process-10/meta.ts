@@ -82,15 +82,11 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
     data: {
       process10Title: 'Our three process steps on creating awesome projects.',
       process10Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Our process',
           width: 600,
           height: 428,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i8.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i8.png',
@@ -99,8 +95,6 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
       },
       process10Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Personalized service',
@@ -109,8 +103,6 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Competitive pricing',
@@ -119,8 +111,6 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Timely delivery',
@@ -140,15 +130,11 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
       process10Title:
         'Nos trois étapes de processus pour créer des projets impressionnants.',
       process10Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Notre processus',
           width: 600,
           height: 428,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i8.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i8.png',
@@ -157,8 +143,6 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
       },
       process10Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Service personnalisé',
@@ -167,8 +151,6 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Prix compétitifs',
@@ -177,8 +159,6 @@ export const process10Demos: Demo<typeof process10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Livraison à temps',

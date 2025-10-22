@@ -95,8 +95,6 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
         'We took pleasure in offering unique solutions to your particular needs.',
       service24Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Web Design',
             description:
@@ -104,15 +102,11 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'Learn More',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Web Design',
                 width: 274,
                 height: 206,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'i24.png',
                   fileType: 'image/png',
                   filePath: '/img/illustrations/i24.png',
@@ -122,8 +116,6 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Digital Marketing',
             description:
@@ -131,15 +123,11 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'Learn More',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Digital Marketing',
                 width: 276,
                 height: 194,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'i19.png',
                   fileType: 'image/png',
                   filePath: '/img/illustrations/i19.png',
@@ -149,8 +137,6 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Motion Graphics',
             description:
@@ -158,15 +144,11 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'Learn More',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Motion Graphics',
                 width: 276,
                 height: 212,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'i18.png',
                   fileType: 'image/png',
                   filePath: '/img/illustrations/i18.png',
@@ -189,8 +171,6 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
         'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
       service24Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Conception de sites Web',
             description:
@@ -198,15 +178,11 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'En savoir plus',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Conception de sites Web',
                 width: 274,
                 height: 206,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'i24.png',
                   fileType: 'image/png',
                   filePath: '/img/illustrations/i24.png',
@@ -216,8 +192,6 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Marketing numérique',
             description:
@@ -225,15 +199,11 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'En savoir plus',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Marketing numérique',
                 width: 276,
                 height: 194,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'i19.png',
                   fileType: 'image/png',
                   filePath: '/img/illustrations/i19.png',
@@ -243,8 +213,6 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Graphiques animés',
             description:
@@ -252,15 +220,11 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'En savoir plus',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Graphiques animés',
                 width: 276,
                 height: 212,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'i18.png',
                   fileType: 'image/png',
                   filePath: '/img/illustrations/i18.png',

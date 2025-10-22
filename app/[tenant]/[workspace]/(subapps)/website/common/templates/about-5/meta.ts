@@ -58,15 +58,11 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
       about5Title:
         'We bring rapid solutions to make the life of our customers easier.',
       about5Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Rapid solutions for customers',
           width: 600,
           height: 428,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i8.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i8.png',
@@ -75,8 +71,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
       },
       about5ProgressList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             percent: 100,
             title: 'Marketing',
@@ -84,8 +78,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             percent: 80,
             color: 'yellow',
@@ -93,8 +85,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             percent: 85,
             color: 'orange',
@@ -102,8 +92,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             percent: 90,
             color: 'green',
@@ -122,15 +110,11 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
       about5Title:
         'Nous apportons des solutions rapides pour faciliter la vie de nos clients.',
       about5Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Solutions rapides pour les clients',
           width: 600,
           height: 428,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i8.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i8.png',
@@ -139,8 +123,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
       },
       about5ProgressList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             percent: 100,
             color: 'blue',
@@ -148,8 +130,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             percent: 80,
             color: 'yellow',
@@ -157,8 +137,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             percent: 85,
             color: 'orange',
@@ -166,8 +144,6 @@ export const about5Demos: Demo<typeof about5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             percent: 90,
             color: 'green',

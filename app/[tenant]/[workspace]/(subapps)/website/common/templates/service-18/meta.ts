@@ -115,8 +115,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
         'Software engineers offer services related to software development, web and mobile app development, DevOps, cloud computing, database management, software testing, maintenance and support, consulting, and custom software development.',
       service18Services1: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'JavaScript',
             percent: 100,
@@ -124,8 +122,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'AWS',
             percent: 80,
@@ -133,8 +129,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'PHP',
             percent: 85,
@@ -142,8 +136,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'MongoDB',
             percent: 90,
@@ -153,8 +145,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
       ],
       service18Services2: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'Software Development',
@@ -162,8 +152,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'DevicesThree',
             title: 'DevOps',
@@ -171,8 +159,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Web Design',
@@ -180,8 +166,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Headphone',
             title: 'Support',
@@ -202,8 +186,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
         'Les ingénieurs logiciels proposent des services liés au développement de logiciels, au développement d’applications Web et mobiles, au DevOps, au cloud computing, à la gestion de bases de données, aux tests de logiciels, à la maintenance et au support, au conseil et au développement de logiciels personnalisés.',
       service18Services1: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'JavaScript',
             percent: 100,
@@ -211,8 +193,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'AWS',
             percent: 80,
@@ -220,8 +200,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'PHP',
             percent: 85,
@@ -229,8 +207,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'MongoDB',
             percent: 90,
@@ -240,8 +216,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
       ],
       service18Services2: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'Développement de logiciels',
@@ -250,8 +224,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'DevicesThree',
             title: 'DevOps',
@@ -260,8 +232,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Conception de sites Web',
@@ -270,8 +240,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Headphone',
             title: 'Support',

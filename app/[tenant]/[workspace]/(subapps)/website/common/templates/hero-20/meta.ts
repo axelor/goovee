@@ -69,22 +69,16 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
       hero20Description:
         'Our area of expertise lies in digital services such as web design, mobile app development, and SEO optimization.',
       hero20Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie2.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie2.mp4',
       },
       hero20Poster: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Video poster',
           width: 2792,
           height: 1872,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'movie2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/movie2.jpg',
@@ -104,22 +98,16 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
       hero20Description:
         'Notre domaine d’expertise réside dans les services numériques tels que la conception de sites web, le développement d’applications mobiles et l’optimisation SEO.',
       hero20Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie2.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie2.mp4',
       },
       hero20Poster: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Affiche de la vidéo',
           width: 2792,
           height: 1872,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'movie2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/movie2.jpg',

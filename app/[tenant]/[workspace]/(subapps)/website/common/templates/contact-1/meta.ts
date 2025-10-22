@@ -62,15 +62,11 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
     sequence: 10,
     data: {
       contact1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Get in touch',
           width: 593,
           height: 568,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about14.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about14.jpg',
@@ -81,8 +77,6 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
       contact1Title:
         'Are you ready to start creating something great together?',
       contact1ContactInfo: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'contact-1-contact-info',
           addressTitle: 'Address',
@@ -102,15 +96,11 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
     sequence: 10,
     data: {
       contact1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Entrer en contact',
           width: 593,
           height: 568,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about14.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about14.jpg',
@@ -121,8 +111,6 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
       contact1Title:
         'Êtes-vous prêt à commencer à créer quelque chose de grand ensemble ?',
       contact1ContactInfo: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'contact-1-contact-info',
           addressTitle: 'Adresse',

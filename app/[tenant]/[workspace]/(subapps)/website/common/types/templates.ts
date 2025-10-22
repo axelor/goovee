@@ -451,12 +451,22 @@ export type Data<TSchema extends TemplateSchema> = ExpandRecursively<
 export type Language = 'en_US' | 'fr_FR';
 export type Site = 'en' | 'fr';
 
+type StripIdAndVersion<T> = T extends (infer U)[]
+  ? StripIdAndVersion<U>[]
+  : T extends Record<string, any>
+    ? {
+        [K in keyof T as K extends 'id' | 'version'
+          ? never
+          : K]: StripIdAndVersion<T[K]>;
+      }
+    : T;
+
 export type Demo<TSchema extends TemplateSchema> = {
   language: Language;
   site: Site;
   page: string;
   sequence: number;
-  data: Data<TSchema>;
+  data: StripIdAndVersion<Data<TSchema>>;
 };
 
 export type DemoLite<TSchema extends TemplateSchema> = Omit<

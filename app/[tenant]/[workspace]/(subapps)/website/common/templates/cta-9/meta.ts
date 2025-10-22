@@ -64,15 +64,11 @@ export const cta9Demos: Demo<typeof cta9Schema>[] = [
       cta9LinkTitle: 'Contact Me',
       cta9LinkHref: '#',
       cta9Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Professional photographer',
           width: 2000,
           height: 1333,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg33.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg33.jpg',
@@ -92,15 +88,11 @@ export const cta9Demos: Demo<typeof cta9Schema>[] = [
       cta9LinkTitle: 'Contactez-moi',
       cta9LinkHref: '#',
       cta9Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Photographe professionnel',
           width: 2000,
           height: 1333,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg33.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg33.jpg',

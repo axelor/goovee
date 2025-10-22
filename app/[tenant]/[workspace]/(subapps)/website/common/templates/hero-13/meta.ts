@@ -68,22 +68,16 @@ export const hero13Demos: Demo<typeof hero13Schema>[] = [
       hero13Title: 'We bring rapid solutions for your business',
       hero13Caption: 'HELLO 👋',
       hero13Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       hero13BackgroundImage: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Rapid solutions background',
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',
@@ -101,22 +95,16 @@ export const hero13Demos: Demo<typeof hero13Schema>[] = [
       hero13Title: 'Nous apportons des solutions rapides pour votre entreprise',
       hero13Caption: 'HELLO 👋',
       hero13Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       hero13BackgroundImage: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Arrière-plan des solutions rapides',
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',

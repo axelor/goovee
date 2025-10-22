@@ -137,15 +137,11 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
     sequence: 9,
     data: {
       footer9Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-light.png',
             fileType: 'image/png',
             filePath: '/img/logo-light.png',
@@ -161,22 +157,20 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
       footer9HelpTitle: 'Need Help?',
       footer9FooterNavTitle: 'Learn More',
       footer9Helps: [
-        {id: '1', version: 0, attrs: {title: 'Support', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Get Started', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'Support', url: '#'}},
+        {attrs: {title: 'Get Started', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer9FooterNav: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer9SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -184,8 +178,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -193,8 +185,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -202,8 +192,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -211,8 +199,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -229,15 +215,11 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
     sequence: 9,
     data: {
       footer9Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-light.png',
             fileType: 'image/png',
             filePath: '/img/logo-light.png',
@@ -253,38 +235,28 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
       footer9HelpTitle: 'Besoin d’aide ?',
       footer9FooterNavTitle: 'En savoir plus',
       footer9Helps: [
-        {id: '1', version: 0, attrs: {title: 'Support', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Commencer', url: '#'}},
+        {attrs: {title: 'Support', url: '#'}},
+        {attrs: {title: 'Commencer', url: '#'}},
         {
-          id: '3',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '4',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer9FooterNav: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
         {
-          id: '4',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer9SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -292,8 +264,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -301,8 +271,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -310,8 +278,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -319,8 +285,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -337,15 +301,11 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
     sequence: 9,
     data: {
       footer9Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-light.png',
             fileType: 'image/png',
             filePath: '/img/logo-light.png',
@@ -361,22 +321,20 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
       footer9HelpTitle: 'Need Help?',
       footer9FooterNavTitle: 'Learn More',
       footer9Helps: [
-        {id: '1', version: 0, attrs: {title: 'Support', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Get Started', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'Support', url: '#'}},
+        {attrs: {title: 'Get Started', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer9FooterNav: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer9SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -384,8 +342,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -393,8 +349,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -402,8 +356,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -411,8 +363,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -429,15 +379,11 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
     sequence: 9,
     data: {
       footer9Logo: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'logo',
           width: 146,
           height: 38,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'logo-light.png',
             fileType: 'image/png',
             filePath: '/img/logo-light.png',
@@ -453,38 +399,28 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
       footer9HelpTitle: 'Besoin d’aide ?',
       footer9FooterNavTitle: 'En savoir plus',
       footer9Helps: [
-        {id: '1', version: 0, attrs: {title: 'Support', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Commencer', url: '#'}},
+        {attrs: {title: 'Support', url: '#'}},
+        {attrs: {title: 'Commencer', url: '#'}},
         {
-          id: '3',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '4',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer9FooterNav: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
         {
-          id: '4',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer9SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -492,8 +428,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -501,8 +435,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -510,8 +442,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -519,8 +449,6 @@ export const footer9Demos: Demo<typeof footer9Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',

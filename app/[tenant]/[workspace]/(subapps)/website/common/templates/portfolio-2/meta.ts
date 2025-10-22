@@ -90,21 +90,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
       portfolio2Pagination: false,
       portfolio2CarouselImages: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Portfolio 1',
             url: '#',
             image: {
-              id: 'img-1',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 1',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp17.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp17.jpg',
@@ -114,21 +108,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Portfolio 2',
             url: '#',
             image: {
-              id: 'img-2',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 2',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp18.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp18.jpg',
@@ -138,21 +126,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Portfolio 3',
             url: '#',
             image: {
-              id: 'img-3',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 3',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp19.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp19.jpg',
@@ -162,21 +144,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Portfolio 4',
             url: '#',
             image: {
-              id: 'img-4',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 4',
                 width: 1100,
                 height: 770,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp20.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp20.jpg',
@@ -186,21 +162,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Portfolio 5',
             url: '#',
             image: {
-              id: 'img-5',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 5',
                 width: 1100,
                 height: 770,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp21.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp21.jpg',
@@ -210,21 +180,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Portfolio 6',
             url: '#',
             image: {
-              id: 'img-6',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 6',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp22.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp22.jpg',
@@ -247,21 +211,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
       portfolio2Pagination: false,
       portfolio2CarouselImages: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Portfolio 1',
             url: '#',
             image: {
-              id: 'img-1',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 1',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp17.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp17.jpg',
@@ -271,21 +229,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Portfolio 2',
             url: '#',
             image: {
-              id: 'img-2',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 2',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp18.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp18.jpg',
@@ -295,21 +247,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Portfolio 3',
             url: '#',
             image: {
-              id: 'img-3',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 3',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp19.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp19.jpg',
@@ -319,21 +265,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Portfolio 4',
             url: '#',
             image: {
-              id: 'img-4',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 4',
                 width: 1100,
                 height: 770,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp20.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp20.jpg',
@@ -343,21 +283,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Portfolio 5',
             url: '#',
             image: {
-              id: 'img-5',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 5',
                 width: 1100,
                 height: 770,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp21.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp21.jpg',
@@ -367,21 +301,15 @@ export const portfolio2Demos: Demo<typeof portfolio2Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Portfolio 6',
             url: '#',
             image: {
-              id: 'img-6',
-              version: 0,
               attrs: {
                 alt: 'Portfolio 6',
                 width: 1170,
                 height: 819,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pp22.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pp22.jpg',

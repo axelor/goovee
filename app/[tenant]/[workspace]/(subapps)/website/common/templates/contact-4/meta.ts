@@ -70,15 +70,11 @@ export const contact4Demos: Demo<typeof contact4Schema>[] = [
     sequence: 10,
     data: {
       contact4Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Let's talk",
           width: 636,
           height: 300,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i5.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i5.png',
@@ -101,15 +97,11 @@ export const contact4Demos: Demo<typeof contact4Schema>[] = [
     sequence: 10,
     data: {
       contact4Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Parlons',
           width: 636,
           height: 300,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i5.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i5.png',

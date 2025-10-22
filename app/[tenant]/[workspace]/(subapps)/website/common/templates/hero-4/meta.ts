@@ -84,15 +84,11 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
       hero4ButtonLink1: '#',
       hero4ButtonLink2: '#',
       hero4Image: {
-        id: '1',
-        version: 1,
         attrs: {
           alt: 'About us',
           width: 720,
           height: 784,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about16.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about16.jpg',
@@ -115,15 +111,11 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
       hero4ButtonLink1: '#',
       hero4ButtonLink2: '#',
       hero4Image: {
-        id: '1',
-        version: 1,
         attrs: {
           alt: 'About us',
           width: 720,
           height: 784,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about16.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about16.jpg',

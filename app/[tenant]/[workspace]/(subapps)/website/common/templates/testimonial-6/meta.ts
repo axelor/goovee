@@ -73,15 +73,11 @@ export const testimonial6Demos: Demo<typeof testimonial6Schema>[] = [
         'I wanted to share my positive experience working with your team. From start to finish, the process was smooth and efficient, and the end result exceeded my expectations. Your team’s attention to detail, creativity, and responsiveness was impressive. I appreciate how you took the time to understand my needs.',
       testimonial6Rating: 5,
       testimonial6Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'coriss',
           width: 408,
           height: 601,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'co4.png',
             fileType: 'image/png',
             filePath: '/img/photos/co4.png',
@@ -102,15 +98,11 @@ export const testimonial6Demos: Demo<typeof testimonial6Schema>[] = [
         'Je voulais partager mon expérience positive de travail avec votre équipe. Du début à la fin, le processus s’est déroulé sans heurts et de manière efficace, et le résultat final a dépassé mes attentes. L’attention portée aux détails, la créativité et la réactivité de votre équipe ont été impressionnantes. J’apprécie que vous ayez pris le temps de comprendre mes besoins.',
       testimonial6Rating: 5,
       testimonial6Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'coriss',
           width: 408,
           height: 601,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'co4.png',
             fileType: 'image/png',
             filePath: '/img/photos/co4.png',

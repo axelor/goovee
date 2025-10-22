@@ -82,8 +82,6 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
         'Let us handle your business needs while you sit back and relax.',
       facts8Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Happy Clients',
             number: 200,
@@ -91,8 +89,6 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             number: 1,
@@ -100,8 +96,6 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             number: 100,
@@ -122,8 +116,6 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
         'Laissez-nous répondre aux besoins de votre entreprise pendant que vous vous asseyez et vous détendez.',
       facts8Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             number: 200,
@@ -131,8 +123,6 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             number: 1,
@@ -140,8 +130,6 @@ export const facts8Demos: Demo<typeof facts8Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             number: 100,

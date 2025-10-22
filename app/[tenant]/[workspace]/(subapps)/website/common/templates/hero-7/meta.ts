@@ -82,15 +82,11 @@ export const hero7Demos: Demo<typeof hero7Schema>[] = [
       hero7ButtonLink1: '#',
       hero7ButtonLink2: '#',
       hero7Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Benefits of choosing us',
           width: 793,
           height: 509,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i12.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i12.png',
@@ -113,15 +109,11 @@ export const hero7Demos: Demo<typeof hero7Schema>[] = [
       hero7ButtonLink1: '#',
       hero7ButtonLink2: '#',
       hero7Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Benefits of choosing us',
           width: 793,
           height: 509,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i12.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i12.png',

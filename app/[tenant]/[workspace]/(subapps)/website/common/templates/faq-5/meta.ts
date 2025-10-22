@@ -46,8 +46,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
     data: {
       faq5Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Can I cancel my subscription?',
             description:
@@ -55,8 +53,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Which payment methods do you accept?',
             description:
@@ -64,8 +60,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'How can I manage my Account?',
             description:
@@ -73,8 +67,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Is my credit card information secure?',
             description:
@@ -92,8 +84,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
     data: {
       faq5Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Puis-je annuler mon abonnement ?',
             description:
@@ -101,8 +91,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Quels modes de paiement acceptez-vous ?',
             description:
@@ -110,8 +98,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Comment puis-je gérer mon compte ?',
             description:
@@ -119,8 +105,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title:
               'Les informations de ma carte de crédit sont-elles sécurisées ?',

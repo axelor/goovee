@@ -97,15 +97,11 @@ export const hero16Demos: Demo<typeof hero16Schema>[] = [
       hero16ButtonLink1: '#',
       hero16ButtonLink2: '#',
       hero16Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Software Engineer & UX Designer',
           width: 560,
           height: 540,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about17.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about17.jpg',
@@ -131,15 +127,11 @@ export const hero16Demos: Demo<typeof hero16Schema>[] = [
       hero16ButtonLink1: '#',
       hero16ButtonLink2: '#',
       hero16Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Ingénieur logiciel et concepteur UX',
           width: 560,
           height: 540,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about17.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about17.jpg',

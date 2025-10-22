@@ -57,15 +57,11 @@ export const contact6Demos: Demo<typeof contact6Schema>[] = [
     sequence: 8,
     data: {
       contact6Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Got any questions?',
           width: 636,
           height: 300,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i5.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i5.png',
@@ -74,8 +70,6 @@ export const contact6Demos: Demo<typeof contact6Schema>[] = [
       },
       contact6Title: "Got any questions? Don't hesitate to get in touch.",
       contact6ContactInfo: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'contact-6-contact-info',
           addressTitle: 'Address',
@@ -95,15 +89,11 @@ export const contact6Demos: Demo<typeof contact6Schema>[] = [
     sequence: 8,
     data: {
       contact6Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Des questions ?',
           width: 636,
           height: 300,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i5.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i5.png',
@@ -113,8 +103,6 @@ export const contact6Demos: Demo<typeof contact6Schema>[] = [
       contact6Title:
         'Vous avez des questions ? N’hésitez pas à nous contacter.',
       contact6ContactInfo: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'contact-6-contact-info',
           addressTitle: 'Adresse',

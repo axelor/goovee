@@ -81,15 +81,11 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
     sequence: 3,
     data: {
       testimonial18Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Testimonial background',
           width: 1440,
           height: 510,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg32.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg32.jpg',
@@ -100,8 +96,6 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
       testimonial18Navigation: false,
       testimonial18Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Selina & Tom',
             review:
@@ -109,8 +103,6 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Jolene & Andrea',
             review:
@@ -118,8 +110,6 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Eve & Will',
             review:
@@ -136,15 +126,11 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
     sequence: 3,
     data: {
       testimonial18Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Arrière-plan de témoignage',
           width: 1440,
           height: 510,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg32.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg32.jpg',
@@ -155,8 +141,6 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
       testimonial18Navigation: false,
       testimonial18Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Selina & Tom',
             review:
@@ -164,8 +148,6 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Jolene & Andrea',
             review:
@@ -173,8 +155,6 @@ export const testimonial18Demos: Demo<typeof testimonial18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Eve & Will',
             review:

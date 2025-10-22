@@ -69,15 +69,11 @@ export const cta4Demos: Demo<typeof cta4Schema>[] = [
       cta4LinkTitle: 'Join Us',
       cta4LinkHref: '#',
       cta4Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Join our community',
           width: 1500,
           height: 1000,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg9.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg9.jpg',
@@ -98,15 +94,11 @@ export const cta4Demos: Demo<typeof cta4Schema>[] = [
       cta4LinkTitle: 'Rejoignez-nous',
       cta4LinkHref: '#',
       cta4Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Rejoignez notre communauté',
           width: 1500,
           height: 1000,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg9.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg9.jpg',

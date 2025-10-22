@@ -90,8 +90,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
         'Let us handle your business needs while you sit back and relax.',
       facts2Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Happy Customers',
             number: 30,
@@ -100,8 +98,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             number: 10,
@@ -110,8 +106,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Expert Employees',
             number: 3,
@@ -133,8 +127,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
         'Laissez-nous répondre aux besoins de votre entreprise pendant que vous vous asseyez et vous détendez.',
       facts2Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             number: 30,
@@ -143,8 +135,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             number: 10,
@@ -153,8 +143,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Employés experts',
             number: 3,
@@ -178,8 +166,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
         'Let us handle your business needs while you sit back and relax.',
       facts2Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Happy Customers',
             number: 30,
@@ -188,8 +174,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             number: 10,
@@ -198,8 +182,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Expert Employees',
             number: 3,
@@ -223,8 +205,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
         'Laissez-nous répondre aux besoins de votre entreprise pendant que vous vous asseyez et vous détendez.',
       facts2Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             number: 30,
@@ -233,8 +213,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             number: 10,
@@ -243,8 +221,6 @@ export const facts2Demos: Demo<typeof facts2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Employés experts',
             number: 3,

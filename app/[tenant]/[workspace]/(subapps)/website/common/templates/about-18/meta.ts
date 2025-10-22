@@ -92,15 +92,11 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
     sequence: 4,
     data: {
       about18Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'What makes us different',
           width: 583,
           height: 550,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about27.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about27.jpg',
@@ -118,25 +114,17 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
       about18Suffix: 'K+',
       about18DataValue: 80,
       about18AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'Customers may choose company quality product.'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'Customers may choose company quality product.'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'Customers may choose company quality product.'},
             },
           ],
@@ -151,15 +139,11 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
     sequence: 4,
     data: {
       about18Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Ce qui nous rend différents',
           width: 583,
           height: 550,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about27.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about27.jpg',
@@ -177,31 +161,23 @@ export const about18Demos: Demo<typeof about18Schema>[] = [
       about18Suffix: 'K+',
       about18DataValue: 80,
       about18AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title:
                   'Les clients peuvent choisir un produit de qualité d’entreprise.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title:
                   'Les clients peuvent choisir un produit de qualité d’entreprise.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title:
                   'Les clients peuvent choisir un produit de qualité d’entreprise.',

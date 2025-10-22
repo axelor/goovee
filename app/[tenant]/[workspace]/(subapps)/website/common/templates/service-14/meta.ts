@@ -95,8 +95,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
         'The service we offer is specifically designed to meet your needs.',
       service14Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'IoT Development',
             icon: 'circuit',
@@ -107,8 +105,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Artificial Intelligence',
             icon: 'processor',
@@ -119,8 +115,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Software Maintenance',
             icon: 'setting',
@@ -131,8 +125,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersecurity',
             icon: 'lock-access',
@@ -156,8 +148,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
         'Le service que nous proposons est spécialement conçu pour répondre à vos besoins.',
       service14Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Développement IoT',
             icon: 'circuit',
@@ -168,8 +158,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Intelligence artificielle',
             icon: 'processor',
@@ -180,8 +168,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Maintenance logicielle',
             icon: 'setting',
@@ -192,8 +178,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersécurité',
             icon: 'lock-access',

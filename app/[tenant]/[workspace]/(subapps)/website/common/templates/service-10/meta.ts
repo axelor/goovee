@@ -137,15 +137,11 @@ export const service10Demos: Demo<typeof service10Schema>[] = [
       service10LinkTitle: 'More Details',
       service10LinkHref: '#',
       service10Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 278,
           height: 278,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se1.jpg',
@@ -153,15 +149,11 @@ export const service10Demos: Demo<typeof service10Schema>[] = [
         },
       },
       service10Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 278,
           height: 278,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se2.jpg',
@@ -196,15 +188,11 @@ export const service10Demos: Demo<typeof service10Schema>[] = [
       service10LinkTitle: 'Plus de détails',
       service10LinkHref: '#',
       service10Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 278,
           height: 278,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se1.jpg',
@@ -212,15 +200,11 @@ export const service10Demos: Demo<typeof service10Schema>[] = [
         },
       },
       service10Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 278,
           height: 278,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se2.jpg',

@@ -107,15 +107,11 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
       facts12Caption:
         'We bring solutions to make life easier for our customers.',
       facts12Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Company achievements',
           width: 1372,
           height: 596,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg22.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg22.png',
@@ -124,8 +120,6 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
       },
       facts12Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             countUp: 10,
@@ -133,8 +127,6 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Happy Clients',
             countUp: 5,
@@ -142,8 +134,6 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             countUp: 265,
@@ -163,15 +153,11 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
       facts12Caption:
         'Nous apportons des solutions pour faciliter la vie de nos clients.',
       facts12Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Réalisations de l'entreprise",
           width: 1372,
           height: 596,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg22.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg22.png',
@@ -180,8 +166,6 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
       },
       facts12Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             countUp: 10,
@@ -189,8 +173,6 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             countUp: 5,
@@ -198,8 +180,6 @@ export const facts12Demos: Demo<typeof facts12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             countUp: 265,

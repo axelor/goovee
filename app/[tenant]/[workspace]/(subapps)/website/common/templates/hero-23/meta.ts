@@ -86,20 +86,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
       hero23Caption: "Hello! I'm Jhon",
       hero23SlideImages: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Slide 1',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Slide background',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg30.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg30.jpg',
@@ -107,15 +101,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Slide thumbnail',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg30-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg30-th.jpg',
@@ -125,20 +115,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Slide 2',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Slide background',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg29.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg29.jpg',
@@ -146,15 +130,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Slide thumbnail',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg29-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg29-th.jpg',
@@ -164,20 +144,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Slide 3',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Slide background',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg28.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg28.jpg',
@@ -185,15 +159,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Slide thumbnail',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg28-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg28-th.jpg',
@@ -203,20 +173,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
           },
         },
         {
-          id: '1',
-          version: 1,
           attrs: {
             title: 'Slide 4',
             image: {
-              id: '1',
-              version: 1,
               attrs: {
                 alt: 'Slide background',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg31.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg31.jpg',
@@ -224,15 +188,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 1,
               attrs: {
                 alt: 'Slide thumbnail',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg31-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg31-th.jpg',
@@ -254,20 +214,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
       hero23Caption: 'Bonjour ! Je suis Jhon',
       hero23SlideImages: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Slide 1',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Fond de diapositive',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg30.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg30.jpg',
@@ -275,15 +229,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Vignette de la diapositive',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg30-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg30-th.jpg',
@@ -293,20 +243,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Slide 2',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Fond de diapositive',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg29.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg29.jpg',
@@ -314,15 +258,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Vignette de la diapositive',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg29-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg29-th.jpg',
@@ -332,20 +272,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Slide 3',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Fond de diapositive',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg28.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg28.jpg',
@@ -353,15 +287,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Vignette de la diapositive',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg28-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg28-th.jpg',
@@ -371,20 +301,14 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
           },
         },
         {
-          id: '1',
-          version: 1,
           attrs: {
             title: 'Slide 4',
             image: {
-              id: '1',
-              version: 1,
               attrs: {
                 alt: 'Fond de diapositive',
                 width: 2000,
                 height: 1333,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg31.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg31.jpg',
@@ -392,15 +316,11 @@ export const hero23Demos: Demo<typeof hero23Schema>[] = [
               },
             },
             thumb: {
-              id: '1',
-              version: 1,
               attrs: {
                 alt: 'Vignette de la diapositive',
                 width: 50,
                 height: 50,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'bg31-th.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/bg31-th.jpg',

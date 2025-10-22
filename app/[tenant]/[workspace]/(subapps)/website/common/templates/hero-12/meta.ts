@@ -82,15 +82,11 @@ export const hero12Demos: Demo<typeof hero12Schema>[] = [
       hero12ButtonLink1: '#',
       hero12ButtonLink2: '#',
       hero12Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'hero',
           width: 660,
           height: 496,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i6.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i6.png',
@@ -113,15 +109,11 @@ export const hero12Demos: Demo<typeof hero12Schema>[] = [
       hero12ButtonLink1: '#',
       hero12ButtonLink2: '#',
       hero12Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'héro',
           width: 660,
           height: 496,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i6.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i6.png',

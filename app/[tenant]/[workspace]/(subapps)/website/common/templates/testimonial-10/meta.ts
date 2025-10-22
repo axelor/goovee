@@ -90,20 +90,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
         'Avoid just believing us. Discover what our clients have thought about us.',
       testimonial10Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Coriss Ambady',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te1.jpg',
@@ -116,20 +110,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Cory Zamora',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te2.jpg',
@@ -142,20 +130,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Nikolas Brooten',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te3.jpg',
@@ -168,20 +150,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Coriss Ambady',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te4.jpg',
@@ -194,20 +170,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Laura Widerski',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Laura Widerski',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te5.jpg',
@@ -220,20 +190,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Jackie Sanders',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te6.jpg',
@@ -259,20 +223,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
         'Évitez de nous croire sur parole. Découvrez ce que nos clients ont pensé de nous.',
       testimonial10Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Coriss Ambady',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te1.jpg',
@@ -285,20 +243,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Cory Zamora',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te2.jpg',
@@ -311,20 +263,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Nikolas Brooten',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te3.jpg',
@@ -337,20 +283,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Coriss Ambady',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te4.jpg',
@@ -363,20 +303,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Laura Widerski',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Laura Widerski',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te5.jpg',
@@ -389,20 +323,14 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Jackie Sanders',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te6.jpg',

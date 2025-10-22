@@ -94,15 +94,11 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
       about2Para:
         'We take great pride in our ability to develop custom solutions that exceed our clients’ expectations and push the boundaries of design. If you are looking for inspiration or want to see what is possible',
       about2Thumbnail: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'About 2 Thumbnail',
           width: 585,
           height: 425,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about11.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about11.jpg',
@@ -112,37 +108,25 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
       about2HideShape: false,
       about2BtnColor: 'white',
       about2Media: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       about2Aboutlist: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We are a firm that understands the impact'},
             },
           ],
@@ -162,15 +146,11 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
       about2Para:
         'Nous sommes très fiers de notre capacité à développer des solutions personnalisées qui dépassent les attentes de nos clients et repoussent les limites du design. Si vous cherchez l’inspiration ou si vous voulez voir ce qui est possible',
       about2Thumbnail: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'About 2 Thumbnail',
           width: 585,
           height: 425,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about11.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about11.jpg',
@@ -180,43 +160,31 @@ export const about2Demos: Demo<typeof about2Schema>[] = [
       about2HideShape: false,
       about2BtnColor: 'white',
       about2Media: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       about2Aboutlist: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous sommes une entreprise qui comprend l’impact',
               },

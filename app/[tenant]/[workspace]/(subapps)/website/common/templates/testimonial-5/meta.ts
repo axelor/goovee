@@ -86,15 +86,11 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
     sequence: 4,
     data: {
       testimonial5Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Testimonial',
           width: 335,
           height: 567,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'co1.png',
             fileType: 'image/png',
             filePath: '/img/photos/co1.png',
@@ -105,8 +101,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
       testimonial5Navigation: false,
       testimonial5Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Sales Director',
@@ -115,8 +109,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Marketing Manager',
@@ -125,8 +117,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'HR Manager',
@@ -135,8 +125,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Investment Planner',
@@ -154,15 +142,11 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
     sequence: 4,
     data: {
       testimonial5Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Témoignage',
           width: 335,
           height: 567,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'co1.png',
             fileType: 'image/png',
             filePath: '/img/photos/co1.png',
@@ -173,8 +157,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
       testimonial5Navigation: false,
       testimonial5Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Directeur des ventes',
@@ -183,8 +165,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Responsable marketing',
@@ -193,8 +173,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'Responsable RH',
@@ -203,8 +181,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Planificateur d’investissement',

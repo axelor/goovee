@@ -74,8 +74,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
     data: {
       testimonial14Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Developer',
@@ -85,8 +83,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Financial Analyst',
@@ -96,8 +92,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Sales Manager',
@@ -107,8 +101,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Marketing Manager',
@@ -128,8 +120,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
     data: {
       testimonial14Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Développeur',
@@ -139,8 +129,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Analyste financier',
@@ -150,8 +138,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Directeur des ventes',
@@ -161,8 +147,6 @@ export const testimonial14Demos: Demo<typeof testimonial14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Responsable marketing',

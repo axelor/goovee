@@ -70,15 +70,11 @@ export const hero14Demos: Demo<typeof hero14Schema>[] = [
       hero14LinkTitle: 'Learn More',
       hero14LinkHref: '#',
       hero14Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Rapid solutions',
           width: 1200,
           height: 650,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about18.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about18.jpg',
@@ -100,15 +96,11 @@ export const hero14Demos: Demo<typeof hero14Schema>[] = [
       hero14LinkTitle: 'En savoir plus',
       hero14LinkHref: '#',
       hero14Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Solutions rapides',
           width: 1200,
           height: 650,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about18.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about18.jpg',

@@ -115,15 +115,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
       service8Description:
         'We took pleasure in offering unique solutions to your particular needs.',
       service8TileImage1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'demo',
           width: 223,
           height: 187,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa9.jpg',
             fileType: 'image/jpg',
             filePath: '/img/photos/sa9.jpg',
@@ -131,15 +127,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
         },
       },
       service8TileImage2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'demo',
           width: 187,
           height: 217,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa10.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa10.jpg',
@@ -147,15 +139,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
         },
       },
       service8TileImage3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'demo',
           width: 321,
           height: 116,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa11.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa11.jpg',
@@ -163,15 +151,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
         },
       },
       service8TileImage4: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'demo',
           width: 294,
           height: 383,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa12.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa12.jpg',
@@ -180,8 +164,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
       },
       service8Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'IoT Development',
             icon: 'circuit',
@@ -190,8 +172,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Artificial Intelligence',
             icon: 'processor',
@@ -200,8 +180,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Software Maintenance',
             icon: 'setting',
@@ -210,8 +188,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersecurity',
             icon: 'lock-access',
@@ -232,15 +208,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
       service8Description:
         'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
       service8TileImage1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'démo',
           width: 223,
           height: 187,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa9.jpg',
             fileType: 'image/jpg',
             filePath: '/img/photos/sa9.jpg',
@@ -248,15 +220,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
         },
       },
       service8TileImage2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'démo',
           width: 187,
           height: 217,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa10.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa10.jpg',
@@ -264,15 +232,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
         },
       },
       service8TileImage3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'démo',
           width: 321,
           height: 116,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa11.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa11.jpg',
@@ -280,15 +244,11 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
         },
       },
       service8TileImage4: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'démo',
           width: 294,
           height: 383,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'sa12.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/sa12.jpg',
@@ -297,8 +257,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
       },
       service8Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Développement IoT',
             icon: 'circuit',
@@ -307,8 +265,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Intelligence artificielle',
             icon: 'processor',
@@ -317,8 +273,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Maintenance logicielle',
             icon: 'setting',
@@ -327,8 +281,6 @@ export const service8Demos: Demo<typeof service8Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersécurité',
             icon: 'lock-access',

@@ -90,15 +90,11 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
     sequence: 7,
     data: {
       about13Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Company strategies and achievement',
           width: 585,
           height: 425,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about11.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about11.jpg',
@@ -112,38 +108,26 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
         'Customers may choose your company because you provide excellent customer service that makes them feel valued and appreciated. This can include fast response times, personalized attention.',
       about13BtnColor: 'white',
       about13Media: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       about13HideShape: false,
       about13AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
           ],
@@ -158,15 +142,11 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
     sequence: 7,
     data: {
       about13Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Stratégies et réalisation de l'entreprise",
           width: 585,
           height: 425,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about11.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about11.jpg',
@@ -179,44 +159,32 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
         'Les clients peuvent choisir votre entreprise parce que vous fournissez un excellent service client qui leur permet de se sentir valorisés et appréciés. Cela peut inclure des temps de réponse rapides, une attention personnalisée.',
       about13BtnColor: 'white',
       about13Media: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       about13HideShape: false,
       about13AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },

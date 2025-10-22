@@ -107,8 +107,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
         'They provided excellent communication and kept me informed every step of the way. The end product exceeded my expectations and has already made a significant impact on my business. I would highly recommend Lighthouse.',
       testimonial1TestimonialList: [
         {
-          id: '24',
-          version: 1,
           attrs: {
             name: 'Tom Onix',
             review: 'Their team  knowledge, professional, & easy to work',
@@ -117,8 +115,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
           },
         },
         {
-          id: '25',
-          version: 1,
           attrs: {
             name: 'Lessar Carey',
             review:
@@ -128,8 +124,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
           },
         },
         {
-          id: '26',
-          version: 1,
           attrs: {
             name: 'Ocsiloco Termend',
             review:
@@ -139,8 +133,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
           },
         },
         {
-          id: '27',
-          version: 1,
           attrs: {
             name: 'Aliko Andree',
             review:
@@ -167,8 +159,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
         "Ils ont fourni une excellente communication et m'ont tenu informé à chaque étape. Le produit final a dépassé mes attentes et a déjà eu un impact significatif sur mon entreprise. Je recommanderais vivement Lighthouse.",
       testimonial1TestimonialList: [
         {
-          id: '24',
-          version: 1,
           attrs: {
             name: 'Tom Onix',
             review:
@@ -178,8 +168,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
           },
         },
         {
-          id: '25',
-          version: 1,
           attrs: {
             name: 'Lessar Carey',
             review:
@@ -189,8 +177,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
           },
         },
         {
-          id: '26',
-          version: 1,
           attrs: {
             name: 'Ocsiloco Termend',
             review:
@@ -200,8 +186,6 @@ export const testimonial1Demos: Demo<typeof testimonial1Schema>[] = [
           },
         },
         {
-          id: '27',
-          version: 1,
           attrs: {
             name: 'Aliko Andree',
             review:

@@ -77,15 +77,11 @@ export const contact2Demos: Demo<typeof contact2Schema>[] = [
       contact2LinkTitle: 'Join Us',
       contact2LinkHref: '#',
       contact2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Let's talk",
           width: 598,
           height: 432,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'tm1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/tm1.jpg',
@@ -108,15 +104,11 @@ export const contact2Demos: Demo<typeof contact2Schema>[] = [
       contact2LinkTitle: 'Rejoignez-nous',
       contact2LinkHref: '#',
       contact2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Parlons',
           width: 598,
           height: 432,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'tm1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/tm1.jpg',

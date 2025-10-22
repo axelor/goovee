@@ -86,15 +86,11 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
     sequence: 6,
     data: {
       about25Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Caitlyn, a food and product photographer',
           width: 512,
           height: 512,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about30.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about30.jpg',
@@ -113,8 +109,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
       about25Heading: 'My Working Process',
       about25AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Concept',
             description:
@@ -122,8 +116,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Prepare',
             description:
@@ -131,8 +123,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Retouch',
             description:
@@ -140,8 +130,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Finalize',
             description:
@@ -158,15 +146,11 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
     sequence: 6,
     data: {
       about25Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Caitlyn, photographe culinaire et de produits',
           width: 512,
           height: 512,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about30.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about30.jpg',
@@ -185,8 +169,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
       about25Heading: 'Mon processus de travail',
       about25AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Concept',
             description:
@@ -194,8 +176,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Préparer',
             description:
@@ -203,8 +183,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Retoucher',
             description:
@@ -212,8 +190,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Finaliser',
             description:

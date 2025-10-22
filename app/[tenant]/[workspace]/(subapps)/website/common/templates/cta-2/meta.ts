@@ -75,15 +75,11 @@ export const cta2Demos: Demo<typeof cta2Schema>[] = [
       cta2LinkHref1: '#',
       cta2LinkHref2: '#',
       cta2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'World map background',
           width: 800,
           height: 484,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'map.png',
             fileType: 'image/png',
             filePath: '/img/map.png',
@@ -105,15 +101,11 @@ export const cta2Demos: Demo<typeof cta2Schema>[] = [
       cta2LinkHref1: '#',
       cta2LinkHref2: '#',
       cta2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Fond de carte du monde',
           width: 800,
           height: 484,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'map.png',
             fileType: 'image/png',
             filePath: '/img/map.png',

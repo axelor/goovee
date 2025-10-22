@@ -107,8 +107,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
       blog2SpaceBetween: 0,
       blog2BlogList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Ligula tristique quis risus',
             category: 'Coding',
@@ -116,15 +114,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-04-14',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Blog post image',
                 width: 775,
                 height: 485,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b4.jpg',
@@ -134,8 +128,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'ullam id dolor elit id nibh',
             category: 'Workspace',
@@ -143,15 +135,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-03-29',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Blog post image',
                 width: 380,
                 height: 240,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b5.jpg',
@@ -161,8 +149,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Ultricies fusce porta elit',
             category: 'Meeting',
@@ -170,15 +156,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-02-26',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Blog post image',
                 width: 380,
                 height: 240,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b6.jpg',
@@ -188,8 +170,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Morbi leo risus porta eget',
             category: 'Business Tips',
@@ -197,15 +177,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-01-07',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Blog post image',
                 width: 480,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b7.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b7.jpg',
@@ -230,8 +206,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
       blog2SpaceBetween: 0,
       blog2BlogList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Ligula tristique quis risus',
             category: 'Codage',
@@ -239,15 +213,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-04-14',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: "Image de l'article de blog",
                 width: 775,
                 height: 485,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b4.jpg',
@@ -257,8 +227,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'ullam id dolor elit id nibh',
             category: 'Espace de travail',
@@ -266,15 +234,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-03-29',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: "Image de l'article de blog",
                 width: 380,
                 height: 240,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b5.jpg',
@@ -284,8 +248,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Ultricies fusce porta elit',
             category: 'Réunion',
@@ -293,15 +255,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-02-26',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: "Image de l'article de blog",
                 width: 380,
                 height: 240,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b6.jpg',
@@ -311,8 +269,6 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Morbi leo risus porta eget',
             category: 'Conseils aux entreprises',
@@ -320,15 +276,11 @@ export const blog2Demos: Demo<typeof blog2Schema>[] = [
               'Mauris convallis non ligula non interdum. Gravida vulputate convallis tempus vestibulum cras imperdiet nun eu dolor.',
             date: '2022-01-07',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: "Image de l'article de blog",
                 width: 480,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'b7.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/b7.jpg',

@@ -88,15 +88,11 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
       facts14Title: 'Trust us, join 10K+ clients to grow your business.',
       facts14Caption: 'Join Our Community',
       facts14Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Company achievements',
           width: 952,
           height: 471,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about26.png',
             fileType: 'image/png',
             filePath: '/img/photos/about26.png',
@@ -105,8 +101,6 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
       },
       facts14Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             amount: 500,
@@ -114,8 +108,6 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Happy Customers',
             amount: 2000,
@@ -123,8 +115,6 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Revenue Growth',
             amount: 2,
@@ -144,15 +134,11 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
         'Faites-nous confiance, rejoignez plus de 10 000 clients pour développer votre entreprise.',
       facts14Caption: 'Rejoignez notre communauté',
       facts14Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Réalisations de l'entreprise",
           width: 952,
           height: 471,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about26.png',
             fileType: 'image/png',
             filePath: '/img/photos/about26.png',
@@ -161,8 +147,6 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
       },
       facts14Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             amount: 500,
@@ -170,8 +154,6 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             amount: 2000,
@@ -179,8 +161,6 @@ export const facts14Demos: Demo<typeof facts14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Croissance des revenus',
             amount: 2,

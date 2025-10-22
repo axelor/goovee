@@ -123,15 +123,11 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
       contact12Description:
         'For more information please get in touch using the form below:',
       contact12Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Photography pricing request form background',
           width: 1440,
           height: 816,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg36.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg36.jpg',
@@ -163,15 +159,11 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
       contact12Description:
         'Pour plus d’informations, veuillez nous contacter en utilisant le formulaire ci-dessous :',
       contact12Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Arrière-plan du formulaire de demande de prix de photographie',
           width: 1440,
           height: 816,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg36.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg36.jpg',

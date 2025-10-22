@@ -87,15 +87,11 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
       hero21ButtonLabel: 'Get Started',
       hero21ButtonLink: '#',
       hero21Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Tech company',
           width: 671,
           height: 492,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i21.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i21.png',
@@ -105,20 +101,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
       hero21ListTitle: 'Our Core Partners',
       hero21Clients: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Client 1',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 272,
                 height: 80,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c1.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c1.png',
@@ -128,20 +118,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Client 2',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 252,
                 height: 88,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c2.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c2.png',
@@ -151,20 +135,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Client 3',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 250,
                 height: 70,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c3.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c3.png',
@@ -174,20 +152,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Client 4',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 268,
                 height: 72,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c4.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c4.png',
@@ -197,20 +169,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Client 5',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 194,
                 height: 62,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c5.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c5.png',
@@ -220,20 +186,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Client 6',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 258,
                 height: 60,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c6.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c6.png',
@@ -258,15 +218,11 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
       hero21ButtonLabel: 'Commencer',
       hero21ButtonLink: '#',
       hero21Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Entreprise technologique',
           width: 671,
           height: 492,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i21.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i21.png',
@@ -276,20 +232,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
       hero21ListTitle: 'Nos principaux partenaires',
       hero21Clients: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Client 1',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 272,
                 height: 80,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c1.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c1.png',
@@ -299,20 +249,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Client 2',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 252,
                 height: 88,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c2.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c2.png',
@@ -322,20 +266,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Client 3',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 250,
                 height: 70,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c3.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c3.png',
@@ -345,20 +283,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Client 4',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 268,
                 height: 72,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c4.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c4.png',
@@ -368,20 +300,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Client 5',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 194,
                 height: 62,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c5.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c5.png',
@@ -391,20 +317,14 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Client 6',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'client',
                 width: 258,
                 height: 60,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'c6.png',
                   fileType: 'image/png',
                   filePath: '/img/brands/c6.png',

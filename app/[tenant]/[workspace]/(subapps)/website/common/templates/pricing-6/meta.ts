@@ -95,8 +95,6 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
       pricing6SwitchRightLabel: 'Yearly (Save 30%)',
       pricing6Plans: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             plan: 'Premium',
             price1: 25,
@@ -104,17 +102,15 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
             buttonText: 'Choose Plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '5 Projects'}},
-              {id: '2', version: 0, attrs: {label: '100K API Access'}},
-              {id: '3', version: 0, attrs: {label: '200MB Storage'}},
-              {id: '4', version: 0, attrs: {label: 'Weekly Reports'}},
-              {id: '5', version: 0, attrs: {label: '7/24 Support'}},
+              {attrs: {label: '5 Projects'}},
+              {attrs: {label: '100K API Access'}},
+              {attrs: {label: '200MB Storage'}},
+              {attrs: {label: 'Weekly Reports'}},
+              {attrs: {label: '7/24 Support'}},
             ],
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             plan: 'Corporate',
             price1: 54,
@@ -122,11 +118,11 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
             buttonText: 'Choose Plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '20 Projects'}},
-              {id: '2', version: 0, attrs: {label: '300K API Access'}},
-              {id: '3', version: 0, attrs: {label: '500MB Storage'}},
-              {id: '4', version: 0, attrs: {label: 'Weekly Reports'}},
-              {id: '5', version: 0, attrs: {label: '7/24 Support'}},
+              {attrs: {label: '20 Projects'}},
+              {attrs: {label: '300K API Access'}},
+              {attrs: {label: '500MB Storage'}},
+              {attrs: {label: 'Weekly Reports'}},
+              {attrs: {label: '7/24 Support'}},
             ],
           },
         },
@@ -150,8 +146,6 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
       pricing6SwitchRightLabel: 'Annuel (Économisez 30%)',
       pricing6Plans: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             plan: 'Premium',
             price1: 25,
@@ -159,17 +153,15 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
             buttonText: 'Choisir le plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '5 projets'}},
-              {id: '2', version: 0, attrs: {label: '100K accès API'}},
-              {id: '3', version: 0, attrs: {label: '200 Mo de stockage'}},
-              {id: '4', version: 0, attrs: {label: 'Rapports hebdomadaires'}},
-              {id: '5', version: 0, attrs: {label: 'Assistance 7j/24'}},
+              {attrs: {label: '5 projets'}},
+              {attrs: {label: '100K accès API'}},
+              {attrs: {label: '200 Mo de stockage'}},
+              {attrs: {label: 'Rapports hebdomadaires'}},
+              {attrs: {label: 'Assistance 7j/24'}},
             ],
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             plan: 'Entreprise',
             price1: 54,
@@ -177,11 +169,11 @@ export const pricing6Demos: Demo<typeof pricing6Schema>[] = [
             buttonText: 'Choisir le plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '20 projets'}},
-              {id: '2', version: 0, attrs: {label: '300K accès API'}},
-              {id: '3', version: 0, attrs: {label: '500 Mo de stockage'}},
-              {id: '4', version: 0, attrs: {label: 'Rapports hebdomadaires'}},
-              {id: '5', version: 0, attrs: {label: 'Assistance 7j/24'}},
+              {attrs: {label: '20 projets'}},
+              {attrs: {label: '300K accès API'}},
+              {attrs: {label: '500 Mo de stockage'}},
+              {attrs: {label: 'Rapports hebdomadaires'}},
+              {attrs: {label: 'Assistance 7j/24'}},
             ],
           },
         },

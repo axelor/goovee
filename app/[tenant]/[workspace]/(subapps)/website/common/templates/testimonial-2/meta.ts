@@ -78,15 +78,11 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
     sequence: 8,
     data: {
       testimonial2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Testimonial',
           width: 598,
           height: 432,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'tm1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/tm1.jpg',
@@ -95,8 +91,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
       },
       testimonial2Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Sales Director',
@@ -104,8 +98,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Marketing Manager',
@@ -113,8 +105,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'HR Manager',
@@ -122,8 +112,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Investment Planner',
@@ -140,15 +128,11 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
     sequence: 8,
     data: {
       testimonial2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Témoignage',
           width: 598,
           height: 432,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'tm1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/tm1.jpg',
@@ -157,8 +141,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
       },
       testimonial2Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Directeur des ventes',
@@ -166,8 +148,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Responsable marketing',
@@ -175,8 +155,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'Responsable RH',
@@ -184,8 +162,6 @@ export const testimonial2Demos: Demo<typeof testimonial2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Planificateur d’investissement',

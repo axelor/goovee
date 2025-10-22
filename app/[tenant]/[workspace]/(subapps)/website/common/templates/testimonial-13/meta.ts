@@ -99,15 +99,11 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
     data: {
       testimonial13Caption: 'Happy Customers',
       testimonial13Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Testimonial',
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',
@@ -118,20 +114,14 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
       testimonial13Navigation: false,
       testimonial13Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Toris Oklee',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Toris Oklee',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te1.jpg',
@@ -144,20 +134,14 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Cory Zamora',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te2.jpg',
@@ -170,20 +154,14 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Barclay Widerski',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te3.jpg',
@@ -206,15 +184,11 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
     data: {
       testimonial13Caption: 'Clients satisfaits',
       testimonial13Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Témoignage',
           width: 1440,
           height: 680,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg2.jpg',
@@ -225,20 +199,14 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
       testimonial13Navigation: false,
       testimonial13Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Toris Oklee',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Toris Oklee',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te1.jpg',
@@ -251,20 +219,14 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Cory Zamora',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te2.jpg',
@@ -277,20 +239,14 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Barclay Widerski',
                 width: 100,
                 height: 100,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'te3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/te3.jpg',

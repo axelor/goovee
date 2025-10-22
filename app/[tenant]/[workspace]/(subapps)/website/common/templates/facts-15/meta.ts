@@ -96,8 +96,6 @@ export const facts15Demos: Demo<typeof facts15Schema>[] = [
         'We bring solutions to make life easier for our customers.',
       facts15Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             number: 10,
@@ -106,8 +104,6 @@ export const facts15Demos: Demo<typeof facts15Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Happy Customers',
             number: 5,
@@ -116,8 +112,6 @@ export const facts15Demos: Demo<typeof facts15Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             number: 265,
@@ -140,8 +134,6 @@ export const facts15Demos: Demo<typeof facts15Schema>[] = [
         'Nous apportons des solutions pour faciliter la vie de nos clients.',
       facts15Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             number: 10,
@@ -150,8 +142,6 @@ export const facts15Demos: Demo<typeof facts15Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             number: 5,
@@ -160,8 +150,6 @@ export const facts15Demos: Demo<typeof facts15Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             number: 265,

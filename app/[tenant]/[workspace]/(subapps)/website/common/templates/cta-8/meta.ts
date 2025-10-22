@@ -69,15 +69,11 @@ export const cta8Demos: Demo<typeof cta8Schema>[] = [
       cta8LinkTitle: 'Get Started',
       cta8LinkHref: '#',
       cta8Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Join our community',
           width: 1440,
           height: 674,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg16.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg16.png',
@@ -98,15 +94,11 @@ export const cta8Demos: Demo<typeof cta8Schema>[] = [
       cta8LinkTitle: 'Commencer',
       cta8LinkHref: '#',
       cta8Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Rejoignez notre communauté',
           width: 1440,
           height: 674,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg16.png',
             fileType: 'image/png',
             filePath: '/img/photos/bg16.png',

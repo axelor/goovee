@@ -69,15 +69,11 @@ export const banner1Demos: Demo<typeof banner1Schema>[] = [
       banner1Title:
         'Lighthouse is currently accessible to download from the App Store as well as the Google Play Store.',
       banner1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Lighthouse app on mobile devices',
           width: 740,
           height: 726,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'devices2.png',
             fileType: 'image/png',
             filePath: '/img/photos/devices2.png',
@@ -99,15 +95,11 @@ export const banner1Demos: Demo<typeof banner1Schema>[] = [
       banner1Title:
         'Lighthouse est actuellement accessible au téléchargement sur l’App Store ainsi que sur le Google Play Store.',
       banner1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Application Lighthouse sur appareils mobiles',
           width: 740,
           height: 726,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'devices2.png',
             fileType: 'image/png',
             filePath: '/img/photos/devices2.png',

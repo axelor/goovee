@@ -62,15 +62,11 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
       banner3Heading:
         'Discover all the essential information you need to create a business process model.',
       banner3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Business process model',
           width: 1440,
           height: 523,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg1.jpg',
@@ -78,8 +74,6 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
         },
       },
       banner3Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
@@ -95,15 +89,11 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
       banner3Heading:
         'Découvrez toutes les informations essentielles dont vous avez besoin pour créer un modèle de processus métier.',
       banner3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Modèle de processus métier',
           width: 1440,
           height: 523,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg1.jpg',
@@ -111,8 +101,6 @@ export const banner3Demos: Demo<typeof banner3Schema>[] = [
         },
       },
       banner3Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',

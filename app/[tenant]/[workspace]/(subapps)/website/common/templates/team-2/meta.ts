@@ -122,20 +122,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
       team2ButtonLink: '#',
       team2Members: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Ethan Johnson',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t3.jpg',
@@ -146,8 +140,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Strategic marketing is my passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -155,8 +147,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -164,8 +154,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',
@@ -176,20 +164,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Gabriel Rodriguez',
                 width: 600,
                 height: 600,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't7.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t7.jpg',
@@ -200,8 +182,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Strategic marketing is my passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -209,8 +189,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -218,8 +196,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',
@@ -230,20 +206,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Samuel Patel',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t6.jpg',
@@ -254,8 +224,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Strategic marketing is my passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -263,8 +231,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -272,8 +238,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',
@@ -284,20 +248,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Andree Buie',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Andree Buie',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't11.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t11.jpg',
@@ -308,8 +266,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Strategic marketing is my passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -317,8 +273,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -326,8 +280,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',
@@ -356,20 +308,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
       team2ButtonLink: '#',
       team2Members: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Ethan Johnson',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t3.jpg',
@@ -380,8 +326,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Le marketing stratégique est ma passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -389,8 +333,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -398,8 +340,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',
@@ -410,20 +350,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Gabriel Rodriguez',
                 width: 600,
                 height: 600,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't7.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t7.jpg',
@@ -434,8 +368,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Le marketing stratégique est ma passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -443,8 +375,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -452,8 +382,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',
@@ -464,20 +392,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Samuel Patel',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t6.jpg',
@@ -488,8 +410,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Le marketing stratégique est ma passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -497,8 +417,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -506,8 +424,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',
@@ -518,20 +434,14 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Andree Buie',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Andree Buie',
                 width: 300,
                 height: 300,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 't11.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/avatars/t11.jpg',
@@ -542,8 +452,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
             description: 'Le marketing stratégique est ma passion.',
             socialLinks: [
               {
-                id: '1',
-                version: 1,
                 attrs: {
                   name: 'Twitter',
                   icon: 'twitter',
@@ -551,8 +459,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '2',
-                version: 1,
                 attrs: {
                   name: 'Facebook',
                   icon: 'facebook-f',
@@ -560,8 +466,6 @@ export const team2Demos: Demo<typeof team2Schema>[] = [
                 },
               },
               {
-                id: '3',
-                version: 1,
                 attrs: {
                   name: 'Dribbble',
                   icon: 'dribbble',

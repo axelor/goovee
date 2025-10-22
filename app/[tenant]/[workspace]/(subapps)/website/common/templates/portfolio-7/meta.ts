@@ -114,15 +114,11 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Title: 'Check out some of our recent projects below.',
       portfolio7Description: 'We love to turn ideas into beautiful things.',
       portfolio7Image1: {
-        id: 'img-1',
-        version: 0,
         attrs: {
           alt: 'Ipsum Ultricies Cursus',
           width: 568,
           height: 455,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'rp1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/rp1.jpg',
@@ -133,15 +129,11 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Caption1: 'Stationary',
       portfolio7Title1: 'Ipsum Ultricies Cursus',
       portfolio7Image2: {
-        id: 'img-2',
-        version: 0,
         attrs: {
           alt: 'Mollis Ipsum Mattis',
           width: 568,
           height: 531,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'rp2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/rp2.jpg',
@@ -152,15 +144,11 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Caption2: 'Invitation',
       portfolio7Title2: 'Mollis Ipsum Mattis',
       portfolio7Image3: {
-        id: 'img-3',
-        version: 0,
         attrs: {
           alt: 'Magna Tristique Inceptos',
           width: 568,
           height: 382,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'rp3.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/rp3.jpg',
@@ -183,15 +171,11 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Description:
         'Nous aimons transformer les idées en de belles choses.',
       portfolio7Image1: {
-        id: 'img-1',
-        version: 0,
         attrs: {
           alt: 'Ipsum Ultricies Cursus',
           width: 568,
           height: 455,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'rp1.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/rp1.jpg',
@@ -202,15 +186,11 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Caption1: 'Papeterie',
       portfolio7Title1: 'Ipsum Ultricies Cursus',
       portfolio7Image2: {
-        id: 'img-2',
-        version: 0,
         attrs: {
           alt: 'Mollis Ipsum Mattis',
           width: 568,
           height: 531,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'rp2.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/rp2.jpg',
@@ -221,15 +201,11 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
       portfolio7Caption2: 'Invitation',
       portfolio7Title2: 'Mollis Ipsum Mattis',
       portfolio7Image3: {
-        id: 'img-3',
-        version: 0,
         attrs: {
           alt: 'Magna Tristique Inceptos',
           width: 568,
           height: 382,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'rp3.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/rp3.jpg',

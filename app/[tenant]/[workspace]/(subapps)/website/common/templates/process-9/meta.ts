@@ -122,15 +122,11 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       process9Description:
         'Find out why our happy customers choose us by following these steps',
       process9Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'About us',
           width: 596,
           height: 565,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about8.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about8.jpg',
@@ -139,8 +135,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       },
       process9BtnColor: 'white',
       process9Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
@@ -148,8 +142,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       process9HideShape: false,
       process9Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: 'Secured Transactions',
@@ -159,8 +151,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: 'Bills Planning',
@@ -170,8 +160,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: 'Always up to date',
@@ -194,15 +182,11 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       process9Description:
         'Découvrez pourquoi nos clients satisfaits nous choisissent en suivant ces étapes',
       process9Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'À propos de nous',
           width: 596,
           height: 565,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about8.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about8.jpg',
@@ -211,8 +195,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       },
       process9BtnColor: 'white',
       process9Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
@@ -220,8 +202,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       process9HideShape: false,
       process9Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: 'Transactions sécurisées',
@@ -231,8 +211,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: 'Planification des factures',
@@ -242,8 +220,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: 'Toujours à jour',

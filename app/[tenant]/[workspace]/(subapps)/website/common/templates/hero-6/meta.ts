@@ -83,15 +83,11 @@ export const hero6Demos: Demo<typeof hero6Schema>[] = [
       hero6GooglePlayTitle: 'Google Play',
       hero6GooglePlayUrl: '#',
       hero6Image: {
-        id: '1',
-        version: 1,
         attrs: {
           alt: 'Devices',
           width: 830,
           height: 895,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'devices.png',
             fileType: 'image/png',
             filePath: '/img/photos/devices.png',
@@ -115,15 +111,11 @@ export const hero6Demos: Demo<typeof hero6Schema>[] = [
       hero6GooglePlayTitle: 'Google Play',
       hero6GooglePlayUrl: '#',
       hero6Image: {
-        id: '1',
-        version: 1,
         attrs: {
           alt: 'Devices',
           width: 830,
           height: 895,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'devices.png',
             fileType: 'image/png',
             filePath: '/img/photos/devices.png',

@@ -60,15 +60,11 @@ export const cta1Demos: Demo<typeof cta1Schema>[] = [
     sequence: 3,
     data: {
       cta1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'SEO analysis illustration',
           width: 568,
           height: 428,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i3.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i3.png',
@@ -89,15 +85,11 @@ export const cta1Demos: Demo<typeof cta1Schema>[] = [
     sequence: 3,
     data: {
       cta1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: "Illustration d'analyse SEO",
           width: 568,
           height: 428,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'i3.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/i3.png',

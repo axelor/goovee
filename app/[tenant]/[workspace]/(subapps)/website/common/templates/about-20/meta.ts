@@ -73,15 +73,11 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
     sequence: 7,
     data: {
       about20Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'What makes us different',
           width: 523,
           height: 268,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'g8.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/g8.jpg',
@@ -89,15 +85,11 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
         },
       },
       about20Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'What makes us different',
           width: 271,
           height: 242,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'g9.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/g9.jpg',
@@ -105,15 +97,11 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
         },
       },
       about20Image3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'What makes us different',
           width: 271,
           height: 218,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'g10.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/g10.jpg',
@@ -125,8 +113,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
         'We provide ideas for creating the lives of our clients easier.',
       about20AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Secure Payment',
             description: 'Curabitur blandit lacus porttitor riduculus mus.',
@@ -134,8 +120,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Daily Update',
             description: 'Curabitur blandit lacus porttitor ridiculus mus.',
@@ -143,8 +127,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'AI Design',
             description: 'Curabitur blandit lacus porttitor ridiculus mus.',
@@ -152,8 +134,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Trendy Product',
             description: 'Curabitur blandit lacus porttitor ridiculus mus.',
@@ -170,15 +150,11 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
     sequence: 7,
     data: {
       about20Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Ce qui nous rend différents',
           width: 523,
           height: 268,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'g8.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/g8.jpg',
@@ -186,15 +162,11 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
         },
       },
       about20Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Ce qui nous rend différents',
           width: 271,
           height: 242,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'g9.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/g9.jpg',
@@ -202,15 +174,11 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
         },
       },
       about20Image3: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Ce qui nous rend différents',
           width: 271,
           height: 218,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'g10.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/g10.jpg',
@@ -222,8 +190,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
         'Nous fournissons des idées pour faciliter la vie de nos clients.',
       about20AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Paiement sécurisé',
             description: 'Curabitur blandit lacus porttitor riduculus mus.',
@@ -231,8 +197,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Mise à jour quotidienne',
             description: 'Curabitur blandit lacus porttitor ridiculus mus.',
@@ -240,8 +204,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Conception IA',
             description: 'Curabitur blandit lacus porttitor ridiculus mus.',
@@ -249,8 +211,6 @@ export const about20Demos: Demo<typeof about20Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Produit tendance',
             description: 'Curabitur blandit lacus porttitor ridiculus mus.',

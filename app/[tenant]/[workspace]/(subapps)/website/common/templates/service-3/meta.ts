@@ -95,8 +95,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
         'We took pleasure in offering unique solutions to your particular needs.',
       service3Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'circuit',
             title: 'IoT Development',
@@ -107,8 +105,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'processor',
             title: 'Artificial Intelligence',
@@ -119,8 +115,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'setting',
             title: 'Software Maintenance',
@@ -131,8 +125,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'lock-access',
             title: 'Cybersecurity',
@@ -156,8 +148,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
         'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
       service3Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'circuit',
             title: 'Développement IoT',
@@ -168,8 +158,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'processor',
             title: 'Intelligence artificielle',
@@ -180,8 +168,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'setting',
             title: 'Maintenance logicielle',
@@ -192,8 +178,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'lock-access',
             title: 'Cybersécurité',

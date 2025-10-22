@@ -73,20 +73,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
     data: {
       hero24Images: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Image 1',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Carousel image',
                 width: 790,
                 height: 531,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf1.jpg',
@@ -96,20 +90,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Image 2',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Carousel image',
                 width: 790,
                 height: 531,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf2.jpg',
@@ -119,20 +107,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Image 3',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Carousel image',
                 width: 790,
                 height: 531,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf3.jpg',
@@ -142,20 +124,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Image 4',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Carousel image',
                 width: 1200,
                 height: 800,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf4.jpg',
@@ -165,20 +141,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Image 5',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Carousel image',
                 width: 1200,
                 height: 800,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf5.jpg',
@@ -188,20 +158,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Image 6',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Carousel image',
                 width: 1200,
                 height: 800,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf6.jpg',
@@ -221,20 +185,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
     data: {
       hero24Images: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Image 1',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Image du carrousel',
                 width: 790,
                 height: 531,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf1.jpg',
@@ -244,20 +202,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Image 2',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Image du carrousel',
                 width: 790,
                 height: 531,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf2.jpg',
@@ -267,20 +219,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Image 3',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Image du carrousel',
                 width: 790,
                 height: 531,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf3.jpg',
@@ -290,20 +236,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Image 4',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Image du carrousel',
                 width: 1200,
                 height: 800,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf4.jpg',
@@ -313,20 +253,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Image 5',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Image du carrousel',
                 width: 1200,
                 height: 800,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf5.jpg',
@@ -336,20 +270,14 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Image 6',
             image: {
-              id: '1',
-              version: 0,
               attrs: {
                 alt: 'Image du carrousel',
                 width: 1200,
                 height: 800,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'cf6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/cf6.jpg',

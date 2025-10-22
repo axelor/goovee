@@ -88,8 +88,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
     data: {
       service21Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Rocket',
@@ -101,8 +99,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Code',
@@ -114,8 +110,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'DevicesTwo',
@@ -127,8 +121,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Hand',
@@ -150,8 +142,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
     data: {
       service21Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Rocket',
@@ -163,8 +153,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Code',
@@ -176,8 +164,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'DevicesTwo',
@@ -189,8 +175,6 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Hand',

@@ -95,15 +95,11 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
     data: {
       service13Title: 'Our service is customized to the unique needs of you.',
       service13Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Our service',
           width: 1200,
           height: 582,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about15.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about15.jpg',
@@ -112,8 +108,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
       },
       service13Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'IoT Development',
             icon: 'circuit',
@@ -124,8 +118,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Artificial Intelligence',
             icon: 'processor',
@@ -136,8 +128,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Software Maintenance',
             icon: 'setting',
@@ -148,8 +138,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersecurity',
             icon: 'lock-access',
@@ -171,15 +159,11 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
       service13Title:
         'Notre service est personnalisé pour répondre à vos besoins uniques.',
       service13Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Notre service',
           width: 1200,
           height: 582,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about15.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about15.jpg',
@@ -188,8 +172,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
       },
       service13Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Développement IoT',
             icon: 'circuit',
@@ -200,8 +182,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Intelligence artificielle',
             icon: 'processor',
@@ -212,8 +192,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Maintenance logicielle',
             icon: 'setting',
@@ -224,8 +202,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersécurité',
             icon: 'lock-access',

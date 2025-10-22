@@ -76,8 +76,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
       pricing8SwitchRightLabel: 'Yearly',
       pricing8Plans: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             plan: 'Basic',
             price1: 9,
@@ -85,17 +83,15 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
             buttonText: 'Choose Plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '1 Project'}},
-              {id: '2', version: 0, attrs: {label: '100K API Access'}},
-              {id: '3', version: 0, attrs: {label: '100MB Storage'}},
-              {id: '4', version: 0, attrs: {label: 'Weekly Reports'}},
-              {id: '5', version: 0, attrs: {label: '7/24 Support'}},
+              {attrs: {label: '1 Project'}},
+              {attrs: {label: '100K API Access'}},
+              {attrs: {label: '100MB Storage'}},
+              {attrs: {label: 'Weekly Reports'}},
+              {attrs: {label: '7/24 Support'}},
             ],
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             plan: 'Premium',
             buttonText: 'Choose Plan',
@@ -103,17 +99,15 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
             price1: 19,
             price2: 199,
             features: [
-              {id: '1', version: 0, attrs: {label: '5 Projects'}},
-              {id: '2', version: 0, attrs: {label: '100K API Access'}},
-              {id: '3', version: 0, attrs: {label: '200MB Storage'}},
-              {id: '4', version: 0, attrs: {label: 'Weekly Reports'}},
-              {id: '5', version: 0, attrs: {label: '7/24 Support'}},
+              {attrs: {label: '5 Projects'}},
+              {attrs: {label: '100K API Access'}},
+              {attrs: {label: '200MB Storage'}},
+              {attrs: {label: 'Weekly Reports'}},
+              {attrs: {label: '7/24 Support'}},
             ],
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             plan: 'Corporate',
             price1: 49,
@@ -121,19 +115,17 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
             buttonText: 'Choose Plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '20 Projects'}},
-              {id: '2', version: 0, attrs: {label: '300K API Access'}},
-              {id: '3', version: 0, attrs: {label: '500MB Storage'}},
-              {id: '4', version: 0, attrs: {label: 'Weekly Reports'}},
-              {id: '5', version: 0, attrs: {label: '7/24 Support'}},
+              {attrs: {label: '20 Projects'}},
+              {attrs: {label: '300K API Access'}},
+              {attrs: {label: '500MB Storage'}},
+              {attrs: {label: 'Weekly Reports'}},
+              {attrs: {label: '7/24 Support'}},
             ],
           },
         },
       ],
       pricing8Faq: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'How do I get my subscription receipt?',
             description:
@@ -141,8 +133,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Are there any discounts for people in need?',
             description:
@@ -150,8 +140,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Do you offer a free trial?',
             description:
@@ -159,8 +147,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Can I cancel my subscription at any time?',
             description:
@@ -182,8 +168,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
       pricing8SwitchRightLabel: 'Annuel',
       pricing8Plans: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             plan: 'Basique',
             price1: 9,
@@ -191,17 +175,15 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
             buttonText: 'Choisir le plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '1 projet'}},
-              {id: '2', version: 0, attrs: {label: '100K accès API'}},
-              {id: '3', version: 0, attrs: {label: '100 Mo de stockage'}},
-              {id: '4', version: 0, attrs: {label: 'Rapports hebdomadaires'}},
-              {id: '5', version: 0, attrs: {label: 'Assistance 7j/24'}},
+              {attrs: {label: '1 projet'}},
+              {attrs: {label: '100K accès API'}},
+              {attrs: {label: '100 Mo de stockage'}},
+              {attrs: {label: 'Rapports hebdomadaires'}},
+              {attrs: {label: 'Assistance 7j/24'}},
             ],
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             plan: 'Premium',
             price1: 19,
@@ -209,17 +191,15 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
             buttonText: 'Choisir le plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '5 projets'}},
-              {id: '2', version: 0, attrs: {label: '100K accès API'}},
-              {id: '3', version: 0, attrs: {label: '200 Mo de stockage'}},
-              {id: '4', version: 0, attrs: {label: 'Rapports hebdomadaires'}},
-              {id: '5', version: 0, attrs: {label: 'Assistance 7j/24'}},
+              {attrs: {label: '5 projets'}},
+              {attrs: {label: '100K accès API'}},
+              {attrs: {label: '200 Mo de stockage'}},
+              {attrs: {label: 'Rapports hebdomadaires'}},
+              {attrs: {label: 'Assistance 7j/24'}},
             ],
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             plan: 'Entreprise',
             price1: 49,
@@ -227,19 +207,17 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
             buttonText: 'Choisir le plan',
             buttonLink: '#',
             features: [
-              {id: '1', version: 0, attrs: {label: '20 projets'}},
-              {id: '2', version: 0, attrs: {label: '300K accès API'}},
-              {id: '3', version: 0, attrs: {label: '500 Mo de stockage'}},
-              {id: '4', version: 0, attrs: {label: 'Rapports hebdomadaires'}},
-              {id: '5', version: 0, attrs: {label: 'Assistance 7j/24'}},
+              {attrs: {label: '20 projets'}},
+              {attrs: {label: '300K accès API'}},
+              {attrs: {label: '500 Mo de stockage'}},
+              {attrs: {label: 'Rapports hebdomadaires'}},
+              {attrs: {label: 'Assistance 7j/24'}},
             ],
           },
         },
       ],
       pricing8Faq: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Comment puis-je obtenir mon reçu d’abonnement ?',
             description:
@@ -247,8 +225,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title:
               'Y a-t-il des réductions pour les personnes dans le besoin ?',
@@ -257,8 +233,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Proposez-vous un essai gratuit ?',
             description:
@@ -266,8 +240,6 @@ export const pricing8Demos: Demo<typeof pricing8Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Puis-je annuler mon abonnement à tout moment ?',
             description:

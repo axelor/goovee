@@ -71,15 +71,11 @@ export const cta3Demos: Demo<typeof cta3Schema>[] = [
       cta3LinkTitle: 'Join Us',
       cta3LinkHref: '#',
       cta3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'World map background',
           width: 800,
           height: 484,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'map.png',
             fileType: 'image/png',
             filePath: '/img/map.png',
@@ -100,15 +96,11 @@ export const cta3Demos: Demo<typeof cta3Schema>[] = [
       cta3LinkTitle: 'Rejoignez-nous',
       cta3LinkHref: '#',
       cta3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Fond de carte du monde',
           width: 800,
           height: 484,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'map.png',
             fileType: 'image/png',
             filePath: '/img/map.png',

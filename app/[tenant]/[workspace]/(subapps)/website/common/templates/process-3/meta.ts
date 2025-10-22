@@ -96,15 +96,11 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       process3Description:
         'Find out why our happy customers choose us by following these steps',
       process3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'process',
           width: 593,
           height: 570,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about7.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about7.jpg',
@@ -113,8 +109,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       },
       process3Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Personalized service',
@@ -123,8 +117,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Competitive pricing',
@@ -133,8 +125,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Timely delivery',
@@ -156,15 +146,11 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       process3Description:
         'Découvrez pourquoi nos clients satisfaits nous choisissent en suivant ces étapes',
       process3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'processus',
           width: 593,
           height: 570,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'about7.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/about7.jpg',
@@ -173,8 +159,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
       },
       process3Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Service personnalisé',
@@ -183,8 +167,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Prix compétitifs',
@@ -193,8 +175,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Livraison à temps',

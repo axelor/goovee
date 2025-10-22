@@ -114,29 +114,23 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
         'My interest is taking pictures, and I enjoy transforming thoughts into lovely things.',
       portfolio5Caption: 'My Recent Photographs',
       portfolio5List: [
-        {id: '1', version: 0, attrs: {title: 'All', value: '*'}},
-        {id: '2', version: 0, attrs: {title: 'Foods', value: '.foods'}},
-        {id: '3', version: 0, attrs: {title: 'Drinks', value: '.drinks'}},
-        {id: '4', version: 0, attrs: {title: 'Events', value: '.events'}},
-        {id: '5', version: 0, attrs: {title: 'Pastries', value: '.pastries'}},
+        {attrs: {title: 'All', value: '*'}},
+        {attrs: {title: 'Foods', value: '.foods'}},
+        {attrs: {title: 'Drinks', value: '.drinks'}},
+        {attrs: {title: 'Events', value: '.events'}},
+        {attrs: {title: 'Pastries', value: '.pastries'}},
       ],
       portfolio5FilterList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Fringilla Nullam',
             category: 'drinks events',
             image: {
-              id: 'img-1',
-              version: 0,
               attrs: {
                 alt: 'Fringilla Nullam',
                 width: 380,
                 height: 254,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf1.jpg',
@@ -144,15 +138,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-1',
-              version: 0,
               attrs: {
                 alt: 'Fringilla Nullam',
                 width: 760,
                 height: 508,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf1-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf1-full.jpg',
@@ -162,21 +152,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Ridiculus Parturient',
             category: 'events',
             image: {
-              id: 'img-2',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Parturient',
                 width: 380,
                 height: 294,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf2.jpg',
@@ -184,15 +168,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-2',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Parturient',
                 width: 760,
                 height: 588,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf2-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf2-full.jpg',
@@ -202,21 +182,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Ornare Ipsum',
             category: 'pastries events',
             image: {
-              id: 'img-3',
-              version: 0,
               attrs: {
                 alt: 'Ornare Ipsum',
                 width: 380,
                 height: 502,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf3.jpg',
@@ -224,15 +198,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-3',
-              version: 0,
               attrs: {
                 alt: 'Ornare Ipsum',
                 width: 760,
                 height: 1004,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf3-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf3-full.jpg',
@@ -242,21 +212,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Nullam Mollis',
             category: 'events',
             image: {
-              id: 'img-4',
-              version: 0,
               attrs: {
                 alt: 'Nullam Mollis',
                 width: 380,
                 height: 456,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf4.jpg',
@@ -264,15 +228,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-4',
-              version: 0,
               attrs: {
                 alt: 'Nullam Mollis',
                 width: 760,
                 height: 912,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf4-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf4-full.jpg',
@@ -282,21 +242,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             title: 'Euismod Risus',
             category: 'pastries events',
             image: {
-              id: 'img-5',
-              version: 0,
               attrs: {
                 alt: 'Euismod Risus',
                 width: 380,
                 height: 305,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf5.jpg',
@@ -304,15 +258,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-5',
-              version: 0,
               attrs: {
                 alt: 'Euismod Risus',
                 width: 760,
                 height: 610,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf5-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf5-full.jpg',
@@ -322,21 +272,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             title: 'Ridiculus Tristique',
             category: 'foods',
             image: {
-              id: 'img-6',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Tristique',
                 width: 380,
                 height: 253,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf6.jpg',
@@ -344,15 +288,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-6',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Tristique',
                 width: 760,
                 height: 506,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf6-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf6-full.jpg',
@@ -362,21 +302,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '7',
-          version: 0,
           attrs: {
             title: 'Sollicitudin Pharetra',
             category: 'foods drinks',
             image: {
-              id: 'img-7',
-              version: 0,
               attrs: {
                 alt: 'Sollicitudin Pharetra',
                 width: 380,
                 height: 359,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf7.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf7.jpg',
@@ -384,15 +318,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-7',
-              version: 0,
               attrs: {
                 alt: 'Sollicitudin Pharetra',
                 width: 760,
                 height: 718,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf7-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf7-full.jpg',
@@ -402,21 +332,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '8',
-          version: 0,
           attrs: {
             title: 'Tristique Venenatis',
             category: 'pastries',
             image: {
-              id: 'img-8',
-              version: 0,
               attrs: {
                 alt: 'Tristique Venenatis',
                 width: 380,
                 height: 254,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf8.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf8.jpg',
@@ -424,15 +348,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-8',
-              version: 0,
               attrs: {
                 alt: 'Tristique Venenatis',
                 width: 760,
                 height: 508,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf8-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf8-full.jpg',
@@ -442,21 +362,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '9',
-          version: 0,
           attrs: {
             title: 'Cursus Fusce',
             category: 'events',
             image: {
-              id: 'img-9',
-              version: 0,
               attrs: {
                 alt: 'Cursus Fusce',
                 width: 380,
                 height: 284,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf9.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf9.jpg',
@@ -464,15 +378,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-9',
-              version: 0,
               attrs: {
                 alt: 'Cursus Fusce',
                 width: 760,
                 height: 568,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf9-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf9-full.jpg',
@@ -482,21 +392,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '10',
-          version: 0,
           attrs: {
             title: 'Consectetur Malesuada',
             category: 'foods',
             image: {
-              id: 'img-10',
-              version: 0,
               attrs: {
                 alt: 'Consectetur Malesuada',
                 width: 380,
                 height: 477,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf10.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf10.jpg',
@@ -504,15 +408,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-10',
-              version: 0,
               attrs: {
                 alt: 'Consectetur Malesuada',
                 width: 760,
                 height: 954,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf10-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf10-full.jpg',
@@ -522,21 +422,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '11',
-          version: 0,
           attrs: {
             title: 'Ultricies Aenean',
             category: 'drinks',
             image: {
-              id: 'img-11',
-              version: 0,
               attrs: {
                 alt: 'Ultricies Aenean',
                 width: 380,
                 height: 274,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf11.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf11.jpg',
@@ -544,15 +438,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-11',
-              version: 0,
               attrs: {
                 alt: 'Ultricies Aenean',
                 width: 760,
                 height: 548,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf11-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf11-full.jpg',
@@ -562,21 +452,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '12',
-          version: 0,
           attrs: {
             title: 'Pellentesque Commodo',
             category: 'foods',
             image: {
-              id: 'img-12',
-              version: 0,
               attrs: {
                 alt: 'Pellentesque Commodo',
                 width: 380,
                 height: 507,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf12.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf12.jpg',
@@ -584,15 +468,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-12',
-              version: 0,
               attrs: {
                 alt: 'Pellentesque Commodo',
                 width: 760,
                 height: 1014,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf12-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf12-full.jpg',
@@ -602,21 +482,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '13',
-          version: 0,
           attrs: {
             title: 'Ultricies Aenean',
             category: 'drinks',
             image: {
-              id: 'img-13',
-              version: 0,
               attrs: {
                 alt: 'Ultricies Aenean',
                 width: 380,
                 height: 391,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf13.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf13.jpg',
@@ -624,15 +498,11 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
               },
             },
             fullImage: {
-              id: 'img-13',
-              version: 0,
               attrs: {
                 alt: 'Ultricies Aenean',
                 width: 760,
                 height: 782,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf13-full.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf13-full.jpg',
@@ -654,33 +524,25 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
         'Mon intérêt est de prendre des photos, et j’aime transformer les pensées en de belles choses.',
       portfolio5Caption: 'Mes photographies récentes',
       portfolio5List: [
-        {id: '1', version: 0, attrs: {title: 'Tous', value: '*'}},
-        {id: '2', version: 0, attrs: {title: 'Aliments', value: '.foods'}},
-        {id: '3', version: 0, attrs: {title: 'Boissons', value: '.drinks'}},
-        {id: '4', version: 0, attrs: {title: 'Événements', value: '.events'}},
+        {attrs: {title: 'Tous', value: '*'}},
+        {attrs: {title: 'Aliments', value: '.foods'}},
+        {attrs: {title: 'Boissons', value: '.drinks'}},
+        {attrs: {title: 'Événements', value: '.events'}},
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Pâtisseries', value: '.pastries'},
         },
       ],
       portfolio5FilterList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Fringilla Nullam',
             category: 'drinks events',
             image: {
-              id: 'img-1',
-              version: 0,
               attrs: {
                 alt: 'Fringilla Nullam',
                 width: 380,
                 height: 254,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf1.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf1.jpg',
@@ -690,21 +552,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Ridiculus Parturient',
             category: 'events',
             image: {
-              id: 'img-2',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Parturient',
                 width: 380,
                 height: 294,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf2.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf2.jpg',
@@ -714,21 +570,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Ornare Ipsum',
             category: 'pastries events',
             image: {
-              id: 'img-3',
-              version: 0,
               attrs: {
                 alt: 'Ornare Ipsum',
                 width: 380,
                 height: 502,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf3.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf3.jpg',
@@ -738,21 +588,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Nullam Mollis',
             category: 'events',
             image: {
-              id: 'img-4',
-              version: 0,
               attrs: {
                 alt: 'Nullam Mollis',
                 width: 380,
                 height: 456,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf4.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf4.jpg',
@@ -762,21 +606,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             title: 'Euismod Risus',
             category: 'pastries events',
             image: {
-              id: 'img-5',
-              version: 0,
               attrs: {
                 alt: 'Euismod Risus',
                 width: 380,
                 height: 305,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf5.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf5.jpg',
@@ -786,21 +624,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             title: 'Ridiculus Tristique',
             category: 'foods',
             image: {
-              id: 'img-6',
-              version: 0,
               attrs: {
                 alt: 'Ridiculus Tristique',
                 width: 380,
                 height: 253,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf6.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf6.jpg',
@@ -810,21 +642,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '7',
-          version: 0,
           attrs: {
             title: 'Sollicitudin Pharetra',
             category: 'foods drinks',
             image: {
-              id: 'img-7',
-              version: 0,
               attrs: {
                 alt: 'Sollicitudin Pharetra',
                 width: 380,
                 height: 359,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf7.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf7.jpg',
@@ -834,21 +660,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '8',
-          version: 0,
           attrs: {
             title: 'Tristique Venenatis',
             category: 'pastries',
             image: {
-              id: 'img-8',
-              version: 0,
               attrs: {
                 alt: 'Tristique Venenatis',
                 width: 380,
                 height: 254,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf8.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf8.jpg',
@@ -858,21 +678,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '9',
-          version: 0,
           attrs: {
             title: 'Cursus Fusce',
             category: 'events',
             image: {
-              id: 'img-9',
-              version: 0,
               attrs: {
                 alt: 'Cursus Fusce',
                 width: 380,
                 height: 284,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf9.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf9.jpg',
@@ -882,21 +696,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '10',
-          version: 0,
           attrs: {
             title: 'Consectetur Malesuada',
             category: 'foods',
             image: {
-              id: 'img-10',
-              version: 0,
               attrs: {
                 alt: 'Consectetur Malesuada',
                 width: 380,
                 height: 477,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf10.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf10.jpg',
@@ -906,21 +714,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '11',
-          version: 0,
           attrs: {
             title: 'Ultricies Aenean',
             category: 'foods',
             image: {
-              id: 'img-11',
-              version: 0,
               attrs: {
                 alt: 'Ultricies Aenean',
                 width: 380,
                 height: 274,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf11.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf11.jpg',
@@ -930,21 +732,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '12',
-          version: 0,
           attrs: {
             title: 'Pellentesque Commodo',
             category: 'foods',
             image: {
-              id: 'img-12',
-              version: 0,
               attrs: {
                 alt: 'Pellentesque Commodo',
                 width: 380,
                 height: 507,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf12.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf12.jpg',
@@ -954,21 +750,15 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
           },
         },
         {
-          id: '13',
-          version: 0,
           attrs: {
             title: 'Ultricies Aenean',
             category: 'foods',
             image: {
-              id: 'img-13',
-              version: 0,
               attrs: {
                 alt: 'Ultricies Aenean',
                 width: 380,
                 height: 391,
                 image: {
-                  id: '1',
-                  version: 1,
                   fileName: 'pf13.jpg',
                   fileType: 'image/jpeg',
                   filePath: '/img/photos/pf13.jpg',

@@ -67,22 +67,16 @@ export const hero22Demos: Demo<typeof hero22Schema>[] = [
       hero22Title: 'Expand your business with our marketing services.',
       hero22Caption: 'Hello! We are here',
       hero22Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       hero22BackgroundImage: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Marketing services background',
           width: 1383,
           height: 734,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg26.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg26.jpg',
@@ -101,22 +95,16 @@ export const hero22Demos: Demo<typeof hero22Schema>[] = [
         'Développez votre entreprise grâce à nos services marketing.',
       hero22Caption: 'Bonjour ! Nous sommes là',
       hero22Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
       },
       hero22BackgroundImage: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Arrière-plan des services marketing',
           width: 1383,
           height: 734,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'bg26.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/bg26.jpg',

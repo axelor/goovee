@@ -128,15 +128,11 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
       service17Section2LinkTitle: 'More Details',
       service17Section2LinkHref: '#',
       service17Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Our services',
           width: 566,
           height: 482,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se3.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se3.jpg',
@@ -144,15 +140,11 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
         },
       },
       service17Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Our services',
           width: 567,
           height: 483,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se4.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se4.jpg',
@@ -160,60 +152,40 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
         },
       },
       service17Service1: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList1',
           bulletColor: 'leaf',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
           ],
         },
       },
       service17Service2: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList2',
           bulletColor: 'leaf',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
           ],
@@ -241,15 +213,11 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
       service17Section2LinkTitle: 'Plus de détails',
       service17Section2LinkHref: '#',
       service17Image1: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Nos services',
           width: 566,
           height: 482,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se3.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se3.jpg',
@@ -257,15 +225,11 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
         },
       },
       service17Image2: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Nos services',
           width: 567,
           height: 483,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'se4.jpg',
             fileType: 'image/jpeg',
             filePath: '/img/photos/se4.jpg',
@@ -273,36 +237,26 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
         },
       },
       service17Service1: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList1',
           bulletColor: 'leaf',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
@@ -311,36 +265,26 @@ export const service17Demos: Demo<typeof service17Schema>[] = [
         },
       },
       service17Service2: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'serviceList2',
           bulletColor: 'leaf',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },

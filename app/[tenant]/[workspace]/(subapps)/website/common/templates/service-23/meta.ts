@@ -168,15 +168,11 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section1LinkTitle: 'More Details',
       service23Section1LinkHref: '#',
       service23Section1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 586,
           height: 283,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'ui4.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/ui4.png',
@@ -185,18 +181,12 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       },
       service23Section1Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {title: 'Aenean quam ornare curabitur blandit.'},
         },
         {
-          id: '2',
-          version: 0,
           attrs: {title: 'Nullam quis risus eget urna mollis ornare leo.'},
         },
         {
-          id: '3',
-          version: 0,
           attrs: {title: 'Etiam porta euismod mollis natoque ornare.'},
         },
       ],
@@ -206,15 +196,11 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section2LinkTitle: 'More Details',
       service23Section2LinkHref: '#',
       service23Section2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 460,
           height: 456,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'ui1.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/ui1.png',
@@ -223,18 +209,12 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       },
       service23Section2Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {title: 'Aenean quam ornare curabitur blandit.'},
         },
         {
-          id: '2',
-          version: 0,
           attrs: {title: 'Nullam quis risus eget urna mollis ornare leo.'},
         },
         {
-          id: '3',
-          version: 0,
           attrs: {title: 'Etiam porta euismod mollis natoque ornare.'},
         },
       ],
@@ -244,15 +224,11 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section3LinkTitle: 'More Details',
       service23Section3LinkHref: '#',
       service23Section3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 514,
           height: 477,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'ui5.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/ui5.png',
@@ -261,18 +237,12 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       },
       service23Section3Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {title: 'Aenean quam ornare curabitur blandit.'},
         },
         {
-          id: '2',
-          version: 0,
           attrs: {title: 'Nullam quis risus eget urna mollis ornare leo.'},
         },
         {
-          id: '3',
-          version: 0,
           attrs: {title: 'Etiam porta euismod mollis natoque ornare.'},
         },
       ],
@@ -293,15 +263,11 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section1LinkTitle: 'Plus de détails',
       service23Section1LinkHref: '#',
       service23Section1Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 586,
           height: 283,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'ui4.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/ui4.png',
@@ -310,18 +276,12 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       },
       service23Section1Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {title: 'Aenean quam ornare curabitur blandit.'},
         },
         {
-          id: '2',
-          version: 0,
           attrs: {title: 'Nullam quis risus eget urna mollis ornare leo.'},
         },
         {
-          id: '3',
-          version: 0,
           attrs: {title: 'Etiam porta euismod mollis natoque ornare.'},
         },
       ],
@@ -331,15 +291,11 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section2LinkTitle: 'Plus de détails',
       service23Section2LinkHref: '#',
       service23Section2Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 460,
           height: 456,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'ui1.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/ui1.png',
@@ -348,18 +304,12 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       },
       service23Section2Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {title: 'Aenean quam ornare curabitur blandit.'},
         },
         {
-          id: '2',
-          version: 0,
           attrs: {title: 'Nullam quis risus eget urna mollis ornare leo.'},
         },
         {
-          id: '3',
-          version: 0,
           attrs: {title: 'Etiam porta euismod mollis natoque ornare.'},
         },
       ],
@@ -369,15 +319,11 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       service23Section3LinkTitle: 'Plus de détails',
       service23Section3LinkHref: '#',
       service23Section3Image: {
-        id: '1',
-        version: 0,
         attrs: {
           alt: 'Service',
           width: 514,
           height: 477,
           image: {
-            id: '1',
-            version: 1,
             fileName: 'ui5.png',
             fileType: 'image/png',
             filePath: '/img/illustrations/ui5.png',
@@ -386,18 +332,12 @@ export const service23Demos: Demo<typeof service23Schema>[] = [
       },
       service23Section3Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {title: 'Aenean quam ornare curabitur blandit.'},
         },
         {
-          id: '2',
-          version: 0,
           attrs: {title: 'Nullam quis risus eget urna mollis ornare leo.'},
         },
         {
-          id: '3',
-          version: 0,
           attrs: {title: 'Etiam porta euismod mollis natoque ornare.'},
         },
       ],
