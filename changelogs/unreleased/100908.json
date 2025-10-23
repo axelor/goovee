@@ -1,5 +1,0 @@
-{
-  "title": "Add support for case insensitive and unaccent search",
-  "type": "feature",
-  "scope": ["core"]
-}

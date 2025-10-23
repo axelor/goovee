@@ -1,6 +1,0 @@
-{
-  "title": "Add support for partial invoice for pay-in-advance orders",
-  "type": "feature",
-  "description": "Generates an invoice for the advance payment percentage when pay-in-advance is enabled.",
-  "scope": ["shop"]
-}

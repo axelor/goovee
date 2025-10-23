@@ -1,3 +1,65 @@
+# 1.1.0 (2025-10-07)
+
+## Features
+
+### Core Platform
+
+- Add support for case insensitive and unaccent search – #100908
+- Add support for login using keycloak – #100832
+
+### E-Shop
+
+- Add support for partial invoice for pay-in-advance orders – #100907
+  <details>
+    <summary>Details</summary>
+
+  Generates an invoice for the advance payment percentage when pay-in-advance is enabled.
+  </details>
+
+- Control visibility of prices and cart based on hidePriceForEmptyPriceList checkbox – #101421
+  <details>
+    <summary>Details</summary>
+
+  The hidePriceForEmptyPriceList checkbox is added to the workspace configuration to control the visibility of prices and cart based on whether main partner of the user has a price list or not.
+  </details>
+
+- update partner price list and partner fiscal position when creating default address – #101466
+
+### User Accounts
+
+- Add support to fetch cities based on ZIP code – #100901
+  <details>
+    <summary>Details</summary>
+
+  Enhanced the address selection functionality to allow fetching cities not only based on the selected country but also using the entered ZIP code. This ensures more accurate city suggestions and improves the user experience during address entry.
+  </details>
+
+### Content
+
+- Add 200+ templates – #98839
+- Add Permission check to wiki page – #99979
+  <details>
+    <summary>Details</summary>
+
+  Only allow users with canEditWiki permission to edit wiki pages
+  </details>
+
+## Fixes
+
+### Core Platform
+
+- Remove support for case insensitive and unaccent search – #101775
+
+## Changes
+
+### Core Platform
+
+- Add goovee config file to discover nested schema – #101786
+
+### Content
+
+- Update README to include sass compilation command and suppress warnings – #100824
+
 # 1.0.0 (2025-09-11)
 
 ## Features

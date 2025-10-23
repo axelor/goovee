@@ -1,5 +1,0 @@
-{
-  "title": "Update README to include sass compilation command and suppress warnings",
-  "type": "change",
-  "scope": ["website"]
-}

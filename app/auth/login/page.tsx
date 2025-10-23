@@ -63,7 +63,13 @@ export default async function Page({
 
   const showGoogleOauth = process.env.SHOW_GOOGLE_OAUTH === 'true';
 
+  const showKeycloakOauth = process.env.SHOW_KEYCLOAK_OAUTH === 'true';
+
   return (
-    <Content canRegister={canRegister} showGoogleOauth={showGoogleOauth} />
+    <Content
+      canRegister={canRegister}
+      showGoogleOauth={showGoogleOauth}
+      showKeycloakOauth={showKeycloakOauth}
+    />
   );
 }

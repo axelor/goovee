@@ -1,6 +1,0 @@
-{
-  "title": "Add support to fetch cities based on ZIP code",
-  "type": "feature",
-  "description": "Enhanced the address selection functionality to allow fetching cities not only based on the selected country but also using the entered ZIP code. This ensures more accurate city suggestions and improves the user experience during address entry.",
-  "scope": ["users"]
-}

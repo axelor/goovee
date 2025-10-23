@@ -20,13 +20,16 @@ import {useToast} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
 import {revalidate} from './actions';
+import {useEnvironment} from '@/lib/core/environment';
 
 export default function Content({
   canRegister,
   showGoogleOauth = true,
+  showKeycloakOauth = true,
 }: {
   canRegister?: boolean;
   showGoogleOauth?: boolean;
+  showKeycloakOauth?: boolean;
 }) {
   const [values, setValues] = useState({email: '', password: ''});
   const [showPassword, setShowPassword] = useState(false);
@@ -37,6 +40,7 @@ export default function Content({
   const searchQuery = new URLSearchParams(searchParams).toString();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
   const {status} = useSession();
+  const env = useEnvironment();
 
   const toggleShowPassword = () => setShowPassword(show => !show);
 
@@ -85,6 +89,12 @@ export default function Content({
   const loginWithGoogle = async () => {
     await signIn('google', {
       callbackUrl: `/auth/login/google?${searchQuery}`,
+    });
+  };
+
+  const loginWithKeycloak = async () => {
+    await signIn('keycloak', {
+      callbackUrl: `/auth/login/keycloak?${searchQuery}`,
     });
   };
 
@@ -211,6 +221,42 @@ export default function Content({
                     className="me-2"
                   />
                   {i18n.t('Log In with Google')}
+                </Button>
+              </div>
+            </>
+          )}
+          {showKeycloakOauth && (
+            <>
+              <div className="flex items-center gap-4 mt-4">
+                <div className="grow">
+                  <Separator />
+                </div>
+                <h5 className="mb-0 font-medium text-xl">{i18n.t('Or')}</h5>
+                <div className="grow">
+                  <Separator />
+                </div>
+              </div>
+              <div className="mt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={loginWithKeycloak}
+                  disabled={submitting}>
+                  <Image
+                    alt="Google"
+                    src={
+                      env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE ||
+                      '/images/keycloak.svg'
+                    }
+                    height={24}
+                    width={24}
+                    className="me-2"
+                  />
+                  {i18n.t(
+                    env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL ||
+                      'Log In with Keycloak',
+                  )}
                 </Button>
               </div>
             </>
