@@ -34,6 +34,7 @@ export const about2Schema = {
       name: 'thumbnail',
       title: 'Thumbnail',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

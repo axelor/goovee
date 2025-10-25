@@ -42,6 +42,7 @@ export const footer2Schema = {
       name: 'contactImage',
       title: 'Contact Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

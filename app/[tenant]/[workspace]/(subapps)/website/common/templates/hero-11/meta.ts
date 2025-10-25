@@ -47,6 +47,7 @@ export const hero11Schema = {
       name: 'backgroundImage',
       title: 'Background Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {
@@ -90,6 +91,7 @@ export const hero11Schema = {
           name: 'image',
           title: 'Image',
           type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
           target: 'Image',
         },
       ],

@@ -36,6 +36,7 @@ export const hero22Schema = {
       name: 'backgroundImage',
       title: 'Background Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

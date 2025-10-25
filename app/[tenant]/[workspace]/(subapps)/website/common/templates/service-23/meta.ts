@@ -47,6 +47,7 @@ export const service23Schema = {
       name: 'section1Image',
       title: 'Section 1 Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {
@@ -79,6 +80,7 @@ export const service23Schema = {
       name: 'section2Image',
       title: 'Section 2 Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {
@@ -111,6 +113,7 @@ export const service23Schema = {
       name: 'section3Image',
       title: 'Section 3 Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

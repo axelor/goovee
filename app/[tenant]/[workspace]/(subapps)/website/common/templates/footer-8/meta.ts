@@ -17,6 +17,7 @@ export const footer8Schema = {
       name: 'logo',
       title: 'Logo',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

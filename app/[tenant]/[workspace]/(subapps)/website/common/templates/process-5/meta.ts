@@ -33,6 +33,7 @@ export const process5Schema = {
       name: 'image',
       title: 'Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

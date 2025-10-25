@@ -33,18 +33,21 @@ export const about11Schema = {
       name: 'tileImage1',
       title: 'Tile Image 1',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {
       name: 'tileImage3',
       title: 'Tile Image 3',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

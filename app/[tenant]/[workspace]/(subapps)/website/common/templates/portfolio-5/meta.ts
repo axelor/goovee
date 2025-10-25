@@ -75,12 +75,14 @@ export const portfolio5Schema = {
           name: 'image',
           title: 'Image',
           type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
           target: 'Image',
         },
         {
           name: 'fullImage',
           title: 'Full Image',
           type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
           target: 'Image',
         },
         {

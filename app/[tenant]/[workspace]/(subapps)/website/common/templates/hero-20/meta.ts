@@ -36,6 +36,7 @@ export const hero20Schema = {
       name: 'poster',
       title: 'Poster',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

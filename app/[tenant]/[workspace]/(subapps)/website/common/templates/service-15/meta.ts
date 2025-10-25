@@ -32,6 +32,7 @@ export const service15Schema = {
       name: 'image',
       title: 'Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {

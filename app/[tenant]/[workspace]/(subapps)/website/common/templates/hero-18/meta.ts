@@ -42,12 +42,14 @@ export const hero18Schema = {
       name: 'image',
       title: 'Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {
       name: 'backgroundImage',
       title: 'Background Image',
       type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
       target: 'Image',
     },
     {
