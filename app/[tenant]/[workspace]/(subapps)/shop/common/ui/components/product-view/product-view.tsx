@@ -67,7 +67,12 @@ export function ProductView({
     }
     setUpdating(true);
     setCartQuantity(quantity);
-    await updateQuantity({productId: product.id, quantity});
+    await updateQuantity({
+      productId: product.id,
+      quantity,
+      computedProduct,
+      images: product.images?.map(String) ?? [],
+    });
     toast({title: i18n.t('Added to cart')});
     setUpdating(false);
   };

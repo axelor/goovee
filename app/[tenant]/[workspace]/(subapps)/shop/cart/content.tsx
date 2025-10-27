@@ -30,7 +30,7 @@ import {getProductImageURL} from '@/utils/files';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {SEARCH_PARAMS} from '@/constants';
-import type {Cart, Product, PortalWorkspace} from '@/types';
+import type {Cart, Product, PortalWorkspace, ComputedProduct} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/actions/cart';
@@ -51,13 +51,20 @@ function CartItem({item, disabled, handleRemove, displayPrices}: any) {
     async ({
       productId,
       quantity,
+      computedProduct,
     }: {
       productId: Product['id'];
       quantity: number;
+      computedProduct: ComputedProduct;
     }) => {
       if (quantity > 0) {
         setUpdating(true);
-        await updateQuantity({productId, quantity});
+        await updateQuantity({
+          productId,
+          quantity,
+          computedProduct,
+          images: computedProduct?.product?.images?.map(String) || [],
+        });
         setUpdating(false);
       }
     },
@@ -69,6 +76,7 @@ function CartItem({item, disabled, handleRemove, displayPrices}: any) {
       handleUpdateQuantity({
         productId: item.computedProduct?.product?.id,
         quantity,
+        computedProduct: item.computedProduct,
       });
     }
   }, [quantity, item, handleUpdateQuantity]);

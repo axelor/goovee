@@ -16,7 +16,45 @@ import {getitem, setitem} from '@/storage/local';
 import {useWorkspace} from './workspace-context';
 import type {ComputedProduct, Product} from '@/types';
 
-const CartContext = React.createContext<any>({});
+type CartContextType = {
+  cart: any;
+  addItem: ({
+    productId,
+    quantity,
+    images,
+    computedProduct,
+  }: {
+    productId: Product['id'];
+    quantity: string | number;
+    images: string[];
+    computedProduct: ComputedProduct;
+  }) => Promise<void>;
+  getProductQuantity: (productId: Product['id']) => Promise<any>;
+  updateQuantity: ({
+    productId,
+    quantity,
+    computedProduct,
+    images,
+  }: {
+    productId: Product['id'];
+    quantity: string | number;
+    computedProduct: ComputedProduct;
+    images: string[];
+  }) => Promise<void>;
+  removeItem: (productId: Product['id']) => Promise<void>;
+  clearCart: () => Promise<void>;
+  getProductNote: (productId: Product['id']) => Promise<any>;
+  setProductNote: (productId: Product['id'], note: string) => Promise<void>;
+  updateAddress: ({
+    addressType,
+    address,
+  }: {
+    addressType: 'invoicing' | 'delivery';
+    address: any;
+  }) => void;
+};
+
+const CartContext = React.createContext<CartContextType | null>(null);
 
 const defaultcart = () => ({
   items: [],
@@ -97,7 +135,7 @@ export default function CartContextProvider({
     }: {
       productId: Product['id'];
       quantity: string | number;
-      images: [string];
+      images: string[];
       computedProduct: ComputedProduct;
     }) => {
       const existing = await getProductQuantity(productId);
@@ -163,14 +201,18 @@ export default function CartContextProvider({
     async ({
       productId,
       quantity,
+      computedProduct,
+      images,
     }: {
       productId: Product['id'];
       quantity: string | number;
+      computedProduct: ComputedProduct;
+      images: string[];
     }) => {
       const existing = await getProductQuantity(productId);
 
       if (!existing) {
-        return await addItem({productId, quantity} as any);
+        return await addItem({productId, quantity, computedProduct, images});
       }
 
       setCart((cart: any) => {
@@ -350,5 +392,9 @@ export default function CartContextProvider({
 }
 
 export function useCart() {
-  return useContext(CartContext);
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('CartContext must be used within a CartProvider');
+  }
+  return context;
 }
