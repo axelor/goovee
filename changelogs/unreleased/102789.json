@@ -1,0 +1,6 @@
+{
+  "title": "Fix payment error during checkout",
+  "description": "Fixes Name, amount , customer , currency and callbackurl are requied error when a product is added via product page",
+  "type": "fix",
+  "scope": ["shop"]
+}

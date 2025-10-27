@@ -101,7 +101,7 @@ export function ProductList({
     await addItem({
       productId: product?.id,
       quantity: 1,
-      images: product?.images,
+      images: product?.images?.map(String) ?? [],
       computedProduct: computedProduct,
     });
 
