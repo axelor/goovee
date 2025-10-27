@@ -15,6 +15,7 @@ const addressFields = {
     lastName: true,
     companyName: true,
     department: true,
+    townName: true,
     country: {
       id: true,
       name: true,
@@ -68,11 +69,7 @@ export async function createPartnerAddress(
               id: values?.address?.country,
             },
           },
-          city: {
-            select: {
-              id: values?.address?.city,
-            },
-          },
+          city: values?.townName,
         },
       },
       isInvoicingAddr: values.isInvoicingAddr,
@@ -121,11 +118,7 @@ export async function updatePartnerAddress(
               id: values?.address?.country,
             },
           },
-          city: {
-            select: {
-              id: values?.address?.city,
-            },
-          },
+          townName: values?.address?.townName,
         },
       },
       isInvoicingAddr: values.isInvoicingAddr,

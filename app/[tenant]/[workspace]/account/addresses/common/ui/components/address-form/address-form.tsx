@@ -23,7 +23,6 @@ import {
   PersonalInformation,
 } from '@/app/[tenant]/[workspace]/account/addresses/common/ui/components';
 import {
-  fetchCities,
   createAddress,
   updateAddress,
 } from '@/app/[tenant]/[workspace]/account/addresses/common/actions/action';
@@ -35,58 +34,19 @@ const personalInformationSchema = z.object({
   companyName: z.string(),
 });
 
-const addressInformationSchema = z
-  .object({
-    country: z.object({
-      id: z.string().min(1, 'Country is required'),
-      name: z.string().min(1, i18n.t('Country name is required')),
-    }),
-    streetName: z.string().min(1, i18n.t('Street name is required')),
-    addressAddition: z.string().optional(),
-    zip: z
-      .string()
-      .min(1, i18n.t('Zip code is required'))
-      .regex(/^\d+$/, i18n.t('Zip code must contain only numbers')),
-    city: z.object({
-      id: z.string().optional(),
-      name: z.string().optional(),
-    }),
-    multipletype: z.boolean().default(false),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.country.id && !data.zip) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['city.id'],
-        message: i18n.t(
-          'Country and Zip must be selected before choosing a city',
-        ),
-      });
-    }
-
-    if (!data.country.id && data.zip) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['city.id'],
-        message: i18n.t('Country must be selected before choosing a city'),
-      });
-    }
-    if (data.country.id && !data.zip) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['city.id'],
-        message: i18n.t('Zip must be entered before choosing a city'),
-      });
-    }
-
-    if (data.country.id && data.zip && !data.city.id) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['city.id'],
-        message: i18n.t('City is required'),
-      });
-    }
-  });
+const addressInformationSchema = z.object({
+  country: z.object({
+    id: z.string().min(1, 'Country is required'),
+    name: z.string().min(1, i18n.t('Country name is required')),
+  }),
+  streetName: z.string().min(1, i18n.t('Street name is required')),
+  addressAddition: z.string().optional(),
+  zip: z
+    .string()
+    .min(1, i18n.t('Zip code is required')),
+  townName: z.string().min(1, i18n.t('Town name is required')),
+  multipletype: z.boolean().default(false),
+});
 
 const formSchema = z.object({
   personalInformation: personalInformationSchema,
@@ -104,7 +64,6 @@ export const AddressForm = ({
   address?: any;
   userType: UserType;
 }) => {
-  const [cities, setCities] = useState([]);
   const title = i18n.t(`${capitalise(type)} Address`);
   const isCompany = userType === UserType.company;
 
@@ -137,10 +96,7 @@ export const AddressForm = ({
         streetName: address?.address?.streetName ?? '',
         addressAddition: address?.address?.countrySubDivision ?? '',
         zip: address?.address?.zip ?? '',
-        city: {
-          id: address?.address?.city?.id ?? '',
-          name: address?.address?.city?.id ?? '',
-        },
+        townName: address?.address?.townName ?? '',
         multipletype: address?.isInvoicingAddr && address?.isDeliveryAddr,
       },
     },
@@ -151,7 +107,7 @@ export const AddressForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const {addressInformation, personalInformation} = values;
-    const {multipletype, city, country, addressAddition, streetName, zip} =
+    const {multipletype, townName, country, addressAddition, streetName, zip} =
       addressInformation;
     const {addressName, firstName, lastName, companyName} = personalInformation;
 
@@ -159,13 +115,13 @@ export const AddressForm = ({
     const isInvoicingAddr = multipletype || type === ADDRESS_TYPE.invoicing;
 
     const computeFullName = () => {
-      return [streetName, addressAddition, zip, city?.name]
+      return [streetName, addressAddition, zip, townName]
         .filter(Boolean)
         .join(' ')
         .toUpperCase();
     };
     const formattedFullName = () => {
-      return [streetName, addressAddition, zip, city?.name, country?.name]
+      return [streetName, addressAddition, zip, townName, country?.name]
         .filter(Boolean)
         .join('\n')
         .toUpperCase();
@@ -176,9 +132,9 @@ export const AddressForm = ({
       addressl2: addressName,
       addressl4: streetName,
       addressl3: addressAddition,
-      addressl6: city.name,
+      addressl6: townName,
       zip,
-      city: city.id,
+      townName,
       streetName,
       countrySubDivision: addressAddition,
       department: addressName,
@@ -227,31 +183,6 @@ export const AddressForm = ({
     }
   };
 
-  useEffect(() => {
-    const getCities = async () => {
-      if (!country.id || !zip) {
-        return;
-      }
-
-      try {
-        const response: any = await fetchCities({
-          countryId: country.id,
-          zip,
-          workspaceURL,
-        });
-        if (response.success) {
-          setCities(response.data);
-        } else {
-          setCities([]);
-        }
-      } catch (error) {
-        console.error('Unexpected error while fetching cities:', error);
-        setCities([]);
-      }
-    };
-
-    getCities();
-  }, [country, workspaceURL, zip]);
 
   return (
     <Form {...form}>
@@ -261,11 +192,7 @@ export const AddressForm = ({
         <div className="flex flex-col gap-4">
           <div className="font-medium text-xl">{title}</div>
           <PersonalInformation form={form} isCompany={isCompany} />
-          <AddressInformation
-            countries={countries}
-            form={form}
-            cities={cities}
-          />
+          <AddressInformation countries={countries} form={form} />
         </div>
 
         <Button

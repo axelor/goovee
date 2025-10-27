@@ -1,8 +1,5 @@
 'use client';
 
-import {useEffect} from 'react';
-import clsx from 'clsx';
-
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {
@@ -17,41 +14,20 @@ import {
   Label,
   Separator,
 } from '@/ui/components';
-import {City, Country} from '@/types';
+import {Country} from '@/types';
 
 interface AddressInformationProps {
   countries: Country[];
-  cities: City[];
   form: any;
 }
 
-export function AddressInformation({
-  countries,
-  cities = [],
-  form,
-}: AddressInformationProps) {
-  const countryId = form.watch('addressInformation.country.id');
-  const zipCode = form.watch('addressInformation.zip');
-
+export function AddressInformation({countries, form}: AddressInformationProps) {
   const handleCountryChange = (selectedOption: {id: string; name: string}) => {
     form.setValue('addressInformation.country', selectedOption, {
       shouldValidate: true,
     });
     form.trigger('addressInformation.country.id');
   };
-
-  const handleCityChange = (selectedOption: {id: string; name: string}) => {
-    form.setValue('addressInformation.city', selectedOption, {
-      shouldValidate: true,
-    });
-    form.trigger('addressInformation.city.id');
-  };
-
-  useEffect(() => {
-    if (countryId && zipCode) {
-      form.trigger('addressInformation.city.id');
-    }
-  }, [countryId, zipCode, form]);
 
   return (
     <div className="bg-white py-4 px-6 rounded-lg">
@@ -129,7 +105,7 @@ export function AddressInformation({
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="addressInformation.zip"
@@ -148,24 +124,15 @@ export function AddressInformation({
           />
           <FormField
             control={form.control}
-            name="addressInformation.city.id"
-            render={({field, fieldState}) => (
-              <FormItem className="md:col-span-2">
+            name="addressInformation.townName"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>
+                  {i18n.t('Town name')}
+                  <span className="text-destructive">*</span>
+                </FormLabel>
                 <FormControl>
-                  <DropdownSelector
-                    options={cities || []}
-                    selectedValue={field.value}
-                    isRequired={true}
-                    label={i18n.t('City')}
-                    placeholder={i18n.t('Select city')}
-                    labelClassName={clsx(
-                      'mb-0',
-                      fieldState?.error && 'text-destructive',
-                    )}
-                    rootClassName="space-y-2"
-                    disabled={!countryId || !zipCode}
-                    onValueChange={handleCityChange}
-                  />
+                  <Input placeholder={i18n.t('Entrer la ville')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

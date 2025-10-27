@@ -241,7 +241,7 @@ export interface Address extends Model {
   addressl5?: string;
   addressl6?: string;
   country?: Country;
-  city?: City;
+  townName?: string;
   zip?: string;
 }
 

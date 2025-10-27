@@ -1,0 +1,6 @@
+{
+    "title": "Using town name instead of city name",
+    "description": "Using town name instead of city name when creating an address",
+    "type": "feat",
+    "scope": ["addresses"]
+}
