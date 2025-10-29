@@ -36,7 +36,7 @@ const personalInformationSchema = z.object({
 
 const addressInformationSchema = z.object({
   country: z.object({
-    id: z.string().min(1, 'Country is required'),
+    id: z.string().min(1, i18n.t('Country is required')),
     name: z.string().min(1, i18n.t('Country name is required')),
   }),
   streetName: z.string().min(1, i18n.t('Street name is required')),
