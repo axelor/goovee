@@ -1,0 +1,5 @@
+{
+  "title": "Update website names, Enable inline creation of image fields, and Strip Demo Data IDs/Versions",
+  "type": "change",
+  "scope": ["website"]
+}
