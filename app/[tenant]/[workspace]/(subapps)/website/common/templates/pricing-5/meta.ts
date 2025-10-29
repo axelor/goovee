@@ -75,7 +75,7 @@ export type Pricing5Data = Data<typeof pricing5Schema>;
 export const pricing5Demos: Demo<typeof pricing5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-8',
     sequence: 9,
     data: {
@@ -125,7 +125,7 @@ export const pricing5Demos: Demo<typeof pricing5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-8',
     sequence: 9,
     data: {

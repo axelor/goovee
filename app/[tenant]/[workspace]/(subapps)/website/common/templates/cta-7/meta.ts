@@ -79,7 +79,7 @@ export type Cta7Data = Data<typeof cta7Schema>;
 export const cta7Demos: Demo<typeof cta7Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-18',
     sequence: 10,
     data: {
@@ -103,7 +103,7 @@ export const cta7Demos: Demo<typeof cta7Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-18',
     sequence: 10,
     data: {

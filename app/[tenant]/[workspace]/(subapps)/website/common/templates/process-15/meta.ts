@@ -77,7 +77,7 @@ export type Process15Data = Data<typeof process15Schema>;
 export const process15Demos: Demo<typeof process15Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-22',
     sequence: 3,
     data: {
@@ -130,7 +130,7 @@ export const process15Demos: Demo<typeof process15Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-22',
     sequence: 3,
     data: {

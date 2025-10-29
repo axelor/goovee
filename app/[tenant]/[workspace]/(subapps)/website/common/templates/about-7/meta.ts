@@ -57,7 +57,7 @@ export type About7Data = Data<typeof about7Schema>;
 export const about7Demos: Demo<typeof about7Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-7',
     sequence: 6,
     data: {
@@ -103,7 +103,7 @@ export const about7Demos: Demo<typeof about7Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-7',
     sequence: 6,
     data: {

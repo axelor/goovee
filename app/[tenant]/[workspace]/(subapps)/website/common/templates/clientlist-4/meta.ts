@@ -50,7 +50,7 @@ export type Clientlist4Data = Data<typeof clientlist4Schema>;
 export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-13',
     sequence: 7,
     data: {
@@ -199,7 +199,7 @@ export const clientlist4Demos: Demo<typeof clientlist4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-13',
     sequence: 7,
     data: {

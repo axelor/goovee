@@ -94,7 +94,7 @@ export type Team3Data = Data<typeof team3Schema>;
 export const team3Demos: Demo<typeof team3Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-15',
     sequence: 5,
     data: {
@@ -318,7 +318,7 @@ export const team3Demos: Demo<typeof team3Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-15',
     sequence: 5,
     data: {

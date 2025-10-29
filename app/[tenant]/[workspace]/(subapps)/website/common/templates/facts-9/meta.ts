@@ -86,7 +86,7 @@ export type Facts9Data = Data<typeof facts9Schema>;
 export const facts9Demos: Demo<typeof facts9Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-13',
     sequence: 2,
     data: {
@@ -144,7 +144,7 @@ export const facts9Demos: Demo<typeof facts9Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-13',
     sequence: 2,
     data: {

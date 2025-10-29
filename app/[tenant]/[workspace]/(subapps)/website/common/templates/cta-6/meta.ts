@@ -57,7 +57,7 @@ export type Cta6Data = Data<typeof cta6Schema>;
 export const cta6Demos: Demo<typeof cta6Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-17',
     sequence: 8,
     data: {
@@ -80,7 +80,7 @@ export const cta6Demos: Demo<typeof cta6Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-17',
     sequence: 8,
     data: {

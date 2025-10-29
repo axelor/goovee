@@ -43,7 +43,7 @@ export type Banner5Data = Data<typeof banner5Schema>;
 export const banner5Demos: Demo<typeof banner5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-23',
     sequence: 4,
     data: {
@@ -54,7 +54,7 @@ export const banner5Demos: Demo<typeof banner5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-23',
     sequence: 4,
     data: {

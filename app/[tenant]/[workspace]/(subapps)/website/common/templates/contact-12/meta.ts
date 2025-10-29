@@ -116,7 +116,7 @@ export type Contact12Data = Data<typeof contact12Schema>;
 export const contact12Demos: Demo<typeof contact12Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-24',
     sequence: 7,
     data: {
@@ -152,7 +152,7 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-24',
     sequence: 7,
     data: {

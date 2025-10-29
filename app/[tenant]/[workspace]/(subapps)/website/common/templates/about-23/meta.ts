@@ -57,7 +57,7 @@ export type About23Data = Data<typeof about23Schema>;
 export const about23Demos: Demo<typeof about23Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-22',
     sequence: 4,
     data: {
@@ -100,7 +100,7 @@ export const about23Demos: Demo<typeof about23Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-22',
     sequence: 4,
     data: {

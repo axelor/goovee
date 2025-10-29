@@ -80,7 +80,7 @@ export type About21Data = Data<typeof about21Schema>;
 export const about21Demos: Demo<typeof about21Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-20',
     sequence: 6,
     data: {
@@ -140,7 +140,7 @@ export const about21Demos: Demo<typeof about21Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-20',
     sequence: 6,
     data: {

@@ -50,7 +50,7 @@ export type Faq3Data = Data<typeof faq3Schema>;
 export const faq3Demos: Demo<typeof faq3Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-8',
     sequence: 10,
     data: {
@@ -91,7 +91,7 @@ export const faq3Demos: Demo<typeof faq3Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-8',
     sequence: 10,
     data: {

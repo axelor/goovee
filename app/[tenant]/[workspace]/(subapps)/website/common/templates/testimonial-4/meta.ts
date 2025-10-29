@@ -100,7 +100,7 @@ export type Testimonial4Data = Data<typeof testimonial4Schema>;
 export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-6',
     sequence: 5,
     data: {
@@ -199,7 +199,7 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-6',
     sequence: 5,
     data: {

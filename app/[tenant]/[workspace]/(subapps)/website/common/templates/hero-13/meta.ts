@@ -62,7 +62,7 @@ export type Hero13Data = Data<typeof hero13Schema>;
 export const hero13Demos: Demo<typeof hero13Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-13',
     sequence: 1,
     data: {
@@ -89,7 +89,7 @@ export const hero13Demos: Demo<typeof hero13Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-13',
     sequence: 1,
     data: {

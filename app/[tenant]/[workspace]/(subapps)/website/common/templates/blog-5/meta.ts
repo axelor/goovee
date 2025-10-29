@@ -112,7 +112,7 @@ export type Blog5Data = Data<typeof blog5Schema>;
 export const blog5Demos: Demo<typeof blog5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-23',
     sequence: 8,
     data: {
@@ -268,7 +268,7 @@ export const blog5Demos: Demo<typeof blog5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-23',
     sequence: 8,
     data: {

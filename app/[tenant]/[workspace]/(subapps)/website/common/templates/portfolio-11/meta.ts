@@ -99,7 +99,7 @@ export type Portfolio11Data = Data<typeof portfolio11Schema>;
 export const portfolio11Demos: Demo<typeof portfolio11Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-20',
     sequence: 4,
     data: {
@@ -269,7 +269,7 @@ export const portfolio11Demos: Demo<typeof portfolio11Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-20',
     sequence: 4,
     data: {

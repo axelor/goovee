@@ -20,8 +20,8 @@ export const website = {
     {
       language: 'en_US',
       website: {
-        name: 'English',
-        slug: 'en',
+        name: 'Lighthouse English',
+        slug: 'lighthouse-en',
         isGuestUserAllow: true,
         homepage: 'demo-1',
         isDefault: true,
@@ -30,8 +30,8 @@ export const website = {
     {
       language: 'fr_FR',
       website: {
-        name: 'Français',
-        slug: 'fr',
+        name: 'Lighthouse Français',
+        slug: 'lighthouse-fr',
         isGuestUserAllow: true,
         homepage: 'demo-1',
       },

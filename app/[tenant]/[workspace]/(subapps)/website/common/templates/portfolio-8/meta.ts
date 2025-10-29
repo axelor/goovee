@@ -90,7 +90,7 @@ export type Portfolio8Data = Data<typeof portfolio8Schema>;
 export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-14',
     sequence: 4,
     data: {
@@ -223,7 +223,7 @@ export const portfolio8Demos: Demo<typeof portfolio8Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-14',
     sequence: 4,
     data: {

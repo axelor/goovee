@@ -53,7 +53,7 @@ export type Cta5Data = Data<typeof cta5Schema>;
 export const cta5Demos: Demo<typeof cta5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-15',
     sequence: 8,
     data: {
@@ -66,7 +66,7 @@ export const cta5Demos: Demo<typeof cta5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-15',
     sequence: 8,
     data: {

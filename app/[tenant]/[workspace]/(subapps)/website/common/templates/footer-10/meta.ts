@@ -145,7 +145,7 @@ export type Footer10Data = Data<typeof footer10Schema>;
 export const footer10Demos: Demo<typeof footer10Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-17',
     sequence: 9,
     data: {
@@ -216,7 +216,7 @@ export const footer10Demos: Demo<typeof footer10Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-17',
     sequence: 9,
     data: {

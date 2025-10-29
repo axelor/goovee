@@ -66,7 +66,7 @@ export type Contact4Data = Data<typeof contact4Schema>;
 export const contact4Demos: Demo<typeof contact4Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-1',
     sequence: 10,
     data: {
@@ -93,7 +93,7 @@ export const contact4Demos: Demo<typeof contact4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-1',
     sequence: 10,
     data: {

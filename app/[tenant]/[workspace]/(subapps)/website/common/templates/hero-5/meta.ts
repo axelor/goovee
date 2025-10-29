@@ -63,7 +63,7 @@ export type Hero5Data = Data<typeof hero5Schema>;
 export const hero5Demos: Demo<typeof hero5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-5',
     sequence: 1,
     data: {
@@ -78,7 +78,7 @@ export const hero5Demos: Demo<typeof hero5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-5',
     sequence: 1,
     data: {

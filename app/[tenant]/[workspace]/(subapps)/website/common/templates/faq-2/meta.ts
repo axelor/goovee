@@ -50,7 +50,7 @@ export type Faq2Data = Data<typeof faq2Schema>;
 export const faq2Demos: Demo<typeof faq2Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-9',
     sequence: 7,
     data: {
@@ -91,7 +91,7 @@ export const faq2Demos: Demo<typeof faq2Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-9',
     sequence: 7,
     data: {

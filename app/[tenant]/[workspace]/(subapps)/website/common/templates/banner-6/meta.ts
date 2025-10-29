@@ -51,7 +51,7 @@ export type Banner6Data = Data<typeof banner6Schema>;
 export const banner6Demos: Demo<typeof banner6Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'others',
     sequence: 2,
     data: {
@@ -76,7 +76,7 @@ export const banner6Demos: Demo<typeof banner6Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'others',
     sequence: 2,
     data: {

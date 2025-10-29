@@ -19,14 +19,14 @@ export type Navbar1Data = Data<typeof navbar1Schema>;
 export const navbar1Demos: Demo<typeof navbar1Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'others',
     sequence: 9,
     data: {},
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'others',
     sequence: 9,
     data: {},

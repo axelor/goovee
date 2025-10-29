@@ -26,7 +26,7 @@ export type HR1Data = Data<typeof hr1Schema>;
 export const hr1Demos: Demo<typeof hr1Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-4',
     sequence: 3,
     data: {
@@ -35,7 +35,7 @@ export const hr1Demos: Demo<typeof hr1Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-4',
     sequence: 3,
     data: {
@@ -44,7 +44,7 @@ export const hr1Demos: Demo<typeof hr1Schema>[] = [
   },
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-4',
     sequence: 8,
     data: {
@@ -53,7 +53,7 @@ export const hr1Demos: Demo<typeof hr1Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-4',
     sequence: 8,
     data: {

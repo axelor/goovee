@@ -57,7 +57,7 @@ export type About16Data = Data<typeof about16Schema>;
 export const about16Demos: Demo<typeof about16Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-17',
     sequence: 7,
     data: {
@@ -100,7 +100,7 @@ export const about16Demos: Demo<typeof about16Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-17',
     sequence: 7,
     data: {

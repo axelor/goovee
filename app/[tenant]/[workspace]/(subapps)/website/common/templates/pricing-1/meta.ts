@@ -80,7 +80,7 @@ export type Pricing1Data = Data<typeof pricing1Schema>;
 export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-1',
     sequence: 9,
     data: {
@@ -154,7 +154,7 @@ export const pricing1Demos: Demo<typeof pricing1Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-1',
     sequence: 9,
     data: {

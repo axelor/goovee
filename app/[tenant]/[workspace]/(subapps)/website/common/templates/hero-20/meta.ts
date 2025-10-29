@@ -62,7 +62,7 @@ export type Hero20Data = Data<typeof hero20Schema>;
 export const hero20Demos: Demo<typeof hero20Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-20',
     sequence: 1,
     data: {
@@ -90,7 +90,7 @@ export const hero20Demos: Demo<typeof hero20Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-20',
     sequence: 1,
     data: {

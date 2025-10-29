@@ -61,7 +61,7 @@ export type Cta8Data = Data<typeof cta8Schema>;
 export const cta8Demos: Demo<typeof cta8Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-19',
     sequence: 8,
     data: {
@@ -85,7 +85,7 @@ export const cta8Demos: Demo<typeof cta8Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-19',
     sequence: 8,
     data: {

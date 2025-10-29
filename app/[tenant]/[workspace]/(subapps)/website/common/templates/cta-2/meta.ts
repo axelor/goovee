@@ -66,7 +66,7 @@ export type Cta2Data = Data<typeof cta2Schema>;
 export const cta2Demos: Demo<typeof cta2Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-5',
     sequence: 7,
     data: {
@@ -91,7 +91,7 @@ export const cta2Demos: Demo<typeof cta2Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-5',
     sequence: 7,
     data: {

@@ -114,7 +114,7 @@ export type Service9Data = Data<typeof service9Schema>;
 export const service9Demos: Demo<typeof service9Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'others',
     sequence: 11,
     data: {
@@ -175,7 +175,7 @@ export const service9Demos: Demo<typeof service9Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'others',
     sequence: 11,
     data: {

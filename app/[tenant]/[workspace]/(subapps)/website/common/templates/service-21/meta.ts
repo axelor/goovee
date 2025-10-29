@@ -82,7 +82,7 @@ export type Service21Data = Data<typeof service21Schema>;
 export const service21Demos: Demo<typeof service21Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-19',
     sequence: 2,
     data: {
@@ -136,7 +136,7 @@ export const service21Demos: Demo<typeof service21Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-19',
     sequence: 2,
     data: {

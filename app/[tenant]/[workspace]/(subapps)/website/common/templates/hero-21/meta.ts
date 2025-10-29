@@ -77,7 +77,7 @@ export type Hero21Data = Data<typeof hero21Schema>;
 export const hero21Demos: Demo<typeof hero21Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-21',
     sequence: 1,
     data: {
@@ -208,7 +208,7 @@ export const hero21Demos: Demo<typeof hero21Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-21',
     sequence: 1,
     data: {

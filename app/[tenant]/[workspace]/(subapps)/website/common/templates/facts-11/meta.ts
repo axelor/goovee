@@ -68,7 +68,7 @@ export type Facts11Data = Data<typeof facts11Schema>;
 export const facts11Demos: Demo<typeof facts11Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-17',
     sequence: 4,
     data: {
@@ -98,7 +98,7 @@ export const facts11Demos: Demo<typeof facts11Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-17',
     sequence: 4,
     data: {

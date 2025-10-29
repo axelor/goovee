@@ -62,7 +62,7 @@ export type Cta3Data = Data<typeof cta3Schema>;
 export const cta3Demos: Demo<typeof cta3Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'others',
     sequence: 5,
     data: {
@@ -87,7 +87,7 @@ export const cta3Demos: Demo<typeof cta3Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'others',
     sequence: 5,
     data: {

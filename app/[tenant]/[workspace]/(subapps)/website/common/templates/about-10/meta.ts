@@ -80,7 +80,7 @@ export type About10Data = Data<typeof about10Schema>;
 export const about10Demos: Demo<typeof about10Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-8',
     sequence: 8,
     data: {
@@ -133,7 +133,7 @@ export const about10Demos: Demo<typeof about10Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-8',
     sequence: 8,
     data: {

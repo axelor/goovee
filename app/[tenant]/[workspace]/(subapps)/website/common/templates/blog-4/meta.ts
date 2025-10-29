@@ -87,7 +87,7 @@ export type Blog4Data = Data<typeof blog4Schema>;
 export const blog4Demos: Demo<typeof blog4Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-18',
     sequence: 7,
     data: {
@@ -177,7 +177,7 @@ export const blog4Demos: Demo<typeof blog4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-18',
     sequence: 7,
     data: {

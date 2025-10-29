@@ -83,7 +83,7 @@ export type Facts4Data = Data<typeof facts4Schema>;
 export const facts4Demos: Demo<typeof facts4Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'others',
     sequence: 7,
     data: {
@@ -128,7 +128,7 @@ export const facts4Demos: Demo<typeof facts4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'others',
     sequence: 7,
     data: {

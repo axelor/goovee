@@ -114,7 +114,7 @@ export type Process9Data = Data<typeof process9Schema>;
 export const process9Demos: Demo<typeof process9Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-9',
     sequence: 5,
     data: {
@@ -174,7 +174,7 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-9',
     sequence: 5,
     data: {

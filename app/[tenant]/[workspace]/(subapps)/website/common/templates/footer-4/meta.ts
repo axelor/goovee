@@ -114,7 +114,7 @@ export type Footer4Data = Data<typeof footer4Schema>;
 export const footer4Demos: Demo<typeof footer4Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-12',
     sequence: 9,
     data: {
@@ -188,7 +188,7 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-12',
     sequence: 9,
     data: {
@@ -266,7 +266,7 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
   },
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-6',
     sequence: 7,
     data: {
@@ -340,7 +340,7 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-6',
     sequence: 7,
     data: {
@@ -418,7 +418,7 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
   },
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-2',
     sequence: 9,
     data: {
@@ -492,7 +492,7 @@ export const footer4Demos: Demo<typeof footer4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-2',
     sequence: 9,
     data: {

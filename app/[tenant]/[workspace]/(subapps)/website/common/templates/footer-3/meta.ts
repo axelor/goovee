@@ -163,7 +163,7 @@ export type Footer3Data = Data<typeof footer3Schema>;
 export const footer3Demos: Demo<typeof footer3Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-7',
     sequence: 8,
     data: {
@@ -249,7 +249,7 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-7',
     sequence: 8,
     data: {

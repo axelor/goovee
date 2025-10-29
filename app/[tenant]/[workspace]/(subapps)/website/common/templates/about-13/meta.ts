@@ -86,7 +86,7 @@ export type About13Data = Data<typeof about13Schema>;
 export const about13Demos: Demo<typeof about13Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-11',
     sequence: 7,
     data: {
@@ -138,7 +138,7 @@ export const about13Demos: Demo<typeof about13Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-11',
     sequence: 7,
     data: {

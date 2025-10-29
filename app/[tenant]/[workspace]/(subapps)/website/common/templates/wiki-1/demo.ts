@@ -4,7 +4,7 @@ import {wiki1Schema} from './meta';
 export const wiki1Demos: Demo<typeof wiki1Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'wiki',
     sequence: 1,
     data: {
@@ -14,7 +14,7 @@ export const wiki1Demos: Demo<typeof wiki1Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'wiki',
     sequence: 1,
     data: {

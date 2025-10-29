@@ -87,7 +87,7 @@ export type Process11Data = Data<typeof process11Schema>;
 export const process11Demos: Demo<typeof process11Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-14',
     sequence: 7,
     data: {
@@ -137,7 +137,7 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-14',
     sequence: 7,
     data: {

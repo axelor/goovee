@@ -449,7 +449,7 @@ export type Data<TSchema extends TemplateSchema> = ExpandRecursively<
 >;
 
 export type Language = 'en_US' | 'fr_FR';
-export type Site = 'en' | 'fr';
+export type Site = 'lighthouse-en' | 'lighthouse-fr';
 
 type StripIdAndVersion<T> = T extends (infer U)[]
   ? StripIdAndVersion<U>[]

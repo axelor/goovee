@@ -86,7 +86,7 @@ export type Service14Data = Data<typeof service14Schema>;
 export const service14Demos: Demo<typeof service14Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-11',
     sequence: 2,
     data: {
@@ -139,7 +139,7 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-11',
     sequence: 2,
     data: {

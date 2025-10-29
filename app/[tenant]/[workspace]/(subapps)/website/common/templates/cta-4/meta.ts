@@ -61,7 +61,7 @@ export type Cta4Data = Data<typeof cta4Schema>;
 export const cta4Demos: Demo<typeof cta4Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-3',
     sequence: 5,
     data: {
@@ -85,7 +85,7 @@ export const cta4Demos: Demo<typeof cta4Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-3',
     sequence: 5,
     data: {

@@ -76,7 +76,7 @@ export type Service20Data = Data<typeof service20Schema>;
 export const service20Demos: Demo<typeof service20Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-18',
     sequence: 2,
     data: {
@@ -137,7 +137,7 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-18',
     sequence: 2,
     data: {

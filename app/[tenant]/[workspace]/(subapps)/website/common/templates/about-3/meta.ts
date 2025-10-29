@@ -57,7 +57,7 @@ export type About3Data = Data<typeof about3Schema>;
 export const about3Demos: Demo<typeof about3Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-3',
     sequence: 4,
     data: {
@@ -103,7 +103,7 @@ export const about3Demos: Demo<typeof about3Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-3',
     sequence: 4,
     data: {

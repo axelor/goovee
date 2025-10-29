@@ -40,7 +40,7 @@ export type Faq5Data = Data<typeof faq5Schema>;
 export const faq5Demos: Demo<typeof faq5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-11',
     sequence: 11,
     data: {
@@ -78,7 +78,7 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-11',
     sequence: 11,
     data: {

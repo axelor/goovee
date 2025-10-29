@@ -52,7 +52,7 @@ export type About14Data = Data<typeof about14Schema>;
 export const about14Demos: Demo<typeof about14Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-12',
     sequence: 4,
     data: {
@@ -94,7 +94,7 @@ export const about14Demos: Demo<typeof about14Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-12',
     sequence: 4,
     data: {

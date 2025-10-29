@@ -108,7 +108,7 @@ export type Portfolio5Data = Data<typeof portfolio5Schema>;
 export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-24',
     sequence: 4,
     data: {
@@ -518,7 +518,7 @@ export const portfolio5Demos: Demo<typeof portfolio5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-24',
     sequence: 4,
     data: {

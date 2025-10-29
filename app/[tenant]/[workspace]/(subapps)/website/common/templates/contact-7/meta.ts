@@ -53,7 +53,7 @@ export type Contact7Data = Data<typeof contact7Schema>;
 export const contact7Demos: Demo<typeof contact7Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-15',
     sequence: 7,
     data: {
@@ -86,7 +86,7 @@ export const contact7Demos: Demo<typeof contact7Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-15',
     sequence: 7,
     data: {

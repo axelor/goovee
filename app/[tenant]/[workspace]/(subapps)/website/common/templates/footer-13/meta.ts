@@ -129,7 +129,7 @@ export type Footer13Data = Data<typeof footer13Schema>;
 export const footer13Demos: Demo<typeof footer13Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-21',
     sequence: 10,
     data: {
@@ -207,7 +207,7 @@ export const footer13Demos: Demo<typeof footer13Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-21',
     sequence: 10,
     data: {

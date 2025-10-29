@@ -56,7 +56,7 @@ export type Cta9Data = Data<typeof cta9Schema>;
 export const cta9Demos: Demo<typeof cta9Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-23',
     sequence: 6,
     data: {
@@ -80,7 +80,7 @@ export const cta9Demos: Demo<typeof cta9Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-23',
     sequence: 6,
     data: {

@@ -68,7 +68,7 @@ export type Hero24Data = Data<typeof hero24Schema>;
 export const hero24Demos: Demo<typeof hero24Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-24',
     sequence: 1,
     data: {
@@ -180,7 +180,7 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-24',
     sequence: 1,
     data: {

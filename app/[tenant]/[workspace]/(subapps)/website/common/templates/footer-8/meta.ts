@@ -114,7 +114,7 @@ export type Footer8Data = Data<typeof footer8Schema>;
 export const footer8Demos: Demo<typeof footer8Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-13',
     sequence: 10,
     data: {
@@ -188,7 +188,7 @@ export const footer8Demos: Demo<typeof footer8Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-13',
     sequence: 10,
     data: {
@@ -266,7 +266,7 @@ export const footer8Demos: Demo<typeof footer8Schema>[] = [
   },
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-9',
     sequence: 8,
     data: {
@@ -340,7 +340,7 @@ export const footer8Demos: Demo<typeof footer8Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-9',
     sequence: 8,
     data: {
@@ -418,7 +418,7 @@ export const footer8Demos: Demo<typeof footer8Schema>[] = [
   },
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-10',
     sequence: 8,
     data: {
@@ -492,7 +492,7 @@ export const footer8Demos: Demo<typeof footer8Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-10',
     sequence: 8,
     data: {

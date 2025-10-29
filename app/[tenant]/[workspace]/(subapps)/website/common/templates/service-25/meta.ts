@@ -97,7 +97,7 @@ export type Service25Data = Data<typeof service25Schema>;
 export const service25Demos: Demo<typeof service25Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-22',
     sequence: 2,
     data: {
@@ -143,7 +143,7 @@ export const service25Demos: Demo<typeof service25Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-22',
     sequence: 2,
     data: {

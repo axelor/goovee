@@ -75,7 +75,7 @@ export type Pricing3Data = Data<typeof pricing3Schema>;
 export const pricing3Demos: Demo<typeof pricing3Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-3',
     sequence: 9,
     data: {
@@ -121,7 +121,7 @@ export const pricing3Demos: Demo<typeof pricing3Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-3',
     sequence: 9,
     data: {

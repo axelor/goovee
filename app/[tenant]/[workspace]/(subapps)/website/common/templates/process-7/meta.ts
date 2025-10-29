@@ -103,7 +103,7 @@ export type Process7Data = Data<typeof process7Schema>;
 export const process7Demos: Demo<typeof process7Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-15',
     sequence: 3,
     data: {
@@ -148,7 +148,7 @@ export const process7Demos: Demo<typeof process7Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-15',
     sequence: 3,
     data: {

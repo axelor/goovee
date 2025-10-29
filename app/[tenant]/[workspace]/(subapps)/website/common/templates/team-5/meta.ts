@@ -67,7 +67,7 @@ export type Team5Data = Data<typeof team5Schema>;
 export const team5Demos: Demo<typeof team5Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-8',
     sequence: 7,
     data: {
@@ -149,7 +149,7 @@ export const team5Demos: Demo<typeof team5Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-8',
     sequence: 7,
     data: {

@@ -98,7 +98,7 @@ export type Process14Data = Data<typeof process14Schema>;
 export const process14Demos: Demo<typeof process14Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-21',
     sequence: 3,
     data: {
@@ -141,7 +141,7 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-21',
     sequence: 3,
     data: {

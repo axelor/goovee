@@ -110,7 +110,7 @@ export type Portfolio7Data = Data<typeof portfolio7Schema>;
 export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-13',
     sequence: 6,
     data: {
@@ -165,7 +165,7 @@ export const portfolio7Demos: Demo<typeof portfolio7Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-13',
     sequence: 6,
     data: {

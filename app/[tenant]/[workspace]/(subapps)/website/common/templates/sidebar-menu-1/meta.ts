@@ -19,14 +19,14 @@ export type SidebarMenu1Data = Data<typeof sidebarMenu1Schema>;
 export const sidebarMenu1Demos: Demo<typeof sidebarMenu1Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'others',
     sequence: 12,
     data: {},
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'others',
     sequence: 12,
     data: {},

@@ -127,7 +127,7 @@ export type Service10Data = Data<typeof service10Schema>;
 export const service10Demos: Demo<typeof service10Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-7',
     sequence: 2,
     data: {
@@ -178,7 +178,7 @@ export const service10Demos: Demo<typeof service10Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-7',
     sequence: 2,
     data: {

@@ -54,7 +54,7 @@ export type Hero10Data = Data<typeof hero10Schema>;
 export const hero10Demos: Demo<typeof hero10Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-10',
     sequence: 1,
     data: {
@@ -67,7 +67,7 @@ export const hero10Demos: Demo<typeof hero10Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-10',
     sequence: 1,
     data: {

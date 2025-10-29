@@ -122,7 +122,7 @@ export type Footer2Data = Data<typeof footer2Schema>;
 export const footer2Demos: Demo<typeof footer2Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-4',
     sequence: 11,
     data: {
@@ -196,7 +196,7 @@ export const footer2Demos: Demo<typeof footer2Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-4',
     sequence: 11,
     data: {

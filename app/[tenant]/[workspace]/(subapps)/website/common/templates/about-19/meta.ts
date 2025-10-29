@@ -104,7 +104,7 @@ export type About19Data = Data<typeof about19Schema>;
 export const about19Demos: Demo<typeof about19Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-18',
     sequence: 8,
     data: {
@@ -200,7 +200,7 @@ export const about19Demos: Demo<typeof about19Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-18',
     sequence: 8,
     data: {

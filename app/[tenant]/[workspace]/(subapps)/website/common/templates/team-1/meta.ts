@@ -90,7 +90,7 @@ export type Team1Data = Data<typeof team1Schema>;
 export const team1Demos: Demo<typeof team1Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-1',
     sequence: 6,
     data: {
@@ -271,7 +271,7 @@ export const team1Demos: Demo<typeof team1Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-1',
     sequence: 6,
     data: {

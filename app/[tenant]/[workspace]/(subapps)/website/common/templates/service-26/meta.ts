@@ -77,7 +77,7 @@ export type Service26Data = Data<typeof service26Schema>;
 export const service26Demos: Demo<typeof service26Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-23',
     sequence: 2,
     data: {
@@ -146,7 +146,7 @@ export const service26Demos: Demo<typeof service26Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-23',
     sequence: 2,
     data: {

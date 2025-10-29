@@ -86,7 +86,7 @@ export type Hero16Data = Data<typeof hero16Schema>;
 export const hero16Demos: Demo<typeof hero16Schema>[] = [
   {
     language: 'en_US',
-    site: 'en',
+    site: 'lighthouse-en',
     page: 'demo-16',
     sequence: 1,
     data: {
@@ -116,7 +116,7 @@ export const hero16Demos: Demo<typeof hero16Schema>[] = [
   },
   {
     language: 'fr_FR',
-    site: 'fr',
+    site: 'lighthouse-fr',
     page: 'demo-16',
     sequence: 1,
     data: {
