@@ -41,9 +41,7 @@ const addressInformationSchema = z.object({
   }),
   streetName: z.string().min(1, i18n.t('Street name is required')),
   addressAddition: z.string().optional(),
-  zip: z
-    .string()
-    .min(1, i18n.t('Zip code is required')),
+  zip: z.string().min(1, i18n.t('Zip code is required')),
   townName: z.string().min(1, i18n.t('Town name is required')),
   multipletype: z.boolean().default(false),
 });
@@ -182,7 +180,6 @@ export const AddressForm = ({
       });
     }
   };
-
 
   return (
     <Form {...form}>
