@@ -1,16 +1,17 @@
-import type {CreateArgs, SelectOptions} from '@goovee/orm';
+import type {CreateArgs, Payload, SelectOptions, UpdateArgs} from '@goovee/orm';
 import {getSession} from '@/auth';
 import {UserType} from '@/auth/types';
 import {hash} from '@/auth/utils';
 import {manager, type Tenant} from '@/tenant';
 import {USER_CREATED_FROM} from '@/constants';
 import {clone} from '@/utils';
-import {ID, Localization, Partner, PortalWorkspace} from '@/types';
+import {ID, Localization, PortalWorkspace} from '@/types';
 import {
   findContactWorkspaceConfig,
   findDefaultPartnerWorkspaceConfig,
 } from './workspace';
 import type {AOSPartner} from '@/goovee/.generated/models';
+import {Cloned} from '@/types/util';
 
 const partnerFields = {
   firstName: true,
@@ -26,6 +27,14 @@ const partnerFields = {
   mainPartner: {
     id: true,
     simpleFullName: true,
+    isInDirectory: true,
+    isEmailInDirectory: true,
+    isPhoneInDirectory: true,
+    isWebsiteInDirectory: true,
+    isAddressInDirectory: true,
+    directoryCompanyDescription: true,
+    isFunctionInDirectory: true,
+    isLinkedinInDirectory: true,
     partnerAddressList: {
       select: {
         isInvoicingAddr: true,
@@ -70,6 +79,14 @@ const partnerFields = {
   isActivatedOnPortal: true,
   createdFromSelect: true,
   canSubscribeNoPublicEvent: true,
+  isInDirectory: true,
+  isEmailInDirectory: true,
+  isPhoneInDirectory: true,
+  isWebsiteInDirectory: true,
+  isAddressInDirectory: true,
+  directoryCompanyDescription: true,
+  isFunctionInDirectory: true,
+  isLinkedinInDirectory: true,
   partnerAddressList: {
     select: {
       isInvoicingAddr: true,
@@ -77,7 +94,11 @@ const partnerFields = {
       address: {formattedFullName: true},
     },
   },
-} satisfies SelectOptions<AOSPartner>;
+} as const satisfies SelectOptions<AOSPartner>;
+
+export type Partner = Cloned<
+  Payload<AOSPartner, {select: typeof partnerFields}>
+>;
 
 export async function findPartnerById(
   id: ID,
@@ -240,7 +261,7 @@ export async function updatePartner({
   data,
   tenantId,
 }: {
-  data: {id: Partner['id']; version: Partner['version']} & Partial<AOSPartner>;
+  data: UpdateArgs<AOSPartner>;
   tenantId: Tenant['id'];
 }) {
   if (!(data && tenantId)) return null;
