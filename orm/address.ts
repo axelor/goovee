@@ -69,7 +69,7 @@ export async function createPartnerAddress(
               id: values?.address?.country,
             },
           },
-          townName: values?.townName,
+          townName: values?.address?.townName,
         },
       },
       isInvoicingAddr: values.isInvoicingAddr,
