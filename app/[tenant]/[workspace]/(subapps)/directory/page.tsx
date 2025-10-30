@@ -1,10 +1,7 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
-import {findWorkspace} from '@/orm/workspace';
-import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
@@ -15,6 +12,7 @@ import type {SearchParams} from './common/types';
 import {CategoryCard} from './common/ui/components/category-card';
 import {Swipe} from './common/ui/components/swipe';
 import {getOrderBy, getPages, getSkip} from './common/utils';
+import {ensureAuth} from './common/utils/auth-helper';
 import {Content} from './content';
 import Hero from './hero';
 
@@ -27,20 +25,11 @@ export default async function Page({
   params: {tenant: string; workspace: string};
   searchParams: SearchParams;
 }) {
-  const session = await getSession();
-
-  // TODO: check if user auth is required
-  // if (!session?.user) notFound();
-
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {error, auth} = await ensureAuth(workspaceURL, tenant);
+  if (error) notFound();
 
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    tenantId: tenant,
-  }).then(clone);
-
-  if (!workspace) notFound();
+  const {workspace} = auth;
 
   const {page = 1, limit = ITEMS_PER_PAGE, sort} = searchParams;
 

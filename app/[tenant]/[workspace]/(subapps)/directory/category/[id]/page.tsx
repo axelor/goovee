@@ -2,11 +2,8 @@ import {notFound} from 'next/navigation';
 import {MdOutlineNotificationAdd} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {t} from '@/lib/core/locale/server';
-import {findWorkspace} from '@/orm/workspace';
 import {Button} from '@/ui/components';
-import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
@@ -18,6 +15,7 @@ import type {SearchParams} from '../../common/types';
 import {CategoryCard} from '../../common/ui/components/category-card';
 import {Swipe} from '../../common/ui/components/swipe';
 import {getOrderBy, getPages, getSkip} from '../../common/utils';
+import {ensureAuth} from '../../common/utils/auth-helper';
 import {Content} from '../../content';
 
 const ITEMS_PER_PAGE = 7;
@@ -28,21 +26,12 @@ export default async function Page({
   params: {tenant: string; workspace: string; id: string};
   searchParams: SearchParams;
 }) {
-  const session = await getSession();
-
-  // TODO: check if user auth is required
-  // if (!session?.user) notFound();
-
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {error, auth} = await ensureAuth(workspaceURL, tenant);
+  if (error) notFound();
+  const {workspace} = auth;
   const {page = 1, limit = ITEMS_PER_PAGE, sort} = searchParams;
 
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    tenantId: tenant,
-  }).then(clone);
-
-  if (!workspace) notFound();
   const {id} = params;
 
   const [category, entries] = await Promise.all([

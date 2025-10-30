@@ -1,15 +1,14 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {FaInstagram, FaLinkedin} from 'react-icons/fa';
 import {FaXTwitter} from 'react-icons/fa6';
 import {MdOutlineWeb} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {t} from '@/lib/core/locale/server';
 import {findModelFields} from '@/orm/model-fields';
-import {findWorkspace} from '@/orm/workspace';
 import {Avatar, AvatarImage, InnerHTML} from '@/ui/components';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
@@ -22,29 +21,18 @@ import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
 import {Category} from '../../common/ui/components/pills';
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '../../common/utils/auth-helper';
 
 export default async function Page({
   params,
 }: {
   params: {tenant: string; workspace: string; id: string};
 }) {
-  const session = await getSession();
   const {id} = params;
-
-  // TODO: check if user auth is required
-  // if (!session?.user) notFound();
-
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    tenantId: tenant,
-  }).then(clone);
-
-  if (!workspace) notFound();
-
+  const {error, auth} = await ensureAuth(workspaceURL, tenant);
+  if (error) notFound();
+  const {workspace} = auth;
   const [entry, config] = await Promise.all([
     findEntry({id, workspaceId: workspace.id, tenantId: tenant}),
     findMapConfig({workspaceId: workspace.id, tenantId: tenant}),
