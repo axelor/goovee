@@ -1,26 +1,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {FaInstagram, FaLinkedin} from 'react-icons/fa';
-import {FaXTwitter} from 'react-icons/fa6';
-import {MdOutlineWeb} from 'react-icons/md';
+import {FaLinkedin} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {t} from '@/lib/core/locale/server';
-import {findModelFields} from '@/orm/model-fields';
 import {Avatar, AvatarImage, InnerHTML} from '@/ui/components';
 import {clone} from '@/utils';
-import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
-import {colors} from '../../common/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
-import {Category} from '../../common/ui/components/pills';
 import {ensureAuth} from '../../common/utils/auth-helper';
 
 export default async function Page({
@@ -30,12 +23,11 @@ export default async function Page({
 }) {
   const {id} = params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-  const {error, auth} = await ensureAuth(workspaceURL, tenant);
+  const {error} = await ensureAuth(workspaceURL, tenant);
   if (error) notFound();
-  const {workspace} = auth;
   const [entry, config] = await Promise.all([
-    findEntry({id, workspaceId: workspace.id, tenantId: tenant}),
-    findMapConfig({workspaceId: workspace.id, tenantId: tenant}),
+    findEntry({id, tenantId: tenant}),
+    findMapConfig({tenantId: tenant}),
   ]);
 
   if (!entry) notFound();
@@ -50,15 +42,15 @@ export default async function Page({
         />
         <Map className="h-80 w-full" entries={[clone(entry)]} config={config} />
       </div>
-      {entry.directoryContactSet && entry.directoryContactSet?.length > 0 && (
+      {entry.mainPartnerContacts && entry.mainPartnerContacts?.length > 0 && (
         <>
           <h2 className="font-semibold text-xl pl-4">
             {await t(
-              entry.directoryContactSet.length > 1 ? 'Contacts' : 'Contact',
+              entry.mainPartnerContacts.length > 1 ? 'Contacts' : 'Contact',
             )}
           </h2>
 
-          {entry.directoryContactSet.map(contact => (
+          {entry.mainPartnerContacts.map(contact => (
             <Contact key={contact.id} tenant={tenant} contact={contact} />
           ))}
         </>
@@ -77,52 +69,25 @@ async function Details({
   workspaceURI: string;
 }) {
   const {
-    title,
-    address,
-    twitter,
-    website,
-    description,
-    linkedIn,
-    image,
-    instagram,
-    directoryEntryCategorySet,
-    attrs,
-    id,
+    mainAddress,
+    emailAddress,
+    fixedPhone,
+    simpleFullName,
+    picture,
+    linkedinLink,
+    webSite,
+    directoryCompanyDescription,
+    mobilePhone,
   } = entryDetail;
-
-  const customFields = (
-    await findModelFields({
-      modelName: 'com.axelor.apps.portal.db.DirectoryEntry',
-      modelField: 'attrs',
-      tenantId: tenant,
-    })
-  )
-    .filter(field => field.type === 'string')
-    .map(field => {
-      const fieldValue =
-        typeof attrs === 'object' && attrs != null ? attrs[field.name] : null;
-      if (!fieldValue) return null;
-      return (
-        <div key={field.id}>
-          <span className="text-base font-semibold me-2">{field.title}:</span>
-          <span className="text-sm text-muted-foreground">{fieldValue}</span>
-        </div>
-      );
-    });
 
   return (
     <div>
       <div className="flex bg-card gap-5 justify-between">
         <div className="space-y-4 mt-4">
-          <h2 className="font-semibold text-xl">{title}</h2>
-          {directoryEntryCategorySet?.map(cat => (
-            <Category
-              name={cat?.title}
-              key={cat.id}
-              className={cn('me-3', colors[cat.color as keyof typeof colors])}
-            />
-          ))}
-          <p className="text-success text-base">{address?.formattedFullName}</p>
+          <h2 className="font-semibold text-xl">{simpleFullName}</h2>
+          <p className="text-success text-base">
+            {mainAddress?.formattedFullName}
+          </p>
         </div>
 
         {/* image */}
@@ -130,11 +95,7 @@ async function Details({
           width={156}
           height={138}
           className="rounded-r-lg h-[138px] object-cover"
-          src={
-            image?.id
-              ? `${workspaceURI}/${SUBAPP_CODES.directory}/api/entry/${id}/image`
-              : NO_IMAGE_URL
-          }
+          src={getPartnerImageURL(picture?.id, tenant, {noimage: true})}
           alt="image"
         />
       </div>
@@ -142,34 +103,45 @@ async function Details({
 
       {/* directory description */}
 
-      <div className="space-y-4 mt-5">
-        <InnerHTML content={description} />
-        {customFields}
+      <div className="DraftEditor-editorContainer my-3">
+        <InnerHTML
+          content={directoryCompanyDescription}
+          className="public-DraftEditor-content"
+        />
       </div>
-      {(linkedIn || twitter || instagram || website) && (
-        <p className="font-semibold text-xl mt-5 mb-5">
-          {await t('Social media')}
-        </p>
-      )}
-      <div className="flex space-x-6">
-        {linkedIn && (
-          <Link href={linkedIn} target="_blank" rel="noreferrer">
+      <div className="ms-4 space-y-4">
+        {emailAddress && (
+          <>
+            <h4 className="font-semibold">{await t('Email')}</h4>
+            <Link
+              className="text-sm text-muted-foreground hover:underline hover:!text-palette-blue-dark"
+              href={`mailto:${emailAddress.address}`}>
+              {emailAddress.address}
+            </Link>
+          </>
+        )}
+        <>
+          <h4 className="font-semibold">{await t('Phone number')}</h4>
+          {fixedPhone && (
+            <Link
+              className="text-sm text-muted-foreground hover:underline hover:!text-palette-blue-dark"
+              href={`tel:${fixedPhone}`}>
+              {fixedPhone}
+            </Link>
+          )}
+          <br />
+          {mobilePhone && (
+            <Link
+              className="text-sm text-muted-foreground hover:underline hover:!text-palette-blue-dark"
+              href={`tel:${mobilePhone}`}>
+              {mobilePhone}
+            </Link>
+          )}
+        </>
+
+        {linkedinLink && (
+          <Link href={linkedinLink} target="_blank" rel="noreferrer">
             <FaLinkedin className="h-8 w-8 text-palette-blue-dark" />
-          </Link>
-        )}
-        {twitter && (
-          <Link href={twitter} target="_blank" rel="noreferrer">
-            <FaXTwitter className="h-8 w-8" />
-          </Link>
-        )}
-        {instagram && (
-          <Link href={instagram} target="_blank" rel="noreferrer">
-            <FaInstagram className="h-8 w-8 text-palette-yellow-dark" />
-          </Link>
-        )}
-        {website && (
-          <Link href={website} target="_blank" rel="noreferrer">
-            <MdOutlineWeb className="h-8 w-8 text-gray-dark" />
           </Link>
         )}
       </div>
@@ -182,12 +154,12 @@ async function Contact({
   contact,
 }: {
   tenant: string;
-  contact: NonNullable<Entry['directoryContactSet']>[number];
+  contact: NonNullable<Entry['mainPartnerContacts']>[number];
 }) {
   const {
-    simpleFullName,
     emailAddress,
     fixedPhone,
+    simpleFullName,
     linkedinLink,
     mobilePhone,
     picture,

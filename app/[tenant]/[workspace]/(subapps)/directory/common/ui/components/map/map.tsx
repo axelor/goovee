@@ -38,7 +38,7 @@ export function Map(props: MapProps) {
   const {className, showExpand, entries, config} = props;
   const [expand, setExpand] = useState(false);
   const mapEntries = useMemo(
-    () => entries.filter(x => x.address?.longit && x.address?.latit && x.isMap),
+    () => entries.filter(x => x.mainAddress?.longit && x.mainAddress?.latit),
     [entries],
   );
   const res = useResponsive();
@@ -46,8 +46,8 @@ export function Map(props: MapProps) {
   const full = small || expand;
 
   const {defaultCenter, defaultZoom} = useMemo(() => {
-    const lats = mapEntries.map(entry => Number(entry.address?.latit));
-    const lngs = mapEntries.map(entry => Number(entry.address?.longit));
+    const lats = mapEntries.map(entry => Number(entry.mainAddress?.latit));
+    const lngs = mapEntries.map(entry => Number(entry.mainAddress?.longit));
 
     const minLat = Math.min(...lats);
     const maxLat = Math.max(...lats);

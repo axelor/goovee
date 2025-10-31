@@ -1,4 +1,4 @@
-import type {AOSPortalDirectoryEntry} from '@/goovee/.generated/models';
+import type {AOSPartner} from '@/goovee/.generated/models';
 import type {BigDecimal, OrderByOptions} from '@goovee/orm';
 
 type Pagination = {
@@ -32,66 +32,62 @@ export type Category = {
 export type Entry = {
   id: string;
   version: number;
-  title?: string;
-  description?: string;
-  address?: {
+  simpleFullName?: string;
+  emailAddress?: {id: string; version: number; address?: string};
+  fixedPhone?: string;
+  mobilePhone?: string;
+  linkedinLink?: string;
+  mainAddress?: {
     id: string;
     version: number;
     formattedFullName?: string;
     latit?: BigDecimal;
     longit?: BigDecimal;
   };
-  linkedIn?: string;
-  twitter?: string;
-  website?: string;
-  isMap?: boolean;
-  image?: {id: string; version: number};
-  directoryContactSet?: {
+  picture?: {id: string; version: number};
+  mainPartnerContacts?: {
     id: string;
     version: number;
     simpleFullName?: string;
     emailAddress?: {id: string; version: number; address?: string};
     fixedPhone?: string;
-    picture?: {id: string; version: number};
     mobilePhone?: string;
     linkedinLink?: string;
+    functionBusinessCard?: string;
+    picture?: {id: string; version: number};
   }[];
-  instagram?: string;
-  directoryEntryCategorySet?: {
-    id: string;
-    version: number;
-    title?: string;
-    color?: string;
-  }[];
-  attrs?: string;
+  isEmailInDirectory?: boolean;
+  isPhoneInDirectory?: boolean;
+  isWebsiteInDirectory?: boolean;
+  isAddressInDirectory?: boolean;
+  directoryCompanyDescription?: string;
+  webSite?: string;
 } & Pagination;
 
 export type ListEntry = {
   id: string;
   version: number;
-  title?: string;
-  description?: string;
-  address?: {
+  simpleFullName?: string;
+  mainAddress?: {
     id: string;
     version: number;
     formattedFullName?: string;
-    latit?: BigDecimal;
     longit?: BigDecimal;
+    latit?: BigDecimal;
   };
-  isMap?: boolean;
-  image?: {id: string; version: number};
-  directoryEntryCategorySet?: {
-    id: string;
-    version: number;
-    title?: string;
-    color?: string;
-  }[];
+  picture?: {id: string; version: number};
+  isAddressInDirectory?: boolean;
+  directoryCompanyDescription?: string;
+  _count?: string;
+  _cursor?: string;
+  _hasNext?: boolean;
+  _hasPrev?: boolean;
 } & Pagination;
 
 export type SearchEntry = {
   id: string;
   version: number;
-  title?: string;
+  simpleFullName?: string;
 } & Pagination;
 
 export type MapConfig = {
@@ -104,5 +100,5 @@ export type SearchParams = {page?: string; limit?: string; sort?: string};
 export type SortOption = {
   value: string;
   label: string;
-  orderBy: OrderByOptions<AOSPortalDirectoryEntry>;
+  orderBy: OrderByOptions<AOSPartner>;
 };

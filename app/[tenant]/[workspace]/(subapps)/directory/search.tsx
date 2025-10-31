@@ -1,12 +1,12 @@
 'use client';
 import {debounce} from 'lodash';
-import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
-import type {ID} from '@goovee/orm';
+import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {i18n} from '@/locale';
+import {Cloned} from '@/types/util';
 import {
   Command,
   CommandEmpty,
@@ -17,20 +17,18 @@ import {
 } from '@/ui/components/command';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
 import {searchEntries} from './common/actions';
-import type {SearchEntry} from './common/types';
+import type {ListEntry, SearchEntry} from './common/types';
+import {Card} from './common/ui/components/card';
 
 export function Search({
   className,
   inputClassName,
-  categoryId,
 }: {
   inputClassName?: string;
   className?: string;
-  categoryId?: ID;
 }) {
   const router = useRouter();
   const {workspaceURL, workspaceURI} = useWorkspace();
@@ -38,7 +36,7 @@ export function Search({
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
-  const [searchResult, setSearchResult] = useState<Cloned<SearchEntry>[]>([]);
+  const [searchResult, setSearchResult] = useState<Cloned<ListEntry>[]>([]);
   const searchRef = useRef<string | undefined>();
 
   const fetchSearchResult = useMemo(
@@ -48,7 +46,6 @@ export function Search({
           const {error, message, data} = await searchEntries({
             search,
             workspaceURL,
-            categoryId,
           });
           if (searchRef.current !== search) return;
           if (error) {
@@ -71,7 +68,7 @@ export function Search({
           }
         }
       }, 500),
-    [toast, workspaceURL, categoryId],
+    [toast, workspaceURL],
   );
 
   const handleSearch = useCallback(
@@ -112,19 +109,15 @@ export function Search({
           <CommandEmpty>
             {loading ? i18n.t('Searching...') : i18n.t('No results found.')}
           </CommandEmpty>
-          <CommandGroup className="p-2">
+          <CommandGroup>
             {Boolean(searchResult?.length)
               ? searchResult.map(result => (
                   <CommandItem
                     key={result.id}
                     value={result.id}
                     onSelect={handleRedirection}
-                    className="block py-2 sm:px-6 cursor-pointer">
-                    <div className="leading-5 text-sm space-y-2 p-3">
-                      <h3 className="font-semibold line-clamp-1">
-                        {result.title}
-                      </h3>
-                    </div>
+                    className="block cursor-pointer">
+                    <Card item={result} workspaceURI={workspaceURI} />
                   </CommandItem>
                 ))
               : null}
