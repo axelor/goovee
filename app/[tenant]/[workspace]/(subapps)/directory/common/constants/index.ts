@@ -36,3 +36,9 @@ export enum MAP_SELECT {
   GoogleMaps = 1,
   OpenStreetMap = 2,
 }
+
+export const civility = [
+  {title: 'M.', value: 1},
+  {title: 'Ms.', value: 2},
+  {title: 'Mx.', value: 3},
+];

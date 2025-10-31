@@ -49,7 +49,7 @@ type MarkerProps = {
 
 export function Marker(props: MarkerProps) {
   const {small, item} = props;
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
 
   const url = `${workspaceURI}/directory/entry/${item.id}`;
   const [markerRef, marker] = useMarkerRef();
@@ -63,19 +63,14 @@ export function Marker(props: MarkerProps) {
       <MarkerComponent
         ref={markerRef}
         position={{
-          lat: Number(item.address?.latit || 0),
-          lng: Number(item.address?.longit || 0),
+          lat: Number(item.mainAddress?.latit || 0),
+          lng: Number(item.mainAddress?.longit || 0),
         }}
         onClick={toggle}
       />
       {show && (
         <InfoWindow anchor={marker} onClose={handleClose} headerDisabled>
-          <Card
-            item={item}
-            url={url}
-            small={small}
-            workspaceURI={workspaceURI}
-          />
+          <Card item={item} url={url} small={small} tenant={tenant} />
         </InfoWindow>
       )}
     </>

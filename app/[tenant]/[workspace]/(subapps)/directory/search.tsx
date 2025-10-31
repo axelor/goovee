@@ -20,7 +20,7 @@ import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import {searchEntries} from './common/actions';
-import type {ListEntry, SearchEntry} from './common/types';
+import type {ListEntry} from './common/types';
 import {Card} from './common/ui/components/card';
 
 export function Search({
@@ -31,7 +31,7 @@ export function Search({
   className?: string;
 }) {
   const router = useRouter();
-  const {workspaceURL, workspaceURI} = useWorkspace();
+  const {workspaceURL, workspaceURI, tenant} = useWorkspace();
   const {toast} = useToast();
   const [search, setSearch] = useState<string>('');
   const [open, setOpen] = useState<boolean>(false);
@@ -117,7 +117,7 @@ export function Search({
                     value={result.id}
                     onSelect={handleRedirection}
                     className="block cursor-pointer">
-                    <Card item={result} workspaceURI={workspaceURI} />
+                    <Card item={result} tenant={tenant} />
                   </CommandItem>
                 ))
               : null}

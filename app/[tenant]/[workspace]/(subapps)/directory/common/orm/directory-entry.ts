@@ -1,39 +1,21 @@
-import {manager} from '@/tenant';
+import type {AOSPartner} from '@/goovee/.generated/models';
 import {t} from '@/lib/core/locale/server';
 import type {Tenant} from '@/tenant';
+import {manager} from '@/tenant';
 import type {ID} from '@/types';
 import type {OrderByOptions} from '@goovee/orm';
-import type {
-  AOSPartner,
-  AOSPortalDirectoryEntry,
-} from '@/goovee/.generated/models';
 
-import type {Entry, ListEntry, SearchEntry} from '../types';
 import {and} from '@/utils/orm';
+import {
+  getCompanyAccessFilter,
+  getContactAccessFilter,
+  maskEntryByAccess,
+} from './helper';
+import {ExpandRecursively} from '@/types/util';
 
-export async function findEntryImage({
-  id,
-  tenantId,
-}: {
-  id: ID;
-  tenantId: Tenant['id'];
-}): Promise<string | undefined> {
-  if (!(id && tenantId)) {
-    throw new Error(await t('Missing required parameters'));
-  }
-
-  const c = await manager.getClient(tenantId);
-
-  const entry = await c.aOSPartner.findOne({
-    where: {
-      id,
-      isInDirectory: true,
-      OR: [{archived: false}, {archived: null}],
-    },
-    select: {picture: {id: true}},
-  });
-  return entry?.picture?.id;
-}
+export type Entry = ExpandRecursively<
+  NonNullable<Awaited<ReturnType<typeof findEntry>>>
+>;
 
 export async function findEntry({
   id,
@@ -41,7 +23,7 @@ export async function findEntry({
 }: {
   id: ID;
   tenantId: Tenant['id'];
-}): Promise<Entry | null> {
+}) {
   if (!(id && tenantId)) {
     throw new Error(await t('Missing required parameters'));
   }
@@ -49,44 +31,67 @@ export async function findEntry({
   const c = await manager.getClient(tenantId);
 
   const entry = await c.aOSPartner.findOne({
-    where: {
-      id: id,
-      isInDirectory: true,
-      isCustomer: true,
-      OR: [{archived: false}, {archived: null}],
-    },
+    where: and<AOSPartner>([{id}, getCompanyAccessFilter()]),
     select: {
       id: true,
-      simpleFullName: true,
+      portalCompanyName: true,
       directoryCompanyDescription: true,
-      mainAddress: {formattedFullName: true, longit: true, latit: true},
       picture: {id: true},
       isAddressInDirectory: true,
+      mainAddress: {formattedFullName: true, longit: true, latit: true},
+      isEmailInDirectory: true,
       emailAddress: {address: true},
+      isPhoneInDirectory: true,
       fixedPhone: true,
       mobilePhone: true,
-      webSite: true,
-      linkedinLink: true,
-      isEmailInDirectory: true,
-      isPhoneInDirectory: true,
       isWebsiteInDirectory: true,
+      webSite: true,
       mainPartnerContacts: {
-        where: {isInDirectory: true},
+        where: getContactAccessFilter(),
         select: {
           id: true,
-          simpleFullName: true,
+          firstName: true,
+          name: true,
+          titleSelect: true,
+          picture: {id: true},
+          isFunctionInDirectory: true,
           functionBusinessCard: true,
+          isEmailInDirectory: true,
           emailAddress: {address: true},
+          isPhoneInDirectory: true,
           fixedPhone: true,
           mobilePhone: true,
+          isLinkedinInDirectory: true,
           linkedinLink: true,
-          picture: {id: true},
         },
+      } as {
+        select: {
+          id: true;
+          firstName: true;
+          name: true;
+          titleSelect: true;
+          picture: {id: true};
+          isFunctionInDirectory: true;
+          functionBusinessCard: true;
+          isEmailInDirectory: true;
+          emailAddress: {address: true};
+          isPhoneInDirectory: true;
+          fixedPhone: true;
+          mobilePhone: true;
+          isLinkedinInDirectory: true;
+          linkedinLink: true;
+        };
       },
     },
   });
-  return entry;
+
+  if (!entry) return null;
+  return maskEntryByAccess(entry);
 }
+
+export type ListEntry = ExpandRecursively<
+  NonNullable<Awaited<ReturnType<typeof findEntries>>[number]>
+>;
 
 export async function findEntries({
   take,
@@ -99,22 +104,18 @@ export async function findEntries({
   skip?: number;
   search?: string;
   tenantId: Tenant['id'];
-  orderBy?: OrderByOptions<AOSPortalDirectoryEntry>;
-}): Promise<ListEntry[]> {
+  orderBy?: OrderByOptions<AOSPartner>;
+}) {
   if (!tenantId) {
     throw new Error(await t('Missing required parameters'));
   }
   const c = await manager.getClient(tenantId);
   const entries = await c.aOSPartner.find({
     where: and<AOSPartner>([
-      {
-        isInDirectory: true,
-        isCustomer: true,
-        OR: [{archived: false}, {archived: null}],
-      },
+      getCompanyAccessFilter(),
       search && {
         OR: [
-          {simpleFullName: {like: `%${search}%`}},
+          {portalCompanyName: {like: `%${search}%`}},
           {mainAddress: {zip: {like: `%${search}%`}}},
           {mainAddress: {formattedFullName: {like: `%${search}%`}}},
           {mainAddress: {city: {name: {like: `%${search}%`}}}},
@@ -126,45 +127,12 @@ export async function findEntries({
     ...(skip ? {skip} : {}),
     select: {
       id: true,
-      simpleFullName: true,
+      portalCompanyName: true,
       directoryCompanyDescription: true,
-      mainAddress: {formattedFullName: true, longit: true, latit: true},
       picture: {id: true},
       isAddressInDirectory: true,
+      mainAddress: {formattedFullName: true, longit: true, latit: true},
     },
   });
-  return entries;
-}
-
-export async function findEntriesBySearch({
-  tenantId,
-  search,
-}: {
-  search?: string;
-  tenantId: Tenant['id'];
-}): Promise<SearchEntry[]> {
-  if (!tenantId) {
-    throw new Error(await t('Missing required parameters'));
-  }
-  const c = await manager.getClient(tenantId);
-  const entries = await c.aOSPartner.find({
-    take: 10,
-    where: and<AOSPartner>([
-      {
-        isInDirectory: true,
-        isCustomer: true,
-        OR: [{archived: false}, {archived: null}],
-      },
-      search && {
-        OR: [
-          {simpleFullName: {like: `%${search}%`}},
-          {mainAddress: {zip: {like: `%${search}%`}}},
-          {mainAddress: {formattedFullName: {like: `%${search}%`}}},
-          {mainAddress: {city: {name: {like: `%${search}%`}}}},
-        ],
-      },
-    ]),
-    select: {simpleFullName: true},
-  });
-  return entries;
+  return entries.map(maskEntryByAccess);
 }
