@@ -31,8 +31,8 @@ export function maskCompanyFieldsByAccess<T extends AOSPartner>(company: T): T {
 export function maskContactFieldsByAccess<T extends AOSPartner>(contact: T): T {
   return {
     ...contact,
-    functionBusinessCard: contact.isFunctionInDirectory
-      ? contact.functionBusinessCard
+    jobTitleFunction: contact.isFunctionInDirectory
+      ? contact.jobTitleFunction
       : null,
     emailAddress: contact.isEmailInDirectory ? contact.emailAddress : null,
     fixedPhone: contact.isPhoneInDirectory ? contact.fixedPhone : null,

@@ -55,7 +55,7 @@ export async function findEntry({
           titleSelect: true,
           picture: {id: true},
           isFunctionInDirectory: true,
-          functionBusinessCard: true,
+          jobTitleFunction: {name: true},
           isEmailInDirectory: true,
           emailAddress: {address: true},
           isPhoneInDirectory: true,
@@ -72,7 +72,7 @@ export async function findEntry({
           titleSelect: true;
           picture: {id: true};
           isFunctionInDirectory: true;
-          functionBusinessCard: true;
+          jobTitleFunction: {name: true};
           isEmailInDirectory: true;
           emailAddress: {address: true};
           isPhoneInDirectory: true;

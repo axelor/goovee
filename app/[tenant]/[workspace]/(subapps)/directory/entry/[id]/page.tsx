@@ -4,7 +4,7 @@ import {notFound} from 'next/navigation';
 import {FaLinkedin} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
-import {t} from '@/lib/core/locale/server';
+import {t, tattr} from '@/lib/core/locale/server';
 import {Avatar, AvatarImage, InnerHTML} from '@/ui/components';
 import {clone} from '@/utils';
 import {getPartnerImageURL} from '@/utils/files';
@@ -166,7 +166,7 @@ async function Contact({
     linkedinLink,
     mobilePhone,
     picture,
-    functionBusinessCard,
+    jobTitleFunction,
   } = contact;
 
   const title = civility.find(x => x.value === titleSelect)?.title;
@@ -186,7 +186,11 @@ async function Contact({
         <span className="font-semibold">{displayName}</span>
       </div>
       <div className="ms-4 space-y-4">
-        {<h4 className="font-semibold">{functionBusinessCard}</h4>}
+        {jobTitleFunction?.name && (
+          <h4 className="font-semibold">
+            {await tattr(jobTitleFunction.name)}
+          </h4>
+        )}
         {emailAddress && (
           <>
             <h4 className="font-semibold">{await t('Email')}</h4>
@@ -198,7 +202,9 @@ async function Contact({
           </>
         )}
         <>
-          <h4 className="font-semibold">{await t('Phone number')}</h4>
+          {(fixedPhone || mobilePhone) && (
+            <h4 className="font-semibold">{await t('Phone number')}</h4>
+          )}
           {fixedPhone && (
             <Link
               className="text-sm text-muted-foreground hover:underline hover:!text-palette-blue-dark"

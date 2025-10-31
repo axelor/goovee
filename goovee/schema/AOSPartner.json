@@ -214,6 +214,11 @@
     {
       "type": "Int",
       "name": "titleSelect"
+    },
+    {
+      "name": "jobTitleFunction",
+      "type": "ManyToOne",
+      "target": "AOSFunction"
     }
   ]
 }
