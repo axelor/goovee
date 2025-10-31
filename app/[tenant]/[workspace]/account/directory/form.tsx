@@ -192,7 +192,9 @@ export default function Form({
                         <FormLabel>{i18n.t('Company Description')}</FormLabel>
                         <FormControl>
                           <RichTextEditor
-                            content={field.value}
+                            content={
+                              companyDataSource?.directoryCompanyDescription
+                            }
                             onChange={field.onChange}
                             classNames={{
                               wrapperClassName: 'overflow-visible border-2',
