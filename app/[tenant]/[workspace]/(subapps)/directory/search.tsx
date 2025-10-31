@@ -117,7 +117,7 @@ export function Search({
                     value={result.id}
                     onSelect={handleRedirection}
                     className="block cursor-pointer">
-                    <Card item={result} tenant={tenant} />
+                    <Card item={result} tenant={tenant} compact />
                   </CommandItem>
                 ))
               : null}
