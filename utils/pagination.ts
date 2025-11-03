@@ -3,7 +3,7 @@ type Ellipsis = typeof ELLIPSIS;
 export function getPaginationButtons({
   currentPage,
   totalPages,
-  maxVisibleButtons = 5,
+  maxVisibleButtons = 7,
 }: {
   currentPage: number;
   totalPages: number;
