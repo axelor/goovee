@@ -70,7 +70,7 @@ export default function Form({
       } else {
         toast({
           variant: 'success',
-          title: i18n.t('Settings updated successfully'),
+          title: i18n.t('Settings updated successfully.'),
         });
       }
     } catch (error) {
