@@ -102,15 +102,15 @@ export default async function Page({
                     tenant={tenant}
                   />
                 ))}
+                {pages > 1 && (
+                  <CardPagination
+                    url={`${workspaceURI}/directory`}
+                    pages={pages}
+                    searchParams={searchParams}
+                  />
+                )}
               </main>
             </div>
-            {pages > 1 && (
-              <CardPagination
-                url={`${workspaceURI}/directory`}
-                pages={pages}
-                searchParams={searchParams}
-              />
-            )}
           </>
         )}
       </div>
