@@ -1,8 +1,11 @@
 'use client';
 
-import {zodResolver} from '@hookform/resolvers/zod';
+import {useMemo, useEffect, type KeyboardEvent} from 'react';
+import {Search as SearchIcon, X as ClearIcon} from 'lucide-react';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
+import {zodResolver} from '@hookform/resolvers/zod';
+
 import {i18n} from '@/lib/core/locale';
 import {useSearchParams} from '@/ui/hooks';
 import {
@@ -21,10 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components';
-import {useMemo, useEffect} from 'react';
-import {defaultSortOption, sortOptions} from './common/constants';
-import {Search as SearchIcon, X as ClearIcon} from 'lucide-react';
-import React from 'react';
+
+import {defaultSortOption, sortOptions} from '../../../constants';
 
 const FilterSchema = z.object({
   name: z.string().optional(),
@@ -35,7 +36,7 @@ const FilterSchema = z.object({
 
 type FilterValues = z.infer<typeof FilterSchema>;
 
-export function DirectoryFilter() {
+export function Filter() {
   const {searchParams, update} = useSearchParams();
 
   const defaultValues = useMemo(
@@ -57,7 +58,7 @@ export function DirectoryFilter() {
     form.reset(defaultValues);
   }, [defaultValues, form]);
 
-  const handleSearch = (key: 'name' | 'city' | 'zip') => {
+  const handleUpdate = (key: keyof FilterValues) => {
     const value = form.getValues(key);
     update([
       {key, value},
@@ -65,7 +66,7 @@ export function DirectoryFilter() {
     ]);
   };
 
-  const handleClear = (key: 'name' | 'city' | 'zip') => {
+  const handleClear = (key: keyof FilterValues) => {
     form.setValue(key, '');
     update([
       {key, value: ''},
@@ -82,12 +83,12 @@ export function DirectoryFilter() {
   };
 
   const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    key: 'name' | 'city' | 'zip',
+    e: KeyboardEvent<HTMLInputElement>,
+    key: keyof FilterValues,
   ) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSearch(key);
+      handleUpdate(key);
     }
   };
 
@@ -125,7 +126,7 @@ export function DirectoryFilter() {
                     size="icon"
                     className="h-7 w-7"
                     tabIndex={-1}
-                    onClick={() => handleSearch('name')}>
+                    onClick={() => handleUpdate('name')}>
                     <SearchIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -164,7 +165,7 @@ export function DirectoryFilter() {
                     size="icon"
                     className="h-7 w-7"
                     tabIndex={-1}
-                    onClick={() => handleSearch('city')}>
+                    onClick={() => handleUpdate('city')}>
                     <SearchIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -203,7 +204,7 @@ export function DirectoryFilter() {
                     size="icon"
                     className="h-7 w-7"
                     tabIndex={-1}
-                    onClick={() => handleSearch('zip')}>
+                    onClick={() => handleUpdate('zip')}>
                     <SearchIcon className="h-4 w-4" />
                   </Button>
                 </div>

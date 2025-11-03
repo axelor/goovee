@@ -22,12 +22,12 @@ import {workspacePathname} from '@/utils/workspace';
 import {findEntries, findMapConfig} from './common/orm';
 import type {ListEntry, SearchParams} from './common/types';
 import {Card} from './common/ui/components/card';
+import {Filter} from './common/ui/components/filter';
 import {Map} from './common/ui/components/map';
 import {MapSkeleton} from './common/ui/components/map/map-skeleton';
 import {getOrderBy, getPages, getSkip} from './common/utils';
 import {ensureAuth} from './common/utils/auth-helper';
 import Hero from './hero';
-import {DirectoryFilter} from './search';
 
 const ITEMS_PER_PAGE = 7;
 
@@ -78,7 +78,7 @@ export default async function Page({
       />
       <div className="container mb-5">
         <div className="my-4">
-          <DirectoryFilter />
+          <Filter />
         </div>
         {!partners || partners.length === 0 ? (
           <h2 className="font-semibold text-xl text-center mt-5">
