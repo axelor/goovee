@@ -4,7 +4,9 @@ import {workspacePathname} from '@/utils/workspace';
 import Form from './form';
 import {findGooveeUserByEmail, isPartner, isAdminContact} from '@/orm/partner';
 
-export default async function DirectorySettingsPage({params}: {
+export default async function Page({
+  params,
+}: {
   params: {tenant: string; workspace: string};
 }) {
   const {tenant, workspaceURL} = workspacePathname(params);
