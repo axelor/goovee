@@ -1,131 +1,242 @@
 'use client';
-import {debounce} from 'lodash';
-import {useRouter} from 'next/navigation';
-import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 
-// ---- CORE IMPORTS ---- //
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {i18n} from '@/locale';
-import {Cloned} from '@/types/util';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
+import {i18n} from '@/lib/core/locale';
+import {useSearchParams} from '@/ui/hooks';
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/ui/components/command';
-import {useToast} from '@/ui/hooks';
-import {cn} from '@/utils/css';
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@/ui/components/form';
+import {Input} from '@/ui/components/input';
+import {Button} from '@/ui/components/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/components';
+import {useMemo, useEffect} from 'react';
+import {defaultSortOption, sortOptions} from './common/constants';
+import {Search as SearchIcon, X as ClearIcon} from 'lucide-react';
+import React from 'react';
 
-// ---- LOCAL IMPORTS ---- //
-import {searchEntries} from './common/actions';
-import type {ListEntry} from './common/types';
-import {Card} from './common/ui/components/card';
+const FilterSchema = z.object({
+  name: z.string().optional(),
+  city: z.string().optional(),
+  zip: z.string().optional(),
+  sort: z.string().optional(),
+});
 
-export function Search({
-  className,
-  inputClassName,
-}: {
-  inputClassName?: string;
-  className?: string;
-}) {
-  const router = useRouter();
-  const {workspaceURL, workspaceURI, tenant} = useWorkspace();
-  const {toast} = useToast();
-  const [search, setSearch] = useState<string>('');
-  const [open, setOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
-  const [searchResult, setSearchResult] = useState<Cloned<ListEntry>[]>([]);
-  const searchRef = useRef<string | undefined>();
+type FilterValues = z.infer<typeof FilterSchema>;
 
-  const fetchSearchResult = useMemo(
-    () =>
-      debounce(async (search: string) => {
-        try {
-          const {error, message, data} = await searchEntries({
-            search,
-            workspaceURL,
-          });
-          if (searchRef.current !== search) return;
-          if (error) {
-            setSearchResult([]);
-            toast({
-              variant: 'destructive',
-              title: message,
-            });
-            return;
-          }
-          setSearchResult(data);
-        } catch (e) {
-          toast({
-            variant: 'destructive',
-            title: i18n.t('Something went wrong'),
-          });
-        } finally {
-          if (searchRef.current === search) {
-            setLoading(false);
-          }
-        }
-      }, 500),
-    [toast, workspaceURL],
+export function DirectoryFilter() {
+  const {searchParams, update} = useSearchParams();
+
+  const defaultValues = useMemo(
+    () => ({
+      name: searchParams.get('name') ?? '',
+      city: searchParams.get('city') ?? '',
+      zip: searchParams.get('zip') ?? '',
+      sort: searchParams.get('sort') ?? defaultSortOption.value,
+    }),
+    [searchParams],
   );
 
-  const handleSearch = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const query = e.target.value;
-      setLoading(true);
-      setOpen(!!query);
-      searchRef.current = query;
-      setSearch(query);
-      fetchSearchResult(query);
-    },
-    [fetchSearchResult],
-  );
+  const form = useForm<FilterValues>({
+    resolver: zodResolver(FilterSchema),
+    defaultValues,
+  });
 
-  const handleRedirection = (id: string) => {
-    router.push(`${workspaceURI}/directory/entry/${id}`);
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [defaultValues, form]);
+
+  const handleSearch = (key: 'name' | 'city' | 'zip') => {
+    const value = form.getValues(key);
+    update([
+      {key, value},
+      {key: 'page', value: '1'},
+    ]);
+  };
+
+  const handleClear = (key: 'name' | 'city' | 'zip') => {
+    form.setValue(key, '');
+    update([
+      {key, value: ''},
+      {key: 'page', value: '1'},
+    ]);
+  };
+
+  const handleSortChange = (value: string) => {
+    form.setValue('sort', value);
+    update([
+      {key: 'sort', value},
+      {key: 'page', value: '1'},
+    ]);
+  };
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    key: 'name' | 'city' | 'zip',
+  ) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch(key);
+    }
   };
 
   return (
-    <div className={cn('w-full relative', className)}>
-      <Command className="p-0 bg-card" shouldFilter={false}>
-        <CommandInput
-          placeholder={i18n.t('Search here')}
-          className={cn(
-            'lg:placeholder:text-base placeholder:text-sm placeholder:font-normal lg:placeholder:font-medium pl-[10px] pr-[132px] h-12 lg:pl-4 border-none text-base font-medium rounded-lg focus-visible:ring-offset-0 focus-visible:ring-0 text-main-black',
-            inputClassName,
+    <Form {...form}>
+      <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({field}) => (
+            <FormItem>
+              <FormLabel>{i18n.t('Name')}</FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input
+                    placeholder={i18n.t('Search by name')}
+                    {...field}
+                    className="pr-20"
+                    onKeyDown={e => handleKeyDown(e, 'name')}
+                  />
+                </FormControl>
+                <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    tabIndex={-1}
+                    onClick={() => handleClear('name')}>
+                    <ClearIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    tabIndex={-1}
+                    onClick={() => handleSearch('name')}>
+                    <SearchIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </FormItem>
           )}
-          value={search}
-          onChangeCapture={handleSearch}
-          loading={loading}
         />
-
-        <CommandList
-          className={cn(
-            'absolute bg-card top-[60px] right-0 border border-grey-1 rounded-lg no-scrollbar text-main-black z-50 w-full p-0',
-            open ? 'block' : 'hidden',
-          )}>
-          <CommandEmpty>
-            {loading ? i18n.t('Searching...') : i18n.t('No results found.')}
-          </CommandEmpty>
-          <CommandGroup>
-            {Boolean(searchResult?.length)
-              ? searchResult.map(result => (
-                  <CommandItem
-                    key={result.id}
-                    value={result.id}
-                    onSelect={handleRedirection}
-                    className="block cursor-pointer">
-                    <Card item={result} tenant={tenant} compact />
-                  </CommandItem>
-                ))
-              : null}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </div>
+        <FormField
+          control={form.control}
+          name="city"
+          render={({field}) => (
+            <FormItem>
+              <FormLabel>{i18n.t('City')}</FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input
+                    placeholder={i18n.t('Search by city')}
+                    {...field}
+                    className="pr-20"
+                    onKeyDown={e => handleKeyDown(e, 'city')}
+                  />
+                </FormControl>
+                <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    tabIndex={-1}
+                    onClick={() => handleClear('city')}>
+                    <ClearIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    tabIndex={-1}
+                    onClick={() => handleSearch('city')}>
+                    <SearchIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="zip"
+          render={({field}) => (
+            <FormItem>
+              <FormLabel>{i18n.t('Zip Code')}</FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <Input
+                    placeholder={i18n.t('Search by zip code')}
+                    {...field}
+                    className="pr-20"
+                    onKeyDown={e => handleKeyDown(e, 'zip')}
+                  />
+                </FormControl>
+                <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    tabIndex={-1}
+                    onClick={() => handleClear('zip')}>
+                    <ClearIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    tabIndex={-1}
+                    onClick={() => handleSearch('zip')}>
+                    <SearchIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="sort"
+          render={({field}) => (
+            <FormItem>
+              <FormLabel>{i18n.t('Sort by')}</FormLabel>
+              <Select
+                onValueChange={handleSortChange}
+                defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={i18n.t('Select sort')} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {sortOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {i18n.t(option.label)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   );
 }
-
-export default Search;

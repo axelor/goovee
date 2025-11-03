@@ -24,10 +24,10 @@ import type {ListEntry, SearchParams} from './common/types';
 import {Card} from './common/ui/components/card';
 import {Map} from './common/ui/components/map';
 import {MapSkeleton} from './common/ui/components/map/map-skeleton';
-import {Sort} from './common/ui/components/sort';
 import {getOrderBy, getPages, getSkip} from './common/utils';
 import {ensureAuth} from './common/utils/auth-helper';
 import Hero from './hero';
+import {DirectoryFilter} from './search';
 
 const ITEMS_PER_PAGE = 7;
 
@@ -44,13 +44,23 @@ export default async function Page({
 
   const {workspace} = auth;
 
-  const {page = 1, limit = ITEMS_PER_PAGE, sort} = searchParams;
+  const {
+    page = 1,
+    limit = ITEMS_PER_PAGE,
+    sort,
+    name,
+    city,
+    zip,
+  } = searchParams;
 
   const partners = await findEntries({
     orderBy: getOrderBy(sort),
     take: +limit,
     skip: getSkip(limit, page),
     tenantId: tenant,
+    name,
+    city,
+    zip,
   });
 
   const pages = getPages(partners, limit);
@@ -67,6 +77,9 @@ export default async function Page({
         image={imageURL}
       />
       <div className="container mb-5">
+        <div className="my-4">
+          <DirectoryFilter />
+        </div>
         {!partners || partners.length === 0 ? (
           <h2 className="font-semibold text-xl text-center mt-5">
             {await t('No entries found.')}
@@ -79,7 +92,6 @@ export default async function Page({
                 <Suspense fallback={<MapSkeleton />}>
                   <ServerMap entries={partners} tenant={tenant} />
                 </Suspense>
-                <Sort />
               </aside>
               <main className="grow flex flex-col gap-4">
                 {partners.map(item => (

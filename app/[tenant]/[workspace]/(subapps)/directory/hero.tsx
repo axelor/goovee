@@ -9,7 +9,6 @@ import {HeroSearch} from '@/ui/components';
 import {BannerVariants} from '@/ui/components/banner';
 
 // ---- LOCAL IMPORTS ---- //
-import Search from './search';
 
 export const Hero = ({
   title,
@@ -23,8 +22,6 @@ export const Hero = ({
   image?: string;
   background?: VariantProps<BannerVariants>['background'];
 }) => {
-  const renderSearch = () => <Search />;
-
   return (
     <HeroSearch
       title={title || i18n.t('app-directory')}
@@ -37,7 +34,7 @@ export const Hero = ({
       background={background || 'default'}
       blendMode={background ? 'overlay' : 'normal'}
       image={image ?? IMAGE_URL}
-      renderSearch={renderSearch}
+      className="h-[250px] lg:h-[300px]"
     />
   );
 };
