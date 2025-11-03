@@ -88,11 +88,9 @@ export default async function Page({
           <>
             {/* NOTE: expand class applied by the map , when it is expanded and when it is in mobile view */}
             <div className="flex has-[.expand]:flex-col gap-4 mt-4">
-              <aside className="space-y-4 z-10">
-                <Suspense fallback={<MapSkeleton />}>
-                  <ServerMap entries={partners} tenant={tenant} />
-                </Suspense>
-              </aside>
+              <Suspense fallback={<MapSkeleton />}>
+                <ServerMap entries={partners} tenant={tenant} />
+              </Suspense>
               <main className="grow flex flex-col gap-4">
                 {partners.map(item => (
                   <Card
@@ -121,7 +119,17 @@ export default async function Page({
 async function ServerMap(props: {entries: ListEntry[]; tenant: string}) {
   const {entries, tenant} = props;
   const mapConfig = await findMapConfig({tenantId: tenant});
-  return <Map showExpand entries={clone(entries)} config={mapConfig} />;
+
+  const mapEntries = entries.filter(
+    x => x.mainAddress?.longit && x.mainAddress?.latit,
+  );
+  if (mapEntries.length === 0) return null;
+
+  return (
+    <aside className="space-y-4 z-10">
+      <Map showExpand entries={clone(mapEntries)} config={mapConfig} />
+    </aside>
+  );
 }
 
 type CardPaginationProps = {
