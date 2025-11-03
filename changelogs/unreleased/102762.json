@@ -1,0 +1,6 @@
+{
+  "title": "Enhance the Directory with new settings and improved display",
+  "description": "The Directory includes new settings and an improved display. A 'Directory settings' menu under 'My Account' allows users to configure company and personal contact visibility. The directory displays company contacts. The homepage features a searchable list of partners, and each partner has a dedicated detail page showing comprehensive information and associated contacts.",
+  "type": "feature",
+  "scope": ["directory", "core"]
+}
