@@ -9,46 +9,33 @@ import type {Entry, ListEntry} from '../../../types';
 
 import {getPartnerImageURL} from '@/utils/files';
 import {Tenant} from '@/lib/core/tenant';
+import {cn} from '@/utils/css';
 
 export type CardProps = {
   item: ListEntry | Entry | Cloned<Entry> | Cloned<ListEntry>;
   url?: string;
-  small?: boolean;
   compact?: boolean;
   tenant: Tenant['id'];
+  className?: string;
 };
 
 const stripImages = (htmlContent: Maybe<string>) =>
   htmlContent?.replace(/<img\b[^>]*>/gi, '');
 
 export function Card(props: CardProps) {
-  const {item, url, small, compact, tenant} = props;
+  const {item, url, compact, tenant, className} = props;
 
   const Wrapper = url ? Link : 'div';
-
-  if (small) {
-    return (
-      <Wrapper
-        href={{pathname: url}}
-        className="block bg-card p-3 rounded-md shadow-sm w-48">
-        <h4 className="font-semibold text-base truncate">
-          {item.portalCompanyName}
-        </h4>
-        {item.mainAddress?.formattedFullName && (
-          <p className="text-sm text-muted-foreground truncate">
-            {item.mainAddress.formattedFullName}
-          </p>
-        )}
-      </Wrapper>
-    );
-  }
 
   if (compact) {
     const addressText = item.mainAddress?.formattedFullName;
     return (
       <Wrapper
         href={{pathname: url}}
-        className="flex items-center gap-3 bg-card p-2 rounded-lg w-full">
+        className={cn(
+          'flex items-center gap-3 p-2 rounded-lg w-full',
+          className,
+        )}>
         <div className="w-10 h-10 flex-shrink-0 relative rounded-md overflow-hidden">
           <Image
             fill
@@ -66,7 +53,7 @@ export function Card(props: CardProps) {
             {item.portalCompanyName}
           </h4>
           {addressText && (
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground truncate !m-0">
               {addressText}
             </p>
           )}
@@ -78,7 +65,10 @@ export function Card(props: CardProps) {
   return (
     <Wrapper
       href={{pathname: url}}
-      className="flex bg-card rounded-lg overflow-hidden shadow-md border border-border/20 transition-all duration-300 hover:shadow-xl hover:border-primary/30">
+      className={cn(
+        'flex bg-card rounded-lg overflow-hidden shadow-md border border-border/20 transition-all duration-300 hover:shadow-xl hover:border-primary/10',
+        className,
+      )}>
       <div className="p-4 sm:p-5 flex-1">
         <h3 className="font-bold text-lg md:text-xl text-foreground line-clamp-2">
           {item.portalCompanyName}

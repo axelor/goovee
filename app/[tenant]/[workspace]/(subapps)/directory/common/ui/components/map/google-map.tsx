@@ -70,7 +70,13 @@ export function Marker(props: MarkerProps) {
       />
       {show && (
         <InfoWindow anchor={marker} onClose={handleClose} headerDisabled>
-          <Card item={item} url={url} small={small} tenant={tenant} />
+          <Card
+            item={item}
+            url={url}
+            compact={small}
+            tenant={tenant}
+            className="hover:bg-accent"
+          />
         </InfoWindow>
       )}
     </>

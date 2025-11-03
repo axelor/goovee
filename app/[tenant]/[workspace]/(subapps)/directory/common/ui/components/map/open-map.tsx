@@ -64,8 +64,9 @@ export const Map = memo((props: MapContentProps) => {
           <Card
             item={popup.item}
             url={`${workspaceURI}/directory/entry/${popup.item.id}`}
-            small={small}
+            compact={small}
             tenant={tenant}
+            className="hover:bg-accent"
           />,
           popup.el,
         )}
