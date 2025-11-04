@@ -211,8 +211,7 @@ export async function upload(formData: FormData, workspaceURL: string) {
           },
         },
         select: {
-          metaFile: true,
-          parent: true,
+          id: true,
         },
       });
     } catch (err) {}

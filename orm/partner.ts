@@ -21,8 +21,8 @@ const partnerFields = {
   isContact: true,
   name: true,
   password: true,
-  emailAddress: true,
-  picture: true,
+  emailAddress: {address: true},
+  picture: {id: true},
   mainPartner: {
     id: true,
     simpleFullName: true,
@@ -30,7 +30,7 @@ const partnerFields = {
       select: {
         isInvoicingAddr: true,
         isDefaultAddr: true,
-        address: true,
+        address: {formattedFullName: true},
       },
     },
   },
@@ -57,7 +57,7 @@ const partnerFields = {
         url: true,
       },
       isAdmin: true,
-      partner: true,
+      partner: {id: true, name: true},
     },
   },
   localization: {
@@ -70,12 +70,11 @@ const partnerFields = {
   isActivatedOnPortal: true,
   createdFromSelect: true,
   canSubscribeNoPublicEvent: true,
-  mainAddress: true,
   partnerAddressList: {
     select: {
       isInvoicingAddr: true,
       isDefaultAddr: true,
-      address: true,
+      address: {formattedFullName: true},
     },
   },
 } satisfies SelectOptions<AOSPartner>;
@@ -257,9 +256,7 @@ export async function updatePartner({
         ...data,
         id: String(data.id),
       },
-      select: {
-        localization: true,
-      },
+      select: {id: true},
     })
     .then(clone);
 

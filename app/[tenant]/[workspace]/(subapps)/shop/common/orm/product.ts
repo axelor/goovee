@@ -784,7 +784,7 @@ export async function findProductsFromStockLocation({
 
     const products = await client.aOSStockLocationLine.find({
       where: filters,
-      select: {product: true},
+      select: {product: {id: true}},
     });
 
     return products?.map((item: any) => item.product.id) || [];

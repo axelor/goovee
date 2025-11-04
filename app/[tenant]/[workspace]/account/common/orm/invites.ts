@@ -38,7 +38,18 @@ export async function findInviteById({
             isAdmin: true,
             contactAppPermissionList: {
               select: {
-                app: true,
+                app: {
+                  background: true,
+                  code: true,
+                  name: true,
+                  color: true,
+                  icon: true,
+                  installed: true,
+                  orderForMySpaceMenu: true,
+                  orderForTopMenu: true,
+                  showInMySpace: true,
+                  showInTopMenu: true,
+                },
                 roleSelect: true,
               },
             },
@@ -198,10 +209,7 @@ export async function findInviteForEmail({
         id: partnerId,
       },
     },
-    select: {
-      partner: true,
-      workspace: true,
-    },
+    select: {id: true},
   });
 
   return invite;

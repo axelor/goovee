@@ -54,7 +54,11 @@ export async function findFile({
     record = await client.aOSDMSFile.findOne({
       where: {id},
       select: {
-        metaFile: true,
+        metaFile: {
+          filePath: true,
+          fileName: true,
+          fileType: true,
+        },
       },
     });
 
@@ -110,7 +114,13 @@ export async function findLatestDMSFileByName({
         fileName: {like: `%${name}%`},
         ...(await filterPrivate({tenantId, user})),
       },
-      select: {metaFile: true},
+      select: {
+        metaFile: {
+          filePath: true,
+          fileName: true,
+          fileType: true,
+        },
+      },
       orderBy: {
         updatedOn: 'DESC',
       } as any,

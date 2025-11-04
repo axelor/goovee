@@ -1,5 +1,7 @@
+import type {AOSPartnerAddress} from '@/goovee/.generated/models';
 import {manager, type Tenant} from '@/tenant';
 import {PartnerAddress, Partner, ID} from '@/types';
+import type {SelectOptions} from '@goovee/orm';
 
 const addressFields = {
   address: {
@@ -8,7 +10,7 @@ const addressFields = {
     addressl3: true,
     addressl4: true,
     addressl6: true,
-    city: true,
+    city: {id: true, name: true, zip: true},
     streetName: true,
     countrySubDivision: true,
     firstName: true,
@@ -25,7 +27,7 @@ const addressFields = {
   isDefaultAddr: true,
   isDeliveryAddr: true,
   isInvoicingAddr: true,
-};
+} satisfies SelectOptions<AOSPartnerAddress>;
 
 export async function findPartnerAddress({
   partnerId,
@@ -515,8 +517,8 @@ export async function getFiscalPositionAndPriceListFromCountry({
         id: countryId,
       },
       select: {
-        fiscalPosition: true,
-        partnerPriceList: true,
+        fiscalPosition: {id: true},
+        partnerPriceList: {id: true},
       },
     });
 

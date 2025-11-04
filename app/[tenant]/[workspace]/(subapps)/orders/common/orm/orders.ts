@@ -81,7 +81,12 @@ export const findOrders = async ({
         createdOn: true,
         inTaxTotal: true,
         exTaxTotal: true,
-        currency: true,
+        currency: {
+          code: true,
+          name: true,
+          numberOfDecimals: true,
+          symbol: true,
+        },
       },
     })
     .catch((err: any) => {
@@ -334,9 +339,9 @@ export async function findInvoices({
       select: {
         invoiceId: true,
         createdOn: true,
-        saleOrder: true,
+        saleOrder: {id: true},
         invoiceLineList: {
-          select: {saleOrderLine: {saleOrder: true}},
+          select: {saleOrderLine: {saleOrder: {id: true}}},
         },
       },
     })

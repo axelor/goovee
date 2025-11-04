@@ -45,7 +45,7 @@ function getSelectFields({
     [commentField]: true,
     [trackingField]: true,
     createdOn: true,
-    partner: {picture: true, simpleFullName: true, name: true},
+    partner: {picture: {id: true}, simpleFullName: true, name: true},
     mailMessageFileList: {select: {attachmentFile: {id: true, fileName: true}}},
     createdBy: {id: true, fullName: true},
   } as const;

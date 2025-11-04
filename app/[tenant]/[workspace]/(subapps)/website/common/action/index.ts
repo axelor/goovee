@@ -127,7 +127,7 @@ export async function getLocaleRedirectionURL({
         },
       },
       select: {
-        pageSet: true,
+        pageSet: {select: {slug: true}},
       },
     });
     const relatedPage = websitePage?.pageSet?.[0];

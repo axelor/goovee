@@ -294,7 +294,7 @@ async function findResourcesFolders(params: Params) {
       },
       select: {
         fileName: true,
-        parent: true,
+        parent: {id: true},
       },
     })
     .then(result =>

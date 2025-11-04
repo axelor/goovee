@@ -59,9 +59,9 @@ export async function findContacts({
       name: true,
       firstName: true,
       simpleFullName: true,
-      emailAddress: true,
+      emailAddress: {address: true},
       fixedPhone: true,
-      mainPartner: true,
+      mainPartner: {id: true, simpleFullName: true},
     },
   });
 

@@ -125,7 +125,13 @@ export async function findUser({
       ...archivedFilter,
     },
     select: {
-      picture: true,
+      picture: {
+        fileName: true,
+        fileType: true,
+        fileSize: true,
+        filePath: true,
+        sizeText: true,
+      },
     },
   });
   return user;
@@ -238,7 +244,13 @@ export async function findPosts({
         title: true,
         forumGroup: {
           name: true,
-          image: true,
+          image: {
+            fileName: true,
+            fileType: true,
+            fileSize: true,
+            filePath: true,
+            sizeText: true,
+          },
         },
         postDateT: true,
         content: true,
@@ -254,7 +266,13 @@ export async function findPosts({
         },
         author: {
           simpleFullName: true,
-          picture: true,
+          picture: {
+            fileName: true,
+            fileType: true,
+            fileSize: true,
+            filePath: true,
+            sizeText: true,
+          },
         },
         createdOn: true,
       },
@@ -392,7 +410,7 @@ export async function findMemberGroupById({
       },
     },
     select: {
-      forumGroup: true,
+      forumGroup: {id: true},
     },
   });
 

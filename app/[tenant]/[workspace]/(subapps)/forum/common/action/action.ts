@@ -501,7 +501,19 @@ export async function addPost({
   try {
     const post = await client.aOSPortalForumPost.create({
       select: {
-        attachmentList: {select: {metaFile: true}},
+        attachmentList: {
+          select: {
+            metaFile: {
+              fileName: true,
+              fileType: true,
+              fileSize: true,
+              filePath: true,
+              sizeText: true,
+              createdOn: true,
+              updatedOn: true,
+            },
+          },
+        },
         title: true,
         forumGroup: {
           name: true,

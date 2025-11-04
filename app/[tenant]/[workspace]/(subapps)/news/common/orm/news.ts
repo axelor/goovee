@@ -391,10 +391,10 @@ export async function findCategories({
     },
     select: {
       name: true,
-      image: true,
-      parentCategory: true,
+      image: {id: true},
+      parentCategory: {id: true},
       slug: true,
-      workspace: true,
+      workspace: {id: true, name: true, url: true},
     },
   });
   return categories;

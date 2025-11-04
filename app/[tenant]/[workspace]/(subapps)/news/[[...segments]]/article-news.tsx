@@ -52,7 +52,7 @@ export async function ArticleNews({
         content: true,
         author: {
           simpleFullName: true,
-          picture: true,
+          picture: {id: true},
         },
       },
     },

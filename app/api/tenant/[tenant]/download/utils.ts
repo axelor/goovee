@@ -49,7 +49,7 @@ export async function findFile({
     record = await client.aOSDMSFile.findOne({
       where: {id},
       select: {
-        metaFile: true,
+        metaFile: {filePath: true, fileName: true, fileType: true},
       },
     });
 
