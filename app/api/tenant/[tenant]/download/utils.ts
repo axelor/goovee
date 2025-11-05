@@ -36,6 +36,11 @@ export async function findFile({
   if (meta) {
     record = await client.aOSMetaFile.findOne({
       where: {id},
+      select: {
+        filePath: true,
+        fileName: true,
+        fileType: true,
+      },
     });
 
     if (!record) {
