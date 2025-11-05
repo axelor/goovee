@@ -99,6 +99,7 @@ export async function deleteInviteById({
             }
           : {}),
       },
+      select: {id: true},
     });
 
     const result = await client.aOSPortalInvitation.delete({
@@ -268,6 +269,7 @@ export async function createInvite({
             })),
         },
       },
+      select: {id: true},
     });
   } catch (err) {
     console.error(err);
@@ -312,6 +314,7 @@ export async function createInvite({
             ],
           },
         },
+        select: {id: true},
       })
       .then(clone);
 

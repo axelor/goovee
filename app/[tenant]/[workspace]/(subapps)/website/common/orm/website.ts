@@ -655,6 +655,7 @@ async function getCustomRelationalFieldTypeData({
       where: {
         name: targetJsonModelName,
       },
+      select: {id: true},
     });
 
     if (!$targetJsonModel) {

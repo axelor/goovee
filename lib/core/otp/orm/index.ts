@@ -42,6 +42,15 @@ export async function create({
           expiresAt,
           used: false,
         },
+        select: {
+          entity: true,
+          scope: true,
+          used: true,
+          value: true,
+          expiresAt: true,
+          createdOn: true,
+          updatedOn: true,
+        },
       })
       .then(clone)
       .then(result => ({...result, otp}));
@@ -91,6 +100,15 @@ export async function findOne({
       entity,
       OR: [{used: {eq: null}}, {used: {eq: false}}],
     },
+    select: {
+      entity: true,
+      scope: true,
+      used: true,
+      value: true,
+      expiresAt: true,
+      createdOn: true,
+      updatedOn: true,
+    },
   });
 }
 
@@ -111,6 +129,15 @@ export async function findOneById({
     where: {
       id,
       OR: [{used: {eq: null}}, {used: {eq: false}}],
+    },
+    select: {
+      entity: true,
+      scope: true,
+      used: true,
+      value: true,
+      expiresAt: true,
+      createdOn: true,
+      updatedOn: true,
     },
   });
 }
@@ -160,5 +187,6 @@ export async function markUsed({
       version,
       used: true,
     },
+    select: {id: true},
   });
 }

@@ -165,6 +165,7 @@ export async function findEmailAddress(email: string, tenantId: Tenant['id']) {
     where: {
       address: email,
     },
+    select: {id: true},
   });
 }
 
@@ -336,13 +337,16 @@ export async function registerContact({
     data.defaultWorkspace = {select: [{id: contactConfig.id}]};
   }
 
-  const contact = await client.aOSPartner.create({data}).then(clone);
+  const contact = await client.aOSPartner
+    .create({data, select: {id: true}})
+    .then(clone);
   await client.aOSPartner.update({
     data: {
       id: mainPartner.id,
       version: mainPartner.version,
       contactPartnerSet: {select: {id: contact.id}},
     },
+    select: {id: true},
   });
   return contact;
 }
@@ -433,11 +437,14 @@ export async function registerPartner({
         id,
         version,
       },
+      select: {id: true},
     });
 
     return udpatedPartner;
   }
 
-  const partner = await client.aOSPartner.create({data}).then(clone);
+  const partner = await client.aOSPartner
+    .create({data, select: {id: true}})
+    .then(clone);
   return partner;
 }

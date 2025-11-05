@@ -154,6 +154,7 @@ export async function updateInviteApplication({
 
     const updatedConfig = await client.aOSPortalContactWorkspaceConfig.update({
       data,
+      select: {id: true},
     });
 
     return {
@@ -250,6 +251,7 @@ export async function updateInviteAuthentication({
           ],
         },
       },
+      select: {id: true},
     });
 
     return {

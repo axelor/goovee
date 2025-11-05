@@ -156,6 +156,7 @@ export async function pinGroup({
           },
           isPin,
         },
+        select: {id: true},
       })
       .then(clone);
 
@@ -325,6 +326,7 @@ export async function joinGroup({
           notificationSelect: NOTIFICATION_VALUES.ALL_ON_MY_POST,
           isPin: false,
         },
+        select: {id: true},
       })
       .then(clone);
 
@@ -414,6 +416,7 @@ export async function addGroupNotification({
           version: memberGroup.version,
           notificationSelect: notificationType,
         },
+        select: {id: true},
       })
       .then(clone);
 
@@ -737,13 +740,17 @@ async function uploadAttachment(formData: FormData): Promise<any> {
         fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
       );
 
-      const metaFile: any = await client.aOSMetaFile.create({
+      const metaFile = await client.aOSMetaFile.create({
         data: {
           fileName: name,
           filePath: timestampFilename,
           fileType: file.type,
           fileSize: file.size,
           sizeText: getFileSizeText(file.size),
+        },
+        select: {
+          fileName: true,
+          filePath: true,
         },
       });
 

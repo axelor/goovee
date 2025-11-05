@@ -86,6 +86,7 @@ export async function createPartnerAddress(
       isDeliveryAddr: values.isDeliveryAddr,
       isDefaultAddr: values.isDefaultAddr,
     },
+    select: {id: true},
   });
 
   if (values.isDeliveryAddr && values?.address?.country?.id) {
@@ -127,6 +128,8 @@ export async function updatePartnerAddress(
       address: {
         update: {
           ...values.address,
+          id: values?.address?.id as string,
+          version: values?.address?.version as number,
           country: {
             select: {
               id: values?.address?.country?.id,
@@ -139,6 +142,7 @@ export async function updatePartnerAddress(
       isDeliveryAddr: values.isDeliveryAddr,
       isDefaultAddr: values.isDefaultAddr,
     },
+    select: {id: true, isDeliveryAddr: true, isDefaultAddr: true},
   });
 
   if (values.isDeliveryAddr && values?.address?.country?.id) {
@@ -146,8 +150,8 @@ export async function updatePartnerAddress(
       partnerId,
       countryId: values.address.country.id,
       tenantId,
-      isDeliveryAddr: address?.isDeliveryAddr,
-      isDefaultAddr: address?.isDefaultAddr,
+      isDeliveryAddr: !!address?.isDeliveryAddr,
+      isDefaultAddr: !!address?.isDefaultAddr,
     });
   }
 
@@ -170,6 +174,7 @@ export async function deletePartnerAddress(
       },
       id: addressId,
     },
+    select: {id: true},
   });
 
   if (!address) return null;
@@ -332,6 +337,7 @@ export async function updateDefaultDeliveryAddress({
           version: current.version,
           isDefaultAddr: false,
         },
+        select: {id: true},
       });
     }
 
@@ -345,6 +351,7 @@ export async function updateDefaultDeliveryAddress({
             version: current.version,
             isDefaultAddr: false,
           },
+          select: {id: true},
         });
       }
     }
@@ -355,6 +362,7 @@ export async function updateDefaultDeliveryAddress({
         version: result.version,
         isDefaultAddr: isDefault,
       },
+      select: {id: true},
     });
 
     if (isDefault && result.address?.country) {
@@ -433,6 +441,7 @@ export async function updateDefaultInvoicingAddress({
           version: current.version,
           isDefaultAddr: false,
         },
+        select: {id: true},
       });
     }
 
@@ -446,6 +455,7 @@ export async function updateDefaultInvoicingAddress({
             version: current.version,
             isDefaultAddr: false,
           },
+          select: {id: true},
         });
       }
     }
@@ -456,6 +466,7 @@ export async function updateDefaultInvoicingAddress({
         version: result.version,
         isDefaultAddr: isDefault,
       },
+      select: {id: true},
     });
 
     return updatedDefault;
@@ -490,6 +501,7 @@ export async function findCountry({
       where: {
         id,
       },
+      select: {name: true},
     });
 
     return country;
@@ -575,6 +587,7 @@ export async function updatePartnerFiscalAndPriceList({
 
     const updatedPartner = await client.aOSPartner.update({
       data: updateData,
+      select: {id: true},
     });
 
     return updatedPartner;

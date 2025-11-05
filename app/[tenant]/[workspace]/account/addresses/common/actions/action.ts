@@ -207,7 +207,7 @@ export async function confirmAddresses({
 
     const client = await manager.getClient(tenantId);
     const result = await client.aOSOrder
-      .update({data: reqBody})
+      .update({data: reqBody, select: {id: true}})
       .then(clone)
       .catch(error => {
         console.error('Update error >>>', error);

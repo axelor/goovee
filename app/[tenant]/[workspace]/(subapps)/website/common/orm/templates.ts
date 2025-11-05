@@ -1021,6 +1021,7 @@ export async function createCMSWebsite(props: {
         id: _mainWebsite.id,
         version: _mainWebsite.version,
       },
+      select: {id: true, name: true},
     });
     await client.aOSPortalCmsSiteLanguage.deleteAll({
       where: {
@@ -1075,6 +1076,7 @@ export async function createCMSWebsite(props: {
         })),
       },
     },
+    select: {id: true},
   });
 
   if (_mainWebsite) {

@@ -248,6 +248,7 @@ export async function updateWikiContent({
       version: contentVersion,
       attrs: {...attributes, [fieldName]: content} as any,
     },
+    select: {id: true},
   });
   return {
     success: true,

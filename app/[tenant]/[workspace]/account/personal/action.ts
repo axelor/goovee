@@ -90,6 +90,7 @@ export async function updateProfileImage(formData: FormData) {
             sizeText: getFileSizeText(file.size),
             description: '',
           },
+          select: {id: true},
         })
         .then(clone);
     } catch (err) {
@@ -291,6 +292,7 @@ export async function update({
             name: newEmail,
             address: newEmail,
           },
+          select: {id: true},
         });
       };
 

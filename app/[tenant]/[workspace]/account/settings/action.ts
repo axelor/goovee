@@ -126,6 +126,7 @@ export async function removeWorkpace({workspaceURL}: {workspaceURL: string}) {
               remove: [partnerWorkspace?.id],
             },
           },
+          select: {id: true},
         })
         .then(clone);
     }
