@@ -215,9 +215,11 @@ export async function findNews({
               : {}),
           },
           select: {
+            id: true,
             name: true,
             color: true,
             parentCategory: {
+              id: true,
               name: true,
               color: true,
               parentCategory: {
@@ -862,6 +864,11 @@ export async function findNewsRelatedNews({
                       },
                     }
                   : {}),
+              },
+              select: {
+                id: true,
+                name: true,
+                color: true,
               },
             },
             publicationDateTime: true,
