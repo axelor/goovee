@@ -100,6 +100,7 @@ export async function findSelectionItems({
     where: {
       select: {name: {eq: selectionName}},
     },
+    select: {color: true, icon: true, order: true, title: true, value: true},
   });
 
   return options;

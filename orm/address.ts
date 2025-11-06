@@ -480,7 +480,9 @@ export async function findCountries(tenantId: Tenant['id']) {
 
   const client = await manager.getClient(tenantId);
 
-  const countries = await client.aOSCountry.find();
+  const countries = await client.aOSCountry.find({
+    select: {name: true},
+  });
 
   return countries;
 }
