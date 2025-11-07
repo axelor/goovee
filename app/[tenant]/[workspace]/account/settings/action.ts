@@ -76,6 +76,7 @@ export async function removeWorkpace({workspaceURL}: {workspaceURL: string}) {
                   url: workspaceURL,
                 },
               },
+              select: {id: true},
             },
           },
         })
@@ -108,6 +109,7 @@ export async function removeWorkpace({workspaceURL}: {workspaceURL: string}) {
                   url: workspaceURL,
                 },
               },
+              select: {id: true},
             },
           },
         })
