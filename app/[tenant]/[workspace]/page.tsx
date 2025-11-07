@@ -6,6 +6,7 @@ import {findSubapps} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {SEARCH_PARAMS} from '@/constants';
 import {getLoginURL} from '@/utils/url';
+import {ClientRedirection} from './client-redirection';
 
 export default async function Page({
   params,
@@ -38,5 +39,6 @@ export default async function Page({
     return user ? notFound() : redirect(loginURL);
   }
 
-  redirect(`${workspaceURL}/${apps[0].code}`);
+  const defaultApp = apps[0];
+  return <ClientRedirection url={`${workspaceURL}/${defaultApp.code}`} />;
 }

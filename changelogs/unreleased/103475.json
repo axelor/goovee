@@ -1,0 +1,5 @@
+{
+  "title": "Fix crash after login when there are no public apps",
+  "type": "fix",
+  "scope": ["core"]
+}
