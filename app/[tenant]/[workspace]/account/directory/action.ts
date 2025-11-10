@@ -11,6 +11,7 @@ import {
 import {ActionResponse} from '@/types/action';
 import {headers} from 'next/headers';
 import {DirectorySettingsFormValues, directorySettingsSchema} from './schema';
+import {findWorkspace} from '@/orm/workspace';
 
 export async function updateDirectorySettings({
   values,
@@ -26,9 +27,23 @@ export async function updateDirectorySettings({
     if (!session || !session.user) {
       return {error: true, message: await t('Unauthorized')};
     }
+    const user = session.user;
 
     if (!tenantId) {
       return {error: true, message: await t('Tenant not found')};
+    }
+
+    const workspace = await findWorkspace({
+      user,
+      url: workspaceURL,
+      tenantId,
+    });
+
+    if (!workspace) {
+      return {
+        error: true,
+        message: await t('Invalid workspace'),
+      };
     }
 
     const {success, data} = directorySettingsSchema.safeParse(values);

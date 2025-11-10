@@ -3,6 +3,8 @@ import {notFound} from 'next/navigation';
 import {workspacePathname} from '@/utils/workspace';
 import Form from './form';
 import {findGooveeUserByEmail, isPartner, isAdminContact} from '@/orm/partner';
+import {findWorkspace} from '@/orm/workspace';
+import {t} from '@/lib/core/locale/server';
 
 export default async function Page({
   params,
@@ -15,6 +17,19 @@ export default async function Page({
 
   if (!user) {
     return notFound();
+  }
+
+  const workspace = await findWorkspace({
+    user,
+    url: workspaceURL,
+    tenantId: tenant,
+  });
+
+  if (!workspace) {
+    return {
+      error: true,
+      message: await t('Invalid workspace'),
+    };
   }
 
   const partner = await findGooveeUserByEmail(user.email, tenant);
