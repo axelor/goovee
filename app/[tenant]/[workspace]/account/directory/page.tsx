@@ -2,7 +2,7 @@ import {getSession} from '@/auth';
 import {notFound} from 'next/navigation';
 import {workspacePathname} from '@/utils/workspace';
 import Form from './form';
-import {findGooveeUserByEmail, isPartner, isAdminContact} from '@/orm/partner';
+import {findGooveeUserByEmail, isAdminContact} from '@/orm/partner';
 import {findWorkspace} from '@/orm/workspace';
 import {t} from '@/lib/core/locale/server';
 
@@ -38,7 +38,7 @@ export default async function Page({
     return notFound();
   }
 
-  const isPartnerUser = Boolean(await isPartner());
+  const isPartnerUser = !user.isContact;
   const isAdminContactUser = Boolean(
     await isAdminContact({
       tenantId: tenant,

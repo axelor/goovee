@@ -5,7 +5,6 @@ import {TENANT_HEADER} from '@/middleware';
 import {
   findGooveeUserByEmail,
   isAdminContact,
-  isPartner,
   updatePartner,
 } from '@/orm/partner';
 import {ActionResponse} from '@/types/action';
@@ -52,7 +51,7 @@ export async function updateDirectorySettings({
       return {error: true, message: await t('Invalid data')};
     }
 
-    const isPartnerUser = Boolean(await isPartner());
+    const isPartnerUser = !user.isContact;
     const isAdminContactUser = Boolean(
       await isAdminContact({
         tenantId: tenantId,
@@ -67,7 +66,7 @@ export async function updateDirectorySettings({
 
     const canUpdateCompany = isPartnerUser || isAdminContactUser;
     const companyPartner = isPartnerUser ? partner : partner.mainPartner;
-    const canUpdateContact = partner.isContact;
+    const canUpdateContact = user.isContact;
 
     if (canUpdateCompany && companyPartner) {
       await updatePartner({
