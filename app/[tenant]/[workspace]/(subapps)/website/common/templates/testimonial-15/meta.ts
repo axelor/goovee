@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const testimonial15Code = 'testimonial15';
+
 export const testimonial15Schema = {
   title: 'Testimonial 15',
-  code: 'testimonial15',
+  code: testimonial15Code,
   type: Template.block,
   fields: [
     {
@@ -15,6 +17,18 @@ export const testimonial15Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial15Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-18 mt-n18',
     },
   ],
   models: [
@@ -49,11 +63,12 @@ export type Testimonial15Data = Data<typeof testimonial15Schema>;
 export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-18',
+    sequence: 6,
     data: {
       testimonial15Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Developer',
@@ -62,8 +77,6 @@ export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Financial Analyst',
@@ -72,8 +85,6 @@ export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Sales Manager',
@@ -82,8 +93,6 @@ export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Marketing Manager',
@@ -96,11 +105,12 @@ export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-18',
+    sequence: 6,
     data: {
       testimonial15Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Développeur',
@@ -109,8 +119,6 @@ export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Analyste financier',
@@ -119,8 +127,6 @@ export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Directeur des ventes',
@@ -129,8 +135,6 @@ export const testimonial15Demos: Demo<typeof testimonial15Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Responsable marketing',

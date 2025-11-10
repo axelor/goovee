@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const facts13Code = 'facts13';
+
 export const facts13Schema = {
   title: 'Facts 13',
-  code: 'facts13',
+  code: facts13Code,
   type: Template.block,
   fields: [
     {
@@ -40,6 +42,18 @@ export const facts13Schema = {
       title: 'Data Value 2',
       type: 'integer',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-15 py-md-17 pb-md-19 mb-13',
+    },
   ],
   models: [],
 } as const satisfies TemplateSchema;
@@ -49,6 +63,9 @@ export type Facts13Data = Data<typeof facts13Schema>;
 export const facts13Demos: Demo<typeof facts13Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-19',
+    sequence: 4,
     data: {
       facts13Title:
         'Choose our team of experts for reduced both cash and time.',
@@ -61,6 +78,9 @@ export const facts13Demos: Demo<typeof facts13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-19',
+    sequence: 4,
     data: {
       facts13Title:
         'Choisissez notre équipe d’experts pour réduire à la fois vos dépenses et votre temps.',

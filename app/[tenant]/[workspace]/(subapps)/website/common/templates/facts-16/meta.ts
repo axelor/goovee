@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const facts16Code = 'facts16';
+
 export const facts16Schema = {
   title: 'Facts 16',
-  code: 'facts16',
+  code: facts16Code,
   type: Template.block,
   fields: [
     {
@@ -25,6 +27,24 @@ export const facts16Schema = {
       title: 'Facts',
       type: 'json-one-to-many',
       target: 'Facts16Facts',
+    },
+    {
+      name: 'sectionClassName',
+      title: 'Section Class Name',
+      type: 'string',
+      defaultValue: 'section-frame overflow-hidden',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary rounded-4',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-17',
     },
   ],
   models: [
@@ -64,14 +84,15 @@ export type Facts16Data = Data<typeof facts16Schema>;
 export const facts16Demos: Demo<typeof facts16Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-22',
+    sequence: 5,
     data: {
       facts16Title:
         'Saving both time and cash by working with our qualified team.',
       facts16Caption: 'Company Facts',
       facts16Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'New Users',
             value: 75,
@@ -80,8 +101,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Social Networks',
             value: 80,
@@ -90,8 +109,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Referrals',
             value: 60,
@@ -100,8 +117,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'New Domain',
             value: 90,
@@ -114,14 +129,15 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-22',
+    sequence: 5,
     data: {
       facts16Title:
         'Économiser du temps et de l’argent en travaillant avec notre équipe qualifiée.',
       facts16Caption: 'Faits sur l’entreprise',
       facts16Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Nouveaux utilisateurs',
             value: 75,
@@ -130,8 +146,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Réseaux sociaux',
             value: 80,
@@ -140,8 +154,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Références',
             value: 60,
@@ -150,8 +162,6 @@ export const facts16Demos: Demo<typeof facts16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Nouveau domaine',
             value: 90,

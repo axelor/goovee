@@ -4,19 +4,21 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const testimonial5Code = 'testimonial5';
 
 export const testimonial5Schema = {
   title: 'Testimonial 5',
-  code: 'testimonial5',
+  code: testimonial5Code,
   type: Template.block,
   fields: [
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'slidesPerView',
@@ -33,6 +35,18 @@ export const testimonial5Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial5Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-16 pb-14 pb-md-0',
     },
   ],
   models: [
@@ -59,8 +73,8 @@ export const testimonial5Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial5Data = Data<typeof testimonial5Schema>;
@@ -68,20 +82,26 @@ export type Testimonial5Data = Data<typeof testimonial5Schema>;
 export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-15',
+    sequence: 4,
     data: {
       testimonial5Image: {
-        id: '1',
-        version: 1,
-        fileName: 'co1.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co1.png',
+        attrs: {
+          alt: 'Testimonial',
+          width: 335,
+          height: 567,
+          image: {
+            fileName: 'co1.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co1.png',
+          },
+        },
       },
       testimonial5SlidesPerView: 1,
       testimonial5Navigation: false,
       testimonial5Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Sales Director',
@@ -90,8 +110,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Marketing Manager',
@@ -100,8 +118,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'HR Manager',
@@ -110,8 +126,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Investment Planner',
@@ -124,20 +138,26 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-15',
+    sequence: 4,
     data: {
       testimonial5Image: {
-        id: '1',
-        version: 1,
-        fileName: 'co1.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co1.png',
+        attrs: {
+          alt: 'Témoignage',
+          width: 335,
+          height: 567,
+          image: {
+            fileName: 'co1.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co1.png',
+          },
+        },
       },
       testimonial5SlidesPerView: 1,
       testimonial5Navigation: false,
       testimonial5Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Directeur des ventes',
@@ -146,8 +166,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Responsable marketing',
@@ -156,8 +174,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'Responsable RH',
@@ -166,8 +182,6 @@ export const testimonial5Demos: Demo<typeof testimonial5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Planificateur d’investissement',

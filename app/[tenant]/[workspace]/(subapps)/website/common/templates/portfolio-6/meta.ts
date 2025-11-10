@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const portfolio6Code = 'portfolio6';
 
 export const portfolio6Schema = {
   title: 'Portfolio 6',
-  code: 'portfolio6',
+  code: portfolio6Code,
   type: Template.block,
   fields: [
     {
@@ -24,19 +26,9 @@ export const portfolio6Schema = {
     {
       name: 'image1',
       title: 'Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
-    },
-    {
-      name: 'image1Height',
-      title: 'Image 1 Height',
-      type: 'integer',
-    },
-    {
-      name: 'image1Width',
-      title: 'Image 1 Width',
-      type: 'integer',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'image1Link',
@@ -56,19 +48,9 @@ export const portfolio6Schema = {
     {
       name: 'image2',
       title: 'Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
-    },
-    {
-      name: 'image2Height',
-      title: 'Image 2 Height',
-      type: 'integer',
-    },
-    {
-      name: 'image2Width',
-      title: 'Image 2 Width',
-      type: 'integer',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'image2Link',
@@ -88,19 +70,9 @@ export const portfolio6Schema = {
     {
       name: 'image3',
       title: 'Image 3',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
-    },
-    {
-      name: 'image3Height',
-      title: 'Image 3 Height',
-      type: 'integer',
-    },
-    {
-      name: 'image3Width',
-      title: 'Image 3 Width',
-      type: 'integer',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'image3Link',
@@ -117,9 +89,20 @@ export const portfolio6Schema = {
       title: 'Title 3',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
+    },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Portfolio6Data = Data<typeof portfolio6Schema>;
@@ -127,42 +110,54 @@ export type Portfolio6Data = Data<typeof portfolio6Schema>;
 export const portfolio6Demos: Demo<typeof portfolio6Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-12',
+    sequence: 7,
     data: {
       portfolio6Title: 'Check out some of our recent projects below.',
       portfolio6Description: 'We love to turn ideas into beautiful things.',
       portfolio6Image1: {
-        id: '1',
-        version: 1,
-        fileName: 'rp1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp1.jpg',
+        attrs: {
+          alt: 'Ipsum Ultricies Cursus',
+          width: 568,
+          height: 455,
+          image: {
+            fileName: 'rp1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp1.jpg',
+          },
+        },
       },
-      portfolio6Image1Height: 455,
-      portfolio6Image1Width: 568,
       portfolio6Image1Link: '#',
       portfolio6Caption1: 'Stationary',
       portfolio6Title1: 'Ipsum Ultricies Cursus',
       portfolio6Image2: {
-        id: '1',
-        version: 1,
-        fileName: 'rp2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp2.jpg',
+        attrs: {
+          alt: 'Mollis Ipsum Mattis',
+          width: 568,
+          height: 531,
+          image: {
+            fileName: 'rp2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp2.jpg',
+          },
+        },
       },
-      portfolio6Image2Height: 531,
-      portfolio6Image2Width: 568,
       portfolio6Image2Link: '#',
       portfolio6Caption2: 'Invitation',
       portfolio6Title2: 'Mollis Ipsum Mattis',
       portfolio6Image3: {
-        id: '1',
-        version: 1,
-        fileName: 'rp3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp3.jpg',
+        attrs: {
+          alt: 'Magna Tristique Inceptos',
+          width: 568,
+          height: 382,
+          image: {
+            fileName: 'rp3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp3.jpg',
+          },
+        },
       },
-      portfolio6Image3Height: 382,
-      portfolio6Image3Width: 568,
       portfolio6Image3Link: '#',
       portfolio6Caption3: 'Notebook',
       portfolio6Title3: 'Magna Tristique Inceptos',
@@ -170,44 +165,56 @@ export const portfolio6Demos: Demo<typeof portfolio6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-12',
+    sequence: 7,
     data: {
       portfolio6Title:
         'Découvrez quelques-uns de nos projets récents ci-dessous.',
       portfolio6Description:
         'Nous aimons transformer les idées en de belles choses.',
       portfolio6Image1: {
-        id: '1',
-        version: 1,
-        fileName: 'rp1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp1.jpg',
+        attrs: {
+          alt: 'Ipsum Ultricies Cursus',
+          width: 568,
+          height: 455,
+          image: {
+            fileName: 'rp1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp1.jpg',
+          },
+        },
       },
-      portfolio6Image1Height: 455,
-      portfolio6Image1Width: 568,
       portfolio6Image1Link: '#',
       portfolio6Caption1: 'Papeterie',
       portfolio6Title1: 'Ipsum Ultricies Cursus',
       portfolio6Image2: {
-        id: '1',
-        version: 1,
-        fileName: 'rp2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp2.jpg',
+        attrs: {
+          alt: 'Mollis Ipsum Mattis',
+          width: 568,
+          height: 531,
+          image: {
+            fileName: 'rp2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp2.jpg',
+          },
+        },
       },
-      portfolio6Image2Height: 531,
-      portfolio6Image2Width: 568,
       portfolio6Image2Link: '#',
       portfolio6Caption2: 'Invitation',
       portfolio6Title2: 'Mollis Ipsum Mattis',
       portfolio6Image3: {
-        id: '1',
-        version: 1,
-        fileName: 'rp3.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/rp3.jpg',
+        attrs: {
+          alt: 'Magna Tristique Inceptos',
+          width: 568,
+          height: 382,
+          image: {
+            fileName: 'rp3.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/rp3.jpg',
+          },
+        },
       },
-      portfolio6Image3Height: 382,
-      portfolio6Image3Width: 568,
       portfolio6Image3Link: '#',
       portfolio6Caption3: 'Carnet',
       portfolio6Title3: 'Magna Tristique Inceptos',

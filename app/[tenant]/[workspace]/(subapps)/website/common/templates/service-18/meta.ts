@@ -4,13 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
+import {solidIconsSelection, colorsSelection} from '../meta-selections';
+
+export const service18Code = 'service18';
 
 export const service18Schema = {
   title: 'Service 18',
-  code: 'service18',
+  code: service18Code,
   type: Template.block,
   fields: [
     {
@@ -35,6 +35,18 @@ export const service18Schema = {
       type: 'json-one-to-many',
       target: 'Service18Service2',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light wrapper-border',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-18',
+    },
   ],
   models: [
     {
@@ -57,10 +69,7 @@ export const service18Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
       ],
     },
@@ -79,10 +88,7 @@ export const service18Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'description',
@@ -92,6 +98,7 @@ export const service18Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection, colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service18Data = Data<typeof service18Schema>;
@@ -99,14 +106,15 @@ export type Service18Data = Data<typeof service18Schema>;
 export const service18Demos: Demo<typeof service18Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-16',
+    sequence: 2,
     data: {
       service18Caption: 'My Services',
       service18Description:
         'Software engineers offer services related to software development, web and mobile app development, DevOps, cloud computing, database management, software testing, maintenance and support, consulting, and custom software development.',
       service18Services1: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'JavaScript',
             percent: 100,
@@ -114,8 +122,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'AWS',
             percent: 80,
@@ -123,8 +129,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'PHP',
             percent: 85,
@@ -132,8 +136,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'MongoDB',
             percent: 90,
@@ -143,8 +145,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
       ],
       service18Services2: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'Software Development',
@@ -152,8 +152,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'DevicesThree',
             title: 'DevOps',
@@ -161,8 +159,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Web Design',
@@ -170,8 +166,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Headphone',
             title: 'Support',
@@ -183,14 +177,15 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-16',
+    sequence: 2,
     data: {
       service18Caption: 'Mes services',
       service18Description:
         'Les ingénieurs logiciels proposent des services liés au développement de logiciels, au développement d’applications Web et mobiles, au DevOps, au cloud computing, à la gestion de bases de données, aux tests de logiciels, à la maintenance et au support, au conseil et au développement de logiciels personnalisés.',
       service18Services1: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'JavaScript',
             percent: 100,
@@ -198,8 +193,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'AWS',
             percent: 80,
@@ -207,8 +200,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'PHP',
             percent: 85,
@@ -216,8 +207,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'MongoDB',
             percent: 90,
@@ -227,8 +216,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
       ],
       service18Services2: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'Développement de logiciels',
@@ -237,8 +224,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'DevicesThree',
             title: 'DevOps',
@@ -247,8 +232,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Conception de sites Web',
@@ -257,8 +240,6 @@ export const service18Demos: Demo<typeof service18Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Headphone',
             title: 'Support',

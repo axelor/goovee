@@ -1,15 +1,16 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {uniconsSelection} from '../meta-selections';
+
+export const service3Code = 'service3';
 
 export const service3Schema = {
   title: 'Service 3',
-  code: 'service3',
+  code: service3Code,
   type: Template.block,
   fields: [
     {
@@ -27,6 +28,18 @@ export const service3Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service3Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
   models: [
@@ -50,10 +63,7 @@ export const service3Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'linkUrl',
@@ -68,6 +78,7 @@ export const service3Schema = {
       ],
     },
   ],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service3Data = Data<typeof service3Schema>;
@@ -75,14 +86,15 @@ export type Service3Data = Data<typeof service3Schema>;
 export const service3Demos: Demo<typeof service3Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-2',
+    sequence: 3,
     data: {
       service3Title: 'What We Do?',
       service3Caption:
         'We took pleasure in offering unique solutions to your particular needs.',
       service3Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'circuit',
             title: 'IoT Development',
@@ -93,8 +105,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'processor',
             title: 'Artificial Intelligence',
@@ -105,8 +115,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'setting',
             title: 'Software Maintenance',
@@ -117,8 +125,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'lock-access',
             title: 'Cybersecurity',
@@ -133,14 +139,15 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-2',
+    sequence: 3,
     data: {
       service3Title: 'Que faisons-nous ?',
       service3Caption:
         'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
       service3Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'circuit',
             title: 'Développement IoT',
@@ -151,8 +158,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'processor',
             title: 'Intelligence artificielle',
@@ -163,8 +168,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'setting',
             title: 'Maintenance logicielle',
@@ -175,8 +178,6 @@ export const service3Demos: Demo<typeof service3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'lock-access',
             title: 'Cybersécurité',

@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const portfolio3Code = 'portfolio3';
 
 export const portfolio3Schema = {
   title: 'Portfolio 3',
-  code: 'portfolio3',
+  code: portfolio3Code,
   type: Template.block,
   fields: [
     {
@@ -37,6 +39,18 @@ export const portfolio3Schema = {
       type: 'json-one-to-many',
       target: 'Portfolio3PortfolioList',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper overflow-hidden',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-lg-7 pb-14 pb-md-16',
+    },
   ],
   models: [
     {
@@ -51,9 +65,9 @@ export const portfolio3Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
+          target: 'Image',
         },
         {
           name: 'category',
@@ -69,8 +83,8 @@ export const portfolio3Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Portfolio3Data = Data<typeof portfolio3Schema>;
@@ -78,6 +92,9 @@ export type Portfolio3Data = Data<typeof portfolio3Schema>;
 export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-21',
+    sequence: 7,
     data: {
       portfolio3Caption: 'Latest Projects',
       portfolio3Description:
@@ -86,98 +103,116 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
       portfolio3Pagination: false,
       portfolio3PortfolioList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Mobile Design',
             title: 'Cras Fermentum Sem',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp1.jpg',
+              attrs: {
+                alt: 'Cras Fermentum Sem',
+                width: 585,
+                height: 384,
+                image: {
+                  fileName: 'sp1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp1.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Web Design',
             title: 'Venenatis Euismod Vehicula',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp2.jpg',
+              attrs: {
+                alt: 'Venenatis Euismod Vehicula',
+                width: 585,
+                height: 384,
+                image: {
+                  fileName: 'sp2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp2.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Stationary',
             title: 'Tortor Tellus Cursus',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp3.jpg',
+              attrs: {
+                alt: 'Tortor Tellus Cursus',
+                width: 585,
+                height: 384,
+                image: {
+                  fileName: 'sp3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp3.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Web Application',
             title: 'Ridiculus Sem Parturient',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp4.jpg',
+              attrs: {
+                alt: 'Ridiculus Sem Parturient',
+                width: 630,
+                height: 410,
+                image: {
+                  fileName: 'sp4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp4.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Web Design',
             title: 'Cursus Sollicitudin Adipiscing',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp5.jpg',
+              attrs: {
+                alt: 'Cursus Sollicitudin Adipiscing',
+                width: 630,
+                height: 410,
+                image: {
+                  fileName: 'sp5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp5.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Stationary',
             title: 'Fringilla Quam Vulputate',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp6.jpg',
+              attrs: {
+                alt: 'Fringilla Quam Vulputate',
+                width: 630,
+                height: 410,
+                image: {
+                  fileName: 'sp6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp6.jpg',
+                },
+              },
             },
           },
         },
@@ -186,6 +221,9 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-21',
+    sequence: 7,
     data: {
       portfolio3Caption: 'Derniers projets',
       portfolio3Description:
@@ -194,98 +232,116 @@ export const portfolio3Demos: Demo<typeof portfolio3Schema>[] = [
       portfolio3Pagination: false,
       portfolio3PortfolioList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Conception mobile',
             title: 'Cras Fermentum Sem',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp1.jpg',
+              attrs: {
+                alt: 'Cras Fermentum Sem',
+                width: 585,
+                height: 384,
+                image: {
+                  fileName: 'sp1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp1.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Conception de sites Web',
             title: 'Venenatis Euismod Vehicula',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp2.jpg',
+              attrs: {
+                alt: 'Venenatis Euismod Vehicula',
+                width: 585,
+                height: 384,
+                image: {
+                  fileName: 'sp2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp2.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Papeterie',
             title: 'Tortor Tellus Cursus',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp3.jpg',
+              attrs: {
+                alt: 'Tortor Tellus Cursus',
+                width: 585,
+                height: 384,
+                image: {
+                  fileName: 'sp3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp3.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Application Web',
             title: 'Ridiculus Sem Parturient',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp4.jpg',
+              attrs: {
+                alt: 'Ridiculus Sem Parturient',
+                width: 630,
+                height: 410,
+                image: {
+                  fileName: 'sp4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp4.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Conception de sites Web',
             title: 'Cursus Sollicitudin Adipiscing',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp5.jpg',
+              attrs: {
+                alt: 'Cursus Sollicitudin Adipiscing',
+                width: 630,
+                height: 410,
+                image: {
+                  fileName: 'sp5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp5.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             url: '#',
             category: 'Papeterie',
             title: 'Fringilla Quam Vulputate',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'sp6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/sp6.jpg',
+              attrs: {
+                alt: 'Fringilla Quam Vulputate',
+                width: 630,
+                height: 410,
+                image: {
+                  fileName: 'sp6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/sp6.jpg',
+                },
+              },
             },
           },
         },

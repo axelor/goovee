@@ -4,20 +4,22 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {imageModel} from '../json-models';
+import {ratingsSelection} from '../meta-selections';
+
+export const testimonial11Code = 'testimonial11';
 
 export const testimonial11Schema = {
   title: 'Testimonial 11',
-  code: 'testimonial11',
+  code: testimonial11Code,
   type: Template.block,
   fields: [
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'slidesPerView',
@@ -34,6 +36,18 @@ export const testimonial11Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial11Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-0 mt-md-n50p mb-14 mb-lg-n6',
     },
   ],
   models: [
@@ -62,12 +76,13 @@ export const testimonial11Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial11Data = Data<typeof testimonial11Schema>;
@@ -75,20 +90,26 @@ export type Testimonial11Data = Data<typeof testimonial11Schema>;
 export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-11',
+    sequence: 9,
     data: {
       testimonial11Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        attrs: {
+          alt: 'Testimonial',
+          width: 1440,
+          height: 680,
+          image: {
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       testimonial11SlidesPerView: 1,
       testimonial11Navigation: false,
       testimonial11Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Lukmen Wisley',
             designation: 'Ui Designer',
@@ -98,8 +119,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Marketing Specialist',
@@ -109,8 +128,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Sales Specialist',
@@ -124,20 +141,26 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-11',
+    sequence: 9,
     data: {
       testimonial11Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        attrs: {
+          alt: 'Témoignage',
+          width: 1440,
+          height: 680,
+          image: {
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       testimonial11SlidesPerView: 1,
       testimonial11Navigation: false,
       testimonial11Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Lukmen Wisley',
             designation: 'Ui Designer',
@@ -147,8 +170,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Spécialiste en marketing',
@@ -158,8 +179,6 @@ export const testimonial11Demos: Demo<typeof testimonial11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             designation: 'Spécialiste des ventes',

@@ -4,13 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {linkColors} from '../../constants/colors';
+import {solidIconsSelection, linkColorsSelection} from '../meta-selections';
+
+export const service16Code = 'service16';
 
 export const service16Schema = {
   title: 'Service 16',
-  code: 'service16',
+  code: service16Code,
   type: Template.block,
   fields: [
     {
@@ -18,6 +18,18 @@ export const service16Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service16Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16 mt-n18 mt-md-n21',
     },
   ],
   models: [
@@ -41,19 +53,13 @@ export const service16Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'linkType',
           title: 'Link Type',
           type: 'string',
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
         {
           name: 'iconClassName',
@@ -73,6 +79,7 @@ export const service16Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service16Data = Data<typeof service16Schema>;
@@ -80,11 +87,12 @@ export type Service16Data = Data<typeof service16Schema>;
 export const service16Demos: Demo<typeof service16Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-12',
+    sequence: 2,
     data: {
       service16Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Megaphone',
@@ -97,8 +105,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'ThumbsUp',
@@ -111,8 +117,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'IdCard',
@@ -125,8 +129,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Box',
@@ -143,11 +145,12 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-12',
+    sequence: 2,
     data: {
       service16Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Megaphone',
@@ -160,8 +163,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'ThumbsUp',
@@ -174,8 +175,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'IdCard',
@@ -188,8 +187,6 @@ export const service16Demos: Demo<typeof service16Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             link: '#',
             icon: 'Box',

@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const hero24Code = 'hero24';
 
 export const hero24Schema = {
   title: 'Hero 24',
-  code: 'hero24',
+  code: hero24Code,
   type: Template.block,
   fields: [
     {
@@ -17,6 +19,24 @@ export const hero24Schema = {
       type: 'json-one-to-many',
       target: 'Hero24Images',
     },
+    {
+      name: 'sectionClassName',
+      title: 'Section Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray overflow-hidden',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container-fluid px-xl-0 pt-6 pb-10',
+    },
   ],
   models: [
     {
@@ -24,8 +44,8 @@ export const hero24Schema = {
       title: 'Images',
       fields: [
         {
-          name: 'title',
-          title: 'Title',
+          name: 'name',
+          title: 'Name',
           type: 'string',
           nameField: true,
           visibleInGrid: true,
@@ -33,14 +53,14 @@ export const hero24Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Hero24Data = Data<typeof hero24Schema>;
@@ -48,89 +68,110 @@ export type Hero24Data = Data<typeof hero24Schema>;
 export const hero24Demos: Demo<typeof hero24Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-24',
+    sequence: 1,
     data: {
       hero24Images: [
         {
-          id: '1',
-          version: 0,
           attrs: {
-            title: 'Slide 1',
+            name: 'Image 1',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf1.jpg',
+              attrs: {
+                alt: 'Carousel image',
+                width: 790,
+                height: 531,
+                image: {
+                  fileName: 'cf1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf1.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
-            title: 'Slide 2',
+            name: 'Image 2',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf2.jpg',
+              attrs: {
+                alt: 'Carousel image',
+                width: 790,
+                height: 531,
+                image: {
+                  fileName: 'cf2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf2.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
-            title: 'Slide 3',
+            name: 'Image 3',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf3.jpg',
+              attrs: {
+                alt: 'Carousel image',
+                width: 790,
+                height: 531,
+                image: {
+                  fileName: 'cf3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf3.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
-            title: 'Slide 4',
+            name: 'Image 4',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf4.jpg',
+              attrs: {
+                alt: 'Carousel image',
+                width: 1200,
+                height: 800,
+                image: {
+                  fileName: 'cf4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf4.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
-            title: 'Slide 5',
+            name: 'Image 5',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf5.jpg',
+              attrs: {
+                alt: 'Carousel image',
+                width: 1200,
+                height: 800,
+                image: {
+                  fileName: 'cf5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf5.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
-            title: 'Slide 6',
+            name: 'Image 6',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf6.jpg',
+              attrs: {
+                alt: 'Carousel image',
+                width: 1200,
+                height: 800,
+                image: {
+                  fileName: 'cf6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf6.jpg',
+                },
+              },
             },
           },
         },
@@ -139,89 +180,110 @@ export const hero24Demos: Demo<typeof hero24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-24',
+    sequence: 1,
     data: {
       hero24Images: [
         {
-          id: '1',
-          version: 0,
           attrs: {
-            title: 'Slide 1',
+            name: 'Image 1',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf1.jpg',
+              attrs: {
+                alt: 'Image du carrousel',
+                width: 790,
+                height: 531,
+                image: {
+                  fileName: 'cf1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf1.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
-            title: 'Slide 2',
+            name: 'Image 2',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf2.jpg',
+              attrs: {
+                alt: 'Image du carrousel',
+                width: 790,
+                height: 531,
+                image: {
+                  fileName: 'cf2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf2.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
-            title: 'Slide 3',
+            name: 'Image 3',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf3.jpg',
+              attrs: {
+                alt: 'Image du carrousel',
+                width: 790,
+                height: 531,
+                image: {
+                  fileName: 'cf3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf3.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
-            title: 'Slide 4',
+            name: 'Image 4',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf4.jpg',
+              attrs: {
+                alt: 'Image du carrousel',
+                width: 1200,
+                height: 800,
+                image: {
+                  fileName: 'cf4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf4.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
-            title: 'Slide 5',
+            name: 'Image 5',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf5.jpg',
+              attrs: {
+                alt: 'Image du carrousel',
+                width: 1200,
+                height: 800,
+                image: {
+                  fileName: 'cf5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf5.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
-            title: 'Slide 6',
+            name: 'Image 6',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'cf6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/cf6.jpg',
+              attrs: {
+                alt: 'Image du carrousel',
+                width: 1200,
+                height: 800,
+                image: {
+                  fileName: 'cf6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/cf6.jpg',
+                },
+              },
             },
           },
         },

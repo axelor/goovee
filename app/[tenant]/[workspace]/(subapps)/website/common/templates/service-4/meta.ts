@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const service4Code = 'service4';
+
 export const service4Schema = {
   title: 'Service 4',
-  code: 'service4',
+  code: service4Code,
   type: Template.block,
   fields: [
     {
@@ -25,6 +27,18 @@ export const service4Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service4Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-19 pt-md-21 mb-14 mb-md-18',
     },
   ],
   models: [
@@ -55,6 +69,11 @@ export const service4Schema = {
           type: 'string',
         },
         {
+          name: 'linkTitle',
+          title: 'Link Title',
+          type: 'string',
+        },
+        {
           name: 'iconBoxClassNames',
           title: 'Icon Box Class Names',
           type: 'string',
@@ -69,30 +88,31 @@ export type Service4Data = Data<typeof service4Schema>;
 export const service4Demos: Demo<typeof service4Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-3',
+    sequence: 2,
     data: {
       service4Title: 'What We Do?',
       service4Caption:
         'We took pleasure in offering unique solutions to your particular needs.',
       service4Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'uil-circuit',
             title: 'IoT Development',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
+            linkTitle: 'Learn More',
             linkUrl: '#',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'uil-processor',
             title: 'Artificial Intelligence',
+            linkTitle: 'Learn More',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
@@ -101,11 +121,10 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'uil-setting',
             title: 'Software Maintenance',
+            linkTitle: 'Learn More',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
@@ -114,11 +133,10 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'uil-lock-access',
             title: 'Cybersecurity',
+            linkTitle: 'Learn More',
             description:
               'IoT development, devices are connected to the internet and data to provide useful services and automate processes.',
             linkUrl: '#',
@@ -131,59 +149,58 @@ export const service4Demos: Demo<typeof service4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-3',
+    sequence: 2,
     data: {
       service4Title: 'Que faisons-nous ?',
       service4Caption:
         'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
       service4Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'uil-circuit',
             title: 'Développement IoT',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'uil-processor',
             title: 'Intelligence artificielle',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'uil-setting',
             title: 'Maintenance logicielle',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
+            linkTitle: 'En savoir plus',
             linkUrl: '#',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'uil-lock-access',
             title: 'Cybersécurité',
             description:
               'Le développement IoT, les appareils sont connectés à Internet et les données pour fournir des services utiles et automatiser les processus.',
             linkUrl: '#',
+            linkTitle: 'En savoir plus',
             iconBoxClassNames:
               'icon btn btn-block btn-lg btn-soft-primary pe-none mb-6',
           },

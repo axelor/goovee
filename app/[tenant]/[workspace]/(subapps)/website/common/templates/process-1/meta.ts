@@ -5,9 +5,11 @@ import {
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
 
+export const process1Code = 'process1';
+
 export const process1Schema = {
   title: 'Process 1',
-  code: 'process1',
+  code: process1Code,
   type: Template.block,
   fields: [
     {
@@ -45,6 +47,18 @@ export const process1Schema = {
       title: 'Process List',
       type: 'json-one-to-many',
       target: 'Process1ProcessList',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled upper-start',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17',
     },
   ],
   models: [
@@ -86,6 +100,9 @@ export type Process1Data = Data<typeof process1Schema>;
 export const process1Demos: Demo<typeof process1Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-1',
+    sequence: 4,
     data: {
       process1Link: '#',
       process1Title: 'Our Strategy',
@@ -94,8 +111,6 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
       process1LinkText: 'Learn More',
       process1ProcessList: [
         {
-          id: '8',
-          version: 1,
           attrs: {
             no: '1',
             title: 'Specialization',
@@ -104,8 +119,6 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           },
         },
         {
-          id: '9',
-          version: 1,
           attrs: {
             no: '2',
             title: 'Collaboration',
@@ -114,8 +127,6 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           },
         },
         {
-          id: '10',
-          version: 1,
           attrs: {
             no: '3',
             title: 'Innovation',
@@ -132,6 +143,9 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-1',
+    sequence: 4,
     data: {
       process1Link: '#',
       process1Title: 'Notre stratégie',
@@ -140,8 +154,6 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
       process1LinkText: 'En savoir plus',
       process1ProcessList: [
         {
-          id: '8',
-          version: 1,
           attrs: {
             no: '1',
             title: 'Spécialisation',
@@ -151,8 +163,6 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           },
         },
         {
-          id: '9',
-          version: 1,
           attrs: {
             no: '2',
             title: 'Collaboration',
@@ -162,8 +172,6 @@ export const process1Demos: Demo<typeof process1Schema>[] = [
           },
         },
         {
-          id: '10',
-          version: 1,
           attrs: {
             no: '3',
             title: 'Innovation',

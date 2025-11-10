@@ -4,20 +4,21 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
+
+export const footer6Code = 'footer6';
 
 export const footer6Schema = {
   title: 'Footer 6',
-  code: 'footer6',
+  code: footer6Code,
   type: Template.block,
   fields: [
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'copyright',
@@ -71,6 +72,18 @@ export const footer6Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-dark text-inverse mt-5 mt-md-16',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-13 py-md-15',
+    },
   ],
   models: [
     socialLinksModel,
@@ -92,8 +105,8 @@ export const footer6Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer6Data = Data<typeof footer6Schema>;
@@ -101,13 +114,21 @@ export type Footer6Data = Data<typeof footer6Schema>;
 export const footer6Demos: Demo<typeof footer6Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-5',
+    sequence: 8,
     data: {
       footer6Logo: {
-        id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer6Copyright: '© 2022 Lighthouse. All rights reserved.',
       footer6AddressTitle: 'Get in Touch',
@@ -120,16 +141,14 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
       footer6NewsletterDescription:
         'Subscribe to our newsletter to get our news & deals delivered to you.',
       footer6Links: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer6SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -137,8 +156,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -146,8 +163,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -155,8 +170,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -164,8 +177,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -177,13 +188,21 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-5',
+    sequence: 8,
     data: {
       footer6Logo: {
-        id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer6Copyright: '© 2022 Lighthouse. Tous les droits sont réservés.',
       footer6AddressTitle: 'Contactez-nous',
@@ -196,24 +215,18 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
       footer6NewsletterDescription:
         'Abonnez-vous à notre newsletter pour recevoir nos actualités et nos offres.',
       footer6Links: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
         {
-          id: '4',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer6SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -221,8 +234,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -230,8 +241,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -239,8 +248,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -248,8 +255,6 @@ export const footer6Demos: Demo<typeof footer6Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',

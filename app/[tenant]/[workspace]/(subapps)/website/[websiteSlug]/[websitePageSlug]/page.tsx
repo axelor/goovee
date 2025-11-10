@@ -1,20 +1,21 @@
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
+import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
+import {MOUNT_TYPE} from '@/subapps/website/common/constants';
 import {
   canEditWiki,
   findWebsitePageBySlug,
+  findWebsitePageSeoBySlug,
+  populateLinesByChunk,
+  ReplacedContentLine,
 } from '@/subapps/website/common/orm/website';
-import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
-import {
-  getWebsiteComponent,
-  getWebsitePlugins,
-} from '@/subapps/website/common/utils/component';
-import {MOUNT_TYPE} from '@/subapps/website/common/constants';
 import {clone} from '@/utils';
+import {Suspense} from 'react';
+import {Plugins, Template} from '../client-wrapper';
 
 export async function generateMetadata({
   params,
@@ -32,7 +33,7 @@ export async function generateMetadata({
   const session = await getSession();
   const user = session?.user;
 
-  const websitePage = await findWebsitePageBySlug({
+  const websitePage = await findWebsitePageSeoBySlug({
     websiteSlug,
     websitePageSlug,
     workspaceURL,
@@ -82,13 +83,58 @@ export default async function Page({
     return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
   }
 
-  const codes: string[] = [];
-  const components = websitePage.contentLines.map(line => {
-    if (!line?.content?.component) return;
-    const Component = getWebsiteComponent(line.content.component);
-    codes.push(line.content.component.code!);
+  let contentLinesChunk: Promise<ReplacedContentLine[]>[] = [];
+
+  if (websitePage?.contentLines?.length) {
+    contentLinesChunk = populateLinesByChunk({
+      contentLines: websitePage?.contentLines,
+      tenantId: tenant,
+      chunkSize: 5,
+    });
+  }
+
+  return (
+    <>
+      {contentLinesChunk.map((chunkPromise, i) => {
+        return (
+          <Suspense key={i}>
+            <ContentChunkRenderer
+              chunkPromise={chunkPromise}
+              workspaceURI={workspaceURI}
+              websiteSlug={websiteSlug}
+              websitePageSlug={websitePageSlug}
+              canEditWiki={canUserEditWiki}
+            />
+          </Suspense>
+        );
+      })}
+      {
+        <Suspense>
+          <PluginsRenderer chunkPromises={contentLinesChunk} />
+        </Suspense>
+      }
+    </>
+  );
+}
+async function ContentChunkRenderer({
+  chunkPromise,
+  workspaceURI,
+  websiteSlug,
+  websitePageSlug,
+  canEditWiki,
+}: {
+  chunkPromise: Promise<ReplacedContentLine[]>;
+  workspaceURI: string;
+  websiteSlug: string;
+  websitePageSlug: string;
+  canEditWiki: boolean;
+}) {
+  const lines = await chunkPromise;
+
+  const components = lines.map(line => {
+    if (!line?.content?.component) return null;
     return (
-      <Component
+      <Template
         key={line.id}
         data={clone(line.content.attrs)}
         lineId={line.id}
@@ -99,18 +145,28 @@ export default async function Page({
         websitePageSlug={websitePageSlug}
         code={line.content.component.code}
         mountType={MOUNT_TYPE.PAGE}
-        canEditWiki={canUserEditWiki}
+        canEditWiki={canEditWiki}
       />
     );
   });
 
-  const plugins = getWebsitePlugins(codes).map((Plugin, i) => (
-    <Plugin key={i} />
-  ));
-  return (
-    <>
-      {plugins}
-      {components}
-    </>
+  return components;
+}
+
+async function PluginsRenderer({
+  chunkPromises,
+}: {
+  chunkPromises: Promise<ReplacedContentLine[]>[];
+}) {
+  const settled = await Promise.allSettled(chunkPromises).then(r =>
+    r.filter(r => r.status === 'fulfilled'),
   );
+
+  const lines = settled.map(r => r.value).flat();
+
+  const codes = lines
+    .map(line => line?.content?.component?.code)
+    .filter(Boolean) as string[];
+
+  return <Plugins codes={codes} />;
 }

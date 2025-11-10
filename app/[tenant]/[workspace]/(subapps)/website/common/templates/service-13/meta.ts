@@ -1,16 +1,17 @@
-import {startCase} from 'lodash-es';
-import {unicons} from '../../constants/unicons';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+import {uniconsSelection} from '../meta-selections';
+
+export const service13Code = 'service13';
 
 export const service13Schema = {
   title: 'Service 13',
-  code: 'service13',
+  code: service13Code,
   type: Template.block,
   fields: [
     {
@@ -21,15 +22,27 @@ export const service13Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'services',
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service13Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-dark',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
     },
   ],
   models: [
@@ -48,10 +61,7 @@ export const service13Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'description',
@@ -70,8 +80,9 @@ export const service13Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service13Data = Data<typeof service13Schema>;
@@ -79,19 +90,25 @@ export type Service13Data = Data<typeof service13Schema>;
 export const service13Demos: Demo<typeof service13Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-10',
+    sequence: 2,
     data: {
       service13Title: 'Our service is customized to the unique needs of you.',
       service13Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about15.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about15.jpg',
+        attrs: {
+          alt: 'Our service',
+          width: 1200,
+          height: 582,
+          image: {
+            fileName: 'about15.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about15.jpg',
+          },
+        },
       },
       service13Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'IoT Development',
             icon: 'circuit',
@@ -102,8 +119,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Artificial Intelligence',
             icon: 'processor',
@@ -114,8 +129,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Software Maintenance',
             icon: 'setting',
@@ -126,8 +139,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersecurity',
             icon: 'lock-access',
@@ -142,20 +153,26 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-10',
+    sequence: 2,
     data: {
       service13Title:
         'Notre service est personnalisé pour répondre à vos besoins uniques.',
       service13Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about15.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about15.jpg',
+        attrs: {
+          alt: 'Notre service',
+          width: 1200,
+          height: 582,
+          image: {
+            fileName: 'about15.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about15.jpg',
+          },
+        },
       },
       service13Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Développement IoT',
             icon: 'circuit',
@@ -166,8 +183,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Intelligence artificielle',
             icon: 'processor',
@@ -178,8 +193,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Maintenance logicielle',
             icon: 'setting',
@@ -190,8 +203,6 @@ export const service13Demos: Demo<typeof service13Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersécurité',
             icon: 'lock-access',

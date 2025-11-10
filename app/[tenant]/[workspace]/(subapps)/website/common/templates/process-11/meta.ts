@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const process11Code = 'process11';
 
 export const process11Schema = {
   title: 'Process 11',
-  code: 'process11',
+  code: process11Code,
   type: Template.block,
   fields: [
     {
@@ -29,15 +31,27 @@ export const process11Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'processes',
       title: 'Processes',
       type: 'json-one-to-many',
       target: 'Process11Processes',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-17',
     },
   ],
   models: [
@@ -64,8 +78,8 @@ export const process11Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Process11Data = Data<typeof process11Schema>;
@@ -73,22 +87,28 @@ export type Process11Data = Data<typeof process11Schema>;
 export const process11Demos: Demo<typeof process11Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-14',
+    sequence: 7,
     data: {
       process11Title:
         "Simply relax and enjoy as we manage your company's requirements.",
       process11Caption: 'Company Strategy',
       process11Heading: 'Our Working Process',
       process11Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about20.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about20.jpg',
+        attrs: {
+          alt: 'Our working process',
+          width: 650,
+          height: 525,
+          image: {
+            fileName: 'about20.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about20.jpg',
+          },
+        },
       },
       process11Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Personalized service',
@@ -97,8 +117,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Competitive pricing',
@@ -107,8 +125,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Timely delivery',
@@ -121,22 +137,28 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-14',
+    sequence: 7,
     data: {
       process11Title:
         'Détendez-vous simplement et profitez pendant que nous gérons les exigences de votre entreprise.',
       process11Caption: 'Stratégie d’entreprise',
       process11Heading: 'Notre processus de travail',
       process11Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about20.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about20.jpg',
+        attrs: {
+          alt: 'Notre processus de travail',
+          width: 650,
+          height: 525,
+          image: {
+            fileName: 'about20.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about20.jpg',
+          },
+        },
       },
       process11Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Service personnalisé',
@@ -145,8 +167,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Prix compétitifs',
@@ -155,8 +175,6 @@ export const process11Demos: Demo<typeof process11Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Livraison à temps',

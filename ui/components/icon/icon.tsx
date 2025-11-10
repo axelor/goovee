@@ -7,19 +7,22 @@ import {
   MdOutlineWarningAmber,
   MdStorefront,
   MdAppRegistration,
-  MdDocumentScanner,
-  MdShoppingBag,
   MdReceiptLong,
-  MdOutlineReceipt,
+  MdOutlineReceiptLong,
   MdPayment,
-  MdNewspaper,
-  MdEvent,
+  MdOutlineNewspaper,
+  MdOutlineEvent,
   MdOutlineForum,
-  MdListAlt,
+  MdOutlineLiveHelp,
   MdFolder,
-  MdOutlinePoll,
+  MdOutlineAssessment,
+  MdOutlineShoppingBag,
   MdAccountCircle,
+  MdOutlineWeb,
 } from 'react-icons/md';
+
+import {FaShareAltSquare} from 'react-icons/fa';
+import {GiDiscussion} from 'react-icons/gi';
 
 interface IconMapping {
   storeFront: IconType;
@@ -38,8 +41,10 @@ interface IconMapping {
   forum: IconType;
   ticketing: IconType;
   directory: IconType;
+  website: IconType;
   survey: IconType;
   account: IconType;
+  chat: IconType;
 }
 
 function getIcon(type: keyof IconMapping): IconType | undefined {
@@ -49,19 +54,21 @@ function getIcon(type: keyof IconMapping): IconType | undefined {
     toastError: MdErrorOutline,
     toastWarning: MdOutlineWarningAmber,
     toastPrimary: MdErrorOutline,
-    shop: MdShoppingBag,
-    quotation: MdOutlineReceipt,
+    shop: MdOutlineShoppingBag,
+    quotation: MdOutlineReceiptLong,
     invoice: MdPayment,
     order: MdReceiptLong,
-    resource: MdDocumentScanner,
+    resource: FaShareAltSquare,
     app: MdAppRegistration,
-    newspaper: MdNewspaper,
-    event: MdEvent,
-    forum: MdOutlineForum,
-    ticketing: MdListAlt,
+    newspaper: MdOutlineNewspaper,
+    event: MdOutlineEvent,
+    forum: GiDiscussion,
+    ticketing: MdOutlineLiveHelp,
     directory: MdFolder,
-    survey: MdOutlinePoll,
+    survey: MdOutlineAssessment,
     account: MdAccountCircle,
+    website: MdOutlineWeb,
+    chat: MdOutlineForum,
   };
 
   const icon = iconMapping[type];

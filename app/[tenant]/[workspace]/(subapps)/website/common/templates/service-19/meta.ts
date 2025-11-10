@@ -1,16 +1,20 @@
-import {startCase} from 'lodash-es';
-import {colors, linkColors} from '../../constants/colors';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {unicons} from '../../constants/unicons';
+import {
+  uniconsSelection,
+  colorsSelection,
+  linkColorsSelection,
+} from '../meta-selections';
+
+export const service19Code = 'service19';
 
 export const service19Schema = {
   title: 'Service 19',
-  code: 'service19',
+  code: service19Code,
   type: Template.block,
   fields: [
     {
@@ -28,6 +32,18 @@ export const service19Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service19Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
   models: [
@@ -56,19 +72,13 @@ export const service19Schema = {
           name: 'iconColor',
           title: 'Icon Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
         {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'linkTitle',
@@ -79,14 +89,12 @@ export const service19Schema = {
           name: 'linkColor',
           title: 'Link Color',
           type: 'string',
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
       ],
     },
   ],
+  selections: [uniconsSelection, colorsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service19Data = Data<typeof service19Schema>;
@@ -94,14 +102,15 @@ export type Service19Data = Data<typeof service19Schema>;
 export const service19Demos: Demo<typeof service19Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-17',
+    sequence: 2,
     data: {
       service19Caption: 'What We Do?',
       service19Description:
         'We have designed our services with your specific needs in mind.',
       service19Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'IoT Development',
             linkUrl: '#',
@@ -114,8 +123,6 @@ export const service19Demos: Demo<typeof service19Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Artificial Intelligence',
             linkUrl: '#',
@@ -128,8 +135,6 @@ export const service19Demos: Demo<typeof service19Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Software Maintenance',
             linkUrl: '#',
@@ -146,14 +151,15 @@ export const service19Demos: Demo<typeof service19Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-17',
+    sequence: 2,
     data: {
       service19Caption: 'Que faisons-nous ?',
       service19Description:
         'Nous avons conçu nos services en pensant à vos besoins spécifiques.',
       service19Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Développement IoT',
             linkUrl: '#',
@@ -166,8 +172,6 @@ export const service19Demos: Demo<typeof service19Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Intelligence artificielle',
             linkUrl: '#',
@@ -180,8 +184,6 @@ export const service19Demos: Demo<typeof service19Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Maintenance logicielle',
             linkUrl: '#',

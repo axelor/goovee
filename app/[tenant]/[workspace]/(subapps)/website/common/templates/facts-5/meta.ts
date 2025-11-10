@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {linealIcons} from '@/subapps/website/common/icons/lineal';
-import {startCase} from 'lodash-es';
+import {linealIconsSelection} from '../meta-selections';
+
+export const facts5Code = 'facts5';
 
 export const facts5Schema = {
   title: 'Facts 5',
-  code: 'facts5',
+  code: facts5Code,
   type: Template.block,
   fields: [
     {
@@ -17,6 +18,18 @@ export const facts5Schema = {
       title: 'Facts',
       type: 'json-one-to-many',
       target: 'Facts5Facts',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
     },
   ],
   models: [
@@ -40,14 +53,12 @@ export const facts5Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: linealIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'lineal-icons',
         },
       ],
     },
   ],
+  selections: [linealIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Facts5Data = Data<typeof facts5Schema>;
@@ -55,11 +66,12 @@ export type Facts5Data = Data<typeof facts5Schema>;
 export const facts5Demos: Demo<typeof facts5Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-15',
+    sequence: 6,
     data: {
       facts5Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Completed Projects',
             value: 7518,
@@ -67,8 +79,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Satisfied Customers',
             value: 3472,
@@ -76,8 +86,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Expert Employees',
             value: 2184,
@@ -85,8 +93,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             value: 4523,
@@ -98,11 +104,12 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-15',
+    sequence: 6,
     data: {
       facts5Facts: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Projets terminés',
             value: 7518,
@@ -110,8 +117,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients satisfaits',
             value: 3472,
@@ -119,8 +124,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Employés experts',
             value: 2184,
@@ -128,8 +131,6 @@ export const facts5Demos: Demo<typeof facts5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             value: 4523,

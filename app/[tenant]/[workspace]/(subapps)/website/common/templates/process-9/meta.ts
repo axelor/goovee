@@ -4,13 +4,14 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {imageModel} from '../json-models';
+import {solidIconsSelection, buttonColorSelection} from '../meta-selections';
+
+export const process9Code = 'process9';
 
 export const process9Schema = {
   title: 'Process 9',
-  code: 'process9',
+  code: process9Code,
   type: Template.block,
   fields: [
     {
@@ -31,24 +32,15 @@ export const process9Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'btnColor',
       title: 'Button Color',
       type: 'string',
-      selection: [
-        {
-          title: 'White',
-          value: 'white',
-        },
-        {
-          title: 'Primary',
-          value: 'primary',
-        },
-      ],
+      selection: 'button-colors',
     },
     {
       name: 'video',
@@ -69,6 +61,18 @@ export const process9Schema = {
       type: 'json-one-to-many',
       target: 'Process9Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-19',
+    },
   ],
   models: [
     {
@@ -84,10 +88,7 @@ export const process9Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -103,8 +104,9 @@ export const process9Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [buttonColorSelection, solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process9Data = Data<typeof process9Schema>;
@@ -112,22 +114,28 @@ export type Process9Data = Data<typeof process9Schema>;
 export const process9Demos: Demo<typeof process9Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-9',
+    sequence: 5,
     data: {
       process9Title: 'Our Working Process',
       process9Caption: 'How It Works?',
       process9Description:
         'Find out why our happy customers choose us by following these steps',
       process9Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about8.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about8.jpg',
+        attrs: {
+          alt: 'About us',
+          width: 596,
+          height: 565,
+          image: {
+            fileName: 'about8.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about8.jpg',
+          },
+        },
       },
       process9BtnColor: 'white',
       process9Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
@@ -135,8 +143,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       process9HideShape: false,
       process9Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: 'Secured Transactions',
@@ -146,8 +152,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: 'Bills Planning',
@@ -157,8 +161,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: 'Always up to date',
@@ -172,22 +174,28 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-9',
+    sequence: 5,
     data: {
       process9Title: 'Notre processus de travail',
       process9Caption: 'Comment ça marche ?',
       process9Description:
         'Découvrez pourquoi nos clients satisfaits nous choisissent en suivant ces étapes',
       process9Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about8.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about8.jpg',
+        attrs: {
+          alt: 'À propos de nous',
+          width: 596,
+          height: 565,
+          image: {
+            fileName: 'about8.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about8.jpg',
+          },
+        },
       },
       process9BtnColor: 'white',
       process9Video: {
-        id: '1',
-        version: 1,
         fileName: 'movie.mp4',
         fileType: 'video/mp4',
         filePath: '/media/movie.mp4',
@@ -195,8 +203,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
       process9HideShape: false,
       process9Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'CheckShield',
             title: 'Transactions sécurisées',
@@ -206,8 +212,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'Dollar',
             title: 'Planification des factures',
@@ -217,8 +221,6 @@ export const process9Demos: Demo<typeof process9Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Update',
             title: 'Toujours à jour',

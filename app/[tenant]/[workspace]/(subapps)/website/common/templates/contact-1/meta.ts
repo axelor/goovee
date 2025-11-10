@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {contactInfoModel} from '../json-models';
+import {contactInfoModel, imageModel} from '../json-models';
+
+export const contact1Code = 'contact1';
 
 export const contact1Schema = {
   title: 'Contact 1',
-  code: 'contact1',
+  code: contact1Code,
   type: Template.block,
   fields: [
     {
@@ -25,9 +26,9 @@ export const contact1Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'contactInfo',
@@ -36,9 +37,20 @@ export const contact1Schema = {
       target: 'ContactInfo',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled lower-start',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-8 pb-md-9',
+    },
   ],
-  models: [contactInfoModel],
-  metaModels: [metaFileModel],
+  models: [contactInfoModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact1Data = Data<typeof contact1Schema>;
@@ -46,20 +58,26 @@ export type Contact1Data = Data<typeof contact1Schema>;
 export const contact1Demos: Demo<typeof contact1Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-3',
+    sequence: 10,
     data: {
       contact1Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about14.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about14.jpg',
+        attrs: {
+          alt: 'Get in touch',
+          width: 593,
+          height: 568,
+          image: {
+            fileName: 'about14.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about14.jpg',
+          },
+        },
       },
       contact1Caption: 'Get In Touch',
       contact1Title:
         'Are you ready to start creating something great together?',
       contact1ContactInfo: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'contact-1-contact-info',
           addressTitle: 'Address',
@@ -74,20 +92,26 @@ export const contact1Demos: Demo<typeof contact1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-3',
+    sequence: 10,
     data: {
       contact1Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about14.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about14.jpg',
+        attrs: {
+          alt: 'Entrer en contact',
+          width: 593,
+          height: 568,
+          image: {
+            fileName: 'about14.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about14.jpg',
+          },
+        },
       },
       contact1Caption: 'Entrer en contact',
       contact1Title:
         'Êtes-vous prêt à commencer à créer quelque chose de grand ensemble ?',
       contact1ContactInfo: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'contact-1-contact-info',
           addressTitle: 'Adresse',

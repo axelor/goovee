@@ -1,0 +1,65 @@
+import type {TemplateProps} from '@/subapps/website/common/types';
+import {type Portfolio11Data} from './meta';
+import {getImage} from '@/subapps/website/common/utils/helper';
+import ProjectCard3 from '@/subapps/website/common/components/reuseable/project-cards/ProjectCard3';
+import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
+
+export default function Portfolio11(props: TemplateProps<Portfolio11Data>) {
+  const {data} = props;
+  const {
+    portfolio11Caption: caption,
+    portfolio11Description: description,
+    portfolio11LinkTitle: linkTitle,
+    portfolio11LinkHref: linkHref,
+    portfolio11PortfolioList: portfolioList,
+    portfolio11WrapperClassName: wrapperClassName,
+    portfolio11ContainerClassName: containerClassName,
+  } = data || {};
+
+  return (
+    <section className={wrapperClassName} data-code={props.code}>
+      <div className={containerClassName}>
+        <div className="row">
+          <div className="col-lg-11 col-xl-10 mx-auto mb-10">
+            <h2 className="fs-16 text-uppercase text-muted text-center mb-3">
+              {caption}
+            </h2>
+            <h3 className="display-3 text-center px-lg-5 px-xl-10 mb-0">
+              {description}
+            </h3>
+          </div>
+        </div>
+
+        <div className="grid grid-view projects-masonry">
+          <div className="row gx-md-8 gy-10 gy-md-13">
+            {portfolioList?.map(({id, attrs: item}, i) => (
+              <div className="project item col-md-6 col-xl-4" key={id}>
+                <ProjectCard3
+                  {...item}
+                  image={getImage({
+                    image: item.image,
+                    path: `portfolio11PortfolioList[${i}].attrs.image`,
+                    ...props,
+                  })}
+                  fullImage={getImage({
+                    image: item.fullImage,
+                    path: `portfolio11PortfolioList[${i}].attrs.fullImage`,
+                    ...props,
+                  })}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center mt-10">
+          <NextLink
+            title={linkTitle}
+            href={linkHref}
+            className="btn btn-lg btn-primary rounded-pill"
+          />
+        </div>
+      </div>
+    </section>
+  );
+}

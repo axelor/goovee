@@ -138,7 +138,7 @@
   "Enter attachment description": "Enter attachment description",
   "Enter attachment title": "Enter attachment title",
   "Enter category description": "Enter category description",
-  "Enter city name": "Enter city name",
+  "Enter town name": "Enter town name",
   "Enter company SIRET number": "Enter company SIRET number",
   "Enter company name": "Enter company name",
   "Enter company number": "Enter company number",
@@ -762,5 +762,7 @@
   "app-shop": "E-Shop",
   "app-survey": "Forms",
   "app-ticketing": "Helpdesk",
-  "app-website": "Content"
+  "app-website": "Content",
+  "Your cart is empty. Please add items before placing an order.": "Your cart is empty. Please add items before placing an order.",
+  "Order creation failed. Please try again.": "Order creation failed. Please try again."
 }

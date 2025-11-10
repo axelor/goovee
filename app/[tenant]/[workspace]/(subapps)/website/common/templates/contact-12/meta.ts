@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const contact12Code = 'contact12';
 
 export const contact12Schema = {
   title: 'Contact 12',
-  code: 'contact12',
+  code: contact12Code,
   type: Template.block,
   fields: [
     {
@@ -24,9 +26,9 @@ export const contact12Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'inputLabel1',
@@ -93,9 +95,20 @@ export const contact12Schema = {
       title: 'Placeholder 3',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-15 py-md-17',
+    },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact12Data = Data<typeof contact12Schema>;
@@ -103,16 +116,24 @@ export type Contact12Data = Data<typeof contact12Schema>;
 export const contact12Demos: Demo<typeof contact12Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-24',
+    sequence: 7,
     data: {
       contact12Title: 'Request Photography Pricing',
       contact12Description:
         'For more information please get in touch using the form below:',
       contact12Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg36.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg36.jpg',
+        attrs: {
+          alt: 'Photography pricing request form background',
+          width: 1440,
+          height: 816,
+          image: {
+            fileName: 'bg36.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg36.jpg',
+          },
+        },
       },
       contact12InputLabel1: 'Name *',
       contact12InputLabel2: 'Email *',
@@ -131,16 +152,24 @@ export const contact12Demos: Demo<typeof contact12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-24',
+    sequence: 7,
     data: {
       contact12Title: 'Demander un devis de photographie',
       contact12Description:
         'Pour plus d’informations, veuillez nous contacter en utilisant le formulaire ci-dessous :',
       contact12Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg36.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg36.jpg',
+        attrs: {
+          alt: 'Arrière-plan du formulaire de demande de prix de photographie',
+          width: 1440,
+          height: 816,
+          image: {
+            fileName: 'bg36.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg36.jpg',
+          },
+        },
       },
       contact12InputLabel1: 'Nom *',
       contact12InputLabel2: 'E-mail *',

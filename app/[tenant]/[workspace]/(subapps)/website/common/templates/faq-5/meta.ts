@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {faq5QuestionsModel} from '../json-models';
 
+export const faq5Code = 'faq5';
+
 export const faq5Schema = {
   title: 'FAQ 5',
-  code: 'faq5',
+  code: faq5Code,
   type: Template.block,
   fields: [
     {
@@ -16,6 +18,18 @@ export const faq5Schema = {
       title: 'Questions',
       type: 'json-one-to-many',
       target: 'Faq5Questions',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
     },
   ],
   models: [faq5QuestionsModel],
@@ -26,11 +40,12 @@ export type Faq5Data = Data<typeof faq5Schema>;
 export const faq5Demos: Demo<typeof faq5Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-11',
+    sequence: 11,
     data: {
       faq5Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Can I cancel my subscription?',
             description:
@@ -38,8 +53,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Which payment methods do you accept?',
             description:
@@ -47,8 +60,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'How can I manage my Account?',
             description:
@@ -56,8 +67,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Is my credit card information secure?',
             description:
@@ -69,11 +78,12 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-11',
+    sequence: 11,
     data: {
       faq5Questions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Puis-je annuler mon abonnement ?',
             description:
@@ -81,8 +91,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Quels modes de paiement acceptez-vous ?',
             description:
@@ -90,8 +98,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Comment puis-je gérer mon compte ?',
             description:
@@ -99,8 +105,6 @@ export const faq5Demos: Demo<typeof faq5Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title:
               'Les informations de ma carte de crédit sont-elles sécurisées ?',

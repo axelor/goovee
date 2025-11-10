@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
+
+export const about15Code = 'about15';
 
 export const about15Schema = {
   title: 'About 15',
-  code: 'about15',
+  code: about15Code,
   type: Template.block,
   fields: [
     {
@@ -25,9 +26,9 @@ export const about15Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'linkTitle',
@@ -46,9 +47,20 @@ export const about15Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-16 pb-md-17',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About15Data = Data<typeof about15Schema>;
@@ -56,13 +68,21 @@ export type About15Data = Data<typeof about15Schema>;
 export const about15Demos: Demo<typeof about15Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-14',
+    sequence: 8,
     data: {
       about15Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about19.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about19.jpg',
+        attrs: {
+          alt: 'Why Choose Us?',
+          width: 566,
+          height: 458,
+          image: {
+            fileName: 'about19.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about19.jpg',
+          },
+        },
       },
       about15Caption: 'Why Choose Us?',
       about15Description:
@@ -70,30 +90,20 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
       about15LinkTitle: 'More Details',
       about15LinkHref: '#',
       about15AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
           ],
@@ -103,13 +113,21 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-14',
+    sequence: 8,
     data: {
       about15Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about19.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about19.jpg',
+        attrs: {
+          alt: 'Pourquoi nous choisir ?',
+          width: 566,
+          height: 458,
+          image: {
+            fileName: 'about19.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about19.jpg',
+          },
+        },
       },
       about15Caption: 'Pourquoi nous choisir ?',
       about15Description:
@@ -117,36 +135,26 @@ export const about15Demos: Demo<typeof about15Schema>[] = [
       about15LinkTitle: 'Plus de détails',
       about15LinkHref: '#',
       about15AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },

@@ -4,20 +4,22 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {imageModel} from '../json-models';
+import {ratingsSelection} from '../meta-selections';
+
+export const testimonial19Code = 'testimonial19';
 
 export const testimonial19Schema = {
   title: 'Testimonial 19',
-  code: 'testimonial19',
+  code: testimonial19Code,
   type: Template.block,
   fields: [
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'caption',
@@ -39,6 +41,18 @@ export const testimonial19Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial19Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper image-wrapper bg-image bg-overlay',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-15 pb-13',
     },
   ],
   models: [
@@ -67,12 +81,13 @@ export const testimonial19Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial19Data = Data<typeof testimonial19Schema>;
@@ -80,21 +95,27 @@ export type Testimonial19Data = Data<typeof testimonial19Schema>;
 export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-24',
+    sequence: 5,
     data: {
       testimonial19Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg35.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg35.jpg',
+        attrs: {
+          alt: 'Testimonial background',
+          width: 1440,
+          height: 558,
+          image: {
+            fileName: 'bg35.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg35.jpg',
+          },
+        },
       },
       testimonial19Caption: 'Happy Customers',
       testimonial19Navigation: false,
       testimonial19SpaceBetween: 0,
       testimonial19Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             designation: 'Financial Analyst',
@@ -104,8 +125,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Marketing Specialist',
@@ -115,8 +134,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Sales Specialist',
@@ -126,8 +143,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Investment Planner',
@@ -137,8 +152,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Laura Widerski',
             designation: 'Sales Specialist',
@@ -152,21 +165,27 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-24',
+    sequence: 5,
     data: {
       testimonial19Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg35.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg35.jpg',
+        attrs: {
+          alt: 'Arrière-plan de témoignage',
+          width: 1440,
+          height: 558,
+          image: {
+            fileName: 'bg35.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg35.jpg',
+          },
+        },
       },
       testimonial19Caption: 'Clients satisfaits',
       testimonial19Navigation: false,
       testimonial19SpaceBetween: 0,
       testimonial19Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             designation: 'Analyste financier',
@@ -176,8 +195,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Spécialiste en marketing',
@@ -187,8 +204,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Spécialiste des ventes',
@@ -198,8 +213,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Planificateur d’investissement',
@@ -209,8 +222,6 @@ export const testimonial19Demos: Demo<typeof testimonial19Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Laura Widerski',
             designation: 'Spécialiste des ventes',

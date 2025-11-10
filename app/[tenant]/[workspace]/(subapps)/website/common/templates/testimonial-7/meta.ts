@@ -4,26 +4,28 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const testimonial7Code = 'testimonial7';
 
 export const testimonial7Schema = {
   title: 'Testimonial 7',
-  code: 'testimonial7',
+  code: testimonial7Code,
   type: Template.block,
   fields: [
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'heading',
@@ -56,6 +58,18 @@ export const testimonial7Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial7Testimonial',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14',
+    },
   ],
   models: [
     {
@@ -81,8 +95,8 @@ export const testimonial7Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial7Data = Data<typeof testimonial7Schema>;
@@ -90,20 +104,33 @@ export type Testimonial7Data = Data<typeof testimonial7Schema>;
 export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-5',
+    sequence: 4,
     data: {
       testimonial7TileImage1: {
-        id: '1',
-        version: 1,
-        fileName: 'sa13.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/sa13.jpg',
+        attrs: {
+          alt: 'Testimonial',
+          width: 325,
+          height: 325,
+          image: {
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial7TileImage2: {
-        id: '1',
-        version: 1,
-        fileName: 'sa14.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/sa14.jpg',
+        attrs: {
+          alt: 'Testimonial',
+          width: 324,
+          height: 217,
+          image: {
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial7Heading: 'Satisfied Clients',
       testimonial7CountUp: 25,
@@ -112,8 +139,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
       testimonial7Navigation: false,
       testimonial7Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Sales Director',
@@ -122,8 +147,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Marketing Manager',
@@ -132,8 +155,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'HR Manager',
@@ -142,8 +163,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Investment Planner',
@@ -156,20 +175,33 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-5',
+    sequence: 4,
     data: {
       testimonial7TileImage1: {
-        id: '1',
-        version: 1,
-        fileName: 'sa13.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/sa13.jpg',
+        attrs: {
+          alt: 'Témoignage',
+          width: 325,
+          height: 325,
+          image: {
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial7TileImage2: {
-        id: '1',
-        version: 1,
-        fileName: 'sa14.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/sa14.jpg',
+        attrs: {
+          alt: 'Témoignage',
+          width: 324,
+          height: 217,
+          image: {
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial7Heading: 'Clients satisfaits',
       testimonial7CountUp: 25,
@@ -178,8 +210,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
       testimonial7Navigation: false,
       testimonial7Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Directeur des ventes',
@@ -188,8 +218,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Responsable marketing',
@@ -198,8 +226,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'Responsable RH',
@@ -208,8 +234,6 @@ export const testimonial7Demos: Demo<typeof testimonial7Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Planificateur d’investissement',

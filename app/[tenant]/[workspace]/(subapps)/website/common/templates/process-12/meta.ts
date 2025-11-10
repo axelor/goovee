@@ -1,15 +1,16 @@
-import {startCase} from 'lodash-es';
-import {colors} from '../../constants/colors';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
+import {colorsSelection} from '../meta-selections';
+
+export const process12Code = 'process12';
 
 export const process12Schema = {
   title: 'Process 12',
-  code: 'process12',
+  code: process12Code,
   type: Template.block,
   fields: [
     {
@@ -48,6 +49,18 @@ export const process12Schema = {
       type: 'json-one-to-many',
       target: 'Process12Processes',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
   ],
   models: [
     {
@@ -80,14 +93,12 @@ export const process12Schema = {
           name: 'color',
           title: 'Color',
           type: 'string',
-          selection: colors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'colors',
         },
       ],
     },
   ],
+  selections: [colorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Process12Data = Data<typeof process12Schema>;
@@ -95,6 +106,9 @@ export type Process12Data = Data<typeof process12Schema>;
 export const process12Demos: Demo<typeof process12Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-17',
+    sequence: 3,
     data: {
       process12Caption: 'Our Strategy',
       process12Heading:
@@ -107,8 +121,6 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
       process12LinkHref: '#',
       process12Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '01',
             className: '',
@@ -119,8 +131,6 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '02',
             color: 'soft-green',
@@ -131,8 +141,6 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '03',
             color: 'soft-orange',
@@ -147,6 +155,9 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-17',
+    sequence: 3,
     data: {
       process12Caption: 'Notre stratégie',
       process12Heading:
@@ -159,8 +170,6 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
       process12LinkHref: '#',
       process12Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '01',
             className: '',
@@ -171,8 +180,6 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '02',
             color: 'soft-green',
@@ -183,8 +190,6 @@ export const process12Demos: Demo<typeof process12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '03',
             color: 'soft-orange',

@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const testimonial13Code = 'testimonial13';
 
 export const testimonial13Schema = {
   title: 'Testimonial 13',
-  code: 'testimonial13',
+  code: testimonial13Code,
   type: Template.block,
   fields: [
     {
@@ -19,9 +21,9 @@ export const testimonial13Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'slidesPerView',
@@ -38,6 +40,19 @@ export const testimonial13Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial13Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-image bg-overlay bg-overlay-300 text-white',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-17',
     },
   ],
   models: [
@@ -65,14 +80,14 @@ export const testimonial13Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial13Data = Data<typeof testimonial13Schema>;
@@ -80,29 +95,40 @@ export type Testimonial13Data = Data<typeof testimonial13Schema>;
 export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-13',
+    sequence: 5,
     data: {
       testimonial13Caption: 'Happy Customers',
       testimonial13Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        attrs: {
+          alt: 'Testimonial',
+          width: 1440,
+          height: 680,
+          image: {
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       testimonial13SlidesPerView: 1,
       testimonial13Navigation: false,
       testimonial13Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Toris Oklee',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te1.jpg',
+              attrs: {
+                alt: 'Toris Oklee',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te1.jpg',
+                },
+              },
             },
             designation: 'Marketing Manager',
             review:
@@ -110,16 +136,19 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te2.jpg',
+              attrs: {
+                alt: 'Cory Zamora',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te2.jpg',
+                },
+              },
             },
             designation: 'Marketing Specialist',
             review:
@@ -127,16 +156,19 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te3.jpg',
+              attrs: {
+                alt: 'Barclay Widerski',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te3.jpg',
+                },
+              },
             },
             designation: 'Sales Specialist',
             review:
@@ -148,29 +180,40 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-13',
+    sequence: 5,
     data: {
       testimonial13Caption: 'Clients satisfaits',
       testimonial13Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        attrs: {
+          alt: 'Témoignage',
+          width: 1440,
+          height: 680,
+          image: {
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       testimonial13SlidesPerView: 1,
       testimonial13Navigation: false,
       testimonial13Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Toris Oklee',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te1.jpg',
+              attrs: {
+                alt: 'Toris Oklee',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te1.jpg',
+                },
+              },
             },
             designation: 'Responsable marketing',
             review:
@@ -178,16 +221,19 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te2.jpg',
+              attrs: {
+                alt: 'Cory Zamora',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te2.jpg',
+                },
+              },
             },
             designation: 'Spécialiste en marketing',
             review:
@@ -195,16 +241,19 @@ export const testimonial13Demos: Demo<typeof testimonial13Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Barclay Widerski',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te3.jpg',
+              attrs: {
+                alt: 'Barclay Widerski',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te3.jpg',
+                },
+              },
             },
             designation: 'Spécialiste des ventes',
             review:

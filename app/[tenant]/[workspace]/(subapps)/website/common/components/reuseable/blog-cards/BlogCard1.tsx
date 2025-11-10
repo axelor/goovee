@@ -2,11 +2,12 @@ import {FC} from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import NextLink from '../links/NextLink';
+import {ImageType} from '@/subapps/website/common/types/templates';
 
 // ======================================================
 type BlogCard1Props = {
   date?: string;
-  image?: string;
+  image?: ImageType;
   title?: string;
   category?: string;
 };
@@ -17,13 +18,15 @@ const BlogCard1: FC<BlogCard1Props> = ({date, image, title, category}) => {
     <article>
       <figure className="overlay overlay-1 hover-scale rounded mb-6">
         <Link href="#" passHref>
-          <Image
-            width={560}
-            height={350}
-            src={image}
-            alt={title}
-            style={{width: '100%', height: 'auto'}}
-          />
+          {image?.url && (
+            <Image
+              height={image.height}
+              width={image.width}
+              src={image.url}
+              alt={image.alt}
+              style={{width: '100%', height: 'auto'}}
+            />
+          )}
           <span className="bg" />
         </Link>
 

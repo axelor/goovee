@@ -10,14 +10,21 @@ import {URL_PARAMS} from '@/constants';
 import {SORT_BY_OPTIONS} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
-import {InfiniteScroll} from '@/subapps/forum/common/ui/components';
-import {useForum} from '@/subapps/forum/common/ui/context';
+import {
+  InfiniteScroll,
+  ThreadSkeleton,
+} from '@/subapps/forum/common/ui/components';
+import {Post} from '@/subapps/forum/common/types/forum';
 
-export const ThreadList = () => {
+export const ThreadList = ({
+  posts,
+  pageInfo,
+}: {
+  posts: Post[];
+  pageInfo: any;
+}) => {
   const {update, searchParams} = useSearchParams();
   const sort = searchParams.get('sort') ?? 'new';
-
-  const {posts, pageInfo} = useForum();
 
   const handleSortBy = (value: any) => {
     if (!value) {
@@ -54,3 +61,14 @@ export const ThreadList = () => {
 };
 
 export default ThreadList;
+
+export function ThreadListSkeleton({postCount = 3}: {postCount?: number}) {
+  const showImageView = Math.floor(Math.random() * postCount);
+  return (
+    <div>
+      {[...Array(postCount)].map((_, i) => (
+        <ThreadSkeleton key={i} galleryPriview={i === showImageView} />
+      ))}
+    </div>
+  );
+}

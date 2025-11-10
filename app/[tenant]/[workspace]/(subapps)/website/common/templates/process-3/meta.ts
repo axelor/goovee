@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const process3Code = 'process3';
 
 export const process3Schema = {
   title: 'Process 3',
-  code: 'process3',
+  code: process3Code,
   type: Template.block,
   fields: [
     {
@@ -29,15 +31,27 @@ export const process3Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'processes',
       title: 'Processes',
       type: 'json-one-to-many',
       target: 'Process3Processes',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-16 mb-md-18',
     },
   ],
   models: [
@@ -65,8 +79,8 @@ export const process3Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Process3Data = Data<typeof process3Schema>;
@@ -74,22 +88,28 @@ export type Process3Data = Data<typeof process3Schema>;
 export const process3Demos: Demo<typeof process3Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-3',
+    sequence: 3,
     data: {
       process3Title: 'Our Working Process',
       process3Caption: 'How It Works?',
       process3Description:
         'Find out why our happy customers choose us by following these steps',
       process3Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        attrs: {
+          alt: 'process',
+          width: 593,
+          height: 570,
+          image: {
+            fileName: 'about7.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about7.jpg',
+          },
+        },
       },
       process3Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Personalized service',
@@ -98,8 +118,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Competitive pricing',
@@ -108,8 +126,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Timely delivery',
@@ -122,22 +138,28 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-3',
+    sequence: 3,
     data: {
       process3Title: 'Notre processus de travail',
       process3Caption: 'Comment ça marche ?',
       process3Description:
         'Découvrez pourquoi nos clients satisfaits nous choisissent en suivant ces étapes',
       process3Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about9.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about9.jpg',
+        attrs: {
+          alt: 'processus',
+          width: 593,
+          height: 570,
+          image: {
+            fileName: 'about7.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about7.jpg',
+          },
+        },
       },
       process3Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Service personnalisé',
@@ -146,8 +168,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Prix compétitifs',
@@ -156,8 +176,6 @@ export const process3Demos: Demo<typeof process3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Livraison à temps',

@@ -4,20 +4,22 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {imageModel} from '../json-models';
+import {ratingsSelection} from '../meta-selections';
+
+export const testimonial16Code = 'testimonial16';
 
 export const testimonial16Schema = {
   title: 'Testimonial 16',
-  code: 'testimonial16',
+  code: testimonial16Code,
   type: Template.block,
   fields: [
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'slidesPerView',
@@ -34,6 +36,18 @@ export const testimonial16Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial16Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-16 pt-md-18 mt-n21 mt-md-n23',
     },
   ],
   models: [
@@ -62,12 +76,13 @@ export const testimonial16Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial16Data = Data<typeof testimonial16Schema>;
@@ -75,20 +90,26 @@ export type Testimonial16Data = Data<typeof testimonial16Schema>;
 export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-19',
+    sequence: 5,
     data: {
       testimonial16BackgroundImage: {
-        id: '1',
-        version: 1,
-        fileName: 'tm2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm2.jpg',
+        attrs: {
+          alt: 'Testimonial background',
+          width: 1370,
+          height: 1050,
+          image: {
+            fileName: 'tm2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm2.jpg',
+          },
+        },
       },
       testimonial16SlidesPerView: 1,
       testimonial16Navigation: false,
       testimonial16Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             designation: 'Financial Analyst',
@@ -98,8 +119,6 @@ export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Marketing Specialist',
@@ -109,8 +128,6 @@ export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Sales Manager',
@@ -124,20 +141,26 @@ export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-19',
+    sequence: 5,
     data: {
       testimonial16BackgroundImage: {
-        id: '1',
-        version: 1,
-        fileName: 'tm2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm2.jpg',
+        attrs: {
+          alt: 'Arrière-plan de témoignage',
+          width: 1370,
+          height: 1050,
+          image: {
+            fileName: 'tm2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm2.jpg',
+          },
+        },
       },
       testimonial16SlidesPerView: 1,
       testimonial16Navigation: false,
       testimonial16Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             designation: 'Analyste financier',
@@ -147,8 +170,6 @@ export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             designation: 'Spécialiste en marketing',
@@ -158,8 +179,6 @@ export const testimonial16Demos: Demo<typeof testimonial16Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             designation: 'Directeur des ventes',

@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {serviceList3Model} from '../json-models';
+import {serviceList3Model, imageModel} from '../json-models';
+
+export const about9Code = 'about9';
 
 export const about9Schema = {
   title: 'About 9',
-  code: 'about9',
+  code: about9Code,
   type: Template.block,
   fields: [
     {
@@ -30,9 +31,9 @@ export const about9Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'aboutList',
@@ -40,9 +41,20 @@ export const about9Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-14 mb-md-18',
+    },
   ],
-  models: [serviceList3Model],
-  metaModels: [metaFileModel],
+  models: [serviceList3Model, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About9Data = Data<typeof about9Schema>;
@@ -50,13 +62,21 @@ export type About9Data = Data<typeof about9Schema>;
 export const about9Demos: Demo<typeof about9Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-8',
+    sequence: 3,
     data: {
       about9Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about10.jpg',
+        attrs: {
+          alt: 'Creative advertising firm',
+          width: 585,
+          height: 425,
+          image: {
+            fileName: 'about10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about10.jpg',
+          },
+        },
       },
       about9Caption: 'Discover Our Company',
       about9Title:
@@ -65,8 +85,6 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Communities can be found in various forms.',
       about9AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Our Mission',
             description: 'The influence of great design and creative thinking',
@@ -74,8 +92,6 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Our Values',
             description: 'The influence of great design and creative thinking',
@@ -87,13 +103,21 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-8',
+    sequence: 3,
     data: {
       about9Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about10.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about10.jpg',
+        attrs: {
+          alt: 'Agence de publicité créative',
+          width: 585,
+          height: 425,
+          image: {
+            fileName: 'about10.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about10.jpg',
+          },
+        },
       },
       about9Caption: 'Découvrez notre entreprise',
       about9Title:
@@ -102,8 +126,6 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel. Les communautés peuvent être trouvées sous diverses formes.',
       about9AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Notre mission',
             description: 'L’influence d’un bon design et d’une pensée créative',
@@ -111,8 +133,6 @@ export const about9Demos: Demo<typeof about9Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Nos valeurs',
             description: 'L’influence d’un bon design et d’une pensée créative',

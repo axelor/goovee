@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const service24Code = 'service24';
 
 export const service24Schema = {
   title: 'Service 24',
-  code: 'service24',
+  code: service24Code,
   type: Template.block,
   fields: [
     {
@@ -26,6 +28,18 @@ export const service24Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service24Service',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gradient-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-lg-8 pb-14 pb-md-17',
     },
   ],
   models: [
@@ -58,14 +72,14 @@ export const service24Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Service24Data = Data<typeof service24Schema>;
@@ -73,14 +87,15 @@ export type Service24Data = Data<typeof service24Schema>;
 export const service24Demos: Demo<typeof service24Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'What We Do?',
       service24Title:
         'We took pleasure in offering unique solutions to your particular needs.',
       service24Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Web Design',
             description:
@@ -88,17 +103,20 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'Learn More',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'i24.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i24.png',
+              attrs: {
+                alt: 'Web Design',
+                width: 274,
+                height: 206,
+                image: {
+                  fileName: 'i24.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i24.png',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Digital Marketing',
             description:
@@ -106,17 +124,20 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'Learn More',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'i19.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i19.png',
+              attrs: {
+                alt: 'Digital Marketing',
+                width: 276,
+                height: 194,
+                image: {
+                  fileName: 'i19.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i19.png',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Motion Graphics',
             description:
@@ -124,11 +145,16 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'Learn More',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'i18.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i18.png',
+              attrs: {
+                alt: 'Motion Graphics',
+                width: 276,
+                height: 212,
+                image: {
+                  fileName: 'i18.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i18.png',
+                },
+              },
             },
           },
         },
@@ -137,14 +163,15 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-21',
+    sequence: 2,
     data: {
       service24Caption: 'Que faisons-nous ?',
       service24Title:
         'Nous avons pris plaisir à offrir des solutions uniques à vos besoins particuliers.',
       service24Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Conception de sites Web',
             description:
@@ -152,17 +179,20 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'En savoir plus',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'i24.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i24.png',
+              attrs: {
+                alt: 'Conception de sites Web',
+                width: 274,
+                height: 206,
+                image: {
+                  fileName: 'i24.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i24.png',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Marketing numérique',
             description:
@@ -170,17 +200,20 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'En savoir plus',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'i19.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i19.png',
+              attrs: {
+                alt: 'Marketing numérique',
+                width: 276,
+                height: 194,
+                image: {
+                  fileName: 'i19.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i19.png',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Graphiques animés',
             description:
@@ -188,11 +221,16 @@ export const service24Demos: Demo<typeof service24Schema>[] = [
             linkTitle: 'En savoir plus',
             linkHref: '#',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'i18.png',
-              fileType: 'image/png',
-              filePath: '/img/illustrations/i18.png',
+              attrs: {
+                alt: 'Graphiques animés',
+                width: 276,
+                height: 212,
+                image: {
+                  fileName: 'i18.png',
+                  fileType: 'image/png',
+                  filePath: '/img/illustrations/i18.png',
+                },
+              },
             },
           },
         },

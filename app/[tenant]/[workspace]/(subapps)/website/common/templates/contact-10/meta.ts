@@ -6,9 +6,11 @@ import {
 } from '../../types/templates';
 import {socialLinksModel} from '../json-models';
 
+export const contact10Code = 'contact10';
+
 export const contact10Schema = {
   title: 'Contact 10',
-  code: 'contact10',
+  code: contact10Code,
   type: Template.block,
   fields: [
     {
@@ -92,6 +94,18 @@ export const contact10Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [socialLinksModel],
 } as const satisfies TemplateSchema;
@@ -101,6 +115,9 @@ export type Contact10Data = Data<typeof contact10Schema>;
 export const contact10Demos: Demo<typeof contact10Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-16',
+    sequence: 4,
     data: {
       contact10Title: "Let's collaborate in case you love the things you see.",
       contact10Description:
@@ -120,8 +137,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
       contact10Placeholder3: 'Your message',
       contact10SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -129,8 +144,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -138,8 +151,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -147,8 +158,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -156,8 +165,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -169,6 +176,9 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-16',
+    sequence: 4,
     data: {
       contact10Title:
         'Collaborons au cas où vous aimez les choses que vous voyez.',
@@ -189,8 +199,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
       contact10Placeholder3: 'Votre message',
       contact10SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -198,8 +206,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -207,8 +213,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -216,8 +220,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -225,8 +227,6 @@ export const contact10Demos: Demo<typeof contact10Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',

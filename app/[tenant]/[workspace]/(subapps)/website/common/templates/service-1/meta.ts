@@ -4,13 +4,13 @@ import {
   Demo,
   TemplateSchema,
 } from '@/subapps/website/common/types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
-import {linkColors} from '../../constants/colors';
+import {solidIconsSelection, linkColorsSelection} from '../meta-selections';
+
+export const service1Code = 'service1';
 
 export const service1Schema = {
   title: 'Service 1',
-  code: 'service1',
+  code: service1Code,
   type: Template.block,
   fields: [
     {
@@ -28,6 +28,18 @@ export const service1Schema = {
       title: 'Services',
       type: 'json-one-to-many',
       target: 'Service1Services',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-16',
     },
   ],
   models: [
@@ -51,10 +63,7 @@ export const service1Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'link',
@@ -67,14 +76,12 @@ export const service1Schema = {
           title: 'Link Type',
           type: 'string',
           visibleInGrid: true,
-          selection: linkColors.map(color => ({
-            title: startCase(color),
-            value: color,
-          })),
+          selection: 'link-colors',
         },
       ],
     },
   ],
+  selections: [solidIconsSelection, linkColorsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service1Data = Data<typeof service1Schema>;
@@ -82,14 +89,15 @@ export type Service1Data = Data<typeof service1Schema>;
 export const service1Demos: Demo<typeof service1Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-1',
+    sequence: 2,
     data: {
-      service1Title: 'What We Do?',
-      service1Caption:
+      service1Caption: 'What We Do?',
+      service1Title:
         'We have designed our services with your specific needs in mind.',
       service1Services: [
         {
-          id: '5',
-          version: 1,
           attrs: {
             icon: 'Rocket',
             link: '#',
@@ -100,8 +108,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 1,
           attrs: {
             icon: 'Code',
             link: '#',
@@ -112,8 +118,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '7',
-          version: 0,
           attrs: {
             icon: 'DevicesTwo',
             link: '#',
@@ -124,8 +128,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '8',
-          version: 1,
           attrs: {
             link: '#',
             icon: 'Hand',
@@ -139,14 +141,15 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-1',
+    sequence: 2,
     data: {
-      service1Title: 'Que faisons-nous ?',
-      service1Caption:
+      service1Caption: 'Que faisons-nous ?',
+      service1Title:
         'Nous avons conçu nos services en pensant à vos besoins spécifiques.',
       service1Services: [
         {
-          id: '5',
-          version: 1,
           attrs: {
             icon: 'Rocket',
             link: '#',
@@ -157,8 +160,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 1,
           attrs: {
             icon: 'Code',
             link: '#',
@@ -169,8 +170,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '7',
-          version: 0,
           attrs: {
             icon: 'DevicesTwo',
             link: '#',
@@ -181,8 +180,6 @@ export const service1Demos: Demo<typeof service1Schema>[] = [
           },
         },
         {
-          id: '8',
-          version: 1,
           attrs: {
             link: '#',
             icon: 'Hand',

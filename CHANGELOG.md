@@ -1,3 +1,92 @@
+# 1.2.0 (2025-11-04)
+
+## Features
+
+### Forum
+
+- Improve forum app with skeletons and loading handlers – #96451
+  <details>
+    <summary>Details</summary>
+
+  Added skeleton components and loading state handlers to enhance user experience and perceived performance while forum data is loading.
+  </details>
+
+### User Accounts
+
+- Add Support for Managing Addresses for Contacts – #103130
+  <details>
+    <summary>Details</summary>
+
+  Ensures consistent address handling across Partners and Contacts
+  </details>
+
+- Using town name instead of city name – #102821
+  <details>
+    <summary>Details</summary>
+
+  Using town name instead of city name when creating an address
+  </details>
+
+### Content
+
+- Implement website seeding and enhance performance – #101934
+  <details>
+    <summary>Details</summary>
+
+  Implement website and page seeding to populate initial content. Optimize performance by replacing standard `&lt;img&gt;` tags with Next.js's `Image` component for better image handling and for background images. Fix UI bugs related to content overlapping and dynamic blog cards.
+  </details>
+
+- Prepare templates for demo – #101503
+  <details>
+    <summary>Details</summary>
+
+  Prepares templates for the demo by implementing performance improvements like chunk loading and separate SEO content fetching. Adds support for nested model/selection declarations, common meta selects, default field values, and selection validation. Also includes template documentation and various fixes.
+  </details>
+
+## Fixes
+
+### Core Platform
+
+- Fix duplicate default address – #102397
+- Update icons for apps to align with goovee website – #102305
+- Upgrade Goovee ORM to 0.0.5 – #100928
+  <details>
+    <summary>Details</summary>
+
+  This Goovee ORM release resolves a regression that caused duplicate records to be returned in relational fields
+  </details>
+
+### E-Shop
+
+- Fix payment error during checkout – #102789
+  <details>
+    <summary>Details</summary>
+
+  Fixes Name, amount , customer , currency and callbackurl are requied error when a product is added via product page
+  </details>
+
+## Changes
+
+### E-Shop
+
+- Refine order creation error messages – #103129
+  <details>
+    <summary>Details</summary>
+
+  Updated user-facing error messages during order creation to be clearer and more helpful across different failure scenarios.
+  </details>
+
+### Content
+
+- Refactor website for performance, add documentation, and fix various issues – #102295
+  <details>
+    <summary>Details</summary>
+
+  Add user documentation for wiki editor. Improve website performance by lazy loading wiki components and enhancing code splitting. Remove unused dependencies and files. Add bundle analyzer. Fix count-up animation, wiki CSS, and dynamic template import issues.
+  </details>
+
+- Update website names, Enable inline creation of image fields, and Strip Demo Data IDs/Versions – #102957
+
 # 1.1.0 (2025-10-07)
 
 ## Features

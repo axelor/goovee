@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {bulletListModel, bulletPointModel} from '../json-models';
+import {bulletListModel, imageModel} from '../json-models';
+
+export const about17Code = 'about17';
 
 export const about17Schema = {
   title: 'About 17',
-  code: 'about17',
+  code: about17Code,
   type: Template.block,
   fields: [
     {
@@ -30,9 +31,9 @@ export const about17Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'aboutList',
@@ -41,9 +42,20 @@ export const about17Schema = {
       type: 'json-many-to-one',
       widgetAttrs: {canNew: 'true', canEdit: 'true'},
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-15 mb-md-18',
+    },
   ],
-  models: [bulletListModel, bulletPointModel],
-  metaModels: [metaFileModel],
+  models: [bulletListModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About17Data = Data<typeof about17Schema>;
@@ -51,13 +63,21 @@ export type About17Data = Data<typeof about17Schema>;
 export const about17Demos: Demo<typeof about17Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-18',
+    sequence: 3,
     data: {
       about17Image: {
-        id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        attrs: {
+          alt: 'Our solution',
+          width: 548,
+          height: 533,
+          image: {
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       about17Caption: 'Our Solution',
       about17Title:
@@ -65,30 +85,20 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
       about17Description:
         'A community refers to a group of people who share common interests, beliefs, values, or goals and interact with one another in a shared location or virtual space. Goals and interact with one another in a shared location or virtual space.',
       about17AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '2',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '3',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
             {
-              id: '4',
-              version: 0,
               attrs: {title: 'We offer stress-free spending control.'},
             },
           ],
@@ -98,13 +108,21 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-18',
+    sequence: 3,
     data: {
       about17Image: {
-        id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        attrs: {
+          alt: 'Notre solution',
+          width: 548,
+          height: 533,
+          image: {
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       about17Caption: 'Notre solution',
       about17Title:
@@ -112,36 +130,26 @@ export const about17Demos: Demo<typeof about17Schema>[] = [
       about17Description:
         'Une communauté fait référence à un groupe de personnes qui partagent des intérêts, des croyances, des valeurs ou des objectifs communs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel. Les objectifs et interagissent les uns avec les autres dans un lieu partagé ou un espace virtuel.',
       about17AboutList: {
-        id: '1',
-        version: 0,
         attrs: {
           name: 'aboutlist',
           bulletColor: 'soft-primary',
           list: [
             {
-              id: '1',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '2',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '3',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },
             },
             {
-              id: '4',
-              version: 0,
               attrs: {
                 title: 'Nous offrons un contrôle des dépenses sans stress.',
               },

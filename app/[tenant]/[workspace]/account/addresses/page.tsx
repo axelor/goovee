@@ -122,8 +122,10 @@ export default async function Page({params, searchParams}: PageParams) {
     data = quotation;
   }
 
+  const userId = user.isContact ? user.mainPartnerId! : user.id!;
+
   const {deliveryAddresses, invoicingAddresses} = await fetchAddresses(
-    user.id,
+    userId,
     tenant,
   );
 

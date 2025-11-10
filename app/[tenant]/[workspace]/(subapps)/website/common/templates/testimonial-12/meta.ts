@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {ratings} from '../../constants/ratings';
+import {ratingsSelection} from '../meta-selections';
+
+export const testimonial12Code = 'testimonial12';
 
 export const testimonial12Schema = {
   title: 'Testimonial 12',
-  code: 'testimonial12',
+  code: testimonial12Code,
   type: Template.block,
   fields: [
     {
@@ -16,6 +18,18 @@ export const testimonial12Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial12Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16 mb-8 mb-md-12 mt-n18 mt-md-n21',
     },
   ],
   models: [
@@ -44,11 +58,12 @@ export const testimonial12Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
       ],
     },
   ],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial12Data = Data<typeof testimonial12Schema>;
@@ -56,11 +71,12 @@ export type Testimonial12Data = Data<typeof testimonial12Schema>;
 export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-12',
+    sequence: 6,
     data: {
       testimonial12Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Developer',
@@ -70,8 +86,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Tomas Anlee',
             designation: 'UX Designer',
@@ -81,8 +95,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Alina Jeen',
             designation: 'Project Analyzer',
@@ -92,8 +104,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Fuppe Dup',
             designation: 'Software Engineer',
@@ -107,11 +117,12 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-12',
+    sequence: 6,
     data: {
       testimonial12Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Elon Tonnis',
             designation: 'Développeur',
@@ -121,8 +132,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Tomas Anlee',
             designation: 'Concepteur UX',
@@ -132,8 +141,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Alina Jeen',
             designation: 'Analyseur de projet',
@@ -143,8 +150,6 @@ export const testimonial12Demos: Demo<typeof testimonial12Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Fuppe Dup',
             designation: 'Ingénieur logiciel',

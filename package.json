@@ -1,6 +1,6 @@
 {
   "name": "@goovee/core",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,15 +16,16 @@
     "website:seed:templates": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-templates.ts",
     "website:reset:templates": "npm run website:run $npm_package_scripts_website_common_dir/scripts/reset-templates.ts",
     "website:seed:contents": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-contents.ts",
+    "website:seed:website": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-website.ts",
     "changelogs:validate": "node ./changelogs/validate",
-    "changelogs:generate": "node ./changelogs/generate"
+    "changelogs:generate": "node ./changelogs/generate",
+    "analyze": "ANALYZE=true pnpm build"
   },
   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.17.0",
     "@excalidraw/excalidraw": "^0.18.0",
-    "@goovee/orm": "^0.0.4",
+    "@goovee/orm": "^0.0.5",
     "@hookform/resolvers": "^3.9.1",
-    "@lexical/clipboard": "0.31.2",
     "@lexical/code": "0.31.2",
     "@lexical/file": "0.31.2",
     "@lexical/hashtag": "0.31.2",
@@ -33,7 +34,6 @@
     "@lexical/mark": "0.31.2",
     "@lexical/markdown": "^0.31.2",
     "@lexical/overflow": "0.31.2",
-    "@lexical/plain-text": "0.31.2",
     "@lexical/react": "0.31.2",
     "@lexical/rich-text": "0.31.2",
     "@lexical/selection": "0.31.2",
@@ -73,7 +73,6 @@
     "clipboard": "^2.0.11",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
-    "countup.js": "^2.5.0",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "dlx": "^0.2.1",
@@ -121,7 +120,6 @@
     "react-markdown": "^9.0.1",
     "react-scroll": "^1.8.9",
     "react-select": "^5.8.2",
-    "react-syntax-highlighter": "^15.5.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.0",
     "sanitize-html": "^2.15.0",
@@ -140,11 +138,11 @@
     "usehooks-ts": "^3.1.0",
     "uuid": "^11.1.0",
     "vaul": "^0.9.9",
-    "y-websocket": "^1.5.4",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.5.4",
     "@swc-node/register": "^1.10.10",
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.12.11",
@@ -166,7 +164,6 @@
     "@types/react-dom": "^18.3.1",
     "@types/react-draft-wysiwyg": "^1.13.8",
     "@types/react-scroll": "^1.8.6",
-    "@types/react-syntax-highlighter": "^15.5.6",
     "@types/sanitize-html": "^2.15.0",
     "autoprefixer": "^10.4.20",
     "commander": "^14.0.0",

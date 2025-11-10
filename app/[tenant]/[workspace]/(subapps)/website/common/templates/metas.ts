@@ -1,3 +1,5 @@
+import type {TemplateSchema, DemoLite} from '../types/templates';
+
 import {about1Demos, about1Schema} from './about-1/meta';
 import {about2Demos, about2Schema} from './about-2/meta';
 import {about3Demos, about3Schema} from './about-3/meta';
@@ -121,6 +123,7 @@ import {hero21Demos, hero21Schema} from './hero-21/meta';
 import {hero22Demos, hero22Schema} from './hero-22/meta';
 import {hero23Demos, hero23Schema} from './hero-23/meta';
 import {hero24Demos, hero24Schema} from './hero-24/meta';
+import {hr1Demos, hr1Schema} from './hr-1/meta';
 import {navbar1Demos, navbar1Schema} from './navbar-1/meta';
 import {pageProgress1Demos, pageProgress1Schema} from './page-progress-1/meta';
 import {pricing1Demos, pricing1Schema} from './pricing-1/meta';
@@ -142,6 +145,7 @@ import {portfolio8Demos, portfolio8Schema} from './portfolio-8/meta';
 import {portfolio9Demos, portfolio9Schema} from './portfolio-9/meta';
 import {portfolio10Demos, portfolio10Schema} from './portfolio-10/meta';
 import {portfolio11Demos, portfolio11Schema} from './portfolio-11/meta';
+import {portfolio12Demos, portfolio12Schema} from './portfolio-12/meta';
 import {process1Demos, process1Schema} from './process-1/meta';
 import {process2Demos, process2Schema} from './process-2/meta';
 import {process3Demos, process3Schema} from './process-3/meta';
@@ -210,9 +214,13 @@ import {testimonial16Demos, testimonial16Schema} from './testimonial-16/meta';
 import {testimonial17Demos, testimonial17Schema} from './testimonial-17/meta';
 import {testimonial18Demos, testimonial18Schema} from './testimonial-18/meta';
 import {testimonial19Demos, testimonial19Schema} from './testimonial-19/meta';
-import {wiki1Demos, wiki1Schema} from './wiki-1/meta';
+import {wiki1Schema} from './wiki-1/meta';
+import {wiki1Demos} from './wiki-1/demo';
 
-export const metas = [
+export const metas: {
+  schema: TemplateSchema;
+  demos: DemoLite<TemplateSchema>[];
+}[] = [
   {schema: about1Schema, demos: about1Demos},
   {schema: about2Schema, demos: about2Demos},
   {schema: about3Schema, demos: about3Demos},
@@ -272,6 +280,7 @@ export const metas = [
   {schema: hero22Schema, demos: hero22Demos},
   {schema: hero23Schema, demos: hero23Demos},
   {schema: hero24Schema, demos: hero24Demos},
+  {schema: hr1Schema, demos: hr1Demos},
   {schema: cta1Schema, demos: cta1Demos},
   {schema: cta2Schema, demos: cta2Demos},
   {schema: cta3Schema, demos: cta3Demos},
@@ -390,6 +399,7 @@ export const metas = [
   {schema: portfolio9Schema, demos: portfolio9Demos},
   {schema: portfolio10Schema, demos: portfolio10Demos},
   {schema: portfolio11Schema, demos: portfolio11Demos},
+  {schema: portfolio12Schema, demos: portfolio12Demos},
   {schema: contact1Schema, demos: contact1Demos},
   {schema: contact2Schema, demos: contact2Demos},
   {schema: contact3Schema, demos: contact3Demos},

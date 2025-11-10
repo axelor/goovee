@@ -11,7 +11,7 @@ import {capitalise} from '@/utils';
 import {ADDRESS_TYPE, SUBAPP_PAGE} from '@/constants';
 import {i18n} from '@/locale';
 import {Button, Form} from '@/ui/components';
-import {Country} from '@/types';
+import {City, Country} from '@/types';
 import {useSearchParams, useToast} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {UserType} from '@/lib/core/auth/types';
@@ -38,12 +38,11 @@ const addressInformationSchema = z.object({
   country: z.object({
     id: z.string().min(1, i18n.t('Country is required')),
     name: z.string().min(1, i18n.t('Country name is required')),
+    version: z.number(),
   }),
   streetName: z.string().min(1, i18n.t('Street name is required')),
   addressAddition: z.string().optional(),
-  zip: z
-    .string()
-    .min(1, i18n.t('Zip code is required')),
+  zip: z.string().min(1, i18n.t('Zip code is required')),
   townName: z.string().min(1, i18n.t('Town name is required')),
   multipletype: z.boolean().default(false),
 });
@@ -92,6 +91,7 @@ export const AddressForm = ({
         country: {
           id: address?.address?.country?.id ?? '',
           name: address?.address?.country?.name ?? '',
+          version: address?.address?.country?.version ?? '',
         },
         streetName: address?.address?.streetName ?? '',
         addressAddition: address?.address?.countrySubDivision ?? '',
@@ -102,9 +102,6 @@ export const AddressForm = ({
     },
   });
 
-  const country = form.watch('addressInformation.country');
-  const zip = form.watch('addressInformation.zip');
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const {addressInformation, personalInformation} = values;
     const {multipletype, townName, country, addressAddition, streetName, zip} =
@@ -113,6 +110,7 @@ export const AddressForm = ({
 
     const isDeliveryAddr = multipletype || type === ADDRESS_TYPE.delivery;
     const isInvoicingAddr = multipletype || type === ADDRESS_TYPE.invoicing;
+    const isDefaultAddr = address?.isDefaultAddr;
 
     const computeFullName = () => {
       return [streetName, addressAddition, zip, townName]
@@ -128,7 +126,9 @@ export const AddressForm = ({
     };
 
     const addressBody = {
-      country: country.id,
+      id: address?.address?.id,
+      version: address?.address?.version,
+      country,
       addressl2: addressName,
       addressl4: streetName,
       addressl3: addressAddition,
@@ -148,10 +148,12 @@ export const AddressForm = ({
     try {
       const action = address ? updateAddress : createAddress;
       const result = await action({
-        address: addressBody as any,
+        address: addressBody,
         id: address?.id,
         isInvoicingAddr,
         isDeliveryAddr,
+        isDefaultAddr,
+        version: address?.version,
       });
 
       if (result) {
@@ -182,7 +184,6 @@ export const AddressForm = ({
       });
     }
   };
-
 
   return (
     <Form {...form}>

@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const cta5Code = 'cta5';
+
 export const cta5Schema = {
   title: 'CTA 5',
-  code: 'cta5',
+  code: cta5Code,
   type: Template.block,
   fields: [
     {
@@ -30,6 +32,18 @@ export const cta5Schema = {
       title: 'Input Value',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16 text-center',
+    },
   ],
   models: [],
 } as const satisfies TemplateSchema;
@@ -39,6 +53,9 @@ export type Cta5Data = Data<typeof cta5Schema>;
 export const cta5Demos: Demo<typeof cta5Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-15',
+    sequence: 8,
     data: {
       cta5Title: 'Visit Our Club!',
       cta5Caption:
@@ -49,6 +66,9 @@ export const cta5Demos: Demo<typeof cta5Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-15',
+    sequence: 8,
     data: {
       cta5Title: 'Visitez notre club !',
       cta5Caption:

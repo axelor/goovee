@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const contact2Code = 'contact2';
 
 export const contact2Schema = {
   title: 'Contacts 2',
-  code: 'contact2',
+  code: contact2Code,
   type: Template.block,
   fields: [
     {
@@ -39,13 +41,24 @@ export const contact2Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact2Data = Data<typeof contact2Schema>;
@@ -53,6 +66,9 @@ export type Contact2Data = Data<typeof contact2Schema>;
 export const contact2Demos: Demo<typeof contact2Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'others',
+    sequence: 3,
     data: {
       contact2Title: 'Let’s Talk',
       contact2Description1:
@@ -62,16 +78,24 @@ export const contact2Demos: Demo<typeof contact2Schema>[] = [
       contact2LinkTitle: 'Join Us',
       contact2LinkHref: '#',
       contact2Image: {
-        id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        attrs: {
+          alt: "Let's talk",
+          width: 598,
+          height: 432,
+          image: {
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'others',
+    sequence: 3,
     data: {
       contact2Title: 'Parlons',
       contact2Description1:
@@ -81,11 +105,16 @@ export const contact2Demos: Demo<typeof contact2Schema>[] = [
       contact2LinkTitle: 'Rejoignez-nous',
       contact2LinkHref: '#',
       contact2Image: {
-        id: '1',
-        version: 1,
-        fileName: 'tm1.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/tm1.jpg',
+        attrs: {
+          alt: 'Parlons',
+          width: 598,
+          height: 432,
+          image: {
+            fileName: 'tm1.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/tm1.jpg',
+          },
+        },
       },
     },
   },

@@ -4,20 +4,21 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
+
+export const footer3Code = 'footer3';
 
 export const footer3Schema = {
   title: 'Footer 3',
-  code: 'footer3',
+  code: footer3Code,
   type: Template.block,
   fields: [
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'newsletterTitle',
@@ -102,6 +103,18 @@ export const footer3Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-gradient-reverse-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-13 pt-md-15 pb-7',
+    },
   ],
   models: [
     socialLinksModel,
@@ -141,8 +154,8 @@ export const footer3Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer3Data = Data<typeof footer3Schema>;
@@ -150,13 +163,21 @@ export type Footer3Data = Data<typeof footer3Schema>;
 export const footer3Demos: Demo<typeof footer3Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-7',
+    sequence: 8,
     data: {
       footer3Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        attrs: {
+          alt: 'Newsletter background',
+          width: 1440,
+          height: 680,
+          image: {
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       footer3NewsletterTitle: 'Subscribe to our newsletter',
       footer3NewsletterDescription:
@@ -175,22 +196,20 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
       footer3ListTitle1: 'Need Help?',
       footer3ListTitle2: 'Learn More',
       footer3Helps: [
-        {id: '1', version: 0, attrs: {title: 'Support', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Get Started', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'Support', url: '#'}},
+        {attrs: {title: 'Get Started', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer3LearnMore: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Pricing', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Features', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Pricing', url: '#'}},
+        {attrs: {title: 'Features', url: '#'}},
       ],
       footer3SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -198,8 +217,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -207,8 +224,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -216,8 +231,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -225,8 +238,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -238,13 +249,21 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-7',
+    sequence: 8,
     data: {
       footer3Image: {
-        id: '1',
-        version: 1,
-        fileName: 'bg2.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg2.jpg',
+        attrs: {
+          alt: 'Arrière-plan de la newsletter',
+          width: 1440,
+          height: 680,
+          image: {
+            fileName: 'bg2.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg2.jpg',
+          },
+        },
       },
       footer3NewsletterTitle: 'Abonnez-vous à notre newsletter',
       footer3NewsletterDescription:
@@ -263,30 +282,24 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
       footer3ListTitle1: 'Besoin d’aide ?',
       footer3ListTitle2: 'En savoir plus',
       footer3Helps: [
-        {id: '1', version: 0, attrs: {title: 'Support', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Commencer', url: '#'}},
+        {attrs: {title: 'Support', url: '#'}},
+        {attrs: {title: 'Commencer', url: '#'}},
         {
-          id: '3',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '4',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer3LearnMore: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Tarifs', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Caractéristiques', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'Tarifs', url: '#'}},
+        {attrs: {title: 'Caractéristiques', url: '#'}},
       ],
       footer3SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -294,8 +307,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -303,8 +314,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -312,8 +321,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -321,8 +328,6 @@ export const footer3Demos: Demo<typeof footer3Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',

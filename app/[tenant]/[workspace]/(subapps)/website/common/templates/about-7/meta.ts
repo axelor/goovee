@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {accordionModel} from '../json-models';
-import {metaFileModel} from '../meta-models';
+import {accordionModel, imageModel} from '../json-models';
+
+export const about7Code = 'about7';
 
 export const about7Schema = {
   title: 'About 7',
-  code: 'about7',
+  code: about7Code,
   type: Template.block,
   fields: [
     {
@@ -25,9 +26,9 @@ export const about7Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'accordions',
@@ -35,9 +36,20 @@ export const about7Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mb-15 mb-md-18',
+    },
   ],
-  models: [accordionModel],
-  metaModels: [metaFileModel],
+  models: [accordionModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About7Data = Data<typeof about7Schema>;
@@ -45,21 +57,27 @@ export type About7Data = Data<typeof about7Schema>;
 export const about7Demos: Demo<typeof about7Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-7',
+    sequence: 6,
     data: {
       about7Title: 'Discover the Benefits of Choosing Us',
       about7LeadParagraph:
         'We are committed to building lasting connections with our clients.',
       about7Image: {
-        id: '1',
-        version: 1,
-        fileName: 'i17.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i17.png',
+        attrs: {
+          alt: 'Benefits of choosing us',
+          width: 673,
+          height: 472,
+          image: {
+            fileName: 'i17.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i17.png',
+          },
+        },
       },
       about7Accordions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             expand: true,
             heading: 'Quality of Service',
@@ -67,8 +85,6 @@ export const about7Demos: Demo<typeof about7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             expand: false,
             heading: 'Competitive Pricing',
@@ -76,8 +92,6 @@ export const about7Demos: Demo<typeof about7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             expand: false,
             heading: 'Customer Service',
@@ -89,21 +103,27 @@ export const about7Demos: Demo<typeof about7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-7',
+    sequence: 6,
     data: {
       about7Title: 'Découvrez les avantages de nous choisir',
       about7LeadParagraph:
         'Nous nous engageons à établir des liens durables avec nos clients.',
       about7Image: {
-        id: '1',
-        version: 1,
-        fileName: 'i17.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i17.png',
+        attrs: {
+          alt: 'Avantages de nous choisir',
+          width: 673,
+          height: 472,
+          image: {
+            fileName: 'i17.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i17.png',
+          },
+        },
       },
       about7Accordions: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             expand: true,
             heading: 'Qualité de service',
@@ -111,8 +131,6 @@ export const about7Demos: Demo<typeof about7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             expand: false,
             heading: 'Prix compétitifs',
@@ -120,8 +138,6 @@ export const about7Demos: Demo<typeof about7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             expand: false,
             heading: 'Service Clients',

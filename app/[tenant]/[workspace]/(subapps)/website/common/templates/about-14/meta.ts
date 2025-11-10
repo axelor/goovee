@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {accordionModel} from '../json-models';
+import {accordionModel, imageModel} from '../json-models';
+
+export const about14Code = 'about14';
 
 export const about14Schema = {
   title: 'About 14',
-  code: 'about14',
+  code: about14Code,
   type: Template.block,
   fields: [
     {
@@ -20,9 +21,9 @@ export const about14Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'accordions',
@@ -30,9 +31,20 @@ export const about14Schema = {
       target: 'Accordion',
       type: 'json-one-to-many',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
+    },
   ],
-  models: [accordionModel],
-  metaModels: [metaFileModel],
+  models: [accordionModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About14Data = Data<typeof about14Schema>;
@@ -40,19 +52,25 @@ export type About14Data = Data<typeof about14Schema>;
 export const about14Demos: Demo<typeof about14Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-12',
+    sequence: 4,
     data: {
       about14Image: {
-        id: '1',
-        version: 1,
-        fileName: 'i2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i2.png',
+        attrs: {
+          alt: 'Valued customers',
+          width: 628,
+          height: 426,
+          image: {
+            fileName: 'i2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i2.png',
+          },
+        },
       },
       about14Title: 'Few reasons why our valued customers choose us.',
       about14Accordions: [
         {
-          id: '11',
-          version: 0,
           attrs: {
             body: 'Customers may choose your company because you offer high-quality products or services that meet their needs and exceed their expectations. This can lead to customer satisfaction, loyalty, and positive word-of-mouth recommendations.',
             expand: true,
@@ -60,16 +78,12 @@ export const about14Demos: Demo<typeof about14Schema>[] = [
           },
         },
         {
-          id: '12',
-          version: 0,
           attrs: {
             body: 'Customers may choose your company because you offer high-quality products or services that meet their needs and exceed their expectations. This can lead to customer satisfaction, loyalty, and positive word-of-mouth recommendations.',
             heading: 'Competitive Pricing',
           },
         },
         {
-          id: '13',
-          version: 0,
           attrs: {
             body: 'Customers may choose your company because you offer high-quality products or services that meet their needs and exceed their expectations. This can lead to customer satisfaction, loyalty, and positive word-of-mouth recommendations.',
             heading: 'Customer Service',
@@ -80,20 +94,26 @@ export const about14Demos: Demo<typeof about14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-12',
+    sequence: 4,
     data: {
       about14Image: {
-        id: '1',
-        version: 1,
-        fileName: 'i2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/i2.png',
+        attrs: {
+          alt: 'Clients évalués',
+          width: 628,
+          height: 426,
+          image: {
+            fileName: 'i2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/i2.png',
+          },
+        },
       },
       about14Title:
         'Quelques raisons pour lesquelles nos précieux clients nous choisissent.',
       about14Accordions: [
         {
-          id: '11',
-          version: 0,
           attrs: {
             body: 'Les clients peuvent choisir votre entreprise car vous proposez des produits ou services de haute qualité qui répondent à leurs besoins et dépassent leurs attentes. Cela peut conduire à la satisfaction des clients, à la fidélité et à des recommandations positives de bouche à oreille.',
             expand: true,
@@ -101,16 +121,12 @@ export const about14Demos: Demo<typeof about14Schema>[] = [
           },
         },
         {
-          id: '12',
-          version: 0,
           attrs: {
             body: 'Les clients peuvent choisir votre entreprise car vous proposez des produits ou services de haute qualité qui répondent à leurs besoins et dépassent leurs attentes. Cela peut conduire à la satisfaction des clients, à la fidélité et à des recommandations positives de bouche à oreille.',
             heading: 'Prix compétitifs',
           },
         },
         {
-          id: '13',
-          version: 0,
           attrs: {
             body: 'Les clients peuvent choisir votre entreprise car vous proposez des produits ou services de haute qualité qui répondent à leurs besoins et dépassent leurs attentes. Cela peut conduire à la satisfaction des clients, à la fidélité et à des recommandations positives de bouche à oreille.',
             heading: 'Service Clients',

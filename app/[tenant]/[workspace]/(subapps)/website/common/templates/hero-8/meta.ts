@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const hero8Code = 'hero8';
 
 export const hero8Schema = {
   title: 'Hero 8',
-  code: 'hero8',
+  code: hero8Code,
   type: Template.block,
   fields: [
     {
@@ -44,9 +46,9 @@ export const hero8Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'countUp',
@@ -63,8 +65,33 @@ export const hero8Schema = {
       title: 'Heading',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper  bg-light mb-13 mb-md-17',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
+    },
+    {
+      name: 'cardClassName',
+      title: 'Card Class Name',
+      type: 'string',
+      defaultValue: 'card bg-soft-primary rounded-4 mt-2',
+    },
+
+    {
+      name: 'cardBodyClassName',
+      title: 'Card Body Class Name',
+      type: 'string',
+      defaultValue: 'card-body p-md-10 py-xl-11 px-xl-15',
+    },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero8Data = Data<typeof hero8Schema>;
@@ -72,6 +99,9 @@ export type Hero8Data = Data<typeof hero8Schema>;
 export const hero8Demos: Demo<typeof hero8Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-8',
+    sequence: 1,
     data: {
       hero8Title: 'Creating particular project ideas with experience',
       hero8Description:
@@ -81,11 +111,16 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
       hero8ButtonLink1: '#',
       hero8ButtonLink2: '#',
       hero8Image: {
-        id: '1',
-        version: 1,
-        fileName: 'co3.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co3.png',
+        attrs: {
+          alt: 'Business process model',
+          width: 369,
+          height: 471,
+          image: {
+            fileName: 'co3.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co3.png',
+          },
+        },
       },
       hero8CountUp: 20,
       hero8Suffix: 'K+',
@@ -94,6 +129,9 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-8',
+    sequence: 1,
     data: {
       hero8Title: 'Créer des idées de projets particulières avec expérience',
       hero8Description:
@@ -103,11 +141,16 @@ export const hero8Demos: Demo<typeof hero8Schema>[] = [
       hero8ButtonLink1: '#',
       hero8ButtonLink2: '#',
       hero8Image: {
-        id: '1',
-        version: 1,
-        fileName: 'co3.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/co3.png',
+        attrs: {
+          alt: 'Modèle de processus métier',
+          width: 369,
+          height: 471,
+          image: {
+            fileName: 'co3.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/co3.png',
+          },
+        },
       },
       hero8CountUp: 20,
       hero8Suffix: 'K+',

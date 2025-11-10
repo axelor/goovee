@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {serviceList3Model} from '../json-models';
+import {serviceList3Model, imageModel} from '../json-models';
+
+export const about25Code = 'about25';
 
 export const about25Schema = {
   title: 'About 25',
-  code: 'about25',
+  code: about25Code,
   type: Template.block,
   fields: [
     {
@@ -30,9 +31,9 @@ export const about25Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'linkTitle',
@@ -60,9 +61,20 @@ export const about25Schema = {
       type: 'json-one-to-many',
       target: 'ServiceList3',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
-  models: [serviceList3Model],
-  metaModels: [metaFileModel],
+  models: [serviceList3Model, imageModel],
 } as const satisfies TemplateSchema;
 
 export type About25Data = Data<typeof about25Schema>;
@@ -70,13 +82,21 @@ export type About25Data = Data<typeof about25Schema>;
 export const about25Demos: Demo<typeof about25Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-24',
+    sequence: 6,
     data: {
       about25Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about30.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about30.jpg',
+        attrs: {
+          alt: 'Caitlyn, a food and product photographer',
+          width: 512,
+          height: 512,
+          image: {
+            fileName: 'about30.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about30.jpg',
+          },
+        },
       },
       about25Caption: 'About Me',
       about25Para1:
@@ -90,8 +110,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
       about25Heading: 'My Working Process',
       about25AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Concept',
             description:
@@ -99,8 +117,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Prepare',
             description:
@@ -108,8 +124,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Retouch',
             description:
@@ -117,8 +131,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Finalize',
             description:
@@ -130,13 +142,21 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-24',
+    sequence: 6,
     data: {
       about25Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about30.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about30.jpg',
+        attrs: {
+          alt: 'Caitlyn, photographe culinaire et de produits',
+          width: 512,
+          height: 512,
+          image: {
+            fileName: 'about30.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about30.jpg',
+          },
+        },
       },
       about25Caption: 'À propos de moi',
       about25Para1:
@@ -150,8 +170,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
       about25Heading: 'Mon processus de travail',
       about25AboutList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Concept',
             description:
@@ -159,8 +177,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Préparer',
             description:
@@ -168,8 +184,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Retoucher',
             description:
@@ -177,8 +191,6 @@ export const about25Demos: Demo<typeof about25Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Finaliser',
             description:

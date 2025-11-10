@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const blog3Code = 'blog3';
 
 export const blog3Schema = {
   title: 'Blog 3',
-  code: 'blog3',
+  code: blog3Code,
   type: Template.block,
   fields: [
     {
@@ -31,6 +33,18 @@ export const blog3Schema = {
       title: 'Blog List',
       type: 'json-one-to-many',
       target: 'Blog3BlogList',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
   models: [
@@ -58,14 +72,14 @@ export const blog3Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Blog3Data = Data<typeof blog3Schema>;
@@ -73,6 +87,9 @@ export type Blog3Data = Data<typeof blog3Schema>;
 export const blog3Demos: Demo<typeof blog3Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-17',
+    sequence: 5,
     data: {
       blog3Caption: 'Case Studies',
       blog3Title:
@@ -80,66 +97,78 @@ export const blog3Demos: Demo<typeof blog3Schema>[] = [
       blog3Navigation: false,
       blog3BlogList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Ligula tristique quis risus',
             category: 'Coding',
             date: '2022-04-14',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b4.jpg',
+              attrs: {
+                alt: 'Blog post image',
+                width: 775,
+                height: 485,
+                image: {
+                  fileName: 'b4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b4.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'ullam id dolor elit id nibh',
             category: 'Workspace',
             date: '2022-03-29',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b5.jpg',
+              attrs: {
+                alt: 'Blog post image',
+                width: 380,
+                height: 240,
+                image: {
+                  fileName: 'b5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b5.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Ultricies fusce porta elit',
             category: 'Meeting',
             date: '2022-02-26',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b6.jpg',
+              attrs: {
+                alt: 'Blog post image',
+                width: 380,
+                height: 240,
+                image: {
+                  fileName: 'b6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b6.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Morbi leo risus porta eget',
             category: 'Business Tips',
             date: '2022-01-07',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b7.jpg',
+              attrs: {
+                alt: 'Blog post image',
+                width: 480,
+                height: 300,
+                image: {
+                  fileName: 'b7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b7.jpg',
+                },
+              },
             },
           },
         },
@@ -148,6 +177,9 @@ export const blog3Demos: Demo<typeof blog3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-17',
+    sequence: 5,
     data: {
       blog3Caption: 'Études de cas',
       blog3Title:
@@ -155,66 +187,78 @@ export const blog3Demos: Demo<typeof blog3Schema>[] = [
       blog3Navigation: false,
       blog3BlogList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Ligula tristique quis risus',
             category: 'Codage',
             date: '2022-04-14',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b4.jpg',
+              attrs: {
+                alt: "Image de l'article de blog",
+                width: 775,
+                height: 485,
+                image: {
+                  fileName: 'b4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b4.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'ullam id dolor elit id nibh',
             category: 'Espace de travail',
             date: '2022-03-29',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b5.jpg',
+              attrs: {
+                alt: "Image de l'article de blog",
+                width: 380,
+                height: 240,
+                image: {
+                  fileName: 'b5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b5.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Ultricies fusce porta elit',
             category: 'Réunion',
             date: '2022-02-26',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b6.jpg',
+              attrs: {
+                alt: "Image de l'article de blog",
+                width: 380,
+                height: 240,
+                image: {
+                  fileName: 'b6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b6.jpg',
+                },
+              },
             },
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Morbi leo risus porta eget',
             category: 'Conseils aux entreprises',
             date: '2022-01-07',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'b7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/photos/b7.jpg',
+              attrs: {
+                alt: "Image de l'article de blog",
+                width: 480,
+                height: 300,
+                image: {
+                  fileName: 'b7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/photos/b7.jpg',
+                },
+              },
             },
           },
         },

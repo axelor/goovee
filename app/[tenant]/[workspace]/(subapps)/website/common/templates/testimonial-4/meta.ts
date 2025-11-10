@@ -4,12 +4,14 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {ratings} from '../../constants/ratings';
+import {imageModel} from '../json-models';
+import {ratingsSelection} from '../meta-selections';
+
+export const testimonial4Code = 'testimonial4';
 
 export const testimonial4Schema = {
   title: 'Testimonial 4',
-  code: 'testimonial4',
+  code: testimonial4Code,
   type: Template.block,
   fields: [
     {
@@ -38,6 +40,18 @@ export const testimonial4Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial4Testimonial',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-16',
+    },
   ],
   models: [
     {
@@ -65,19 +79,20 @@ export const testimonial4Schema = {
           name: 'rating',
           title: 'Rating',
           type: 'integer',
-          selection: ratings,
+          selection: 'ratings',
         },
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
+  selections: [ratingsSelection],
 } as const satisfies TemplateSchema;
 
 export type Testimonial4Data = Data<typeof testimonial4Schema>;
@@ -85,6 +100,9 @@ export type Testimonial4Data = Data<typeof testimonial4Schema>;
 export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-6',
+    sequence: 5,
     data: {
       testimonial4Caption: 'Happy Customers',
       testimonial4Title:
@@ -93,16 +111,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
       testimonial4Navigation: false,
       testimonial4Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te7.jpg',
+              attrs: {
+                alt: 'Ethan Johnson',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te7.jpg',
+                },
+              },
             },
             designation: 'Sales Director',
             review:
@@ -111,16 +132,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te8.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te8.jpg',
+              attrs: {
+                alt: 'Gabriel Rodriguez',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te8.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te8.jpg',
+                },
+              },
             },
             designation: 'Marketing Manager',
             review:
@@ -129,16 +153,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te9.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te9.jpg',
+              attrs: {
+                alt: 'Samuel Patel',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te9.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te9.jpg',
+                },
+              },
             },
             designation: 'HR Manager',
             review:
@@ -147,16 +174,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te10.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te10.jpg',
+              attrs: {
+                alt: 'Jackie Sanders',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te10.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te10.jpg',
+                },
+              },
             },
             designation: 'Investment Planner',
             review:
@@ -169,6 +199,9 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-6',
+    sequence: 5,
     data: {
       testimonial4Caption: 'Clients satisfaits',
       testimonial4Title:
@@ -177,16 +210,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
       testimonial4Navigation: false,
       testimonial4Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te7.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te7.jpg',
+              attrs: {
+                alt: 'Ethan Johnson',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te7.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te7.jpg',
+                },
+              },
             },
             designation: 'Directeur des ventes',
             review:
@@ -195,16 +231,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te8.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te8.jpg',
+              attrs: {
+                alt: 'Gabriel Rodriguez',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te8.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te8.jpg',
+                },
+              },
             },
             designation: 'Responsable marketing',
             review:
@@ -213,16 +252,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te9.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te9.jpg',
+              attrs: {
+                alt: 'Samuel Patel',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te9.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te9.jpg',
+                },
+              },
             },
             designation: 'Responsable RH',
             review:
@@ -231,16 +273,19 @@ export const testimonial4Demos: Demo<typeof testimonial4Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te10.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te10.jpg',
+              attrs: {
+                alt: 'Jackie Sanders',
+                width: 300,
+                height: 300,
+                image: {
+                  fileName: 'te10.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te10.jpg',
+                },
+              },
             },
             designation: 'Planificateur d’investissement',
             review:

@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const process6Code = 'process6';
+
 export const process6Schema = {
   title: 'Process 6',
-  code: 'process6',
+  code: process6Code,
   type: Template.block,
   fields: [
     {
@@ -25,6 +27,18 @@ export const process6Schema = {
       title: 'Processes',
       type: 'json-one-to-many',
       target: 'Process6Processes',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled lower-end',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
     },
   ],
   models: [
@@ -59,14 +73,15 @@ export type Process6Data = Data<typeof process6Schema>;
 export const process6Demos: Demo<typeof process6Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-13',
+    sequence: 4,
     data: {
       process6Title: 'Our Working Process',
       process6Caption:
         'We create expenses relaxed so that you maintain full control over them.',
       process6Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '01',
             title: 'Concept',
@@ -75,8 +90,6 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '02',
             title: 'Prepare',
@@ -85,8 +98,6 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '03',
             title: 'Retouch',
@@ -95,8 +106,6 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             no: '04',
             title: 'Finalize',
@@ -109,14 +118,15 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-13',
+    sequence: 4,
     data: {
       process6Title: 'Notre processus de travail',
       process6Caption:
         'Nous créons des dépenses détendues afin que vous puissiez en garder le contrôle total.',
       process6Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '01',
             title: 'Concept',
@@ -125,8 +135,6 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '02',
             title: 'Préparer',
@@ -135,8 +143,6 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '03',
             title: 'Retoucher',
@@ -145,8 +151,6 @@ export const process6Demos: Demo<typeof process6Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             no: '04',
             title: 'Finaliser',

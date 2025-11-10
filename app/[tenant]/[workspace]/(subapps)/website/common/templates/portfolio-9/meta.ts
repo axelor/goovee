@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const portfolio9Code = 'portfolio9';
 
 export const portfolio9Schema = {
   title: 'Portfolio 9',
-  code: 'portfolio9',
+  code: portfolio9Code,
   type: Template.block,
   fields: [
     {
@@ -134,34 +136,45 @@ export const portfolio9Schema = {
     {
       name: 'image1',
       title: 'Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'image2',
       title: 'Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'image3',
       title: 'Image 3',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'image4',
       title: 'Image 4',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light wrapper-border',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 pt-md-18 pb-md-16',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Portfolio9Data = Data<typeof portfolio9Schema>;
@@ -169,6 +182,9 @@ export type Portfolio9Data = Data<typeof portfolio9Schema>;
 export const portfolio9Demos: Demo<typeof portfolio9Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-16',
+    sequence: 3,
     data: {
       portfolio9Title: 'Latest Projects',
       portfolio9Description:
@@ -200,37 +216,60 @@ export const portfolio9Demos: Demo<typeof portfolio9Schema>[] = [
       portfolio9Section4LinkTitle: 'See Project',
       portfolio9Section4LinkHref: '#',
       portfolio9Image1: {
-        id: '1',
-        version: 1,
-        fileName: 'f1.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f1.png',
+        attrs: {
+          alt: 'Sandbox Real Estate',
+          width: 1036,
+          height: 578,
+          image: {
+            fileName: 'f1.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f1.png',
+          },
+        },
       },
       portfolio9Image2: {
-        id: '1',
-        version: 1,
-        fileName: 'f2.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f2.png',
+        attrs: {
+          alt: 'Budget App',
+          width: 524,
+          height: 528,
+          image: {
+            fileName: 'f2.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f2.png',
+          },
+        },
       },
       portfolio9Image3: {
-        id: '1',
-        version: 1,
-        fileName: 'f3.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f3.png',
+        attrs: {
+          alt: 'Missio Theme',
+          width: 585,
+          height: 350,
+          image: {
+            fileName: 'f3.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f3.png',
+          },
+        },
       },
       portfolio9Image4: {
-        id: '1',
-        version: 1,
-        fileName: 'f4.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f4.png',
+        attrs: {
+          alt: 'Storage App',
+          width: 585,
+          height: 350,
+          image: {
+            fileName: 'f4.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f4.png',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-16',
+    sequence: 3,
     data: {
       portfolio9Title: 'Derniers projets',
       portfolio9Description:
@@ -262,32 +301,52 @@ export const portfolio9Demos: Demo<typeof portfolio9Schema>[] = [
       portfolio9Section4LinkTitle: 'Voir le projet',
       portfolio9Section4LinkHref: '#',
       portfolio9Image1: {
-        id: '1',
-        version: 1,
-        fileName: 'f1.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f1.png',
+        attrs: {
+          alt: 'Sandbox Real Estate',
+          width: 1036,
+          height: 578,
+          image: {
+            fileName: 'f1.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f1.png',
+          },
+        },
       },
       portfolio9Image2: {
-        id: '1',
-        version: 1,
-        fileName: 'f2.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f2.png',
+        attrs: {
+          alt: 'Application de budget',
+          width: 524,
+          height: 528,
+          image: {
+            fileName: 'f2.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f2.png',
+          },
+        },
       },
       portfolio9Image3: {
-        id: '1',
-        version: 1,
-        fileName: 'f3.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f3.png',
+        attrs: {
+          alt: 'Thème Missio',
+          width: 585,
+          height: 350,
+          image: {
+            fileName: 'f3.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f3.png',
+          },
+        },
       },
       portfolio9Image4: {
-        id: '1',
-        version: 1,
-        fileName: 'f4.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/f4.png',
+        attrs: {
+          alt: 'Application de stockage',
+          width: 585,
+          height: 350,
+          image: {
+            fileName: 'f4.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/f4.png',
+          },
+        },
       },
     },
   },

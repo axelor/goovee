@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const hero4Code = 'hero4';
 
 export const hero4Schema = {
   title: 'Hero 4',
-  code: 'hero4',
+  code: hero4Code,
   type: Template.block,
   fields: [
     {
@@ -44,12 +46,25 @@ export const hero4Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper position-relative min-vh-70 d-lg-flex align-items-center bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero4Data = Data<typeof hero4Schema>;
@@ -57,6 +72,9 @@ export type Hero4Data = Data<typeof hero4Schema>;
 export const hero4Demos: Demo<typeof hero4Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-4',
+    sequence: 1,
     data: {
       hero4Title:
         "Simple get down & calm down and we're control your requirements.",
@@ -67,16 +85,24 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
       hero4ButtonLink1: '#',
       hero4ButtonLink2: '#',
       hero4Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about16.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about16.jpg',
+        attrs: {
+          alt: 'About us',
+          width: 720,
+          height: 784,
+          image: {
+            fileName: 'about16.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about16.jpg',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-4',
+    sequence: 1,
     data: {
       hero4Title: 'Calmez-vous et nous contrôlons vos besoins.',
       hero4Description:
@@ -86,11 +112,16 @@ export const hero4Demos: Demo<typeof hero4Schema>[] = [
       hero4ButtonLink1: '#',
       hero4ButtonLink2: '#',
       hero4Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about16.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about16.jpg',
+        attrs: {
+          alt: 'About us',
+          width: 720,
+          height: 784,
+          image: {
+            fileName: 'about16.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about16.jpg',
+          },
+        },
       },
     },
   },

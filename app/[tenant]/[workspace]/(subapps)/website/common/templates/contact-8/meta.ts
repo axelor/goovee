@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const contact8Code = 'contact8';
 
 export const contact8Schema = {
   title: 'Contact 8',
-  code: 'contact8',
+  code: contact8Code,
   type: Template.block,
   fields: [
     {
@@ -39,16 +41,16 @@ export const contact8Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'heading',
@@ -65,9 +67,20 @@ export const contact8Schema = {
       title: 'Suffix',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light angled lower-end',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-16',
+    },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Contact8Data = Data<typeof contact8Schema>;
@@ -75,6 +88,9 @@ export type Contact8Data = Data<typeof contact8Schema>;
 export const contact8Demos: Demo<typeof contact8Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-13',
+    sequence: 9,
     data: {
       contact8Title: 'Get in Touch',
       contact8Description:
@@ -84,18 +100,28 @@ export const contact8Demos: Demo<typeof contact8Schema>[] = [
       contact8LinkTitle: 'Join Us',
       contact8LinkHref: '#',
       contact8TileImage1: {
-        id: '1',
-        version: 1,
-        fileName: 'about4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about4.jpg',
+        attrs: {
+          alt: 'Grow your business',
+          width: 465,
+          height: 533,
+          image: {
+            fileName: 'about4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about4.jpg',
+          },
+        },
       },
       contact8TileImage2: {
-        id: '1',
-        version: 1,
-        fileName: 'about5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about5.jpg',
+        attrs: {
+          alt: 'Grow your business',
+          width: 1200,
+          height: 650,
+          image: {
+            fileName: 'about5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about5.jpg',
+          },
+        },
       },
       contact8Heading: 'Satisfied Clients',
       contact8CountUp: 5000,
@@ -104,6 +130,9 @@ export const contact8Demos: Demo<typeof contact8Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-13',
+    sequence: 9,
     data: {
       contact8Title: 'Entrer en contact',
       contact8Description:
@@ -113,18 +142,28 @@ export const contact8Demos: Demo<typeof contact8Schema>[] = [
       contact8LinkTitle: 'Rejoignez-nous',
       contact8LinkHref: '#',
       contact8TileImage1: {
-        id: '1',
-        version: 1,
-        fileName: 'about4.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about4.jpg',
+        attrs: {
+          alt: 'Développez votre entreprise',
+          width: 465,
+          height: 533,
+          image: {
+            fileName: 'about4.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about4.jpg',
+          },
+        },
       },
       contact8TileImage2: {
-        id: '1',
-        version: 1,
-        fileName: 'about5.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about5.jpg',
+        attrs: {
+          alt: 'Développez votre entreprise',
+          width: 1200,
+          height: 650,
+          image: {
+            fileName: 'about5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about5.jpg',
+          },
+        },
       },
       contact8Heading: 'Clients satisfaits',
       contact8CountUp: 5000,

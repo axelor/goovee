@@ -1,15 +1,16 @@
-import {startCase} from 'lodash-es';
 import {
   Template,
   type Data,
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {unicons} from '../../constants/unicons';
+import {uniconsSelection} from '../meta-selections';
+
+export const service14Code = 'service14';
 
 export const service14Schema = {
   title: 'Service 14',
-  code: 'service14',
+  code: service14Code,
   type: Template.block,
   fields: [
     {
@@ -28,6 +29,18 @@ export const service14Schema = {
       type: 'json-one-to-many',
       target: 'Service14Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-17',
+    },
   ],
   models: [
     {
@@ -45,10 +58,7 @@ export const service14Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: unicons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'unicons',
         },
         {
           name: 'description',
@@ -68,6 +78,7 @@ export const service14Schema = {
       ],
     },
   ],
+  selections: [uniconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service14Data = Data<typeof service14Schema>;
@@ -75,14 +86,15 @@ export type Service14Data = Data<typeof service14Schema>;
 export const service14Demos: Demo<typeof service14Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-11',
+    sequence: 2,
     data: {
       service14Caption: 'What We Do?',
       service14Title:
         'The service we offer is specifically designed to meet your needs.',
       service14Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'IoT Development',
             icon: 'circuit',
@@ -93,8 +105,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Artificial Intelligence',
             icon: 'processor',
@@ -105,8 +115,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Software Maintenance',
             icon: 'setting',
@@ -117,8 +125,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersecurity',
             icon: 'lock-access',
@@ -133,14 +139,15 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-11',
+    sequence: 2,
     data: {
       service14Caption: 'Que faisons-nous ?',
       service14Title:
         'Le service que nous proposons est spécialement conçu pour répondre à vos besoins.',
       service14Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Développement IoT',
             icon: 'circuit',
@@ -151,8 +158,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Intelligence artificielle',
             icon: 'processor',
@@ -163,8 +168,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Maintenance logicielle',
             icon: 'setting',
@@ -175,8 +178,6 @@ export const service14Demos: Demo<typeof service14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Cybersécurité',
             icon: 'lock-access',

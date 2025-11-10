@@ -22,7 +22,11 @@ interface AddressInformationProps {
 }
 
 export function AddressInformation({countries, form}: AddressInformationProps) {
-  const handleCountryChange = (selectedOption: {id: string; name: string}) => {
+  const handleCountryChange = (selectedOption: {
+    id: string;
+    name: string;
+    version: number;
+  }) => {
     form.setValue('addressInformation.country', selectedOption, {
       shouldValidate: true,
     });
@@ -132,7 +136,7 @@ export function AddressInformation({countries, form}: AddressInformationProps) {
                   <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder={i18n.t('Enter city name')} {...field} />
+                  <Input placeholder={i18n.t('Enter town name')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,16 +1,21 @@
-import {ProgressBar} from '@/subapps/website/common/hooks/progress-bar';
+import dynamic from 'next/dynamic';
 import {ComponentType} from 'react';
-import {LightBox} from '../hooks/lightbox';
-import {Tooltip} from '../hooks/tooltip';
-import {NestedDropdown} from '../hooks/nested-dropdown';
-import {Clipboard} from '../hooks/clipboard';
-import {ReplaceMe} from '../hooks/replace-me';
 
 export const plugins = {
-  'progress-bar': ProgressBar,
-  lightbox: LightBox,
-  tooltip: Tooltip,
-  'nested-dropdown': NestedDropdown,
-  clipboard: Clipboard,
-  'replace-me': ReplaceMe,
+  'progress-bar': dynamic(() =>
+    import('../hooks/progress-bar').then(mod => mod.ProgressBar),
+  ),
+  lightbox: dynamic(() =>
+    import('../hooks/lightbox').then(mod => mod.LightBox),
+  ),
+  tooltip: dynamic(() => import('../hooks/tooltip').then(mod => mod.Tooltip)),
+  'nested-dropdown': dynamic(() =>
+    import('../hooks/nested-dropdown').then(mod => mod.NestedDropdown),
+  ),
+  clipboard: dynamic(() =>
+    import('../hooks/clipboard').then(mod => mod.Clipboard),
+  ),
+  'replace-me': dynamic(() =>
+    import('../hooks/replace-me').then(mod => mod.ReplaceMe),
+  ),
 } as Record<string, ComponentType>;

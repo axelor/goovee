@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const testimonial10Code = 'testimonial10';
 
 export const testimonial10Schema = {
   title: 'Testimonial 10',
-  code: 'testimonial10',
+  code: testimonial10Code,
   type: Template.block,
   fields: [
     {
@@ -26,6 +28,18 @@ export const testimonial10Schema = {
       title: 'Testimonials',
       type: 'json-one-to-many',
       target: 'Testimonial10Testimonial',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-14 py-md-17',
     },
   ],
   models: [
@@ -53,14 +67,14 @@ export const testimonial10Schema = {
         {
           name: 'image',
           title: 'Image',
-          type: 'many-to-one',
-          target: 'com.axelor.meta.db.MetaFile',
-          widget: 'Image',
+          type: 'json-many-to-one',
+          widgetAttrs: {canNew: 'true', canEdit: 'true'},
+          target: 'Image',
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial10Data = Data<typeof testimonial10Schema>;
@@ -68,22 +82,28 @@ export type Testimonial10Data = Data<typeof testimonial10Schema>;
 export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-9',
+    sequence: 4,
     data: {
       testimonial10Caption: 'Happy Clients',
       testimonial10Description:
         'Avoid just believing us. Discover what our clients have thought about us.',
       testimonial10Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te1.jpg',
+              attrs: {
+                alt: 'Coriss Ambady',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te1.jpg',
+                },
+              },
             },
             designation: 'Financial Analyst',
             review:
@@ -91,16 +111,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te2.jpg',
+              attrs: {
+                alt: 'Cory Zamora',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te2.jpg',
+                },
+              },
             },
             designation: 'Marketing Specialist',
             review:
@@ -108,16 +131,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te3.jpg',
+              attrs: {
+                alt: 'Nikolas Brooten',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te3.jpg',
+                },
+              },
             },
             designation: 'Sales Manager',
             review:
@@ -125,16 +151,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te4.jpg',
+              attrs: {
+                alt: 'Coriss Ambady',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te4.jpg',
+                },
+              },
             },
             designation: 'Financial Analyst',
             review:
@@ -142,16 +171,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Laura Widerski',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te5.jpg',
+              attrs: {
+                alt: 'Laura Widerski',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te5.jpg',
+                },
+              },
             },
             designation: 'Sales Specialist',
             review:
@@ -159,16 +191,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te6.jpg',
+              attrs: {
+                alt: 'Jackie Sanders',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te6.jpg',
+                },
+              },
             },
             designation: 'Jackie Sanders',
             review:
@@ -180,22 +215,28 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-9',
+    sequence: 4,
     data: {
       testimonial10Caption: 'Clients satisfaits',
       testimonial10Description:
         'Évitez de nous croire sur parole. Découvrez ce que nos clients ont pensé de nous.',
       testimonial10Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te1.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te1.jpg',
+              attrs: {
+                alt: 'Coriss Ambady',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te1.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te1.jpg',
+                },
+              },
             },
             designation: 'Analyste financier',
             review:
@@ -203,16 +244,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Cory Zamora',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te2.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te2.jpg',
+              attrs: {
+                alt: 'Cory Zamora',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te2.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te2.jpg',
+                },
+              },
             },
             designation: 'Spécialiste en marketing',
             review:
@@ -220,16 +264,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Nikolas Brooten',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te3.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te3.jpg',
+              attrs: {
+                alt: 'Nikolas Brooten',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te3.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te3.jpg',
+                },
+              },
             },
             designation: 'Directeur des ventes',
             review:
@@ -237,16 +284,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Coriss Ambady',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te4.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te4.jpg',
+              attrs: {
+                alt: 'Coriss Ambady',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te4.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te4.jpg',
+                },
+              },
             },
             designation: 'Analyste financier',
             review:
@@ -254,16 +304,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             name: 'Laura Widerski',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te5.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te5.jpg',
+              attrs: {
+                alt: 'Laura Widerski',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te5.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te5.jpg',
+                },
+              },
             },
             designation: 'Spécialiste des ventes',
             review:
@@ -271,16 +324,19 @@ export const testimonial10Demos: Demo<typeof testimonial10Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             image: {
-              id: '1',
-              version: 1,
-              fileName: 'te6.jpg',
-              fileType: 'image/jpeg',
-              filePath: '/img/avatars/te6.jpg',
+              attrs: {
+                alt: 'Jackie Sanders',
+                width: 100,
+                height: 100,
+                image: {
+                  fileName: 'te6.jpg',
+                  fileType: 'image/jpeg',
+                  filePath: '/img/avatars/te6.jpg',
+                },
+              },
             },
             designation: 'Jackie Sanders',
             review:

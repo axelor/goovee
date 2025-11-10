@@ -10,8 +10,6 @@ import {getSession} from '@/auth';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {
-  findCities,
-  findCountry,
   updateDefaultDeliveryAddress,
   updateDefaultInvoicingAddress,
 } from '@/orm/address';
@@ -32,26 +30,30 @@ export async function createAddress(values: Partial<PartnerAddress>) {
 
   if (!(session && tenantId)) return null;
 
-  const address = await createPartnerAddress(
-    session.user?.id,
-    values,
-    tenantId,
-  ).then(clone);
+  const userId = session?.user.isContact
+    ? session?.user.mainPartnerId!
+    : session?.user.id!;
+
+  const address = await createPartnerAddress(userId, values, tenantId).then(
+    clone,
+  );
 
   return address;
 }
 
-export async function updateAddress(values: Partial<PartnerAddress>) {
+export async function updateAddress(values: PartnerAddress) {
   const session = await getSession();
   const tenantId = headers().get(TENANT_HEADER);
 
   if (!(session && tenantId)) return null;
 
-  const address = await updatePartnerAddress(
-    session.user?.id,
-    values,
-    tenantId,
-  ).then(clone);
+  const userId = session?.user.isContact
+    ? session?.user.mainPartnerId!
+    : session?.user.id!;
+
+  const address = await updatePartnerAddress(userId, values, tenantId).then(
+    clone,
+  );
 
   return address;
 }
@@ -75,7 +77,16 @@ export async function updateDefaultAddress({
       ? updateDefaultDeliveryAddress
       : updateDefaultInvoicingAddress;
 
-  return updateHandler(id, session?.user?.id, tenantId, isDefault).then(clone);
+  const userId = session?.user.isContact
+    ? session?.user.mainPartnerId!
+    : session?.user.id!;
+
+  return updateHandler({
+    partnerAddressId: id,
+    partnerId: userId,
+    tenantId,
+    isDefault,
+  }).then(clone);
 }
 
 export async function deleteAddress(id: PartnerAddress['id']) {

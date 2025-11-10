@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const hero9Code = 'hero9';
 
 export const hero9Schema = {
   title: 'Hero 9',
-  code: 'hero9',
+  code: hero9Code,
   type: Template.block,
   fields: [
     {
@@ -44,15 +46,27 @@ export const hero9Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'typewriter',
       title: 'Typewriter',
       type: 'json-one-to-many',
       target: 'Hero9Typewriter',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-soft-primary',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-10 pb-14 pb-lg-0',
     },
   ],
   models: [
@@ -69,8 +83,8 @@ export const hero9Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Hero9Data = Data<typeof hero9Schema>;
@@ -78,6 +92,9 @@ export type Hero9Data = Data<typeof hero9Schema>;
 export const hero9Demos: Demo<typeof hero9Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-9',
+    sequence: 1,
     data: {
       hero9Title: 'Lighthouse is simple and strong, with',
       hero9Description:
@@ -87,21 +104,29 @@ export const hero9Demos: Demo<typeof hero9Schema>[] = [
       hero9ButtonLink1: '#',
       hero9ButtonLink2: '#',
       hero9Image: {
-        id: '1',
-        version: 1,
-        fileName: 'sa16.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/sa16.png',
+        attrs: {
+          alt: 'Business process model',
+          width: 665,
+          height: 651,
+          image: {
+            fileName: 'sa16.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/sa16.png',
+          },
+        },
       },
       hero9Typewriter: [
-        {id: '1', version: 0, attrs: {text: 'quick transactions.'}},
-        {id: '2', version: 0, attrs: {text: 'easy usage'}},
-        {id: '3', version: 0, attrs: {text: 'secure payments'}},
+        {attrs: {text: 'quick transactions.'}},
+        {attrs: {text: 'easy usage'}},
+        {attrs: {text: 'secure payments'}},
       ],
     },
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-9',
+    sequence: 1,
     data: {
       hero9Title: 'Lighthouse est simple et solide, avec',
       hero9Description:
@@ -111,16 +136,21 @@ export const hero9Demos: Demo<typeof hero9Schema>[] = [
       hero9ButtonLink1: '#',
       hero9ButtonLink2: '#',
       hero9Image: {
-        id: '1',
-        version: 1,
-        fileName: 'sa16.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/sa16.png',
+        attrs: {
+          alt: 'Business process model',
+          width: 665,
+          height: 651,
+          image: {
+            fileName: 'sa16.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/sa16.png',
+          },
+        },
       },
       hero9Typewriter: [
-        {id: '1', version: 0, attrs: {text: 'transactions rapides.'}},
-        {id: '2', version: 0, attrs: {text: 'utilisation facile'}},
-        {id: '3', version: 0, attrs: {text: 'paiements sécurisés'}},
+        {attrs: {text: 'transactions rapides.'}},
+        {attrs: {text: 'utilisation facile'}},
+        {attrs: {text: 'paiements sécurisés'}},
       ],
     },
   },

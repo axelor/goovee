@@ -138,7 +138,7 @@
   "Enter attachment description": "Entrer la description de la pièce jointe",
   "Enter attachment title": "Entrer le titre de la pièce jointe",
   "Enter category description": "Entrer la description de la catégorie",
-  "Enter city name": "Entrer le nom de la ville",
+  "Enter town name": "Entrez le nom de la ville",
   "Enter company SIRET number": "Entrer le numéro SIRET de l’entreprise",
   "Enter company name": "Entrer le nom de l’entreprise",
   "Enter company number": "Entrer le numéro de l’entreprise",
@@ -762,5 +762,7 @@
   "app-shop": "E-Boutique",
   "app-survey": "Formulaire",
   "app-ticketing": "Support",
-  "app-website": "Ressource"
+  "app-website": "Ressource",
+  "Your cart is empty. Please add items before placing an order.": "Votre panier est vide. Veuillez ajouter des articles avant de passer commande.",
+  "Order creation failed. Please try again.": "La création de la commande a échoué. Veuillez réessayer."
 }

@@ -5,9 +5,11 @@ import {
   type TemplateSchema,
 } from '../../types/templates';
 
+export const process14Code = 'process14';
+
 export const process14Schema = {
   title: 'Process 14',
-  code: 'process14',
+  code: process14Code,
   type: Template.block,
   fields: [
     {
@@ -45,6 +47,18 @@ export const process14Schema = {
       title: 'Processes',
       type: 'json-one-to-many',
       target: 'Process14Processes',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-14 pb-md-17',
     },
   ],
   models: [
@@ -84,6 +98,9 @@ export type Process14Data = Data<typeof process14Schema>;
 export const process14Demos: Demo<typeof process14Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-21',
+    sequence: 3,
     data: {
       process14Title:
         'These 3 practical measure help us organize company projects.',
@@ -96,8 +113,6 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
       process14LinkHref: '#',
       process14Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Specialization',
@@ -106,8 +121,6 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Collaboration',
@@ -116,8 +129,6 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Innovation',
@@ -130,6 +141,9 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-21',
+    sequence: 3,
     data: {
       process14Title:
         'Ces 3 mesures pratiques aident notre entreprise à organiser ses projets.',
@@ -142,8 +156,6 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
       process14LinkHref: '#',
       process14Processes: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             no: '1',
             title: 'Spécialisation',
@@ -153,8 +165,6 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             no: '2',
             title: 'Collaboration',
@@ -164,8 +174,6 @@ export const process14Demos: Demo<typeof process14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             no: '3',
             title: 'Innovation',

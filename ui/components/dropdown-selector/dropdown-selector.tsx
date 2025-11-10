@@ -13,8 +13,13 @@ import {
 } from '@/ui/components';
 import {cn} from '@/utils/css';
 
-type DropdownSelectorProps = {
-  options: any[];
+type DropdownOptionBase = {
+  id: string | number;
+  name: string;
+};
+
+type DropdownSelectorProps<T extends DropdownOptionBase> = {
+  options: T[];
   label: string;
   placeholder?: string;
   selectedValue?: string;
@@ -23,10 +28,10 @@ type DropdownSelectorProps = {
   isRequired?: boolean;
   disabled?: boolean;
   hasError?: boolean;
-  onValueChange: (selectedOption: {id: string; name: string}) => void;
+  onValueChange: (selectedOption: T) => void;
 };
 
-export function DropdownSelector({
+export function DropdownSelector<T extends DropdownOptionBase>({
   options = [],
   label,
   placeholder = 'Select an option',
@@ -37,7 +42,7 @@ export function DropdownSelector({
   disabled,
   hasError,
   onValueChange,
-}: DropdownSelectorProps) {
+}: DropdownSelectorProps<T>) {
   return (
     <div className={rootClassName}>
       <Label
@@ -52,7 +57,9 @@ export function DropdownSelector({
         disabled={disabled}
         onValueChange={(value: string) => {
           const selectedOption = options.find(option => option.id === value);
-          onValueChange(selectedOption);
+          if (selectedOption) {
+            onValueChange(selectedOption);
+          }
         }}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder} />
@@ -61,7 +68,7 @@ export function DropdownSelector({
           <SelectGroup>
             <SelectLabel>{label}</SelectLabel>
             {options.map(option => (
-              <SelectItem key={option.id} value={option.id}>
+              <SelectItem key={option.id} value={String(option.id)}>
                 {option.name}
               </SelectItem>
             ))}

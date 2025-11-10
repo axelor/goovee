@@ -66,10 +66,10 @@ export async function createPartnerAddress(
           ...values.address,
           country: {
             select: {
-              id: values?.address?.country,
+              id: values?.address?.country?.id,
             },
           },
-          townName: values?.townName,
+          townName: values?.address?.townName,
         },
       },
       isInvoicingAddr: values.isInvoicingAddr,
@@ -78,10 +78,10 @@ export async function createPartnerAddress(
     },
   });
 
-  if (values.isDeliveryAddr && values?.address?.country) {
+  if (values.isDeliveryAddr && values?.address?.country?.id) {
     await updatePartnerFiscal({
       partnerId,
-      countryId: values.address.country,
+      countryId: values.address.country.id,
       tenantId,
       isDeliveryAddr: values.isDeliveryAddr,
       isDefaultAddr: values.isDefaultAddr,
@@ -115,7 +115,7 @@ export async function updatePartnerAddress(
           ...values.address,
           country: {
             select: {
-              id: values?.address?.country,
+              id: values?.address?.country?.id,
             },
           },
           townName: values?.address?.townName,
@@ -127,10 +127,10 @@ export async function updatePartnerAddress(
     },
   });
 
-  if (values.isDeliveryAddr && values?.address?.country) {
+  if (values.isDeliveryAddr && values?.address?.country?.id) {
     await updatePartnerFiscal({
       partnerId,
-      countryId: values.address.country,
+      countryId: values.address.country.id,
       tenantId,
       isDeliveryAddr: address?.isDeliveryAddr,
       isDefaultAddr: address?.isDefaultAddr,
@@ -281,12 +281,17 @@ export async function findDefaultDeliveryAddress(
   return result;
 }
 
-export async function updateDefaultDeliveryAddress(
-  partnerAddressId: PartnerAddress['id'],
-  partnerId: Partner['id'],
-  tenantId: Tenant['id'],
-  isDefault?: boolean,
-) {
+export async function updateDefaultDeliveryAddress({
+  partnerAddressId,
+  partnerId,
+  tenantId,
+  isDefault,
+}: {
+  partnerAddressId: PartnerAddress['id'];
+  partnerId: Partner['id'];
+  tenantId: Tenant['id'];
+  isDefault?: boolean;
+}) {
   if (!(partnerAddressId && partnerId && tenantId)) return null;
 
   const client = await manager.getClient(tenantId);
@@ -314,6 +319,20 @@ export async function updateDefaultDeliveryAddress(
           isDefaultAddr: false,
         },
       });
+    }
+
+    if (result.isInvoicingAddr && isDefault) {
+      const current = await findDefaultInvoicingAddress(partnerId, tenantId);
+
+      if (current && current.id !== result.id) {
+        await client.aOSPartnerAddress.update({
+          data: {
+            id: current.id,
+            version: current.version,
+            isDefaultAddr: false,
+          },
+        });
+      }
     }
 
     const updatedDefault = await client.aOSPartnerAddress.update({
@@ -363,12 +382,17 @@ export async function findDefaultInvoicingAddress(
   return result;
 }
 
-export async function updateDefaultInvoicingAddress(
-  partnerAddressId: PartnerAddress['id'],
-  partnerId: Partner['id'],
-  tenantId: Tenant['id'],
-  isDefault?: boolean,
-) {
+export async function updateDefaultInvoicingAddress({
+  partnerAddressId,
+  partnerId,
+  tenantId,
+  isDefault,
+}: {
+  partnerAddressId: PartnerAddress['id'];
+  partnerId: Partner['id'];
+  tenantId: Tenant['id'];
+  isDefault?: boolean;
+}) {
   if (!(partnerAddressId && partnerId && tenantId)) return null;
 
   const client = await manager.getClient(tenantId);
@@ -396,6 +420,20 @@ export async function updateDefaultInvoicingAddress(
           isDefaultAddr: false,
         },
       });
+    }
+
+    if (result.isDeliveryAddr && isDefault) {
+      const current = await findDefaultDeliveryAddress(partnerId, tenantId);
+
+      if (current && current.id !== result.id) {
+        await client.aOSPartnerAddress.update({
+          data: {
+            id: current.id,
+            version: current.version,
+            isDefaultAddr: false,
+          },
+        });
+      }
     }
 
     const updatedDefault = await client.aOSPartnerAddress.update({
@@ -444,37 +482,6 @@ export async function findCountry({
   } catch (error) {
     console.log('error:', error);
     return null;
-  }
-}
-
-export async function findCities({
-  countryId,
-  tenantId,
-  zip,
-}: {
-  countryId: string | number;
-  tenantId: Tenant['id'];
-  zip: string;
-}): Promise<City[]> {
-  if (!tenantId || !countryId || !zip) return [];
-
-  try {
-    const client = await manager.getClient(tenantId);
-
-    const cities = await client.aOSCity.find({
-      where: {
-        country: {id: countryId},
-        zip,
-      },
-    });
-
-    return cities.map(city => ({
-      id: city.id,
-      name: city.name,
-    })) as City[];
-  } catch (error) {
-    console.error('Error fetching cities:', error);
-    return [];
   }
 }
 

@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const cta3Code = 'cta3';
 
 export const cta3Schema = {
   title: 'CTA 3',
-  code: 'cta3',
+  code: cta3Code,
   type: Template.block,
   fields: [
     {
@@ -34,13 +36,25 @@ export const cta3Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue:
+        'wrapper image-wrapper bg-auto bg-map text-center mb-14 mb-md-16',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container py-md-18 position-relative',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Cta3Data = Data<typeof cta3Schema>;
@@ -48,6 +62,9 @@ export type Cta3Data = Data<typeof cta3Schema>;
 export const cta3Demos: Demo<typeof cta3Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'others',
+    sequence: 5,
     data: {
       cta3Title: 'Explore Our Community',
       cta3Description:
@@ -55,16 +72,24 @@ export const cta3Demos: Demo<typeof cta3Schema>[] = [
       cta3LinkTitle: 'Join Us',
       cta3LinkHref: '#',
       cta3Image: {
-        id: '1',
-        version: 1,
-        fileName: 'map.png',
-        fileType: 'image/png',
-        filePath: '/img/map.png',
+        attrs: {
+          alt: 'World map background',
+          width: 800,
+          height: 484,
+          image: {
+            fileName: 'map.png',
+            fileType: 'image/png',
+            filePath: '/img/map.png',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'others',
+    sequence: 5,
     data: {
       cta3Title: 'Découvrez notre communauté',
       cta3Description:
@@ -72,11 +97,16 @@ export const cta3Demos: Demo<typeof cta3Schema>[] = [
       cta3LinkTitle: 'Rejoignez-nous',
       cta3LinkHref: '#',
       cta3Image: {
-        id: '1',
-        version: 1,
-        fileName: 'map.png',
-        fileType: 'image/png',
-        filePath: '/img/map.png',
+        attrs: {
+          alt: 'Fond de carte du monde',
+          width: 800,
+          height: 484,
+          image: {
+            fileName: 'map.png',
+            fileType: 'image/png',
+            filePath: '/img/map.png',
+          },
+        },
       },
     },
   },

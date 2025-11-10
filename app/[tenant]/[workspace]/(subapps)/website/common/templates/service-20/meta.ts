@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection} from '../meta-selections';
+
+export const service20Code = 'service20';
 
 export const service20Schema = {
   title: 'Service 20',
-  code: 'service20',
+  code: service20Code,
   type: Template.block,
   fields: [
     {
@@ -28,6 +29,18 @@ export const service20Schema = {
       type: 'json-one-to-many',
       target: 'Service20Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-17',
+    },
   ],
   models: [
     {
@@ -45,10 +58,7 @@ export const service20Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'description',
@@ -58,6 +68,7 @@ export const service20Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service20Data = Data<typeof service20Schema>;
@@ -65,14 +76,15 @@ export type Service20Data = Data<typeof service20Schema>;
 export const service20Demos: Demo<typeof service20Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-18',
+    sequence: 2,
     data: {
       service20Caption: 'Our Features',
       service20Description:
         'Sandbox is the only app you need to track your goals for better health.',
       service20Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'IoT Development',
@@ -81,8 +93,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'AI',
             title: 'Artificial Intelligence',
@@ -91,8 +101,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Software Maintenance',
@@ -101,8 +109,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Shield',
             title: 'Cybersecurity',
@@ -111,8 +117,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Rocket',
             title: 'IT Consulting',
@@ -121,8 +125,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'Cart',
             title: 'E-commerce Solutions',
@@ -135,14 +137,15 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-18',
+    sequence: 2,
     data: {
       service20Caption: 'Nos fonctionnalités',
       service20Description:
         'Sandbox est la seule application dont vous avez besoin pour suivre vos objectifs pour une meilleure santé.',
       service20Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'Code',
             title: 'Développement IoT',
@@ -151,8 +154,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'AI',
             title: 'Intelligence artificielle',
@@ -161,8 +162,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'Setting',
             title: 'Maintenance logicielle',
@@ -171,8 +170,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'Shield',
             title: 'Cybersécurité',
@@ -181,8 +178,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Rocket',
             title: 'Conseil en informatique',
@@ -191,8 +186,6 @@ export const service20Demos: Demo<typeof service20Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'Cart',
             title: 'Solutions de commerce électronique',

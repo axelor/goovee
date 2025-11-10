@@ -4,12 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {solidIcons} from '@/subapps/website/common/icons/solid';
-import {startCase} from 'lodash-es';
+import {solidIconsSelection} from '../meta-selections';
+
+export const service7Code = 'service7';
 
 export const service7Schema = {
   title: 'Service 7',
-  code: 'service7',
+  code: service7Code,
   type: Template.block,
   fields: [
     {
@@ -28,6 +29,18 @@ export const service7Schema = {
       type: 'json-one-to-many',
       target: 'Service7Service',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-14 pt-md-17 mb-14 mb-md-17',
+    },
   ],
   models: [
     {
@@ -38,10 +51,7 @@ export const service7Schema = {
           name: 'icon',
           title: 'Icon',
           type: 'string',
-          selection: solidIcons.map(icon => ({
-            title: startCase(icon),
-            value: icon,
-          })),
+          selection: 'solid-icons',
         },
         {
           name: 'title',
@@ -58,6 +68,7 @@ export const service7Schema = {
       ],
     },
   ],
+  selections: [solidIconsSelection],
 } as const satisfies TemplateSchema;
 
 export type Service7Data = Data<typeof service7Schema>;
@@ -65,14 +76,15 @@ export type Service7Data = Data<typeof service7Schema>;
 export const service7Demos: Demo<typeof service7Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-6',
+    sequence: 2,
     data: {
       service7Caption: 'App Features',
       service7Title:
         'By using Lighthouse, you can monitor all of your health-related objectives in a single application.',
       service7Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'HandHoldingMedical',
             title: 'Primary Care',
@@ -81,8 +93,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'SuitcaseMdical',
             title: 'Maintain Health',
@@ -91,8 +101,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'BrainPlus',
             title: 'Pain Management',
@@ -101,8 +109,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'ScaleUnbalanced',
             title: 'Weight Management',
@@ -111,8 +117,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Stethoscope',
             title: 'Diagnostic Reports',
@@ -121,8 +125,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'TruckMedical',
             title: 'Emergency Care',
@@ -135,14 +137,15 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-6',
+    sequence: 2,
     data: {
       service7Caption: 'Fonctionnalités de l’application',
       service7Title:
         'En utilisant Lighthouse, vous pouvez surveiller tous vos objectifs liés à la santé dans une seule application.',
       service7Services: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             icon: 'HandHoldingMedical',
             title: 'Soins primaires',
@@ -151,8 +154,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             icon: 'SuitcaseMdical',
             title: 'Maintenir la santé',
@@ -161,8 +162,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             icon: 'BrainPlus',
             title: 'Gestion de la douleur',
@@ -171,8 +170,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             icon: 'ScaleUnbalanced',
             title: 'Gestion du poids',
@@ -181,8 +178,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             icon: 'Stethoscope',
             title: 'Rapports de diagnostic',
@@ -191,8 +186,6 @@ export const service7Demos: Demo<typeof service7Schema>[] = [
           },
         },
         {
-          id: '6',
-          version: 0,
           attrs: {
             icon: 'TruckMedical',
             title: 'Soins d’urgence',

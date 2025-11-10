@@ -62,7 +62,9 @@ async function createOrder({
   if (!cart?.items?.length) {
     return {
       error: true,
-      message: await t('Bad request'),
+      message: await t(
+        'Your cart is empty. Please add items before placing an order.',
+      ),
     };
   }
 
@@ -184,9 +186,10 @@ async function createOrder({
     });
 
     if (res?.data?.status === -1) {
+      console.error('Order creation failed: ', res?.data?.message);
       return {
         error: true,
-        message: await t('Error creating order. Try again.'),
+        message: await t('Order creation failed. Please try again.'),
       };
     }
 

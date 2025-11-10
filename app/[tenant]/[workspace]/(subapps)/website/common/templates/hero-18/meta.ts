@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const hero18Code = 'hero18';
 
 export const hero18Schema = {
   title: 'Hero 18',
-  code: 'hero18',
+  code: hero18Code,
   type: Template.block,
   fields: [
     {
@@ -39,20 +41,49 @@ export const hero18Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
+    },
+    {
+      name: 'sectionClassName',
+      title: 'Section Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerCardClassName',
+      title: 'Container Card Class Name',
+      type: 'string',
+      defaultValue: 'container-card',
+    },
+    {
+      name: 'cardClassName',
+      title: 'Card Class Name',
+      type: 'string',
+      defaultValue: 'card image-wrapper mt-2 mb-5 overflow-hidden',
+    },
+    {
+      name: 'cardBodyClassName',
+      title: 'Card Body Class Name',
+      type: 'string',
+      defaultValue: 'card-body py-14 px-0 position-relative',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container',
     },
   ],
-  models: [],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero18Data = Data<typeof hero18Schema>;
@@ -60,6 +91,9 @@ export type Hero18Data = Data<typeof hero18Schema>;
 export const hero18Demos: Demo<typeof hero18Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-18',
+    sequence: 1,
     data: {
       hero18Title1: 'Networking',
       hero18Title2: 'solutions for worldwide communication',
@@ -68,23 +102,36 @@ export const hero18Demos: Demo<typeof hero18Schema>[] = [
       hero18ButtonLabel: 'Explore Now',
       hero18ButtonLink: '#',
       hero18Image: {
-        id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        attrs: {
+          alt: 'Networking solutions',
+          width: 548,
+          height: 533,
+          image: {
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       hero18BackgroundImage: {
-        id: '1',
-        version: 1,
-        fileName: 'bg22.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg22.png',
+        attrs: {
+          alt: 'Networking solutions background',
+          width: 1372,
+          height: 596,
+          image: {
+            fileName: 'bg22.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg22.png',
+          },
+        },
       },
     },
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-18',
+    sequence: 1,
     data: {
       hero18Title1: 'Réseau',
       hero18Title2: 'solutions pour une communication mondiale',
@@ -93,18 +140,28 @@ export const hero18Demos: Demo<typeof hero18Schema>[] = [
       hero18ButtonLabel: 'Explorer maintenant',
       hero18ButtonLink: '#',
       hero18Image: {
-        id: '1',
-        version: 1,
-        fileName: '3d2.png',
-        fileType: 'image/png',
-        filePath: '/img/illustrations/3d2.png',
+        attrs: {
+          alt: 'Solutions de mise en réseau',
+          width: 548,
+          height: 533,
+          image: {
+            fileName: '3d2.png',
+            fileType: 'image/png',
+            filePath: '/img/illustrations/3d2.png',
+          },
+        },
       },
       hero18BackgroundImage: {
-        id: '1',
-        version: 1,
-        fileName: 'bg22.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/bg22.png',
+        attrs: {
+          alt: 'Arrière-plan des solutions de mise en réseau',
+          width: 1372,
+          height: 596,
+          image: {
+            fileName: 'bg22.png',
+            fileType: 'image/png',
+            filePath: '/img/photos/bg22.png',
+          },
+        },
       },
     },
   },

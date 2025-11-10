@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const testimonial3Code = 'testimonial3';
 
 export const testimonial3Schema = {
   title: 'Testimonial 3',
-  code: 'testimonial3',
+  code: testimonial3Code,
   type: Template.block,
   fields: [
     {
@@ -24,16 +26,16 @@ export const testimonial3Schema = {
     {
       name: 'tileImage1',
       title: 'Tile Image 1',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'tileImage2',
       title: 'Tile Image 2',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'heading',
@@ -66,6 +68,18 @@ export const testimonial3Schema = {
       type: 'json-one-to-many',
       target: 'Testimonial3Testimonial',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container mt-15 mt-md-18 mb-14 mb-md-17',
+    },
   ],
   models: [
     {
@@ -91,8 +105,8 @@ export const testimonial3Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Testimonial3Data = Data<typeof testimonial3Schema>;
@@ -100,33 +114,44 @@ export type Testimonial3Data = Data<typeof testimonial3Schema>;
 export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-4',
+    sequence: 9,
     data: {
       testimonial3Title: 'What Our Customers Think About Us',
       testimonial3Description:
         'Read our customer reviews to see what they are saying about our services and expertise.',
       testimonial3TileImage1: {
-        id: '1',
-        version: 1,
-        fileName: 'sa5.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/sa5.png',
+        attrs: {
+          alt: 'Testimonial',
+          width: 325,
+          height: 325,
+          image: {
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial3TileImage2: {
-        id: '1',
-        version: 1,
-        fileName: 'sa6.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/sa6.jpg',
+        attrs: {
+          alt: 'Testimonial',
+          width: 324,
+          height: 217,
+          image: {
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial3Heading: 'Satisfied Clients',
-      testimonial3CountUp: 75,
-      testimonial3Suffix: '%',
+      testimonial3CountUp: 5000,
+      testimonial3Suffix: '+',
       testimonial3SlidesPerView: 1,
       testimonial3Navigation: false,
       testimonial3Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Sales Director',
@@ -134,8 +159,6 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Marketing Manager',
@@ -143,8 +166,6 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'HR Manager',
@@ -152,8 +173,6 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Investment Planner',
@@ -165,33 +184,44 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-4',
+    sequence: 9,
     data: {
       testimonial3Title: 'Ce que nos clients pensent de nous',
       testimonial3Description:
         'Lisez les avis de nos clients pour voir ce qu’ils disent de nos services et de notre expertise.',
       testimonial3TileImage1: {
-        id: '1',
-        version: 1,
-        fileName: 'sa5.png',
-        fileType: 'image/png',
-        filePath: '/img/photos/sa5.png',
+        attrs: {
+          alt: 'Témoignage',
+          width: 325,
+          height: 325,
+          image: {
+            fileName: 'g5.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g5.jpg',
+          },
+        },
       },
       testimonial3TileImage2: {
-        id: '1',
-        version: 1,
-        fileName: 'sa6.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/sa6.jpg',
+        attrs: {
+          alt: 'Témoignage',
+          width: 324,
+          height: 217,
+          image: {
+            fileName: 'g6.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/g6.jpg',
+          },
+        },
       },
       testimonial3Heading: 'Clients satisfaits',
-      testimonial3CountUp: 75,
-      testimonial3Suffix: '%',
+      testimonial3CountUp: 5000,
+      testimonial3Suffix: '+',
       testimonial3SlidesPerView: 1,
       testimonial3Navigation: false,
       testimonial3Testimonials: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             name: 'Ethan Johnson',
             designation: 'Directeur des ventes',
@@ -199,8 +229,6 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             name: 'Gabriel Rodriguez',
             designation: 'Responsable marketing',
@@ -208,8 +236,6 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             name: 'Samuel Patel',
             designation: 'Responsable RH',
@@ -217,8 +243,6 @@ export const testimonial3Demos: Demo<typeof testimonial3Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             name: 'Jackie Sanders',
             designation: 'Planificateur d’investissement',

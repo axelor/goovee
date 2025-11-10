@@ -4,20 +4,21 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
+
+export const footer15Code = 'footer15';
 
 export const footer15Schema = {
   title: 'Footer 15',
-  code: 'footer15',
+  code: footer15Code,
   type: Template.block,
   fields: [
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'title',
@@ -60,9 +61,20 @@ export const footer15Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-13 pb-7',
+    },
   ],
-  models: [socialLinksModel],
-  metaModels: [metaFileModel],
+  models: [socialLinksModel, imageModel],
 } as const satisfies TemplateSchema;
 
 export type Footer15Data = Data<typeof footer15Schema>;
@@ -70,13 +82,21 @@ export type Footer15Data = Data<typeof footer15Schema>;
 export const footer15Demos: Demo<typeof footer15Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-24',
+    sequence: 8,
     data: {
       footer15Logo: {
-        id: '1',
-        version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer15Title:
         "I'm Caitlyn Lighthouse, a photographer specializing in food, drink and product photography.",
@@ -89,8 +109,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
       footer15Phone2: '00 (987) 654 32 10',
       footer15SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -98,8 +116,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -107,8 +123,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -116,8 +130,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -125,8 +137,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -138,13 +148,21 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-24',
+    sequence: 8,
     data: {
       footer15Logo: {
-        id: '1',
-        version: 1,
-        fileName: 'logo-dark.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-dark.png',
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            fileName: 'logo-dark.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-dark.png',
+          },
+        },
       },
       footer15Title:
         'Je suis Caitlyn Lighthouse, une photographe spécialisée dans la photographie de nourriture, de boissons et de produits.',
@@ -157,8 +175,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
       footer15Phone2: '00 (987) 654 32 10',
       footer15SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -166,8 +182,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -175,8 +189,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -184,8 +196,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -193,8 +203,6 @@ export const footer15Demos: Demo<typeof footer15Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',

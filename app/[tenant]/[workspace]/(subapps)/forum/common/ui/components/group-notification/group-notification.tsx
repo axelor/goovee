@@ -9,15 +9,16 @@ import {
   RadioGroup,
   RadioGroupItem,
   Separator,
+  Skeleton,
 } from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {NOTIFICATIONS_OPTIONS} from '@/app/[tenant]/[workspace]/(subapps)/forum/common/constants';
 import {Group} from '@/subapps/forum/common/types/forum';
 import {addGroupNotification} from '@/subapps/forum/common/action/action';
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 interface groupNotificationPros {
   group: Group;
@@ -25,9 +26,9 @@ interface groupNotificationPros {
 
 export const GroupNotification = ({group}: groupNotificationPros) => {
   const [selectedOption, setSelectedOption] = useState<string | null>('');
-  const {forumGroup, id, notificationSelect, isPin} = group;
+  const {forumGroup, notificationSelect} = group;
 
-  const {workspaceURL, tenant} = useWorkspace();
+  const {workspaceURL} = useWorkspace();
   const {toast} = useToast();
 
   useEffect(() => {
@@ -35,6 +36,8 @@ export const GroupNotification = ({group}: groupNotificationPros) => {
   }, []);
 
   const handleChange = async (notificationType: string) => {
+    const prevType = selectedOption;
+    setSelectedOption(notificationType);
     const {id, forumGroup} = group;
     const response = await addGroupNotification({
       id,
@@ -43,9 +46,8 @@ export const GroupNotification = ({group}: groupNotificationPros) => {
       workspaceURL,
     });
 
-    if (response?.success) {
-      setSelectedOption(notificationType);
-    } else {
+    if (!response?.success) {
+      setSelectedOption(prevType);
       toast({
         variant: 'destructive',
         title: i18n.t(response?.message || 'An error occurred'),
@@ -89,3 +91,25 @@ export const GroupNotification = ({group}: groupNotificationPros) => {
 };
 
 export default GroupNotification;
+
+export function ForumNotificationSkeleton() {
+  return (
+    <section className="py-2 w-full rounded-sm bg-white">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="grid grid-cols-[1fr_4fr] mt-12">
+          <div className="flex gap-2 items-center">
+            <Skeleton className="w-8 h-8 rounded-full" />
+            <Skeleton className="w-full h-8" />
+          </div>
+          <div className="grid grid-cols-4 text-center align-middle text-sm font-normal gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex w-full items-center justify-center">
+                <Skeleton className="w-6 h-6 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}

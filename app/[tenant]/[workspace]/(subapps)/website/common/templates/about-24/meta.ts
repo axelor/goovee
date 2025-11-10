@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const about24Code = 'about24';
 
 export const about24Schema = {
   title: 'About 24',
-  code: 'about24',
+  code: about24Code,
   type: Template.block,
   fields: [
     {
@@ -24,9 +26,9 @@ export const about24Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'heading1',
@@ -76,6 +78,18 @@ export const about24Schema = {
       title: 'Process List',
       type: 'json-one-to-many',
       target: 'About24ProcessList',
+    },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-light',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-md-14 pb-14 pb-md-16',
     },
   ],
   models: [
@@ -156,8 +170,8 @@ export const about24Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type About24Data = Data<typeof about24Schema>;
@@ -165,13 +179,21 @@ export type About24Data = Data<typeof about24Schema>;
 export const about24Demos: Demo<typeof about24Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-23',
+    sequence: 7,
     data: {
       about24Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about29.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about29.jpg',
+        attrs: {
+          alt: 'Professional photographer at work',
+          width: 610,
+          height: 610,
+          image: {
+            fileName: 'about29.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about29.jpg',
+          },
+        },
       },
       about24Title:
         "Hi, I'm Jhon, and I'm a film bridal and individual photography located in United Kingdom.",
@@ -186,8 +208,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       about24Heading3: 'My Process',
       about24FactList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Shots Taken',
             value: 100,
@@ -195,8 +215,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Happy Clients',
             value: 15,
@@ -204,8 +222,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Awards Won',
             value: 75,
@@ -215,32 +231,24 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24SkillList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Photoshop',
             value: 100,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Lightroom',
             value: 80,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Premiere Pro',
             value: 85,
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: '#D',
             value: 75,
@@ -249,36 +257,26 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24List: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'One effective way to detail your skills.',
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Nullam quis risus eget urna mollis.',
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Donec id elit non mi porta gravida.',
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'One effective way to detail your skills.',
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             title: 'Cras justo odio dapibus ac facilisis in.',
           },
@@ -286,8 +284,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24ProcessList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Personalized service',
             subtitle:
@@ -296,8 +292,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Competitive pricing',
             subtitle:
@@ -306,8 +300,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Timely delivery',
             subtitle:
@@ -320,13 +312,21 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-23',
+    sequence: 7,
     data: {
       about24Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about29.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about29.jpg',
+        attrs: {
+          alt: 'Photographe professionnel au travail',
+          width: 610,
+          height: 610,
+          image: {
+            fileName: 'about29.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about29.jpg',
+          },
+        },
       },
       about24Title:
         "Bonjour, je m'appelle Jhon et je suis une photographie de mariage et individuelle située au Royaume-Uni.",
@@ -341,8 +341,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       about24Heading3: 'Mon processus',
       about24FactList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Photos prises',
             value: 100,
@@ -350,8 +348,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Clients heureux',
             value: 15,
@@ -359,8 +355,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Récompenses gagnées',
             value: 75,
@@ -370,32 +364,24 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24SkillList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Photoshop',
             value: 100,
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Lightroom',
             value: 80,
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Premiere Pro',
             value: 85,
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: '#D',
             value: 75,
@@ -404,36 +390,26 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24List: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Un moyen efficace de détailler vos compétences.',
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Nullam quis risus eget urna mollis.',
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Donec id elit non mi porta gravida.',
           },
         },
         {
-          id: '4',
-          version: 0,
           attrs: {
             title: 'Un moyen efficace de détailler vos compétences.',
           },
         },
         {
-          id: '5',
-          version: 0,
           attrs: {
             title: 'Cras justo odio dapibus ac facilisis in.',
           },
@@ -441,8 +417,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
       ],
       about24ProcessList: [
         {
-          id: '1',
-          version: 0,
           attrs: {
             title: 'Service personnalisé',
             subtitle:
@@ -451,8 +425,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 0,
           attrs: {
             title: 'Prix compétitifs',
             subtitle:
@@ -461,8 +433,6 @@ export const about24Demos: Demo<typeof about24Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 0,
           attrs: {
             title: 'Livraison à temps',
             subtitle:

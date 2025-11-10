@@ -4,11 +4,13 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
+import {imageModel} from '../json-models';
+
+export const hero16Code = 'hero16';
 
 export const hero16Schema = {
   title: 'Hero 16',
-  code: 'hero16',
+  code: hero16Code,
   type: Template.block,
   fields: [
     {
@@ -44,9 +46,9 @@ export const hero16Schema = {
     {
       name: 'image',
       title: 'Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'countUp',
@@ -63,8 +65,20 @@ export const hero16Schema = {
       title: 'Heading',
       type: 'string',
     },
+    {
+      name: 'wrapperClassName',
+      title: 'Wrapper Class Name',
+      type: 'string',
+      defaultValue: 'wrapper bg-gray',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pt-12 pt-md-14 pb-14 pb-md-16',
+    },
   ],
-  metaModels: [metaFileModel],
+  models: [imageModel],
 } as const satisfies TemplateSchema;
 
 export type Hero16Data = Data<typeof hero16Schema>;
@@ -72,6 +86,9 @@ export type Hero16Data = Data<typeof hero16Schema>;
 export const hero16Demos: Demo<typeof hero16Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-16',
+    sequence: 1,
     data: {
       hero16Title: 'I’m a Software Engineer & UX Designer.',
       hero16Description:
@@ -81,11 +98,16 @@ export const hero16Demos: Demo<typeof hero16Schema>[] = [
       hero16ButtonLink1: '#',
       hero16ButtonLink2: '#',
       hero16Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about17.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about17.jpg',
+        attrs: {
+          alt: 'Software Engineer & UX Designer',
+          width: 560,
+          height: 540,
+          image: {
+            fileName: 'about17.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about17.jpg',
+          },
+        },
       },
       hero16CountUp: 250,
       hero16Suffix: '+',
@@ -94,6 +116,9 @@ export const hero16Demos: Demo<typeof hero16Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-16',
+    sequence: 1,
     data: {
       hero16Title: 'Je suis ingénieur logiciel et concepteur UX.',
       hero16Description:
@@ -103,11 +128,16 @@ export const hero16Demos: Demo<typeof hero16Schema>[] = [
       hero16ButtonLink1: '#',
       hero16ButtonLink2: '#',
       hero16Image: {
-        id: '1',
-        version: 1,
-        fileName: 'about17.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/about17.jpg',
+        attrs: {
+          alt: 'Ingénieur logiciel et concepteur UX',
+          width: 560,
+          height: 540,
+          image: {
+            fileName: 'about17.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/about17.jpg',
+          },
+        },
       },
       hero16CountUp: 250,
       hero16Suffix: '+',

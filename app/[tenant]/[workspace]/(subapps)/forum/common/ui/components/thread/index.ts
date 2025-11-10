@@ -1,4 +1,4 @@
 export * from './thread';
-export * from './thread-header';
-export * from './thread-body';
-export * from './thread-footer';
+export {ThreadHeader} from './thread-header';
+export {ThreadBody} from './thread-body';
+export {ThreadFooter} from './thread-footer';

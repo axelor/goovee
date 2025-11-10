@@ -1,7 +1,7 @@
 'use client';
-import {FC, useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 
-const PageProgress: FC = () => {
+function PageProgress() {
   const progressWrapRef = useRef<HTMLDivElement>(null);
   const progressPathRef = useRef<SVGPathElement>(null);
 
@@ -59,6 +59,6 @@ const PageProgress: FC = () => {
       </svg>
     </div>
   );
-};
+}
 
 export default PageProgress;

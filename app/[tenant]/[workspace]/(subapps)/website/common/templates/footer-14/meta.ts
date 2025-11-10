@@ -4,27 +4,28 @@ import {
   type Demo,
   type TemplateSchema,
 } from '../../types/templates';
-import {metaFileModel} from '../meta-models';
-import {socialLinksModel} from '../json-models';
+import {imageModel, socialLinksModel} from '../json-models';
+
+export const footer14Code = 'footer14';
 
 export const footer14Schema = {
   title: 'Footer 14',
-  code: 'footer14',
+  code: footer14Code,
   type: Template.block,
   fields: [
     {
       name: 'logo',
       title: 'Logo',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'backgroundImage',
       title: 'Background Image',
-      type: 'many-to-one',
-      target: 'com.axelor.meta.db.MetaFile',
-      widget: 'Image',
+      type: 'json-many-to-one',
+      widgetAttrs: {canNew: 'true', canEdit: 'true'},
+      target: 'Image',
     },
     {
       name: 'title',
@@ -93,6 +94,18 @@ export const footer14Schema = {
       type: 'json-one-to-many',
       target: 'SocialLinks',
     },
+    {
+      name: 'footerClassName',
+      title: 'Footer Class Name',
+      type: 'string',
+      defaultValue: 'footer bg-dark section-frame mt-15',
+    },
+    {
+      name: 'containerClassName',
+      title: 'Container Class Name',
+      type: 'string',
+      defaultValue: 'container pb-13 pb-md-15',
+    },
   ],
   models: [
     socialLinksModel,
@@ -114,8 +127,8 @@ export const footer14Schema = {
         },
       ],
     },
+    imageModel,
   ],
-  metaModels: [metaFileModel],
 } as const satisfies TemplateSchema;
 
 export type Footer14Data = Data<typeof footer14Schema>;
@@ -123,20 +136,33 @@ export type Footer14Data = Data<typeof footer14Schema>;
 export const footer14Demos: Demo<typeof footer14Schema>[] = [
   {
     language: 'en_US',
+    site: 'lighthouse-en',
+    page: 'demo-22',
+    sequence: 8,
     data: {
       footer14Logo: {
-        id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer14BackgroundImage: {
-        id: '1',
-        version: 1,
-        fileName: 'bg27.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg27.jpg',
+        attrs: {
+          alt: 'Call to action background',
+          width: 1153,
+          height: 202,
+          image: {
+            fileName: 'bg27.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg27.jpg',
+          },
+        },
       },
       footer14Title:
         'Over 5K+ customers have put faith in us. Join them by utilize our offer to help your company develop.',
@@ -153,16 +179,14 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
       footer14NewsletterDescription:
         'Subscribe to our newsletter to get our news & deals delivered to you.',
       footer14Links: [
-        {id: '1', version: 0, attrs: {title: 'About Us', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Our Story', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projects', url: '#'}},
-        {id: '4', version: 0, attrs: {title: 'Terms of Use', url: '#'}},
-        {id: '5', version: 0, attrs: {title: 'Privacy Policy', url: '#'}},
+        {attrs: {title: 'About Us', url: '#'}},
+        {attrs: {title: 'Our Story', url: '#'}},
+        {attrs: {title: 'Projects', url: '#'}},
+        {attrs: {title: 'Terms of Use', url: '#'}},
+        {attrs: {title: 'Privacy Policy', url: '#'}},
       ],
       footer14SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -170,8 +194,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -179,8 +201,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -188,8 +208,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -197,8 +215,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
@@ -210,20 +226,33 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
   },
   {
     language: 'fr_FR',
+    site: 'lighthouse-fr',
+    page: 'demo-22',
+    sequence: 8,
     data: {
       footer14Logo: {
-        id: '1',
-        version: 1,
-        fileName: 'logo-light.png',
-        fileType: 'image/png',
-        filePath: '/img/logo-light.png',
+        attrs: {
+          alt: 'logo',
+          width: 146,
+          height: 38,
+          image: {
+            fileName: 'logo-light.png',
+            fileType: 'image/png',
+            filePath: '/img/logo-light.png',
+          },
+        },
       },
       footer14BackgroundImage: {
-        id: '1',
-        version: 1,
-        fileName: 'bg27.jpg',
-        fileType: 'image/jpeg',
-        filePath: '/img/photos/bg27.jpg',
+        attrs: {
+          alt: "Arrière-plan de l'appel à l'action",
+          width: 1153,
+          height: 202,
+          image: {
+            fileName: 'bg27.jpg',
+            fileType: 'image/jpeg',
+            filePath: '/img/photos/bg27.jpg',
+          },
+        },
       },
       footer14Title:
         'Plus de 5 000 clients nous ont fait confiance. Rejoignez-les en utilisant notre offre pour aider votre entreprise à se développer.',
@@ -240,24 +269,18 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
       footer14NewsletterDescription:
         'Abonnez-vous à notre newsletter pour recevoir nos actualités et nos offres.',
       footer14Links: [
-        {id: '1', version: 0, attrs: {title: 'À propos de nous', url: '#'}},
-        {id: '2', version: 0, attrs: {title: 'Notre histoire', url: '#'}},
-        {id: '3', version: 0, attrs: {title: 'Projets', url: '#'}},
+        {attrs: {title: 'À propos de nous', url: '#'}},
+        {attrs: {title: 'Notre histoire', url: '#'}},
+        {attrs: {title: 'Projets', url: '#'}},
         {
-          id: '4',
-          version: 0,
           attrs: {title: "Conditions d'utilisation", url: '#'},
         },
         {
-          id: '5',
-          version: 0,
           attrs: {title: 'Politique de confidentialité', url: '#'},
         },
       ],
       footer14SocialLinks: [
         {
-          id: '1',
-          version: 1,
           attrs: {
             name: 'Twitter',
             icon: 'twitter',
@@ -265,8 +288,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '2',
-          version: 1,
           attrs: {
             name: 'Facebook',
             icon: 'facebook-f',
@@ -274,8 +295,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '3',
-          version: 1,
           attrs: {
             name: 'Dribbble',
             icon: 'dribbble',
@@ -283,8 +302,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '4',
-          version: 1,
           attrs: {
             name: 'Instagram',
             icon: 'instagram',
@@ -292,8 +309,6 @@ export const footer14Demos: Demo<typeof footer14Schema>[] = [
           },
         },
         {
-          id: '5',
-          version: 1,
           attrs: {
             name: 'Youtube',
             icon: 'youtube',
