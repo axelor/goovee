@@ -98,6 +98,8 @@ export function Payments({
           onValidatePayment={onPayboxValidatePayment}
           onPaymentSuccess={onPaymentSuccess}
           onApprove={onApprove}
+          successMessage={successMessage}
+          errorMessage={errorMessage}
         />
       )}
     </div>
