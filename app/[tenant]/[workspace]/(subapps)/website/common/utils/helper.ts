@@ -79,7 +79,7 @@ export function getImage(
   return {url, alt, width, height, metaFile: image};
 }
 
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 100;
 
 export async function processBatchSettled<T, R>(
   data: T[],
