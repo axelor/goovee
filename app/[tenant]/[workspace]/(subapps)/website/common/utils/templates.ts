@@ -1,54 +1,54 @@
 import {manager, Tenant} from '@/lib/core/tenant';
 import {
+  ArrayFieldTypes,
   COMPONENT_MODEL,
   CONTENT_MODEL,
   CONTENT_MODEL_ATTRS,
   JSON_MODEL,
   JSON_MODEL_ATTRS,
-  RelationalFieldTypes,
   JsonRelationalFieldTypes,
-  ArrayFieldTypes,
   ObjectFieldTypes,
+  RelationalFieldTypes,
 } from '@/subapps/website/common/constants';
 import {
-  createCMSContent,
-  createCustomFields,
-  createMetaJsonModel,
   createCMSComponent,
-  deleteCustomFields,
-  deleteMetaJsonModels,
-  createMetaSelect,
-  getCommnonSelectionName,
-  deleteMetaSelects,
+  createCMSContent,
   createCMSPage,
   createCMSWebsite,
-  updateHomepage,
+  createCustomFields,
+  createMetaJsonModel,
+  createMetaSelect,
+  deleteCustomFields,
+  deleteMetaJsonModels,
+  deleteMetaSelects,
+  getCommnonSelectionName,
   replacePageSet,
+  updateHomepage,
 } from '@/subapps/website/common/orm/templates';
-import {camelCase, startCase} from 'lodash-es';
 import {metas} from '@/subapps/website/common/templates/metas';
 import {website} from '@/subapps/website/common/templates/site';
+import {camelCase, startCase} from 'lodash-es';
 import {
   ArrayField,
   CustomField,
+  DemoLite,
   Field,
   JsonRelationalField,
-  TemplateSchema,
+  MetaSelection,
   Model,
   ObjectField,
   RelationalField,
-  MetaSelection,
-  DemoLite,
+  TemplateSchema,
 } from '../types/templates';
 import {
-  processBatch,
   Cache,
-  formatCustomFieldName,
   collectModels,
   collectSelections,
   collectUniqueModels,
   collectUniqueSelections,
   formatComponentCode,
+  formatCustomFieldName,
+  processBatch,
 } from './helper';
 
 const CUSTOM_MODEL_PREFIX = 'GooveeTemplate';
@@ -279,82 +279,42 @@ export async function seedComponents(tenantId: Tenant['id']) {
   const schemas = _schemas.map(formatSchema);
   const client = await manager.getClient(tenantId);
   return await client.$transaction(async client => {
-    const componentsSettled = await processBatch(metas, async ({schema}) =>
+    const components = await processBatch(metas, ({schema}) =>
       createCMSComponent({schema, client}),
     );
-    const components = componentsSettled
-      .filter(res => res.status === 'fulfilled')
-      .map(res => res.value);
-
-    const failedComponents = componentsSettled.filter(
-      res => res.status === 'rejected',
-    );
-
-    if (failedComponents.length) {
-      console.log('\x1b[31m🔥 Failed Components:\x1b[0m');
-      console.dir(failedComponents, {depth: null});
-      throw new Error('Failed to create some CMS components.');
-    }
 
     const models = getModels(schemas);
-    const jsonModelsSettled = await processBatch(models, async model =>
+    const jsonModels = await processBatch(models, model =>
       createMetaJsonModel({model, client}),
     );
-    const jsonModels = jsonModelsSettled
-      .filter(res => res.status === 'fulfilled')
-      .map(res => res.value);
-
-    const failedJsonModels = jsonModelsSettled.filter(
-      res => res.status === 'rejected',
-    );
-
-    if (failedJsonModels.length) {
-      console.log('\x1b[31m🔥 Failed JSON Models:\x1b[0m');
-      console.dir(failedJsonModels, {depth: null});
-      throw new Error('Failed to create some meta JSON models.');
-    }
 
     const selections = getSelections(schemas);
-    const selectionsSettled = await processBatch(
-      Array.from(selections.values()),
-      async selection => {
-        const timeStamp = new Date();
-        const name = getCommnonSelectionName(selection.name);
-        return createMetaSelect({
-          client,
-          metaSelectData: {
-            isCustom: true,
-            priority: 20,
-            name: name,
-            xmlId: name,
-            updatedOn: timeStamp,
-          },
-          metaSelectItemsData: selection.options.map((option, i) => ({
-            title: option.title,
-            value: String(option.value),
-            color: option.color,
-            icon: option.icon,
-            order: i + 1,
-            updatedOn: timeStamp,
-          })),
-        });
-      },
-    );
-
-    const failedSelections = selectionsSettled.filter(
-      res => res.status === 'rejected',
-    );
-
-    if (failedSelections.length) {
-      console.log('\x1b[31m🔥 Failed Selections:\x1b[0m');
-      console.dir(failedSelections, {depth: null});
-      throw new Error('Failed to create some meta selections.');
-    }
+    await processBatch(Array.from(selections.values()), async selection => {
+      const timeStamp = new Date();
+      const name = getCommnonSelectionName(selection.name);
+      return createMetaSelect({
+        client,
+        metaSelectData: {
+          isCustom: true,
+          priority: 20,
+          name: name,
+          xmlId: name,
+          updatedOn: timeStamp,
+        },
+        metaSelectItemsData: selection.options.map((option, i) => ({
+          title: option.title,
+          value: String(option.value),
+          color: option.color,
+          icon: option.icon,
+          order: i + 1,
+          updatedOn: timeStamp,
+        })),
+      });
+    });
 
     const customModels = await processBatch(models, async model => {
       const jsonModel = jsonModels.find(m => m.name === model.name);
       if (!jsonModel) {
-        console.log(`\x1b[31m✖ Model ${model.name} was not created.\x1b[0m`);
         throw new Error(`Model ${model.name} was not created`);
       }
       const fields = await createCustomFields({
@@ -381,11 +341,11 @@ export async function seedComponents(tenantId: Tenant['id']) {
       addPanel: true,
       selections,
     });
+
     return {
-      components: componentsSettled,
+      components,
       contentFields,
       customModels,
-      selections: selectionsSettled,
     };
   });
 }
@@ -424,7 +384,7 @@ export async function seedContents(tenantId: Tenant['id']) {
   const client = await manager.getClient(tenantId);
   return await client.$transaction(async client => {
     const fileCache = new Cache<Promise<{id: string}>>();
-    const res = await processBatch(metas, async ({schema, demos}) => {
+    return await processBatch(metas, async ({schema, demos}) => {
       return await createCMSContent({
         client,
         schema: formatSchema(schema),
@@ -432,13 +392,6 @@ export async function seedContents(tenantId: Tenant['id']) {
         fileCache,
       });
     });
-    const failed = res.filter(r => r.status === 'rejected');
-    if (failed.length > 0) {
-      console.log('\x1b[31m🔥 Failed Contents:\x1b[0m');
-      console.dir(failed, {depth: null});
-      throw new Error('Failed to create some CMS contents.');
-    }
-    return res;
   });
 }
 
@@ -479,7 +432,7 @@ export async function seedWebsite(tenantId: Tenant['id']) {
       lines.sort((a, b) => a.sequence - b.sequence);
     });
 
-    const cmsPagesSettled = await processBatch(
+    const cmsPages = await processBatch(
       Array.from(pages.values()),
       async demos => {
         const page = demos[0].page;
@@ -498,40 +451,25 @@ export async function seedWebsite(tenantId: Tenant['id']) {
         });
       },
     );
-    const cmsPages = cmsPagesSettled
-      .filter(res => res.status === 'fulfilled')
-      .map(res => res.value);
 
-    const failedPages = cmsPagesSettled.filter(
-      res => res.status === 'rejected',
-    );
-    if (failedPages.length) {
-      console.log('\x1b[31m🔥 Failed Pages:\x1b[0m');
-      console.dir(failedPages, {depth: null});
-      throw new Error('Failed to create some CMS pages.');
-    }
-
-    await Promise.allSettled(
-      sites.map(async site => {
-        const homepageSlug = website.sites.find(
-          s => s.website.slug === site.slug,
-        )?.website?.homepage;
-        if (homepageSlug) {
-          const homePageId = cmsPages.find(
-            p => p.slug === homepageSlug && p.website!.id === site.id,
-          )?.id;
-          if (!homePageId) {
-            throw new Error(`Homepage ${homepageSlug} not found`);
-          }
-          await updateHomepage({
-            client,
-            siteId: site.id,
-            siteVersion: site.version,
-            pageId: homePageId,
-          });
+    await processBatch(sites, async site => {
+      const homepageSlug = website.sites.find(s => s.website.slug === site.slug)
+        ?.website?.homepage;
+      if (homepageSlug) {
+        const homePageId = cmsPages.find(
+          p => p.slug === homepageSlug && p.website!.id === site.id,
+        )?.id;
+        if (!homePageId) {
+          throw new Error(`Homepage ${homepageSlug} not found`);
         }
-      }),
-    );
+        await updateHomepage({
+          client,
+          siteId: site.id,
+          siteVersion: site.version,
+          pageId: homePageId,
+        });
+      }
+    });
 
     await processBatch(cmsPages, async page => {
       const otherLanguagePages = cmsPages.filter(

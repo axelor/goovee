@@ -19,7 +19,6 @@ import type {
   AOSPortalCmsSite,
 } from '@/goovee/.generated/models';
 import type {Client} from '@/goovee/.generated/client';
-import {manager, type Tenant} from '@/lib/core/tenant';
 import {getFileSizeText} from '@/utils/files';
 import {xml} from '@/utils/template-string';
 import type {CreateArgs, SelectArg} from '@goovee/orm';
@@ -283,37 +282,35 @@ export async function createMetaSelect({
         where: {select: {id: _metaSelect.id}},
       });
     }
-      metaSelect = await client.aOSMetaSelect.update({
-        data: {
-          id: _metaSelect.id,
-          version: _metaSelect.version,
-          items: {
-            create: metaSelectItemsData.map(item => ({
-              ...item,
-              createdOn: item.updatedOn,
-            })),
-          },
+    metaSelect = await client.aOSMetaSelect.update({
+      data: {
+        id: _metaSelect.id,
+        version: _metaSelect.version,
+        items: {
+          create: metaSelectItemsData.map(item => ({
+            ...item,
+            createdOn: item.updatedOn,
+          })),
         },
-        select: {id: true, name: true},
-      });
-      console.log(`\x1b[33m⚠️ Updated select: ${metaSelectData.name}\x1b[0m `);
+      },
+      select: {id: true, name: true},
+    });
+    console.log(`\x1b[33m⚠️ Updated select: ${metaSelectData.name}\x1b[0m `);
   } else {
-      metaSelect = await client.aOSMetaSelect.create({
-        data: {
-          ...metaSelectData,
-          createdOn: metaSelectData.updatedOn,
-          items: {
-            create: metaSelectItemsData.map(item => ({
-              ...item,
-              createdOn: metaSelectData.updatedOn,
-            })),
-          },
+    metaSelect = await client.aOSMetaSelect.create({
+      data: {
+        ...metaSelectData,
+        createdOn: metaSelectData.updatedOn,
+        items: {
+          create: metaSelectItemsData.map(item => ({
+            ...item,
+            createdOn: metaSelectData.updatedOn,
+          })),
         },
-        select: {id: true, name: true},
-      });
-      console.log(
-        `\x1b[32m✅ Created metaSelect: ${metaSelectData.name}\x1b[0m`,
-      );
+      },
+      select: {id: true, name: true},
+    });
+    console.log(`\x1b[32m✅ Created metaSelect: ${metaSelectData.name}\x1b[0m`);
   }
   return metaSelect;
 }
@@ -734,23 +731,23 @@ async function getMetaFile({
   filePath: string;
   fileCache: Cache<Promise<{id: string}>>;
 }) {
-    const metaFilePath = `${FILE_PREFIX}-${fileName}`;
-    const fileCacheKey = `${metaFilePath}-${fileType}-${fileName}`;
+  const metaFilePath = `${FILE_PREFIX}-${fileName}`;
+  const fileCacheKey = `${metaFilePath}-${fileType}-${fileName}`;
 
-    const cachedMetaFile = await fileCache.get(fileCacheKey);
-    if (cachedMetaFile) return cachedMetaFile;
+  const cachedMetaFile = await fileCache.get(fileCacheKey);
+  if (cachedMetaFile) return cachedMetaFile;
 
-    //NOTE: FileCache is used to avoid copying the same file multiple times in the given seeding process
-    const metaFilePromise = createMetaFile({
-      client,
-      originPath,
-      metaFilePath,
-      fileName,
-      fileType,
-    });
+  //NOTE: FileCache is used to avoid copying the same file multiple times in the given seeding process
+  const metaFilePromise = createMetaFile({
+    client,
+    originPath,
+    metaFilePath,
+    fileName,
+    fileType,
+  });
 
-    fileCache.set(fileCacheKey, metaFilePromise);
-    return metaFilePromise;
+  fileCache.set(fileCacheKey, metaFilePromise);
+  return metaFilePromise;
 }
 
 async function createAttrs(props: {
