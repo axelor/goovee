@@ -234,7 +234,7 @@ async function Contact({
     .join(' ');
 
   return (
-    <div className="bg-card rounded-lg shadow-md overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
+    <div className="bg-card rounded-lg shadow-md overflow-hidden">
       <div className="p-5">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
