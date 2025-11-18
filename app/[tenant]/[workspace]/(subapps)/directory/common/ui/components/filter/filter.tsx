@@ -92,13 +92,15 @@ export function Filter() {
 
   return (
     <Form {...form}>
-      <form className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
+      <form className="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-4 items-end">
         <FormField
           control={form.control}
           name="city"
           render={({field}) => (
             <FormItem>
-              <FormLabel>{i18n.t('City')}</FormLabel>
+              <FormLabel className="hidden lg:inline">
+                {i18n.t('City')}
+              </FormLabel>
               <div className="relative">
                 <FormControl>
                   <Input
@@ -137,7 +139,9 @@ export function Filter() {
           name="zip"
           render={({field}) => (
             <FormItem>
-              <FormLabel>{i18n.t('Zip Code')}</FormLabel>
+              <FormLabel className="hidden lg:inline">
+                {i18n.t('Zip Code')}
+              </FormLabel>
               <div className="relative">
                 <FormControl>
                   <Input
@@ -176,7 +180,9 @@ export function Filter() {
           name="sort"
           render={({field}) => (
             <FormItem>
-              <FormLabel>{i18n.t('Sort by')}</FormLabel>
+              <FormLabel className="hidden lg:inline">
+                {i18n.t('Sort by')}
+              </FormLabel>
               <Select
                 onValueChange={handleSortChange}
                 defaultValue={field.value}>
