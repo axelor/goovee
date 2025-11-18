@@ -28,7 +28,6 @@ import {
 import {defaultSortOption, sortOptions} from '../../../constants';
 
 const FilterSchema = z.object({
-  name: z.string().optional(),
   city: z.string().optional(),
   zip: z.string().optional(),
   sort: z.string().optional(),
@@ -41,7 +40,6 @@ export function Filter() {
 
   const defaultValues = useMemo(
     () => ({
-      name: searchParams.get('name') ?? '',
       city: searchParams.get('city') ?? '',
       zip: searchParams.get('zip') ?? '',
       sort: searchParams.get('sort') ?? defaultSortOption.value,
@@ -94,46 +92,7 @@ export function Filter() {
 
   return (
     <Form {...form}>
-      <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>{i18n.t('Name')}</FormLabel>
-              <div className="relative">
-                <FormControl>
-                  <Input
-                    placeholder={i18n.t('Search by name')}
-                    {...field}
-                    className="pr-20"
-                    onKeyDown={e => handleKeyDown(e, 'name')}
-                  />
-                </FormControl>
-                <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    tabIndex={-1}
-                    onClick={() => handleClear('name')}>
-                    <ClearIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    tabIndex={-1}
-                    onClick={() => handleUpdate('name')}>
-                    <SearchIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </FormItem>
-          )}
-        />
+      <form className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
         <FormField
           control={form.control}
           name="city"

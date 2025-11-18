@@ -98,15 +98,15 @@ export async function findEntries({
   skip,
   tenantId,
   orderBy,
-  name,
+  search,
   city,
   zip,
 }: {
   take?: number;
   skip?: number;
-  name?: string;
   city?: string;
   zip?: string;
+  search?: string;
   tenantId: Tenant['id'];
   orderBy?: OrderByOptions<AOSPartner>;
 }) {
@@ -117,9 +117,14 @@ export async function findEntries({
   const entries = await c.aOSPartner.find({
     where: and<AOSPartner>([
       getCompanyAccessFilter(),
-      name && {portalCompanyName: {like: `%${name}%`}},
       city && {mainAddress: {city: {name: {like: `%${city}%`}}}},
       zip && {mainAddress: {zip: {like: `%${zip}%`}}},
+      search && {
+        OR: [
+          {portalCompanyName: {like: `%${search}%`}},
+          {directoryCompanyDescription: {like: `%${search}%`}},
+        ],
+      },
     ]),
     orderBy,
     ...(take ? {take} : {}),

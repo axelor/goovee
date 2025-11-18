@@ -11,7 +11,6 @@ export type SearchParams = {
   page?: string;
   limit?: string;
   sort?: string;
-  name?: string;
   city?: string;
   zip?: string;
 };

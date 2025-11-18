@@ -44,21 +44,13 @@ export default async function Page({
 
   const {workspace} = auth;
 
-  const {
-    page = 1,
-    limit = ITEMS_PER_PAGE,
-    sort,
-    name,
-    city,
-    zip,
-  } = searchParams;
+  const {page = 1, limit = ITEMS_PER_PAGE, sort, city, zip} = searchParams;
 
   const partners = await findEntries({
     orderBy: getOrderBy(sort),
     take: +limit,
     skip: getSkip(limit, page),
     tenantId: tenant,
-    name,
     city,
     zip,
   });
