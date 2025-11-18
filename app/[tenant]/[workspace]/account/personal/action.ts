@@ -112,7 +112,11 @@ export async function updateProfileImage(formData: FormData) {
               },
             }
           : {
-              picture: null,
+              picture: {
+                select: {
+                  id: null,
+                },
+              },
             }),
       },
       tenantId,
