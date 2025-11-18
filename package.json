@@ -24,7 +24,7 @@
   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.17.0",
     "@excalidraw/excalidraw": "^0.18.0",
-    "@goovee/orm": "^0.0.5",
+    "@goovee/orm": "^0.0.6",
     "@hookform/resolvers": "^3.9.1",
     "@lexical/code": "0.31.2",
     "@lexical/file": "0.31.2",
