@@ -36,6 +36,7 @@ const partnerFields = {
     directoryCompanyDescription: true,
     isFunctionInDirectory: true,
     isLinkedinInDirectory: true,
+    picture: {id: true},
     partnerAddressList: {
       select: {
         isInvoicingAddr: true,
