@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {FaLinkedin} from 'react-icons/fa';
+import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
 import {t, tattr} from '@/lib/core/locale/server';
@@ -9,9 +10,9 @@ import {Avatar, AvatarImage, InnerHTML} from '@/ui/components';
 import {clone} from '@/utils';
 import {getPartnerImageURL} from '@/utils/files';
 import {workspacePathname} from '@/utils/workspace';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
-import {NO_IMAGE_URL} from '@/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
@@ -25,7 +26,7 @@ export default async function Page({
   params: {tenant: string; workspace: string; id: string};
 }) {
   const {id} = params;
-  const {workspaceURL, tenant} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
   const {error} = await ensureAuth(workspaceURL, tenant);
   if (error) notFound();
   const [entry, config] = await Promise.all([
@@ -37,6 +38,12 @@ export default async function Page({
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <Link
+        href={`${workspaceURI}/${SUBAPP_CODES.directory}`}
+        className="mb-4 inline-flex items-center gap-2 text-primary hover:underline">
+        <IoArrowBackOutline className="h-5 w-5" />
+        {await t('Back to Directory')}
+      </Link>
       <div className="bg-card shadow-lg rounded-lg overflow-hidden">
         <Details entryDetail={entry} tenant={tenant} />
         <div className="p-4 sm:p-6 lg:p-8">
