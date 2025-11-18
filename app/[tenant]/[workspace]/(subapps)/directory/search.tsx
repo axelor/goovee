@@ -5,6 +5,7 @@ import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {Cloned} from '@/types/util';
 import {
@@ -84,7 +85,7 @@ export function Search({
   );
 
   const handleRedirection = (id: string) => {
-    router.push(`${workspaceURI}/directory/entry/${id}`);
+    router.push(`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${id}`);
   };
 
   return (

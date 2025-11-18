@@ -87,14 +87,14 @@ export default async function Page({
                 {partners.map(item => (
                   <Card
                     item={item}
-                    url={`${workspaceURI}/directory/entry/${item.id}`}
+                    url={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${item.id}`}
                     key={item.id}
                     tenant={tenant}
                   />
                 ))}
                 {pages > 1 && (
                   <CardPagination
-                    url={`${workspaceURI}/directory`}
+                    url={`${workspaceURI}/${SUBAPP_CODES.directory}`}
                     pages={pages}
                     searchParams={searchParams}
                   />

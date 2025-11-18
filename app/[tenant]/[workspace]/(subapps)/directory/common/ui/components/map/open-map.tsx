@@ -4,6 +4,7 @@ import {memo, useLayoutEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {SUBAPP_CODES} from '@/constants';
 
 import {Card} from '../card';
 import {MapContentProps} from './types';
@@ -63,7 +64,7 @@ export const Map = memo((props: MapContentProps) => {
         createPortal(
           <Card
             item={popup.item}
-            url={`${workspaceURI}/directory/entry/${popup.item.id}`}
+            url={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${popup.item.id}`}
             compact={small}
             tenant={tenant}
             className="hover:bg-accent"
