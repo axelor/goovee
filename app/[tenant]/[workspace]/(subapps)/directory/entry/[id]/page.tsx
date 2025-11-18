@@ -96,8 +96,8 @@ async function Details({
       <div className="flex flex-col sm:flex-row sm:items-start gap-6">
         <div className="flex-shrink-0">
           <Image
-            width={150}
-            height={150}
+            width={192}
+            height={192}
             className="rounded-lg object-cover w-36 h-36 sm:w-48 sm:h-48"
             src={getPartnerImageURL(picture?.id, tenant, {
               noimage: true,
