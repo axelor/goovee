@@ -90,6 +90,7 @@ export default async function Page({
     fullName,
     role,
     mainPartner: user.mainPartnerId?.toString(),
+    linkedinLink: partner.linkedinLink,
   };
 
   return (

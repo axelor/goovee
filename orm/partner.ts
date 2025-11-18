@@ -24,6 +24,7 @@ const partnerFields = {
   password: true,
   emailAddress: {address: true},
   picture: {id: true},
+  linkedinLink: true,
   mainPartner: {
     id: true,
     simpleFullName: true,

@@ -184,6 +184,7 @@ export async function update({
   email,
   otp,
   mainPartner,
+  linkedInLink,
 }: {
   companyName?: string;
   identificationNumber?: string;
@@ -193,6 +194,7 @@ export async function update({
   email: string;
   otp?: string;
   mainPartner?: string;
+  linkedInLink?: string;
 }) {
   const tenantId = headers().get(TENANT_HEADER);
 
@@ -311,6 +313,7 @@ export async function update({
         fixedPhone: companyNumber,
         firstName,
         name: isCompany ? companyName : name,
+        linkedinLink: isCompany ? undefined : linkedInLink,
         ...(partner.isContact && mainPartner
           ? {
               mainPartner: {
