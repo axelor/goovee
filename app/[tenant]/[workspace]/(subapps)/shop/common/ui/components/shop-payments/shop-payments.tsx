@@ -19,6 +19,7 @@ import {
   payboxCreateOrder,
   validatePayboxPayment,
 } from '@/subapps/shop/cart/(protected)/checkout/action';
+import {ORDER_SUCCESS_PARAM} from '@/subapps/shop/common/constants';
 
 interface ShopPaymentsProps {
   workspace: PortalWorkspace;
@@ -40,7 +41,7 @@ export function ShopPayments({workspace, orderSubapp}: ShopPaymentsProps) {
           `${workspaceURI}/${SUBAPP_CODES.orders}/${SUBAPP_PAGE.orders}/${order.data}`,
         );
       } else {
-        router.replace(`${workspaceURI}/shop`);
+        router.replace(`${workspaceURI}/shop?${ORDER_SUCCESS_PARAM}=true`);
       }
     },
     [workspaceURI, router, orderSubapp],
@@ -95,6 +96,7 @@ export function ShopPayments({workspace, orderSubapp}: ShopPaymentsProps) {
         onApprove={redirectOrder}
         successMessage="Order completed successfully."
         errorMessage="Failed to process your order."
+        skipSuccessToast={!orderSubapp}
       />
     </>
   );

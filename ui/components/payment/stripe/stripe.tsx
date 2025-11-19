@@ -18,6 +18,7 @@ export function Stripe({
   onValidateSession,
   onPaymentSuccess,
   onApprove,
+  skipSuccessToast,
 }: StripeProps) {
   const {toast} = useToast();
   const [verifying, setVerifying] = useState(false);
@@ -73,10 +74,11 @@ export function Stripe({
             title: i18n.t(result.message || errorMessage),
           });
         } else {
-          toast({
-            variant: 'success',
-            title: i18n.t(successMessage),
-          });
+          !skipSuccessToast &&
+            toast({
+              variant: 'success',
+              title: i18n.t(successMessage),
+            });
           if (onPaymentSuccess) {
             onPaymentSuccess();
           }
@@ -99,6 +101,7 @@ export function Stripe({
       toast,
       onPaymentSuccess,
       onApprove,
+      skipSuccessToast,
     ],
   );
 

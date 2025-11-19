@@ -22,6 +22,7 @@ import {
   CarouselSkeleton,
   CategoriesSkeleton,
   FeaturedCategoriesSkeleton,
+  OrderAlert,
 } from '@/app/[tenant]/[workspace]/(subapps)/shop/common/ui/components';
 
 async function Categories({tenant, user, workspace}: any) {
@@ -155,8 +156,11 @@ export default function Page({
   params: {tenant: string; workspace: string};
 }) {
   return (
-    <Suspense fallback={<ShopSkeleton />}>
-      <Shop params={params} />
-    </Suspense>
+    <>
+      <Suspense fallback={<ShopSkeleton />}>
+        <Shop params={params} />
+      </Suspense>
+      <OrderAlert />
+    </>
   );
 }

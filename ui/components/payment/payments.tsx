@@ -20,6 +20,7 @@ export function Payments({
   onPayboxValidatePayment,
   successMessage = '',
   errorMessage = '',
+  skipSuccessToast,
 }: {
   workspace: PortalWorkspace;
   disabled?: boolean;
@@ -38,6 +39,7 @@ export function Payments({
   }) => Promise<ErrorResponse | SuccessResponse<{id: ID; version: number}>>;
   successMessage?: string;
   errorMessage?: string;
+  skipSuccessToast?: boolean;
 }) {
   const config = workspace?.config;
   const allowOnlinePayment = config?.allowOnlinePaymentForEcommerce;
@@ -74,6 +76,7 @@ export function Payments({
           successMessage={successMessage}
           errorMessage={errorMessage}
           onPaymentSuccess={onPaymentSuccess}
+          skipSuccessToast={skipSuccessToast}
         />
       )}
       {allowStripe && (
@@ -88,6 +91,7 @@ export function Payments({
           onApprove={onApprove}
           successMessage={successMessage}
           errorMessage={errorMessage}
+          skipSuccessToast={skipSuccessToast}
         />
       )}
       {allowPaybox && (
@@ -100,6 +104,7 @@ export function Payments({
           onApprove={onApprove}
           successMessage={successMessage}
           errorMessage={errorMessage}
+          skipSuccessToast={skipSuccessToast}
         />
       )}
     </div>
