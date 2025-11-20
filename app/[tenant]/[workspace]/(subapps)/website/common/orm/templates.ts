@@ -30,8 +30,6 @@ import type {
   Field,
   TemplateSchema,
   Model,
-  MetaSelection,
-  SelectionOption,
   DemoLite,
 } from '../types/templates';
 import {
@@ -74,18 +72,6 @@ export function getCommnonSelectionName(name: string) {
   return `${SELECT_PREFIX}-${name}`;
 }
 
-function generateSelectionText(options: readonly SelectionOption[]) {
-  return options
-    .map(
-      item =>
-        `${item.value}:${item.title}` +
-        '\n' +
-        (item.color ? `color:${item.color}` + '\n' : '') +
-        (item.icon ? `icon:${item.icon}` + '\n' : ''),
-    )
-    .join('\n');
-}
-
 export async function createCustomFields({
   fields,
   model,
@@ -94,7 +80,6 @@ export async function createCustomFields({
   client,
   jsonModel,
   addPanel,
-  selections,
 }: {
   model: string;
   modelField: string;
@@ -103,7 +88,6 @@ export async function createCustomFields({
   client: Client;
   jsonModel?: {id: string; name?: string};
   addPanel?: boolean;
-  selections: Map<string, MetaSelection>;
 }) {
   const timeStamp = new Date();
 
@@ -132,7 +116,6 @@ export async function createCustomFields({
         select: {id: true, name: true},
       });
 
-      let selectionText: string | undefined;
       let selection: string | undefined;
       let metaSelectData: CreateArgs<AOSMetaSelect> | undefined;
       let metaSelectItemsData: CreateArgs<AOSMetaSelectItem>[] | undefined;
@@ -157,14 +140,9 @@ export async function createCustomFields({
             order: i + 1,
             updatedOn: timeStamp,
           }));
-
-          selectionText = generateSelectionText(field.selection);
         }
         if (typeof field.selection === 'string') {
           name = getCommnonSelectionName(field.selection);
-          selectionText = generateSelectionText(
-            selections.get(field.selection)?.options || [],
-          );
         }
 
         selection = name;
@@ -180,7 +158,7 @@ export async function createCustomFields({
         isSelectionField:
           'selection' in field &&
           (!!field.selection?.length || typeof field.selection === 'string'),
-        selectionText: selectionText,
+        selectionText: null,
         selection: selection,
         sequence: i,
         uniqueModel,

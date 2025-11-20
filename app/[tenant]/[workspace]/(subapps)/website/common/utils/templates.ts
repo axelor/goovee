@@ -325,7 +325,6 @@ export async function seedComponents(tenantId: Tenant['id']) {
         jsonModel,
         client,
         addPanel: true,
-        selections,
       });
       return {...jsonModel, fields};
     });
@@ -339,7 +338,6 @@ export async function seedComponents(tenantId: Tenant['id']) {
       fields,
       client,
       addPanel: true,
-      selections,
     });
 
     return {
