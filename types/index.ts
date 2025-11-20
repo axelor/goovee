@@ -172,7 +172,7 @@ export interface PortalAppConfig extends Model {
 export interface PortalApp extends Model {
   name: string;
   code: string;
-  installed: string;
+  isInstalled: boolean;
   orderForMySpaceMenu: number;
   orderForTopMenu: number;
   showInMySpace: boolean;

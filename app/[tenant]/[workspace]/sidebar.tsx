@@ -86,7 +86,7 @@ export function Sidebar({
       <div className="flex flex-col flex-1 gap-6">
         <TooltipProvider>
           {subapps
-            ?.filter((app: any) => app.installed)
+            ?.filter((app: any) => app.isInstalled)
             .sort(
               (app1: any, app2: any) =>
                 app1.orderForMySpaceMenu - app2.orderForMySpaceMenu,

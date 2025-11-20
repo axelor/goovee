@@ -44,7 +44,7 @@ export async function findInviteById({
                   name: true,
                   color: true,
                   icon: true,
-                  installed: true,
+                  isInstalled: true,
                   orderForMySpaceMenu: true,
                   orderForTopMenu: true,
                   showInMySpace: true,

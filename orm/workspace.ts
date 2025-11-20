@@ -209,7 +209,7 @@ export async function findWorkspaceMembers({
                 app: {
                   name: true,
                   code: true,
-                  installed: true,
+                  isInstalled: true,
                 },
                 roleSelect: true,
               },
@@ -273,7 +273,7 @@ export async function findContactWorkspaceConfig({
                 showInTopMenu: true,
                 color: true,
                 icon: true,
-                installed: true,
+                isInstalled: true,
                 name: true,
                 orderForTopMenu: true,
               },
@@ -334,7 +334,7 @@ export async function findPartnerWorkspaceConfig({
               showInTopMenu: true,
               color: true,
               icon: true,
-              installed: true,
+              isInstalled: true,
               name: true,
               orderForTopMenu: true,
             },
@@ -387,7 +387,7 @@ export async function findDefaultPartnerWorkspaceConfig({
             showInTopMenu: true,
             color: true,
             icon: true,
-            installed: true,
+            isInstalled: true,
             name: true,
             orderForTopMenu: true,
           },
@@ -455,7 +455,7 @@ export async function findDefaultGuestWorkspaceConfig({
             showInTopMenu: true,
             color: true,
             icon: true,
-            installed: true,
+            isInstalled: true,
             name: true,
             orderForTopMenu: true,
           },
@@ -601,7 +601,7 @@ export async function findOpenWorkspaces({
               showInTopMenu: true,
               color: true,
               icon: true,
-              installed: true,
+              isInstalled: true,
               name: true,
               orderForTopMenu: true,
             },
@@ -839,7 +839,7 @@ export async function findWorkspaceApps({
   }
 
   const available = (app: any) =>
-    apps.some(a => a.code === app.code && a.installed === 'yes');
+    apps.some(a => a.code === app.code && a.isInstalled);
 
   const contactApps = (contactWorkpaceConfig?.apps || []).filter(available);
 
@@ -861,14 +861,7 @@ export async function findSubapps({
     url,
     user,
     tenantId,
-  })
-    .then(clone)
-    .then(subapps =>
-      subapps.map((app: any) => ({
-        ...app,
-        installed: app?.installed === 'yes',
-      })),
-    );
+  }).then(clone);
 
   return apps;
 }
@@ -906,7 +899,7 @@ export async function findSubappAccess({
 
   const subapp = await findSubapp({code, url, user, tenantId});
 
-  if (!subapp?.installed) return null;
+  if (!subapp?.isInstalled) return null;
 
   return subapp;
 }

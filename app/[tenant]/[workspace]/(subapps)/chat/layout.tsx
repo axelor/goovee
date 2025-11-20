@@ -42,7 +42,7 @@ export default async function Layout({
     tenantId: tenant,
   });
 
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return notFound();
   }
 

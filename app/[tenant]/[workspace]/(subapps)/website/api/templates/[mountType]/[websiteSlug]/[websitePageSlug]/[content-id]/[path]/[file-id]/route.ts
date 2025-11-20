@@ -70,7 +70,7 @@ export async function GET(
     url: workspaceURL,
     tenantId,
   });
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return new NextResponse('Unauthorized', {status: 401});
   }
 

@@ -50,7 +50,7 @@ async function Quotations({
     tenantId: tenant,
   });
 
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return notFound();
   }
 

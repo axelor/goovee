@@ -126,7 +126,7 @@ export default async function Layout({
   const shopSubapp = subapps?.find(
     (app: any) => app.code === SUBAPP_CODES.shop,
   );
-  const showCart = !hidePriceAndPurchase && shopSubapp?.installed;
+  const showCart = !hidePriceAndPurchase && shopSubapp?.isInstalled;
 
   return (
     <Workspace

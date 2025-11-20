@@ -52,7 +52,7 @@ async function Orders({
     tenantId: tenant,
   });
 
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return notFound();
   }
 

@@ -15,7 +15,7 @@ export default function Content({subapps}: {subapps: any}) {
     <>
       <div className="flex flex-col gap-10">
         {subapps
-          .filter((app: any) => app.installed && app.showInMySpace)
+          .filter((app: any) => app.isInstalled && app.showInMySpace)
           .sort(
             (app1: any, app2: any) =>
               app1.orderForMySpaceMenu - app2.orderForMySpaceMenu,

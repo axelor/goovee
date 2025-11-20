@@ -78,7 +78,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
           ) : null}
 
           {subapps
-            ?.filter((app: any) => app.installed)
+            ?.filter((app: any) => app.isInstalled)
             .sort(
               (app1: any, app2: any) =>
                 app1.orderForMySpaceMenu - app2.orderForMySpaceMenu,
