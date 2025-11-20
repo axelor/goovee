@@ -3,13 +3,7 @@
 import {i18n} from '@/lib/core/locale';
 import {useState, useEffect} from 'react';
 
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogCancel,
-} from '@/ui/components/alert-dialog';
+import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
 import {ORDER_SUCCESS_PARAM} from '../../../constants';
 
 export function OrderAlert() {
@@ -36,24 +30,13 @@ export function OrderAlert() {
     }
   }, []);
 
-  const handleClose = () => {
-    setShowDialog(false);
-  };
-
   return (
-    <AlertDialog open={showDialog}>
-      <AlertDialogContent className="bg-success-dark border-success-dark">
-        <AlertDialogTitle className="text-success-light">
+    <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <DialogContent className="py-16 px-10">
+        <DialogTitle className="text-center">
           {i18n.t('Order completed successfully.')}
-        </AlertDialogTitle>
-        <AlertDialogFooter>
-          <AlertDialogCancel
-            className="border-success-dark"
-            onClick={handleClose}>
-            {i18n.t('OK')}
-          </AlertDialogCancel>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogTitle>
+      </DialogContent>
+    </Dialog>
   );
 }
