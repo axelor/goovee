@@ -5,19 +5,19 @@ import {FaLinkedin} from 'react-icons/fa';
 import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {t, tattr} from '@/lib/core/locale/server';
-import {Avatar, AvatarImage, InnerHTML} from '@/ui/components';
+import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
 import {getPartnerImageURL} from '@/utils/files';
 import {workspacePathname} from '@/utils/workspace';
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
+import {civility} from '../../common/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
 import {ensureAuth} from '../../common/utils/auth-helper';
-import {civility} from '../../common/constants';
 
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
 export default async function Page({
@@ -204,12 +204,7 @@ async function Details({
       {directoryCompanyDescription && (
         <div className="mt-6 border-t border-border pt-6">
           <h3 className="text-xl font-semibold mb-2">{await t('About')}</h3>
-          <div className="prose prose-sm sm:prose-base max-w-none text-muted-foreground DraftEditor-editorContainer">
-            <InnerHTML
-              content={directoryCompanyDescription}
-              className="public-DraftEditor-content"
-            />
-          </div>
+          <RichTextViewer content={directoryCompanyDescription} />
         </div>
       )}
     </div>
