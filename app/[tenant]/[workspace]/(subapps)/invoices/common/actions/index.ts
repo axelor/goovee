@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import {headers} from 'next/headers';
+import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -350,9 +351,11 @@ export async function createStripeCheckoutSession({
 export async function validateStripePayment({
   stripeSessionId,
   workspaceURL,
+  invalidatePath,
 }: {
   stripeSessionId: string;
   workspaceURL: string;
+  invalidatePath: string;
 }) {
   if (!stripeSessionId) {
     return {error: true, message: await t('Missing stripe session id!')};
@@ -497,6 +500,7 @@ export async function validateStripePayment({
       version: context.version,
       tenantId,
     });
+    revalidatePath(invalidatePath);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Stripe payment:', error);
@@ -588,9 +592,11 @@ export async function payboxCreateOrder({
 export async function validatePayboxPayment({
   params,
   workspaceURL,
+  invalidatePath,
 }: {
   params: any;
   workspaceURL: string;
+  invalidatePath: string;
 }) {
   if (!params) {
     return {error: true, message: await t('Bad request')};
@@ -734,6 +740,7 @@ export async function validatePayboxPayment({
       version: context.version,
       tenantId,
     });
+    revalidatePath(invalidatePath);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Paybox payment:', error);

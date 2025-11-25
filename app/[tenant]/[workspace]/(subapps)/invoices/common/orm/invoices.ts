@@ -178,6 +178,7 @@ export const findInvoice = async ({
           symbol: true,
         },
         invoicePaymentList: {
+          orderBy: {paymentDate: 'ASC'},
           select: {
             paymentDate: true,
             amount: true,
