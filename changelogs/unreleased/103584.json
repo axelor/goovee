@@ -1,5 +1,0 @@
-{
-  "title": "Show customised message for paybox payments",
-  "type": "fix",
-  "scope": ["core"]
-}

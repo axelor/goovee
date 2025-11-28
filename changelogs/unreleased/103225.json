@@ -1,6 +1,0 @@
-{
-  "title": "Handle date formatting across timezones",
-  "type": "fix",
-  "description": "Ensure consistent date handling across timezones by performing all date formatting on the client side.",
-  "scope": ["core"]
-}

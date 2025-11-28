@@ -1,6 +1,0 @@
-{
-  "title": "Fix Rich Text Editor styling and content overflow issues",
-  "type": "fix",
-  "description": "Apply consistent Rich Text Editor styling and resolve content overflow problems across modules. Integrate RichTextViewer in Forum thread body and Ticketing ticket details for unified rendering, and update form grid layout styles to prevent overlap and improve alignment.",
-  "scope": ["forum", "ticketing", "core"]
-}

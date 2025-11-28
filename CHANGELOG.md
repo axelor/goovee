@@ -1,3 +1,164 @@
+# 1.3.0 (2025-11-28)
+
+## Features
+
+### Core Platform
+
+- Enhance the Directory with new settings and improved display – #102762
+  <details>
+    <summary>Details</summary>
+
+  The Directory includes new settings and an improved display. A 'Directory settings' menu under 'My Account' allows users to configure company and personal contact visibility. The directory displays company contacts. The homepage features a searchable list of partners, and each partner has a dedicated detail page showing comprehensive information and associated contacts.
+  </details>
+
+- Upgrade Goovee ORM to 0.0.6 – #102970
+  <details>
+    <summary>Details</summary>
+
+  This enables case insensitive search and fixes profile picture deletion
+  </details>
+
+### Directory
+
+- Enhance the Directory with new settings and improved display – #102762
+  <details>
+    <summary>Details</summary>
+
+  The Directory includes new settings and an improved display. A 'Directory settings' menu under 'My Account' allows users to configure company and personal contact visibility. The directory displays company contacts. The homepage features a searchable list of partners, and each partner has a dedicated detail page showing comprehensive information and associated contacts.
+  </details>
+
+### E-Shop
+
+- Show order success dialog when order subapp is not present – #103625
+
+## Fixes
+
+### Core Platform
+
+- Fix crash after login when there are no public apps – #103475
+- Fix redirection after first time sso keycloak login – #104086
+  <details>
+    <summary>Details</summary>
+
+  Redirect the user after first time login using keycloak without refreshing the page.
+  </details>
+
+- Fix Rich Text Editor styling and content overflow issues – #103321
+  <details>
+    <summary>Details</summary>
+
+  Apply consistent Rich Text Editor styling and resolve content overflow problems across modules. Integrate RichTextViewer in Forum thread body and Ticketing ticket details for unified rendering, and update form grid layout styles to prevent overlap and improve alignment.
+  </details>
+
+- Fix validation not updating after deleting array items – #104037
+  <details>
+    <summary>Details</summary>
+
+  Ensured form validation re-runs when an array item is removed, preventing stale validation states.
+  </details>
+
+- Handle date formatting across timezones – #103225
+  <details>
+    <summary>Details</summary>
+
+  Ensure consistent date handling across timezones by performing all date formatting on the client side.
+  </details>
+
+- Restrict Contact Address Selection to Partner Addresses in Shop and Quotations – #103363
+  <details>
+    <summary>Details</summary>
+
+  Implemented strict address filtering in Shop and Quotations. Contacts are now restricted to selecting only addresses associated with their parent Partner.
+  </details>
+
+- Show customised message for paybox payments – #103584
+
+### Events
+
+- Fix paid amount scaling mismatch for events – #104191
+  <details>
+    <summary>Details</summary>
+
+  Applied proper scaling to generated payment amounts to ensure the paid amount matches the expected amount after processing.
+  </details>
+
+### Forum
+
+- Fix Rich Text Editor styling and content overflow issues – #103321
+  <details>
+    <summary>Details</summary>
+
+  Apply consistent Rich Text Editor styling and resolve content overflow problems across modules. Integrate RichTextViewer in Forum thread body and Ticketing ticket details for unified rendering, and update form grid layout styles to prevent overlap and improve alignment.
+  </details>
+
+### Invoices
+
+- Fix paid amount not reflecting on partial payment of invoice – #104343
+
+### Orders
+
+- Fix amount scaling and tax line formatting – #104194
+  <details>
+    <summary>Details</summary>
+
+  Applied correct scaling and formatting for totals and taxLineSet values to resolve amount mismatch issues in orders and quotations.
+  </details>
+
+- Fix download issue for invoices and customer deliveries on completed orders – #103376
+  <details>
+    <summary>Details</summary>
+
+  Resolved an issue preventing downloads of invoices and customer deliveries when an order had completed status.
+  </details>
+
+### Quotations
+
+- Fix amount scaling and tax line formatting – #104194
+  <details>
+    <summary>Details</summary>
+
+  Applied correct scaling and formatting for totals and taxLineSet values to resolve amount mismatch issues in orders and quotations.
+  </details>
+
+- Restrict Contact Address Selection to Partner Addresses in Shop and Quotations – #103363
+  <details>
+    <summary>Details</summary>
+
+  Implemented strict address filtering in Shop and Quotations. Contacts are now restricted to selecting only addresses associated with their parent Partner.
+  </details>
+
+### E-Shop
+
+- Fix mainPrice comparison and add dynamic item pricing – #104174
+  <details>
+    <summary>Details</summary>
+
+  Corrected mainPrice comparison from 'ati' to 'at' and updated payload items to apply conditional ATI/WT pricing while creating and requesting an order.
+  </details>
+
+- Reorder primary and secondary price display – #104175
+  <details>
+    <summary>Details</summary>
+
+  Adjusted the rendering order to display the primary price first and the secondary price below it for clearer visual hierarchy in product view section.
+  </details>
+
+- Restrict Contact Address Selection to Partner Addresses in Shop and Quotations – #103363
+  <details>
+    <summary>Details</summary>
+
+  Implemented strict address filtering in Shop and Quotations. Contacts are now restricted to selecting only addresses associated with their parent Partner.
+  </details>
+
+### Helpdesk
+
+- Fix Rich Text Editor styling and content overflow issues – #103321
+  <details>
+    <summary>Details</summary>
+
+  Apply consistent Rich Text Editor styling and resolve content overflow problems across modules. Integrate RichTextViewer in Forum thread body and Ticketing ticket details for unified rendering, and update form grid layout styles to prevent overlap and improve alignment.
+  </details>
+
 # 1.2.0 (2025-11-04)
 
 ## Features

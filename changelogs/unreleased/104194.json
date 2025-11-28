@@ -1,6 +1,0 @@
-{
-  "title": "Fix amount scaling and tax line formatting",
-  "type": "fix",
-  "description": "Applied correct scaling and formatting for totals and taxLineSet values to resolve amount mismatch issues in orders and quotations.",
-  "scope": ["orders", "quotations"]
-}

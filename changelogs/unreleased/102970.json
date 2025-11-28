@@ -1,6 +1,0 @@
-{
-  "title": "Upgrade Goovee ORM to 0.0.6",
-  "type": "feature",
-  "description": "This enables case insensitive search and fixes profile picture deletion",
-  "scope": ["core"]
-}

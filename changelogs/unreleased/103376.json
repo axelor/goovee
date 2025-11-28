@@ -1,6 +1,0 @@
-{
-  "title": "Fix download issue for invoices and customer deliveries on completed orders",
-  "type": "fix",
-  "description": "Resolved an issue preventing downloads of invoices and customer deliveries when an order had completed status.",
-  "scope": ["orders"]
-}

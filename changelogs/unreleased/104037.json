@@ -1,6 +1,0 @@
-{
-  "title": "Fix validation not updating after deleting array items",
-  "type": "fix",
-  "description": "Ensured form validation re-runs when an array item is removed, preventing stale validation states.",
-  "scope": ["core"]
-}
