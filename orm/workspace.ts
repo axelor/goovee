@@ -123,6 +123,15 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   isCompanyOrAddressRequired: true,
   payInAdvance: true,
   advancePaymentPercentage: true,
+  isHomepageDisplay: true,
+  isHomepageDisplayNews: true,
+  isHomepageDisplayEvents: true,
+  isHomepageDisplayMessage: true,
+  isHomepageDisplayResources: true,
+  homepageHeroTitle: true,
+  homepageHeroDescription: true,
+  homepageHeroOverlayColorSelect: true,
+  homepageHeroBgImage: {id: true},
 };
 
 export async function findWorkspaceMembers({
