@@ -74,6 +74,18 @@ export interface Post extends Model {
   createdOn: string;
 }
 
+export interface RecentlyActivePost {
+  id: ID;
+  version: Version;
+  title: string;
+  comment: {
+    id: ID;
+    version: Version;
+    note: string;
+    createdOn: string;
+  };
+}
+
 export enum ContentType {
   POST = 'post',
   COMMENT = 'comment',

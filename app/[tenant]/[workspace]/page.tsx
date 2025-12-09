@@ -6,7 +6,7 @@ import {findSubapps, findWorkspace} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {SEARCH_PARAMS} from '@/constants';
 import {getLoginURL} from '@/utils/url';
-import {ClientRedirection} from './client-redirection';
+import {ClientRedirection} from './client';
 import {Home} from './home';
 
 export default async function Page({
@@ -40,15 +40,23 @@ export default async function Page({
     return user ? notFound() : redirect(loginURL);
   }
 
-  if (workspace.config?.isHomepageDisplay) {
-    return <Home workspace={workspace} workspaceURI={workspaceURI} />;
-  }
-
   const apps = await findSubapps({
     user: session?.user,
     url: workspaceURL,
     tenantId: tenant,
   });
+
+  if (workspace.config?.isHomepageDisplay) {
+    return (
+      <Home
+        tenant={tenant}
+        user={session?.user}
+        workspace={workspace}
+        workspaceURI={workspaceURI}
+        apps={apps}
+      />
+    );
+  }
 
   if (!apps?.length) {
     return user ? notFound() : redirect(loginURL);
