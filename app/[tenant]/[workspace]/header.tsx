@@ -27,15 +27,14 @@ import {useResponsive} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
 
 function Logo({workspace}: {workspace: PortalWorkspace}) {
-  const {workspaceURI, tenant, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const logoId = workspace.logo?.id || workspace.config?.company?.logo?.id;
   const logoURL = logoId
-    ? `${workspaceURL}/api/workspace/logo/image`
+    ? `${workspaceURI}/api/workspace/logo/image`
     : DEFAULT_LOGO_URL;
 
   return (
-    <Link
-      href={`/?workspaceURI=${encodeURIComponent(workspaceURI || '')}&tenant=${encodeURIComponent(tenant || '')}`}>
+    <Link href={workspaceURI}>
       <div className="flex items-center justify-start">
         <div className="w-24 aspect-[2/1] relative">
           <Image
