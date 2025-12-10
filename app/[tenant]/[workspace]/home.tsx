@@ -86,6 +86,7 @@ export async function Home({
             : 'normal'
         }
         groupImg={logoURL}
+        groupImgClassName="object-contain"
         image={imageURL}
       />
 

@@ -69,8 +69,10 @@ export const Banner = ({
   className,
   blendMode,
   background,
+  groupImgClassName,
 }: {
   groupImg?: string;
+  groupImgClassName?: string;
   title: string;
   description: string;
   image?: any;
@@ -98,7 +100,7 @@ export const Banner = ({
               fill
               src={groupImg}
               alt="Group"
-              className="rounded-lg object-cover"
+              className={cn('rounded-lg object-cover', groupImgClassName)}
             />
           </div>
         )}
