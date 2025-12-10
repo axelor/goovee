@@ -28,9 +28,11 @@ import {useWorkspace} from './workspace-context';
 export function Sidebar({
   subapps,
   workspaces,
+  showHome,
 }: {
   subapps: any;
   workspaces?: any;
+  showHome: boolean | null | undefined;
 }) {
   const {data: session} = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -85,12 +87,14 @@ export function Sidebar({
       </div>
       <div className="flex flex-col flex-1 gap-6">
         <TooltipProvider>
-          <App
-            href={workspaceURI}
-            icon="home"
-            collapsed={collapsed}
-            name="app-home"
-          />
+          {showHome && (
+            <App
+              href={workspaceURI}
+              icon="home"
+              collapsed={collapsed}
+              name="app-home"
+            />
+          )}
           {subapps
             ?.filter((app: any) => app.installed)
             .sort(

@@ -46,6 +46,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
 
   const displayContact = workspace?.config?.isDisplayContact;
   const contactEmail = workspace?.config?.contactEmailAddress?.address;
+  const showHome = workspace?.config?.isHomepageDisplay;
 
   return (
     <>
@@ -77,7 +78,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
             )
           ) : null}
 
-          <App href={workspaceURI} icon="home" name="app-home" />
+          {showHome && <App href={workspaceURI} icon="home" name="app-home" />}
           {subapps
             ?.filter((app: any) => app.installed)
             .sort(
