@@ -346,9 +346,7 @@ async function ForumCard({
                     </Suspense>
                   </div>
                   <div className="flex items-center text-xs text-muted-foreground line-clamp-1">
-                    <span className="font-medium truncate ms-1">
-                      {post.title}
-                    </span>
+                    <span className="font-medium truncate">{post.title}</span>
                   </div>
                 </div>{' '}
               </Link>
