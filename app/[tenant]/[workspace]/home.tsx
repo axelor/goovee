@@ -14,7 +14,6 @@ import {HeroSearch} from '@/ui/components/hero-search';
 import {Icon} from '@/ui/components/icon';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {Skeleton} from '@/ui/components/skeleton/skeleton';
-import {clone} from '@/utils';
 
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
 import {findEvents} from './(subapps)/events/common/orm/event';
@@ -22,7 +21,7 @@ import {findPostsWithLatestComment} from './(subapps)/forum/common/orm/forum';
 import type {RecentlyActivePost} from './(subapps)/forum/common/types/forum';
 import {findHomePageHeaderNews} from './(subapps)/news/common/orm/news';
 import {fetchLatestFiles} from './(subapps)/resources/common/orm/dms';
-import {CommentDateDisplay, EventDateDisplay} from './client';
+import {DateDisplay} from './client';
 
 export async function Home({
   tenant,
@@ -262,7 +261,7 @@ async function EventsCard({
                 </span>
                 <div className="text-xs text-muted-foreground text-right">
                   <Suspense>
-                    <EventDateDisplay event={clone(event)} />
+                    <DateDisplay date={event.eventStartDateTime} />
                   </Suspense>
                 </div>
               </div>
@@ -328,7 +327,7 @@ async function ForumCard({
                   />
                   <div className="text-xs text-muted-foreground text-right">
                     <Suspense>
-                      <CommentDateDisplay comment={clone(post.comment)} />
+                      <DateDisplay date={post.comment.createdOn} />
                     </Suspense>
                   </div>
                   <div className="flex items-center text-xs text-muted-foreground line-clamp-1">
@@ -403,6 +402,11 @@ async function ResourcesCard({
                       <span>•</span>
                       <span>{file.metaFile.sizeText}</span>
                     </>
+                  )}
+                  {file.metaFile?.createdOn && (
+                    <span className="text-xs text-muted-foreground text-right ms-auto">
+                      <DateDisplay date={file.metaFile.createdOn} />
+                    </span>
                   )}
                 </div>
               </div>

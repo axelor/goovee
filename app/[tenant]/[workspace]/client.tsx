@@ -23,31 +23,22 @@ export function ClientRedirection(props: {url: string}) {
   );
 }
 
-export function EventDateDisplay({event}: {event: any}) {
+export function DateDisplay({
+  date,
+  dateFormat = 'MMMM D YYYY,',
+  timeFormat = ' h:mm a',
+}: {
+  date: string | Date | null;
+  dateFormat?: string;
+  timeFormat?: string;
+}) {
   if (typeof window === 'undefined')
     throw new Error('Render on client side only');
+  if (!date) return null;
   return (
     <TooltipComponent
-      triggerText={formatRelativeTime(event.eventStartDateTime)}
-      tooltipText={formatDateTime(event.eventStartDateTime, {
-        dateFormat: 'MMMM D YYYY,',
-        timeFormat: ' h:mm a',
-      })}
-    />
-  );
-}
-
-export function CommentDateDisplay({comment}: {comment: any}) {
-  if (typeof window === 'undefined')
-    throw new Error('Render on client side only');
-  const {createdOn} = comment;
-  return (
-    <TooltipComponent
-      triggerText={formatRelativeTime(createdOn!)}
-      tooltipText={formatDateTime(createdOn!, {
-        dateFormat: 'MMMM DD YYYY,',
-        timeFormat: ' h:mm a',
-      })}
+      triggerText={formatRelativeTime(date)}
+      tooltipText={formatDateTime(date, {dateFormat, timeFormat})}
     />
   );
 }
