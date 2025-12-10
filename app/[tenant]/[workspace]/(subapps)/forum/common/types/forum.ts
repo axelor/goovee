@@ -83,6 +83,8 @@ export interface RecentlyActivePost {
     version: Version;
     note: string;
     createdOn: string;
+    partner?: {id: ID; version: Version; name: string; simpleFullName?: string};
+    createdBy?: {id: ID; version: Version; name: string; fullName?: string};
   };
 }
 

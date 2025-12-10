@@ -325,7 +325,16 @@ async function ForumCard({
                     content={note}
                     className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2"
                   />
-                  <div className="text-xs text-muted-foreground text-right">
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                    <div>
+                      {t('by')}{' '}
+                      <span className="font-medium truncate">
+                        {post.comment.partner
+                          ? (post.comment.partner.simpleFullName ??
+                            post.comment.partner.name)
+                          : post.comment.createdBy?.fullName}
+                      </span>{' '}
+                    </div>
                     <Suspense>
                       <DateDisplay date={post.comment.createdOn} />
                     </Suspense>
@@ -335,7 +344,7 @@ async function ForumCard({
                       {post.title}
                     </span>
                   </div>
-                </div>
+                </div>{' '}
               </Link>
             );
           })

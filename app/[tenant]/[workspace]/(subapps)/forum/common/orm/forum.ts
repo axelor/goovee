@@ -446,6 +446,8 @@ export async function findRecentlyActivePosts({
             m.note AS "commentNote",
             m.created_on AS "commentDate",
             m.version AS "commentVersion",
+            m.created_by AS "commentCreatedById",
+            m.partner AS "commentPartnerId",
             ROW_NUMBER() OVER (PARTITION BY m.related_id ORDER BY m.created_on DESC) as rn
         FROM mail_message m
         WHERE m.related_model = 'com.axelor.apps.portal.db.ForumPost'
@@ -461,11 +463,25 @@ export async function findRecentlyActivePosts({
             'id', lc."commentId",
             'version', lc."commentVersion",
             'note', lc."commentNote",
-            'createdOn', lc."commentDate"
+            'createdOn', lc."commentDate",
+            'partner', JSON_BUILD_OBJECT(
+                'id', bp.id,
+                'version', bp.version,
+                'name', bp.name,
+                'simpleFullName', bp.simple_full_name
+            ),
+            'createdBy', JSON_BUILD_OBJECT(
+                'id', au.id,
+                'version', au.version,
+                'name', au.name,
+                'fullName', au.full_name
+            )
         ) AS comment
     FROM portal_forum_post post
     JOIN LatestComment lc ON post.id = lc."postId" AND lc.rn = 1
     LEFT JOIN portal_forum_group forumGroup ON post.forum_group = forumGroup.id
+    LEFT JOIN base_partner bp ON lc."commentPartnerId" = bp.id
+    LEFT JOIN auth_user au ON lc."commentCreatedById" = au.id
     ${whereClause}
     ORDER BY lc."commentDate" DESC
     LIMIT $1
