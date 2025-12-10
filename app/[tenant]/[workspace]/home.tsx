@@ -14,6 +14,9 @@ import {HeroSearch} from '@/ui/components/hero-search';
 import {Icon} from '@/ui/components/icon';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {Skeleton} from '@/ui/components/skeleton/skeleton';
+import {getFileTypeIcon, getIconColor} from '@/utils/files';
+import {BadgeList} from '@/ui/components/badge-list';
+import {clone} from '@/utils';
 
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
 import {findEvents} from './(subapps)/events/common/orm/event';
@@ -21,6 +24,7 @@ import {findRecentlyActivePosts} from './(subapps)/forum/common/orm/forum';
 import type {RecentlyActivePost} from './(subapps)/forum/common/types/forum';
 import {findHomePageHeaderNews} from './(subapps)/news/common/orm/news';
 import {fetchLatestFiles} from './(subapps)/resources/common/orm/dms';
+import {DynamicIcon} from './(subapps)/resources/common/ui/components/dynamic-icon';
 import {DateDisplay} from './client';
 
 export async function Home({
@@ -259,7 +263,8 @@ async function EventsCard({
                 <span className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
                   {event.eventTitle}
                 </span>
-                <div className="text-xs text-muted-foreground text-right">
+                <div className="flex justify-between text-xs text-muted-foreground text-right">
+                  <BadgeList items={clone(event.eventCategorySet)} />
                   <Suspense>
                     <DateDisplay date={event.eventStartDateTime} />
                   </Suspense>
@@ -393,34 +398,47 @@ async function ResourcesCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {files && files.length > 0 ? (
-          files.map(file => (
-            <Link
-              key={file.id}
-              href={`${workspaceURI}/${SUBAPP_CODES.resources}/${file.id}`}
-              className="block group rounded-md border p-3 hover:bg-muted/50 transition-colors">
-              <div className="flex flex-col space-y-1 overflow-hidden flex-grow">
-                <span className="font-medium text-sm group-hover:text-primary transition-colors truncate">
-                  {file.fileName}
-                </span>
-                <div className="text-xs text-muted-foreground flex gap-2">
-                  {file.metaFile?.fileType && (
-                    <span className="uppercase">{file.metaFile.fileType}</span>
-                  )}
-                  {file.metaFile?.sizeText && (
-                    <>
-                      <span>•</span>
-                      <span>{file.metaFile.sizeText}</span>
-                    </>
-                  )}
-                  {file.metaFile?.createdOn && (
-                    <span className="text-xs text-muted-foreground text-right ms-auto">
-                      <DateDisplay date={file.metaFile.createdOn} />
-                    </span>
-                  )}
+          files.map(file => {
+            const icon = getFileTypeIcon(file.metaFile?.fileType);
+            const iconColor = getIconColor(icon);
+            return (
+              <Link
+                key={file.id}
+                href={`${workspaceURI}/${SUBAPP_CODES.resources}/${file.id}`}
+                className="block group rounded-md border p-3 hover:bg-muted/50 transition-colors">
+                <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
+                  <DynamicIcon
+                    icon={icon}
+                    className={'h-6 w-6 shrink-0'}
+                    {...(iconColor
+                      ? {
+                          style: {
+                            color: iconColor,
+                          },
+                        }
+                      : {})}
+                  />
+                  <div className="flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm group-hover:text-primary transition-colors truncate">
+                        {file.fileName}
+                      </span>
+                    </div>
+                    <div className="flex items-center text-xs text-muted-foreground gap-2">
+                      {file.metaFile?.sizeText && (
+                        <p className="line-clamp-1">{file.metaFile.sizeText}</p>
+                      )}
+                      {file.metaFile?.createdOn && (
+                        <span className="line-clamp-1 ms-auto">
+                          <DateDisplay date={file.metaFile.createdOn} />
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))
+              </Link>
+            );
+          })
         ) : (
           <div className="text-sm text-muted-foreground text-center py-4">
             {await t('No recent resources')}
