@@ -418,7 +418,7 @@ export async function findMemberGroupById({
   return group;
 }
 
-export async function findPostsWithLatestComment({
+export async function findRecentlyActivePosts({
   workspaceID,
   tenantId,
   user,

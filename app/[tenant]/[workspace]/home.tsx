@@ -17,7 +17,7 @@ import {Skeleton} from '@/ui/components/skeleton/skeleton';
 
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
 import {findEvents} from './(subapps)/events/common/orm/event';
-import {findPostsWithLatestComment} from './(subapps)/forum/common/orm/forum';
+import {findRecentlyActivePosts} from './(subapps)/forum/common/orm/forum';
 import type {RecentlyActivePost} from './(subapps)/forum/common/types/forum';
 import {findHomePageHeaderNews} from './(subapps)/news/common/orm/news';
 import {fetchLatestFiles} from './(subapps)/resources/common/orm/dms';
@@ -288,7 +288,7 @@ async function ForumCard({
   user: User | undefined;
   workspaceURI: string;
 }) {
-  const forumPosts = await findPostsWithLatestComment({
+  const forumPosts = await findRecentlyActivePosts({
     workspaceID: workspace.id,
     tenantId: tenant,
     user,
