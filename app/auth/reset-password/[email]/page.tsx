@@ -31,7 +31,10 @@ const formSchema = z
   .object({
     email: z.string().email().min(1, i18n.t('Email is required')),
     otp: z.string().min(1, i18n.t('OTP is required')),
-    password: z.string().min(1, i18n.t('Password is required')),
+    password: z
+      .string()
+      .min(1, i18n.t('Password is required'))
+      .min(8, i18n.t('Password must be at least 8 characters')),
     confirmPassword: z.string().min(1, i18n.t('Confirm password is required')),
   })
   .refine(data => data.password === data.confirmPassword, {

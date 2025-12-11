@@ -471,3 +471,79 @@ export async function registerPartner({
     .then(clone);
   return partner;
 }
+
+function isChatAppInstalled(apps?: Array<{code?: string; installed?: string}>): boolean {
+  if (!apps || apps.length === 0) return false;
+  const chatApp = apps.find(app => app.code === 'chat');
+  return chatApp?.installed === 'yes';
+}
+
+export async function shouldCreateMattermostUser(
+  partnerId: ID,
+  tenantId: Tenant['id'],
+): Promise<boolean> {
+  if (!(partnerId && tenantId)) return false;
+
+  const client = await manager.getClient(tenantId);
+  if (!client) return false;
+
+  const partner = await client.aOSPartner.findOne({
+    where: {id: partnerId},
+    select: {
+      isContact: true,
+      partnerWorkspaceSet: {
+        select: {
+          portalAppConfig: {
+            isCreateMattermostUser: true,
+          },
+          apps: {
+            select: {
+              code: true,
+              installed: true,
+            },
+          },
+        },
+      },
+      contactWorkspaceConfigSet: {
+        select: {
+          portalWorkspace: {
+            defaultPartnerWorkspace: {
+              portalAppConfig: {
+                isCreateMattermostUser: true,
+              },
+              apps: {
+                select: {
+                  code: true,
+                  installed: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!partner) return false;
+
+  if (!partner.isContact) {
+    return (
+      partner.partnerWorkspaceSet?.some(
+        ws =>
+          ws.portalAppConfig?.isCreateMattermostUser === true &&
+          isChatAppInstalled(ws.apps),
+      ) || false
+    );
+  } else {
+    return (
+      partner.contactWorkspaceConfigSet?.some(
+        config =>
+          config.portalWorkspace?.defaultPartnerWorkspace?.portalAppConfig
+            ?.isCreateMattermostUser === true &&
+          isChatAppInstalled(
+            config.portalWorkspace?.defaultPartnerWorkspace?.apps,
+          ),
+      ) || false
+    );
+  }
+}

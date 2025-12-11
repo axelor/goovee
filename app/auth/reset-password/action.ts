@@ -4,9 +4,14 @@ import {hash} from '@/auth/utils';
 import {getTranslation} from '@/locale/server';
 import {create as createOTP, findOne, isValid, markUsed} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
-import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
+import {
+  findGooveeUserByEmail,
+  shouldCreateMattermostUser,
+  updatePartner,
+} from '@/orm/partner';
 import NotificationManager, {NotificationType} from '@/notification';
 import {type Tenant} from '@/tenant';
+import {syncMattermostPassword} from '@/lib/core/mattermost';
 
 function error(message: string) {
   return {
@@ -185,6 +190,15 @@ export async function resetPassword({
     );
   }
 
+  if (password.length < 8) {
+    return error(
+      await getTranslation(
+        {tenant: tenantId},
+        'Password must be at least 8 characters',
+      ),
+    );
+  }
+
   const user = await findGooveeUserByEmail(email, tenantId);
 
   if (!user) {
@@ -220,6 +234,52 @@ export async function resetPassword({
       },
       tenantId,
     });
+
+    // Check if Mattermost password sync is enabled for this partner
+    const shouldSyncMattermost = await shouldCreateMattermostUser(
+      user.id,
+      tenantId,
+    );
+
+    if (shouldSyncMattermost) {
+      try {
+        const mattermostResult = await syncMattermostPassword(
+          user.emailAddress?.address || email,
+          password,
+        );
+
+        if (mattermostResult.success) {
+          if (mattermostResult.synced) {
+            console.log(
+              '[MATTERMOST] Password synced successfully during password reset:',
+              {
+                email: user.emailAddress?.address || email,
+                partnerId: user.id,
+              },
+            );
+          }
+        } else {
+          console.error(
+            '[MATTERMOST] Password sync failed during password reset:',
+            {
+              email: user.emailAddress?.address || email,
+              partnerId: user.id,
+              error: mattermostResult.error,
+              message: mattermostResult.message,
+            },
+          );
+        }
+      } catch (mattermostError: any) {
+        console.error(
+          '[MATTERMOST] Unexpected error syncing password during password reset:',
+          {
+            email: user.emailAddress?.address || email,
+            partnerId: user.id,
+            error: mattermostError.message,
+          },
+        );
+      }
+    }
 
     await markUsed({id: result.id, tenantId});
 
