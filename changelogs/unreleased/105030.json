@@ -1,0 +1,6 @@
+{
+  "title": "Mattermost password reset and opening the mattermost web app",
+  "type": "feature",
+  "description": "Mattermost password reset and opening the mattermost web app",
+  "scope": ["chat"]
+}
