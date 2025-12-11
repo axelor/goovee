@@ -364,6 +364,7 @@
   "Password changed successfully.": "Password changed successfully.",
   "Password is required": "Password is required",
   "Password reset successfully.": "Password reset successfully.",
+  "Password must be at least 8 characters": "Password must be at least 8 characters",
   "Pay": "Pay",
   "Pay with Stripe": "Pay with Stripe",
   "Payment Method": "Payment Method",

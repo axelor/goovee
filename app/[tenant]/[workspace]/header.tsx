@@ -119,17 +119,6 @@ export default function Header({
                     code === 'chat' &&
                     portalAppConfig?.chatDisplayTypeSelect === 1;
 
-                  if (code === 'chat') {
-                    console.log('[DEBUG CHAT]', {
-                      code,
-                      chatDisplayTypeSelect: portalAppConfig?.chatDisplayTypeSelect,
-                      typeOf: typeof portalAppConfig?.chatDisplayTypeSelect,
-                      isExternalChat,
-                      strictComparison: portalAppConfig?.chatDisplayTypeSelect === 1,
-                      looseComparison: portalAppConfig?.chatDisplayTypeSelect == 1,
-                    });
-                  }
-
                   if (isExternalChat) {
                     return (
                       <button
@@ -139,12 +128,19 @@ export default function Header({
                           if (result.success && result.url) {
                             window.open(result.url, '_blank');
                           } else {
-                            console.error('[MATTERMOST] Redirect failed:', result.error);
+                            console.error(
+                              '[MATTERMOST] Redirect failed:',
+                              result.error,
+                            );
                           }
                         }}
                         className="cursor-pointer bg-transparent border-none p-0">
                         {icon ? (
-                          <Icon name={icon} className="h-6 w-6" style={{color}} />
+                          <Icon
+                            name={icon}
+                            className="h-6 w-6"
+                            style={{color}}
+                          />
                         ) : (
                           <p className="font-medium">{i18n.t(name)}</p>
                         )}

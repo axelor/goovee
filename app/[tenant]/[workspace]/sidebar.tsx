@@ -109,8 +109,7 @@ export function Sidebar({
               const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
               const portalAppConfig = workspace?.config;
               const isExternalChat =
-                code === 'chat' &&
-                portalAppConfig?.chatDisplayTypeSelect === 1;
+                code === 'chat' && portalAppConfig?.chatDisplayTypeSelect === 1;
 
               if (isExternalChat) {
                 return (
@@ -121,7 +120,10 @@ export function Sidebar({
                       if (result.success && result.url) {
                         window.open(result.url, '_blank');
                       } else {
-                        console.error('[MATTERMOST] Redirect failed:', result.error);
+                        console.error(
+                          '[MATTERMOST] Redirect failed:',
+                          result.error,
+                        );
                       }
                     }}
                     className="no-underline cursor-pointer bg-transparent border-none p-0 text-left">

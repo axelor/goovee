@@ -472,7 +472,9 @@ export async function registerPartner({
   return partner;
 }
 
-function isChatAppInstalled(apps?: Array<{code?: string; installed?: string}>): boolean {
+function isChatAppInstalled(
+  apps?: Array<{code?: string; installed?: string}>,
+): boolean {
   if (!apps || apps.length === 0) return false;
   const chatApp = apps.find(app => app.code === 'chat');
   return chatApp?.installed === 'yes';
