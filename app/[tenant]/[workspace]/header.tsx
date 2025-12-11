@@ -25,6 +25,7 @@ import {PortalWorkspace} from '@/types';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
+import {createMattermostRedirectUrl} from './actions/mattermost-redirect';
 
 function Logo({workspace}: {workspace: PortalWorkspace}) {
   const {workspaceURI} = useWorkspace();
@@ -113,6 +114,44 @@ export default function Header({
                 .map(({name, icon, code, color}: any) => {
                   const page =
                     SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
+                  const portalAppConfig = workspace?.config;
+                  const isExternalChat =
+                    code === 'chat' &&
+                    portalAppConfig?.chatDisplayTypeSelect === 1;
+
+                  if (code === 'chat') {
+                    console.log('[DEBUG CHAT]', {
+                      code,
+                      chatDisplayTypeSelect: portalAppConfig?.chatDisplayTypeSelect,
+                      typeOf: typeof portalAppConfig?.chatDisplayTypeSelect,
+                      isExternalChat,
+                      strictComparison: portalAppConfig?.chatDisplayTypeSelect === 1,
+                      looseComparison: portalAppConfig?.chatDisplayTypeSelect == 1,
+                    });
+                  }
+
+                  if (isExternalChat) {
+                    return (
+                      <button
+                        key={code}
+                        onClick={async () => {
+                          const result = await createMattermostRedirectUrl();
+                          if (result.success && result.url) {
+                            window.open(result.url, '_blank');
+                          } else {
+                            console.error('[MATTERMOST] Redirect failed:', result.error);
+                          }
+                        }}
+                        className="cursor-pointer bg-transparent border-none p-0">
+                        {icon ? (
+                          <Icon name={icon} className="h-6 w-6" style={{color}} />
+                        ) : (
+                          <p className="font-medium">{i18n.t(name)}</p>
+                        )}
+                      </button>
+                    );
+                  }
+
                   return (
                     <Link key={code} href={`${workspaceURI}/${code}${page}`}>
                       {icon ? (

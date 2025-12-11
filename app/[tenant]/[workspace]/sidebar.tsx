@@ -24,15 +24,18 @@ import {
 import {SUBAPP_PAGE} from '@/constants';
 import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
+import {createMattermostRedirectUrl} from './actions/mattermost-redirect';
 
 export function Sidebar({
   subapps,
   workspaces,
   showHome,
+  workspace,
 }: {
   subapps: any;
   workspaces?: any;
   showHome: boolean | null | undefined;
+  workspace?: any;
 }) {
   const {data: session} = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -104,6 +107,56 @@ export function Sidebar({
             .reverse()
             ?.map(({code, name, icon, color, background}: any) => {
               const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
+              const portalAppConfig = workspace?.config;
+              const isExternalChat =
+                code === 'chat' &&
+                portalAppConfig?.chatDisplayTypeSelect === 1;
+
+              if (isExternalChat) {
+                return (
+                  <button
+                    key={code}
+                    onClick={async () => {
+                      const result = await createMattermostRedirectUrl();
+                      if (result.success && result.url) {
+                        window.open(result.url, '_blank');
+                      } else {
+                        console.error('[MATTERMOST] Redirect failed:', result.error);
+                      }
+                    }}
+                    className="no-underline cursor-pointer bg-transparent border-none p-0 text-left">
+                    <div className="flex gap-4 items-center">
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Icon
+                              name={icon || 'app'}
+                              className="h-6 w-6"
+                              style={{color}}
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          align="center"
+                          className="bg-success-light"
+                          hidden={!collapsed}>
+                          <p>{i18n.t(name)}</p>
+                          <TooltipArrow className="fill-success-light" />
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <p
+                        className={`${
+                          collapsed ? 'hidden' : 'block'
+                        } whitespace-nowrap overflow-hidden duration-500`}>
+                        {i18n.t(name)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              }
+
               return (
                 <App
                   href={`${workspaceURI}/${code}${page}`}

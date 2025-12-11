@@ -141,6 +141,7 @@ export default async function Layout({
               subapps={subapps}
               workspaces={workspaces}
               showHome={$workspace?.config?.isHomepageDisplay}
+              workspace={$workspace}
             />
           )}
           <div className="flex flex-col flex-1 max-h-full max-w-full min-w-0">
