@@ -13,6 +13,7 @@ type HearoSerchTypes = {
   renderSearch?: any;
   className?: string;
   groupImgClassName?: string;
+  groupClassName?: string;
 } & VariantProps<BannerVariants>;
 
 export const HeroSearch = ({
@@ -25,6 +26,7 @@ export const HeroSearch = ({
   blendMode,
   className,
   groupImgClassName,
+  groupClassName,
 }: HearoSerchTypes) => {
   return (
     <>
@@ -38,6 +40,7 @@ export const HeroSearch = ({
         blendMode={blendMode}
         className={className}
         groupImgClassName={groupImgClassName}
+        groupClassName={groupClassName}
       />
     </>
   );

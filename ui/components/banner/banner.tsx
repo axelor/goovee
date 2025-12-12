@@ -70,9 +70,11 @@ export const Banner = ({
   blendMode,
   background,
   groupImgClassName,
+  groupClassName,
 }: {
   groupImg?: string;
   groupImgClassName?: string;
+  groupClassName?: string;
   title: string;
   description: string;
   image?: any;
@@ -95,7 +97,11 @@ export const Banner = ({
       <div className={cn(bannerVariants({blendMode, background}))} />
       <div className="relative z-2 px-4 flex text-white items-center flex-col justify-center py-0.5">
         {groupImg && (
-          <div className="w-20 h-20 overflow-hidden rounded-lg relative mb-4">
+          <div
+            className={cn(
+              'w-20 h-20 overflow-hidden rounded-lg relative mb-4',
+              groupClassName,
+            )}>
             <Image
               fill
               src={groupImg}

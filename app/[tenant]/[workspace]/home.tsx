@@ -87,6 +87,7 @@ export async function Home({
         }
         groupImg={logoURL}
         groupImgClassName="object-contain"
+        groupClassName="w-24 aspect-[2/1] mb-2"
         image={imageURL}
       />
 
