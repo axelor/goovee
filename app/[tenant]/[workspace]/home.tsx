@@ -417,7 +417,7 @@ async function ResourcesCard({
                         }
                       : {})}
                   />
-                  <div className="flex flex-col">
+                  <div className="flex flex-col min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-sm group-hover:text-primary transition-colors truncate">
                         {file.fileName}
