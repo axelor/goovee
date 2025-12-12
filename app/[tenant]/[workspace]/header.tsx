@@ -43,6 +43,7 @@ function Logo({workspace}: {workspace: PortalWorkspace}) {
             alt="Logo"
             className="w-full h-full object-contain"
             priority
+            sizes="96px"
           />
         </div>
       </div>

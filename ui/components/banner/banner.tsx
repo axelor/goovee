@@ -107,6 +107,7 @@ export const Banner = ({
               src={groupImg}
               alt="Group"
               className={cn('rounded-lg object-cover', groupImgClassName)}
+              sizes="96px"
             />
           </div>
         )}
