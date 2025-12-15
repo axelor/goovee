@@ -132,7 +132,6 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   homepageHeroDescription: true,
   homepageHeroOverlayColorSelect: true,
   homepageHeroBgImage: {id: true},
-  chatDisplayTypeSelect: true
   chatDisplayTypeSelect: true,
 };
 
