@@ -1,0 +1,5 @@
+{
+  "title": "Show parent folder name in resource list",
+  "type": "feature",
+  "scope": ["resources"]
+}
