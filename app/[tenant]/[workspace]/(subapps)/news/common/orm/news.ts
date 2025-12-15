@@ -512,17 +512,19 @@ export async function findHomePageHeaderNews({
   workspace,
   tenant,
   user,
+  limit = HEADER_NEWS_LIMIT,
 }: {
   workspace: PortalWorkspace;
   tenant: Tenant['id'];
   user?: User;
+  limit?: number;
 }) {
   const result = await findNews({
     orderBy: {publicationDateTime: ORDER_BY.DESC},
     workspace,
     tenantId: tenant,
     user,
-    limit: HEADER_NEWS_LIMIT,
+    limit,
     params: {
       select: {
         description: true,

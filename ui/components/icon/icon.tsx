@@ -19,6 +19,7 @@ import {
   MdOutlineShoppingBag,
   MdAccountCircle,
   MdOutlineWeb,
+  MdOutlineHome,
 } from 'react-icons/md';
 
 import {FaShareAltSquare} from 'react-icons/fa';
@@ -45,6 +46,7 @@ interface IconMapping {
   survey: IconType;
   account: IconType;
   chat: IconType;
+  home: IconType;
 }
 
 function getIcon(type: keyof IconMapping): IconType | undefined {
@@ -69,6 +71,7 @@ function getIcon(type: keyof IconMapping): IconType | undefined {
     account: MdAccountCircle,
     website: MdOutlineWeb,
     chat: MdOutlineForum,
+    home: MdOutlineHome,
   };
 
   const icon = iconMapping[type];

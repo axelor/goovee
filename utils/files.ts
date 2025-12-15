@@ -96,7 +96,7 @@ export function getProductImageURL(
   return `/api/tenant/${tenant}/product/image/${id}`;
 }
 
-export function getFileTypeIcon(fileType: string) {
+export function getFileTypeIcon(fileType: string | null | undefined) {
   if (fileType === null || fileType === undefined) {
     return 'md-Web';
   }

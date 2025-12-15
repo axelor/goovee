@@ -28,9 +28,11 @@ import {useWorkspace} from './workspace-context';
 export function Sidebar({
   subapps,
   workspaces,
+  showHome,
 }: {
   subapps: any;
   workspaces?: any;
+  showHome: boolean | null | undefined;
 }) {
   const {data: session} = useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -85,6 +87,14 @@ export function Sidebar({
       </div>
       <div className="flex flex-col flex-1 gap-6">
         <TooltipProvider>
+          {showHome && (
+            <App
+              href={workspaceURI}
+              icon="home"
+              collapsed={collapsed}
+              name="app-home"
+            />
+          )}
           {subapps
             ?.filter((app: any) => app.installed)
             .sort(
@@ -95,67 +105,22 @@ export function Sidebar({
             ?.map(({code, name, icon, color, background}: any) => {
               const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
               return (
-                <Link
-                  key={code}
+                <App
                   href={`${workspaceURI}/${code}${page}`}
-                  className="no-underline">
-                  <div className="flex gap-4 items-center" key={code}>
-                    <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <span>
-                          <Icon
-                            name={icon || 'app'}
-                            className="h-6 w-6"
-                            style={{color}}
-                          />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="right"
-                        align="center"
-                        className="bg-success-light"
-                        hidden={!collapsed}>
-                        <p>{i18n.t(name)}</p>
-                        <TooltipArrow className="fill-success-light" />
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <p
-                      className={`${
-                        collapsed ? 'hidden' : 'block'
-                      } whitespace-nowrap overflow-hidden duration-500`}>
-                      {i18n.t(name)}
-                    </p>
-                  </div>
-                </Link>
+                  key={code}
+                  icon={icon}
+                  color={color}
+                  collapsed={collapsed}
+                  name={name}
+                />
               );
             })}
-          <Link href={`${workspaceURI}/account`} className="no-underline">
-            <div className="flex gap-4 items-center">
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <span>
-                    <Icon name="account" className="h-6 w-6" />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  align="center"
-                  className="bg-success-light"
-                  hidden={!collapsed}>
-                  <p>{i18n.t('My Account')}</p>
-                  <TooltipArrow className="fill-success-light" />
-                </TooltipContent>
-              </Tooltip>
-
-              <p
-                className={`${
-                  collapsed ? 'hidden' : 'block'
-                } whitespace-nowrap overflow-hidden duration-500`}>
-                {i18n.t('My Account')}
-              </p>
-            </div>
-          </Link>
+          <App
+            href={`${workspaceURI}/account`}
+            icon="account"
+            collapsed={collapsed}
+            name="My Account"
+          />
           <div className="flex-1" />
         </TooltipProvider>
       </div>
@@ -164,3 +129,39 @@ export function Sidebar({
 }
 
 export default Sidebar;
+
+function App(props: {
+  icon: string;
+  name: string;
+  href: string;
+  color?: string;
+  collapsed: boolean;
+}) {
+  const {href, icon, color, collapsed, name} = props;
+  return (
+    <Link href={href} className="no-underline">
+      <div className="flex gap-4 items-center">
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <span>
+              <Icon name={icon || 'app'} className="h-6 w-6" style={{color}} />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            side="right"
+            align="center"
+            className="bg-success-light"
+            hidden={!collapsed}>
+            <p>{i18n.t(name)}</p>
+            <TooltipArrow className="fill-success-light" />
+          </TooltipContent>
+        </Tooltip>
+
+        <p
+          className={`${collapsed ? 'hidden' : 'block'} whitespace-nowrap overflow-hidden duration-500`}>
+          {i18n.t(name)}
+        </p>
+      </div>
+    </Link>
+  );
+}

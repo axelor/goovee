@@ -763,6 +763,7 @@
   "app-survey": "Forms",
   "app-ticketing": "Helpdesk",
   "app-website": "Content",
+  "app-home": "Home",
   "Your cart is empty. Please add items before placing an order.": "Your cart is empty. Please add items before placing an order.",
   "Order creation failed. Please try again.": "Order creation failed. Please try again.",
   "Add my contact to the directory": "Add my contact to the directory",
@@ -784,5 +785,11 @@
   "Directory settings": "Directory settings",
   "Zip Code": "Zip Code",
   "Company picture": "Company picture",
+  "Latest contents": "Latest contents",
+  "Latest news": "Latest news",
+  "No recent discussions": "No recent discussions",
+  "No recent resources": "No recent resources",
+  "No upcoming events": "No upcoming events",
+  "View all": "View all",
   "Back to Directory": "Back to Directory"
 }

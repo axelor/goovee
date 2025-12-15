@@ -1,0 +1,6 @@
+{
+  "title": "Introuduce new workspace homepage",
+  "type": "feat",
+  "description": "The homepage provides a centralized overview of the latest news, upcoming events, recent forum discussions, and newly added resource",
+  "scope": ["core"]
+}

@@ -46,6 +46,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
 
   const displayContact = workspace?.config?.isDisplayContact;
   const contactEmail = workspace?.config?.contactEmailAddress?.address;
+  const showHome = workspace?.config?.isHomepageDisplay;
 
   return (
     <>
@@ -77,6 +78,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
             )
           ) : null}
 
+          {showHome && <App href={workspaceURI} icon="home" name="app-home" />}
           {subapps
             ?.filter((app: any) => app.installed)
             .sort(
@@ -87,35 +89,22 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
             ?.map(({code, name, icon, color, background}: any) => {
               const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
               return (
-                <Link
+                <App
                   key={code}
                   href={`${workspaceURI}/${code}${page}`}
-                  className="no-underline">
-                  <div
-                    className="flex items-center pt-8 px-6 py-2 font-normal gap-x-4"
-                    key={code}>
-                    <Icon
-                      name={icon || 'app'}
-                      className="h-6 w-6"
-                      style={{color}}
-                    />
-                    <p className="max-w-full whitespace-nowrap text-main-black">
-                      {i18n.t(name)}
-                    </p>
-                  </div>
-                </Link>
+                  icon={icon}
+                  color={color}
+                  name={name}
+                />
               );
             })}
 
           {Boolean(user) && (
-            <Link href={`${workspaceURI}/account`} className="no-underline">
-              <div className="flex items-center pt-8 px-6 py-2 font-normal gap-x-4">
-                <Icon name="account" className="h-6 w-6" />
-                <p className="max-w-full whitespace-nowrap text-main-black">
-                  {i18n.t('My Account')}
-                </p>
-              </div>
-            </Link>
+            <App
+              href={`${workspaceURI}/account`}
+              icon="account"
+              name="My Account"
+            />
           )}
           <div className="flex flex-grow flex-col justify-end">
             {displayContact && (
@@ -131,6 +120,25 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
         </SheetContent>
       </Sheet>
     </>
+  );
+}
+
+function App(props: {
+  name: string;
+  href: string;
+  icon: string;
+  color?: string;
+}) {
+  const {href, icon, color, name} = props;
+  return (
+    <Link href={href} className="no-underline">
+      <div className="flex items-center pt-8 px-6 py-2 font-normal gap-x-4">
+        <Icon name={icon || 'app'} className="h-6 w-6" style={{color}} />
+        <p className="max-w-full whitespace-nowrap text-main-black">
+          {i18n.t(name)}
+        </p>
+      </div>
+    </Link>
   );
 }
 

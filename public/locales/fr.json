@@ -763,6 +763,7 @@
   "app-survey": "Formulaire",
   "app-ticketing": "Support",
   "app-website": "Ressource",
+  "app-home": "Accueil",
   "Your cart is empty. Please add items before placing an order.": "Votre panier est vide. Veuillez ajouter des articles avant de passer commande.",
   "Order creation failed. Please try again.": "La création de la commande a échoué. Veuillez réessayer.",
   "Add my contact to the directory": "Ajouter mon contact à l’annuaire",
@@ -784,5 +785,11 @@
   "Directory Settings": "Paramètres de l’annuaire",
   "Zip Code": "Code postal",
   "Company picture": "Photo de l’entreprise",
+  "Latest contents": "Derniers contenus",
+  "Latest news": "Dernières actualités",
+  "No recent discussions": "Aucune discussion récente",
+  "No recent resources": "Aucune ressource récente",
+  "No upcoming events": "Aucun événement à venir",
+  "View all": "Voir tout",
   "Back to Directory": "Retour à l’annuaire"
 }

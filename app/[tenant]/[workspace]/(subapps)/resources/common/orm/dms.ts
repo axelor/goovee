@@ -135,11 +135,13 @@ export async function fetchLatestFiles({
   tenantId,
   user,
   archived,
+  take = 10,
 }: {
   workspace: PortalWorkspace;
   tenantId: Tenant['id'];
   user?: User;
   archived?: boolean;
+  take?: number;
 }) {
   if (!(workspace && tenantId)) return [];
 
@@ -178,7 +180,7 @@ export async function fetchLatestFiles({
     orderBy: {
       updatedOn: 'DESC',
     } as any,
-    take: 10,
+    take,
   });
 
   return files;
