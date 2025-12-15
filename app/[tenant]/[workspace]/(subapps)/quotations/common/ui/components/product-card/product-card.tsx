@@ -76,7 +76,7 @@ export const ProductCard = ({
                       {i18n.t('Tax')}
                     </p>
                     <p className="text-base mb-0">
-                      {saleOrder?.taxLineSet[0]?.value} %
+                      {saleOrder?.taxLineSet[0]?.value}%
                     </p>
                   </div>
                   <div className="flex justify-between px-4">

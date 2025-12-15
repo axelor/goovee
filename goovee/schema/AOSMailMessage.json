@@ -32,14 +32,6 @@
       "name": "relatedName"
     },
     {
-      "type": "Date",
-      "name": "createdOn"
-    },
-    {
-      "type": "Date",
-      "name": "updatedOn"
-    },
-    {
       "type": "ManyToOne",
       "name": "author",
       "target": "AOSUser"

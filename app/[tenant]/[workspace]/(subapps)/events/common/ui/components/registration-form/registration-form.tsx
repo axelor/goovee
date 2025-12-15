@@ -1,6 +1,6 @@
 'use client';
 
-import {useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {MdAdd} from 'react-icons/md';
 
@@ -74,6 +74,7 @@ export const RegistrationForm = ({
     maxParticipantPerRegistration,
     slug,
     additionalFieldSet,
+    priceScale,
   } = eventDetails || {};
 
   const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -368,9 +369,9 @@ export const RegistrationForm = ({
     ],
   );
 
-  const handleTotalPriceChange = (value: number) => {
+  const handleTotalPriceChange = useCallback((value: number) => {
     setTotalPrice(value);
-  };
+  }, []);
 
   const onSubmit = async (values: any) => {
     try {
@@ -500,6 +501,7 @@ export const RegistrationForm = ({
                       id: eventId,
                       displayAti: eventPrice,
                       facilityList,
+                      priceScale,
                     }}
                     form={form}
                     metaFields={metaFields}

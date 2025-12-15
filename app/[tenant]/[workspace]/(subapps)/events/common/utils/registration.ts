@@ -1,6 +1,5 @@
 import type {Tenant} from '@/lib/core/tenant';
 import type {Participant} from '@/types';
-import {endOfDay} from 'date-fns';
 import {
   type EventConfig,
   type EventConfigPartner,

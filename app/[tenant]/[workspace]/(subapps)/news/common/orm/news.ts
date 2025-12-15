@@ -215,9 +215,11 @@ export async function findNews({
               : {}),
           },
           select: {
+            id: true,
             name: true,
             color: true,
             parentCategory: {
+              id: true,
               name: true,
               color: true,
               parentCategory: {
@@ -391,10 +393,10 @@ export async function findCategories({
     },
     select: {
       name: true,
-      image: true,
-      parentCategory: true,
+      image: {id: true},
+      parentCategory: {id: true},
       slug: true,
-      workspace: true,
+      workspace: {id: true, name: true, url: true},
     },
   });
   return categories;
@@ -510,17 +512,19 @@ export async function findHomePageHeaderNews({
   workspace,
   tenant,
   user,
+  limit = HEADER_NEWS_LIMIT,
 }: {
   workspace: PortalWorkspace;
   tenant: Tenant['id'];
   user?: User;
+  limit?: number;
 }) {
   const result = await findNews({
     orderBy: {publicationDateTime: ORDER_BY.DESC},
     workspace,
     tenantId: tenant,
     user,
-    limit: HEADER_NEWS_LIMIT,
+    limit,
     params: {
       select: {
         description: true,
@@ -862,6 +866,11 @@ export async function findNewsRelatedNews({
                       },
                     }
                   : {}),
+              },
+              select: {
+                id: true,
+                name: true,
+                color: true,
               },
             },
             publicationDateTime: true,

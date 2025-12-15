@@ -139,7 +139,7 @@ export async function createTicket({
     data: {
       createdOn: new Date(),
       updatedOn: new Date(),
-      taskDate: new Date(),
+      taskDate: new Date().toISOString().slice(0, 10),
       assignment: ASSIGNMENT.CUSTOMER,
       typeSelect: TYPE_SELECT.TICKET,
       invoicingType: INVOICING_TYPE.NO_INVOICING,
@@ -211,7 +211,7 @@ export async function createTicket({
     {
       name: 'taskDate',
       title: 'Task Date',
-      value: String(newTicket.taskDate) ?? '', //NOTE: ORM type is Date , but it is sending string,
+      value: newTicket.taskDate ?? '',
     },
     {
       name: 'invoicingType',

@@ -170,6 +170,55 @@
       "type": "ManyToOne",
       "name": "fiscalPosition",
       "target": "AOSFiscalPosition"
+    },
+    {
+      "type": "Boolean",
+      "name": "isInDirectory"
+    },
+    {
+      "type": "Boolean",
+      "name": "isEmailInDirectory"
+    },
+    {
+      "type": "Boolean",
+      "name": "isPhoneInDirectory"
+    },
+    {
+      "type": "Boolean",
+      "name": "isWebsiteInDirectory"
+    },
+    {
+      "type": "Boolean",
+      "name": "isAddressInDirectory"
+    },
+    {
+      "type": "String",
+      "name": "directoryCompanyDescription"
+    },
+    {
+      "type": "Boolean",
+      "name": "isFunctionInDirectory"
+    },
+    {
+      "type": "Boolean",
+      "name": "isLinkedinInDirectory"
+    },
+    {
+      "type": "String",
+      "name": "functionBusinessCard"
+    },
+    {
+      "type": "String",
+      "name": "webSite"
+    },
+    {
+      "type": "Int",
+      "name": "titleSelect"
+    },
+    {
+      "name": "jobTitleFunction",
+      "type": "ManyToOne",
+      "target": "AOSFunction"
     }
   ]
 }

@@ -10,6 +10,7 @@ import {computeTotal} from '@/utils/cart';
 import {TENANT_HEADER} from '@/middleware';
 import {manager} from '@/tenant';
 import type {PortalWorkspace, Product} from '@/types';
+import {MAIN_PRICE} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct as $findProduct} from '@/subapps/shop/common/orm/product';
@@ -71,7 +72,7 @@ export async function requestQuotation({
   });
 }
 
-export async function requestOrder({
+async function requestOrder({
   cart,
   workspace,
   type = 'order',
@@ -139,13 +140,14 @@ export async function requestOrder({
       }
     }
     const {invoicingAddress, deliveryAddress} = cart;
+    const isAtiPricing = workspace?.config?.mainPrice === MAIN_PRICE.ATI;
 
     const payload = {
       partnerId,
       contactId,
       shipping: 0,
       total,
-      inAti: workspace?.config?.mainPrice === 'ati',
+      inAti: isAtiPricing,
       items: $cart.items.map((i: any) => {
         const {computedProduct, note, quantity} = i;
         if (!computedProduct) return null;
@@ -154,7 +156,7 @@ export async function requestOrder({
           productId: product?.id,
           note: note || '',
           quantity,
-          price: price?.ati,
+          price: isAtiPricing ? price?.ati : price?.wt,
         };
       }),
       workspaceId: workspace.id,

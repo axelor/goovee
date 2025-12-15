@@ -1,10 +1,11 @@
 'use client';
+
 import React, {useMemo} from 'react';
 import {MdOutlineMoreHoriz} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {DATE_FORMATS, NOT_INTERESTED, REPORT, SUBAPP_CODES} from '@/constants';
+import {NOT_INTERESTED, REPORT, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {
   Avatar,
@@ -12,9 +13,11 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  RichTextViewer,
 } from '@/ui/components';
 import {getPartnerImageURL} from '@/utils/files';
-import {formatDate} from '@/locale/formatters';
+import {formatDateTime} from '@/locale/formatters';
+import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import {SEE_LESS, SEE_MORE} from '@/subapps/forum/common/constants';
@@ -24,10 +27,6 @@ import {
   ImageGallery,
 } from '@/subapps/forum/common/ui/components';
 import {useTruncatedElement} from '@/subapps/forum/common/ui/hooks/use-truncatedElement';
-
-interface MetaFile {
-  fileType: string;
-}
 
 export const ThreadBody = ({
   post,
@@ -82,7 +81,10 @@ export const ThreadBody = ({
                 {author?.simpleFullName}
               </div>
               <div className="text-xs">
-                {formatDate(postDateT, {dateFormat: DATE_FORMATS.full_date})}
+                {formatDateTime(postDateT, {
+                  dateFormat: 'MMMM D YYYY,',
+                  timeFormat: ' h:mm a',
+                })}
               </div>
             </div>
           </div>
@@ -103,12 +105,11 @@ export const ThreadBody = ({
         </div>
         <div className="flex flex-col gap-2">
           <div className="text-lg font-semibold line-clamp-1">{title}</div>
-          <div
+          <RichTextViewer
             ref={ref}
-            className={`break-words text-xl ${!isShowingMore && 'line-clamp-3'} postContent`}
-            dangerouslySetInnerHTML={{
-              __html: content || '',
-            }}></div>
+            content={content}
+            innerHTMLClassName={cn(!isShowingMore && 'line-clamp-3')}
+          />
           <div className="flex justify-end">
             <span className="text-xs font-semibold">
               {isTruncated && (

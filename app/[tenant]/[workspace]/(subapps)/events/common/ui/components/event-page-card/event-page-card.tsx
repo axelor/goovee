@@ -20,6 +20,7 @@ import {
   InnerHTML,
 } from '@/ui/components';
 import {cn} from '@/utils/css';
+import {formatDateTime} from '@/lib/core/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -124,7 +125,10 @@ export const EventPageCard = ({eventDetails, workspace}: any) => {
             <p>
               {i18n.t('Registration deadline')}:{' '}
               <span className="font-normal text-destructive">
-                {registrationDeadlineDateTime}
+                {formatDateTime(registrationDeadlineDateTime, {
+                  dateFormat: 'MMMM D YYYY,',
+                  timeFormat: ' h:mm a',
+                })}
               </span>
             </p>
           )}

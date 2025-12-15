@@ -35,10 +35,6 @@
       "target": "AOSCommentFile"
     },
     {
-      "name": "createdOn",
-      "type": "Date"
-    },
-    {
       "name": "createdBy",
       "type": "ManyToOne",
       "target": "AOSUser"

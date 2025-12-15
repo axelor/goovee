@@ -3,7 +3,7 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORRS ---- //
 import {ADDRESS_TYPE, SUBAPP_PAGE} from '@/constants';
-import {clone} from '@/utils';
+import {clone, getPartnerId} from '@/utils';
 import {getSession} from '@/auth';
 import {findCountries, findPartnerAddress} from '@/orm/address';
 import {findGooveeUserByEmail, PartnerTypeMap} from '@/orm/partner';
@@ -52,9 +52,13 @@ export default async function Page({
 
   const countries: any = await findCountries(tenant).then(clone);
 
-  const partnerAddress = await findPartnerAddress(address_id, tenant).then(
-    clone,
-  );
+  const userId = getPartnerId(user);
+
+  const partnerAddress = await findPartnerAddress({
+    partnerId: userId,
+    addressId: address_id,
+    tenantId: tenant,
+  }).then(clone);
 
   if (!partnerAddress) {
     redirect(`${REDIRECT_ADDRESS_URL}`);

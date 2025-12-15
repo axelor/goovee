@@ -11,21 +11,55 @@ import {
   YEAR,
 } from '@/constants';
 import type {
+  AOSMetaJsonField,
   AOSPortalEvent,
   AOSPortalEventCategory,
 } from '@/goovee/.generated/models';
 import {dayjs} from '@/locale';
-import {formatDate, formatNumber} from '@/locale/server/formatters';
+import {formatNumber} from '@/locale/server/formatters';
 import {filterPrivate} from '@/orm/filter';
 import {type Tenant, manager} from '@/tenant';
 import type {ID, PortalWorkspace, User} from '@/types';
 import {getPageInfo} from '@/utils';
 import {formatDateToISOString, formatToTwoDigits} from '@/utils/date';
 import {and} from '@/utils/orm';
+import type {SelectOptions} from '@goovee/orm';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_STATUS, EVENT_TYPE} from '@/subapps/events/common/constants';
 import {findProductsFromWS} from '@/subapps/events/common/orm/product';
+
+const additionalFieldSetFields = {
+  columnSequence: true,
+  name: true,
+  title: true,
+  type: true,
+  defaultValue: true,
+  model: true,
+  modelField: true,
+  selection: true,
+  widget: true,
+  help: true,
+  hidden: true,
+  required: true,
+  readonly: true,
+  nameField: true,
+  minSize: true,
+  maxSize: true,
+  precision: true,
+  scale: true,
+  sequence: true,
+  regex: true,
+  showIf: true,
+  contextField: true,
+  contextFieldValue: true,
+  widgetAttrs: true,
+  createdOn: true,
+  updatedOn: true,
+  targetJsonModel: {name: true},
+  jsonModel: {name: true},
+  targetModel: true,
+} as const satisfies SelectOptions<AOSMetaJsonField>;
 
 const buildDateFilters = ({
   eventStartDateTimeCriteria,
@@ -128,7 +162,6 @@ export async function findEvent({
   user?: User;
 }) {
   if (!((slug || id) && workspace && tenantId)) return null;
-
   const c = await manager.getClient(tenantId);
 
   const privateFilter = await filterPrivate({user, tenantId});
@@ -181,10 +214,15 @@ export async function findEvent({
             id: true,
             facility: true,
             price: true,
-            additionalFieldSet: true,
+            additionalFieldSet: {
+              select: additionalFieldSetFields,
+            },
           },
         },
-        additionalFieldSet: true,
+        additionalFieldSet: {
+          select: additionalFieldSetFields,
+        },
+
         isPublic: true,
         isHidden: true,
         isLoginNotNeeded: true,
@@ -289,12 +327,7 @@ export async function findEvent({
       code: productsFromWS?.currencyCode,
     },
     eventLink,
-    registrationDeadlineDateTime: await formatDate(
-      event?.registrationDeadlineDateTime as any,
-      {
-        dateFormat: 'MMMM DD YYYY, h:mm a',
-      },
-    ),
+    priceScale: scale,
   };
 }
 

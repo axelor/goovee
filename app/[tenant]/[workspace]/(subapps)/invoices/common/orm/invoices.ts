@@ -7,7 +7,7 @@ import {
   ORDER_BY,
 } from '@/constants';
 import {clone, getPageInfo, getSkipInfo} from '@/utils';
-import {formatDate, formatNumber} from '@/locale/server/formatters';
+import {formatNumber} from '@/locale/server/formatters';
 import type {Partner, PortalWorkspace} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -70,22 +70,13 @@ export const findInvoices = async ({
   const invoices: any = [];
 
   for (const invoice of $invoices) {
-    const {
-      currency,
-      exTaxTotal,
-      inTaxTotal,
-      dueDate,
-      invoiceDate,
-      amountRemaining,
-    } = invoice;
+    const {currency, exTaxTotal, inTaxTotal, amountRemaining} = invoice;
     const currencySymbol = currency.symbol || DEFAULT_CURRENCY_SYMBOL;
     const scale = currency.numberOfDecimals || DEFAULT_CURRENCY_SCALE;
     const isUnpaid = Number(amountRemaining) !== 0;
     const $invoice = {
       ...invoice,
       isUnpaid,
-      dueDate: await formatDate(dueDate!),
-      invoiceDate: await formatDate(invoiceDate!),
       exTaxTotal: await formatNumber(exTaxTotal, {
         scale,
         currency: currencySymbol,
@@ -187,6 +178,7 @@ export const findInvoice = async ({
           symbol: true,
         },
         invoicePaymentList: {
+          orderBy: {paymentDate: 'ASC'},
           select: {
             paymentDate: true,
             amount: true,
@@ -206,8 +198,6 @@ export const findInvoice = async ({
     inTaxTotal,
     amountRemaining,
     taxTotal,
-    dueDate,
-    invoiceDate,
     invoicePaymentList,
   } = invoice;
   const currencySymbol = currency.symbol || DEFAULT_CURRENCY_SYMBOL;
@@ -228,8 +218,6 @@ export const findInvoice = async ({
 
   return {
     ...invoice,
-    dueDate: await formatDate(dueDate!),
-    invoiceDate: await formatDate(invoiceDate!),
     exTaxTotal: await formatNumber(exTaxTotal, {
       scale,
       currency: currencySymbol,

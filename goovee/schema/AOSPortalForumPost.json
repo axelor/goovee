@@ -32,11 +32,7 @@
       "type": "ManyToOne",
       "target": "AOSPartner"
     },
-    {
-      "name": "createdOn",
-      "type": "Date"
-    },
-    {"name": "postDateT", "type": "Date", "column": "post_datet"},
+    {"name": "postDateT", "type": "DateTime", "column": "post_datet"},
     {
       "name": "archived",
       "type": "Boolean"

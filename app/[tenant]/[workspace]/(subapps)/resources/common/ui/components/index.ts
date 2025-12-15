@@ -7,3 +7,4 @@ export {
   ResourceListSkeleton,
   ExplorerSkeleton,
 } from './skeleton';
+export {PostedBy} from './posted-by';

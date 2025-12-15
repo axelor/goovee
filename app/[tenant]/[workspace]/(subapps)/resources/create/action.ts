@@ -13,7 +13,6 @@ import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {findWorkspace, findSubappAccess} from '@/orm/workspace';
-import {getCurrentDateTime} from '@/utils/date';
 import {TENANT_HEADER} from '@/middleware';
 import {getFileSizeText} from '@/utils/files';
 import {getStoragePath} from '@/storage/index';
@@ -170,7 +169,7 @@ export async function upload(formData: FormData, workspaceURL: string) {
         fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
       );
 
-      const timestamp = getCurrentDateTime();
+      const timestamp = new Date();
 
       await client.aOSDMSFile.create({
         data: {
@@ -212,8 +211,7 @@ export async function upload(formData: FormData, workspaceURL: string) {
           },
         },
         select: {
-          metaFile: true,
-          parent: true,
+          id: true,
         },
       });
     } catch (err) {}

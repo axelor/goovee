@@ -137,7 +137,11 @@ export default async function Layout({
       <CartContext>
         <div className="h-full w-full flex min-h-screen">
           {isLeftNavigation && (
-            <Sidebar subapps={subapps} workspaces={workspaces} />
+            <Sidebar
+              subapps={subapps}
+              workspaces={workspaces}
+              showHome={$workspace?.config?.isHomepageDisplay}
+            />
           )}
           <div className="flex flex-col flex-1 max-h-full max-w-full min-w-0">
             <Header

@@ -27,8 +27,14 @@ export async function mailTemplate({
   const {name, surname, subscriptionSet = []} = participant;
   const fullName = `${name} ${surname}`.trim();
 
-  const formattedEventStartDateTime = await formatDate(eventStartDateTime);
-  const formattedEventEndDateTime = await formatDate(eventEndDateTime);
+  const formattedEventStartDateTime = await formatDate(eventStartDateTime, {
+    timezone: 'Europe/Paris',
+    dateFormat: 'YYYY-MM-DD HH:mm Z',
+  });
+  const formattedEventEndDateTime = await formatDate(eventEndDateTime, {
+    timezone: 'Europe/Paris',
+    dateFormat: 'YYYY-MM-DD HH:mm Z',
+  });
   const dateDetails = eventAllDay
     ? html`<strong>Date:</strong> ${formattedEventStartDateTime}`
     : html`<strong>Date:</strong> ${formattedEventStartDateTime} -

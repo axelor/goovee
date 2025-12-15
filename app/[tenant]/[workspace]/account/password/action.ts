@@ -72,6 +72,7 @@ export async function changePassword({
         version: partner.version,
         password: hashedNewPassword,
       },
+      select: {id: true},
     });
   } catch (err) {
     return {

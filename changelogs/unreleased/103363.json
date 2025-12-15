@@ -1,0 +1,6 @@
+{
+  "title": "Restrict Contact Address Selection to Partner Addresses in Shop and Quotations",
+  "type": "fix",
+  "description": "Implemented strict address filtering in Shop and Quotations. Contacts are now restricted to selecting only addresses associated with their parent Partner.",
+  "scope": ["core", "shop", "quotations"]
+}

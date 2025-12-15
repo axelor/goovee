@@ -1,6 +1,7 @@
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {Chip} from '@/ui/components';
+import {formatDate} from '@/lib/core/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
 import {getStatus} from '@/subapps/orders/common/utils/orders';
@@ -36,7 +37,7 @@ export const OrderColumns = [
     label: i18n.t('Created on'),
     sortable: true,
     getter: (row: any) => row.createdOn,
-    content: (row: any) => row.createdOn,
+    content: (row: any) => formatDate(row.createdOn),
   },
   {
     key: 'exTaxTotal',

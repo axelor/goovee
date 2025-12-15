@@ -1,22 +1,9 @@
-import moment from 'moment';
-
 // ---- CORE IMPORTS ---- //
 import {DATE_FORMATS} from '@/constants';
 import {dayjs} from '@/locale';
 
-export function parseDate(
-  dateString: any,
-  format: string = DATE_FORMATS.us_date,
-) {
-  return moment(dateString).format(format);
-}
-
 export function formatDateToISOString(mdate: any) {
   return dayjs(mdate).utc().format(DATE_FORMATS.iso_8601_utc_timestamp);
-}
-
-export function getCurrentDateTime() {
-  return moment().format(DATE_FORMATS.timestamp_with_microseconds);
 }
 
 export const convertDateToISO8601 = (date: Date | undefined) => {

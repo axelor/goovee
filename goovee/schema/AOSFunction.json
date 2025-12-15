@@ -1,0 +1,15 @@
+{
+  "name": "AOSFunction",
+  "table": "base_function",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "code"
+    },
+    {
+      "type": "String",
+      "name": "name"
+    }
+  ]
+}

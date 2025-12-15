@@ -6,6 +6,7 @@ import React from 'react';
 import {Separator, Container, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
 import {PortalWorkspace} from '@/types';
+import {formatDate} from '@/lib/core/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
@@ -45,7 +46,9 @@ export default function Content({
             <h5 className="text-sm font-medium mb-0">
               {isUnpaid ? `${i18n.t('Due date:')}` : `${i18n.t('Paid on:')}`}
             </h5>
-            <p className="text-sm">{isUnpaid ? dueDate : invoiceDate}</p>
+            <p className="text-sm">
+              {formatDate(isUnpaid ? dueDate : invoiceDate)}
+            </p>
           </div>
         </div>
       </div>

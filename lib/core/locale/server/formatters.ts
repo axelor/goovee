@@ -3,6 +3,7 @@ import {i18n} from '@/locale/i18n';
 import {l10n} from '@/locale/server/l10n';
 import {DEFAULT_SCALE} from '@/locale/contants';
 import {addCurrency} from '@/locale/utils';
+import {Timezones} from '@/types/date';
 
 /**
  * Numbers
@@ -107,6 +108,7 @@ type DateTimeFormatOpts = {
   type?: 'DATE';
   big?: boolean;
   locale?: string;
+  timezone?: Timezones;
 };
 
 export async function getDateFormat({
@@ -136,12 +138,25 @@ export async function getDateTimeFormat(opts: DateTimeFormatOpts = {}) {
 
 export async function formatDate(
   value: string | Date,
-  {dateFormat, locale}: Pick<DateTimeFormatOpts, 'dateFormat' | 'locale'> = {},
+  {
+    dateFormat,
+    locale,
+    timezone,
+  }: Pick<DateTimeFormatOpts, 'dateFormat' | 'locale' | 'timezone'> = {},
 ) {
   const format = await getDateFormat({dateFormat, locale});
   const _l10n = await l10n();
   const dayjs = _l10n.getDayjs();
-  return value ? dayjs(value).format(format) : '';
+
+  if (!value) return '';
+
+  let date = dayjs(value);
+
+  if (timezone) {
+    date = date.tz(timezone);
+  }
+
+  return date.format(format);
 }
 
 export async function formatTime(

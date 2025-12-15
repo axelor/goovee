@@ -41,6 +41,11 @@ export async function findFile({
   if (meta) {
     record = await client.aOSMetaFile.findOne({
       where: {id},
+      select: {
+        filePath: true,
+        fileName: true,
+        fileType: true,
+      },
     });
 
     if (!record) {
@@ -54,7 +59,11 @@ export async function findFile({
     record = await client.aOSDMSFile.findOne({
       where: {id},
       select: {
-        metaFile: true,
+        metaFile: {
+          filePath: true,
+          fileName: true,
+          fileType: true,
+        },
       },
     });
 
@@ -110,7 +119,13 @@ export async function findLatestDMSFileByName({
         fileName: {like: `%${name}%`},
         ...(await filterPrivate({tenantId, user})),
       },
-      select: {metaFile: true},
+      select: {
+        metaFile: {
+          filePath: true,
+          fileName: true,
+          fileType: true,
+        },
+      },
       orderBy: {
         updatedOn: 'DESC',
       } as any,
@@ -171,7 +186,6 @@ export async function streamFile({
   try {
     const data: ReadableStream<Uint8Array> = createStream(filePath);
     const stats: Stats = await fs.promises.stat(filePath);
-
     const res = new NextResponse(data, {
       status: 200,
       headers: new Headers({

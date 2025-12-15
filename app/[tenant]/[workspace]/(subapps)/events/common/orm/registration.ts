@@ -190,6 +190,7 @@ export async function findEventRegistration({
       id,
       event: {id: eventId},
     },
+    select: {id: true},
   });
 
   return result;

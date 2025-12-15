@@ -18,7 +18,7 @@ import {TENANT_HEADER} from '@/middleware';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {ID, PaymentOption, PortalWorkspace, User} from '@/types';
 import {ActionResponse} from '@/types/action';
-import {clone} from '@/utils';
+import {clone, scale} from '@/utils';
 import {zodParseFormData} from '@/utils/formdata';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
 
@@ -167,14 +167,16 @@ export async function register({
 
   const {workspace, participants} = validationResult.data;
 
+  const {priceScale} = $event;
   const {total: expectedAmount} = getCalculatedTotalPrice(values, $event);
+  const expected = Number(scale(expectedAmount, priceScale));
 
-  if (paidAmount !== expectedAmount) {
+  if (paidAmount !== expected) {
     return error(
       await t(
         'Paid amount {0} is not equal to expected amount {1}',
         String(paidAmount),
-        String(expectedAmount),
+        String(expected),
       ),
     );
   }

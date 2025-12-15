@@ -41,7 +41,7 @@ export async function fetchFolders({
     },
     select: {
       fileName: true,
-      parent: true,
+      parent: {id: true},
       contentType: true,
       description: true,
       colorSelect: true,
@@ -112,9 +112,18 @@ export async function fetchFiles({
     },
     select: {
       fileName: true,
-      createdBy: true,
+      createdBy: {name: true, fullName: true},
       createdOn: true,
-      metaFile: true,
+      metaFile: {
+        description: true,
+        sizeText: true,
+        createdOn: true,
+        updatedOn: true,
+        fileName: true,
+        filePath: true,
+        fileSize: true,
+        fileType: true,
+      },
     },
   });
 
@@ -126,11 +135,13 @@ export async function fetchLatestFiles({
   tenantId,
   user,
   archived,
+  take = 10,
 }: {
   workspace: PortalWorkspace;
   tenantId: Tenant['id'];
   user?: User;
   archived?: boolean;
+  take?: number;
 }) {
   if (!(workspace && tenantId)) return [];
 
@@ -153,14 +164,23 @@ export async function fetchLatestFiles({
     },
     select: {
       fileName: true,
-      createdBy: true,
+      createdBy: {name: true, fullName: true},
       createdOn: true,
-      metaFile: true,
+      metaFile: {
+        description: true,
+        sizeText: true,
+        createdOn: true,
+        updatedOn: true,
+        fileName: true,
+        filePath: true,
+        fileSize: true,
+        fileType: true,
+      },
     },
     orderBy: {
       updatedOn: 'DESC',
     } as any,
-    take: 10,
+    take,
   });
 
   return files;
@@ -198,13 +218,22 @@ export async function fetchFile({
       fileName: true,
       contentType: true,
       content: true,
-      createdBy: true,
+      createdBy: {name: true, fullName: true},
       createdOn: true,
-      metaFile: true,
+      metaFile: {
+        description: true,
+        sizeText: true,
+        createdOn: true,
+        updatedOn: true,
+        fileName: true,
+        filePath: true,
+        fileSize: true,
+        fileType: true,
+      },
       permissionSelect: true,
       isPrivate: true,
-      partnerSet: true,
-      partnerCategorySet: true,
+      partnerSet: {select: {id: true}},
+      partnerCategorySet: {select: {id: true}},
       isDirectory: true,
       description: true,
     },

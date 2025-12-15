@@ -19,6 +19,7 @@ export function Paybox({
   onValidatePayment,
   successMessage,
   errorMessage,
+  skipSuccessToast,
 }: PayboxProps) {
   const {toast} = useToast();
   const [verifying, setVerifying] = useState(false);
@@ -69,10 +70,11 @@ export function Paybox({
           title: result.message,
         });
       } else {
-        toast({
-          variant: 'success',
-          title: i18n.t(successMessage || 'Payment completed successfully'),
-        });
+        !skipSuccessToast &&
+          toast({
+            variant: 'success',
+            title: i18n.t(successMessage || 'Payment completed successfully'),
+          });
 
         if (onPaymentSuccess) {
           onPaymentSuccess();
@@ -97,6 +99,7 @@ export function Paybox({
     onApprove,
     successMessage,
     errorMessage,
+    skipSuccessToast,
   ]);
 
   const payboxResponse = searchParams.get('paybox_response');

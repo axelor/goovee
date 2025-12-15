@@ -154,6 +154,7 @@ export async function updateInviteApplication({
 
     const updatedConfig = await client.aOSPortalContactWorkspaceConfig.update({
       data,
+      select: {id: true},
     });
 
     return {
@@ -250,6 +251,7 @@ export async function updateInviteAuthentication({
           ],
         },
       },
+      select: {id: true},
     });
 
     return {
@@ -438,14 +440,7 @@ export async function updateMemberApplication({
     const updatedConfig = await client.aOSPortalContactWorkspaceConfig
       .update({
         data,
-        select: {
-          contactAppPermissionList: {
-            select: {
-              app: true,
-              roleSelect: true,
-            },
-          },
-        },
+        select: {id: true},
       })
       .then(clone);
 
@@ -554,16 +549,7 @@ export async function updateMemberAuthentication({
             ],
           },
         },
-        select: {
-          contactAppPermissionList: {
-            select: {
-              roleSelect: true,
-              app: {
-                code: true,
-              },
-            },
-          },
-        },
+        select: {id: true},
       })
       .then(clone);
 

@@ -7,13 +7,12 @@ import {promisify} from 'util';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-
 import {manager} from '@/lib/core/tenant';
 import {getSession} from '@/auth';
 import {TENANT_HEADER} from '@/middleware';
 import {getFileSizeText} from '@/utils/files';
 import {getTranslation, t} from '@/locale/server';
-import {clone} from '@/utils';
+import {clone, getPartnerId} from '@/utils';
 import {
   PartnerTypeMap,
   findGooveeUserByEmail,
@@ -91,6 +90,7 @@ export async function updateProfileImage(formData: FormData) {
             sizeText: getFileSizeText(file.size),
             description: '',
           },
+          select: {id: true},
         })
         .then(clone);
     } catch (err) {
@@ -112,7 +112,11 @@ export async function updateProfileImage(formData: FormData) {
               },
             }
           : {
-              picture: null,
+              picture: {
+                select: {
+                  id: null,
+                },
+              },
             }),
       },
       tenantId,
@@ -180,6 +184,7 @@ export async function update({
   email,
   otp,
   mainPartner,
+  linkedInLink,
 }: {
   companyName?: string;
   identificationNumber?: string;
@@ -189,6 +194,7 @@ export async function update({
   email: string;
   otp?: string;
   mainPartner?: string;
+  linkedInLink?: string;
 }) {
   const tenantId = headers().get(TENANT_HEADER);
 
@@ -292,6 +298,7 @@ export async function update({
             name: newEmail,
             address: newEmail,
           },
+          select: {id: true},
         });
       };
 
@@ -306,6 +313,7 @@ export async function update({
         fixedPhone: companyNumber,
         firstName,
         name: isCompany ? companyName : name,
+        linkedinLink: isCompany ? undefined : linkedInLink,
         ...(partner.isContact && mainPartner
           ? {
               mainPartner: {
@@ -358,7 +366,7 @@ export async function generateOTPForUpdate({
     return error(await t('Bad request'));
   }
 
-  const partnerId = user.isContact ? user.mainPartnerId : user.id;
+  const partnerId = getPartnerId(user);
 
   const partner = await findPartnerById(partnerId!, tenantId);
 

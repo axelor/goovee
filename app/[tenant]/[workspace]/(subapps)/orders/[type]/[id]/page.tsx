@@ -15,11 +15,12 @@ import Content from './content';
 import {findOrder} from '@/subapps/orders/common/orm/orders';
 import {ORDER} from '@/subapps/orders/common/constants/orders';
 import {OrderSkeleton} from '@/subapps/orders/common/ui/components';
+import {OrderType} from '@/subapps/orders/common/types/orders';
 
 async function Order({
   params,
 }: {
-  params: {tenant: string; workspace: string; type: string; id: string};
+  params: {tenant: string; workspace: string; type: OrderType; id: string};
 }) {
   const {type, id, tenant} = params;
 
@@ -83,13 +84,13 @@ async function Order({
     return notFound();
   }
 
-  return <Content order={clone(order)} />;
+  return <Content order={clone(order)} orderType={type} />;
 }
 
 export default async function Page({
   params,
 }: {
-  params: {tenant: string; workspace: string; type: string; id: string};
+  params: {tenant: string; workspace: string; type: OrderType; id: string};
 }) {
   return (
     <Suspense fallback={<OrderSkeleton />}>

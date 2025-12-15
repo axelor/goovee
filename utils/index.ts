@@ -2,6 +2,7 @@ import {DEFAULT_SCALE} from '@/locale';
 import {DEFAULT_CURRENCY_SYMBOL} from '@/constants';
 
 import type {Cloned} from '@/types/util';
+import {User} from '@/types';
 
 export function clone<T>(obj: T): Cloned<T> {
   return obj && JSON.parse(JSON.stringify(obj));
@@ -91,4 +92,8 @@ export function htmlToNormalString(htmlString: string) {
   }
 
   return plainText;
+}
+
+export function getPartnerId(user: User): number {
+  return Number(user.isContact ? user.mainPartnerId : user.id);
 }

@@ -21,6 +21,7 @@ export function Paypal({
   createOrder,
   captureOrder,
   onPaymentSuccess,
+  skipSuccessToast,
 }: PaypalProps) {
   const {toast} = useToast();
   const [verifying, setVerifying] = useState(false);
@@ -65,10 +66,11 @@ export function Paypal({
           title: result.message,
         });
       } else {
-        toast({
-          variant: 'success',
-          title: i18n.t(successMessage),
-        });
+        !skipSuccessToast &&
+          toast({
+            variant: 'success',
+            title: i18n.t(successMessage),
+          });
         if (onPaymentSuccess) {
           onPaymentSuccess();
         }

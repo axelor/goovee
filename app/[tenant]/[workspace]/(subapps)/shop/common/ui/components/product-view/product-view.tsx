@@ -157,12 +157,12 @@ export function ProductView({
             </div>
             {workspace?.config?.displayPrices && !hidePriceAndPurchase && (
               <>
+                <p className="text-xl font-semibold mb-2">
+                  {price.displayPrimary}
+                </p>
                 {price.displayTwoPrices && (
-                  <p className="text-xl font-semibold mb-2">
-                    {price.displaySecondary}
-                  </p>
+                  <p className="text-sm">{price.displaySecondary}</p>
                 )}
-                <p className="text-sm">{price.displayPrimary}</p>
               </>
             )}
             <ProductMetaFieldView productId={product.id} fields={metaFields} />

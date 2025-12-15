@@ -1,0 +1,6 @@
+{
+  "title": "Fix paid amount scaling mismatch for events",
+  "type": "fix",
+  "description": "Applied proper scaling to generated payment amounts to ensure the paid amount matches the expected amount after processing.",
+  "scope": ["events"]
+}

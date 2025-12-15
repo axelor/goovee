@@ -1,6 +1,9 @@
 // ---- CORE IMPORTS ---- //
 import type {Address, ID, Product, Unit} from '@/types';
 
+// ---- LOCAL IMPORTS ---- //
+import {ORDER} from '@/subapps/orders/common/constants/orders';
+
 export type Order = {
   id: ID;
   orderNumber: string;
@@ -50,3 +53,5 @@ export type Invoice = {
   invoiceId: string;
   invoiceDate: string;
 };
+
+export type OrderType = (typeof ORDER)[keyof typeof ORDER];

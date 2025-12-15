@@ -14,14 +14,6 @@
     {
       "type": "JSON",
       "name": "attrs"
-    },
-    {
-      "type": "Date",
-      "name": "createdOn"
-    },
-    {
-      "type": "Date",
-      "name": "updatedOn"
     }
   ]
 }

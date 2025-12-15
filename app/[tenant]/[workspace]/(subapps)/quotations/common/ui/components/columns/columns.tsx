@@ -1,14 +1,12 @@
 'use client';
 
-import {MdEast} from 'react-icons/md';
-
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {Button, Chip} from '@/ui/components';
-import {cn} from '@/utils/css';
+import {Chip} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {getStatus} from '@/subapps/quotations/common/utils/quotations';
+import {formatDate} from '@/lib/core/locale/formatters';
 
 export const Columns = [
   {
@@ -44,6 +42,6 @@ export const Columns = [
     label: i18n.t('Created on'),
     sortable: true,
     getter: (row: any) => row.createdOn,
-    content: (row: any) => row.createdOn,
+    content: (row: any) => formatDate(row.createdOn),
   },
 ];

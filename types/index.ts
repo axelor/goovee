@@ -167,6 +167,15 @@ export interface PortalAppConfig extends Model {
   isCompanyOrAddressRequired?: boolean;
   payInAdvance?: boolean;
   advancePaymentPercentage?: BigDecimal;
+  isHomepageDisplay?: boolean;
+  isHomepageDisplayNews?: boolean;
+  isHomepageDisplayEvents?: boolean;
+  isHomepageDisplayMessage?: boolean;
+  isHomepageDisplayResources?: boolean;
+  homepageHeroTitle?: string;
+  homepageHeroDescription?: string;
+  homepageHeroOverlayColorSelect?: OverlayColor;
+  homepageHeroBgImage?: {id: string};
 }
 
 export interface PortalApp extends Model {

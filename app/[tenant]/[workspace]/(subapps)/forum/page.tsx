@@ -100,9 +100,9 @@ async function Forum({
           <NavMenu items={MENU} />
         </div>
         <Hero />
-        <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-[17.563rem_1fr] gap-5">
+        <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
           <GroupControls />
-          <div>
+          <div className="col-span-2">
             <ComposePost />
             <Tabs activeTab={type} />
             <Suspense fallback={<ThreadListSkeleton />}>

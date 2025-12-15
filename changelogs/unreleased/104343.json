@@ -1,0 +1,5 @@
+{
+  "title": "Fix paid amount not reflecting on partial payment of invoice",
+  "type": "fix",
+  "scope": ["invoices"]
+}

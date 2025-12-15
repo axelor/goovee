@@ -9,6 +9,7 @@ export const ROUTES = {
   notifications: 'notifications',
   apps: 'apps',
   settings: 'settings',
+  directory: 'directory',
 };
 
 export const GLOBAL_MENU = [
@@ -28,6 +29,10 @@ export const GLOBAL_MENU = [
   {
     label: 'Addresses',
     route: ROUTES.addresses,
+  },
+  {
+    label: 'Directory settings',
+    route: ROUTES.directory,
   },
 ];
 

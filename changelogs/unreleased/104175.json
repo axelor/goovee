@@ -1,0 +1,6 @@
+{
+  "title": "Reorder primary and secondary price display",
+  "type": "fix",
+  "description": "Adjusted the rendering order to display the primary price first and the secondary price below it for clearer visual hierarchy in product view section.",
+  "scope": ["shop"]
+}

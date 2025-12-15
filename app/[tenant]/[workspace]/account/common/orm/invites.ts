@@ -38,7 +38,18 @@ export async function findInviteById({
             isAdmin: true,
             contactAppPermissionList: {
               select: {
-                app: true,
+                app: {
+                  background: true,
+                  code: true,
+                  name: true,
+                  color: true,
+                  icon: true,
+                  installed: true,
+                  orderForMySpaceMenu: true,
+                  orderForTopMenu: true,
+                  showInMySpace: true,
+                  showInTopMenu: true,
+                },
                 roleSelect: true,
               },
             },
@@ -88,6 +99,7 @@ export async function deleteInviteById({
             }
           : {}),
       },
+      select: {id: true},
     });
 
     const result = await client.aOSPortalInvitation.delete({
@@ -198,10 +210,7 @@ export async function findInviteForEmail({
         id: partnerId,
       },
     },
-    select: {
-      partner: true,
-      workspace: true,
-    },
+    select: {id: true},
   });
 
   return invite;
@@ -220,7 +229,7 @@ export async function createInvite({
   role: Role;
   email: string;
   apps: InviteAppsConfig;
-  partnerId: string;
+  partnerId: Partner['id'];
 }) {
   if (!(workspace?.id && tenantId && role && email && apps && partnerId)) {
     return null;
@@ -260,6 +269,7 @@ export async function createInvite({
             })),
         },
       },
+      select: {id: true},
     });
   } catch (err) {
     console.error(err);
@@ -304,6 +314,7 @@ export async function createInvite({
             ],
           },
         },
+        select: {id: true},
       })
       .then(clone);
 

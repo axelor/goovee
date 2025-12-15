@@ -1,3 +1,4 @@
+// ---- CORE IMPORTS ---- //
 import {Container} from '@/ui/components/container';
 import {Separator} from '@/ui/components/separator';
 import {Skeleton} from '@/ui/components/skeleton';

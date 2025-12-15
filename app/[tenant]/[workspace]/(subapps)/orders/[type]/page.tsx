@@ -15,12 +15,13 @@ import {getWhereClauseForEntity} from '@/utils/filters';
 import Content from '@/subapps/orders/[type]/content';
 import {findOrders} from '@/subapps/orders/common/orm/orders';
 import {ORDER} from '@/subapps/orders/common/constants/orders';
+import {OrderType} from '@/subapps/orders/common/types/orders';
 
 async function Orders({
   params,
   searchParams,
 }: {
-  params: {type: string; tenant: string; workspace: string};
+  params: {type: OrderType; tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
   const {type, tenant} = params;
@@ -92,7 +93,7 @@ export default async function Page({
   params,
   searchParams,
 }: {
-  params: {type: string; tenant: string; workspace: string};
+  params: {type: OrderType; tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
   return (

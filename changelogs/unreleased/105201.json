@@ -1,0 +1,6 @@
+{
+  "title": "Update next",
+  "type": "security",
+  "description": "Fixes Denial of Service (DoS) vulnerability in next.js",
+  "scope": ["core"]
+}

@@ -112,6 +112,7 @@ export async function subscribe({
             ],
           },
         },
+        select: {id: true},
       });
 
       revalidatePath('/', 'layout');
@@ -158,16 +159,15 @@ export async function subscribe({
                 {
                   name: `${user.name}-${url}`,
                   portalWorkspace: {
-                    select: [
-                      {
-                        id: workspace.id,
-                      },
-                    ],
+                    select: {
+                      id: workspace.id,
+                    },
                   },
                 },
               ],
             },
           },
+          select: {id: true},
         });
 
         revalidatePath('/', 'layout');
@@ -624,6 +624,7 @@ async function registerAosContactAsAdmin({
         },
         isAdmin: true,
       },
+      select: {id: true},
     });
 
     if (!contactConfig?.id) return registrationError;
@@ -650,8 +651,9 @@ async function registerAosContactAsAdmin({
             ? {select: {id: localization.id}}
             : undefined,
           contactWorkspaceConfigSet: {select: [{id: contactConfig.id}]},
-          defaultWorkspace: {select: [{id: contactConfig.id}]},
+          defaultWorkspace: {select: {id: contactConfig.id}},
         },
+        select: {id: true},
       });
     } catch (err) {
       return registrationError;

@@ -26,10 +26,8 @@ export const colors = {
 };
 
 export const sortOptions: SortOption[] = [
-  {value: 'a-z', label: 'A-Z', orderBy: {title: 'ASC'}},
-  {value: 'z-a', label: 'Z-A', orderBy: {title: 'DESC'}},
-  {value: 'newest', label: 'Newest', orderBy: {createdOn: 'DESC'}},
-  {value: 'oldest', label: 'Oldest', orderBy: {createdOn: 'ASC'}},
+  {value: 'a-z', label: 'A-Z', orderBy: {simpleFullName: 'ASC'}},
+  {value: 'z-a', label: 'Z-A', orderBy: {simpleFullName: 'DESC'}},
 ];
 
 export const defaultSortOption = sortOptions[0];
@@ -38,3 +36,9 @@ export enum MAP_SELECT {
   GoogleMaps = 1,
   OpenStreetMap = 2,
 }
+
+export const civility = [
+  {title: 'M.', value: 1},
+  {title: 'Ms.', value: 2},
+  {title: 'Mx.', value: 3},
+];

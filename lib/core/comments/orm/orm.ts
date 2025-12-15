@@ -45,7 +45,7 @@ function getSelectFields({
     [commentField]: true,
     [trackingField]: true,
     createdOn: true,
-    partner: {picture: true, simpleFullName: true, name: true},
+    partner: {picture: {id: true}, simpleFullName: true, name: true},
     mailMessageFileList: {select: {attachmentFile: {id: true, fileName: true}}},
     createdBy: {id: true, fullName: true},
   } as const;
@@ -274,7 +274,7 @@ async function getPopularCommentsBySorting({
 
 type Attachment = {
   id: ID;
-  description?: string;
+  description: string | null;
 };
 
 async function upload({
@@ -313,6 +313,7 @@ async function upload({
         sizeText: getFileSizeText(file.size),
         description,
       },
+      select: {id: true, description: true},
     });
 
     return {
@@ -403,6 +404,7 @@ export async function addComment(
         },
       }),
     },
+    select: {id: true},
   });
 
   const comments = await client.aOSMailMessage.find({

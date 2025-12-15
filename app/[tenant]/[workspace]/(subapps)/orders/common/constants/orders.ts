@@ -65,4 +65,4 @@ export const DOWNLOAD_PDF = 'Download pdf';
 export const ORDER = {
   ONGOING: 'ongoing',
   COMPLETED: 'completed',
-};
+} as const;

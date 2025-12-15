@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useCallback, useMemo} from 'react';
+import React, {useCallback} from 'react';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -10,6 +10,7 @@ import {i18n} from '@/locale';
 import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Payments} from '@/ui/components/payment';
+import {scale} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
 import {register} from '@/subapps/events/common/actions/actions';
@@ -89,7 +90,9 @@ export function EventPayments({
 
       const result = getMappedParticipants(form, metaFields);
       const {total} = getCalculatedTotalPrice(result, event);
-      if (!total || total <= 0) {
+      const $total = Number(scale(total, event.priceScale));
+
+      if (!$total || $total <= 0) {
         toast({
           variant: 'destructive',
           title: i18n.t('Total price must be greater than zero.'),

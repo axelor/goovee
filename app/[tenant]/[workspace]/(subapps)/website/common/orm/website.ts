@@ -78,7 +78,7 @@ export async function findAllMainWebsites({
           },
         },
         select: {
-          language: true,
+          language: {code: true, isAvailableOnPortal: true, name: true},
           website: {
             slug: true,
           },
@@ -244,7 +244,7 @@ export async function findWebsiteBySlug({
       slug: true,
       isGuestUserAllow: true,
       homepage: {slug: true},
-      mainWebsite: true,
+      mainWebsite: {name: true},
       ...(includeHeader && {
         header: {attrs: true, component: {title: true, code: true}},
       }),
@@ -255,8 +255,7 @@ export async function findWebsiteBySlug({
         menu: {
           title: true,
           component: {title: true, code: true, typeSelect: true},
-          language: true,
-          menuList: true,
+          language: {code: true, isAvailableOnPortal: true, name: true},
         },
       }),
     },
@@ -548,7 +547,7 @@ export async function findAllMainWebsiteLanguages({
             },
           },
           select: {
-            language: true,
+            language: {code: true, isAvailableOnPortal: true, name: true},
             website: {
               slug: true,
             },
@@ -656,6 +655,7 @@ async function getCustomRelationalFieldTypeData({
       where: {
         name: targetJsonModelName,
       },
+      select: {id: true},
     });
 
     if (!$targetJsonModel) {

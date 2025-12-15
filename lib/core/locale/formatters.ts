@@ -132,7 +132,9 @@ export function formatDate(
   {dateFormat}: Pick<DateTimeFormatOpts, 'dateFormat'> = {},
 ) {
   const format = getDateFormat({dateFormat});
-  return value ? dayjs(value).format(format) : '';
+
+  const standardized = standardizeDate(value);
+  return standardized ? dayjs(standardized).format(format) : '';
 }
 
 export function formatTime(
@@ -155,7 +157,9 @@ export function formatDateTime(
   opts: DateTimeFormatOpts = {},
 ) {
   const format = getDateTimeFormat(opts);
-  return value ? dayjs(value).format(format) : '';
+
+  const standardized = standardizeDate(value);
+  return standardized ? dayjs(standardized).format(format) : '';
 }
 
 export function formatDuration(
@@ -193,7 +197,9 @@ export function formatRelativeTime(
 
   if (!value) return '';
 
-  result = dayjs(value).fromNow();
+  const standardized = standardizeDate(value);
+
+  result = dayjs(standardized).fromNow();
 
   if (type === 'DATE') {
     result = dayjs(value).calendar(null, {
@@ -209,6 +215,25 @@ export function formatRelativeTime(
   return result[0].toLocaleUpperCase() + result.slice(1);
 }
 
+export function standardizeDate(value: Date | string): Date | null {
+  if (value == null) return null;
+  if (value instanceof Date) return value;
+
+  const date = value.includes('T')
+    ? new Date(value)
+    : new Date(
+        new Date(value).getUTCFullYear(),
+        new Date(value).getUTCMonth(),
+        new Date(value).getUTCDate(),
+      );
+
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date;
+}
+
 export const formatters = {
   formatNumber,
   formatInteger,
@@ -219,6 +244,7 @@ export const formatters = {
   formatDateTime,
   formatDuration,
   formatRelativeTime,
+  standardizeDate,
 };
 
 export default formatters;

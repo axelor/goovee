@@ -16,10 +16,6 @@
       "name": "deliveryState"
     },
     {
-      "type": "Date",
-      "name": "createdOn"
-    },
-    {
       "type": "Decimal",
       "name": "inTaxTotal"
     },

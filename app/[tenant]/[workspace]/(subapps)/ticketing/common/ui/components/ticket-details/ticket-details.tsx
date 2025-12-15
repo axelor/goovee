@@ -3,7 +3,7 @@
 import {i18n} from '@/locale';
 import {formatDate} from '@/locale/formatters';
 import type {PortalAppConfig} from '@/types';
-import type {Cloned, Maybe} from '@/types/util';
+import type {Maybe} from '@/types/util';
 import {
   Button,
   Dialog,
@@ -14,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  InnerHTML,
   Select,
   SelectContent,
   SelectItem,
@@ -30,6 +29,7 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {Progress} from '@/ui/components/progress';
+import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
 import {cn} from '@/utils/css';
 import {useMemo} from 'react';
 import {FIELDS, INVOICING_TYPE, UPDATABLE_FIELDS} from '../../../constants';
@@ -41,8 +41,6 @@ import type {
 import {isWithProvider} from '../../../utils';
 import {Category, Priority, Status} from '../pills';
 import {useTicketDetails} from './ticket-details-provider';
-
-import '@/ui/components/rich-text-editor/rich-text-editor.css';
 
 type Props = {
   categories: TCategory[];
@@ -378,12 +376,7 @@ export function TicketDetails(props: Props) {
                   <hr />
                 </>
               )}
-            <div className="DraftEditor-editorContainer">
-              <InnerHTML
-                content={ticket.description}
-                className="public-DraftEditor-content"
-              />
-            </div>
+            <RichTextViewer content={ticket.description} />
           </div>
         </div>
       </form>

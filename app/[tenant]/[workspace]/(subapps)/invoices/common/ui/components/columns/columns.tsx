@@ -6,6 +6,7 @@ import {MdEast} from 'react-icons/md';
 import {i18n} from '@/locale';
 import {Button, Chip} from '@/ui/components';
 import {cn} from '@/utils/css';
+import {formatDate} from '@/lib/core/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
 import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
@@ -42,7 +43,7 @@ export const Columns = [
     label: i18n.t('Due on'),
     sortable: true,
     getter: (row: any) => row.dueDate,
-    content: (row: any) => row.dueDate,
+    content: (row: any) => formatDate(row.dueDate),
   },
   {
     key: 'exTaxTotal',

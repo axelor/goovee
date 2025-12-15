@@ -12,6 +12,7 @@ import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
 import {isPaymentOptionAvailable} from '@/utils/payment';
 import {TENANT_HEADER} from '@/middleware';
+import {scale} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEvent} from '@/subapps/events/common/orm/event';
@@ -73,8 +74,10 @@ export async function createStripeCheckoutSession({
   const currency = $event.currency;
   const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
 
-  const {total: amount} = getCalculatedTotalPrice(values, $event);
-  if (!amount || amount <= 0) {
+  const {total} = getCalculatedTotalPrice(values, $event);
+  const expectedAmount = Number(scale(total, $event.priceScale));
+
+  if (!expectedAmount || expectedAmount <= 0) {
     return error(await t('Total price must be greater than 0'));
   }
 
@@ -96,7 +99,7 @@ export async function createStripeCheckoutSession({
         email: emailAddress,
       },
       name: await t('Event Registration'),
-      amount: amount,
+      amount: expectedAmount,
       currency: currencyCode,
       context: values,
       tenantId,
@@ -173,8 +176,10 @@ export async function paypalCreateOrder({
     return error(await t('Invalid event'));
   }
 
-  const {total: amount} = getCalculatedTotalPrice(values, $event);
-  if (!amount || amount <= 0) {
+  const {total} = getCalculatedTotalPrice(values, $event);
+  const expectedAmount = Number(scale(total, $event.priceScale));
+
+  if (!expectedAmount || expectedAmount <= 0) {
     return error(await t('Total price must be greater than 0.'));
   }
 
@@ -190,7 +195,7 @@ export async function paypalCreateOrder({
   const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
   try {
     const response = await createPaypalOrder({
-      amount,
+      amount: expectedAmount,
       currency: currencyCode,
       email: emailAddress,
       tenantId,
@@ -261,8 +266,10 @@ export async function payboxCreateOrder({
   const currency = $event.currency;
   const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
 
-  const {total: amount} = getCalculatedTotalPrice(values, $event);
-  if (!amount || amount <= 0) {
+  const {total} = getCalculatedTotalPrice(values, $event);
+  const expectedAmount = Number(scale(total, $event.priceScale));
+
+  if (!expectedAmount || expectedAmount <= 0) {
     return error(await t('Total price must be greater than 0'));
   }
 
@@ -278,7 +285,7 @@ export async function payboxCreateOrder({
   }
   try {
     const response = await createPayboxOrder({
-      amount,
+      amount: expectedAmount,
       currency: currencyCode,
       email: emailAddress,
       context: values,

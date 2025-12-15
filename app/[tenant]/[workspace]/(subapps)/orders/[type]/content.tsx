@@ -6,7 +6,7 @@ import {useRouter} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {Container, NavView, TableList} from '@/ui/components';
 import {i18n} from '@/locale';
-import {SUBAPP_CODES, SUBAPP_PAGE, URL_PARAMS} from '@/constants';
+import {SUBAPP_CODES, URL_PARAMS} from '@/constants';
 import {useSortBy} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 

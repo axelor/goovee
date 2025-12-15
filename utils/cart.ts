@@ -1,10 +1,10 @@
 // ---- CORE IMPORTS ---- //
-
 import {scale} from '@/utils';
 import {
   DEFAULT_CURRENCY_CODE,
   DEFAULT_CURRENCY_SCALE,
   DEFAULT_CURRENCY_SYMBOL,
+  MAIN_PRICE,
 } from '@/constants';
 import type {
   Cart,
@@ -23,7 +23,7 @@ export function computeTotal({
   workspace?: PortalWorkspace;
   formatNumber?: any;
 }) {
-  let mainPrice: PortalAppConfig['mainPrice'] = 'at';
+  let mainPrice: PortalAppConfig['mainPrice'] = MAIN_PRICE.ATI;
 
   if (workspace?.config?.mainPrice) {
     mainPrice = workspace?.config?.mainPrice;

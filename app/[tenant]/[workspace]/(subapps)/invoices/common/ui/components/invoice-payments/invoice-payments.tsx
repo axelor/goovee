@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback} from 'react';
+import {useCallback, useMemo} from 'react';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -45,24 +45,25 @@ export function InvoicePayments({
   const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
 
+  const redirectionPath = useMemo(() => {
+    if (paymentType === INVOICE_PAYMENT_OPTIONS.PARTIAL) {
+      return `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${invoice.id}`;
+    } else {
+      return `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.paid}/${invoice.id}`;
+    }
+  }, [invoice.id, paymentType, workspaceURI]);
+
   const redirectToInvoice = useCallback(
     async (result: any) => {
       if (result) {
-        const {data} = result;
         if (paymentType === INVOICE_PAYMENT_OPTIONS.PARTIAL) {
           resetPaymentType();
           resetForm();
-          router.replace(
-            `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${data.id}`,
-          );
-        } else {
-          router.replace(
-            `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.paid}/${data.id}`,
-          );
         }
+        router.replace(redirectionPath);
       }
     },
-    [paymentType, router, workspaceURI, resetPaymentType, resetForm],
+    [paymentType, router, resetPaymentType, resetForm, redirectionPath],
   );
 
   const handleInvoiceValidation = async () => {
@@ -85,6 +86,7 @@ export function InvoicePayments({
       const response: any = await validateStripePayment({
         stripeSessionId,
         workspaceURL,
+        invalidatePath: redirectionPath,
       });
 
       return response;
@@ -105,6 +107,7 @@ export function InvoicePayments({
       const response: any = await validatePayboxPayment({
         params,
         workspaceURL,
+        invalidatePath: redirectionPath,
       });
       return response;
     } catch (error) {

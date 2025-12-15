@@ -14,6 +14,7 @@ export type PaypalProps = {
   onPaymentSuccess?: () => any;
   successMessage?: string;
   errorMessage?: string;
+  skipSuccessToast?: boolean;
 };
 
 export type StripeProps = {
@@ -30,6 +31,7 @@ export type StripeProps = {
   onValidateSession: (params: {stripeSessionId: string}) => Promise<any>;
   onApprove?: (result: any) => void;
   onPaymentSuccess?: () => any;
+  skipSuccessToast?: boolean;
 };
 
 export type PayboxProps = {
@@ -45,4 +47,5 @@ export type PayboxProps = {
   }) => Promise<any>;
   onPaymentSuccess?: () => void;
   onApprove: (result: any) => void;
+  skipSuccessToast?: boolean;
 };

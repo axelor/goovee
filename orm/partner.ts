@@ -1,16 +1,17 @@
-import type {CreateArgs, SelectOptions} from '@goovee/orm';
+import type {CreateArgs, Payload, SelectOptions, UpdateArgs} from '@goovee/orm';
 import {getSession} from '@/auth';
 import {UserType} from '@/auth/types';
 import {hash} from '@/auth/utils';
 import {manager, type Tenant} from '@/tenant';
 import {USER_CREATED_FROM} from '@/constants';
 import {clone} from '@/utils';
-import {ID, Localization, Partner, PortalWorkspace} from '@/types';
+import {ID, Localization, PortalWorkspace} from '@/types';
 import {
   findContactWorkspaceConfig,
   findDefaultPartnerWorkspaceConfig,
 } from './workspace';
 import type {AOSPartner} from '@/goovee/.generated/models';
+import {Cloned} from '@/types/util';
 
 const partnerFields = {
   firstName: true,
@@ -21,16 +22,26 @@ const partnerFields = {
   isContact: true,
   name: true,
   password: true,
-  emailAddress: true,
-  picture: true,
+  emailAddress: {address: true},
+  picture: {id: true},
+  linkedinLink: true,
   mainPartner: {
     id: true,
     simpleFullName: true,
+    isInDirectory: true,
+    isEmailInDirectory: true,
+    isPhoneInDirectory: true,
+    isWebsiteInDirectory: true,
+    isAddressInDirectory: true,
+    directoryCompanyDescription: true,
+    isFunctionInDirectory: true,
+    isLinkedinInDirectory: true,
+    picture: {id: true},
     partnerAddressList: {
       select: {
         isInvoicingAddr: true,
         isDefaultAddr: true,
-        address: true,
+        address: {formattedFullName: true},
       },
     },
   },
@@ -57,7 +68,7 @@ const partnerFields = {
         url: true,
       },
       isAdmin: true,
-      partner: true,
+      partner: {id: true, name: true},
     },
   },
   localization: {
@@ -70,15 +81,26 @@ const partnerFields = {
   isActivatedOnPortal: true,
   createdFromSelect: true,
   canSubscribeNoPublicEvent: true,
-  mainAddress: true,
+  isInDirectory: true,
+  isEmailInDirectory: true,
+  isPhoneInDirectory: true,
+  isWebsiteInDirectory: true,
+  isAddressInDirectory: true,
+  directoryCompanyDescription: true,
+  isFunctionInDirectory: true,
+  isLinkedinInDirectory: true,
   partnerAddressList: {
     select: {
       isInvoicingAddr: true,
       isDefaultAddr: true,
-      address: true,
+      address: {formattedFullName: true},
     },
   },
-} satisfies SelectOptions<AOSPartner>;
+} as const satisfies SelectOptions<AOSPartner>;
+
+export type Partner = Cloned<
+  Payload<AOSPartner, {select: typeof partnerFields}>
+>;
 
 export async function findPartnerById(
   id: ID,
@@ -166,6 +188,7 @@ export async function findEmailAddress(email: string, tenantId: Tenant['id']) {
     where: {
       address: email,
     },
+    select: {id: true},
   });
 }
 
@@ -240,7 +263,7 @@ export async function updatePartner({
   data,
   tenantId,
 }: {
-  data: {id: Partner['id']; version: Partner['version']} & Partial<AOSPartner>;
+  data: UpdateArgs<AOSPartner>;
   tenantId: Tenant['id'];
 }) {
   if (!(data && tenantId)) return null;
@@ -257,9 +280,7 @@ export async function updatePartner({
         ...data,
         id: String(data.id),
       },
-      select: {
-        localization: true,
-      },
+      select: {id: true},
     })
     .then(clone);
 
@@ -339,13 +360,16 @@ export async function registerContact({
     data.defaultWorkspace = {select: [{id: contactConfig.id}]};
   }
 
-  const contact = await client.aOSPartner.create({data}).then(clone);
+  const contact = await client.aOSPartner
+    .create({data, select: {id: true}})
+    .then(clone);
   await client.aOSPartner.update({
     data: {
       id: mainPartner.id,
       version: mainPartner.version,
       contactPartnerSet: {select: {id: contact.id}},
     },
+    select: {id: true},
   });
   return contact;
 }
@@ -436,11 +460,14 @@ export async function registerPartner({
         id,
         version,
       },
+      select: {id: true},
     });
 
     return udpatedPartner;
   }
 
-  const partner = await client.aOSPartner.create({data}).then(clone);
+  const partner = await client.aOSPartner
+    .create({data, select: {id: true}})
+    .then(clone);
   return partner;
 }

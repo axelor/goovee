@@ -16,7 +16,7 @@ import {
 import {NOT_INTERESTED, REPORT, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {
-  formatDate,
+  formatDateTime,
   formatNumber,
   formatRelativeTime,
 } from '@/locale/formatters';
@@ -216,8 +216,9 @@ export const CommentListItem = ({
             </div>
             <TooltipComponent
               triggerText={`${i18n.t('Updated')} ${formatRelativeTime(parentMailMessage?.createdOn!)}`}
-              tooltipText={formatDate(parentMailMessage?.createdOn!, {
-                dateFormat: `MMMM DD YYYY, h:mm a`,
+              tooltipText={formatDateTime(parentMailMessage?.createdOn!, {
+                dateFormat: 'MMMM DD YYYY,',
+                timeFormat: ' h:mm a',
               })}
             />
           </div>
@@ -290,8 +291,9 @@ export const CommentListItem = ({
           </div>
           <TooltipComponent
             triggerText={`${i18n.t('Updated')} ${formatRelativeTime(createdOn!)}`}
-            tooltipText={formatDate(createdOn!, {
-              dateFormat: `MMMM DD YYYY, h:mm a`,
+            tooltipText={formatDateTime(createdOn!, {
+              dateFormat: 'MMMM DD YYYY,',
+              timeFormat: ' h:mm a',
             })}
           />
         </div>

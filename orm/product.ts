@@ -1,5 +1,7 @@
+// ---- CORE IMPORTS ---- //
 import {type Tenant, manager} from '@/lib/core/tenant';
 import type {User, PortalWorkspace} from '@/types';
+import {getPartnerId} from '@/utils';
 
 export async function shouldHidePricesAndPurchase({
   user,
@@ -16,7 +18,7 @@ export async function shouldHidePricesAndPurchase({
     const client = await manager.getClient(tenantId);
     const mainPartner = await client.aOSPartner.findOne({
       where: {
-        id: user.isContact ? user.mainPartnerId : user.id,
+        id: getPartnerId(user),
       },
       select: {
         salePartnerPriceList: {id: true},

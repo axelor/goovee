@@ -8,7 +8,6 @@ import {t} from '@/locale/server';
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {formatDate} from '@/locale/server/formatters';
 import {findWorkspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
@@ -16,6 +15,7 @@ import DownloadIcon from './download-icon';
 import HTMLViewer from './html-viewer';
 import ImageViewer from './image-viewer';
 import PDFViewer from './pdf-viewer';
+import {PostedBy} from '@/subapps/resources/common/ui/components';
 
 const viewer: Record<string, React.JSXElementConstructor<any>> = {
   'application/pdf': PDFViewer,
@@ -69,7 +69,7 @@ export default async function Page({
   }
 
   const name = file?.fileName || '--';
-  const date = formatDate(file?.createdOn!) || '--';
+  const date = file?.createdOn! || '--';
   const author = file?.createdBy?.name || '--';
   const size = file?.metaFile?.sizeText || '--';
 
@@ -87,9 +87,7 @@ export default async function Page({
           <DownloadIcon record={file} />
         </div>
         <div className="flex items-start gap-4 text-xs leading-4">
-          <p className="grow">
-            {await t('Posted on')} {date} {await t('by')} {author}
-          </p>
+          <PostedBy date={date} author={author} />
           <p className="pe-2">
             <span className="font-semibold">{await t('Size')}: </span>
             {size}

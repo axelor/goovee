@@ -4,6 +4,7 @@ import {manager, type Tenant} from '@/tenant';
 import {getSession} from '@/lib/core/auth';
 import {and} from '@/utils/orm';
 import type {AOSPartner} from '@/goovee/.generated/models';
+import {getPartnerId} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -36,7 +37,7 @@ export async function findContacts({
     return null;
   }
 
-  const partnerId = user.isContact ? user.mainPartnerId : user.id;
+  const partnerId = getPartnerId(user);
 
   const c = await manager.getClient(tenantId);
 
@@ -58,9 +59,9 @@ export async function findContacts({
       name: true,
       firstName: true,
       simpleFullName: true,
-      emailAddress: true,
+      emailAddress: {address: true},
       fixedPhone: true,
-      mainPartner: true,
+      mainPartner: {id: true, simpleFullName: true},
     },
   });
 

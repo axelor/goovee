@@ -12,6 +12,7 @@ import advancedFormat from 'dayjs/plugin/advancedFormat';
 import utc from 'dayjs/plugin/utc';
 import kebabCase from 'lodash/kebabCase';
 import {DEFAULT_DATE_FORMAT} from '@/locale/contants';
+import timezone from 'dayjs/plugin/timezone';
 
 dayjs.extend(localizedFormat);
 dayjs.extend(customParseFormat);
@@ -23,6 +24,7 @@ dayjs.extend(isSameOrBefore);
 dayjs.extend(calendar);
 dayjs.extend(advancedFormat);
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const getNormalizedLocale = (locale: string) => kebabCase(locale);
 const getCountry = (locale: string) => kebabCase(locale).split('-')[1];

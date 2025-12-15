@@ -1,79 +1,73 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {FaInstagram, FaLinkedin} from 'react-icons/fa';
-import {FaXTwitter} from 'react-icons/fa6';
-import {MdOutlineWeb} from 'react-icons/md';
+import {FaLinkedin} from 'react-icons/fa';
+import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {t} from '@/lib/core/locale/server';
-import {findModelFields} from '@/orm/model-fields';
-import {findWorkspace} from '@/orm/workspace';
-import {Avatar, AvatarImage, InnerHTML} from '@/ui/components';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {t, tattr} from '@/lib/core/locale/server';
+import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
-import {cn} from '@/utils/css';
 import {getPartnerImageURL} from '@/utils/files';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
-import {colors} from '../../common/constants';
+import {civility} from '../../common/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
-import {Category} from '../../common/ui/components/pills';
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '../../common/utils/auth-helper';
 
+import '@/ui/components/rich-text-editor/rich-text-editor.css';
 export default async function Page({
   params,
 }: {
   params: {tenant: string; workspace: string; id: string};
 }) {
-  const session = await getSession();
   const {id} = params;
-
-  // TODO: check if user auth is required
-  // if (!session?.user) notFound();
-
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    tenantId: tenant,
-  }).then(clone);
-
-  if (!workspace) notFound();
-
+  const {error} = await ensureAuth(workspaceURL, tenant);
+  if (error) notFound();
   const [entry, config] = await Promise.all([
-    findEntry({id, workspaceId: workspace.id, tenantId: tenant}),
-    findMapConfig({workspaceId: workspace.id, tenantId: tenant}),
+    findEntry({id, tenantId: tenant}),
+    findMapConfig({tenantId: tenant}),
   ]);
 
   if (!entry) notFound();
 
   return (
-    <div className="container flex flex-col gap-4 mt-4 mb-5">
-      <div className="flex flex-col gap-4 bg-card p-4 rounded-lg">
-        <Details
-          entryDetail={entry}
-          tenant={tenant}
-          workspaceURI={workspaceURI}
-        />
-        <Map className="h-80 w-full" entries={[clone(entry)]} config={config} />
+    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <Link
+        href={`${workspaceURI}/${SUBAPP_CODES.directory}`}
+        className="mb-4 inline-flex items-center gap-2 text-primary hover:underline">
+        <IoArrowBackOutline className="h-5 w-5" />
+        {await t('Back to Directory')}
+      </Link>
+      <div className="bg-card shadow-lg rounded-lg overflow-hidden">
+        <Details entryDetail={entry} tenant={tenant} />
+        <div className="p-4 sm:p-6 lg:p-8">
+          <Map
+            className="h-96 w-full rounded-md"
+            entries={[clone(entry)]}
+            config={config}
+          />
+        </div>
       </div>
-      {entry.directoryContactSet && entry.directoryContactSet?.length > 0 && (
-        <>
-          <h2 className="font-semibold text-xl pl-4">
+
+      {entry.mainPartnerContacts && entry.mainPartnerContacts?.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl mb-6">
             {await t(
-              entry.directoryContactSet.length > 1 ? 'Contacts' : 'Contact',
+              entry.mainPartnerContacts.length > 1 ? 'Contacts' : 'Contact',
             )}
           </h2>
-
-          {entry.directoryContactSet.map(contact => (
-            <Contact key={contact.id} tenant={tenant} contact={contact} />
-          ))}
-        </>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {entry.mainPartnerContacts.map(contact => (
+              <Contact key={contact.id} tenant={tenant} contact={contact} />
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -82,109 +76,137 @@ export default async function Page({
 async function Details({
   entryDetail,
   tenant,
-  workspaceURI,
 }: {
   entryDetail: Entry;
   tenant: string;
-  workspaceURI: string;
 }) {
   const {
-    title,
-    address,
-    twitter,
-    website,
-    description,
-    linkedIn,
-    image,
-    instagram,
-    directoryEntryCategorySet,
-    attrs,
-    id,
+    mainAddress,
+    emailAddress,
+    fixedPhone,
+    portalCompanyName,
+    picture,
+    webSite,
+    directoryCompanyDescription,
+    mobilePhone,
   } = entryDetail;
 
-  const customFields = (
-    await findModelFields({
-      modelName: 'com.axelor.apps.portal.db.DirectoryEntry',
-      modelField: 'attrs',
-      tenantId: tenant,
-    })
-  )
-    .filter(field => field.type === 'string')
-    .map(field => {
-      const fieldValue =
-        typeof attrs === 'object' && attrs != null ? attrs[field.name] : null;
-      if (!fieldValue) return null;
-      return (
-        <div key={field.id}>
-          <span className="text-base font-semibold me-2">{field.title}:</span>
-          <span className="text-sm text-muted-foreground">{fieldValue}</span>
-        </div>
-      );
-    });
-
   return (
-    <div>
-      <div className="flex bg-card gap-5 justify-between">
-        <div className="space-y-4 mt-4">
-          <h2 className="font-semibold text-xl">{title}</h2>
-          {directoryEntryCategorySet?.map(cat => (
-            <Category
-              name={cat?.title}
-              key={cat.id}
-              className={cn('me-3', colors[cat.color as keyof typeof colors])}
-            />
-          ))}
-          <p className="text-success text-base">{address?.formattedFullName}</p>
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+        <div className="flex-shrink-0">
+          <Image
+            width={192}
+            height={192}
+            className="rounded-lg object-cover w-36 h-36 sm:w-48 sm:h-48"
+            src={getPartnerImageURL(picture?.id, tenant, {
+              noimage: true,
+              noimageSrc: NO_IMAGE_URL,
+            })}
+            alt={portalCompanyName ?? 'Company Logo'}
+          />
         </div>
-
-        {/* image */}
-        <Image
-          width={156}
-          height={138}
-          className="rounded-r-lg h-[138px] object-cover"
-          src={
-            image?.id
-              ? `${workspaceURI}/${SUBAPP_CODES.directory}/api/entry/${id}/image`
-              : NO_IMAGE_URL
-          }
-          alt="image"
-        />
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+            {portalCompanyName}
+          </h1>
+          {mainAddress?.formattedFullName && (
+            <p className="mt-2 text-lg text-muted-foreground">
+              {mainAddress.formattedFullName}
+            </p>
+          )}
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+            {emailAddress && (
+              <Link
+                href={`mailto:${emailAddress.address}`}
+                className="text-sm text-primary hover:underline flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                {emailAddress.address}
+              </Link>
+            )}
+            {fixedPhone && (
+              <Link
+                href={`tel:${fixedPhone}`}
+                className="text-sm text-primary hover:underline flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                  />
+                </svg>
+                {fixedPhone}
+              </Link>
+            )}
+            {mobilePhone && (
+              <Link
+                href={`tel:${mobilePhone}`}
+                className="text-sm text-primary hover:underline flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+                {mobilePhone}
+              </Link>
+            )}
+            {webSite && (
+              <Link
+                href={webSite}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-primary hover:underline flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+                {webSite}
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
-      <hr />
-
-      {/* directory description */}
-
-      <div className="space-y-4 mt-5">
-        <InnerHTML content={description} />
-        {customFields}
-      </div>
-      {(linkedIn || twitter || instagram || website) && (
-        <p className="font-semibold text-xl mt-5 mb-5">
-          {await t('Social media')}
-        </p>
+      {directoryCompanyDescription && (
+        <div className="mt-6 border-t border-border pt-6">
+          <h3 className="text-xl font-semibold mb-2">{await t('About')}</h3>
+          <RichTextViewer content={directoryCompanyDescription} />
+        </div>
       )}
-      <div className="flex space-x-6">
-        {linkedIn && (
-          <Link href={linkedIn} target="_blank" rel="noreferrer">
-            <FaLinkedin className="h-8 w-8 text-palette-blue-dark" />
-          </Link>
-        )}
-        {twitter && (
-          <Link href={twitter} target="_blank" rel="noreferrer">
-            <FaXTwitter className="h-8 w-8" />
-          </Link>
-        )}
-        {instagram && (
-          <Link href={instagram} target="_blank" rel="noreferrer">
-            <FaInstagram className="h-8 w-8 text-palette-yellow-dark" />
-          </Link>
-        )}
-        {website && (
-          <Link href={website} target="_blank" rel="noreferrer">
-            <MdOutlineWeb className="h-8 w-8 text-gray-dark" />
-          </Link>
-        )}
-      </div>
     </div>
   );
 }
@@ -194,63 +216,126 @@ async function Contact({
   contact,
 }: {
   tenant: string;
-  contact: NonNullable<Entry['directoryContactSet']>[number];
+  contact: NonNullable<Entry['mainPartnerContacts']>[number];
 }) {
   const {
-    simpleFullName,
     emailAddress,
     fixedPhone,
+    firstName,
+    name,
+    titleSelect,
     linkedinLink,
     mobilePhone,
     picture,
+    jobTitleFunction,
   } = contact;
-  return (
-    <div className="bg-card space-y-4 p-4 rounded-lg">
-      <div className="flex items-center gap-2">
-        <Avatar className="h-10 w-10">
-          <AvatarImage
-            className="object-cover"
-            src={getPartnerImageURL(picture?.id, tenant, {noimage: true})}
-          />
-        </Avatar>
-        <span className="font-semibold">{simpleFullName}</span>
-      </div>
-      <div className="ms-4 space-y-4">
-        {emailAddress && (
-          <>
-            <h4 className="font-semibold">{await t('Email')}</h4>
-            <Link
-              className="text-sm text-muted-foreground hover:underline hover:!text-palette-blue-dark"
-              href={`mailto:${emailAddress.address}`}>
-              {emailAddress.address}
-            </Link>
-          </>
-        )}
-        <>
-          <h4 className="font-semibold">{await t('Phone number')}</h4>
-          {fixedPhone && (
-            <Link
-              className="text-sm text-muted-foreground hover:underline hover:!text-palette-blue-dark"
-              href={`tel:${fixedPhone}`}>
-              {fixedPhone}
-            </Link>
-          )}
-          <br />
-          {mobilePhone && (
-            <Link
-              className="text-sm text-muted-foreground hover:underline hover:!text-palette-blue-dark"
-              href={`tel:${mobilePhone}`}>
-              {mobilePhone}
-            </Link>
-          )}
-        </>
 
-        {linkedinLink && (
-          <Link href={linkedinLink} target="_blank" rel="noreferrer">
-            <FaLinkedin className="h-8 w-8 text-palette-blue-dark" />
-          </Link>
-        )}
+  const title = civility.find(x => x.value === titleSelect)?.title;
+  const displayName = [title && (await t(title)), firstName, name]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <div className="bg-card rounded-lg shadow-md overflow-hidden">
+      <div className="p-5">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage
+              className="object-cover"
+              src={getPartnerImageURL(picture?.id, tenant, {noimage: true})}
+              alt={displayName}
+            />
+          </Avatar>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-foreground">{displayName}</h3>
+            {jobTitleFunction?.name && (
+              <p className="text-sm text-muted-foreground">
+                {await tattr(jobTitleFunction.name)}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="mt-4 space-y-3 text-sm">
+          {emailAddress && (
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-muted-foreground"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              <Link
+                href={`mailto:${emailAddress.address}`}
+                className="text-primary hover:underline">
+                {emailAddress.address}
+              </Link>
+            </div>
+          )}
+          {fixedPhone && (
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-muted-foreground"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+              <Link
+                href={`tel:${fixedPhone}`}
+                className="text-primary hover:underline">
+                {fixedPhone}
+              </Link>
+            </div>
+          )}
+          {mobilePhone && (
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-muted-foreground"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                />
+              </svg>
+              <Link
+                href={`tel:${mobilePhone}`}
+                className="text-primary hover:underline">
+                {mobilePhone}
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
+      {linkedinLink && (
+        <div className="border-t border-border px-5 py-3 bg-muted/50">
+          <Link
+            href={linkedinLink}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-sm text-primary hover:underline">
+            <FaLinkedin className="h-5 w-5 text-[#0077b5]" />
+            <span>{await t('LinkedIn Profile')}</span>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

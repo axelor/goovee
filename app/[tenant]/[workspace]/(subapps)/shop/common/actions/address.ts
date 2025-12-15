@@ -2,6 +2,7 @@
 
 import {headers} from 'next/headers';
 
+// ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {TENANT_HEADER} from '@/middleware';
 import {
@@ -12,7 +13,7 @@ import {
   findPartnerAddress,
 } from '@/orm/address';
 import type {ID} from '@/types';
-import {clone} from '@/utils';
+import {clone, getPartnerId} from '@/utils';
 
 export async function findDefaultInvoicing() {
   const session = await getSession();
@@ -22,7 +23,9 @@ export async function findDefaultInvoicing() {
 
   if (!(user && tenantId)) return null;
 
-  return findDefaultInvoicingAddress(user.id, tenantId).then(clone);
+  const userId = getPartnerId(user);
+
+  return findDefaultInvoicingAddress(userId, tenantId).then(clone);
 }
 
 export async function findDefaultDelivery() {
@@ -33,7 +36,9 @@ export async function findDefaultDelivery() {
 
   if (!(user && tenantId)) return null;
 
-  return findDefaultDeliveryAddress(user.id, tenantId).then(clone);
+  const userId = getPartnerId(user);
+
+  return findDefaultDeliveryAddress(userId, tenantId).then(clone);
 }
 
 export async function findAddress(id: ID) {
@@ -44,7 +49,11 @@ export async function findAddress(id: ID) {
 
   if (!(user && tenantId)) return null;
 
-  return findPartnerAddress(id, tenantId).then(clone);
+  const userId = getPartnerId(user);
+
+  return findPartnerAddress({partnerId: userId, addressId: id, tenantId}).then(
+    clone,
+  );
 }
 
 export async function fetchDeliveryAddresses() {
@@ -55,7 +64,9 @@ export async function fetchDeliveryAddresses() {
 
   if (!(user && tenantId)) return null;
 
-  return findDeliveryAddresses(user.id, tenantId).then(clone);
+  const userId = getPartnerId(user);
+
+  return findDeliveryAddresses(userId, tenantId).then(clone);
 }
 
 export async function fetchInvoicingAddresses() {
@@ -66,5 +77,7 @@ export async function fetchInvoicingAddresses() {
 
   if (!(user && tenantId)) return null;
 
-  return findInvoicingAddresses(user.id, tenantId).then(clone);
+  const userId = getPartnerId(user);
+
+  return findInvoicingAddresses(userId, tenantId).then(clone);
 }

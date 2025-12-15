@@ -84,6 +84,7 @@ const findTenantTranslations = cache(async function findTenantTranslations(
       return client.aOSMetaTranslation
         .find({
           where: {language: locale, ...(keys ? {key: {in: keys}} : {})},
+          select: {key: true, value: true},
         })
         .then(t =>
           t.reduce(

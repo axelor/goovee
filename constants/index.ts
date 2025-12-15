@@ -244,3 +244,11 @@ export const INVOICE_ENTITY_TYPE = {
 
 export const NO_IMAGE_URL = '/images/no-image.png';
 export const DEFAULT_LOGO_URL = `/images/default-logo.png`;
+
+/**
+ * MAIN PRICE
+ */
+export const MAIN_PRICE = {
+  ATI: 'at',
+  WTI: 'wt',
+};

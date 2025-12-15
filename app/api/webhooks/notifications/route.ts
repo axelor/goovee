@@ -179,7 +179,13 @@ async function sendNotifications(data: {
     const client = await manager.getClient(tenantId);
 
     const users = await client.aOSPartner
-      .find({select: {emailAddress: true, localization: true}})
+      .find({
+        select: {
+          id: true,
+          emailAddress: {address: true},
+          localization: {code: true},
+        },
+      })
       .then(users =>
         users.map(u => ({
           id: u.id,

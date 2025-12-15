@@ -24,7 +24,6 @@ export const Hero = ({
   background?: VariantProps<BannerVariants>['background'];
 }) => {
   const renderSearch = () => <Search />;
-
   return (
     <HeroSearch
       title={title || i18n.t('app-directory')}

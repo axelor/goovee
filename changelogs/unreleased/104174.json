@@ -1,0 +1,6 @@
+{
+  "title": "Fix mainPrice comparison and add dynamic item pricing",
+  "type": "fix",
+  "description": "Corrected mainPrice comparison from 'ati' to 'at' and updated payload items to apply conditional ATI/WT pricing while creating and requesting an order.",
+  "scope": ["shop"]
+}

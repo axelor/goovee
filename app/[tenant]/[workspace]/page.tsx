@@ -2,10 +2,12 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {findSubapps} from '@/orm/workspace';
+import {findSubapps, findWorkspace} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {SEARCH_PARAMS} from '@/constants';
 import {getLoginURL} from '@/utils/url';
+import {ClientRedirection} from './client';
+import {Home} from './home';
 
 export default async function Page({
   params,
@@ -28,15 +30,38 @@ export default async function Page({
     return user ? notFound() : redirect(loginURL);
   }
 
+  const workspace = await findWorkspace({
+    user,
+    url: workspaceURL,
+    tenantId: tenant,
+  });
+
+  if (!workspace) {
+    return user ? notFound() : redirect(loginURL);
+  }
+
   const apps = await findSubapps({
     user: session?.user,
     url: workspaceURL,
     tenantId: tenant,
   });
 
+  if (workspace.config?.isHomepageDisplay) {
+    return (
+      <Home
+        tenant={tenant}
+        user={session?.user}
+        workspace={workspace}
+        workspaceURI={workspaceURI}
+        apps={apps}
+      />
+    );
+  }
+
   if (!apps?.length) {
     return user ? notFound() : redirect(loginURL);
   }
 
-  redirect(`${workspaceURL}/${apps[0].code}`);
+  const defaultApp = apps[0];
+  return <ClientRedirection url={`${workspaceURL}/${defaultApp.code}`} />;
 }

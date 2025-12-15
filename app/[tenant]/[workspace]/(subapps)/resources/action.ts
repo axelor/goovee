@@ -48,10 +48,19 @@ export async function findDmsFiles({
       },
       select: {
         fileName: true,
-        createdBy: true,
+        createdBy: {name: true, fullName: true},
         createdOn: true,
-        metaFile: true,
-        parent: true,
+        metaFile: {
+          description: true,
+          sizeText: true,
+          createdOn: true,
+          updatedOn: true,
+          fileName: true,
+          filePath: true,
+          fileSize: true,
+          fileType: true,
+        },
+        parent: {id: true},
         isDirectory: true,
       },
     })

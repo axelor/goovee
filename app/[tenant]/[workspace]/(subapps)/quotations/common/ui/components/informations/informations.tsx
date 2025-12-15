@@ -5,6 +5,7 @@ import {MdOutlineFileDownload} from 'react-icons/md';
 // ---- CORE IMPORTS ---- //
 import {Separator, Button, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
+import {formatDate} from '@/lib/core/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
 import {getStatus} from '@/subapps/quotations/common/utils/quotations';
@@ -16,7 +17,7 @@ export const Informations = ({statusSelect, endOfValidityDate}: InfoProps) => {
   const DateInfoRow = (label: string, date: any) => (
     <div className="flex items-center gap-2">
       <h5 className="text-sm font-medium mb-0">{i18n.t(label)}:</h5>
-      <p className="text-sm">{date || '--/--/----'}</p>
+      <p className="text-sm">{formatDate(date) || '--/--/----'}</p>
     </div>
   );
 

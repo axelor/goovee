@@ -9,7 +9,7 @@ import {
   findDefaultPartnerWorkspace,
 } from '@/orm/workspace';
 import {getSession} from '@/auth';
-import {clone} from '@/utils';
+import {clone, getPartnerId} from '@/utils';
 import {TenancyType, manager} from '@/tenant';
 import {DEFAULT_TENANT} from '@/constants';
 
@@ -60,7 +60,7 @@ export default async function Page({
   let redirectURL;
 
   if (user) {
-    const partnerId = user.isContact ? user.mainPartnerId : user.id;
+    const partnerId = getPartnerId(user);
 
     const defaultWorkspace = await findDefaultPartnerWorkspace({
       partnerId,

@@ -1,14 +1,16 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {EditorState} from 'draft-js';
+import {convertToRaw, ContentState, EditorState} from 'draft-js';
 import dynamic from 'next/dynamic';
-import {stateToHTML} from 'draft-js-export-html';
-import {stateFromHTML} from 'draft-js-import-html';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import './rich-text-editor.css';
+import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
+
+// ---- CORE IMPORTS ---- //
 import {cn} from '@/utils/css';
 import {Skeleton} from '../skeleton';
+import './rich-text-editor.css';
 
 const Editor = dynamic(
   () => import('react-draft-wysiwyg').then(module => module.Editor),
@@ -44,31 +46,35 @@ export const RichTextEditor = ({
 
   const initiated = useRef(false);
 
-  const [editorState, setEditorState] = useState<EditorState>(
-    content
-      ? EditorState.createWithContent(stateFromHTML(content)) ||
-          EditorState.createEmpty()
-      : EditorState.createEmpty(),
+  const convertHtmlToEditorState = (html?: string) => {
+    if (!html) return EditorState.createEmpty();
+    const blocksFromHtml = htmlToDraft(html);
+    const contentState = ContentState.createFromBlockArray(
+      blocksFromHtml.contentBlocks,
+      blocksFromHtml.entityMap,
+    );
+    return EditorState.createWithContent(contentState);
+  };
+
+  const [editorState, setEditorState] = useState<EditorState>(() =>
+    convertHtmlToEditorState(content),
   );
 
   const handleChange = useCallback(
-    (editorState: EditorState) => {
-      setEditorState(editorState);
-      const contentState = editorState.getCurrentContent();
-      const htmlVersion = stateToHTML(contentState);
+    (newEditorState: EditorState) => {
+      setEditorState(newEditorState);
+      const contentStateRaw = convertToRaw(newEditorState.getCurrentContent());
+      const htmlVersion = draftToHtml(contentStateRaw);
+
       onChange?.(htmlVersion);
     },
     [onChange],
   );
 
   useEffect(() => {
-    if (initiated.current) {
-      setEditorState(
-        EditorState.createWithContent(stateFromHTML(content)) ||
-          EditorState.createEmpty(),
-      );
+    if (initiated.current && content) {
+      setEditorState(convertHtmlToEditorState(content));
     }
-
     initiated.current = true;
   }, [content]);
 

@@ -4,6 +4,7 @@ import {memo, useLayoutEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {SUBAPP_CODES} from '@/constants';
 
 import {Card} from '../card';
 import {MapContentProps} from './types';
@@ -21,7 +22,7 @@ export const Map = memo((props: MapContentProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [popup, setPopup] = useState<Popup | null>(null);
   const {className, center, zoom, items, small} = props;
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
 
   useLayoutEffect(() => {
     if (!mapRef.current) return;
@@ -37,7 +38,10 @@ export const Map = memo((props: MapContentProps) => {
 
     items.forEach(item => {
       const popupEl = document.createElement('div');
-      L.marker([Number(item.address?.latit), Number(item.address?.longit)])
+      L.marker([
+        Number(item.mainAddress?.latit),
+        Number(item.mainAddress?.longit),
+      ])
         .bindPopup(popupEl, {
           minWidth: small ? 300 : 500,
           className: '[&_.leaflet-popup-content]:m-0',
@@ -60,9 +64,10 @@ export const Map = memo((props: MapContentProps) => {
         createPortal(
           <Card
             item={popup.item}
-            url={`${workspaceURI}/directory/entry/${popup.item.id}`}
-            small={small}
-            workspaceURI={workspaceURI}
+            url={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${popup.item.id}`}
+            compact={small}
+            tenant={tenant}
+            className="hover:bg-accent"
           />,
           popup.el,
         )}

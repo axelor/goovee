@@ -1,7 +1,7 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {clone} from '@/utils';
+import {clone, getPartnerId} from '@/utils';
 import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {findSubappAccess} from '@/orm/workspace';
@@ -122,7 +122,7 @@ export default async function Page({params, searchParams}: PageParams) {
     data = quotation;
   }
 
-  const userId = user.isContact ? user.mainPartnerId! : user.id!;
+  const userId = getPartnerId(user);
 
   const {deliveryAddresses, invoicingAddresses} = await fetchAddresses(
     userId,

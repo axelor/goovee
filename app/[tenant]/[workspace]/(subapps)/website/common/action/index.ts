@@ -127,7 +127,7 @@ export async function getLocaleRedirectionURL({
         },
       },
       select: {
-        pageSet: true,
+        pageSet: {select: {slug: true}},
       },
     });
     const relatedPage = websitePage?.pageSet?.[0];
@@ -248,6 +248,7 @@ export async function updateWikiContent({
       version: contentVersion,
       attrs: {...attributes, [fieldName]: content} as any,
     },
+    select: {id: true},
   });
   return {
     success: true,

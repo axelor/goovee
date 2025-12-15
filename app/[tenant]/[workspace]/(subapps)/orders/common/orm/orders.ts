@@ -7,7 +7,7 @@ import {
   ORDER_BY,
 } from '@/constants';
 import {clone, getPageInfo, getSkipInfo} from '@/utils';
-import {formatDate, formatNumber} from '@/locale/server/formatters';
+import {formatNumber} from '@/locale/server/formatters';
 import type {Partner, PortalWorkspace} from '@/types';
 import {ID} from '@goovee/orm';
 import {and} from '@/utils/orm';
@@ -81,7 +81,12 @@ export const findOrders = async ({
         createdOn: true,
         inTaxTotal: true,
         exTaxTotal: true,
-        currency: true,
+        currency: {
+          code: true,
+          name: true,
+          numberOfDecimals: true,
+          symbol: true,
+        },
       },
     })
     .catch((err: any) => {
@@ -97,7 +102,6 @@ export const findOrders = async ({
 
     const $order = {
       ...order,
-      createdOn: await formatDate(order?.createdOn!),
       exTaxTotal: await formatNumber(exTaxTotal, {
         scale: unit,
         currency: currencySymbol,
@@ -289,7 +293,6 @@ export async function findOrder({
 
   return {
     ...order,
-    createdOn: await formatDate(order?.createdOn!),
     exTaxTotal: await formatNumber(exTaxTotal, {
       scale,
       currency: currencySymbol,
@@ -336,9 +339,9 @@ export async function findInvoices({
       select: {
         invoiceId: true,
         createdOn: true,
-        saleOrder: true,
+        saleOrder: {id: true},
         invoiceLineList: {
-          select: {saleOrderLine: {saleOrder: true}},
+          select: {saleOrderLine: {saleOrder: {id: true}}},
         },
       },
     })
@@ -418,28 +421,33 @@ async function processSaleOrderLineList(
         currency: currencySymbol,
         type: 'DECIMAL',
       }),
+      taxLineSet: await Promise.all(
+        line.taxLineSet.map(async (taxLine: any) => ({
+          ...taxLine,
+          value: await formatNumber(taxLine.value, {
+            scale,
+            type: 'DECIMAL',
+          }),
+        })),
+      ),
     })),
   );
 }
 
 async function processInvoices(invoices: any[]) {
   return Promise.all(
-    (invoices ?? []).map(async ({invoiceId, createdOn, ...rest}) => ({
+    (invoices ?? []).map(async ({invoiceId, ...rest}) => ({
       ...rest,
       invoiceId,
-      createdOn: await formatDate(createdOn!),
     })),
   );
 }
 
 async function processCustomerDeliveries(customerDeliveries: any[]) {
   return Promise.all(
-    (customerDeliveries ?? []).map(
-      async ({stockMoveSeq, createdOn, ...rest}) => ({
-        ...rest,
-        stockMoveSeq,
-        createdOn: await formatDate(createdOn!),
-      }),
-    ),
+    (customerDeliveries ?? []).map(async ({stockMoveSeq, ...rest}) => ({
+      ...rest,
+      stockMoveSeq,
+    })),
   );
 }

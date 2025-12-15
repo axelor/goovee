@@ -27,7 +27,7 @@ export async function findInviteById({
       },
       partner: {
         id: true,
-        localization: true,
+        localization: {code: true, isAvailableOnPortal: true, name: true},
       },
       workspace: {
         url: true,

@@ -121,6 +121,7 @@ export default function Personal({
     fullName,
     role,
     mainPartner,
+    linkedinLink,
   },
   partners,
 }: {
@@ -136,6 +137,7 @@ export default function Personal({
     fullName?: string;
     role?: string;
     mainPartner?: string;
+    linkedinLink?: string;
   };
   partners: Array<{id: ID; name: string}>;
 }) {
@@ -169,7 +171,7 @@ export default function Personal({
       showLinkOnDirectory: false,
       showEmailOnDirectory: false,
       showPhoneOnDirectory: false,
-      linkedInLink: '',
+      linkedInLink: linkedinLink || '',
       mainPartner,
     },
   });
@@ -597,6 +599,28 @@ export default function Personal({
                 />
               )}
             </div>
+
+            {!isCompany && (
+              <div>
+                <FormField
+                  control={form.control}
+                  name="linkedInLink"
+                  render={({field}) => (
+                    <FormItem>
+                      <FormLabel>{i18n.t('LinkedIn link')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value}
+                          placeholder={i18n.t('Enter your linkedin link')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
             <div className="sr-only space-y-4">
               <Title text={i18n.t('Directory')}></Title>
               <div>
@@ -698,25 +722,6 @@ export default function Personal({
                       <div className="space-y-1 leading-none">
                         <FormLabel>{i18n.t('Phone')}</FormLabel>
                       </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div>
-                <FormField
-                  control={form.control}
-                  name="linkedInLink"
-                  render={({field}) => (
-                    <FormItem>
-                      <FormLabel>{i18n.t('LinkedIn link')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value={field.value}
-                          placeholder={i18n.t('Enter your linkedin link')}
-                        />
-                      </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />

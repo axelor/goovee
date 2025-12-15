@@ -42,6 +42,7 @@ export interface Event {
   maxParticipantPerEvent: number;
   maxParticipantPerRegistration: number;
   additionalFieldSet: any[];
+  priceScale: number;
 }
 export interface EventsProps {
   events: Event[];
@@ -89,7 +90,7 @@ export interface ListEvent {
     } | null;
     color?: string;
   }[];
-  eventStartDateTime?: Date;
+  eventStartDateTime: Date;
   eventAllDay?: boolean;
   eventEndDateTime?: Date;
   registrationDeadlineDateTime?: Date;

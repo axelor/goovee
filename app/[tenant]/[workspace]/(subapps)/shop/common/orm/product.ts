@@ -8,6 +8,7 @@ import {
   DEFAULT_PAGE,
   DEFAULT_TAX_VALUE,
   DEFAULT_UNIT_PRICE_SCALE,
+  MAIN_PRICE,
   OUT_OF_STOCK_TYPE,
 } from '@/constants';
 import type {
@@ -505,8 +506,8 @@ export async function findProducts({
         type: 'DECIMAL',
       })) as string;
 
-      let primary = mainPrice === 'at' ? ati : wt;
-      let secondary = mainPrice === 'at' ? wt : ati;
+      let primary = mainPrice === MAIN_PRICE.ATI ? ati : wt;
+      let secondary = mainPrice === MAIN_PRICE.ATI ? wt : ati;
 
       const [formattedPrimary, formattedSecondary] = await Promise.all([
         formatNumber(primary, {
@@ -521,8 +522,8 @@ export async function findProducts({
         }),
       ]);
 
-      const unitPrimary = mainPrice === 'at' ? 'ATI' : 'WT';
-      const unitSecondary = mainPrice === 'at' ? 'WT' : 'ATI';
+      const unitPrimary = mainPrice === MAIN_PRICE.ATI ? 'ATI' : 'WT';
+      const unitSecondary = mainPrice === MAIN_PRICE.ATI ? 'WT' : 'ATI';
 
       const displayPrimary = `${formattedPrimary} ${unitPrimary}`;
       const displaySecondary = `${formattedSecondary} ${unitSecondary}`;
@@ -784,7 +785,7 @@ export async function findProductsFromStockLocation({
 
     const products = await client.aOSStockLocationLine.find({
       where: filters,
-      select: {product: true},
+      select: {product: {id: true}},
     });
 
     return products?.map((item: any) => item.product.id) || [];

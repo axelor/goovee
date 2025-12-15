@@ -12,11 +12,15 @@ export type ExpandRecursively<T> = T extends (...args: infer A) => infer R
   ? (...args: ExpandRecursively<A>) => ExpandRecursively<R>
   : T extends Date
     ? Date
-    : T extends object
-      ? T extends infer O
-        ? {[K in keyof O]: ExpandRecursively<O[K]>}
-        : never
-      : T;
+    : T extends BigDecimal
+      ? BigDecimal
+      : T extends Promise<infer U>
+        ? Promise<ExpandRecursively<U>>
+        : T extends object
+          ? T extends infer O
+            ? {[K in keyof O]: ExpandRecursively<O[K]>}
+            : never
+          : T;
 
 export type Merge<A, B> = {
   [K in keyof A | keyof B]: K extends keyof A & keyof B

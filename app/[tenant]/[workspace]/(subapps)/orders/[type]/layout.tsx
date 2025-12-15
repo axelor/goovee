@@ -1,15 +1,15 @@
 import {notFound} from 'next/navigation';
 
 // ---- LOCAL IMPORTS ---- //
-
 import {ORDER_TAB_ITEMS} from '@/subapps/orders/common/constants/orders';
+import {OrderType} from '@/subapps/orders/common/types/orders';
 
 export default async function Layout({
   params,
   children,
 }: {
   params: {
-    type: string;
+    type: OrderType;
     tenant: string;
     workspace: string;
   };

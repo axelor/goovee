@@ -19,6 +19,7 @@ import {findWorkspace} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
 import {SEARCH_PARAMS} from '@/constants';
 import type {PortalWorkspace} from '@/types';
+import {getPartnerId} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
 import {inviteTemplate} from '../../../common/constants/template';
@@ -188,7 +189,7 @@ export async function sendInvites({
 
   let inviteError;
 
-  const partnerId = (user.isContact ? user.mainPartnerId : user.id) as any;
+  const partnerId = getPartnerId(user);
 
   const partner = await findPartnerById(partnerId, tenantId);
 

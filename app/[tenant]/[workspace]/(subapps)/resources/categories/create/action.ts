@@ -164,6 +164,7 @@ export async function create(formData: FormData, workspaceURL: string) {
               }
             : {}),
         },
+        select: {id: true},
       })
       .then(clone);
 

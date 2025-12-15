@@ -15,7 +15,6 @@ import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {ID, PortalWorkspace} from '@/types';
 import {getSession} from '@/auth';
 import {getFileSizeText} from '@/utils/files';
-import {getCurrentDateTime} from '@/utils/date';
 import {manager} from '@/tenant';
 import {TENANT_HEADER} from '@/middleware';
 import {filterPrivate} from '@/orm/filter';
@@ -157,6 +156,7 @@ export async function pinGroup({
           },
           isPin,
         },
+        select: {id: true},
       })
       .then(clone);
 
@@ -326,6 +326,7 @@ export async function joinGroup({
           notificationSelect: NOTIFICATION_VALUES.ALL_ON_MY_POST,
           isPin: false,
         },
+        select: {id: true},
       })
       .then(clone);
 
@@ -415,6 +416,7 @@ export async function addGroupNotification({
           version: memberGroup.version,
           notificationSelect: notificationType,
         },
+        select: {id: true},
       })
       .then(clone);
 
@@ -498,12 +500,23 @@ export async function addPost({
     );
   }
 
-  const publicationDateTime: any = getCurrentDateTime();
-
+  const timeStamp = new Date();
   try {
     const post = await client.aOSPortalForumPost.create({
       select: {
-        attachmentList: {select: {metaFile: true}},
+        attachmentList: {
+          select: {
+            metaFile: {
+              fileName: true,
+              fileType: true,
+              fileSize: true,
+              filePath: true,
+              sizeText: true,
+              createdOn: true,
+              updatedOn: true,
+            },
+          },
+        },
         title: true,
         forumGroup: {
           name: true,
@@ -517,8 +530,8 @@ export async function addPost({
         createdOn: true,
       },
       data: {
-        postDateT: publicationDateTime,
-        createdOn: publicationDateTime,
+        postDateT: timeStamp,
+        createdOn: timeStamp,
         forumGroup: {
           where: {
             ...(await filterPrivate({user, tenantId})),
@@ -727,13 +740,17 @@ async function uploadAttachment(formData: FormData): Promise<any> {
         fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
       );
 
-      const metaFile: any = await client.aOSMetaFile.create({
+      const metaFile = await client.aOSMetaFile.create({
         data: {
           fileName: name,
           filePath: timestampFilename,
           fileType: file.type,
           fileSize: file.size,
           sizeText: getFileSizeText(file.size),
+        },
+        select: {
+          fileName: true,
+          filePath: true,
         },
       });
 

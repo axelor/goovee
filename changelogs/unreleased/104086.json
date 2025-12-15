@@ -1,0 +1,6 @@
+{
+  "title": "Fix redirection after first time sso keycloak login",
+  "type": "fix",
+  "description": "Redirect the user after first time login using keycloak without refreshing the page.",
+  "scope": ["core"]
+}

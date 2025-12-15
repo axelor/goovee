@@ -3,7 +3,7 @@ import {EventPayments} from '@/subapps/events/common/types';
 
 export const getCalculatedTotalPrice = (
   data: Record<string, any>,
-  event: EventPayments = {id: '', displayAti: '0', facilityList: []},
+  event: EventPayments,
 ): {
   total: number;
   subscriptionPrices: {facility: string; price: number}[];
@@ -15,7 +15,7 @@ export const getCalculatedTotalPrice = (
 
   const getFacilityPrice = (facilityName: string) => {
     const facility = facilities.find(f => f.facility === facilityName);
-    return facility ? parseFloat(facility.displayAti) || 0 : 0;
+    return facility ? Number(facility.displayAti) || 0 : 0;
   };
 
   const addToSubscriptionPrices = (facility: string, price: number) => {
@@ -34,6 +34,7 @@ export const getCalculatedTotalPrice = (
       return sum + price;
     }, 0);
   };
+
   let total =
     (data.subscriptionSet
       ? calculateSubscriptionsTotal(data.subscriptionSet)

@@ -1,7 +1,8 @@
+// ---- CORE IMPORTS ---- //
 import {manager, type Tenant} from '@/tenant';
 import {AOSPortalAppConfig} from '@/goovee/.generated/models';
 import {ID, Partner, PortalWorkspace, User} from '@/types';
-import {clone} from '@/utils';
+import {clone, getPartnerId} from '@/utils';
 import {SelectOptions} from '@goovee/orm';
 
 export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
@@ -62,7 +63,7 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
       title: true,
       subTitle: true,
       href: true,
-      image: true,
+      image: {id: true},
     },
   },
   allowGuestEventRegistration: true,
@@ -76,19 +77,19 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   isExistingContactsOnly: true,
   invitationTemplateList: {
     select: {
-      localization: true,
-      template: true,
+      localization: {code: true},
+      template: {name: true, subject: true, content: true, language: true},
     },
   },
   otpTemplateList: {
     select: {
-      localization: true,
-      template: true,
+      localization: {code: true},
+      template: {name: true, subject: true, content: true, language: true},
     },
   },
   noMoreStockSelect: true,
   outOfStockQty: true,
-  defaultStockLocation: true,
+  defaultStockLocation: {id: true},
   directoryHeroTitle: true,
   directoryHeroBgImage: {
     id: true,
@@ -116,12 +117,21 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   isShowPublicationDate: true,
   isShowPublicationTime: true,
   isDisplayContact: true,
-  contactEmailAddress: true,
+  contactEmailAddress: {address: true},
   contactName: true,
   contactPhone: true,
   isCompanyOrAddressRequired: true,
   payInAdvance: true,
   advancePaymentPercentage: true,
+  isHomepageDisplay: true,
+  isHomepageDisplayNews: true,
+  isHomepageDisplayEvents: true,
+  isHomepageDisplayMessage: true,
+  isHomepageDisplayResources: true,
+  homepageHeroTitle: true,
+  homepageHeroDescription: true,
+  homepageHeroOverlayColorSelect: true,
+  homepageHeroBgImage: {id: true},
 };
 
 export async function findWorkspaceMembers({
@@ -165,7 +175,7 @@ export async function findWorkspaceMembers({
       firstName: true,
       name: true,
       fullName: true,
-      picture: true,
+      picture: {id: true},
       isContact: true,
       emailAddress: {
         address: true,
@@ -192,7 +202,7 @@ export async function findWorkspaceMembers({
         firstName: true,
         name: true,
         fullName: true,
-        picture: true,
+        picture: {id: true},
         isContact: true,
         emailAddress: {
           address: true,
@@ -260,12 +270,22 @@ export async function findContactWorkspaceConfig({
           },
         },
         select: {
-          portalWorkspace: true,
           isAdmin: true,
           contactAppPermissionList: {
             select: {
               roleSelect: true,
-              app: true,
+              app: {
+                background: true,
+                orderForMySpaceMenu: true,
+                showInMySpace: true,
+                code: true,
+                showInTopMenu: true,
+                color: true,
+                icon: true,
+                installed: true,
+                name: true,
+                orderForTopMenu: true,
+              },
             },
           },
         },
@@ -314,7 +334,20 @@ export async function findPartnerWorkspaceConfig({
         },
         select: {
           portalAppConfig: portalAppConfigFields,
-          apps: true,
+          apps: {
+            select: {
+              background: true,
+              orderForMySpaceMenu: true,
+              showInMySpace: true,
+              code: true,
+              showInTopMenu: true,
+              color: true,
+              icon: true,
+              installed: true,
+              name: true,
+              orderForTopMenu: true,
+            },
+          },
         },
       },
     },
@@ -354,7 +387,20 @@ export async function findDefaultPartnerWorkspaceConfig({
     },
     select: {
       defaultPartnerWorkspace: {
-        apps: true,
+        apps: {
+          select: {
+            background: true,
+            orderForMySpaceMenu: true,
+            showInMySpace: true,
+            code: true,
+            showInTopMenu: true,
+            color: true,
+            icon: true,
+            installed: true,
+            name: true,
+            orderForTopMenu: true,
+          },
+        },
         portalAppConfig: portalAppConfigFields,
       },
     },
@@ -409,7 +455,20 @@ export async function findDefaultGuestWorkspaceConfig({
     },
     select: {
       defaultGuestWorkspace: {
-        apps: true,
+        apps: {
+          select: {
+            background: true,
+            orderForMySpaceMenu: true,
+            showInMySpace: true,
+            code: true,
+            showInTopMenu: true,
+            color: true,
+            icon: true,
+            installed: true,
+            name: true,
+            orderForTopMenu: true,
+          },
+        },
         portalAppConfig: portalAppConfigFields,
       },
     },
@@ -448,7 +507,7 @@ export async function findWorkspace({
     select: {
       name: true,
       url: true,
-      defaultTheme: true,
+      defaultTheme: {name: true, css: true},
       navigationSelect: true,
       user: {id: true},
       workspaceLogo: {
@@ -462,7 +521,7 @@ export async function findWorkspace({
   let workspaceConfig;
 
   if (user) {
-    const partnerId = user.isContact ? user.mainPartnerId : user.id;
+    const partnerId = getPartnerId(user);
 
     const partnerWorkspaceConfig = await findPartnerWorkspaceConfig({
       partnerId,
@@ -542,7 +601,20 @@ export async function findOpenWorkspaces({
         url: true,
         allowRegistrationSelect: true,
         defaultGuestWorkspace: {
-          apps: true,
+          apps: {
+            select: {
+              background: true,
+              orderForMySpaceMenu: true,
+              showInMySpace: true,
+              code: true,
+              showInTopMenu: true,
+              color: true,
+              icon: true,
+              installed: true,
+              name: true,
+              orderForTopMenu: true,
+            },
+          },
         },
       },
       orderBy: {updatedOn: 'DESC'} as any,
@@ -700,9 +772,9 @@ export async function findWorkspaceByURL({
       name: true,
       navigationSelect: true,
       url: true,
-      defaultGuestWorkspace: true,
-      defaultTheme: true,
-      defaultPartnerWorkspace: true,
+      defaultGuestWorkspace: {id: true, name: true},
+      defaultTheme: {css: true, name: true},
+      defaultPartnerWorkspace: {id: true, name: true},
       allowRegistrationSelect: true,
     },
   });

@@ -4,7 +4,7 @@ import {ComponentPropsWithoutRef, forwardRef} from 'react';
 
 import type {Maybe} from '@/types/util';
 
-type InnerHTMLProps = {
+export type InnerHTMLProps = {
   content: Maybe<string>;
 } & Omit<
   ComponentPropsWithoutRef<'div'>,

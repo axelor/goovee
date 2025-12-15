@@ -98,5 +98,6 @@ export async function markPaymentAsProcessed({
       status: CONTEXT_STATUS.processed,
       updatedOn: timeStamp,
     },
+    select: {id: true},
   });
 }

@@ -87,6 +87,7 @@ export type EventPayments = {
     formattedPrice: string;
     displayAti?: string | number;
   }>;
+  priceScale: number;
 };
 
 export type Subscription = {

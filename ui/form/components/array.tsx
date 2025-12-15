@@ -58,6 +58,7 @@ export const ArrayComponent = ({
       form.setValue(
         field.name,
         _current.filter(({valueId}: any) => valueId !== _valueId),
+        {shouldValidate: true},
       );
     },
     [field.name, form],

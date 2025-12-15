@@ -358,6 +358,43 @@
     {
       "name": "advancePaymentPercentage",
       "type": "Decimal"
+    },
+    {
+      "name": "isHomepageDisplay",
+      "type": "Boolean"
+    },
+    {
+      "name": "isHomepageDisplayNews",
+      "type": "Boolean"
+    },
+    {
+      "name": "isHomepageDisplayEvents",
+      "type": "Boolean"
+    },
+    {
+      "name": "isHomepageDisplayMessage",
+      "type": "Boolean"
+    },
+    {
+      "name": "isHomepageDisplayResources",
+      "type": "Boolean"
+    },
+    {
+      "name": "homepageHeroTitle",
+      "type": "String"
+    },
+    {
+      "name": "homepageHeroDescription",
+      "type": "String"
+    },
+    {
+      "name": "homepageHeroOverlayColorSelect",
+      "type": "String"
+    },
+    {
+      "name": "homepageHeroBgImage",
+      "type": "ManyToOne",
+      "target": "AOSMetaFile"
     }
   ]
 }
