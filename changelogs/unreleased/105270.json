@@ -1,0 +1,5 @@
+{
+  "title": "Show header in fixed position based on config",
+  "type": "feature",
+  "scope": ["core"]
+}

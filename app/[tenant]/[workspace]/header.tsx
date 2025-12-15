@@ -25,6 +25,7 @@ import {PortalWorkspace} from '@/types';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
+import {cn} from '@/utils/css';
 
 function Logo({workspace}: {workspace: PortalWorkspace}) {
   const {workspaceURI} = useWorkspace();
@@ -93,10 +94,14 @@ export default function Header({
 
   const shouldDisplayIcons = visible && !loading;
   const showCartIcon = showCart && shouldDisplayIcons;
+  const isFixedHeader = workspace?.config?.isFixedHeader;
 
   return (
-    <>
-      <div className="min-h-16 bg-background text-foreground px-6 py-2 flex items-center border-b border-border border-solid">
+    <div className={cn(isFixedHeader && 'sticky top-0 z-50', 'bg-background')}>
+      <div
+        className={cn(
+          'min-h-16 bg-background text-foreground px-6 py-2 flex items-center border-b border-border border-solid',
+        )}>
         <Logo workspace={workspace} />
 
         <div className="grow" />
@@ -178,6 +183,6 @@ export default function Header({
           </div>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
