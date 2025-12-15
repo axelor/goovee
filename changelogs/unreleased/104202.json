@@ -1,0 +1,6 @@
+{
+  "title": "Always include paidAmount in payload",
+  "type": "fix",
+  "description": "Updated shop order invoice payload to always include paidAmount, defaulting to the full total when no advance payment percentage is applied.",
+  "scope": ["shop"]
+}

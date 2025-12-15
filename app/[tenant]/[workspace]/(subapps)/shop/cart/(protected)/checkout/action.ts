@@ -146,13 +146,15 @@ async function createOrder({
     const payInAdvance = workspace.config?.payInAdvance;
     const advancePaymentPercentage = workspace.config?.advancePaymentPercentage;
 
-    let expectedAmount;
+    let paidAmount;
     if (payInAdvance && Number(advancePaymentPercentage) > 0) {
-      expectedAmount = calculateAdvanceAmount({
+      paidAmount = calculateAdvanceAmount({
         amount: Number(total),
         percentage: Number(advancePaymentPercentage),
         payInAdvance,
       }).toString();
+    } else {
+      paidAmount = Number(total).toString();
     }
 
     const isAtiPricing = workspace?.config?.mainPrice === MAIN_PRICE.ATI;
@@ -177,7 +179,7 @@ async function createOrder({
       workspaceId: workspace.id,
       invocingPartnerAddressId: invoicingAddress,
       deliveryPartnerAddressId: deliveryAddress,
-      ...(expectedAmount ? {paidAmount: expectedAmount} : {}),
+      paidAmount,
     };
 
     const res = await axios.post(ws, payload, {
