@@ -132,6 +132,7 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   homepageHeroDescription: true,
   homepageHeroOverlayColorSelect: true,
   homepageHeroBgImage: {id: true},
+  isFixedHeader: true,
 };
 
 export async function findWorkspaceMembers({

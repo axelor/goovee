@@ -395,6 +395,10 @@
       "name": "homepageHeroBgImage",
       "type": "ManyToOne",
       "target": "AOSMetaFile"
+    },
+    {
+      "name": "isFixedHeader",
+      "type": "Boolean"
     }
   ]
 }
