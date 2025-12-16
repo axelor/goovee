@@ -856,7 +856,7 @@ export const createComment: CreateComment = async formData => {
     tenantId,
   });
 
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return {error: true, message: await t('Unauthorized Access')};
   }
 
@@ -975,7 +975,7 @@ export const fetchComments: FetchComments = async props => {
     url: workspaceURL,
     tenantId,
   });
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return {error: true, message: await t('Unauthorized Access')};
   }
 

@@ -24,8 +24,8 @@
       "name": "icon"
     },
     {
-      "type": "String",
-      "name": "installed"
+      "type": "Boolean",
+      "name": "isInstalled"
     },
     {
       "type": "Int",

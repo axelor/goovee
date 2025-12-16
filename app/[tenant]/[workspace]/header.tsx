@@ -109,7 +109,7 @@ export default function Header({
           <div className="flex items-center gap-8">
             {shouldDisplayIcons &&
               subapps
-                .filter((app: any) => app.installed && app.showInTopMenu)
+                .filter((app: any) => app.isInstalled && app.showInTopMenu)
                 .sort(
                   (app1: any, app2: any) =>
                     app1.orderForTopMenu - app2.orderForTopMenu,
@@ -155,7 +155,7 @@ export default function Header({
           </div>
           <div className="flex gap-10 w-100 max-w-full overflow-x-auto">
             {subapps
-              ?.filter((app: any) => app.installed)
+              ?.filter((app: any) => app.isInstalled)
               .sort(
                 (app1: any, app2: any) =>
                   app1.orderForTopMenu - app2.orderForTopMenu,

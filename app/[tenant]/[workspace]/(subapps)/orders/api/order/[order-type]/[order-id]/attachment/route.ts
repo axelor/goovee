@@ -50,7 +50,7 @@ export async function GET(
     tenantId,
   });
 
-  if (!subapp?.installed) {
+  if (!subapp?.isInstalled) {
     return new NextResponse('Access denied', {status: 401});
   }
 

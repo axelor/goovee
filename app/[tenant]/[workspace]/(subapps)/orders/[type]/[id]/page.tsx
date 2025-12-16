@@ -48,7 +48,7 @@ async function Order({
     tenantId: tenant,
   });
 
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return notFound();
   }
 

@@ -57,7 +57,7 @@ async function Invoices({
     tenantId: tenant,
   });
 
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return notFound();
   }
 

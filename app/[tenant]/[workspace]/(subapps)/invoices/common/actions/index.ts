@@ -794,7 +794,7 @@ async function updateInvoice({
     tenantId,
   });
 
-  if (!app?.installed) {
+  if (!app?.isInstalled) {
     return {error: true, message: await t('Unauthorized app access.')};
   }
 
