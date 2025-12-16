@@ -164,6 +164,9 @@ export async function fetchLatestFiles({
     },
     select: {
       fileName: true,
+      parent: {
+        fileName: true,
+      },
       createdBy: {name: true, fullName: true},
       createdOn: true,
       metaFile: {
@@ -179,7 +182,7 @@ export async function fetchLatestFiles({
     },
     orderBy: {
       updatedOn: 'DESC',
-    } as any,
+    },
     take,
   });
 

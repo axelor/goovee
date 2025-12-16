@@ -36,6 +36,7 @@ export function ResourceList({resources}: any) {
           const author = resource.createdBy?.name || '--';
           const date = formatDate(resource?.createdOn) || '--';
           const size = resource?.metaFile?.sizeText || '--';
+          const parent = resource?.parent?.fileName || '--';
 
           const icon = getFileTypeIcon(resource.metaFile?.fileType);
           const iconColor = getIconColor(icon);
@@ -49,8 +50,8 @@ export function ResourceList({resources}: any) {
               key={resource.id}
               onClick={handleRedirection(resource)}>
               <div className="leading-5 text-sm space-y-2">
-                <div className="grid grid-cols-[1fr_40%] items-center">
-                  <div className="flex items-center gap-2">
+                <div className="grid grid-cols-[1fr_30px] lg:grid-cols-[1fr_60%] items-center">
+                  <div className="flex items-center gap-2 min-w-0">
                     <DynamicIcon
                       icon={icon}
                       className={'h-6 w-6 shrink-0'}
@@ -62,30 +63,34 @@ export function ResourceList({resources}: any) {
                           }
                         : {})}
                     />
-                    <h3 className="font-semibold line-clamp-1">
+                    <h3 className="font-semibold truncate min-w-0 flex-1">
                       {resource.fileName}
                     </h3>
                   </div>
-                  <div className="grid sm:grid-cols-[1fr_1fr_1fr_20px] gap-16 md:gap-12 lg:gap-16 shrink-0">
-                    <p className="hidden sm:inline-block line-clamp-1 whitespace-nowrap">
+                  <div className="grid lg:grid-cols-[2fr_1fr_1fr_1fr_30px] gap-x-2 lg:gap-x-4">
+                    <p className="hidden lg:inline-block truncate whitespace-nowrap min-w-0">
+                      {parent}
+                    </p>
+                    <p className="hidden lg:inline-block whitespace-nowrap">
                       {author}
                     </p>
-                    <p className="hidden sm:inline-block line-clamp-1 whitespace-nowrap">
+                    <p className="hidden lg:inline-block whitespace-nowrap">
                       {date}
                     </p>
-                    <p className="hidden sm:inline-block line-clamp-1 whitespace-nowrap text-end">
+                    <p className="hidden lg:inline-block whitespace-nowrap text-end">
                       {size}
                     </p>
                     <MdOutlineFileDownload
-                      className="shrink-0 h-6 w-6 bg-success-light text-success cursor-pointer ms-auto sm:ms-0"
+                      className="shrink-0 h-6 w-6 bg-success-light text-success cursor-pointer ms-auto lg:ms-0"
                       onClick={handleDownload(resource)}
                     />
                   </div>
                 </div>
-                <div className="sm:hidden flex items-center justify-between">
-                  <p className="line-clamp-1">{author}</p>
-                  <p className="line-clamp-1">{date}</p>
-                  <p className="line-clamp-1">{size}</p>
+                <div className="lg:hidden flex gap-4 items-center justify-between">
+                  <p className="truncate whitespace-nowrap">{parent}</p>
+                  <p className="whitespace-nowrap">{author}</p>
+                  <p className="whitespace-nowrap">{date}</p>
+                  <p className="whitespace-nowrap">{size}</p>
                 </div>
               </div>
               {resource?.metaFile?.description && (
