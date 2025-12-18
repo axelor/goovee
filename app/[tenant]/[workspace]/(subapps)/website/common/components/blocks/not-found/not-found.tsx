@@ -1,33 +1,39 @@
 import Image from 'next/image';
-import NextLink from '../../reuseable/links/NextLink';
-import notFound from '@/public/img/illustrations/404.png';
 import {i18n} from '@/locale';
+import notFound from '@/public/img/illustrations/404.png';
+import NextLink from '../../reuseable/links/NextLink';
+import {ArrowRight} from 'lucide-react';
 
 export function NotFound({homePageUrl}: {homePageUrl?: string}) {
   return (
-    <main className="content-wrapper">
-      <section className="wrapper bg-light">
-        <div className="container pt-12 pt-md-14 pb-14 pb-md-16">
-          <div className="row">
-            <div className="col-lg-9 col-xl-8 mx-auto text-center">
-              <Image src={notFound} className="mb-10" alt="404 - Not Found" />
-            </div>
-
-            <div className="col-lg-8 col-xl-7 col-xxl-6 mx-auto text-center">
-              <h1 className="mb-3">{i18n.t('404 Error Page!')}</h1>
-              <p className="lead mb-7 px-md-12 px-lg-5 px-xl-7">
-                {i18n.t('The page you are looking for does not exist.')}
-              </p>
-
-              <NextLink
-                title={i18n.t('Go to Homepage')}
-                href={homePageUrl || '/'}
-                className="btn btn-primary rounded-pill"
-              />
-            </div>
-          </div>
+    <main className="!flex !h-full !w-full !items-center !justify-center !bg-background !p-4 md:!p-12">
+      <div className="!grid !w-full !max-w-4xl !items-center !gap-8 md:!grid-cols-2">
+        <div className="!flex !justify-center">
+          <Image
+            src={notFound}
+            className="!max-w-full"
+            alt="404 - Not Found Illustration"
+          />
         </div>
-      </section>
+        <div className="!flex !flex-col !items-center !text-center md:!items-start md:!text-left">
+          <h1 className="!text-4xl !font-bold !tracking-tight !text-[#3F78E0] sm:!text-5xl">
+            {i18n.t('Page Not Found!')}
+          </h1>
+          <p className="!p-0 !mt-2 !text-base !text-muted-foreground">
+            {i18n.t("Sorry, we couldn't find the page you're looking for.")}
+          </p>
+
+          <NextLink
+            href={homePageUrl || '/'}
+            title={
+              <>
+                <span>{i18n.t('Go to Homepage')}</span>
+                <ArrowRight className="!h-4 !w-4" />
+              </>
+            }
+            className="!mt-4 !inline-flex !items-center !gap-2 !rounded-md !bg-[#3F78E0] !px-4 !py-2 !text-sm !font-medium !text-primary-foreground !shadow !transition-colors hover:!bg-[#3F78E0]/90 focus-visible:!outline-none focus-visible:!ring-1 focus-visible:!ring-ring"></NextLink>
+        </div>
+      </div>
     </main>
   );
 }

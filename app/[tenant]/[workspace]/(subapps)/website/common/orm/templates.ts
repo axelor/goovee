@@ -18,7 +18,7 @@ import type {
   AOSPortalCmsPage,
   AOSPortalCmsSite,
 } from '@/goovee/.generated/models';
-import {manager, type Tenant} from '@/lib/core/tenant';
+import type {Client} from '@/goovee/.generated/client';
 import {getFileSizeText} from '@/utils/files';
 import {xml} from '@/utils/template-string';
 import type {CreateArgs, SelectArg} from '@goovee/orm';
@@ -30,8 +30,6 @@ import type {
   Field,
   TemplateSchema,
   Model,
-  MetaSelection,
-  SelectionOption,
   DemoLite,
 } from '../types/templates';
 import {
@@ -74,38 +72,23 @@ export function getCommnonSelectionName(name: string) {
   return `${SELECT_PREFIX}-${name}`;
 }
 
-function generateSelectionText(options: readonly SelectionOption[]) {
-  return options
-    .map(
-      item =>
-        `${item.value}:${item.title}` +
-        '\n' +
-        (item.color ? `color:${item.color}` + '\n' : '') +
-        (item.icon ? `icon:${item.icon}` + '\n' : ''),
-    )
-    .join('\n');
-}
-
 export async function createCustomFields({
   fields,
   model,
   modelField,
   uniqueModel,
-  tenantId,
+  client,
   jsonModel,
   addPanel,
-  selections,
 }: {
   model: string;
   modelField: string;
   uniqueModel: string;
   fields: CustomField[];
-  tenantId: Tenant['id'];
+  client: Client;
   jsonModel?: {id: string; name?: string};
   addPanel?: boolean;
-  selections: Map<string, MetaSelection>;
 }) {
-  const client = await manager.getClient(tenantId);
   const timeStamp = new Date();
 
   if (addPanel && fields[0]?.type !== 'panel') {
@@ -133,7 +116,6 @@ export async function createCustomFields({
         select: {id: true, name: true},
       });
 
-      let selectionText: string | undefined;
       let selection: string | undefined;
       let metaSelectData: CreateArgs<AOSMetaSelect> | undefined;
       let metaSelectItemsData: CreateArgs<AOSMetaSelectItem>[] | undefined;
@@ -158,14 +140,9 @@ export async function createCustomFields({
             order: i + 1,
             updatedOn: timeStamp,
           }));
-
-          selectionText = generateSelectionText(field.selection);
         }
         if (typeof field.selection === 'string') {
           name = getCommnonSelectionName(field.selection);
-          selectionText = generateSelectionText(
-            selections.get(field.selection)?.options || [],
-          );
         }
 
         selection = name;
@@ -181,7 +158,7 @@ export async function createCustomFields({
         isSelectionField:
           'selection' in field &&
           (!!field.selection?.length || typeof field.selection === 'string'),
-        selectionText: selectionText,
+        selectionText: null,
         selection: selection,
         sequence: i,
         uniqueModel,
@@ -226,7 +203,7 @@ export async function createCustomFields({
         );
         if (metaSelectData && metaSelectItemsData) {
           await createMetaSelect({
-            tenantId,
+            client,
             metaSelectData,
             metaSelectItemsData,
           });
@@ -245,7 +222,7 @@ export async function createCustomFields({
 
       if (metaSelectData && metaSelectItemsData) {
         await createMetaSelect({
-          tenantId,
+          client,
           metaSelectData,
           metaSelectItemsData,
         });
@@ -258,16 +235,14 @@ export async function createCustomFields({
 }
 
 export async function createMetaSelect({
-  tenantId,
+  client,
   metaSelectData,
   metaSelectItemsData,
 }: {
-  tenantId: Tenant['id'];
+  client: Client;
   metaSelectData: CreateArgs<AOSMetaSelect>;
   metaSelectItemsData: CreateArgs<AOSMetaSelectItem>[];
 }): Promise<{id: string; name?: string} | undefined> {
-  const client = await manager.getClient(tenantId);
-
   let metaSelect: {id: string; name?: string} | undefined;
   const _metaSelect = await client.aOSMetaSelect.findOne({
     where: {name: metaSelectData.name},
@@ -285,64 +260,46 @@ export async function createMetaSelect({
         where: {select: {id: _metaSelect.id}},
       });
     }
-    try {
-      metaSelect = await client.aOSMetaSelect.update({
-        data: {
-          id: _metaSelect.id,
-          version: _metaSelect.version,
-          items: {
-            create: metaSelectItemsData.map(item => ({
-              ...item,
-              createdOn: item.updatedOn,
-            })),
-          },
+    metaSelect = await client.aOSMetaSelect.update({
+      data: {
+        id: _metaSelect.id,
+        version: _metaSelect.version,
+        items: {
+          create: metaSelectItemsData.map(item => ({
+            ...item,
+            createdOn: item.updatedOn,
+          })),
         },
-        select: {id: true, name: true},
-      });
-      console.log(`\x1b[33m⚠️ Updated select: ${metaSelectData.name}\x1b[0m `);
-    } catch (error) {
-      console.log(
-        `\x1b[31m✖ Failed to update metaSelect: ${metaSelectData.name}\x1b[0m`,
-      );
-      console.log(error);
-    }
+      },
+      select: {id: true, name: true},
+    });
+    console.log(`\x1b[33m⚠️ Updated select: ${metaSelectData.name}\x1b[0m `);
   } else {
-    try {
-      metaSelect = await client.aOSMetaSelect.create({
-        data: {
-          ...metaSelectData,
-          createdOn: metaSelectData.updatedOn,
-          items: {
-            create: metaSelectItemsData.map(item => ({
-              ...item,
-              createdOn: metaSelectData.updatedOn,
-            })),
-          },
+    metaSelect = await client.aOSMetaSelect.create({
+      data: {
+        ...metaSelectData,
+        createdOn: metaSelectData.updatedOn,
+        items: {
+          create: metaSelectItemsData.map(item => ({
+            ...item,
+            createdOn: metaSelectData.updatedOn,
+          })),
         },
-        select: {id: true, name: true},
-      });
-      console.log(
-        `\x1b[32m✅ Created metaSelect: ${metaSelectData.name}\x1b[0m`,
-      );
-    } catch (error) {
-      console.log(
-        `\x1b[31m✖ Failed to create metaSelect: ${metaSelectData.name}\x1b[0m`,
-      );
-
-      console.log(error);
-    }
+      },
+      select: {id: true, name: true},
+    });
+    console.log(`\x1b[32m✅ Created metaSelect: ${metaSelectData.name}\x1b[0m`);
   }
   return metaSelect;
 }
 
 export async function createMetaJsonModel({
   model,
-  tenantId,
+  client,
 }: {
   model: Model;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
-  const client = await manager.getClient(tenantId);
   const timeStamp = new Date();
 
   const nameField = model.fields.find(f => f.nameField)?.name;
@@ -463,12 +420,11 @@ export async function createMetaJsonModel({
 
 export async function createCMSComponent({
   schema,
-  tenantId,
+  client,
 }: {
   schema: TemplateSchema;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
-  const client = await manager.getClient(tenantId);
   const timeStamp = new Date();
   const _component = await client.aOSPortalCmsComponent.findOne({
     where: {code: schema.code},
@@ -506,15 +462,14 @@ export async function createCMSComponent({
 export async function deleteCustomFields({
   model,
   modelField,
-  tenantId,
+  client,
   jsonModelPrefix,
 }: {
   model: string;
   modelField: string;
   jsonModelPrefix?: string;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
-  const client = await manager.getClient(tenantId);
   await client.aOSMetaJsonField.deleteAll({
     where: {
       model,
@@ -537,12 +492,11 @@ export async function deleteCustomFields({
 
 export async function deleteMetaJsonModels({
   jsonModelPrefix,
-  tenantId,
+  client,
 }: {
   jsonModelPrefix?: string;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
-  const client = await manager.getClient(tenantId);
   const models = await client.aOSMetaJsonModel.find({
     where: {
       name: {like: jsonModelPrefix + '%'},
@@ -577,9 +531,8 @@ export async function deleteMetaJsonModels({
   );
 }
 
-export async function deleteMetaSelects(props: {tenantId: Tenant['id']}) {
-  const {tenantId} = props;
-  const client = await manager.getClient(tenantId);
+export async function deleteMetaSelects(props: {client: Client}) {
+  const {client} = props;
   await client.aOSMetaSelectItem.deleteAll({
     where: {select: {name: {like: `${SELECT_PREFIX}%`}}},
   });
@@ -592,14 +545,13 @@ export async function deleteMetaSelects(props: {tenantId: Tenant['id']}) {
 }
 
 export async function createCMSContent(props: {
-  tenantId: Tenant['id'];
+  client: Client;
   schema: TemplateSchema;
   demos: DemoLite<TemplateSchema>[];
   fileCache: Cache<Promise<{id: string}>>;
 }) {
-  const {tenantId, demos, schema, fileCache} = props;
+  const {client, demos, schema, fileCache} = props;
 
-  const client = await manager.getClient(tenantId);
   return await Promise.all(
     demos.map(async demo => {
       const timeStamp = new Date();
@@ -626,7 +578,7 @@ export async function createCMSContent(props: {
 
       //TODO: add support for updating attrs
       const attrs = await createAttrs({
-        tenantId,
+        client,
         schema,
         data: demo.data,
         fields: schema.fields,
@@ -668,10 +620,9 @@ async function createMetaJsonRecord(props: {
   jsonModel: string;
   attrs: any;
   name?: string;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
-  const {tenantId, jsonModel, attrs, name} = props;
-  const client = await manager.getClient(tenantId);
+  const {client, jsonModel, attrs, name} = props;
   const timeStamp = new Date();
   const record = await client.aOSMetaJsonRecord.create({
     data: {jsonModel, attrs, updatedOn: timeStamp, createdOn: timeStamp, name},
@@ -692,20 +643,18 @@ async function getFileFromPublic(filePath: string) {
 }
 
 async function createMetaFile({
-  tenantId,
+  client,
   originPath,
   metaFilePath,
   fileName,
   fileType,
 }: {
-  tenantId: Tenant['id'];
+  client: Client;
   originPath: string;
   metaFilePath: string;
   fileName: string;
   fileType: string;
 }): Promise<{id: string}> {
-  const client = await manager.getClient(tenantId);
-
   const buffer = await getFileFromPublic(originPath);
   await pump(
     Readable.from(buffer),
@@ -748,7 +697,7 @@ async function createMetaFile({
 }
 
 async function getMetaFile({
-  tenantId,
+  client,
   fileName,
   fileType,
   filePath: originPath,
@@ -756,42 +705,37 @@ async function getMetaFile({
 }: {
   fileName: string;
   fileType: string;
-  tenantId: Tenant['id'];
+  client: Client;
   filePath: string;
   fileCache: Cache<Promise<{id: string}>>;
 }) {
-  try {
-    const metaFilePath = `${FILE_PREFIX}-${fileName}`;
-    const fileCacheKey = `${metaFilePath}-${fileType}-${fileName}`;
+  const metaFilePath = `${FILE_PREFIX}-${fileName}`;
+  const fileCacheKey = `${metaFilePath}-${fileType}-${fileName}`;
 
-    const cachedMetaFile = await fileCache.get(fileCacheKey);
-    if (cachedMetaFile) return cachedMetaFile;
+  const cachedMetaFile = await fileCache.get(fileCacheKey);
+  if (cachedMetaFile) return cachedMetaFile;
 
-    //NOTE: FileCache is used to avoid copying the same file multiple times in the given seeding process
-    const metaFilePromise = createMetaFile({
-      tenantId,
-      originPath,
-      metaFilePath,
-      fileName,
-      fileType,
-    });
+  //NOTE: FileCache is used to avoid copying the same file multiple times in the given seeding process
+  const metaFilePromise = createMetaFile({
+    client,
+    originPath,
+    metaFilePath,
+    fileName,
+    fileType,
+  });
 
-    fileCache.set(fileCacheKey, metaFilePromise);
-    return metaFilePromise;
-  } catch (error) {
-    console.log(`\x1b[31m✖ Failed to create meta file: ${fileName}\x1b[0m`);
-    throw new Error('Failed to create meta file');
-  }
+  fileCache.set(fileCacheKey, metaFilePromise);
+  return metaFilePromise;
 }
 
 async function createAttrs(props: {
-  tenantId: Tenant['id'];
+  client: Client;
   schema: TemplateSchema;
   fields: Field[];
   data: any;
   fileCache: Cache<Promise<{id: string}>>;
 }) {
-  const {tenantId, fields, schema, data, fileCache} = props;
+  const {client, fields, schema, data, fileCache} = props;
   const {attrs, fieldsMap} = fields.reduce<{
     attrs: Record<string, any>;
     fieldsMap: Map<string, Field>;
@@ -822,13 +766,13 @@ async function createAttrs(props: {
                 name: nameField && record.attrs?.[nameField],
                 jsonModel: field.target,
                 attrs: await createAttrs({
-                  tenantId,
+                  client,
                   schema,
                   fields: modelFields,
                   data: record.attrs,
                   fileCache,
                 }),
-                tenantId,
+                client,
               });
             }),
           );
@@ -840,13 +784,13 @@ async function createAttrs(props: {
             jsonModel: field.target,
             name: nameField && value.attrs?.[nameField],
             attrs: await createAttrs({
-              tenantId,
+              client,
               fields: modelFields,
               schema,
               data: value.attrs,
               fileCache,
             }),
-            tenantId,
+            client,
           });
           attrs[key] = {id: Number(metaJsonRecord.id)};
         }
@@ -866,7 +810,7 @@ async function createAttrs(props: {
                 fileName: record.fileName,
                 fileType: record.fileType,
                 filePath: record.filePath,
-                tenantId,
+                client,
                 fileCache,
               });
             }),
@@ -877,7 +821,7 @@ async function createAttrs(props: {
             fileName: value.fileName,
             fileType: value.fileType,
             filePath: value.filePath,
-            tenantId,
+            client,
             fileCache,
           });
           attrs[key] = {id: Number(record.id)};
@@ -891,15 +835,14 @@ async function createAttrs(props: {
 }
 
 export async function createCMSPage(props: {
-  tenantId: Tenant['id'];
+  client: Client;
   page: string;
   language: string;
   siteId: string;
   demos: DemoLite<TemplateSchema>[];
   title: string;
 }) {
-  const {tenantId, siteId, page, language, demos, title} = props;
-  const client = await manager.getClient(tenantId);
+  const {client, siteId, page, language, demos, title} = props;
   const timeStamp = new Date();
 
   const cmsPageFields = {
@@ -993,11 +936,10 @@ export async function createCMSPage(props: {
 }
 
 export async function createCMSWebsite(props: {
-  tenantId: Tenant['id'];
+  client: Client;
   website: Website;
 }) {
-  const {tenantId, website} = props;
-  const client = await manager.getClient(tenantId);
+  const {client, website} = props;
   const timeStamp = new Date();
   const _mainWebsite = await client.aOSPortalCmsMainWebsite.findOne({
     where: {
@@ -1044,7 +986,7 @@ export async function createCMSWebsite(props: {
   }
 
   const cmsSites = await createCMSSites({
-    tenantId,
+    client,
     website,
     mainWebsiteId: mainWebsite.id,
   });
@@ -1091,12 +1033,11 @@ export async function createCMSWebsite(props: {
 }
 
 export async function createCMSSites(props: {
-  tenantId: Tenant['id'];
+  client: Client;
   website: Website;
   mainWebsiteId: string;
 }) {
-  const {tenantId, website, mainWebsiteId} = props;
-  const client = await manager.getClient(tenantId);
+  const {client, website, mainWebsiteId} = props;
   const timeStamp = new Date();
   const cmsSites = await Promise.all(
     website.sites.map(async site => {
@@ -1137,13 +1078,12 @@ export async function createCMSSites(props: {
 }
 
 export async function updateHomepage(props: {
-  tenantId: Tenant['id'];
+  client: Client;
   siteId: string;
   siteVersion: number;
   pageId: string;
 }) {
-  const {tenantId, siteId, siteVersion, pageId} = props;
-  const client = await manager.getClient(tenantId);
+  const {client, siteId, siteVersion, pageId} = props;
   const timeStamp = new Date();
 
   const site = await client.aOSPortalCmsSite.update({
@@ -1160,13 +1100,12 @@ export async function updateHomepage(props: {
 }
 
 export async function replacePageSet(props: {
-  tenantId: Tenant['id'];
+  client: Client;
   pageId: string;
   pageVersion: number;
   pageSetIds: string[];
 }) {
-  const {tenantId, pageId, pageVersion, pageSetIds: pageSetIds} = props;
-  const client = await manager.getClient(tenantId);
+  const {client, pageId, pageVersion, pageSetIds: pageSetIds} = props;
 
   const _page = await client.aOSPortalCmsPage.findOne({
     where: {id: pageId},
