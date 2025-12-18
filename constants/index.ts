@@ -76,6 +76,11 @@ export enum SUBAPP_CODES {
   website = 'website',
 }
 
+export enum CHAT_TYPE {
+  external = 1,
+  internal = 2,
+}
+
 /**
  * SUBAPP WITH ROLES
  */

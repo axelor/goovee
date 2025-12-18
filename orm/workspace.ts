@@ -4,6 +4,7 @@ import {AOSPortalAppConfig} from '@/goovee/.generated/models';
 import {ID, Partner, PortalWorkspace, User} from '@/types';
 import {clone, getPartnerId} from '@/utils';
 import {SelectOptions} from '@goovee/orm';
+import {SUBAPP_CODES} from '@/constants';
 
 export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   name: true,
@@ -133,6 +134,7 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   homepageHeroOverlayColorSelect: true,
   homepageHeroBgImage: {id: true},
   isFixedHeader: true,
+  chatDisplayTypeSelect: true,
 };
 
 export async function findWorkspaceMembers({
@@ -912,4 +914,82 @@ export async function findSubappAccess({
   if (!subapp?.isInstalled) return null;
 
   return subapp;
+}
+
+function isChatAppInstalled(
+  apps?: Array<{code?: string; isInstalled?: boolean}>,
+) {
+  if (!apps || apps.length === 0) return false;
+  const chatApp = apps.find(app => app.code === SUBAPP_CODES.chat);
+  return chatApp?.isInstalled;
+}
+
+export async function shouldCreateMattermostUser(
+  partnerId: ID,
+  tenantId: Tenant['id'],
+): Promise<boolean> {
+  if (!(partnerId && tenantId)) return false;
+
+  const client = await manager.getClient(tenantId);
+  if (!client) return false;
+
+  const partner = await client.aOSPartner.findOne({
+    where: {id: partnerId},
+    select: {
+      isContact: true,
+      partnerWorkspaceSet: {
+        select: {
+          portalAppConfig: {
+            isCreateMattermostUser: true,
+          },
+          apps: {
+            select: {
+              code: true,
+              isInstalled: true,
+            },
+          },
+        },
+      },
+      contactWorkspaceConfigSet: {
+        select: {
+          portalWorkspace: {
+            defaultPartnerWorkspace: {
+              portalAppConfig: {
+                isCreateMattermostUser: true,
+              },
+              apps: {
+                select: {
+                  code: true,
+                  isInstalled: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!partner) return false;
+
+  if (!partner.isContact) {
+    return (
+      partner.partnerWorkspaceSet?.some(
+        ws =>
+          ws.portalAppConfig?.isCreateMattermostUser === true &&
+          isChatAppInstalled(ws.apps),
+      ) || false
+    );
+  } else {
+    return (
+      partner.contactWorkspaceConfigSet?.some(
+        config =>
+          config.portalWorkspace?.defaultPartnerWorkspace?.portalAppConfig
+            ?.isCreateMattermostUser === true &&
+          isChatAppInstalled(
+            config.portalWorkspace?.defaultPartnerWorkspace?.apps,
+          ),
+      ) || false
+    );
+  }
 }

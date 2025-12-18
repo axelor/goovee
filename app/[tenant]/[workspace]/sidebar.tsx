@@ -21,22 +21,28 @@ import {
   TooltipTrigger,
   TooltipArrow,
 } from '@/ui/components/tooltip';
-import {SUBAPP_PAGE} from '@/constants';
+import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
+import {useEnvironment} from '@/lib/core/environment';
+import {CHAT_TYPE} from '@/constants';
 
 export function Sidebar({
   subapps,
   workspaces,
   showHome,
+  workspace,
 }: {
   subapps: any;
   workspaces?: any;
   showHome: boolean | null | undefined;
+  workspace?: any;
 }) {
   const {data: session} = useSession();
   const [collapsed, setCollapsed] = useState(false);
   const {workspaceURI, workspaceURL} = useWorkspace();
+  const env = useEnvironment();
+  const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
 
   const user = session?.user;
 
@@ -104,14 +110,24 @@ export function Sidebar({
             .reverse()
             ?.map(({code, name, icon, color, background}: any) => {
               const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
+              const portalAppConfig = workspace?.config;
+              const isExternalChat =
+                code === SUBAPP_CODES.chat &&
+                portalAppConfig?.chatDisplayTypeSelect === CHAT_TYPE.external;
+
               return (
                 <App
-                  href={`${workspaceURI}/${code}${page}`}
+                  href={
+                    isExternalChat
+                      ? mattermostUrl
+                      : `${workspaceURI}/${code}${page}`
+                  }
                   key={code}
                   icon={icon}
                   color={color}
                   collapsed={collapsed}
                   name={name}
+                  isExternal={isExternalChat}
                 />
               );
             })}
@@ -136,10 +152,15 @@ function App(props: {
   href: string;
   color?: string;
   collapsed: boolean;
+  isExternal?: boolean;
 }) {
-  const {href, icon, color, collapsed, name} = props;
+  const {href, icon, color, collapsed, name, isExternal} = props;
   return (
-    <Link href={href} className="no-underline">
+    <Link
+      href={href}
+      className="no-underline"
+      target={isExternal ? '_blank' : undefined}
+      rel={isExternal ? 'noopener noreferrer' : undefined}>
       <div className="flex gap-4 items-center">
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>

@@ -26,6 +26,8 @@ import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
 import {cn} from '@/utils/css';
+import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
+import {useEnvironment} from '@/lib/core/environment';
 
 function Logo({workspace}: {workspace: PortalWorkspace}) {
   const {workspaceURI} = useWorkspace();
@@ -82,6 +84,8 @@ export default function Header({
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
   const {visible, loading} = useNavigationVisibility();
   const res: any = useResponsive();
+  const env = useEnvironment();
+  const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
   const isLarge = ['lg', 'xl', 'xxl'].some(x => res[x]);
 
   const redirect = (value: any) => router.push(value);
@@ -118,8 +122,22 @@ export default function Header({
                 .map(({name, icon, code, color}: any) => {
                   const page =
                     SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
+                  const portalAppConfig = workspace?.config;
+                  const isExternalChat =
+                    code === SUBAPP_CODES.chat &&
+                    portalAppConfig?.chatDisplayTypeSelect ===
+                      CHAT_TYPE.external;
+
                   return (
-                    <Link key={code} href={`${workspaceURI}/${code}${page}`}>
+                    <Link
+                      key={code}
+                      href={
+                        isExternalChat
+                          ? mattermostUrl
+                          : `${workspaceURI}/${code}${page}`
+                      }
+                      target={isExternalChat ? '_blank' : undefined}
+                      rel={isExternalChat ? 'noopener noreferrer' : undefined}>
                       {icon ? (
                         <Icon name={icon} className="h-6 w-6" style={{color}} />
                       ) : (

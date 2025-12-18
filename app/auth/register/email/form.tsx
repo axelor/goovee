@@ -58,7 +58,10 @@ const formSchema = z
     name: z.string(),
     email: z.string().min(1, {message: i18n.t('Email is required')}),
     phone: z.string(),
-    password: z.string().min(1, {message: i18n.t('Password is required')}),
+    password: z
+      .string()
+      .min(1, {message: i18n.t('Password is required')})
+      .min(8, {message: i18n.t('Password must be at least 8 characters')}),
     confirmPassword: z
       .string()
       .min(1, {message: i18n.t('Confirm password is required')}),

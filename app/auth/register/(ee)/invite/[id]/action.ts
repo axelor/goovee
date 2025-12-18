@@ -131,6 +131,15 @@ export async function registerByEmail(data: RegisterDTO) {
     return error(await getTranslation({tenant: tenantId}, 'Bad request'));
   }
 
+  if (password.length < 8) {
+    return error(
+      await getTranslation(
+        {tenant: tenantId},
+        'Password must be at least 8 characters',
+      ),
+    );
+  }
+
   if (!otp) {
     return error(await getTranslation({tenant: tenantId}, 'OTP is required.'));
   }
