@@ -5,7 +5,7 @@ import {pipeline, Readable} from 'stream';
 import {promisify} from 'util';
 import {getSession} from '@/lib/core/auth';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {
   findGooveeUserByEmail,
   isAdminContact,

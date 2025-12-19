@@ -7,7 +7,7 @@ import {getSession} from '@/auth';
 import {compare, hash} from '@/auth/utils';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {manager} from '@/tenant';
 
 export async function changePassword({

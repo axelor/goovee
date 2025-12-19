@@ -8,7 +8,7 @@ import {revalidatePath} from 'next/cache';
 import {getSession} from '@/auth';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {findSubapp, findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';

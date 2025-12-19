@@ -11,7 +11,7 @@ import {createStripeOrder} from '@/payment/stripe/actions';
 import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
 import {isPaymentOptionAvailable} from '@/utils/payment';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {scale} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //

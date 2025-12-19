@@ -13,7 +13,7 @@ import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {findWorkspace, findSubappAccess} from '@/orm/workspace';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {getFileSizeText} from '@/utils/files';
 import {getStoragePath} from '@/storage/index';
 

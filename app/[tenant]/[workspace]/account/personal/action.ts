@@ -9,7 +9,7 @@ import {headers} from 'next/headers';
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/lib/core/tenant';
 import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {getFileSizeText} from '@/utils/files';
 import {getTranslation, t} from '@/locale/server';
 import {clone, getPartnerId} from '@/utils';

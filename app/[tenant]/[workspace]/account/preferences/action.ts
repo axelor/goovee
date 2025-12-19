@@ -5,7 +5,7 @@ import {headers} from 'next/headers';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findContactWorkspaces, findPartnerWorkspaces} from '@/orm/workspace';
 
 // ---- CORE IMPORTS ---- //

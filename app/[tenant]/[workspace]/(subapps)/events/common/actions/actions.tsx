@@ -14,7 +14,7 @@ import {
 import {addComment, findComments} from '@/comments/orm';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, tattr} from '@/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {ID, PaymentOption, PortalWorkspace, User} from '@/types';
 import {ActionResponse} from '@/types/action';

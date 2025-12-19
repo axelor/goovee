@@ -6,7 +6,7 @@ import {revalidatePath} from 'next/cache';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findWorkspace} from '@/orm/workspace';
 import {findGooveeUserByEmail, updatePartner} from '@/orm/partner';
 import {clone} from '@/utils';
