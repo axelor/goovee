@@ -8,7 +8,7 @@ import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import {ModelMap, ORDER_BY, SUBAPP_CODES} from '@/constants';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {type Tenant} from '@/tenant';
 import {addComment, findComments} from '@/comments/orm';
 import {

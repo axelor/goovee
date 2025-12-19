@@ -5,7 +5,7 @@ import {headers} from 'next/headers';
 import {ZodIssueCode} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {t} from '@/locale/server';
 import {clone} from '@/utils';
 import type {ID} from '@goovee/orm';

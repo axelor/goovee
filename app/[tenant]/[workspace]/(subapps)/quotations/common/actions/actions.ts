@@ -6,7 +6,7 @@ import {headers} from 'next/headers';
 import {getSession} from '@/auth';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {addComment, findComments} from '@/comments/orm';

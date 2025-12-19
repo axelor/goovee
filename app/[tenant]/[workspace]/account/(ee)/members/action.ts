@@ -6,7 +6,7 @@ import {revalidatePath} from 'next/cache';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findWorkspace, findWorkspaceMembers} from '@/orm/workspace';
 import {isAdminContact, isPartner, updatePartner} from '@/orm/partner';
 import {manager} from '@/tenant';

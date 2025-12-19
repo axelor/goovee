@@ -1,7 +1,7 @@
 import {headers} from 'next/headers';
 
 import {manager} from '@/lib/core/tenant';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
 
 import {SchemaType, ViewSchema} from '../types';

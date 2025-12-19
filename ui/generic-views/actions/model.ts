@@ -2,7 +2,7 @@ import axios from 'axios';
 import {headers} from 'next/headers';
 
 import {manager} from '@/lib/core/tenant';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 
 export async function getModelData(model: string) {
   const tenantId = (await headers()).get(TENANT_HEADER);

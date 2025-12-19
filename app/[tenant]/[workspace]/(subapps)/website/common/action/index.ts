@@ -6,7 +6,7 @@ import {headers} from 'next/headers';
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findSubappAccess} from '@/orm/workspace';
 import type {ID, PortalWorkspace, Website, WebsitePage} from '@/types';
 import {manager} from '@/tenant';

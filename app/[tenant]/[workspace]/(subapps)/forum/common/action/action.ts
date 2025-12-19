@@ -16,7 +16,7 @@ import {ID, PortalWorkspace} from '@/types';
 import {getSession} from '@/auth';
 import {getFileSizeText} from '@/utils/files';
 import {manager} from '@/tenant';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {filterPrivate} from '@/orm/filter';
 import {
   CreateComment,

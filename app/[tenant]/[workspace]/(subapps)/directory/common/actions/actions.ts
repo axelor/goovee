@@ -4,7 +4,7 @@ import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/lib/core/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import type {Cloned} from '@/types/util';
 import {clone} from '@/utils';
 
