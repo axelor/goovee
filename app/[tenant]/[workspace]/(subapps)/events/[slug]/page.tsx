@@ -10,11 +10,12 @@ import {getSession} from '@/auth';
 // ---- LOCAL IMPORTS ---- //
 import {EventDetails} from '@/subapps/events/common/ui/components';
 
-export default async function Page({
-  params,
-}: {
-  params: {slug: string; tenant: string; workspace: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{slug: string; tenant: string; workspace: string}>;
+  }
+) {
+  const params = await props.params;
   const {slug, tenant} = params;
 
   const session = await getSession();

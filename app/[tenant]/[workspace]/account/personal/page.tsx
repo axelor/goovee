@@ -10,11 +10,12 @@ import {workspacePathname} from '@/utils/workspace';
 import Form from './form';
 import {Role} from '../common/types';
 
-export default async function Page({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string}>;
+  }
+) {
+  const params = await props.params;
   const {tenant, workspaceURL} = workspacePathname(params);
 
   const session = await getSession();

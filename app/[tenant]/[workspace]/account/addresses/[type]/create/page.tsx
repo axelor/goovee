@@ -12,7 +12,8 @@ import {findGooveeUserByEmail, PartnerTypeMap} from '@/orm/partner';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 
-export default async function Page({params}: {params: any}) {
+export default async function Page(props: {params: Promise<any>}) {
+  const params = await props.params;
   const {tenant, type} = params;
 
   const {workspaceURI} = workspacePathname(params);

@@ -232,25 +232,27 @@ export function ThumbsCarouselSkeleton() {
           </SwiperSlide>
         ))}
       </Swiper>
-
       <div
         className="absolute h-full w-full"
         style={{top: 0, left: 0, zIndex: 1}}>
         <div>
           <Skeleton
-            ref={(node: any) => setPrevEl(node)}
+            ref={(node: any) => {
+              setPrevEl(node);
+            }}
             className="absolute h-4 w-20"
             style={{top: '40%', left: '1rem'}}
           />
 
           <Skeleton
-            ref={(node: any) => setPrevEl(node)}
+            ref={(node: any) => {
+              setPrevEl(node);
+            }}
             className="absolute h-4 w-20"
             style={{top: '40%', left: '1rem'}}
           />
         </div>
       </div>
-
       <Swiper
         freeMode
         threshold={2}

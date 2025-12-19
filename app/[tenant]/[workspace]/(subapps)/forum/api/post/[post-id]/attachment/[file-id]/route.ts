@@ -12,17 +12,16 @@ import {findPosts} from '@/subapps/forum/common/orm/forum';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       'post-id': string;
       'file-id': string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'post-id': postId, 'file-id': fileId} = params;
 

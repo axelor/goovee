@@ -10,11 +10,12 @@ import Content from './content';
 import {findAvailableSubapps, findMembers} from '../../common/orm/members';
 import {findInvites} from '../../common/orm/invites';
 
-export default async function Page({
-  params,
-}: {
-  params: {workspace: string; tenant: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{workspace: string; tenant: string}>;
+  }
+) {
+  const params = await props.params;
   const {tenant: tenantId, workspaceURL} = workspacePathname(params);
 
   const session = await getSession();

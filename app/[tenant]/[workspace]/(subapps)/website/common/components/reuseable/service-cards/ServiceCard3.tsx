@@ -3,7 +3,7 @@ import {FC, ReactElement} from 'react';
 // ================================================
 type ServiceCard3Props = {
   title?: string;
-  Icon?: ReactElement;
+  Icon?: ReactElement<any>;
   className?: string;
   description?: string;
 };

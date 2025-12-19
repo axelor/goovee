@@ -11,17 +11,16 @@ import {type Category} from '@/app/[tenant]/[workspace]/(subapps)/events/common/
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       'category-id': string;
       'file-id': string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'category-id': categoryId, 'file-id': fileId} = params;
 

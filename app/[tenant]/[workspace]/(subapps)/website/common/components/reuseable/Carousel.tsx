@@ -9,7 +9,7 @@ interface CarouselProps extends SwiperProps {
   navigation?: boolean;
   spaceBetween?: number;
   slideClassName?: string;
-  children: ReactElement[];
+  children: ReactElement<any>[];
   slidesPerView?: number | 'auto';
 }
 // ==================================================================
@@ -42,19 +42,22 @@ const Carousel: FC<CarouselProps> = ({
           </SwiperSlide>
         ))}
       </Swiper>
-
       <div className="swiper-controls">
         {/* custom navigation */}
         {navigation && (
           <div className="swiper-navigation">
             <div
               role="button"
-              ref={node => setPrevEl(node)}
+              ref={node => {
+                setPrevEl(node);
+              }}
               className="swiper-button swiper-button-prev"
             />
             <div
               role="button"
-              ref={node => setNextEl(node)}
+              ref={node => {
+                setNextEl(node);
+              }}
               className="swiper-button swiper-button-next"
             />
           </div>
@@ -64,7 +67,9 @@ const Carousel: FC<CarouselProps> = ({
         {pagination && (
           <div
             className="swiper-pagination"
-            ref={node => setPaginationEl(node)}
+            ref={node => {
+              setPaginationEl(node);
+            }}
           />
         )}
       </div>

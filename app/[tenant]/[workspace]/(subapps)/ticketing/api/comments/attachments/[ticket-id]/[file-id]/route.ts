@@ -11,17 +11,16 @@ import {SUBAPP_CODES} from '@/constants';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       'ticket-id': string;
       'file-id': string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
   const {'ticket-id': ticketId, 'file-id': fileId} = params;
 

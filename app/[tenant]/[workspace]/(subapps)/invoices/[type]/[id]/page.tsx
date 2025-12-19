@@ -84,11 +84,12 @@ async function Invoice({
   );
 }
 
-export default async function Page({
-  params,
-}: {
-  params: {id: string; type: string; tenant: string; workspace: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{id: string; type: string; tenant: string; workspace: string}>;
+  }
+) {
+  const params = await props.params;
   return (
     <Suspense fallback={<InvoiceSkeleton />}>
       <Invoice params={params} />

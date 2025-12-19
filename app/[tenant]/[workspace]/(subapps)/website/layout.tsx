@@ -7,16 +7,21 @@ import {SUBAPP_CODES} from '@/constants';
 import {findSubappAccess} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: {
-    tenant: string;
-    workspace: string;
-  };
-  children: ReactNode;
-}) {
+export default async function Layout(
+  props: {
+    params: Promise<{
+      tenant: string;
+      workspace: string;
+    }>;
+    children: ReactNode;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const session = await getSession();
   const user = session?.user;
 

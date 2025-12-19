@@ -14,14 +14,15 @@ import Form from './form';
 import {extractSearchParams, isExistingUser} from '../../common/utils';
 import {UserExists} from '../../common/ui/components';
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: {
-    workspaceURI?: string;
-    tenant: string;
-  };
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<{
+      workspaceURI?: string;
+      tenant: string;
+    }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const {workspaceURI, tenantId, workspaceURL} = extractSearchParams({
     searchParams,
   });

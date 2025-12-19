@@ -12,8 +12,9 @@ import {findGroupById} from '@/subapps/forum/common/orm/forum';
 
 export async function GET(
   request: NextRequest,
-  {params}: {params: {tenant: string; workspace: string; 'group-id': string}},
+  props: {params: Promise<{tenant: string; workspace: string; 'group-id': string}>}
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'group-id': groupId} = params;
 

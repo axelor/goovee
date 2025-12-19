@@ -13,17 +13,16 @@ import {findQuotation} from '../../../../../common/orm/quotations';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       'quotation-id': string;
       'file-id': string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'quotation-id': quotationId, 'file-id': fileId} = params;
 

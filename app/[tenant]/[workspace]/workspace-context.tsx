@@ -41,7 +41,7 @@ export function Workspace({
   children: React.ReactNode;
 }) {
   const {updateTheme} = useTheme();
-  const prevTheme = useRef<any>();
+  const prevTheme = useRef<any>(undefined);
   const env = useEnvironment();
 
   const workspaceURI = `/${tenant}/${workspace}`;

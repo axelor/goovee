@@ -35,6 +35,8 @@ import TwitterPlugin from './TwitterPlugin';
 import YouTubePlugin from './YouTubePlugin';
 import {HorizontalRulePlugin} from '@lexical/react/LexicalHorizontalRulePlugin';
 
+import type { JSX } from "react";
+
 export default function EditingPlugins(props: {
   historyState?: HistoryState;
   activeEditor: LexicalEditor;

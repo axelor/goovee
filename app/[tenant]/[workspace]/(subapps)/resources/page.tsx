@@ -58,11 +58,12 @@ async function LatestResources({
   return <ResourceList resources={files} />;
 }
 
-export default async function Page({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string}>;
+  }
+) {
+  const params = await props.params;
   const {tenant} = params;
   const session = await getSession();
   const user = session?.user;

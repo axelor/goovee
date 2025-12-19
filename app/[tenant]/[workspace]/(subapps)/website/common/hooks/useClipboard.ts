@@ -3,7 +3,7 @@ import {useEffect, useRef} from 'react';
 
 const useClipboard = () => {
   const clipboard = useRef<ClipboardJS | undefined>(undefined);
-  const copyIconCode = useRef<ClipboardJS | undefined>();
+  const copyIconCode = useRef<ClipboardJS | undefined>(undefined);
 
   useEffect(() => {
     (async () => {

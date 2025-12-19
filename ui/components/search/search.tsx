@@ -41,7 +41,7 @@ export const Search = ({
   const [results, setResults] = useState<any[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const searchRef = useRef<string | undefined>();
+  const searchRef = useRef<string | undefined>(undefined);
 
   const debouncedFindQuery = useCallback(
     debounce(async (query: string) => {

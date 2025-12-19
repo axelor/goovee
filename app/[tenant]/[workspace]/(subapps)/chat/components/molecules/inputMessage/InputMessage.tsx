@@ -36,12 +36,12 @@ export const InputMessage = ({
 }: {
   messageText: string;
   setMessageText: (value: string) => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
   triggerFileInput: () => void;
   isSendEnabled: boolean;
   handleMessageSend: () => void;
-  chatContainerRef: React.RefObject<HTMLDivElement>;
+  chatContainerRef: React.RefObject<HTMLDivElement | null>;
   postReply: any;
   setPostReply: (post: Post) => void;
 }) => {

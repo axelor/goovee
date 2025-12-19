@@ -11,7 +11,7 @@ export interface CarouselProps extends SwiperProps {
   navigation?: boolean;
   spaceBetween?: number;
   slideClassName?: string;
-  children: ReactElement[];
+  children: ReactElement<any>[];
   slidesPerView?: number | 'auto';
 }
 // ==================================================================
@@ -44,7 +44,6 @@ export const Carousel: FC<CarouselProps> = ({
           </SwiperSlide>
         ))}
       </Swiper>
-
       {/* Controls container - absolute positioning now relative to the new outer div */}
       <div className="absolute top-0 left-0 z-10 h-full w-full pointer-events-none">
         {/* custom navigation */}
@@ -52,7 +51,9 @@ export const Carousel: FC<CarouselProps> = ({
           <div className="flex flex-row justify-center absolute -bottom-16 left-0 w-full pointer-events-auto">
             <Button
               role="button"
-              ref={node => setPrevEl(node)}
+              ref={node => {
+                setPrevEl(node);
+              }}
               variant="default"
               size="icon"
               className="relative h-11 w-11 rounded-full shadow-sm mx-1 bg-primary/90 text-white hover:bg-primary [&.swiper-button-disabled]:cursor-not-allowed [&.swiper-button-disabled]:opacity-50 [&.swiper-button-disabled]:bg-primary/70">
@@ -60,7 +61,9 @@ export const Carousel: FC<CarouselProps> = ({
             </Button>
             <Button
               role="button"
-              ref={node => setNextEl(node)}
+              ref={node => {
+                setNextEl(node);
+              }}
               variant="default"
               size="icon"
               className="relative h-11 w-11 rounded-full shadow-sm mx-1 bg-primary/90 text-white hover:bg-primary [&.swiper-button-disabled]:cursor-not-allowed [&.swiper-button-disabled]:opacity-50 [&.swiper-button-disabled]:bg-primary/70">
@@ -73,7 +76,9 @@ export const Carousel: FC<CarouselProps> = ({
         {pagination && (
           <div
             className="absolute -bottom-[6.5rem] left-0 flex w-full justify-center pointer-events-auto [&_.swiper-pagination-bullet]:mx-1.5 [&_.swiper-pagination-bullet]:h-2.5 [&_.swiper-pagination-bullet]:w-2.5 [&_.swiper-pagination-bullet]:cursor-pointer [&_.swiper-pagination-bullet]:rounded-full [&_.swiper-pagination-bullet]:border-[3px] [&_.swiper-pagination-bullet]:border-transparent [&_.swiper-pagination-bullet]:bg-secondary [&_.swiper-pagination-bullet]:opacity-50 [&_.swiper-pagination-bullet]:transition-all [&_.swiper-pagination-bullet]:scale-60 hover:[&_.swiper-pagination-bullet]:scale-100 [&_.swiper-pagination-bullet-active]:scale-100 [&_.swiper-pagination-bullet-active]:border-secondary [&_.swiper-pagination-bullet-active]:bg-transparent [&_.swiper-pagination-bullet-active]:opacity-100"
-            ref={node => setPaginationEl(node)}
+            ref={node => {
+              setPaginationEl(node);
+            }}
           />
         )}
       </div>

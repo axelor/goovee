@@ -23,15 +23,16 @@ import {Template} from './client-wrapper';
 import {LanguageSelection} from './language-selection';
 import {TemplateRoot} from './template-root';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: {
-    tenant: string;
-    workspace: string;
-    websiteSlug: string;
-  };
-}) {
+export async function generateMetadata(
+  props: {
+    params: Promise<{
+      tenant: string;
+      workspace: string;
+      websiteSlug: string;
+    }>;
+  }
+) {
+  const params = await props.params;
   const {workspaceURL} = workspacePathname(params);
   const {tenant, websiteSlug} = params;
 
@@ -57,17 +58,22 @@ export async function generateMetadata({
   };
 }
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: {
-    tenant: string;
-    workspace: string;
-    websiteSlug: Website['slug'];
-  };
-  children: ReactNode;
-}) {
+export default async function Layout(
+  props: {
+    params: Promise<{
+      tenant: string;
+      workspace: string;
+      websiteSlug: Website['slug'];
+    }>;
+    children: ReactNode;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const session = await getSession();
   const user = session?.user;
 

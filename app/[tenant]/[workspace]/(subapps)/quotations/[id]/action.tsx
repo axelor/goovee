@@ -32,7 +32,7 @@ export async function confirmQuotation({
   workspaceURL: string;
   quotationId: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(workspaceURL && quotationId && tenantId)) {
     return {
@@ -132,7 +132,7 @@ export async function paypalCaptureOrder({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(orderId && workspaceURL && quotation && tenantId)) {
     return {
@@ -262,7 +262,7 @@ export async function paypalCreateOrder({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(workspaceURL && tenantId)) {
     return {
@@ -386,7 +386,7 @@ export async function createStripeCheckoutSession({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(quotation && workspaceURL && tenantId)) {
     return {
@@ -502,7 +502,7 @@ export async function validateStripePayment({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(quotation && workspaceURL && tenantId)) {
     return {

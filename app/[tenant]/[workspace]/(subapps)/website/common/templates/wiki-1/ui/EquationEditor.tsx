@@ -27,7 +27,7 @@ function EquationEditor(
         value={equation}
         onChange={onChange}
         autoFocus={true}
-        ref={forwardedRef as RefObject<HTMLInputElement>}
+        ref={forwardedRef as RefObject<HTMLInputElement | null>}
       />
       <span className="EquationEditor_dollarSign">$</span>
     </span>
@@ -38,7 +38,7 @@ function EquationEditor(
         className="EquationEditor_blockEditor"
         value={equation}
         onChange={onChange}
-        ref={forwardedRef as RefObject<HTMLTextAreaElement>}
+        ref={forwardedRef as RefObject<HTMLTextAreaElement | null>}
       />
       <span className="EquationEditor_dollarSign">{'\n$$'}</span>
     </div>

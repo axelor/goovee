@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, { useState, type JSX } from 'react';
 import {cva, VariantProps} from 'class-variance-authority';
 import {MdInfoOutline, MdClose, MdCheckCircleOutline} from 'react-icons/md';
 

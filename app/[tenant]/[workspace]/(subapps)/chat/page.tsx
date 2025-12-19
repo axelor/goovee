@@ -9,7 +9,8 @@ import {getSession} from '@/lib/core/auth';
 import {t} from '@/locale/server';
 import {getAdminToken} from '@/lib/core/mattermost';
 
-export default async function Chat({params}: {params: {tenant: string}}) {
+export default async function Chat(props: {params: Promise<{tenant: string}>}) {
+  const params = await props.params;
   const session = await getSession();
   const user = session?.user;
   const token = getAdminToken();

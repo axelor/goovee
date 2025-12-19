@@ -6,7 +6,7 @@ type ListItemLinkProps = {
   href: string;
   liClassName?: string;
   linkClassName?: string;
-  title: string | ReactElement;
+  title: string | ReactElement<any>;
   onClick?: () => void;
 };
 // =========================================================

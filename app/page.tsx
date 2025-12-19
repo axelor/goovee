@@ -13,11 +13,12 @@ import {clone, getPartnerId} from '@/utils';
 import {TenancyType, manager} from '@/tenant';
 import {DEFAULT_TENANT} from '@/constants';
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: {workspaceURI?: string; tenant?: string};
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<{workspaceURI?: string; tenant?: string}>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const session = await getSession();
   const user = session?.user;
 

@@ -62,16 +62,17 @@ import {
   RelatedTicketsHeader,
 } from './headers';
 
-export default async function Page({
-  params,
-}: {
-  params: {
-    tenant: string;
-    workspace: string;
-    'project-id': string;
-    'ticket-id': string;
-  };
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{
+      tenant: string;
+      workspace: string;
+      'project-id': string;
+      'ticket-id': string;
+    }>;
+  }
+) {
+  const params = await props.params;
   const {workspaceURI, workspaceURL} = workspacePathname(params);
   const projectId = params['project-id'];
   const ticketId = params['ticket-id'];

@@ -13,8 +13,9 @@ import {fetchFile} from '@/subapps/resources/common/orm/dms';
 
 export async function GET(
   request: NextRequest,
-  {params}: {params: {tenant: string; workspace: string; 'file-id': string}},
+  props: {params: Promise<{tenant: string; workspace: string; 'file-id': string}>}
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'file-id': fileId} = params;
 

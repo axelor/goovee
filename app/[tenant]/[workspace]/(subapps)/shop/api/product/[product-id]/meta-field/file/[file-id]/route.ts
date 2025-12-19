@@ -21,17 +21,16 @@ import {isRelationalType} from '@/subapps/shop/common/utils';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       'product-id': string;
       'file-id': string;
       workspace: string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {'product-id': productId, 'file-id': fileId, tenant} = params;
   const {workspaceURL} = workspacePathname(params);
 
