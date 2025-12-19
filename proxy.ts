@@ -43,7 +43,7 @@ function notFound(req: NextRequest, {message = ''}: {message?: string} = {}) {
 
 const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
 
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   const url = req.nextUrl;
   const pathname = url.pathname;
 
