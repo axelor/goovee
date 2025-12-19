@@ -12,17 +12,16 @@ import {findNews} from '../../../../../common/orm/news';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       'news-id': string;
       'file-id': string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'news-id': newsId, 'file-id': fileId} = params;
 

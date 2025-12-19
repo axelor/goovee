@@ -137,13 +137,14 @@ async function ForumGroup({
   );
 }
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {id: string; type: string; tenant: string; workspace: string};
-  searchParams: {[key: string]: string | undefined};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{id: string; type: string; tenant: string; workspace: string}>;
+    searchParams: Promise<{[key: string]: string | undefined}>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   return (
     <Suspense fallback={<ForumSkeleton />}>
       <ForumGroup params={params} searchParams={searchParams} />

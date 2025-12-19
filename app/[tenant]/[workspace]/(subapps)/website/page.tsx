@@ -13,11 +13,12 @@ import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
 import {inverseTransformLocale} from '@/locale/utils';
 import type {Website} from '@/types';
 
-export default async function Page({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string}>;
+  }
+) {
+  const params = await props.params;
   const {tenant} = params;
 
   const {workspaceURL, workspaceURI} = workspacePathname(params);

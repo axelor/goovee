@@ -84,13 +84,14 @@ async function Quotations({
   return <Content quotations={clone(quotations)} pageInfo={pageInfo} />;
 }
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {tenant: string; workspace: string};
-  searchParams: {[key: string]: string | undefined};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string}>;
+    searchParams: Promise<{[key: string]: string | undefined}>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   return (
     <Suspense fallback={<TableSkeleton columnCount={3} rowCount={10} />}>
       <Quotations params={params} searchParams={searchParams} />

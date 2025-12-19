@@ -11,8 +11,9 @@ import {workspacePathname} from '@/utils/workspace';
 
 export async function GET(
   request: NextRequest,
-  {params}: {params: {tenant: string; workspace: string}},
+  props: {params: Promise<{tenant: string; workspace: string}>}
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
 
   const session = await getSession();

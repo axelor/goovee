@@ -10,7 +10,7 @@ type ServiceCard1Props = {
   description?: string;
   cardClassName?: string;
   iconClassName?: string;
-  Icon: (props: IconProps) => ReactElement;
+  Icon: (props: IconProps) => ReactElement<any>;
 };
 // ===============================================================
 const ServiceCard1: FC<ServiceCard1Props> = props => {

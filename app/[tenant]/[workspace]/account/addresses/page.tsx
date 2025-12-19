@@ -15,12 +15,12 @@ import Content from './content';
 import {findQuotation} from '@/subapps/quotations/common/orm/quotations';
 
 interface PageParams {
-  params: {id: string; tenant: string; workspace: string};
-  searchParams: {
+  params: Promise<{id: string; tenant: string; workspace: string}>;
+  searchParams: Promise<{
     quotation?: string;
     checkout?: boolean;
     callbackURL?: string;
-  };
+  }>;
 }
 
 async function fetchUser() {
@@ -90,7 +90,9 @@ async function fetchAddresses(userId: Partner['id'], tenant: string) {
   return {deliveryAddresses, invoicingAddresses};
 }
 
-export default async function Page({params, searchParams}: PageParams) {
+export default async function Page(props: PageParams) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const {tenant} = params;
   const {
     quotation: quotationId = null,

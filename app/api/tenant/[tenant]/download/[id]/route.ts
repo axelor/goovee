@@ -3,8 +3,9 @@ import {findFile, streamFile} from '../utils';
 
 export async function GET(
   request: NextRequest,
-  {params}: {params: {tenant: string; id: string}},
+  props: {params: Promise<{tenant: string; id: string}>}
 ) {
+  const params = await props.params;
   return new NextResponse('Forbidden', {status: 403});
   const {id, tenant} = params;
 

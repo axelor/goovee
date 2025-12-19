@@ -4,8 +4,9 @@ import {manager} from '@/tenant';
 
 export async function GET(
   request: NextRequest,
-  {params}: {params: {tenant: string; 'file-id': string}},
+  props: {params: Promise<{tenant: string; 'file-id': string}>}
 ) {
+  const params = await props.params;
   const {'file-id': fileId, tenant} = params;
 
   const client = await manager.getClient(tenant);

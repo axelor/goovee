@@ -25,7 +25,7 @@ import {Button} from '@/ui/components/button';
 
 // ---- LOCAL IMPORTS ---- //
 import {resetPassword} from '../action';
-import {useState} from 'react';
+import { useState, use } from 'react';
 
 const formSchema = z
   .object({
@@ -42,7 +42,8 @@ const formSchema = z
     path: ['confirmPassword'],
   });
 
-export default function Page({params}: {params: {email: string}}) {
+export default function Page(props: {params: Promise<{email: string}>}) {
+  const params = use(props.params);
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);

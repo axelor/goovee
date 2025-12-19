@@ -89,13 +89,14 @@ async function Orders({
   );
 }
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {type: OrderType; tenant: string; workspace: string};
-  searchParams: {[key: string]: string | undefined};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{type: OrderType; tenant: string; workspace: string}>;
+    searchParams: Promise<{[key: string]: string | undefined}>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   return (
     <Suspense fallback={<TableSkeleton />}>
       <Orders params={params} searchParams={searchParams} />

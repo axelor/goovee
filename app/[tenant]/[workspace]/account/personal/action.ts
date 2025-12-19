@@ -44,7 +44,7 @@ function error(message: string) {
 export async function updateProfileImage(formData: FormData) {
   const file: any = formData.get('picture');
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));
@@ -132,7 +132,7 @@ export async function updateProfileImage(formData: FormData) {
 }
 
 export async function fetchPersonalSettings() {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));
@@ -196,7 +196,7 @@ export async function update({
   mainPartner?: string;
   linkedInLink?: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));
@@ -347,7 +347,7 @@ export async function generateOTPForUpdate({
     return error(await t('Email and workspace is required'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));

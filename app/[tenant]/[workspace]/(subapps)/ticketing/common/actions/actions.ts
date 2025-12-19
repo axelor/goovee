@@ -57,7 +57,7 @@ export async function mutate(
   props: MutateProps,
   config?: ActionConfig,
 ): ActionResponse<MutateResponse> {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -221,7 +221,7 @@ export async function updateAssignment(
   const {workspaceURL, data} = props;
   const {force} = config || {};
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -283,7 +283,7 @@ export async function closeTicket(
   const {workspaceURL, data} = props;
   const {force} = config || {};
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -350,7 +350,7 @@ export async function cancelTicket(
   const {workspaceURL, data} = props;
   const {force} = config || {};
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -419,7 +419,7 @@ export async function createRelatedLink(
 ): ActionResponse<true> {
   const {workspaceURL, data} = props;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -455,7 +455,7 @@ export async function createChildLink(
 ): ActionResponse<true> {
   const {workspaceURL, data} = props;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -489,7 +489,7 @@ export async function createParentLink(
 ): ActionResponse<true> {
   const {workspaceURL, data} = props;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -528,7 +528,7 @@ export async function deleteChildLink(
 ): ActionResponse<true> {
   const {workspaceURL, data} = props;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -567,7 +567,7 @@ export async function deleteParentLink(
 ): ActionResponse<true> {
   const {workspaceURL, data} = props;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -605,7 +605,7 @@ export async function deleteRelatedLink(
 ): ActionResponse<ID> {
   const {workspaceURL, data} = props;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -643,7 +643,7 @@ export async function searchTickets({
   projectId?: ID;
   excludeList?: ID[];
 }): ActionResponse<Cloned<TicketSearch>[]> {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -670,7 +670,7 @@ export async function searchTickets({
 }
 
 export const createComment: CreateComment = async formData => {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }
@@ -774,7 +774,7 @@ export const createComment: CreateComment = async formData => {
 export const fetchComments: FetchComments = async props => {
   const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }

@@ -38,7 +38,7 @@ export function Search({
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<Cloned<ListEntry>[]>([]);
-  const searchRef = useRef<string | undefined>();
+  const searchRef = useRef<string | undefined>(undefined);
 
   const fetchSearchResult = useMemo(
     () =>

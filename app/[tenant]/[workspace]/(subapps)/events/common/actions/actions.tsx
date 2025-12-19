@@ -78,7 +78,7 @@ export async function getAllEvents({
   user?: User;
   onlyRegisteredEvent?: boolean;
 }) {
-  tenantId = headers().get(TENANT_HEADER) || tenantId;
+  tenantId = (await headers()).get(TENANT_HEADER) || tenantId;
 
   if (!(workspace && tenantId)) {
     return {events: [], pageInfo: null};
@@ -126,7 +126,7 @@ export async function register({
   values?: any;
   payment?: {data: {id?: string; params?: any}; mode: PaymentOption};
 }): ActionResponse<{id: ID; version: number}> {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('Tenant ID is missing!'));
 
   const $event = await findEvent({
@@ -224,7 +224,7 @@ export async function fetchContacts({
   search: string;
   workspaceURL: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -256,7 +256,7 @@ export async function isValidParticipant(props: {
   email: string;
 }): ActionResponse<true> {
   const {workspaceURL, eventId, email} = props;
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -317,7 +317,7 @@ export const createComment: CreateComment = async formData => {
     return {error: true, message: await t('Unauthorized')};
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }
@@ -396,7 +396,7 @@ export const fetchComments: FetchComments = async props => {
 
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -470,7 +470,7 @@ export const fetchEvent = async ({
   if (!slug) return error(await t('Missing event slug'));
   if (!workspaceURL) return error(await t('Workspace URL is missing'));
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('Tenant ID is missing!'));
 
   const session = await getSession();

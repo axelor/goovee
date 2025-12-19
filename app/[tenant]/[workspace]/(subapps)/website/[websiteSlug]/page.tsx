@@ -13,15 +13,16 @@ import {
 } from '@/subapps/website/common/orm/website';
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
 
-export default async function Layout({
-  params,
-}: {
-  params: {
-    tenant: string;
-    workspace: string;
-    websiteSlug: Website['slug'];
-  };
-}) {
+export default async function Layout(
+  props: {
+    params: Promise<{
+      tenant: string;
+      workspace: string;
+      websiteSlug: Website['slug'];
+    }>;
+  }
+) {
+  const params = await props.params;
   const session = await getSession();
   const user = session?.user;
 

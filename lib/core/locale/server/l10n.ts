@@ -25,7 +25,7 @@ export async function l10n(l?: string) {
   const user = session?.user;
   const userLocale = user?.locale;
 
-  const acceptLanguage = headers?.()?.get('Accept-Language')!;
+  const acceptLanguage = await headers()?.get('Accept-Language')!;
   const acceptLanguageLocale = acceptLanguage?.split(',')?.[0];
 
   const locale = l || userLocale || acceptLanguageLocale || DEFAULT_LOCALE;

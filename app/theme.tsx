@@ -21,7 +21,7 @@ export default function Theme({
   children,
   theme: themeProp,
 }: {
-  children: React.ReactElement;
+  children: React.ReactElement<any>;
   theme: Theme;
 }) {
   const [theme, setTheme] = useState(themeProp);

@@ -10,16 +10,15 @@ import {findNewsImageBySlug} from '@/subapps/news/common/orm/news';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       slug: string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {searchParams} = new URL(request.url);
   const isFullView = searchParams.get('isFullView') === 'true';
 

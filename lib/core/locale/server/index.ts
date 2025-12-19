@@ -24,7 +24,7 @@ export async function getTranslation(
   ...interpolations: string[]
 ) {
   if (!tenant) {
-    tenant = headers().get(TENANT_HEADER) as string;
+    tenant = (await headers()).get(TENANT_HEADER) as string;
   }
 
   if (!user) {

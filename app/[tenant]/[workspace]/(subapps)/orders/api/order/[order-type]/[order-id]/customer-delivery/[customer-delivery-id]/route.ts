@@ -16,18 +16,17 @@ import {ORDER} from '@/subapps/orders/common/constants/orders';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       'order-type': OrderType;
       'order-id': string;
       'customer-delivery-id': string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {
     'order-type': orderType,

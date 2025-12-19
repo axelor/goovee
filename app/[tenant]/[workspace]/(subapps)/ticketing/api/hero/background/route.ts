@@ -5,8 +5,9 @@ import {ensureAuth} from '../../../common/utils/auth-helper';
 
 export async function GET(
   request: NextRequest,
-  {params}: {params: {tenant: string; workspace: string}},
+  props: {params: Promise<{tenant: string; workspace: string}>}
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
 
   const {error, info} = await ensureAuth(workspaceURL, tenant);

@@ -29,7 +29,7 @@ export async function updateDirectorySettings({
   workspaceURL: string;
 }): ActionResponse<null> {
   try {
-    const tenantId = headers().get(TENANT_HEADER);
+    const tenantId = (await headers()).get(TENANT_HEADER);
 
     const session = await getSession();
     if (!session || !session.user) {
@@ -136,7 +136,7 @@ export async function updateCompanyProfileImage(
   if (!workspaceURL)
     return {error: true, message: await t('Workspace URL is required')};
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   const session = await getSession();
   if (!session || !session.user) {

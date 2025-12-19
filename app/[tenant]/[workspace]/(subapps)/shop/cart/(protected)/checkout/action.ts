@@ -238,7 +238,7 @@ export async function paypalCaptureOrder({
 
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -379,7 +379,7 @@ export async function paypalCreateOrder({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -512,7 +512,7 @@ export async function createStripeCheckoutSession({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -654,7 +654,7 @@ export async function validateStripePayment({
 
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -807,7 +807,7 @@ export async function payboxCreateOrder({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -939,7 +939,7 @@ export async function validatePayboxPayment({
 
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {

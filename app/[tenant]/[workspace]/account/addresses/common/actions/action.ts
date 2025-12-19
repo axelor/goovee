@@ -26,7 +26,7 @@ import {getQuotationRecord} from '@/app/[tenant]/[workspace]/account/addresses/c
 
 export async function createAddress(values: Partial<PartnerAddress>) {
   const session = await getSession();
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(session && tenantId)) return null;
 
@@ -41,7 +41,7 @@ export async function createAddress(values: Partial<PartnerAddress>) {
 
 export async function updateAddress(values: PartnerAddress) {
   const session = await getSession();
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(session && tenantId)) return null;
 
@@ -64,7 +64,7 @@ export async function updateDefaultAddress({
   isDefault?: boolean;
 }) {
   const session = await getSession();
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(session && tenantId)) return null;
 
@@ -85,7 +85,7 @@ export async function updateDefaultAddress({
 
 export async function deleteAddress(id: PartnerAddress['id']) {
   const session = await getSession();
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(session?.user && tenantId && id)) return null;
 
@@ -106,7 +106,7 @@ export async function confirmAddresses({
   record: any;
   subAppCode: SUBAPP_CODES;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!workspaceURL) {
     return {

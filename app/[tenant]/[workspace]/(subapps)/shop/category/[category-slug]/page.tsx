@@ -125,13 +125,14 @@ async function Category({
   );
 }
 
-export default function Page({
-  params,
-  searchParams,
-}: {
-  params: {tenant: string; workspace: string; 'category-slug': string};
-  searchParams: {[key: string]: string | undefined};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string; 'category-slug': string}>;
+    searchParams: Promise<{[key: string]: string | undefined}>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   return (
     <Suspense fallback={<ProductListSkeleton />}>
       <Category params={params} searchParams={searchParams} />

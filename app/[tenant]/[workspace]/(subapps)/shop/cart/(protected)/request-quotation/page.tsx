@@ -11,11 +11,12 @@ import {SUBAPP_CODES} from '@/constants';
 import Content from './content';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
-export default async function Page({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string}>;
+  }
+) {
+  const params = await props.params;
   const {tenant} = params;
   const session = await getSession();
 

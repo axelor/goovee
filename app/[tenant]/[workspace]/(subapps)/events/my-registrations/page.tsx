@@ -32,17 +32,17 @@ import {Card} from '@/ui/components';
 import {Suspense} from 'react';
 
 export default async function Page(context: any) {
-  const params = context?.params;
-  const page = context?.searchParams?.page || 1;
-  const query = context?.searchParams?.query || '';
-  const category = context?.searchParams?.category
-    ? Array.isArray(context?.searchParams?.category)
-      ? context?.searchParams?.category
-      : [context?.searchParams?.category]
+  const params = (await context?.params);
+  const page = (await context?.searchParams)?.page || 1;
+  const query = (await context?.searchParams)?.query || '';
+  const category = (await context?.searchParams)?.category
+    ? Array.isArray((await context?.searchParams)?.category)
+      ? (await context?.searchParams)?.category
+      : [(await context?.searchParams)?.category]
     : [];
 
-  const date = context?.searchParams?.date || undefined;
-  const type = context?.searchParams?.type || EVENT_TYPE.UPCOMING;
+  const date = (await context?.searchParams)?.date || undefined;
+  const type = (await context?.searchParams)?.type || EVENT_TYPE.UPCOMING;
 
   if (!MY_REGISTRATION_TAB_ITEMS.some(item => item.label === type)) {
     return notFound();

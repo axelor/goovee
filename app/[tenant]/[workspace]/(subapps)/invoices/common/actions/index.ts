@@ -40,7 +40,7 @@ export async function paypalCreateOrder({
   amount: string;
   workspaceURL: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Tenant is missing')};
   }
@@ -116,7 +116,7 @@ export async function paypalCaptureOrder({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {
       error: true,
@@ -280,7 +280,7 @@ export async function createStripeCheckoutSession({
   amount: string;
   workspaceURL: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Tenant is missing')};
   }
@@ -365,7 +365,7 @@ export async function validateStripePayment({
     return {error: true, message: await t('Workspace not provided!')};
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Invalid tenant')};
   }
@@ -529,7 +529,7 @@ export async function payboxCreateOrder({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Tenant is missing')};
   }
@@ -606,7 +606,7 @@ export async function validatePayboxPayment({
     return {error: true, message: await t('Workspace not provided!')};
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Invalid tenant')};
   }

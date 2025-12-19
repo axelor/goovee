@@ -27,11 +27,12 @@ const viewer: Record<string, React.JSXElementConstructor<any>> = {
   html: HTMLViewer,
 };
 
-export default async function Page({
-  params,
-}: {
-  params: {tenant: string; workspace: string; id: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string; id: string}>;
+  }
+) {
+  const params = await props.params;
   const {id, tenant} = params;
   const {workspaceURL} = workspacePathname(params);
 

@@ -10,17 +10,16 @@ import {isAttachmentOfNews} from '@/subapps/news/common/orm/news';
 
 export async function GET(
   request: NextRequest,
-  {
-    params,
-  }: {
-    params: {
+  props: {
+    params: Promise<{
       tenant: string;
       workspace: string;
       slug: string;
       'file-id': string;
-    };
-  },
+    }>;
+  }
 ) {
+  const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {slug, 'file-id': fileId} = params;
 

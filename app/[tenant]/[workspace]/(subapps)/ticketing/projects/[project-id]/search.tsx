@@ -39,7 +39,7 @@ export function Search({
   const [open, setOpen] = useState<boolean>(false);
   const [tickets, setTickets] = useState<Cloned<TicketSearch>[]>([]);
   const [loading, setLoading] = useState(false);
-  const searchRef = useRef<string | undefined>();
+  const searchRef = useRef<string | undefined>(undefined);
 
   const fetchTickets = useMemo(
     () =>

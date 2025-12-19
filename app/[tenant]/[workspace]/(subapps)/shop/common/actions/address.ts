@@ -19,7 +19,7 @@ export async function findDefaultInvoicing() {
   const session = await getSession();
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(user && tenantId)) return null;
 
@@ -32,7 +32,7 @@ export async function findDefaultDelivery() {
   const session = await getSession();
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(user && tenantId)) return null;
 
@@ -45,7 +45,7 @@ export async function findAddress(id: ID) {
   const session = await getSession();
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(user && tenantId)) return null;
 
@@ -60,7 +60,7 @@ export async function fetchDeliveryAddresses() {
   const session = await getSession();
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(user && tenantId)) return null;
 
@@ -73,7 +73,7 @@ export async function fetchInvoicingAddresses() {
   const session = await getSession();
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!(user && tenantId)) return null;
 

@@ -31,7 +31,7 @@ export async function createStripeCheckoutSession({
   workspaceURL: string;
   values: any;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
   const validationRes = await validateRegistration({
     eventId: event?.id?.toString(),
@@ -133,7 +133,7 @@ export async function paypalCreateOrder({
     id: string | number;
   };
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
 
   const validationRes = await validateRegistration({
@@ -223,7 +223,7 @@ export async function payboxCreateOrder({
   values: any;
   uri: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
 
   const validationRes = await validateRegistration({

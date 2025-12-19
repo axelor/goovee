@@ -12,11 +12,12 @@ import {t} from '@/locale/server';
 import {Title} from '../common/ui/components';
 import {Preference} from './preference';
 
-export default async function Page({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{tenant: string; workspace: string}>;
+  }
+) {
+  const params = await props.params;
   const {tenant: tenantId} = params;
   const {workspaceURL: url} = workspacePathname(params);
 

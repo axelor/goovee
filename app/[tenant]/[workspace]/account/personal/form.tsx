@@ -147,7 +147,7 @@ export default function Personal({
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<any>(pictureProp);
   const [updatingPicture, setUpdatingPicture] = useState(false);
-  const pictureInputRef = useRef<any>();
+  const pictureInputRef = useRef<any>(undefined);
   const router = useRouter();
 
   const {timeRemaining, isExpired, reset} = useCountDown(0);

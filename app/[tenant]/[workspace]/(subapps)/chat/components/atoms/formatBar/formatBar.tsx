@@ -17,7 +17,7 @@ export const FormattingToolbar = ({
   messageText,
   setMessageText,
 }: {
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   messageText: string;
   setMessageText: (value: string) => void;
 }) => {
