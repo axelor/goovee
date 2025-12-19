@@ -15,6 +15,11 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+    localPatterns: [
+      {
+        pathname: '/**',
+      },
+    ],
   },
   eslint: {
     ignoreDuringBuilds: true,
