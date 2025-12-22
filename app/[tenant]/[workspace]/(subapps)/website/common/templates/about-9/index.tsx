@@ -2,19 +2,8 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type About9Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
-import Design from '@/subapps/website/common/icons/solid/Design';
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
-
-function getIcon(icon: string) {
-  return icon
-    ? dynamic(() =>
-        import(`@/subapps/website/common/icons/solid/${icon}`).catch(err => {
-          return Design;
-        }),
-      )
-    : Design;
-}
+import {getIcon} from '@/subapps/website/common/icons/solid';
 
 export default function About9(props: TemplateProps<About9Data>) {
   const {data} = props;
@@ -61,7 +50,7 @@ export default function About9(props: TemplateProps<About9Data>) {
 
             <div className="row gx-xl-10 gy-6">
               {aboutList?.map(({id, attrs: item}) => {
-                const Icon = getIcon(item.icon ?? '');
+                const Icon = item.icon && getIcon(item.icon);
                 return (
                   <div className="col-md-6" key={id}>
                     <ServiceCard3

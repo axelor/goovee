@@ -3,13 +3,7 @@ import {type Process9Data} from './meta';
 import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
-import dynamic from 'next/dynamic';
-import IconProps from '../../types/icons';
-
-function getIcon(icon?: string) {
-  if (!icon) return (props: IconProps) => null;
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
+import {getIcon} from '@/subapps/website/common/icons/solid';
 
 export default function Process9(props: TemplateProps<Process9Data>) {
   const {data} = props;

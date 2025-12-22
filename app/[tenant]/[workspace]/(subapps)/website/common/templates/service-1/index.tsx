@@ -1,20 +1,9 @@
 import ServiceCard1 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard1';
 // -------- data -------- //
-import Design from '@/subapps/website/common/icons/solid/Design';
-import dynamic from 'next/dynamic';
+import {getIcon} from '@/subapps/website/common/icons/solid';
 import {TemplateProps} from '@/subapps/website/common/types';
 
 import type {Service1Data} from './meta';
-
-function getIcon(icon?: string) {
-  return icon
-    ? dynamic(() =>
-        import(`@/subapps/website/common/icons/solid/${icon}`).catch(err => {
-          return Design;
-        }),
-      )
-    : Design;
-}
 
 export default function Service1(props: TemplateProps<Service1Data>) {
   const {data} = props;

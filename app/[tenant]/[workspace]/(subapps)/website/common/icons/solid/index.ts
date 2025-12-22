@@ -1,3 +1,6 @@
+import dynamic from 'next/dynamic';
+import {ComponentType} from 'react';
+
 export const solidIcons = [
   'AI',
   'BarChart',
@@ -50,3 +53,60 @@ export const solidIcons = [
   'Update',
   'User',
 ] as const;
+
+const iconMap: Record<string, ComponentType> = {
+  AI: dynamic(() => import('./AI')),
+  BarChart: dynamic(() => import('./BarChart')),
+  Box: dynamic(() => import('./Box')),
+  BrainPlus: dynamic(() => import('./BrainPlus')),
+  Briefcase: dynamic(() => import('./Briefcase')),
+  Bullhorn: dynamic(() => import('./Bullhorn')),
+  Calendar: dynamic(() => import('./Calendar')),
+  Cart: dynamic(() => import('./Cart')),
+  Checked: dynamic(() => import('./Checked')),
+  CheckShield: dynamic(() => import('./CheckShield')),
+  Check: dynamic(() => import('./Check')),
+  ClipboardList: dynamic(() => import('./ClipboardList')),
+  CloudNetwork2: dynamic(() => import('./CloudNetwork2')),
+  Code: dynamic(() => import('./Code')),
+  Compare: dynamic(() => import('./Compare')),
+  Controls: dynamic(() => import('./Controls')),
+  Currency: dynamic(() => import('./Currency')),
+  Design: dynamic(() => import('./Design')),
+  DevicesThree: dynamic(() => import('./DevicesThree')),
+  Devices: dynamic(() => import('./Devices')),
+  DevicesTwo: dynamic(() => import('./DevicesTwo')),
+  DisplayChartUp: dynamic(() => import('./DisplayChartUp')),
+  Dollar: dynamic(() => import('./Dollar')),
+  Download: dynamic(() => import('./Download')),
+  HandHoldingMedical: dynamic(() => import('./HandHoldingMedical')),
+  Hand: dynamic(() => import('./Hand')),
+  Headphone: dynamic(() => import('./Headphone')),
+  HourGlassStart: dynamic(() => import('./HourGlassStart')),
+  IdCard: dynamic(() => import('./IdCard')),
+  Layers: dynamic(() => import('./Layers')),
+  LayoutTwo: dynamic(() => import('./LayoutTwo')),
+  Like: dynamic(() => import('./Like')),
+  Lock: dynamic(() => import('./Lock')),
+  Megaphone: dynamic(() => import('./Megaphone')),
+  Rocket: dynamic(() => import('./Rocket')),
+  Safe: dynamic(() => import('./Safe')),
+  ScaleUnbalanced: dynamic(() => import('./ScaleUnbalanced')),
+  Search: dynamic(() => import('./Search')),
+  SeoTwo: dynamic(() => import('./SeoTwo')),
+  Server: dynamic(() => import('./Server')),
+  Setting: dynamic(() => import('./Setting')),
+  Shield: dynamic(() => import('./Shield')),
+  ShoppingBusket: dynamic(() => import('./ShoppingBusket')),
+  Stethoscope: dynamic(() => import('./Stethoscope')),
+  SuitcaseMdical: dynamic(() => import('./SuitcaseMdical')),
+  ThumbsUp: dynamic(() => import('./ThumbsUp')),
+  TouchScreen: dynamic(() => import('./TouchScreen')),
+  TruckMedical: dynamic(() => import('./TruckMedical')),
+  Update: dynamic(() => import('./Update')),
+  User: dynamic(() => import('./User')),
+};
+
+export function getIcon(icon: string) {
+  return iconMap[icon];
+}

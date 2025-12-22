@@ -1,12 +1,6 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service18Data} from './meta';
-import dynamic from 'next/dynamic';
-import IconProps from '../../types/icons';
-
-function getIcon(icon?: string) {
-  if (!icon) return (props: IconProps) => null;
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
+import {getIcon} from '@/subapps/website/common/icons/solid';
 
 export default function Service18(props: TemplateProps<Service18Data>) {
   const {data} = props;

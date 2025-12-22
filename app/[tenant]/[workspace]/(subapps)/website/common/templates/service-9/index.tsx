@@ -2,13 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service9Data} from './meta';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
 import ServiceCard4 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard4';
-import dynamic from 'next/dynamic';
-import IconProps from '../../types/icons';
-
-function getIcon(icon?: string) {
-  if (!icon) return (props: IconProps) => null;
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
+import {getIcon} from '@/subapps/website/common/icons/solid';
 
 export default function Service9(props: TemplateProps<Service9Data>) {
   const {data} = props;

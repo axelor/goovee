@@ -1,12 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process5Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
-import dynamic from 'next/dynamic';
+import {getIcon} from '@/subapps/website/common/icons/solid';
 import Image from 'next/image';
-
-function getIcon(icon: string) {
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
 
 export default function Process5(props: TemplateProps<Process5Data>) {
   const {data} = props;

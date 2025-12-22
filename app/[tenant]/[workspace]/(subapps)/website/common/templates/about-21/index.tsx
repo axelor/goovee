@@ -3,18 +3,7 @@ import {type About21Data} from './meta';
 import {getImage, getMetaFileURL} from '@/subapps/website/common/utils/helper';
 import Banner4 from '@/subapps/website/common/components/blocks/banner/Banner4';
 import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
-import Design from '@/subapps/website/common/icons/solid/Design';
-import dynamic from 'next/dynamic';
-
-function getIcon(icon: string) {
-  return icon
-    ? dynamic(() =>
-        import(`@/subapps/website/common/icons/solid/${icon}`).catch(err => {
-          return Design;
-        }),
-      )
-    : Design;
-}
+import {getIcon} from '@/subapps/website/common/icons/solid';
 
 export default function About21(props: TemplateProps<About21Data>) {
   const {data} = props;
@@ -61,7 +50,7 @@ export default function About21(props: TemplateProps<About21Data>) {
             <h3 className="display-3 mb-8">{description}</h3>
             <div className="row gy-6">
               {aboutList?.map(({id, attrs: item}) => {
-                const Icon = getIcon(item.icon ?? '');
+                const Icon = item.icon && getIcon(item.icon);
                 return (
                   <div className="col-md-6" key={id}>
                     <ServiceCard3

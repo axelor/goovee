@@ -5,12 +5,8 @@ import {Fragment} from 'react';
 import Tiles1 from '@/subapps/website/common/components/elements/tiles/Tiles1';
 import ListColumn from '@/subapps/website/common/components/reuseable/ListColumn';
 import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
-import dynamic from 'next/dynamic';
+import {getIcon} from '@/subapps/website/common/icons/solid';
 import {getImage} from '../../utils/helper';
-
-const getIcon = (icon: string) => {
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-};
 
 export default function Service5(props: TemplateProps<Service5Data>) {
   const {data} = props;
