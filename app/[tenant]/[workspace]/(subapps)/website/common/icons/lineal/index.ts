@@ -1,3 +1,6 @@
+import dynamic from 'next/dynamic';
+import {ComponentType} from 'react';
+
 export const linealIcons = [
   'Analytics',
   'AwardTwo',
@@ -16,7 +19,6 @@ export const linealIcons = [
   'Gift',
   'Home',
   'IdCard',
-  'index',
   'Insurance',
   'LightBulb',
   'List',
@@ -50,3 +52,60 @@ export const linealIcons = [
   'VideoEditing',
   'Wallet',
 ] as const;
+
+const iconMap: Record<string, ComponentType> = {
+  Analytics: dynamic(() => import('./Analytics')),
+  AwardTwo: dynamic(() => import('./AwardTwo')),
+  BarChart: dynamic(() => import('./BarChart')),
+  BriefcaseTwo: dynamic(() => import('./BriefcaseTwo')),
+  Browser: dynamic(() => import('./Browser')),
+  ChatTwo: dynamic(() => import('./ChatTwo')),
+  CheckList: dynamic(() => import('./CheckList')),
+  Check: dynamic(() => import('./Check')),
+  ClockThree: dynamic(() => import('./ClockThree')),
+  CloudComputing: dynamic(() => import('./CloudComputing')),
+  CloudComputingTwo: dynamic(() => import('./CloudComputingTwo')),
+  Design: dynamic(() => import('./Design')),
+  Earth: dynamic(() => import('./Earth')),
+  Email: dynamic(() => import('./Email')),
+  Gift: dynamic(() => import('./Gift')),
+  Home: dynamic(() => import('./Home')),
+  IdCard: dynamic(() => import('./IdCard')),
+  Insurance: dynamic(() => import('./Insurance')),
+  LightBulb: dynamic(() => import('./LightBulb')),
+  List: dynamic(() => import('./List')),
+  Loading: dynamic(() => import('./Loading')),
+  Loyalty: dynamic(() => import('./Loyalty')),
+  Medal: dynamic(() => import('./Medal')),
+  Megaphone: dynamic(() => import('./Megaphone')),
+  Padlock: dynamic(() => import('./Padlock')),
+  Pentool: dynamic(() => import('./Pentool')),
+  PieChartTwo: dynamic(() => import('./PieChartTwo')),
+  Printer: dynamic(() => import('./Printer')),
+  PrinterTwo: dynamic(() => import('./PrinterTwo')),
+  Puzzle: dynamic(() => import('./Puzzle')),
+  Rocket: dynamic(() => import('./Rocket')),
+  RocketTwo: dynamic(() => import('./RocketTwo')),
+  Savings: dynamic(() => import('./Savings')),
+  Search: dynamic(() => import('./Search')),
+  SearchTwo: dynamic(() => import('./SearchTwo')),
+  SettingsThree: dynamic(() => import('./SettingsThree')),
+  Settings: dynamic(() => import('./Settings')),
+  Shield: dynamic(() => import('./Shield')),
+  ShoppingBasket: dynamic(() => import('./ShoppingBasket')),
+  ShopTwo: dynamic(() => import('./ShopTwo')),
+  Smartphone: dynamic(() => import('./Smartphone')),
+  SmartphoneTwo: dynamic(() => import('./SmartphoneTwo')),
+  Target: dynamic(() => import('./Target')),
+  Team: dynamic(() => import('./Team')),
+  TeleMarketer: dynamic(() => import('./TeleMarketer')),
+  Telephone: dynamic(() => import('./Telephone')),
+  User: dynamic(() => import('./User')),
+  VideoEditing: dynamic(() => import('./VideoEditing')),
+  Wallet: dynamic(() => import('./Wallet')),
+};
+
+export function getIcon(icon: string) {
+  return iconMap[icon];
+}
+

@@ -1,13 +1,7 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts5Data} from './meta';
 import {CountUp} from '@/subapps/website/common/components/reuseable/countup';
-import Design from '@/subapps/website/common/icons/lineal/Design';
-import dynamic from 'next/dynamic';
-
-function getIcon(icon?: string) {
-  if (!icon) return Design;
-  return dynamic(() => import(`@/subapps/website/common/icons/lineal/${icon}`));
-}
+import {getIcon} from '@/subapps/website/common/icons/lineal';
 
 export default function Facts5(props: TemplateProps<Facts5Data>) {
   const {data} = props;

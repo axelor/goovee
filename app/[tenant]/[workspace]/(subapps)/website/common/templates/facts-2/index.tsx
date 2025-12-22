@@ -1,11 +1,8 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Facts2Data} from './meta';
 import Counter3 from '@/subapps/website/common/components/reuseable/counter/Counter3';
-import dynamic from 'next/dynamic';
+import {getIcon} from '@/subapps/website/common/icons/solid';
 
-function getIcon(icon: string) {
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
 export default function Facts2(props: TemplateProps<Facts2Data>) {
   const {data} = props;
   const {

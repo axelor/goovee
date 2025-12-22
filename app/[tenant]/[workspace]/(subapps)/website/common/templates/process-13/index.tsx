@@ -1,13 +1,12 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
+import {getIcon} from '@/subapps/website/common/icons/solid';
 import {type Process13Data} from './meta';
-import dynamic from 'next/dynamic';
+
 import Hex from '@/subapps/website/common/icons/Hex';
 import {getMetaFileURL} from '../../utils/helper';
 import Plyr from '@/subapps/website/common/components/reuseable/Plyr';
 
-const getIcon = (icon: string) => {
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-};
+
 
 export default function Process13(props: TemplateProps<Process13Data>) {
   const {data} = props;

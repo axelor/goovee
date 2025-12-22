@@ -1,13 +1,12 @@
 import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Process4Data} from './meta';
-import dynamic from 'next/dynamic';
+import {getIcon} from '@/subapps/website/common/icons/solid';
+
 import animation from '@/subapps/website/common/utils/animation';
 import {getMetaFileURL} from '../../utils/helper';
 import Plyr from '@/subapps/website/common/components/reuseable/Plyr';
 
-function getIcon(icon: string) {
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
+
 
 export default function Process4(props: TemplateProps<Process4Data>) {
   const {data} = props;
