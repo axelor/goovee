@@ -7,7 +7,7 @@ import {MdOutlineCategory} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {DynamicIcon} from './common/ui/components';
+import {DynamicIcon} from '@/ui/components';
 
 export default function Categories({items}: any) {
   const router = useRouter();

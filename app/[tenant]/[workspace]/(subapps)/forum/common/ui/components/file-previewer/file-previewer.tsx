@@ -2,12 +2,9 @@
 import React, {useMemo} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {DynamicIcon, DocViewer} from '@/ui/components';
-import {getFileTypeIcon, getIconColor} from '@/utils/files';
+import {DocViewer, FileIcon} from '@/ui/components';
 
 export const FilePreviewer = React.memo(({file}: {file: any}) => {
-  const icon = getFileTypeIcon(file?.type);
-  const iconColor = getIconColor(icon);
   const url = useMemo(
     () =>
       file instanceof Blob || file instanceof File
@@ -23,16 +20,9 @@ export const FilePreviewer = React.memo(({file}: {file: any}) => {
       ) : (
         <div className="px-2 border h-10 xl:h-12 flex items-center font-xl mb-2 rounded-md gap-2">
           <div className="w-6 h-6 rounded-lg relative">
-            <DynamicIcon
-              icon={icon}
+            <FileIcon
+              fileType={file?.type}
               className={'h-6 w-6 shrink-0'}
-              {...(iconColor
-                ? {
-                    style: {
-                      color: iconColor,
-                    },
-                  }
-                : {})}
             />
           </div>
 

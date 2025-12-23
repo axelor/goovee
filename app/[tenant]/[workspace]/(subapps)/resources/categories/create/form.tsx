@@ -32,7 +32,7 @@ import {i18n} from '@/locale';
 
 // ---- LOCAL IMPORTS ---- //
 import {create} from './action';
-import {DynamicIcon} from '@/subapps/resources/common/ui/components';
+import {DynamicIcon} from '@/ui/components/dynamic-icon';
 
 const formSchema = z.object({
   title: z.string().min(1, {message: i18n.t('Title is required')}),
