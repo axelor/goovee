@@ -66,12 +66,6 @@ export const Search = ({
     debouncedFindQuery(search);
   }, [search, debouncedFindQuery]);
 
-  useEffect(() => {
-    if (onSearch) {
-      onSearch(search);
-    }
-  }, [search, onSearch]);
-
   return (
     <>
       <div className="w-full relative">
@@ -83,6 +77,7 @@ export const Search = ({
             onChangeCapture={(e: React.ChangeEvent<HTMLInputElement>) => {
               setSearch(e.target.value);
               setLoading(true);
+              onSearch && onSearch(e.target.value);
               searchRef.current = e.target.value;
             }}
             onFocus={() => onFocus && onFocus(true)}
