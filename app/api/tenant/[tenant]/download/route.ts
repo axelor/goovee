@@ -2,7 +2,10 @@ import {manager} from '@/tenant';
 import axios from 'axios';
 import {NextResponse} from 'next/server';
 
-export async function POST(request: Request, props: {params: Promise<{tenant: string}>}) {
+export async function POST(
+  request: Request,
+  props: {params: Promise<{tenant: string}>},
+) {
   const params = await props.params;
   let tenant;
 

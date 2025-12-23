@@ -31,15 +31,13 @@ function Description({
   );
 }
 
-export default async function Page(
-  props: {
-    searchParams: Promise<{
-      workspaceURI?: string;
-      tenant: string;
-      callbackurl: string;
-    }>;
-  }
-) {
+export default async function Page(props: {
+  searchParams: Promise<{
+    workspaceURI?: string;
+    tenant: string;
+    callbackurl: string;
+  }>;
+}) {
   const searchParams = await props.searchParams;
   const {workspaceURI, tenantId, workspaceURL} = extractSearchParams({
     searchParams,

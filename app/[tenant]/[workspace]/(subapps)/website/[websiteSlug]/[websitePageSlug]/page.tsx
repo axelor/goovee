@@ -17,16 +17,14 @@ import {clone} from '@/utils';
 import {Suspense} from 'react';
 import {Plugins, Template} from '../client-wrapper';
 
-export async function generateMetadata(
-  props: {
-    params: Promise<{
-      tenant: string;
-      workspace: string;
-      websiteSlug: string;
-      websitePageSlug: string;
-    }>;
-  }
-) {
+export async function generateMetadata(props: {
+  params: Promise<{
+    tenant: string;
+    workspace: string;
+    websiteSlug: string;
+    websitePageSlug: string;
+  }>;
+}) {
   const params = await props.params;
   const {workspaceURL} = workspacePathname(params);
   const {tenant, websiteSlug, websitePageSlug} = params;
@@ -53,16 +51,14 @@ export async function generateMetadata(
   };
 }
 
-export default async function Page(
-  props: {
-    params: Promise<{
-      tenant: string;
-      workspace: string;
-      websiteSlug: string;
-      websitePageSlug: string;
-    }>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{
+    tenant: string;
+    workspace: string;
+    websiteSlug: string;
+    websitePageSlug: string;
+  }>;
+}) {
   const params = await props.params;
   const {workspaceURL, workspaceURI} = workspacePathname(params);
   const {tenant, websiteSlug, websitePageSlug} = params;

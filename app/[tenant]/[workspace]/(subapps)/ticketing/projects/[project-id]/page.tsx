@@ -57,12 +57,10 @@ import {getOrderBy, getSkip} from '../../common/utils/search-param';
 import {EncodedFilter} from '../../common/utils/validators';
 import Search from './search';
 
-export default async function Page(
-  props0: {
-    params: Promise<{tenant: string; workspace: string; 'project-id': string}>;
-    searchParams: Promise<SearchParams>;
-  }
-) {
+export default async function Page(props0: {
+  params: Promise<{tenant: string; workspace: string; 'project-id': string}>;
+  searchParams: Promise<SearchParams>;
+}) {
   const searchParams = await props0.searchParams;
   const params = await props0.params;
   const projectId = params?.['project-id'];

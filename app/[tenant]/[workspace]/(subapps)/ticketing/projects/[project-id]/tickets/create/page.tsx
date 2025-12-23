@@ -31,18 +31,16 @@ import {ensureAuth} from '../../../../common/utils/auth-helper';
 import {EncodedFilter} from '../../../../common/utils/validators';
 import {Form} from './client-form';
 
-export default async function Page(
-  props: {
-    params: Promise<{
-      tenant: string;
-      workspace: string;
-      'project-id': string;
-    }>;
-    searchParams: Promise<{
-      parentId?: string;
-    }>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{
+    tenant: string;
+    workspace: string;
+    'project-id': string;
+  }>;
+  searchParams: Promise<{
+    parentId?: string;
+  }>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const projectId = params['project-id'];

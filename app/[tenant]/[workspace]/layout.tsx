@@ -26,15 +26,13 @@ const defaultTheme = {
   css: JSON.stringify(DEFAULT_THEME_OPTIONS),
 };
 
-export async function generateMetadata(
-  props: {
-    params: Promise<{
-      tenant: string;
-      workspace: string;
-      websiteSlug: string;
-    }>;
-  }
-) {
+export async function generateMetadata(props: {
+  params: Promise<{
+    tenant: string;
+    workspace: string;
+    websiteSlug: string;
+  }>;
+}) {
   const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
 
@@ -56,17 +54,13 @@ export async function generateMetadata(
   };
 }
 
-export default async function Layout(
-  props: {
-    params: Promise<{tenant: string; workspace: string}>;
-    children: React.ReactNode;
-  }
-) {
+export default async function Layout(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+  children: React.ReactNode;
+}) {
   const params = await props.params;
 
-  const {
-    children
-  } = props;
+  const {children} = props;
 
   const {tenant} = params;
   const session = await getSession();

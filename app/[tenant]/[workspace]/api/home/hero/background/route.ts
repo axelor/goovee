@@ -6,7 +6,7 @@ import {NextRequest, NextResponse} from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  props: {params: Promise<{tenant: string; workspace: string}>}
+  props: {params: Promise<{tenant: string; workspace: string}>},
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);

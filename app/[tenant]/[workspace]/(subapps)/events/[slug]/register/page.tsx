@@ -20,11 +20,9 @@ import {
   isLoginNeededForRegistration,
 } from '@/subapps/events/common/utils';
 
-export default async function Page(
-  props: {
-    params: Promise<{slug: string; tenant: string; workspace: string}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{slug: string; tenant: string; workspace: string}>;
+}) {
   const params = await props.params;
   const {slug, tenant} = params;
 

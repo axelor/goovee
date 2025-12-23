@@ -8,17 +8,13 @@ import {workspacePathname} from '@/utils/workspace';
 // ---- LOCAL IMPORTS ---- //
 import LayoutContent from './layout-content';
 
-export default async function Layout(
-  props: {
-    children: React.ReactNode;
-    params: Promise<{tenant: string; workspace: string}>;
-  }
-) {
+export default async function Layout(props: {
+  children: React.ReactNode;
+  params: Promise<{tenant: string; workspace: string}>;
+}) {
   const params = await props.params;
 
-  const {
-    children
-  } = props;
+  const {children} = props;
 
   const session = await getSession();
   if (!session) return notFound();

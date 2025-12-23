@@ -10,14 +10,12 @@ import Form from './form';
 import {findInviteById} from '../../../../common/orm/register';
 import Subscribe from '../subscribe';
 
-export default async function Page(
-  props: {
-    params: Promise<{
-      id: string;
-    }>;
-    searchParams: Promise<any>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{
+    id: string;
+  }>;
+  searchParams: Promise<any>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const {id} = params;

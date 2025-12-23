@@ -6,8 +6,6 @@ import animation from '@/subapps/website/common/utils/animation';
 import {getMetaFileURL} from '../../utils/helper';
 import Plyr from '@/subapps/website/common/components/reuseable/Plyr';
 
-
-
 export default function Process4(props: TemplateProps<Process4Data>) {
   const {data} = props;
   const {

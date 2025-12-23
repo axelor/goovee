@@ -16,7 +16,7 @@ export async function GET(
       workspace: string;
       slug: string;
     }>;
-  }
+  },
 ) {
   const params = await props.params;
   const {searchParams} = new URL(request.url);

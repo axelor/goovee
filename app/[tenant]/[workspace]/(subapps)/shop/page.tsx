@@ -150,11 +150,9 @@ function ShopSkeleton() {
   );
 }
 
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+}) {
   const params = await props.params;
   return (
     <>

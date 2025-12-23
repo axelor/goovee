@@ -25,7 +25,7 @@ import {Button} from '@/ui/components/button';
 
 // ---- LOCAL IMPORTS ---- //
 import {resetPassword} from '../action';
-import { useState, use } from 'react';
+import {useState, use} from 'react';
 
 const formSchema = z
   .object({

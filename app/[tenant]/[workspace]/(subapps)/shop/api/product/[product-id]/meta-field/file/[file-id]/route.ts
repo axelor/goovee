@@ -28,7 +28,7 @@ export async function GET(
       'file-id': string;
       workspace: string;
     }>;
-  }
+  },
 ) {
   const params = await props.params;
   const {'product-id': productId, 'file-id': fileId, tenant} = params;

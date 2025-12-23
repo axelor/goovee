@@ -32,7 +32,7 @@ import {Card} from '@/ui/components';
 import {Suspense} from 'react';
 
 export default async function Page(context: any) {
-  const params = (await context?.params);
+  const params = await context?.params;
   const page = (await context?.searchParams)?.page || 1;
   const query = (await context?.searchParams)?.query || '';
   const category = (await context?.searchParams)?.category

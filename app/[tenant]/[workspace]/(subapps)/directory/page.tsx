@@ -31,12 +31,10 @@ import Hero from './hero';
 
 const ITEMS_PER_PAGE = 7;
 
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string}>;
-    searchParams: Promise<SearchParams>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+  searchParams: Promise<SearchParams>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
