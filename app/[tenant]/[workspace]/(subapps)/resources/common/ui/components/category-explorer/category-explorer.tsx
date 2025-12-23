@@ -15,7 +15,7 @@ import {cn} from '@/utils/css';
 // ---- LOCAL IMPORTS ---- //
 import {useSearchParams} from '@/subapps/resources/common/ui/hooks/use-search-params';
 import styles from './category-explorer.module.scss';
-import {DynamicIcon} from '../dynamic-icon';
+import {DynamicIcon} from '@/ui/components/dynamic-icon';
 
 interface CategoryExplorerProps extends React.HTMLAttributes<HTMLDivElement> {
   categories?: any[];

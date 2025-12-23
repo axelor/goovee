@@ -14,8 +14,8 @@ import {HeroSearch} from '@/ui/components/hero-search';
 import {Icon} from '@/ui/components/icon';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {Skeleton} from '@/ui/components/skeleton/skeleton';
-import {getFileTypeIcon, getIconColor} from '@/utils/files';
 import {BadgeList} from '@/ui/components/badge-list';
+import {FileIcon} from '@/ui/components/file-icon';
 import {clone} from '@/utils';
 
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
@@ -24,7 +24,6 @@ import {findRecentlyActivePosts} from './(subapps)/forum/common/orm/forum';
 import type {RecentlyActivePost} from './(subapps)/forum/common/types/forum';
 import {findHomePageHeaderNews} from './(subapps)/news/common/orm/news';
 import {fetchLatestFiles} from './(subapps)/resources/common/orm/dms';
-import {DynamicIcon} from './(subapps)/resources/common/ui/components/dynamic-icon';
 import {DateDisplay} from './client';
 
 export async function Home({
@@ -399,24 +398,15 @@ async function ResourcesCard({
       <CardContent className="space-y-4">
         {files && files.length > 0 ? (
           files.map(file => {
-            const icon = getFileTypeIcon(file.metaFile?.fileType);
-            const iconColor = getIconColor(icon);
             return (
               <Link
                 key={file.id}
                 href={`${workspaceURI}/${SUBAPP_CODES.resources}/${file.id}`}
                 className="block group rounded-md border p-3 hover:bg-muted/50 transition-colors">
                 <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
-                  <DynamicIcon
-                    icon={icon}
+                  <FileIcon
+                    fileType={file.metaFile?.fileType}
                     className={'h-6 w-6 shrink-0'}
-                    {...(iconColor
-                      ? {
-                          style: {
-                            color: iconColor,
-                          },
-                        }
-                      : {})}
                   />
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center justify-between">
