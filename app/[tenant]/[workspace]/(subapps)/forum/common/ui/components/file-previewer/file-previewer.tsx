@@ -20,10 +20,7 @@ export const FilePreviewer = React.memo(({file}: {file: any}) => {
       ) : (
         <div className="px-2 border h-10 xl:h-12 flex items-center font-xl mb-2 rounded-md gap-2">
           <div className="w-6 h-6 rounded-lg relative">
-            <FileIcon
-              fileType={file?.type}
-              className={'h-6 w-6 shrink-0'}
-            />
+            <FileIcon fileType={file?.type} className={'h-6 w-6 shrink-0'} />
           </div>
 
           <a

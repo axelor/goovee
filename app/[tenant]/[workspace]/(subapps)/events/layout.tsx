@@ -14,20 +14,16 @@ import {
   MobileMenuCategory,
 } from '@/subapps/events/common/ui/components';
 
-export default async function Layout(
-  props: {
-    params: Promise<{
-      tenant: string;
-      workspace: string;
-    }>;
-    children: React.ReactNode;
-  }
-) {
+export default async function Layout(props: {
+  params: Promise<{
+    tenant: string;
+    workspace: string;
+  }>;
+  children: React.ReactNode;
+}) {
   const params = await props.params;
 
-  const {
-    children
-  } = props;
+  const {children} = props;
 
   const {tenant} = params;
 

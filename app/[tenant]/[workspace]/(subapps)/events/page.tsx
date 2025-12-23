@@ -31,7 +31,7 @@ import {
 import Hero from './hero';
 
 export default async function Page(context: any) {
-  const params = (await context?.params);
+  const params = await context?.params;
   const page = (await context?.searchParams)?.page || 1;
   const category = (await context?.searchParams)?.category
     ? Array.isArray((await context?.searchParams)?.category)

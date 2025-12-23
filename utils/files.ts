@@ -95,4 +95,3 @@ export function getProductImageURL(
 
   return `/api/tenant/${tenant}/product/image/${id}`;
 }
-

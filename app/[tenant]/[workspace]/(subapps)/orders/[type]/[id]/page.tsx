@@ -87,11 +87,14 @@ async function Order({
   return <Content order={clone(order)} orderType={type} />;
 }
 
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string; type: OrderType; id: string}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{
+    tenant: string;
+    workspace: string;
+    type: OrderType;
+    id: string;
+  }>;
+}) {
   const params = await props.params;
   return (
     <Suspense fallback={<OrderSkeleton />}>

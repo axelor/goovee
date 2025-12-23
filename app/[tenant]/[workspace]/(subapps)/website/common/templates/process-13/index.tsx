@@ -6,8 +6,6 @@ import Hex from '@/subapps/website/common/icons/Hex';
 import {getMetaFileURL} from '../../utils/helper';
 import Plyr from '@/subapps/website/common/components/reuseable/Plyr';
 
-
-
 export default function Process13(props: TemplateProps<Process13Data>) {
   const {data} = props;
   const {

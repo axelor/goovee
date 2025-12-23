@@ -12,12 +12,10 @@ import ResourceForm from './form';
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
 import {ACTION} from '@/subapps/resources/common/constants';
 
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string}>;
-    searchParams: Promise<{id: string}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+  searchParams: Promise<{id: string}>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const {tenant} = params;

@@ -7,11 +7,9 @@ import {workspacePathname} from '@/utils/workspace';
 import {getSession} from '@/auth';
 import Content from './content';
 
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+}) {
   const params = await props.params;
   const {tenant} = params;
   const session = await getSession();

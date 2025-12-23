@@ -26,12 +26,10 @@ import {getPaginationButtons} from '@/utils/pagination';
 import {ensureAuth} from './common/utils/auth-helper';
 import {getSkip} from './common/utils/search-param';
 
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string}>;
-    searchParams: Promise<{[key: string]: string | undefined}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+  searchParams: Promise<{[key: string]: string | undefined}>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);

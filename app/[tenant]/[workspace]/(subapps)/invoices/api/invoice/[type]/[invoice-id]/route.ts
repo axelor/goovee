@@ -21,7 +21,7 @@ export async function GET(
       'invoice-id': string;
       type: string;
     }>;
-  }
+  },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);

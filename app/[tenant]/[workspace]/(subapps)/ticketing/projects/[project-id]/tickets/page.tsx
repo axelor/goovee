@@ -60,12 +60,10 @@ import {
 import Search from '../search';
 
 const TICKETS_PER_PAGE = 10;
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string; 'project-id': string}>;
-    searchParams: Promise<SearchParams>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string; 'project-id': string}>;
+  searchParams: Promise<SearchParams>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const projectId = params?.['project-id'];

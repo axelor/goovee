@@ -18,7 +18,7 @@ export async function GET(
       'ticket-id': string;
       'file-id': string;
     }>;
-  }
+  },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);

@@ -8,7 +8,7 @@ import type {AOSProduct} from '@/goovee/.generated/models';
 
 export async function GET(
   request: NextRequest,
-  props: {params: Promise<{tenant: string; id: string}>}
+  props: {params: Promise<{tenant: string; id: string}>},
 ) {
   const params = await props.params;
   const {id, tenant} = params;

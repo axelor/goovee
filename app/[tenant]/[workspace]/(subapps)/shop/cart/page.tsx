@@ -39,11 +39,9 @@ async function CartView({
   return <Content workspace={workspace} tenant={tenant} />;
 }
 
-export default async function Cart(
-  props: {
-    params: Promise<{tenant: string; workspace: string}>;
-  }
-) {
+export default async function Cart(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+}) {
   const params = await props.params;
   return (
     <Suspense fallback={<CartSkeleton />}>

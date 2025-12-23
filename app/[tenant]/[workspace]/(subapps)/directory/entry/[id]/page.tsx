@@ -20,11 +20,9 @@ import {Map} from '../../common/ui/components/map';
 import {ensureAuth} from '../../common/utils/auth-helper';
 
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
-export default async function Page(
-  props: {
-    params: Promise<{tenant: string; workspace: string; id: string}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string; id: string}>;
+}) {
   const params = await props.params;
   const {id} = params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);

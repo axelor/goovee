@@ -34,7 +34,7 @@ export async function GET(
   req: NextRequest,
   props: {
     params: Promise<{tenant: string}>;
-  }
+  },
 ) {
   const params = await props.params;
   const authHeader = req.headers.get('authorization');

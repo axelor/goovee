@@ -78,12 +78,10 @@ async function Resources({
   return <ResourceList resources={files} />;
 }
 
-export default async function Page(
-  props: {
-    searchParams: Promise<{id: string}>;
-    params: Promise<{tenant: string; workspace: string}>;
-  }
-) {
+export default async function Page(props: {
+  searchParams: Promise<{id: string}>;
+  params: Promise<{tenant: string; workspace: string}>;
+}) {
   const params = await props.params;
   const searchParams = await props.searchParams;
   const {tenant} = params;

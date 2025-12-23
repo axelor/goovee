@@ -15,12 +15,10 @@ import {
 import {MembersNoticationsWrapper} from './wrapper';
 import GroupAction from './groupAction';
 
-export default async function Page(
-  props: {
-    params: Promise<any>;
-    searchParams: Promise<{[key: string]: string | undefined}>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<any>;
+  searchParams: Promise<{[key: string]: string | undefined}>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const {tenant} = params;

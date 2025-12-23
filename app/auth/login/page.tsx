@@ -14,11 +14,9 @@ import {
 } from '@/constants';
 import {TenancyType, manager} from '@/tenant';
 
-export default async function Page(
-  props: {
-    searchParams: Promise<{[key: string]: string}>;
-  }
-) {
+export default async function Page(props: {
+  searchParams: Promise<{[key: string]: string}>;
+}) {
   const searchParams = await props.searchParams;
   const session = await getSession();
 

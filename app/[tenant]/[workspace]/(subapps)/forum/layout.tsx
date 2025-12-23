@@ -11,20 +11,16 @@ import {SUBAPP_CODES} from '@/constants';
 import {MENU} from '@/app/[tenant]/[workspace]/(subapps)/forum/common/constants';
 import MobileMenu from '@/subapps/forum/mobile-menu';
 
-export default async function Layout(
-  props: {
-    params: Promise<{
-      tenant: string;
-      workspace: string;
-    }>;
-    children: React.ReactNode;
-  }
-) {
+export default async function Layout(props: {
+  params: Promise<{
+    tenant: string;
+    workspace: string;
+  }>;
+  children: React.ReactNode;
+}) {
   const params = await props.params;
 
-  const {
-    children
-  } = props;
+  const {children} = props;
 
   const session = await getSession();
 

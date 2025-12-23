@@ -19,7 +19,7 @@ export async function GET(
       'post-id': string;
       'file-id': string;
     }>;
-  }
+  },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);

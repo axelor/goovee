@@ -23,7 +23,7 @@ export async function GET(
       'order-type': OrderType;
       'order-id': string;
     }>;
-  }
+  },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);

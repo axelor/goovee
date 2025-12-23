@@ -12,7 +12,7 @@ export async function GET(
       tenant: string;
       workspace: string;
     }>;
-  }
+  },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);

@@ -65,7 +65,11 @@ export const FieldComponent = ({
   );
 
   const renderComponent = useCallback(
-    ({field}: {field: ControllerRenderProps<any, any>}): React.ReactElement<any> => {
+    ({
+      field,
+    }: {
+      field: ControllerRenderProps<any, any>;
+    }): React.ReactElement<any> => {
       if (item.widget === WidgetType.custom) {
         return React.createElement(item.customComponent as any, {
           style: widthStyle,

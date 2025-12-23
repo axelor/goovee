@@ -108,4 +108,3 @@ const iconMap: Record<string, ComponentType> = {
 export function getIcon(icon: string) {
   return iconMap[icon];
 }
-
