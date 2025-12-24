@@ -1347,7 +1347,7 @@
     background-color: rgba(150, 150, 150, 0.4);
   }
 
-  .emoji-inner::moz-selection {
+  .emoji-inner::-moz-selection {
     color: transparent;
     background-color: rgba(150, 150, 150, 0.4);
   }

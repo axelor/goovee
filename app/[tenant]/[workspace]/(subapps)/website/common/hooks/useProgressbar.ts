@@ -9,7 +9,7 @@ declare global {
 const useProgressbar = () => {
   useEffect(() => {
     require('@/subapps/website/common/plugins/waypoints');
-    const ProgressBar = require('@/subapps/website/common/plugins/progressbar');
+    const ProgressBar = require('progressbar.js');
 
     const pline = document.querySelectorAll('.progressbar.line');
     const pcircle = document.querySelectorAll('.progressbar.semi-circle');

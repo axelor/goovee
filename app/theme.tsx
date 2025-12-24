@@ -9,11 +9,6 @@ import React, {
 } from 'react';
 import {generateCSSVariableString} from '@/utils/css';
 import type {Theme} from '@/types/theme';
-import 'swiper/css';
-import 'swiper/css/free-mode';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/thumbs';
 
 const ThemeContext = React.createContext({});
 
