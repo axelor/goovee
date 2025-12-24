@@ -1,4 +1,3 @@
-import TerserPlugin from 'terser-webpack-plugin';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
 /** @type {import('next').NextConfig} */
@@ -25,41 +24,13 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  webpack: (config, context) => {
-    const svgrules = config.module.rules.find(r => r.test?.test?.('.svg'));
-
-    config.module.rules.push(
-      {
-        ...svgrules,
-        test: /\.svg$/i,
-        resourceQuery: /url/, // *.svg?url
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
-      {
-        test: /\.svg$/i,
-        resourceQuery: {not: /url/}, // exclude if *.svg?url
-        use: ['@svgr/webpack'],
-      },
-    );
-
-    svgrules.exclude = /\.svg$/i;
-
-    /**
-     * Disable minimize (ORM issue)
-     */
-
-    config.optimization = {
-      ...config.optimization,
-      minimize: true,
-      minimizer: [
-        new TerserPlugin({
-          terserOptions: {
-            keep_classnames: true,
-          },
-        }),
-      ],
-    };
-
-    return config;
+    },
   },
   basePath: process.env.GOOVEE_PUBLIC_BASE_PATH,
   /**
