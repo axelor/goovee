@@ -21,9 +21,6 @@ const nextConfig = {
       },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -63,12 +60,6 @@ const nextConfig = {
     };
 
     return config;
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
   },
   basePath: process.env.GOOVEE_PUBLIC_BASE_PATH,
   /**
