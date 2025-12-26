@@ -105,8 +105,8 @@ export async function formatSchema(
   metaFields: any[],
   parent?: string,
 ): Promise<{fields: Field[]; panels: Panel[]}> {
-  let fields: Field[] = [];
-  let panels: Panel[] = [];
+  const fields: Field[] = [];
+  const panels: Panel[] = [];
 
   for (let idx = 0; idx < schema.length; idx++) {
     const _item = schema[idx];
@@ -173,7 +173,7 @@ export function formatGridSchema(
 ): {
   columns: Partial<Column>[];
 } {
-  let columns: Partial<Column>[] = [];
+  const columns: Partial<Column>[] = [];
 
   schema.forEach((_item: any) => {
     if (_item.type === SchemaItemType.field) {

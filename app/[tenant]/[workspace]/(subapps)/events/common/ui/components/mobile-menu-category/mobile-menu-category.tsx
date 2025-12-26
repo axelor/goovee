@@ -122,7 +122,7 @@ export function MobileMenuCategory({categories, user}: any) {
   const [container, setContainer] = useState<any>(null);
 
   useEffect(() => {
-    let container = document.getElementById('subapp-menu');
+    const container = document.getElementById('subapp-menu');
 
     if (container) {
       container.classList.add(styles.container);

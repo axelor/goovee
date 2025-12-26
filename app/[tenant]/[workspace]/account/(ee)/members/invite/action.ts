@@ -117,7 +117,7 @@ export async function sendInvites({
     return error(await t('Bad request'));
   }
 
-  let emailAddresses = emails
+  const emailAddresses = emails
     .split(',')
     ?.map(email => email?.trim())
     .filter(Boolean);
@@ -197,7 +197,7 @@ export async function sendInvites({
     return error(await t('Invalid partner'));
   }
 
-  let emailsWithMemberAlready = [],
+  const emailsWithMemberAlready = [],
     emailsWithOutSamePartner = [],
     emailsWithExistingInvite = [],
     emailsAlreadyRegistered = [];
@@ -357,7 +357,7 @@ export async function sendInvites({
     ) {
       message += `\n ${await t('Some invites are not send for the following ')} ${await t('reason')} : `;
 
-      let errors = [];
+      const errors = [];
 
       const getEmails = (emails: string[]) => emails.join(', ');
 

@@ -98,7 +98,7 @@ export function Total({isUnpaid, workspace, invoice, invoiceType}: TotalProps) {
   }, [form]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
+    const value = e.target.value;
 
     if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
       form.setValue('amount', value);

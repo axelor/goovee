@@ -29,7 +29,7 @@ export default function Content({
   invoices: [];
   pageInfo?: any;
   workspace: PortalWorkspace;
-  invoiceType: String;
+  invoiceType: string;
 }) {
   const router = useRouter();
   const {workspaceURI} = useWorkspace();
@@ -70,7 +70,7 @@ export default function Content({
 
   const invoiceColumns = useMemo(
     () =>
-      new Map<String, any>([
+      new Map<string, any>([
         [INVOICE.UNPAID, unpaidColumns],
         [INVOICE.PAID, Columns],
       ]),

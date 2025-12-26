@@ -31,7 +31,7 @@ export function buildWhereClause({
 
   const isPaid = type === INVOICE.PAID;
 
-  let whereClause: any = {
+  const whereClause: any = {
     ...params?.where,
     statusSelect: {eq: INVOICE_STATUS.VENTILATED},
     operationTypeSelect: INVOICE_CATEGORY.SALE_INVOICE,

@@ -85,7 +85,7 @@ const getFieldSchema = (field: Field) => {
 };
 
 export function createFormSchema(fields: Field[]): ZodSchema {
-  let schemaConfig: any = {};
+  const schemaConfig: any = {};
 
   fields
     .filter(

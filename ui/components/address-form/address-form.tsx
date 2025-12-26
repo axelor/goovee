@@ -42,7 +42,7 @@ export function AddressForm({
   const [values, setValues] = useState(
     valuesProp || {...defaultAddress, country: countries?.[0]},
   );
-  const [selectedValue, setSelectedValue] = useState<String>(
+  const [selectedValue, setSelectedValue] = useState<string>(
     countries?.[0].id.toString(),
   );
 
@@ -103,7 +103,7 @@ export function AddressForm({
           <Label className="font-medium mb-1">{i18n.t('Country')}</Label>
           <Select
             onValueChange={o => {
-              let selectedCountry = countries?.find(op => op.id === o);
+              const selectedCountry = countries?.find(op => op.id === o);
               setSelectedValue(o);
               setValues(v => ({...v, country: selectedCountry}) as any);
             }}
