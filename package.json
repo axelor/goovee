@@ -19,7 +19,7 @@
     "website:seed:website": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-website.ts",
     "changelogs:validate": "node ./changelogs/validate",
     "changelogs:generate": "node ./changelogs/generate",
-    "analyze": "ANALYZE=true pnpm build"
+    "analyze": "next experimental-analyze"
   },
   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.17.0",
