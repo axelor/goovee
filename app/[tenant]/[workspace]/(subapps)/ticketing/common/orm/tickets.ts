@@ -135,7 +135,7 @@ export async function createTicket({
   const projectManager = project.assignedTo?.id;
   const defaultStatus = project?.projectTaskStatusSet?.[0]?.id;
 
-  let ticketWithoutFullName = await client.aOSProjectTask.create({
+  const ticketWithoutFullName = await client.aOSProjectTask.create({
     data: {
       createdOn: new Date(),
       updatedOn: new Date(),

@@ -125,7 +125,7 @@ async function Product({
 
   if (!computedProduct) redirect(`${workspaceURI}/shop`);
 
-  let breadcrumbs: any = [];
+  const breadcrumbs: any = [];
   const {product} = computedProduct;
 
   if (breadcrumbs.length) {

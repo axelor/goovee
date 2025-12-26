@@ -67,7 +67,7 @@ export default function MobileMenuCategory({categories}: any) {
     router.push(`${workspaceURI}/shop/category/${category.slug}`);
   };
   useEffect(() => {
-    let container = document.getElementById('subapp-menu');
+    const container = document.getElementById('subapp-menu');
 
     if (container) {
       container.classList.add(styles.container);

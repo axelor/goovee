@@ -89,7 +89,7 @@ export async function findAllMainWebsites({
 
   return mainWebsites
     .map((mainWebsite: any) => {
-      let $website =
+      const $website =
         mainWebsite?.languageList?.[0]?.website || mainWebsite?.defaultWebsite;
 
       if ($website) {

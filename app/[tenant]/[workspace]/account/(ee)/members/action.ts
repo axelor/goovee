@@ -308,7 +308,7 @@ export async function deleteMember({
     return error(await t('Unauthorized')); // admin contact cannot remove partner
   }
 
-  let $member = members?.contacts?.find((c: any) => c.id === member.id);
+  const $member = members?.contacts?.find((c: any) => c.id === member.id);
 
   if (!$member?.contactWorkspaceConfig?.id) {
     return error(await t('Bad request'));
@@ -383,7 +383,7 @@ export async function updateMemberApplication({
     return error(await t('Unauthorized')); // admin contact cannot update partner
   }
 
-  let $member = members?.contacts?.find((c: any) => c.id === member.id);
+  const $member = members?.contacts?.find((c: any) => c.id === member.id);
 
   if (!$member) {
     return error(await t('Bad request'));
@@ -502,7 +502,7 @@ export async function updateMemberAuthentication({
     return error(await t('Unauthorized')); // admin contact cannot update partner
   }
 
-  let $member = members?.contacts?.find((c: any) => c.id === member.id);
+  const $member = members?.contacts?.find((c: any) => c.id === member.id);
 
   if (!$member) {
     return error(await t('Bad request'));

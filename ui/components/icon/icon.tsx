@@ -92,7 +92,7 @@ export const Icon = ({
   style?: React.CSSProperties;
   onClick?: () => void;
 }) => {
-  let IconComponent: any = getIcon(name);
+  const IconComponent: any = getIcon(name);
 
   if (!IconComponent) {
     return null;

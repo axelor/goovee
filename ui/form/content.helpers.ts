@@ -26,7 +26,7 @@ const getContentOfPanel = (
     return [];
   }
 
-  let result: (DisplayPanel | FieldType)[] = fields.filter(
+  const result: (DisplayPanel | FieldType)[] = fields.filter(
     _item => _item.parent === panelKey,
   );
 

@@ -150,8 +150,8 @@ export function extractCustomData(
   modelField: string,
   customFields: any[],
 ): any {
-  let result: any = {};
-  let customData: any = {};
+  const result: any = {};
+  const customData: any = {};
 
   for (const [key, value] of Object.entries(formState)) {
     if (customFields.find(({name}) => name == key)) {

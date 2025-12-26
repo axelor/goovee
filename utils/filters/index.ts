@@ -17,7 +17,7 @@ export function getWhereClauseForEntity({
 
   const {id, mainPartnerId, isContact} = user;
 
-  let where: any = {
+  const where: any = {
     [partnerKey]: {
       id: isContact ? mainPartnerId : id,
     },

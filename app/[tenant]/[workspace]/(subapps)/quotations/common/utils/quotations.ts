@@ -40,9 +40,9 @@ export function getStatus(statusSelect: any): {
 
 export const updateDocument = (date1: any, date2: any) => {
   let update;
-  let diffInDays = Math.round(date1.diff(date2, DAYS, true));
-  let diffInHours = date1.diff(date2, HOURS);
-  let diffInMins = Math.round(date1.diff(date2, MINUTES, true));
+  const diffInDays = Math.round(date1.diff(date2, DAYS, true));
+  const diffInHours = date1.diff(date2, HOURS);
+  const diffInMins = Math.round(date1.diff(date2, MINUTES, true));
 
   if (diffInDays === 0) {
     if (diffInHours === 0) {

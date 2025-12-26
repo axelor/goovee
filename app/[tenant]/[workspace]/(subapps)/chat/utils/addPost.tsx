@@ -40,7 +40,7 @@ const updateLocalState = (setCurrentChannel: any, post: any, user?: any) => {
     if (user) {
       displayName = getDisplayName(user);
     } else {
-      let user = findUserById(prevChannel.users, post.user_id);
+      const user = findUserById(prevChannel.users, post.user_id);
       displayName = getDisplayName(user);
     }
 

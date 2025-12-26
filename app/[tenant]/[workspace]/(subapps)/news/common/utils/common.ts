@@ -5,7 +5,7 @@ export function getFormatString({
   includeTime = true,
 }: {
   dateString: any;
-  includeTime: Boolean | undefined;
+  includeTime: boolean | undefined;
 }) {
   const date = dayjs(dateString);
   const currentYear = dayjs().year();

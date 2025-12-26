@@ -29,7 +29,7 @@ export function computeTotal({
     mainPrice = workspace?.config?.mainPrice;
   }
 
-  let {subtotal, tax} = cart?.items?.reduce(
+  const {subtotal, tax} = cart?.items?.reduce(
     (acc, i) => {
       const {computedProduct, quantity} = i as unknown as {
         computedProduct: ComputedProduct;
@@ -73,7 +73,7 @@ export function computeTotal({
     },
   };
 
-  let total = scale(subtotal + tax, currencyScale);
+  const total = scale(subtotal + tax, currencyScale);
 
   return {
     total,

@@ -47,7 +47,7 @@ function getItemDefaultValue(item: Field): any {
 }
 
 export function createDefaultValues(items: Field[]) {
-  let result: any = {};
+  const result: any = {};
 
   items.forEach(_i => {
     result[_i.name] = getItemDefaultValue(_i);

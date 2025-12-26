@@ -25,7 +25,7 @@ export const isSameDay = (date1: Date, date2: Date) => {
 export const dateIsExist = (dateToCheck: Date, datesArray: Date[]) => {
   const formattedDateToCheck = new Date(dateToCheck).toISOString();
 
-  for (let date of datesArray) {
+  for (const date of datesArray) {
     const formattedDate = new Date(date).toISOString();
     if (formattedDate === formattedDateToCheck) {
       return true;
@@ -35,6 +35,6 @@ export const dateIsExist = (dateToCheck: Date, datesArray: Date[]) => {
   return false;
 };
 
-export function formatToTwoDigits(val: String | number) {
+export function formatToTwoDigits(val: string | number) {
   return String(val).padStart(2, '0');
 }

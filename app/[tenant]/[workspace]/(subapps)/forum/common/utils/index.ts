@@ -66,7 +66,7 @@ export async function getPopularQuery({
   tenantId: Tenant['id'];
   user?: User;
   archived?: boolean;
-  memberGroupIDs?: Array<String>;
+  memberGroupIDs?: Array<string>;
 }) {
   if (!workspaceID) {
     return {
