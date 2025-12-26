@@ -8,7 +8,8 @@
     "target": "ESNext",
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "useDefineForClassFields": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -47,7 +48,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
   ],
   "exclude": ["node_modules"]
 }
