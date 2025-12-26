@@ -31,7 +31,6 @@ import {
 } from '../../context/ToolbarContext';
 import {$createAlertNode, $isAlertNode, AlertNode} from '../../nodes/AlertNode';
 
-// eslint-disable-next-line no-shadow
 export enum UpdateFontSizeType {
   increment = 1,
   decrement,
