@@ -95,7 +95,7 @@
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.379.0",
     "lz-string": "^1.5.0",
-    "next": "16.1.0",
+    "next": "16.1.1",
     "next-auth": "^4.24.10",
     "next-themes": "^0.3.0",
     "nodemailer": "^6.9.16",
@@ -139,7 +139,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "16.1.0",
+    "@next/bundle-analyzer": "16.1.1",
     "@swc-node/register": "^1.10.10",
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.12.11",
@@ -166,7 +166,7 @@
     "commander": "^14.0.0",
     "dotenv": "^17.2.0",
     "eslint": "^9.39.2",
-    "eslint-config-next": "16.1.0",
+    "eslint-config-next": "16.1.1",
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
