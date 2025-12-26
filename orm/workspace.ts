@@ -211,6 +211,7 @@ export async function findWorkspaceMembers({
           address: true,
         },
         contactWorkspaceConfigSet: {
+          where: {portalWorkspace: {url}},
           select: {
             isAdmin: true,
             portalWorkspace: {
