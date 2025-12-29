@@ -1,26 +1,25 @@
 # 1.4.0 (2025-12-29)
 
-
 ## Features
-
 
 ### Chat
 
-- Mattermost password reset and opening the mattermost web app – #105030  
+- Mattermost password reset and opening the mattermost web app – #105030
   <details>
     <summary>Details</summary>
 
-    Mattermost password reset and opening the mattermost web app
+  Mattermost password reset and opening the mattermost web app
   </details>
 
 ### Core Platform
 
-- Introduce new workspace homepage – #104954  
+- Introduce new workspace homepage – #104954
   <details>
     <summary>Details</summary>
 
-    The homepage provides a centralized overview of the latest news, upcoming events, recent forum discussions, and newly added resource
+  The homepage provides a centralized overview of the latest news, upcoming events, recent forum discussions, and newly added resource
   </details>
+
 - Show header in fixed position based on config – #105270
 
 ### Documents
@@ -29,22 +28,20 @@
 
 ## Fixes
 
-
 ### Core Platform
 
 - Fix wrong config used for members when multiple configs are available – #105774
 
 ### E-Shop
 
-- Always include paidAmount in payload – #104202  
+- Always include paidAmount in payload – #104202
   <details>
     <summary>Details</summary>
 
-    Updated shop order invoice payload to always include paidAmount, defaulting to the full total when no advance payment percentage is applied.
+  Updated shop order invoice payload to always include paidAmount, defaulting to the full total when no advance payment percentage is applied.
   </details>
 
 ## Changes
-
 
 ### Core Platform
 
@@ -56,16 +53,14 @@
 
 ## Security
 
-
 ### Core Platform
 
-- Update next – #105201  
+- Update next – #105201
   <details>
     <summary>Details</summary>
 
-    Fixes Denial of Service (DoS) vulnerability in next.js
+  Fixes Denial of Service (DoS) vulnerability in next.js
   </details>
-
 
 # 1.3.0 (2025-11-28)
 
