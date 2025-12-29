@@ -1,5 +1,0 @@
-{
-  "title": "Migrate installed string to isInstalled boolean",
-  "type": "change",
-  "scope": ["core"]
-}
