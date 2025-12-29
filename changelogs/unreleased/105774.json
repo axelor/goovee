@@ -1,0 +1,5 @@
+{
+  "title": "Fix wrong config used for members when multiple configs are available",
+  "type": "fix",
+  "scope": ["core"]
+}
