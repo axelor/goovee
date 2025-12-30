@@ -2,7 +2,7 @@
 
 import {useMemo, useState} from 'react';
 import Link from 'next/link';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
@@ -125,7 +125,7 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
     },
   });
 
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const router = useRouter();

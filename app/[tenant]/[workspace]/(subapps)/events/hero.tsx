@@ -1,5 +1,5 @@
 'use client';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -20,7 +20,7 @@ import {getAllEvents} from '@/subapps/events/common/actions/actions';
 import {SearchItem} from '@/subapps/events/common/ui/components';
 
 export const Hero = ({workspace}: {workspace: PortalWorkspace}) => {
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const {user} = session || {};
   const {workspaceURI} = useWorkspace();
   const router = useRouter();

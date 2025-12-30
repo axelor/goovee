@@ -1,39 +1,92 @@
-import Credentials from 'next-auth/providers/credentials';
+import type {BetterAuthPlugin} from 'better-auth';
+import {createAuthEndpoint} from 'better-auth/api';
+import {setSessionCookie} from 'better-auth/cookies';
+import {z} from 'zod';
+
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {compare} from './utils';
+import {compare} from '@/auth/utils';
 
-export const credentials = Credentials({
-  name: 'Credentials',
-  credentials: {
-    email: {label: 'Email', type: 'text'},
-    password: {label: 'Password', type: 'password'},
+const credentials = {
+  id: 'credentials',
+  endpoints: {
+    signInWithCredentials: createAuthEndpoint(
+      '/credentials/sign-in',
+      {
+        method: 'POST',
+        body: z.object({
+          email: z.email(),
+          password: z.string(),
+          tenantId: z.string(),
+        }),
+        metadata: {
+          openapi: {
+            summary: 'Sign in with email and password',
+            tags: ['auth'],
+          },
+        },
+      },
+      async ctx => {
+        const {email, password, tenantId} = ctx.body;
+
+        const user = await findGooveeUserByEmail(email, tenantId);
+        if (!user) {
+          throw ctx.error('UNAUTHORIZED', {
+            message: 'Invalid credentials',
+            code: 'INVALID_CREDENTIALS',
+          });
+        }
+
+        if (!user.password) {
+          throw ctx.error('UNAUTHORIZED', {
+            message: 'Invalid credentials',
+            code: 'INVALID_CREDENTIALS',
+          });
+        }
+
+        const valid = await compare(password, user.password);
+        if (!valid) {
+          throw ctx.error('UNAUTHORIZED', {
+            message: 'Invalid credentials',
+            code: 'INVALID_CREDENTIALS',
+          });
+        }
+
+        const session = await ctx.context.internalAdapter.createSession(
+          user.id,
+          false,
+          {tenantId},
+        );
+        await setSessionCookie(
+          ctx,
+          {
+            session,
+            user: {
+              id: user.id,
+              name: user.fullName || '',
+              email: user.emailAddress?.address || email,
+              emailVerified: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          },
+          false,
+        );
+        return session;
+      },
+    ),
   },
-  async authorize({email, password, tenantId}: any, req) {
-    if (!email) return null;
+  rateLimit: [
+    {
+      pathMatcher: path => path === '/credentials/sign-in',
+      window: 60_000,
+      max: 10,
+    },
+  ],
 
-    const user = await findGooveeUserByEmail(email, tenantId);
-
-    if (!user) {
-      return null;
-    }
-
-    const {id, fullName: name, password: hashedpassword} = user;
-
-    if (!(password && hashedpassword)) {
-      return null;
-    }
-
-    const isvalid = await compare(password, hashedpassword);
-
-    if (!isvalid) return null;
-
-    return {
-      id,
-      name,
-      email,
-      tenantId,
-    };
+  $ERROR_CODES: {
+    INVALID_CREDENTIALS: 'Invalid credentials',
   },
-});
+} satisfies BetterAuthPlugin;
 
+export type Credentials = typeof credentials;
 export default credentials;

@@ -68,12 +68,12 @@ export default async function Layout(props: {
 
   const {workspaceURL, workspaceURI, workspace} = workspacePathname(params);
 
-  if (user && !user?.id) {
-    /**
-     * Remove tenative login using oauth for registration
-     */
-    return <AnonymousSignOut callbackurl={workspaceURL} />;
-  }
+  // if (user && !user?.id) {
+  //   /**
+  //    * Remove tenative login using oauth for registration
+  //    */
+  //   return <AnonymousSignOut callbackurl={workspaceURL} />;
+  // }
 
   const $workspace = await findWorkspace({
     user,

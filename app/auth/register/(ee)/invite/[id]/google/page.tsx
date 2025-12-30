@@ -35,16 +35,9 @@ export default async function Page(props: {
   const session = await getSession();
   const user = session?.user;
 
-  if (!user) {
-    return notFound();
-  }
-
-  /**
-   * Google Oauth Uses doesn't contain id or other information
-   */
-  const contact = await findContactByEmail(user.email, tenantId);
-
+  //TODO: Why are we checking if the user is a contact? why can't subscribe be shown to a customer?
   if (user) {
+    const contact = await findContactByEmail(user.email, tenantId);
     if (user.email !== invite.emailAddress.address) {
       return (
         <div className="container space-y-6 mt-8">
@@ -64,20 +57,10 @@ export default async function Page(props: {
       contact?.isContact
     ) {
       return (
-        <Subscribe
-          workspaceURL={invite.workspace.url}
-          inviteId={invite.id}
-          updateSession={!!contact}
-        />
+        <Subscribe workspaceURL={invite.workspace.url} inviteId={invite.id} />
       );
     }
   }
 
-  return (
-    <Form
-      email={invite?.emailAddress?.address}
-      inviteId={invite.id}
-      updateSession={!!contact}
-    />
-  );
+  return <Form email={invite?.emailAddress?.address} inviteId={invite.id} />;
 }

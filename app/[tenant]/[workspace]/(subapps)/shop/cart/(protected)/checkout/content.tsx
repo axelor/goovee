@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -232,7 +232,7 @@ export default function Content({
   orderSubapp?: any;
   tenant: string;
 }) {
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const [shippingType, setShippingType] = useState<string>(

@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import {useSession} from 'next-auth/react';
+import Image from 'next/image';
+import {authClient} from '@/lib/auth-client';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
@@ -41,7 +42,7 @@ import {SEARCH_PARAMS} from '@/constants';
 import type {PortalWorkspace} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
-import {registerByGoogle, subscribe} from '../../actions';
+import {subscribe} from '../../actions';
 
 const formSchema = z
   .object({
@@ -86,7 +87,7 @@ const formSchema = z
   );
 
 export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
-  const {data: session, update} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -98,7 +99,7 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
       companyNumber: '',
       firstName: '',
       name: '',
-      email: user?.email,
+      email: user?.email || '',
       phone: '',
       showProfileAsContactOnDirectory: false,
       showNameOnDirectory: false,
@@ -113,6 +114,11 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
+  const workspaceURI = searchParams.get('workspaceURI') as string;
+  const callbackurl = searchParams.get('callbackurl');
+  const redirection = callbackurl
+    ? decodeURIComponent(callbackurl)
+    : workspaceURI;
 
   const showDirectoryControls = form.watch(
     'showProfileAsContactOnDirectory',
@@ -121,63 +127,24 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
 
   const {toast} = useToast();
 
-  if (!user) {
-    return (
-      <div className="container space-y-6 mt-8">
-        <h1 className="text-[2rem] font-bold">{i18n.t('Sign Up')}</h1>
-        <div className="bg-white py-4 px-6">
-          <p>
-            {i18n.t('Login with your gmail account to continue registration')}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const handleCancel = () => {
     router.replace('/');
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!(workspace && tenantId)) return;
-
-    try {
-      const res: any = await registerByGoogle({
+    await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: redirection,
+      errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      requestSignUp: true,
+      additionalData: {
         ...values,
-        workspaceURL: workspace?.url,
         tenantId,
+        workspaceURL: workspace?.url,
         locale: l10n.getLocale(),
-      });
-
-      if (res.success) {
-        toast({
-          variant: 'success',
-          title: res.message,
-        });
-
-        await update({
-          ...res?.data,
-          email: user?.email,
-          tenantId,
-        });
-
-        router.push(
-          searchParams.get('callbackurl') ||
-            searchParams.get('workspaceURL') ||
-            '/',
-        );
-      } else if (res.error) {
-        toast({
-          variant: 'destructive',
-          title: res.message,
-        });
-      }
-    } catch (err) {
-      toast({
-        variant: 'destructive',
-        title: i18n.t('Error registering, try again'),
-      });
-    }
+      },
+    });
   };
 
   const handleSubscription = async () => {
@@ -340,20 +307,21 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
                 />
               </>
             )}
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({field}) => (
-                <FormItem>
-                  <FormLabel>{i18n.t('Email')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} value={field.value} disabled />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {user?.email && (
+              <FormField
+                control={form.control}
+                name="email"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>{i18n.t('Email')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} value={field.value} disabled />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -526,8 +494,16 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
                 </>
               )}
             </div>
-            <Button variant="success" className="w-full">
-              {i18n.t('Sign Up')}
+            <Button variant="outline-success" className="w-full rounded-full">
+              <Image
+                alt="Google"
+                src="/images/google.svg"
+                height={24}
+                width={24}
+                className="me-2"
+              />
+
+              {i18n.t('Sign Up with Google')}
             </Button>
             <p className="text-success">
               {i18n.t('Already have an account')} ?{' '}

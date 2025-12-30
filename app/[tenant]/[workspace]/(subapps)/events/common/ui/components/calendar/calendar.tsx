@@ -6,7 +6,7 @@ import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {DayPicker} from 'react-day-picker';
 import {MdOutlineArrowDropDown} from 'react-icons/md';
 import {addMonths, subMonths} from 'date-fns';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {cn} from '@/utils/css';
@@ -156,7 +156,7 @@ export function Calendar({
 }) {
   const [eventDates, setEventDates] = React.useState<Date[]>([]);
 
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const {user} = session || {};
 
   const today = date !== undefined ? new Date(date) : new Date();

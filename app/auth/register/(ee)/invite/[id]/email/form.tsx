@@ -7,7 +7,7 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {MdOutlineVisibility, MdOutlineVisibilityOff} from 'react-icons/md';
 import Image from 'next/image';
-import {signIn} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {i18n, l10n} from '@/locale';
@@ -29,6 +29,7 @@ import {generateOTP} from './actions';
 
 // ---- LOCAL IMPORTS ----//
 import {registerByEmail} from '../action';
+import Link from 'next/link';
 
 const formSchema = z
   .object({
@@ -80,12 +81,6 @@ export default function SignUp({
 
   const toggleShowPassword = () => setShowPassword(show => !show);
   const toggleShowConfirmPassword = () => setShowConfirmPassword(show => !show);
-
-  const handleSignUpWithGoogle = async () => {
-    await signIn('google', {
-      callbackUrl: `/auth/register/invite/${inviteId}/google?${searchQuery}`,
-    });
-  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!(email && tenantId)) {
@@ -334,19 +329,24 @@ export default function SignUp({
             <Separator />
           </div>
         </div>
+
         <Button
+          asChild
           type="button"
           variant="outline-success"
-          className="w-full rounded-full"
-          onClick={handleSignUpWithGoogle}>
-          <Image
-            alt="Google"
-            src="/images/google.svg"
-            height={24}
-            width={24}
-            className="me-2"
-          />
-          {i18n.t('Sign Up with Google')}
+          className="w-full rounded-full">
+          <Link
+            href={`/auth/register/invite/${inviteId}/google?${searchQuery}`}>
+            <Image
+              alt="Google"
+              src="/images/google.svg"
+              height={24}
+              width={24}
+              className="me-2"
+            />
+
+            {i18n.t('Sign Up with Google')}
+          </Link>
         </Button>
       </div>
     </div>

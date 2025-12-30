@@ -1,7 +1,7 @@
 import {getSession} from '@/auth';
-import {clone} from '@/utils';
-import {findWorkspaces} from '@/orm/workspace';
 import {getGooveeEnvironment} from '@/environment';
+import {findWorkspaces} from '@/orm/workspace';
+import {clone} from '@/utils';
 
 export function extractSearchParams({
   searchParams,
@@ -56,5 +56,3 @@ export async function isExistingUser({
 
   return existing;
 }
-
-async function isRegistrationEnabled() {}

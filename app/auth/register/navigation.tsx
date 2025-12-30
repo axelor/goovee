@@ -1,25 +1,18 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
-import {signIn} from 'next-auth/react';
+import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
+import type {PortalWorkspace} from '@/types';
 import {Button} from '@/ui/components/button';
 import {Separator} from '@/ui/components/separator';
-import type {PortalWorkspace} from '@/types';
 
 export default function Navigation({workspace}: {workspace?: PortalWorkspace}) {
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
-
-  const handleSignUpWithGoogle = async () => {
-    await signIn('google', {
-      callbackUrl: `/auth/register/google?${searchQuery}`,
-    });
-  };
 
   return (
     <div className="container space-y-6 mt-8 md:!w-3/4 xl:!w-1/2">
@@ -46,18 +39,21 @@ export default function Navigation({workspace}: {workspace?: PortalWorkspace}) {
           </div>
         </div>
         <Button
+          asChild
           type="button"
           variant="outline-success"
-          className="w-full rounded-full"
-          onClick={handleSignUpWithGoogle}>
-          <Image
-            alt="Google"
-            src="/images/google.svg"
-            height={24}
-            width={24}
-            className="me-2"
-          />
-          {i18n.t('Sign Up with Google')}
+          className="w-full rounded-full">
+          <Link href={`/auth/register/google?${searchQuery}`}>
+            <Image
+              alt="Google"
+              src="/images/google.svg"
+              height={24}
+              width={24}
+              className="me-2"
+            />
+
+            {i18n.t('Sign Up with Google')}
+          </Link>
         </Button>
       </div>
     </div>

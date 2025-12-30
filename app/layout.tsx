@@ -9,7 +9,6 @@ import {Toaster} from '@/ui/components/toaster';
 // ---- LOCAL IMPORTS ---- //
 import Theme from './theme';
 import Locale from './locale';
-import Session from './session';
 import {
   APP_DESCRIPTION,
   APP_TEMPLATE_TITLE,
@@ -79,12 +78,10 @@ export default async function RootLayout({
         </head>
         <body className={fontSans.className}>
           <Environment>
-            <Session>
-              <Locale>
-                <ServiceWorker />
-                {children}
-              </Locale>
-            </Session>
+            <Locale>
+              <ServiceWorker />
+              {children}
+            </Locale>
             <Toaster />
           </Environment>
         </body>

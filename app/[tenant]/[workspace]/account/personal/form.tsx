@@ -1,8 +1,8 @@
 'use client';
 
-import {useMemo, useReducer, useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -142,7 +142,7 @@ export default function Personal({
   partners: Array<{id: ID; name: string}>;
 }) {
   const {toast} = useToast();
-  const {data: session, update: updateSession} = useSession();
+  const {refetch} = authClient.useSession();
   const {tenant, workspaceURL} = useWorkspace();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<any>(pictureProp);
@@ -213,11 +213,12 @@ export default function Personal({
          * Update session when change in email or main partner for contact
          */
         if (editEmail || isMainPartnerUpdated) {
-          await updateSession({
-            email,
-            id: session?.user?.id,
-            tenantId: tenant,
+          await authClient.getSession({
+            query: {
+              disableCookieCache: true,
+            },
           });
+          await refetch();
         }
 
         handleCancelEditEmail();

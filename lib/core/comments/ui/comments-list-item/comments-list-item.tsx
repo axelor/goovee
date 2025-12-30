@@ -1,4 +1,4 @@
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {useMemo, useState} from 'react';
 import {
   MdFavoriteBorder,
@@ -115,7 +115,7 @@ export const CommentListItem = ({
     [trackingFieldValue],
   );
 
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const isLoggedIn = Boolean(session?.user?.id);
   const isDisabled = !isLoggedIn || disabled;
 
