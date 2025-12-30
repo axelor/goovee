@@ -29,7 +29,7 @@ import {useState, use} from 'react';
 
 const formSchema = z
   .object({
-    email: z.string().email().min(1, i18n.t('Email is required')),
+    email: z.email().min(1, i18n.t('Email is required')),
     otp: z.string().min(1, i18n.t('OTP is required')),
     password: z
       .string()

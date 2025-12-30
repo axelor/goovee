@@ -135,7 +135,7 @@
     "typewriter-effect": "^2.22.0",
     "uuid": "^11.1.0",
     "vaul": "^0.9.9",
-    "zod": "^3.23.8",
+    "zod": "^4.2.1",
     "zustand": "^4.5.5"
   },
   "devDependencies": {

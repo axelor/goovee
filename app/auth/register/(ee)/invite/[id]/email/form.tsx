@@ -127,7 +127,7 @@ export default function SignUp({
 
   const isValidEmail = useMemo(() => {
     try {
-      z.string().email().parse(email);
+      z.email().parse(email);
       return true;
     } catch (err) {}
     return false;

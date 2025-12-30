@@ -25,7 +25,7 @@ import {useToast} from '@/ui/hooks';
 import {requestResetPassword} from './action';
 
 const formSchema = z.object({
-  email: z.string().email().min(1, 'Email is required'),
+  email: z.email().min(1, 'Email is required'),
 });
 
 export default function Content() {

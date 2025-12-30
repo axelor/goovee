@@ -256,7 +256,9 @@ export async function sendInvites({
 
   for (const email of emailAddresses) {
     try {
-      z.string().email({message: 'Invalid email address'}).parse(email);
+      z.email({
+        error: 'Invalid email address',
+      }).parse(email);
 
       const existingGooveeUser = await findGooveeUserByEmail(email, tenantId);
       const isExistingPartner =

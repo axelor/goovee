@@ -351,8 +351,8 @@ dependencies:
     specifier: ^0.9.9
     version: 0.9.9(@types/react-dom@19.2.3)(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
   zod:
-    specifier: ^3.23.8
-    version: 3.23.8
+    specifier: ^4.2.1
+    version: 4.2.1
   zustand:
     specifier: ^4.5.5
     version: 4.5.5(@types/react@19.2.7)(react@19.2.3)
@@ -7764,8 +7764,8 @@ packages:
       '@babel/parser': 7.26.2
       eslint: 9.39.2
       hermes-parser: 0.25.1
-      zod: 3.25.76
-      zod-validation-error: 4.0.2(zod@3.25.76)
+      zod: 4.2.1
+      zod-validation-error: 4.0.2(zod@4.2.1)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -12117,7 +12117,7 @@ packages:
       recast: 0.23.9
       ts-morph: 18.0.0
       tsconfig-paths: 4.2.0
-      zod: 3.23.8
+      zod: 3.25.76
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -13571,22 +13571,21 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zod-validation-error@4.0.2(zod@3.25.76):
+  /zod-validation-error@4.0.2(zod@4.2.1):
     resolution: {integrity: sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
     dependencies:
-      zod: 3.25.76
+      zod: 4.2.1
     dev: true
-
-  /zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
-    dev: false
 
   /zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-    dev: true
+    dev: false
+
+  /zod@4.2.1:
+    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
 
   /zustand@4.5.5(@types/react@19.2.7)(react@19.2.3):
     resolution: {integrity: sha512-+0PALYNJNgK6hldkgDq2vLrw5f6g/jCInz52n9RTpropGgeAf/ioFUCdtsjCqu4gNhW9D01rUQBROoRjdzyn2Q==}
