@@ -10,6 +10,11 @@ overrides:
   react: 19.2.3
   react-dom: 19.2.3
 
+patchedDependencies:
+  next@16.1.1:
+    hash: osneooqskhssrhjwqmrua5354a
+    path: patches/next@16.1.1.patch
+
 dependencies:
   '@cyntler/react-doc-viewer':
     specifier: ^1.17.0
@@ -232,7 +237,7 @@ dependencies:
     version: 1.5.0
   next:
     specifier: 16.1.1
-    version: 16.1.1(@babel/core@7.26.0)(react-dom@19.2.3)(react@19.2.3)(sass@1.80.6)
+    version: 16.1.1(patch_hash=osneooqskhssrhjwqmrua5354a)(@babel/core@7.26.0)(react-dom@19.2.3)(react@19.2.3)(sass@1.80.6)
   next-auth:
     specifier: ^4.24.10
     version: 4.24.10(next@16.1.1)(nodemailer@6.9.16)(react-dom@19.2.3)(react@19.2.3)
@@ -10415,7 +10420,7 @@ packages:
       '@panva/hkdf': 1.2.1
       cookie: 0.7.2
       jose: 4.15.9
-      next: 16.1.1(@babel/core@7.26.0)(react-dom@19.2.3)(react@19.2.3)(sass@1.80.6)
+      next: 16.1.1(patch_hash=osneooqskhssrhjwqmrua5354a)(@babel/core@7.26.0)(react-dom@19.2.3)(react@19.2.3)(sass@1.80.6)
       nodemailer: 6.9.16
       oauth: 0.9.15
       openid-client: 5.7.0
@@ -10436,7 +10441,7 @@ packages:
       react-dom: 19.2.3(react@19.2.3)
     dev: false
 
-  /next@16.1.1(@babel/core@7.26.0)(react-dom@19.2.3)(react@19.2.3)(sass@1.80.6):
+  /next@16.1.1(patch_hash=osneooqskhssrhjwqmrua5354a)(@babel/core@7.26.0)(react-dom@19.2.3)(react@19.2.3)(sass@1.80.6):
     resolution: {integrity: sha512-QI+T7xrxt1pF6SQ/JYFz95ro/mg/1Znk5vBebsWwbpejj1T0A23hO7GYEaVac9QUOT2BIMiuzm0L99ooq7k0/w==}
     engines: {node: '>=20.9.0'}
     hasBin: true
@@ -10480,6 +10485,7 @@ packages:
       - '@babel/core'
       - babel-plugin-macros
     dev: false
+    patched: true
 
   /no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
