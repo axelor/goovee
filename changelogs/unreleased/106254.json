@@ -1,0 +1,6 @@
+{
+  "title": "next 14.2.35 patch",
+  "type": "patch",
+  "description": "Fetching image optimizer issue",
+  "scope": ["core"]
+}
