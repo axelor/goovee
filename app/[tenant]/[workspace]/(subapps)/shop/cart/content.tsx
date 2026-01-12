@@ -3,7 +3,7 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {LuChevronLeft} from 'react-icons/lu';
 import {MdDeleteOutline} from 'react-icons/md';
 
@@ -225,7 +225,7 @@ function CartSummary({
   const noitem = !cart?.items?.length;
   const {displayTotal} = computeTotal({cart, workspace});
   const {workspaceURI, tenant} = useWorkspace();
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const authenticated = session?.user?.id;
 
   return (
@@ -302,7 +302,7 @@ export default function Content({
   workspace?: PortalWorkspace;
   tenant: string;
 }) {
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const {cart, removeItem} = useCart();

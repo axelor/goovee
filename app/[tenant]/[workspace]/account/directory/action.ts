@@ -5,7 +5,7 @@ import {pipeline, Readable} from 'stream';
 import {promisify} from 'util';
 import {getSession} from '@/lib/core/auth';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {
   findGooveeUserByEmail,
   isAdminContact,
@@ -29,7 +29,7 @@ export async function updateDirectorySettings({
   workspaceURL: string;
 }): ActionResponse<null> {
   try {
-    const tenantId = headers().get(TENANT_HEADER);
+    const tenantId = (await headers()).get(TENANT_HEADER);
 
     const session = await getSession();
     if (!session || !session.user) {
@@ -136,7 +136,7 @@ export async function updateCompanyProfileImage(
   if (!workspaceURL)
     return {error: true, message: await t('Workspace URL is required')};
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   const session = await getSession();
   if (!session || !session.user) {

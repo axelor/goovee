@@ -506,8 +506,8 @@ export async function findProducts({
         type: 'DECIMAL',
       })) as string;
 
-      let primary = mainPrice === MAIN_PRICE.ATI ? ati : wt;
-      let secondary = mainPrice === MAIN_PRICE.ATI ? wt : ati;
+      const primary = mainPrice === MAIN_PRICE.ATI ? ati : wt;
+      const secondary = mainPrice === MAIN_PRICE.ATI ? wt : ati;
 
       const [formattedPrimary, formattedSecondary] = await Promise.all([
         formatNumber(primary, {

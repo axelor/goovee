@@ -2,25 +2,17 @@
 
 import {revalidatePath} from 'next/cache';
 
-import {Tenant} from '@/tenant';
-import {getTranslation, t} from '@/locale/server';
-import {
-  findContactByEmail,
-  findGooveeUserByEmail,
-  findPartnerByEmail,
-  registerContact,
-  updatePartner,
-} from '@/orm/partner';
-import {findRegistrationLocalization} from '@/orm/localizations';
 import {deleteInviteById} from '@/app/[tenant]/[workspace]/account/common/orm/invites';
 import {getSession} from '@/auth';
-import {PortalWorkspace} from '@/types';
-import {findOne, isValid} from '@/otp/orm';
+import {registerByInvite, type RegisterInviteDTO} from '@/lib/core/auth/orm';
+import {getTranslation, t} from '@/locale/server';
+import {findPartnerByEmail, updatePartner} from '@/orm/partner';
 import {Scope} from '@/otp/constants';
+import {findOne, isValid} from '@/otp/orm';
+import {Tenant} from '@/tenant';
+import {PortalWorkspace} from '@/types';
 
 import {findInviteById} from '../../../common/orm/register';
-import {withMattermostSync} from '@/lib/core/mattermost';
-import {INVITE_REGISTER} from '@/constants';
 
 function error(message: string) {
   return {
@@ -29,130 +21,7 @@ function error(message: string) {
   };
 }
 
-type RegisterDTO = {
-  firstName: string;
-  name: string;
-  email: string;
-  otp?: string;
-  password?: string;
-  tenantId: string;
-  inviteId: string;
-  locale?: string;
-};
-
-export async function register({
-  firstName,
-  name,
-  email,
-  password,
-  tenantId,
-  inviteId,
-  locale,
-}: RegisterDTO) {
-  if (!(name && firstName && tenantId && inviteId)) {
-    return error(await t('Bad request'));
-  }
-
-  const invite = await findInviteById({id: inviteId, tenantId});
-
-  if (!invite) {
-    return error(await t('Invalid invite'));
-  }
-
-  if (!invite?.partner?.id) {
-    return error(await t('No partner available for the workspace'));
-  }
-
-  if (email !== invite.emailAddress?.address) {
-    return error(await t('Bad request'));
-  }
-
-  const {workspace} = invite;
-
-  if (!workspace) {
-    return error(await 'Invalid workspace');
-  }
-
-  const gooveeUser = await findGooveeUserByEmail(email, tenantId);
-
-  if (gooveeUser) {
-    return error(
-      await t('Already registered, try login and subscribing invite'),
-    );
-  }
-
-  const existingRecord = await findContactByEmail(email, tenantId);
-
-  if (
-    existingRecord &&
-    existingRecord.mainPartner &&
-    existingRecord.mainPartner.id !== invite.partner.id
-  ) {
-    return error(await t('Contact already exists with another partner.'));
-  }
-
-  const contactConfig = invite?.contactAppPermissionList?.[0];
-
-  let localization = invite.partner?.localization;
-
-  if (!localization) {
-    localization = await findRegistrationLocalization({locale, tenantId});
-  }
-  if (password) {
-    try {
-      await withMattermostSync({
-        tenantId,
-        email,
-        password,
-        name,
-        firstName,
-        context: INVITE_REGISTER,
-      });
-    } catch (err: any) {
-      return {
-        message: await t('Error registering contact. Try again.'),
-        success: false,
-      };
-    }
-  }
-
-  try {
-    const contact = await registerContact({
-      email,
-      name,
-      firstName,
-      password,
-      tenantId,
-      contactConfig,
-      existingRecord,
-      partnerId: invite.partner.id,
-      localizationId: localization?.id,
-    });
-
-    const uri = `${workspace.url.replace(process.env.GOOVEE_PUBLIC_HOST, '')}`;
-
-    revalidatePath('/', 'layout');
-
-    deleteInviteById({
-      id: invite.id,
-      tenantId,
-    }).catch(err => {
-      console.error(err);
-    });
-
-    return {
-      success: true,
-      data: {
-        contact,
-        query: `?callbackurl=${encodeURIComponent(`${invite.workspace?.url}/`)}&workspaceURI=${encodeURIComponent(`${uri}/`)}&tenant=${tenantId}`,
-      },
-    };
-  } catch (err) {
-    return error(await t('Error registering contact. Try again.'));
-  }
-}
-
-export async function registerByEmail(data: RegisterDTO) {
+export async function registerByEmail(data: RegisterInviteDTO) {
   const {email, password, otp, tenantId} = data;
 
   if (!tenantId) {
@@ -190,20 +59,7 @@ export async function registerByEmail(data: RegisterDTO) {
     return error(await getTranslation({tenant: tenantId}, 'Invalid OTP'));
   }
 
-  return register(data);
-}
-
-export async function registerByGoogle(
-  data: Omit<RegisterDTO, 'password' | 'email' | 'otp'>,
-) {
-  const session = await getSession();
-  const user = session?.user;
-
-  if (!user) {
-    return error(await t('Login with google to register'));
-  }
-
-  return register({...data, email: user.email});
+  return registerByInvite(data);
 }
 
 export async function subscribe({
@@ -286,30 +142,5 @@ export async function subscribe({
   return {
     success: true,
     message: await t('Subscribed successfully.'),
-  };
-}
-
-export async function fetchUpdatedSession({tenantId}: {tenantId: string}) {
-  if (!tenantId) {
-    return null;
-  }
-
-  const session = await getSession();
-  const user = session?.user;
-
-  if (!user) {
-    return null;
-  }
-
-  const partner = await findGooveeUserByEmail(user.email, tenantId);
-
-  if (!partner) {
-    return null;
-  }
-
-  return {
-    id: partner.id,
-    email: user.email,
-    tenantId,
   };
 }

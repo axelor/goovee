@@ -70,7 +70,7 @@ export default function MobileMenuCategory({categories}: {categories: any}) {
   };
 
   useEffect(() => {
-    let container = document.getElementById('subapp-menu');
+    const container = document.getElementById('subapp-menu');
 
     if (container) {
       container.classList.add(styles.container);

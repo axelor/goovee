@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {MdOutlineForum} from 'react-icons/md';
 import {useRouter} from 'next/navigation';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -30,7 +30,7 @@ export default function MobileMenu({items}: any) {
   const openSidebar = useCallback(() => setOpen(true), []);
   const closeSidebar = useCallback(() => setOpen(false), []);
 
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
 
   const filteredItems = session
     ? items
@@ -42,7 +42,7 @@ export default function MobileMenu({items}: any) {
   };
 
   useEffect(() => {
-    let container = document.getElementById('subapp-menu');
+    const container = document.getElementById('subapp-menu');
 
     if (container) {
       container.classList.add(styles.container);

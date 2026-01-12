@@ -26,15 +26,14 @@ const defaultTheme = {
   css: JSON.stringify(DEFAULT_THEME_OPTIONS),
 };
 
-export async function generateMetadata({
-  params,
-}: {
-  params: {
+export async function generateMetadata(props: {
+  params: Promise<{
     tenant: string;
     workspace: string;
     websiteSlug: string;
-  };
+  }>;
 }) {
+  const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
 
   const session = await getSession();
@@ -55,25 +54,26 @@ export async function generateMetadata({
   };
 }
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: {tenant: string; workspace: string};
+export default async function Layout(props: {
+  params: Promise<{tenant: string; workspace: string}>;
   children: React.ReactNode;
 }) {
+  const params = await props.params;
+
+  const {children} = props;
+
   const {tenant} = params;
   const session = await getSession();
   const user = session?.user;
 
   const {workspaceURL, workspaceURI, workspace} = workspacePathname(params);
 
-  if (user && !user?.id) {
-    /**
-     * Remove tenative login using oauth for registration
-     */
-    return <AnonymousSignOut callbackurl={workspaceURL} />;
-  }
+  // if (user && !user?.id) {
+  //   /**
+  //    * Remove tenative login using oauth for registration
+  //    */
+  //   return <AnonymousSignOut callbackurl={workspaceURL} />;
+  // }
 
   const $workspace = await findWorkspace({
     user,

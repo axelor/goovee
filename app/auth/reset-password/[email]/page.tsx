@@ -25,11 +25,12 @@ import {Button} from '@/ui/components/button';
 
 // ---- LOCAL IMPORTS ---- //
 import {resetPassword} from '../action';
-import {useState} from 'react';
+import {useState, use} from 'react';
+import {authClient} from '@/lib/auth-client';
 
 const formSchema = z
   .object({
-    email: z.string().email().min(1, i18n.t('Email is required')),
+    email: z.email().min(1, i18n.t('Email is required')),
     otp: z.string().min(1, i18n.t('OTP is required')),
     password: z
       .string()
@@ -42,7 +43,9 @@ const formSchema = z
     path: ['confirmPassword'],
   });
 
-export default function Page({params}: {params: {email: string}}) {
+export default function Page(props: {params: Promise<{email: string}>}) {
+  const params = use(props.params);
+  const {data: session} = authClient.useSession();
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
@@ -90,6 +93,21 @@ export default function Page({params}: {params: {email: string}}) {
       });
     }
   };
+
+  if (session?.user) {
+    return (
+      <div className="container space-y-6 mt-8">
+        <h1 className="text-[2rem] font-bold">{i18n.t('Reset Password')}</h1>
+        <div className="bg-white py-4 px-6">
+          <p>
+            {i18n.t(
+              'You are currently loggedin. Logout to reset your password.',
+            )}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container space-y-6 mt-8">

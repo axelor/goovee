@@ -3,7 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {usePathname, useRouter} from 'next/navigation';
 import Link from 'next/link';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {MdApps, MdNotificationsNone} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -25,7 +25,7 @@ import Cart from '@/app/[tenant]/[workspace]/cart';
 
 function MobileSidebar({subapps, workspaces, workspace}: any) {
   const pathname = usePathname();
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const [open, setOpen] = useState(false);
 
   const user = session?.user;
@@ -146,7 +146,7 @@ export function MobileMenu({subapps, workspaces, workspace, showCart}: any) {
   const router = useRouter();
   const redirect = () => router.push('/notifications');
 
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const {loading, visible} = useNavigationVisibility();

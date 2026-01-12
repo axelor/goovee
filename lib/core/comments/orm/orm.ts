@@ -534,7 +534,7 @@ export async function isFileOfRecord({
   }
 
   const client = await manager.getClient(tenantId);
-  let comment = await client.aOSMailMessage.findOne({
+  const comment = await client.aOSMailMessage.findOne({
     where: {
       relatedId: Number(recordId),
       mailMessageFileList: {attachmentFile: {id: fileId}},

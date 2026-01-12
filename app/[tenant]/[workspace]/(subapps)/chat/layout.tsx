@@ -11,16 +11,17 @@ import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: {
+export default async function Layout(props: {
+  params: Promise<{
     tenant: string;
     workspace: string;
-  };
+  }>;
   children: React.ReactNode;
 }) {
+  const params = await props.params;
+
+  const {children} = props;
+
   const session = await getSession();
 
   const {workspaceURL, tenant} = workspacePathname(params);

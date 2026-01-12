@@ -1,7 +1,7 @@
 import {formatStudioFields} from '@/ui/form';
 
 export const getFacilitiesCustomFields = (facilityList: any[]): any[] => {
-  let result: any[] = [];
+  const result: any[] = [];
 
   facilityList.forEach((facility: any) => {
     const fields = formatStudioFields(facility.additionalFieldSet).map(_f => ({

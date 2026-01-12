@@ -19,8 +19,7 @@ import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import {formatDate} from '@/locale/formatters';
-import {DynamicIcon} from '@/subapps/resources/common/ui/components';
-import {getFileTypeIcon, getIconColor} from '@/utils/files';
+import {FileIcon} from '@/ui/components/file-icon';
 import {findDmsFiles} from './action';
 
 export function Search({workspace}: {workspace: PortalWorkspace}) {
@@ -88,12 +87,6 @@ function ResourceItem({resource}: any) {
   const date = formatDate(resource?.createdOn) || '--';
   const size = resource?.metaFile?.sizeText || '--';
 
-  const icon = isDirectory
-    ? 'md-Web'
-    : getFileTypeIcon(resource.metaFile?.fileType);
-
-  const iconColor = getIconColor(icon);
-
   return (
     <div
       className="border-b cursor-pointer"
@@ -102,16 +95,9 @@ function ResourceItem({resource}: any) {
       <div className="leading-5 text-sm space-y-2">
         <div className="flex items-center">
           <div className="flex items-center gap-2 grow">
-            <DynamicIcon
-              icon={icon}
+            <FileIcon
+              fileType={isDirectory ? null : resource.metaFile?.fileType}
               className={'h-6 w-6 shrink-0'}
-              {...(iconColor
-                ? {
-                    style: {
-                      color: iconColor,
-                    },
-                  }
-                : {})}
             />
             <h3 className="font-semibold line-clamp-1">{resource.fileName}</h3>
           </div>

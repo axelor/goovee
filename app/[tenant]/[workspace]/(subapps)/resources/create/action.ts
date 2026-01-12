@@ -13,7 +13,7 @@ import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {findWorkspace, findSubappAccess} from '@/orm/workspace';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {getFileSizeText} from '@/utils/files';
 import {getStoragePath} from '@/storage/index';
 
@@ -24,13 +24,13 @@ import {ACTION} from '@/subapps/resources/common/constants';
 const pump = promisify(pipeline);
 
 function extractFileValues(formData: FormData) {
-  let values: any = [];
+  const values: any = [];
 
-  for (let pair of formData.entries()) {
-    let key = pair[0];
-    let value = pair[1];
+  for (const pair of formData.entries()) {
+    const key = pair[0];
+    const value = pair[1];
 
-    let index: any = Number(key.match(/\[(\d+)\]/)?.[1]);
+    const index: any = Number(key.match(/\[(\d+)\]/)?.[1]);
 
     if (Number.isNaN(index)) {
       continue;
@@ -40,7 +40,7 @@ function extractFileValues(formData: FormData) {
       values[index] = {};
     }
 
-    let field = key.substring(key.lastIndexOf('[') + 1, key.lastIndexOf(']'));
+    const field = key.substring(key.lastIndexOf('[') + 1, key.lastIndexOf(']'));
 
     if (field === 'title' || field === 'description') {
       values[index][field] = value;
@@ -61,7 +61,7 @@ export async function upload(formData: FormData, workspaceURL: string) {
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {

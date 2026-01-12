@@ -1,6 +1,6 @@
 'use client';
 
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {useCallback, useState} from 'react';
 import {
   MdAdd,
@@ -102,7 +102,7 @@ export function Comments(props: CommentsProps) {
     fetchComments,
     createComment,
   });
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const isLoggedIn = !!session?.user?.id;
   const isDisabled = !isLoggedIn || disabled;
 

@@ -33,7 +33,7 @@ const IDSchema = z.union([z.string(), z.number()]);
 export const FetchCommentsPropsSchema = z.object({
   workspaceURL: z.string(),
   recordId: IDSchema,
-  sort: z.nativeEnum(SORT_TYPE).optional(),
+  sort: z.enum(SORT_TYPE).optional(),
   limit: z.number().optional(),
   skip: z.number().optional(),
   exclude: z.array(IDSchema).optional(),

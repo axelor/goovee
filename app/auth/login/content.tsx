@@ -2,14 +2,14 @@
 
 import React, {useState} from 'react';
 import Link from 'next/link';
-import {useRouter, useSearchParams} from 'next/navigation';
-import {signIn, useSession} from 'next-auth/react';
+import {useSearchParams} from 'next/navigation';
+import {authClient} from '@/lib/auth-client';
 import Image from 'next/image';
 import {MdOutlineRefresh} from 'react-icons/md';
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
 
 // ---- CORE IMPORTS ---- //
-import {i18n} from '@/locale';
+import {i18n, l10n} from '@/locale';
 import {TextField} from '@/ui/components/text-field';
 import {Checkbox} from '@/ui/components/checkbox';
 import {Label} from '@/ui/components/label';
@@ -19,7 +19,6 @@ import {SEARCH_PARAMS} from '@/constants';
 import {useToast} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
-import {revalidate} from './actions';
 import {useEnvironment} from '@/lib/core/environment';
 
 export default function Content({
@@ -31,15 +30,19 @@ export default function Content({
   showGoogleOauth?: boolean;
   showKeycloakOauth?: boolean;
 }) {
-  const [values, setValues] = useState({email: '', password: ''});
+  const [values, setValues] = useState({
+    email: '',
+    password: '',
+    rememberMe: true,
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const {toast} = useToast();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
-  const {status} = useSession();
+  const workspaceURI = searchParams.get('workspaceURI');
+  const {isPending} = authClient.useSession();
   const env = useEnvironment();
 
   const toggleShowPassword = () => setShowPassword(show => !show);
@@ -56,7 +59,7 @@ export default function Content({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const {email, password} = values;
+    const {email, password, rememberMe} = values;
 
     if (!(email && password)) {
       return toast({
@@ -67,17 +70,17 @@ export default function Content({
 
     setSubmitting(true);
 
-    const login = await signIn('credentials', {
+    const login = await authClient.credentials.signIn({
       email,
       password,
       tenantId,
-      redirect: false,
+      rememberMe,
     });
 
-    if (login?.ok) {
-      await revalidate();
-      router.push(redirection);
+    if (!login.error) {
+      window.location.href = redirection;
     } else {
+      console.error(login.error);
       toast({
         title: i18n.t('Login unsuccessful, Try again'),
         variant: 'destructive',
@@ -87,20 +90,30 @@ export default function Content({
   };
 
   const loginWithGoogle = async () => {
-    await signIn('google', {
-      callbackUrl: `/auth/login/google?${searchQuery}`,
+    await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: redirection,
+      errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      additionalData: {
+        tenantId,
+      },
     });
   };
 
   const loginWithKeycloak = async () => {
-    await signIn('keycloak', {
-      callbackUrl: `/auth/login/keycloak?${searchQuery}`,
+    await authClient.signIn.oauth2({
+      providerId: 'keycloak',
+      callbackURL: redirection,
+      errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      additionalData: {
+        tenantId,
+        workspaceURI,
+        locale: l10n.getLocale(),
+      },
     });
   };
 
-  const isSessionLoading = ['loading', 'authenticated'].includes(status);
-
-  if (isSessionLoading) {
+  if (isPending) {
     return (
       <Dialog open>
         <DialogTitle></DialogTitle>
@@ -150,7 +163,15 @@ export default function Content({
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Checkbox variant="success" id="terms" disabled={submitting} />
+                <Checkbox
+                  variant="success"
+                  id="terms"
+                  disabled={submitting}
+                  checked={values.rememberMe}
+                  onCheckedChange={checked =>
+                    setValues(v => ({...v, rememberMe: !!checked}))
+                  }
+                />
                 <Label htmlFor="terms" className="ml-2">
                   {i18n.t('Remember Me')}
                 </Label>

@@ -1,7 +1,7 @@
 import {headers} from 'next/headers';
 
 import {manager} from '@/lib/core/tenant';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
 
 import {SchemaType, ViewSchema} from '../types';
@@ -14,7 +14,7 @@ export async function findView({
   name: string;
   schemaType: SchemaType;
 }): Promise<{schema?: ViewSchema; metaFields?: any[]}> {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) return {};
 

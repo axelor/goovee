@@ -43,23 +43,25 @@ function Carousel2(props: {
           </SwiperSlide>
         ))}
       </SwiperCarousel>
-
       {/* custom navigations */}
       <div className="swiper-controls">
         <div className="swiper-navigation">
           <div
             role="button"
-            ref={node => setPrevEl(node)}
+            ref={node => {
+              setPrevEl(node);
+            }}
             className="swiper-button swiper-button-prev"
           />
           <div
             role="button"
-            ref={node => setNextEl(node)}
+            ref={node => {
+              setNextEl(node);
+            }}
             className="swiper-button swiper-button-next"
           />
         </div>
       </div>
-
       <SwiperCarousel
         freeMode
         threshold={2}

@@ -1,15 +1,16 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {useSession} from 'next-auth/react';
-import {useRouter, useSearchParams} from 'next/navigation';
-import {z} from 'zod';
-import {useForm} from 'react-hook-form';
+import Image from 'next/image';
+import {authClient} from '@/lib/auth-client';
 import {zodResolver} from '@hookform/resolvers/zod';
+import {useSearchParams} from 'next/navigation';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
+import {SEARCH_PARAMS} from '@/constants';
 import {i18n, l10n} from '@/locale';
-import {useToast} from '@/ui/hooks';
+import {Button} from '@/ui/components/button';
 import {
   Form,
   FormControl,
@@ -18,12 +19,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/ui/components/form';
-import {Button} from '@/ui/components/button';
 import {Input} from '@/ui/components/input';
-import {SEARCH_PARAMS} from '@/constants';
+import {useToast} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ----//
-import {fetchUpdatedSession, registerByGoogle} from '../action';
 
 const formSchema = z.object({
   firstName: z.string(),
@@ -34,11 +33,9 @@ const formSchema = z.object({
 export default function SignUp({
   email,
   inviteId,
-  updateSession,
 }: {
   email: string;
   inviteId: string;
-  updateSession: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,26 +46,15 @@ export default function SignUp({
     },
   });
 
-  const router = useRouter();
   const searchParams = useSearchParams();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
+  const workspaceURI = searchParams.get('workspaceURI') as string;
+  const callbackurl = searchParams.get('callbackurl');
+  const redirection = callbackurl
+    ? decodeURIComponent(callbackurl)
+    : workspaceURI;
 
   const {toast} = useToast();
-  const {update} = useSession();
-
-  const handleUpdateSession = async () => {
-    if (tenantId) {
-      const session = await fetchUpdatedSession({tenantId});
-      if (session) {
-        await update(session);
-        router.refresh();
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (updateSession) handleUpdateSession();
-  }, []);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!tenantId) {
@@ -79,35 +65,18 @@ export default function SignUp({
       return;
     }
 
-    try {
-      const res: any = await registerByGoogle({
+    await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: redirection,
+      errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      requestSignUp: true,
+      additionalData: {
         ...values,
         tenantId,
         inviteId,
         locale: l10n.getLocale(),
-      });
-
-      await handleUpdateSession();
-
-      if (res.success) {
-        toast({
-          variant: 'success',
-          title: i18n.t('Registration successfully done.'),
-        });
-
-        router.push(`/auth/login${res?.data?.query}`);
-      } else if (res.error) {
-        toast({
-          variant: 'destructive',
-          title: res.message,
-        });
-      }
-    } catch (err) {
-      toast({
-        variant: 'destructive',
-        title: i18n.t('Error registering, try again'),
-      });
-    }
+      },
+    });
   };
 
   return (
@@ -169,8 +138,16 @@ export default function SignUp({
               />
             </div>
 
-            <Button variant="success" className="w-full rounded-full">
-              {i18n.t('Sign Up')}
+            <Button variant="outline-success" className="w-full rounded-full">
+              <Image
+                alt="Google"
+                src="/images/google.svg"
+                height={24}
+                width={24}
+                className="me-2"
+              />
+
+              {i18n.t('Sign Up with Google')}
             </Button>
           </form>
         </Form>

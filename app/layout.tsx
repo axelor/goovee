@@ -9,7 +9,6 @@ import {Toaster} from '@/ui/components/toaster';
 // ---- LOCAL IMPORTS ---- //
 import Theme from './theme';
 import Locale from './locale';
-import Session from './session';
 import {
   APP_DESCRIPTION,
   APP_TEMPLATE_TITLE,
@@ -17,6 +16,11 @@ import {
 } from '@/constants';
 import ServiceWorker from './service-worker';
 import './globals.css';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/thumbs';
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -74,12 +78,10 @@ export default async function RootLayout({
         </head>
         <body className={fontSans.className}>
           <Environment>
-            <Session>
-              <Locale>
-                <ServiceWorker />
-                {children}
-              </Locale>
-            </Session>
+            <Locale>
+              <ServiceWorker />
+              {children}
+            </Locale>
             <Toaster />
           </Environment>
         </body>

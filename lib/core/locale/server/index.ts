@@ -2,7 +2,7 @@ import {cache} from 'react';
 import {headers} from 'next/headers';
 import {getSession} from '@/auth';
 
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findTranslations} from '@/locale/api';
 import {translate} from '@/locale/utils';
@@ -24,7 +24,7 @@ export async function getTranslation(
   ...interpolations: string[]
 ) {
   if (!tenant) {
-    tenant = headers().get(TENANT_HEADER) as string;
+    tenant = (await headers()).get(TENANT_HEADER) as string;
   }
 
   if (!user) {

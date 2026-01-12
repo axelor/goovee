@@ -37,7 +37,7 @@ import {getInitials} from '@/utils/names';
 import {getPartnerImageURL} from '@/utils/files';
 import {SUBAPP_WITH_ROLES} from '@/constants';
 import {useToast} from '@/ui/hooks';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- LOCAL IMPORTS ---- //
 import {Authorization, Role} from '../../common/types';
@@ -52,7 +52,7 @@ import {
 } from './action';
 
 function Members({members, availableApps}: any) {
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const {workspaceURL, tenant} = useWorkspace();

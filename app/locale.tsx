@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useCallback, useEffect, useState} from 'react';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {useAppLang} from '@/ui/hooks';
@@ -13,7 +13,7 @@ export default function Locale({children}: {children: React.ReactNode}) {
   const params = useParams();
   const tenant = params?.tenant;
 
-  const {data: session, status} = useSession();
+  const {data: session, isPending} = authClient.useSession();
   const user = session?.user;
   const locale = user?.locale;
 
@@ -35,7 +35,7 @@ export default function Locale({children}: {children: React.ReactNode}) {
     document.documentElement.dir = dir;
   }, [dir, lang]);
 
-  if (loading > 0 || status === 'loading') return null;
+  if (loading > 0 || isPending) return null;
 
   return <>{children}</>;
 }

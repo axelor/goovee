@@ -6,7 +6,7 @@ import {headers} from 'next/headers';
 import {manager} from '@/tenant';
 import {clone} from '@/utils';
 import type {PortalWorkspace} from '@/types';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {getSession} from '@/auth';
 import {filterPrivate} from '@/orm/filter';
 
@@ -19,7 +19,7 @@ export async function findDmsFiles({
 }) {
   if (!workspace) return [];
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) return [];
 

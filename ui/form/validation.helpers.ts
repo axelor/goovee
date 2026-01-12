@@ -37,13 +37,13 @@ const getFieldSchema = (field: Field) => {
           schema = createFormSchema(field.subSchema);
         }
       } else {
-        schema = z.object({}).passthrough();
+        schema = z.looseObject({});
       }
 
       schema = schema.array();
       break;
     case InputType.object:
-      schema = z.object({}).passthrough();
+      schema = z.looseObject({});
       break;
     default:
       throw new Error(`Type ${field.type} is not managed for schema creation`);
@@ -85,7 +85,7 @@ const getFieldSchema = (field: Field) => {
 };
 
 export function createFormSchema(fields: Field[]): ZodSchema {
-  let schemaConfig: any = {};
+  const schemaConfig: any = {};
 
   fields
     .filter(

@@ -1,8 +1,8 @@
 'use client';
 
-import {useMemo, useReducer, useRef, useState} from 'react';
-import {useRouter} from 'next/navigation';
-import {useSession} from 'next-auth/react';
+import {useMemo, useRef, useState} from 'react';
+import {usePathname, useRouter} from 'next/navigation';
+import {authClient} from '@/lib/auth-client';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -50,6 +50,7 @@ import {
 import {Title} from '../common/ui/components';
 import {update, updateProfileImage, generateOTPForUpdate} from './action';
 import {RoleLabel} from '../common/constants';
+import {getLoginURL} from '@/utils/url';
 
 const formSchema = z
   .object({
@@ -141,13 +142,13 @@ export default function Personal({
   };
   partners: Array<{id: ID; name: string}>;
 }) {
+  const pathname = usePathname();
   const {toast} = useToast();
-  const {data: session, update: updateSession} = useSession();
-  const {tenant, workspaceURL} = useWorkspace();
+  const {tenant, workspaceURL, workspaceURI} = useWorkspace();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<any>(pictureProp);
   const [updatingPicture, setUpdatingPicture] = useState(false);
-  const pictureInputRef = useRef<any>();
+  const pictureInputRef = useRef<any>(undefined);
   const router = useRouter();
 
   const {timeRemaining, isExpired, reset} = useCountDown(0);
@@ -213,16 +214,18 @@ export default function Personal({
          * Update session when change in email or main partner for contact
          */
         if (editEmail || isMainPartnerUpdated) {
-          await updateSession({
-            email,
-            id: session?.user?.id,
-            tenantId: tenant,
+          await authClient.signOut();
+
+          const loginURL = getLoginURL({
+            callbackurl: pathname,
+            workspaceURI,
+            tenant,
           });
+          window.location.href = loginURL;
+        } else {
+          handleCancelEditEmail();
+          router.refresh();
         }
-
-        handleCancelEditEmail();
-
-        router.refresh();
       } else {
         toast({
           variant: 'destructive',
@@ -298,7 +301,7 @@ export default function Personal({
 
   const isValidEmail = useMemo(() => {
     try {
-      z.string().email().parse(email);
+      z.email().parse(email);
       return true;
     } catch (err) {}
     return false;

@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {PREFIX_CART_KEY} from '@/constants';
@@ -72,7 +72,7 @@ export default function CartContextProvider({
   const {workspaceURL} = useWorkspace();
   const shouldUpdateLocalStorage = useRef<boolean>(false);
 
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const cartKey = useMemo(
