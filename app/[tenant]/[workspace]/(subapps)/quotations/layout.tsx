@@ -7,16 +7,17 @@ import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: {
+export default async function Layout(props: {
+  params: Promise<{
     tenant: string;
     workspace: string;
-  };
+  }>;
   children: React.ReactNode;
 }) {
+  const params = await props.params;
+
+  const {children} = props;
+
   const {tenant} = params;
   const session = await getSession();
 

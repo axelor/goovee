@@ -4,8 +4,9 @@ import {NextResponse} from 'next/server';
 
 export async function POST(
   request: Request,
-  {params}: {params: {tenant: string}},
+  props: {params: Promise<{tenant: string}>},
 ) {
+  const params = await props.params;
   let tenant;
 
   return new NextResponse('Forbidden', {status: 403});

@@ -9,9 +9,29 @@ import {SUBAPP_CODES} from '@/constants';
 import {Card} from '../card';
 import {MapContentProps} from './types';
 
-import 'leaflet-defaulticon-compatibility';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'; // Re-uses images from ~leaflet package
 import 'leaflet/dist/leaflet.css';
+
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+
+// Fix for missing default icon images in Next.js/Turbopack
+const getIconSrc = (icon: any) => {
+  if (typeof icon === 'string') return icon;
+  if (icon && typeof icon === 'object' && icon.src) return icon.src;
+  return icon;
+};
+
+const defaultIcon = L.icon({
+  iconUrl: getIconSrc(iconUrl),
+  iconRetinaUrl: getIconSrc(iconRetinaUrl),
+  shadowUrl: getIconSrc(shadowUrl),
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41],
+});
 
 type Popup = {
   el: HTMLElement;
@@ -38,10 +58,10 @@ export const Map = memo((props: MapContentProps) => {
 
     items.forEach(item => {
       const popupEl = document.createElement('div');
-      L.marker([
-        Number(item.mainAddress?.latit),
-        Number(item.mainAddress?.longit),
-      ])
+      L.marker(
+        [Number(item.mainAddress?.latit), Number(item.mainAddress?.longit)],
+        {icon: defaultIcon},
+      )
         .bindPopup(popupEl, {
           minWidth: small ? 300 : 500,
           className: '[&_.leaflet-popup-content]:m-0',

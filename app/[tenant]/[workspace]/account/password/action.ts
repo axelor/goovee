@@ -7,7 +7,7 @@ import {getSession} from '@/auth';
 import {compare, hash} from '@/auth/utils';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {manager} from '@/tenant';
 import {withMattermostSync} from '@/lib/core/mattermost';
 import {CHANGE_PASSWORD} from '@/constants';
@@ -43,7 +43,7 @@ export async function changePassword({
     };
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {

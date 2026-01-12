@@ -9,11 +9,6 @@ import React, {
 } from 'react';
 import {generateCSSVariableString} from '@/utils/css';
 import type {Theme} from '@/types/theme';
-import 'swiper/css';
-import 'swiper/css/free-mode';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/thumbs';
 
 const ThemeContext = React.createContext({});
 
@@ -21,7 +16,7 @@ export default function Theme({
   children,
   theme: themeProp,
 }: {
-  children: React.ReactElement;
+  children: React.ReactElement<any>;
   theme: Theme;
 }) {
   const [theme, setTheme] = useState(themeProp);

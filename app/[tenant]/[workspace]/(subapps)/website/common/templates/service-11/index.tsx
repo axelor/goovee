@@ -2,14 +2,8 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service11Data} from './meta';
 import {getImage} from '@/subapps/website/common/utils/helper';
 import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
-import IconProps from '../../types/icons';
-import dynamic from 'next/dynamic';
+import {getIcon} from '@/subapps/website/common/icons/solid';
 import Image from 'next/image';
-
-function getIcon(icon: string) {
-  if (!icon) return (props: IconProps) => null;
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
 export default function Service11(props: TemplateProps<Service11Data>) {
   const {data} = props;
   const {

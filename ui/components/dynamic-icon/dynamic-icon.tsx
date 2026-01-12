@@ -6,6 +6,11 @@ import {MdDownloading, MdOutlineError} from 'react-icons/md';
 
 const loading = () => <MdDownloading className="text-muted" />;
 
+/**
+ * @deprecated
+ * Do not use this component, it will cause infinite loop.
+ * Calling dynamic import inside render is not supported in Next.js 15 onwards.
+ */
 export function DynamicIcon({
   icon,
   ...rest
@@ -14,6 +19,7 @@ export function DynamicIcon({
   className?: string;
   onClick?: any;
   style?: any;
+  fill?: string;
 }) {
   const [library, name] = icon?.split('-');
 

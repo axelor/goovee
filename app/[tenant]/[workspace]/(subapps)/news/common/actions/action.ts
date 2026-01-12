@@ -8,7 +8,7 @@ import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import {ModelMap, ORDER_BY, SUBAPP_CODES} from '@/constants';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {type Tenant} from '@/tenant';
 import {addComment, findComments} from '@/comments/orm';
 import {
@@ -28,7 +28,7 @@ export async function findSearchNews({workspaceURL}: {workspaceURL: string}) {
   const session = await getSession();
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {
@@ -142,7 +142,7 @@ export const createComment: CreateComment = async formData => {
     return {error: true, message: await t('Unauthorized')};
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }
@@ -221,7 +221,7 @@ export const fetchComments: FetchComments = async props => {
 
   const user = session?.user;
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return {

@@ -4,7 +4,7 @@ import {Fragment} from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {MdNotificationsNone} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -78,7 +78,7 @@ export default function Header({
   showCart?: boolean;
 }) {
   const router = useRouter();
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();

@@ -7,7 +7,7 @@ import {headers} from 'next/headers';
 import {getSession} from '@/auth';
 import {clone} from '@/utils';
 import {computeTotal} from '@/utils/cart';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {manager} from '@/tenant';
 import type {PortalWorkspace, Product} from '@/types';
 import {MAIN_PRICE} from '@/constants';
@@ -26,7 +26,7 @@ export async function findProduct({
   id: Product['id'];
   workspace?: PortalWorkspace;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return null;
@@ -81,7 +81,7 @@ async function requestOrder({
   workspace: PortalWorkspace;
   type?: 'quotation' | 'order';
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return null;

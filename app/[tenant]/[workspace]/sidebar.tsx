@@ -4,7 +4,7 @@ import {useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {MdApps} from 'react-icons/md';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {cn} from '@/utils/css';
 import {Icon} from '@/ui/components';
 import {
@@ -38,7 +38,7 @@ export function Sidebar({
   showHome: boolean | null | undefined;
   workspace?: any;
 }) {
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const [collapsed, setCollapsed] = useState(false);
   const {workspaceURI, workspaceURL} = useWorkspace();
   const env = useEnvironment();

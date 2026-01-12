@@ -2,7 +2,7 @@
 
 import {useEffect, useState} from 'react';
 import {z} from 'zod';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useToast} from '@/ui/hooks/use-toast';
@@ -42,7 +42,7 @@ const formSchema = z.object({
 });
 
 export default function Page() {
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const {toast} = useToast();

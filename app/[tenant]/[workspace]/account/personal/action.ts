@@ -9,7 +9,7 @@ import {headers} from 'next/headers';
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/lib/core/tenant';
 import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {getFileSizeText} from '@/utils/files';
 import {getTranslation, t} from '@/locale/server';
 import {clone, getPartnerId} from '@/utils';
@@ -45,7 +45,7 @@ function error(message: string) {
 export async function updateProfileImage(formData: FormData) {
   const file: any = formData.get('picture');
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));
@@ -133,7 +133,7 @@ export async function updateProfileImage(formData: FormData) {
 }
 
 export async function fetchPersonalSettings() {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));
@@ -197,7 +197,7 @@ export async function update({
   mainPartner?: string;
   linkedInLink?: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));
@@ -284,41 +284,12 @@ export async function update({
       return error(await t('Invalid partner'));
     }
   }
+  // WARN: After updating the email address, getSession() will throw an error as it can't find the user in the session
+  // so we translate the messasge beforehand since it internally calls getSession()
+  const successMessage = await t('Settings updated successfully.');
+  const errorMessage = await t('Error updating settings. Try again.');
 
   try {
-    if (email !== partner?.emailAddress.address) {
-      try {
-        await withMattermostEmailSync({
-          oldEmail: partner.emailAddress.address,
-          newEmail: email,
-          context: 'UPDATE_EMAIL',
-        });
-      } catch (err: any) {
-        return {
-          message: await t('Error updating email. Try again.'),
-          success: false,
-        };
-      }
-
-      const updateEmail = async (emailAddress: any, newEmail: string) => {
-        if (!emailAddress) return;
-
-        const {id, version} = emailAddress;
-
-        await client.aOSEmailAddress.update({
-          data: {
-            id,
-            version,
-            name: newEmail,
-            address: newEmail,
-          },
-          select: {id: true},
-        });
-      };
-
-      await updateEmail(partner?.emailAddress, email);
-    }
-
     const updatedPartner = await updatePartner({
       data: {
         id: partner.id,
@@ -341,12 +312,46 @@ export async function update({
       tenantId,
     });
 
+    if (email !== partner?.emailAddress?.address) {
+      try {
+        await withMattermostEmailSync({
+          oldEmail: partner.emailAddress.address,
+          newEmail: email,
+          context: 'UPDATE_EMAIL',
+        });
+      } catch (err: any) {
+        return {
+          message: await t('Error updating email. Try again.'),
+          success: false,
+        };
+      }
+      const updateEmail = async (emailAddress: any, newEmail: string) => {
+        if (!emailAddress) return;
+
+        const {id, version} = emailAddress;
+
+        await client.aOSEmailAddress.update({
+          data: {
+            id,
+            version,
+            name: newEmail,
+            address: newEmail,
+          },
+          select: {id: true},
+        });
+      };
+
+      await updateEmail(partner?.emailAddress, email);
+      // WARN: After updating the email address, getSession() will throw an error as it can't find the user in the session
+      // we can not call any function that requires a after this
+    }
+
     return {
       success: true,
-      message: await t('Settings updated successfully.'),
+      message: successMessage,
     };
   } catch (err) {
-    return error(await t('Error updating settings. Try again.'));
+    return error(errorMessage);
   }
 }
 
@@ -361,7 +366,7 @@ export async function generateOTPForUpdate({
     return error(await t('Email and workspace is required'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('TenantId is required'));

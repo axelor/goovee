@@ -4,7 +4,7 @@ import {FC, ReactElement} from 'react';
 type ServiceCardProps = {
   title?: string;
   cardColor?: string;
-  Icon?: ReactElement;
+  Icon?: ReactElement<any>;
   columnClass?: string;
   description?: string;
 };

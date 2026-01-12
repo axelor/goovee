@@ -22,16 +22,15 @@ import {
 } from '@/subapps/shop/common/constants';
 import {transformMetaFields} from '@/subapps/shop/common/utils/meta-field-value';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: {
+export async function generateMetadata(props: {
+  params: Promise<{
     tenant: string;
     workspace: string;
     'category-slug': string;
     'product-slug': string;
-  };
+  }>;
 }) {
+  const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
 
   const categorySlug = params['category-slug'];
@@ -199,17 +198,16 @@ async function Product({
   );
 }
 
-export default async function Page({
-  params,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     tenant: string;
     workspace: string;
     'product-slug': string;
     'category-slug': string;
-  };
-  searchParams: {[key: string]: string};
+  }>;
+  searchParams: Promise<{[key: string]: string}>;
 }) {
+  const params = await props.params;
   return (
     <Suspense fallback={<ProductViewSkeleton />}>
       <Product params={params} />

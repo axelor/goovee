@@ -1,5 +1,5 @@
 'use client';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -43,7 +43,7 @@ export const EventPageCard = ({eventDetails, workspace}: any) => {
     registrationDeadlineDateTime,
   } = eventDetails || {};
   const {workspaceURI} = useWorkspace();
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const allowGuestEventRegistration =

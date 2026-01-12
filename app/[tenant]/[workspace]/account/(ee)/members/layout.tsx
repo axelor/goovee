@@ -5,16 +5,17 @@ import {getSession} from '@/auth';
 import {isAdminContact, isPartner} from '@/orm/partner';
 import {workspacePathname} from '@/utils/workspace';
 
-export default async function Layout({
-  children,
-  params,
-}: {
+export default async function Layout(props: {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     tenant: string;
     workspace: string;
-  };
+  }>;
 }) {
+  const params = await props.params;
+
+  const {children} = props;
+
   const session = await getSession();
   if (!session) return notFound();
 

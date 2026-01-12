@@ -3,14 +3,8 @@ import {type Service12Data} from './meta';
 import {getImage, getTemplateId} from '@/subapps/website/common/utils/helper';
 import {Fragment} from 'react';
 import NextLink from '@/subapps/website/common/components/reuseable/links/NextLink';
-import IconProps from '../../types/icons';
-import dynamic from 'next/dynamic';
+import {getIcon} from '@/subapps/website/common/icons/solid';
 import Image from 'next/image';
-
-function getIcon(icon: string) {
-  if (!icon) return (props: IconProps) => null;
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
 
 export default function Service12(props: TemplateProps<Service12Data>) {
   const {data} = props;

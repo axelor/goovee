@@ -78,7 +78,7 @@ export const EmojiPopup = ({
 }: {
   onEmojiClick: (name: string) => void;
   onClose: () => void;
-  triggerRef?: React.RefObject<HTMLElement>;
+  triggerRef?: React.RefObject<HTMLElement | null>;
   input?: boolean;
 }) => {
   const [activeCategory, setActiveCategory] = useState(0);

@@ -1,5 +1,6 @@
+import {auth} from '@/lib/auth';
+import {getSessionCookie} from 'better-auth/cookies';
 import {NextRequest, NextResponse} from 'next/server';
-import {getToken} from 'next-auth/jwt';
 
 export const TENANT_HEADER = 'x-tenant-id';
 export const WORKSPACE_HEADER = 'x-workspace-id';
@@ -43,7 +44,7 @@ function notFound(req: NextRequest, {message = ''}: {message?: string} = {}) {
 
 const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
 
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   const url = req.nextUrl;
   const pathname = url.pathname;
 
@@ -55,15 +56,20 @@ export default async function middleware(req: NextRequest) {
 
   if (isMultiTenancy) {
     if (!tenant) return notFound(req);
-
-    const token = await getToken({req, secret: process.env.NEXTAUTH_SECRET});
-    const tenantMismatch = token && token.tenantId && token.tenantId !== tenant;
-
-    if (tenantMismatch)
-      return notFound(req, {
-        message:
-          'You are already loggedin to a tenant. For accessing different tenant, you need to logout first.',
+    const sessionCookie = getSessionCookie(req);
+    if (sessionCookie) {
+      const session = await auth.api.getSession({
+        headers: req.headers,
       });
+      const tenantMismatch =
+        session && session.user.tenantId && session.user.tenantId !== tenant;
+
+      if (tenantMismatch)
+        return notFound(req, {
+          message:
+            'You are already loggedin to a tenant. For accessing different tenant, you need to logout first.',
+        });
+    }
   }
 
   const headers = new Headers(req.headers);

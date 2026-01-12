@@ -2,13 +2,7 @@ import type {TemplateProps} from '@/subapps/website/common/types';
 import {type Service7Data} from './meta';
 import ServiceCard3 from '@/subapps/website/common/components/reuseable/service-cards/ServiceCard3';
 import {Fragment} from 'react';
-import IconProps from '../../types/icons';
-import dynamic from 'next/dynamic';
-
-function getIcon(icon?: string) {
-  if (!icon) return (props: IconProps) => null;
-  return dynamic(() => import(`@/subapps/website/common/icons/solid/${icon}`));
-}
+import {getIcon} from '@/subapps/website/common/icons/solid';
 
 export default function Service7(props: TemplateProps<Service7Data>) {
   const {data} = props;

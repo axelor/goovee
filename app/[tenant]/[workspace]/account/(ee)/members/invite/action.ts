@@ -7,7 +7,7 @@ import {revalidatePath} from 'next/cache';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {t} from '@/locale/server';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {
   findContactByEmail,
   findGooveeUserByEmail,
@@ -58,7 +58,7 @@ export async function deleteInvite({
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -117,7 +117,7 @@ export async function sendInvites({
     return error(await t('Bad request'));
   }
 
-  let emailAddresses = emails
+  const emailAddresses = emails
     .split(',')
     ?.map(email => email?.trim())
     .filter(Boolean);
@@ -133,7 +133,7 @@ export async function sendInvites({
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -197,7 +197,7 @@ export async function sendInvites({
     return error(await t('Invalid partner'));
   }
 
-  let emailsWithMemberAlready = [],
+  const emailsWithMemberAlready = [],
     emailsWithOutSamePartner = [],
     emailsWithExistingInvite = [],
     emailsAlreadyRegistered = [];
@@ -256,7 +256,9 @@ export async function sendInvites({
 
   for (const email of emailAddresses) {
     try {
-      z.string().email({message: 'Invalid email address'}).parse(email);
+      z.email({
+        error: 'Invalid email address',
+      }).parse(email);
 
       const existingGooveeUser = await findGooveeUserByEmail(email, tenantId);
       const isExistingPartner =
@@ -357,7 +359,7 @@ export async function sendInvites({
     ) {
       message += `\n ${await t('Some invites are not send for the following ')} ${await t('reason')} : `;
 
-      let errors = [];
+      const errors = [];
 
       const getEmails = (emails: string[]) => emails.join(', ');
 

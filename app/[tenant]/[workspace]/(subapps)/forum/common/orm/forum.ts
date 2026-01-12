@@ -163,7 +163,7 @@ export async function findPosts({
   tenantId: Tenant['id'];
   user?: User;
   archived?: boolean;
-  memberGroupIDs?: Array<String>;
+  memberGroupIDs?: Array<string>;
 }) {
   if (!(workspaceID && tenantId)) {
     return {
@@ -315,7 +315,7 @@ export async function findPostsByGroupId({
   search?: string | undefined;
   tenantId: Tenant['id'];
   user?: User;
-  memberGroupIDs?: Array<String>;
+  memberGroupIDs?: Array<string>;
 }) {
   const whereClause = {
     forumGroup: {

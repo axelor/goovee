@@ -16,11 +16,11 @@ import {findQuotation} from '@/subapps/quotations/common/orm/quotations';
 import {QuotationSkeleton} from '@/subapps/quotations/common/ui/components';
 
 type PageProps = {
-  params: {
+  params: Promise<{
     id: any;
     tenant: string;
     workspace: string;
-  };
+  }>;
 };
 async function Quotation({params}: PageProps) {
   const {id, tenant} = params;
@@ -87,7 +87,8 @@ async function Quotation({params}: PageProps) {
   );
 }
 
-export default async function Page({params}: PageProps) {
+export default async function Page(props: PageProps) {
+  const params = await props.params;
   return (
     <Suspense fallback={<QuotationSkeleton />}>
       <Quotation params={params} />

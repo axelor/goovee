@@ -23,15 +23,14 @@ import {
   PRODUCT_ATTRS,
 } from '@/subapps/shop/common/constants';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: {
+export async function generateMetadata(props: {
+  params: Promise<{
     tenant: string;
     workspace: string;
     'product-slug': string;
-  };
+  }>;
 }) {
+  const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
   const productSlug = params['product-slug'];
 
@@ -126,7 +125,7 @@ async function Product({
 
   if (!computedProduct) redirect(`${workspaceURI}/shop`);
 
-  let breadcrumbs: any = [];
+  const breadcrumbs: any = [];
   const {product} = computedProduct;
 
   if (breadcrumbs.length) {
@@ -153,12 +152,11 @@ async function Product({
   );
 }
 
-export default async function Page({
-  params,
-}: {
-  params: {tenant: string; workspace: string; 'product-slug': string};
-  searchParams: {[key: string]: string};
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string; 'product-slug': string}>;
+  searchParams: Promise<{[key: string]: string}>;
 }) {
+  const params = await props.params;
   return (
     <Suspense fallback={<ProductViewSkeleton />}>
       <Product params={params} />

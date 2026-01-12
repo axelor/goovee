@@ -10,15 +10,14 @@ import Form from './form';
 import {findInviteById} from '../../../../common/orm/register';
 import Subscribe from '../subscribe';
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     id: string;
-  };
-  searchParams: any;
+  }>;
+  searchParams: Promise<any>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const {id} = params;
   const tenantId = searchParams?.[SEARCH_PARAMS.TENANT_ID];
 
@@ -49,7 +48,16 @@ export default async function Page({
           </div>
         </div>
       );
-    } else if (user.email === invite.emailAddress.address && user.isContact) {
+    } else if (!user.isContact) {
+      return (
+        <div className="container space-y-6 mt-8">
+          <h1 className="text-[2rem] font-bold">{await t('Sign Up')}</h1>
+          <div className="bg-white py-4 px-6">
+            <p>{await t('Only contacts can register via invite.')}</p>
+          </div>
+        </div>
+      );
+    } else {
       return (
         <Subscribe workspaceURL={invite.workspace.url} inviteId={invite.id} />
       );

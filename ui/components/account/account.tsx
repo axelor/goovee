@@ -3,7 +3,7 @@
 import {useState} from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {signOut, useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 import {MdOutlineAccountCircle} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -22,7 +22,6 @@ import {
   AlertDialogAction,
 } from '@/ui/components';
 import type {ID} from '@/types';
-import {SEARCH_PARAMS} from '@/constants';
 import {getLoginURL} from '@/utils/url';
 
 export function Account({
@@ -34,7 +33,7 @@ export function Account({
 }) {
   const pathname = usePathname();
 
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const [confirmationDialog, setConfirmationDialog] = useState(false);
 
   const openConfirmation = () => {
@@ -53,10 +52,10 @@ export function Account({
     tenant,
   });
 
-  const handleLogout = () => {
-    signOut({
-      callbackUrl: loginURL,
-    });
+  const handleLogout = async () => {
+    await authClient.signOut();
+    // Force a hard reload/redirect to ensure auth client picks up the new session cookie
+    window.location.href = loginURL;
   };
 
   return (

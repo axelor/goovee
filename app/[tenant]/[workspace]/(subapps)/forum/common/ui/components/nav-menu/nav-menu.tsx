@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {Separator} from '@/ui/components/separator';
@@ -11,7 +11,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Skeleton} from '@/ui/components';
 
 export const NavMenu = ({items}: {items: any}) => {
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const {workspaceURI} = useWorkspace();
 
   const filteredItems = session

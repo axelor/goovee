@@ -8,12 +8,12 @@ import {MdOutlineFileDownload} from 'react-icons/md';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
-import {download, getFileTypeIcon, getIconColor} from '@/utils/files';
+import {download} from '@/utils/files';
 import {formatDate} from '@/locale/formatters';
 
 import {SUBAPP_CODES} from '@/constants';
 // ---- LOCAL IMPORTS ---- //
-import {DynamicIcon} from '@/subapps/resources/common/ui/components/dynamic-icon';
+import {FileIcon} from '@/ui/components/file-icon';
 
 export function ResourceList({resources}: any) {
   const router = useRouter();
@@ -38,8 +38,6 @@ export function ResourceList({resources}: any) {
           const size = resource?.metaFile?.sizeText || '--';
           const parent = resource?.parent?.fileName || '--';
 
-          const icon = getFileTypeIcon(resource.metaFile?.fileType);
-          const iconColor = getIconColor(icon);
           const isLast = index === resources.length - 1;
 
           return (
@@ -52,16 +50,9 @@ export function ResourceList({resources}: any) {
               <div className="leading-5 text-sm space-y-2">
                 <div className="grid grid-cols-[1fr_30px] lg:grid-cols-[1fr_60%] items-center">
                   <div className="flex items-center gap-2 min-w-0">
-                    <DynamicIcon
-                      icon={icon}
+                    <FileIcon
+                      fileType={resource.metaFile?.fileType}
                       className={'h-6 w-6 shrink-0'}
-                      {...(iconColor
-                        ? {
-                            style: {
-                              color: iconColor,
-                            },
-                          }
-                        : {})}
                     />
                     <h3 className="font-semibold truncate min-w-0 flex-1">
                       {resource.fileName}

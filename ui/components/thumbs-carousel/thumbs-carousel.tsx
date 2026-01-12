@@ -43,13 +43,14 @@ export const ThumbsCarousel = ({
           </SwiperSlide>
         ))}
       </SwiperCarousel>
-
       <div
         className="absolute h-full w-full"
         style={{top: 0, left: 0, zIndex: 1}}>
         <div>
           <Button
-            ref={(node: any) => setPrevEl(node)}
+            ref={(node: any) => {
+              setPrevEl(node);
+            }}
             className="absolute"
             style={{top: '40%', left: '1rem'}}>
             <div className="flex">
@@ -57,7 +58,9 @@ export const ThumbsCarousel = ({
             </div>
           </Button>
           <Button
-            ref={(node: any) => setNextEl(node)}
+            ref={(node: any) => {
+              setNextEl(node);
+            }}
             className="absolute right-4"
             style={{top: '40%'}}>
             <div className="flex">
@@ -66,7 +69,6 @@ export const ThumbsCarousel = ({
           </Button>
         </div>
       </div>
-
       <SwiperCarousel
         freeMode
         threshold={2}

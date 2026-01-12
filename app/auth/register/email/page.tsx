@@ -9,14 +9,13 @@ import {extractSearchParams, isExistingUser} from '../common/utils';
 import {UserExists} from '../common/ui/components';
 import {PortalWorkspace} from '@/types';
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: {
+export default async function Page(props: {
+  searchParams: Promise<{
     workspaceURI?: string;
     tenant: string;
-  };
+  }>;
 }) {
+  const searchParams = await props.searchParams;
   const {workspaceURI, tenantId, workspaceURL} = extractSearchParams({
     searchParams,
   });

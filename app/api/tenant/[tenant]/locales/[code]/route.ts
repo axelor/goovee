@@ -3,8 +3,9 @@ import {NextResponse} from 'next/server';
 
 export async function GET(
   request: Request,
-  {params}: {params: {tenant: string; code: string}},
+  props: {params: Promise<{tenant: string; code: string}>},
 ) {
+  const params = await props.params;
   const {code, tenant} = params;
 
   try {

@@ -6,13 +6,14 @@ import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {SEARCH_PARAMS} from '@/constants';
 
-export default async function Layout({
-  children,
-  params,
-}: {
+export default async function Layout(props: {
   children: React.ReactNode;
-  params: {tenant: string; workspace: string};
+  params: Promise<{tenant: string; workspace: string}>;
 }) {
+  const params = await props.params;
+
+  const {children} = props;
+
   const {tenant} = params;
   const session = await getSession();
 

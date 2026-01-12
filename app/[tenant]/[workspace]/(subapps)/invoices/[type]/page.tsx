@@ -97,17 +97,16 @@ async function Invoices({
   );
 }
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     type: string;
     tenant: string;
     workspace: string;
-  };
-  searchParams: {[key: string]: string | undefined};
+  }>;
+  searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   return (
     <Suspense fallback={<TableSkeleton />}>
       <Invoices params={params} searchParams={searchParams} />

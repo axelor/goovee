@@ -12,17 +12,16 @@ import {workspacePathname} from '@/utils/workspace';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 
-export default async function Page({
-  params,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     id: string;
     tenant: string;
     workspace: string;
     type: ADDRESS_TYPE;
     address_id: string;
-  };
+  }>;
 }) {
+  const params = await props.params;
   const {tenant, type, address_id} = params;
   const {workspaceURI} = workspacePathname(params);
 

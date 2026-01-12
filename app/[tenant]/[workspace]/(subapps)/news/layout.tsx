@@ -13,16 +13,17 @@ import {t} from '@/locale/server';
 import MobileMenuCategory from '@/subapps/news/mobile-menu-category';
 import {findCategories} from '@/subapps/news/common/orm/news';
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: {
+export default async function Layout(props: {
+  params: Promise<{
     tenant: string;
     workspace: string;
-  };
+  }>;
   children: React.ReactNode;
 }) {
+  const params = await props.params;
+
+  const {children} = props;
+
   const {tenant} = params;
 
   const session = await getSession();

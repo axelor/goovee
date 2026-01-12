@@ -6,7 +6,7 @@ import {revalidatePath} from 'next/cache';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
-import {TENANT_HEADER} from '@/middleware';
+import {TENANT_HEADER} from '@/proxy';
 import {findWorkspace, findWorkspaceMembers} from '@/orm/workspace';
 import {isAdminContact, isPartner, updatePartner} from '@/orm/partner';
 import {manager} from '@/tenant';
@@ -36,7 +36,7 @@ async function canUpdate({workspaceURL}: {workspaceURL: string}) {
     return false;
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return false;
@@ -77,7 +77,7 @@ export async function updateInviteApplication({
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -184,7 +184,7 @@ export async function updateInviteAuthentication({
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -277,7 +277,7 @@ export async function deleteMember({
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -308,7 +308,7 @@ export async function deleteMember({
     return error(await t('Unauthorized')); // admin contact cannot remove partner
   }
 
-  let $member = members?.contacts?.find((c: any) => c.id === member.id);
+  const $member = members?.contacts?.find((c: any) => c.id === member.id);
 
   if (!$member?.contactWorkspaceConfig?.id) {
     return error(await t('Bad request'));
@@ -352,7 +352,7 @@ export async function updateMemberApplication({
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -383,7 +383,7 @@ export async function updateMemberApplication({
     return error(await t('Unauthorized')); // admin contact cannot update partner
   }
 
-  let $member = members?.contacts?.find((c: any) => c.id === member.id);
+  const $member = members?.contacts?.find((c: any) => c.id === member.id);
 
   if (!$member) {
     return error(await t('Bad request'));
@@ -471,7 +471,7 @@ export async function updateMemberAuthentication({
     return error(await t('Unauthorized'));
   }
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
     return error(await t('Bad request'));
@@ -502,7 +502,7 @@ export async function updateMemberAuthentication({
     return error(await t('Unauthorized')); // admin contact cannot update partner
   }
 
-  let $member = members?.contacts?.find((c: any) => c.id === member.id);
+  const $member = members?.contacts?.find((c: any) => c.id === member.id);
 
   if (!$member) {
     return error(await t('Bad request'));

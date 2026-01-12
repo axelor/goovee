@@ -9,7 +9,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {useSearchParams} from '@/ui/hooks';
-import {useSession} from 'next-auth/react';
+import {authClient} from '@/lib/auth-client';
 
 // ---- LOCAL IMPORTS ---- //
 import {EventDateCard} from '@/subapps/events/common/ui/components';
@@ -23,7 +23,7 @@ function Content({event}: ContentProps) {
   const isPaid = searchParams.get('isPaid')?.toLowerCase() === 'true';
 
   const {workspaceURI} = useWorkspace();
-  const {data: session} = useSession();
+  const {data: session} = authClient.useSession();
   const user = session?.user;
 
   const hideEventHomeNavigationButton = event.isHidden && !user;
