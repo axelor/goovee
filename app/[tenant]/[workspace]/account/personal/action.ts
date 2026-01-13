@@ -283,28 +283,12 @@ export async function update({
       return error(await t('Invalid partner'));
     }
   }
+  // WARN: After updating the email address, getSession() will throw an error as it can't find the user in the session
+  // so we translate the messasge beforehand since it internally calls getSession()
+  const successMessage = await t('Settings updated successfully.');
+  const errorMessage = await t('Error updating settings. Try again.');
 
   try {
-    if (email !== partner?.emailAddress.address) {
-      const updateEmail = async (emailAddress: any, newEmail: string) => {
-        if (!emailAddress) return;
-
-        const {id, version} = emailAddress;
-
-        await client.aOSEmailAddress.update({
-          data: {
-            id,
-            version,
-            name: newEmail,
-            address: newEmail,
-          },
-          select: {id: true},
-        });
-      };
-
-      await updateEmail(partner?.emailAddress, email);
-    }
-
     const updatedPartner = await updatePartner({
       data: {
         id: partner.id,
@@ -327,12 +311,34 @@ export async function update({
       tenantId,
     });
 
+    if (email !== partner?.emailAddress?.address) {
+      const updateEmail = async (emailAddress: any, newEmail: string) => {
+        if (!emailAddress) return;
+
+        const {id, version} = emailAddress;
+
+        await client.aOSEmailAddress.update({
+          data: {
+            id,
+            version,
+            name: newEmail,
+            address: newEmail,
+          },
+          select: {id: true},
+        });
+      };
+
+      await updateEmail(partner?.emailAddress, email);
+      // WARN: After updating the email address, getSession() will throw an error as it can't find the user in the session
+      // we can not call any function that requires a after this
+    }
+
     return {
       success: true,
-      message: await t('Settings updated successfully.'),
+      message: successMessage,
     };
   } catch (err) {
-    return error(await t('Error updating settings. Try again.'));
+    return error(errorMessage);
   }
 }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import {useMemo, useRef, useState} from 'react';
-import {useRouter} from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
@@ -50,6 +50,7 @@ import {
 import {Title} from '../common/ui/components';
 import {update, updateProfileImage, generateOTPForUpdate} from './action';
 import {RoleLabel} from '../common/constants';
+import {getLoginURL} from '@/utils/url';
 
 const formSchema = z
   .object({
@@ -141,9 +142,9 @@ export default function Personal({
   };
   partners: Array<{id: ID; name: string}>;
 }) {
+  const pathname = usePathname();
   const {toast} = useToast();
-  const {refetch} = authClient.useSession();
-  const {tenant, workspaceURL} = useWorkspace();
+  const {tenant, workspaceURL, workspaceURI} = useWorkspace();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<any>(pictureProp);
   const [updatingPicture, setUpdatingPicture] = useState(false);
@@ -213,17 +214,18 @@ export default function Personal({
          * Update session when change in email or main partner for contact
          */
         if (editEmail || isMainPartnerUpdated) {
-          await authClient.getSession({
-            query: {
-              disableCookieCache: true,
-            },
+          await authClient.signOut();
+
+          const loginURL = getLoginURL({
+            callbackurl: pathname,
+            workspaceURI,
+            tenant,
           });
-          await refetch();
+          window.location.href = loginURL;
+        } else {
+          handleCancelEditEmail();
+          router.refresh();
         }
-
-        handleCancelEditEmail();
-
-        router.refresh();
       } else {
         toast({
           variant: 'destructive',
