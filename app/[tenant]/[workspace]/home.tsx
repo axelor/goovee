@@ -101,8 +101,7 @@ export async function Home({
             <HyperlinkCard workspace={workspace} workspaceURI={workspaceURI} />
           </aside>
         )}
-        <div
-          className={`${showHyperlinks ? 'lg:pr-[220px]' : ''} space-y-6`}>
+        <div className={`${showHyperlinks ? 'lg:pr-[220px]' : ''} space-y-6`}>
           <div>
             {showNews && (
               <div className="space-y-6">
