@@ -100,6 +100,12 @@
       "mappedBy": "portalAppConfig"
     },
     {
+      "type": "OneToMany",
+      "name": "hyperlinkList",
+      "target": "AOSPortalHyperlink",
+      "mappedBy": "portalAppConfig"
+    },
+    {
       "type": "String",
       "name": "ticketHeroTitle"
     },
@@ -377,6 +383,10 @@
     },
     {
       "name": "isHomepageDisplayResources",
+      "type": "Boolean"
+    },
+    {
+      "name": "isHomepageDisplayHyperlinks",
       "type": "Boolean"
     },
     {

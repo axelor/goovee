@@ -172,6 +172,12 @@ export interface PortalAppConfig extends Model {
   isHomepageDisplayEvents?: boolean;
   isHomepageDisplayMessage?: boolean;
   isHomepageDisplayResources?: boolean;
+  isHomepageDisplayHyperlinks?: boolean;
+  hyperlinkList?: Array<{
+    id: ID;
+    link?: string;
+    logo?: {id: ID};
+  }>;
   homepageHeroTitle?: string;
   homepageHeroDescription?: string;
   homepageHeroOverlayColorSelect?: OverlayColor;

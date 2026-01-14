@@ -1,0 +1,21 @@
+{
+  "name": "AOSPortalHyperlink",
+  "table": "portal_hyperlink",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "link"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "logo",
+      "target": "AOSMetaFile"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "portalAppConfig",
+      "target": "AOSPortalAppConfig"
+    }
+  ]
+}
