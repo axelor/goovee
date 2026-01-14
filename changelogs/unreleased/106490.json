@@ -1,0 +1,6 @@
+{
+  "title": "Hyperlink on the Homepage",
+  "type": "feat",
+  "description": "Add a selection of hyperlinks represented by logos to the homepage",
+  "scope": ["core"]
+}
