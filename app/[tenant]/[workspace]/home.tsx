@@ -95,10 +95,15 @@ export async function Home({
         image={imageURL}
       />
 
-      <div className="container my-6 mx-auto">
+      <div className="container my-6 mx-auto relative">
+        {showHyperlinks && (
+          <aside className="hidden lg:block absolute right-0 top-0 w-[200px]">
+            <HyperlinkCard workspace={workspace} workspaceURI={workspaceURI} />
+          </aside>
+        )}
         <div
-          className={`${showHyperlinks ? 'grid grid-cols-1 lg:grid-cols-[1fr_250px] gap-8' : 'space-y-6'}`}>
-          <div className={`${showHyperlinks ? 'space-y-6 min-w-0' : ''}`}>
+          className={`${showHyperlinks ? 'lg:pr-[220px]' : ''} space-y-6`}>
+          <div>
             {showNews && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between gap-4">
@@ -166,12 +171,12 @@ export async function Home({
           </div>
 
           {showHyperlinks && (
-            <aside>
+            <div className="lg:hidden">
               <HyperlinkCard
                 workspace={workspace}
                 workspaceURI={workspaceURI}
               />
-            </aside>
+            </div>
           )}
         </div>
       </div>
