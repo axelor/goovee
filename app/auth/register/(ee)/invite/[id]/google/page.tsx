@@ -4,7 +4,6 @@ import {notFound} from 'next/navigation';
 import {getSession} from '@/auth';
 import {SEARCH_PARAMS} from '@/constants';
 import {t} from '@/locale/server';
-import {findContactByEmail} from '@/orm/partner';
 
 // ---- LOCAL IMPORTS ---- //
 import Form from './form';
@@ -35,9 +34,7 @@ export default async function Page(props: {
   const session = await getSession();
   const user = session?.user;
 
-  //TODO: Why are we checking if the user is a contact? why can't subscribe be shown to a customer?
   if (user) {
-    const contact = await findContactByEmail(user.email, tenantId);
     if (user.email !== invite.emailAddress.address) {
       return (
         <div className="container space-y-6 mt-8">
@@ -51,11 +48,16 @@ export default async function Page(props: {
           </div>
         </div>
       );
-    } else if (
-      user.email === invite.emailAddress.address &&
-      contact?.isActivatedOnPortal &&
-      contact?.isContact
-    ) {
+    } else if (!user.isContact) {
+      return (
+        <div className="container space-y-6 mt-8">
+          <h1 className="text-[2rem] font-bold">{await t('Sign Up')}</h1>
+          <div className="bg-white py-4 px-6">
+            <p>{await t('Only contacts can register via invite.')}</p>
+          </div>
+        </div>
+      );
+    } else {
       return (
         <Subscribe workspaceURL={invite.workspace.url} inviteId={invite.id} />
       );
