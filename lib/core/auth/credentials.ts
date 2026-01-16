@@ -1,10 +1,14 @@
-import type {BetterAuthPlugin} from 'better-auth';
-import {createAuthEndpoint} from 'better-auth/api';
+import {BetterAuthPlugin, defineErrorCodes} from 'better-auth';
+import {APIError, createAuthEndpoint} from 'better-auth/api';
 import {setSessionCookie} from 'better-auth/cookies';
 import {z} from 'zod';
 
-import {findGooveeUserByEmail} from '@/orm/partner';
 import {compare} from '@/auth/utils';
+import {findGooveeUserByEmail} from '@/orm/partner';
+
+const ERROR_CODES = defineErrorCodes({
+  INVALID_CREDENTIALS: 'Invalid credentials',
+});
 
 const credentials = {
   id: 'credentials',
@@ -30,24 +34,21 @@ const credentials = {
 
         const user = await findGooveeUserByEmail(email, tenantId);
         if (!user) {
-          throw ctx.error('UNAUTHORIZED', {
-            message: 'Invalid credentials',
-            code: 'INVALID_CREDENTIALS',
+          throw new APIError('UNAUTHORIZED', {
+            message: ERROR_CODES.INVALID_CREDENTIALS,
           });
         }
 
         if (!user.password) {
-          throw ctx.error('UNAUTHORIZED', {
-            message: 'Invalid credentials',
-            code: 'INVALID_CREDENTIALS',
+          throw new APIError('UNAUTHORIZED', {
+            message: ERROR_CODES.INVALID_CREDENTIALS,
           });
         }
 
         const valid = await compare(password, user.password);
         if (!valid) {
-          throw ctx.error('UNAUTHORIZED', {
-            message: 'Invalid credentials',
-            code: 'INVALID_CREDENTIALS',
+          throw new APIError('UNAUTHORIZED', {
+            message: ERROR_CODES.INVALID_CREDENTIALS,
           });
         }
 
@@ -83,9 +84,7 @@ const credentials = {
     },
   ],
 
-  $ERROR_CODES: {
-    INVALID_CREDENTIALS: 'Invalid credentials',
-  },
+  $ERROR_CODES: ERROR_CODES,
 } satisfies BetterAuthPlugin;
 
 export type Credentials = typeof credentials;

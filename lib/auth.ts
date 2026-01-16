@@ -1,5 +1,9 @@
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {betterAuth, type BetterAuthOptions} from 'better-auth';
+import {
+  betterAuth,
+  type BetterAuthOptions,
+  defineErrorCodes,
+} from 'better-auth';
 import {APIError, getOAuthState} from 'better-auth/api';
 import {nextCookies} from 'better-auth/next-js';
 import {customSession} from 'better-auth/plugins';
@@ -7,6 +11,12 @@ import google from './core/auth/(ee)/google';
 import keycloak from './core/auth/(ee)/keycloak';
 import credentials from './core/auth/credentials';
 import {register, registerByInvite} from './core/auth/orm';
+
+const ERROR_CODES = defineErrorCodes({
+  TENANT_ID_REQUIRED: 'Tenant ID is required',
+  PARTNER_NOT_FOUND: 'Partner not found',
+  REGISTRATION_FAILED: 'Registration failed due to unexpected error',
+});
 
 const options = {
   onAPIError: {
@@ -23,7 +33,7 @@ const options = {
             const data = await getOAuthState();
             if (!data?.tenantId || !user.email) {
               throw new APIError('UNPROCESSABLE_ENTITY', {
-                message: 'Tenant ID is required',
+                message: ERROR_CODES.TENANT_ID_REQUIRED,
               });
             }
 
@@ -39,7 +49,7 @@ const options = {
                   res = await signUp({...data, email: user.email});
                 } catch (err) {
                   throw new APIError('UNPROCESSABLE_ENTITY', {
-                    message: 'Registration failed due to unexpected error',
+                    message: ERROR_CODES.REGISTRATION_FAILED,
                   });
                 }
                 if ('error' in res) {
@@ -56,7 +66,7 @@ const options = {
 
             if (!partner) {
               throw new APIError('UNPROCESSABLE_ENTITY', {
-                message: 'Partner not found',
+                message: ERROR_CODES.PARTNER_NOT_FOUND,
               });
             }
           }
@@ -74,7 +84,7 @@ const options = {
             const data = await getOAuthState();
             if (!data?.tenantId) {
               throw new APIError('UNPROCESSABLE_ENTITY', {
-                message: 'Tenant ID is required',
+                message: ERROR_CODES.TENANT_ID_REQUIRED,
               });
             }
             return {
@@ -87,7 +97,7 @@ const options = {
 
           if (!session.tenantId) {
             throw new APIError('UNPROCESSABLE_ENTITY', {
-              message: 'Tenant ID is required',
+              message: ERROR_CODES.TENANT_ID_REQUIRED,
             });
           }
 
@@ -127,7 +137,7 @@ export const auth = betterAuth({
 
       if (!partner) {
         throw new APIError('UNPROCESSABLE_ENTITY', {
-          message: 'Partner not found',
+          message: ERROR_CODES.PARTNER_NOT_FOUND,
         });
       }
 
