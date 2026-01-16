@@ -180,6 +180,9 @@ export const NAVIGATION = {
 export const SEARCH_PARAMS = {
   TENANT_ID: 'tenant',
   USER_TYPE: 'type',
+  COMPANY_NAME: 'companyName',
+  IDENTIFICATION_NUMBER: 'identificationNumber',
+  EMAIL: 'email',
 };
 
 export const REPORT = 'Report';
