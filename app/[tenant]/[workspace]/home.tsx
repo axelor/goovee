@@ -17,6 +17,7 @@ import {Skeleton} from '@/ui/components/skeleton/skeleton';
 import {getFileTypeIcon, getIconColor} from '@/utils/files';
 import {BadgeList} from '@/ui/components/badge-list';
 import {clone} from '@/utils';
+import {cn} from '@/utils/css';
 
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
 import {findEvents} from './(subapps)/events/common/orm/event';
@@ -95,89 +96,82 @@ export async function Home({
         image={imageURL}
       />
 
-      <div className="container my-6 mx-auto relative">
-        {showHyperlinks && (
-          <aside className="hidden lg:block absolute right-0 top-0 w-[200px]">
-            <HyperlinkCard workspace={workspace} workspaceURI={workspaceURI} />
-          </aside>
-        )}
-        <div className={`${showHyperlinks ? 'lg:pr-[220px]' : ''} space-y-6`}>
-          <div>
-            {showNews && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between gap-4">
-                  <h2 className="font-semibold text-xl">
-                    {await t('Latest news')}
-                  </h2>
-                  <Link
-                    href={`${workspaceURI}/${SUBAPP_CODES.news}`}
-                    className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-                    {await t('View all')} <ArrowRight className="h-3 w-3" />
-                  </Link>
-                </div>
-                <Suspense fallback={<NewsSkeleton />}>
-                  <LatestNews
-                    workspace={workspace}
-                    tenant={tenant}
-                    user={user}
-                    workspaceURI={workspaceURI}
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {hasContents && (
-              <>
+      <div
+        className={cn('container my-6 mx-auto grid grid-cols-1 gap-6', {
+          'lg:grid-cols-[1fr_200px]': showHyperlinks,
+        })}>
+        <div className="space-y-6 min-w-0">
+          {showNews && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between gap-4">
                 <h2 className="font-semibold text-xl">
-                  {await t('Latest contents')}
+                  {await t('Latest news')}
                 </h2>
+                <Link
+                  href={`${workspaceURI}/${SUBAPP_CODES.news}`}
+                  className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+                  {await t('View all')} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <Suspense fallback={<NewsSkeleton />}>
+                <LatestNews
+                  workspace={workspace}
+                  tenant={tenant}
+                  user={user}
+                  workspaceURI={workspaceURI}
+                />
+              </Suspense>
+            </div>
+          )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {showEvents && (
-                    <Suspense fallback={<ContentCardSkeleton />}>
-                      <EventsCard
-                        workspace={workspace}
-                        tenant={tenant}
-                        user={user}
-                        workspaceURI={workspaceURI}
-                      />
-                    </Suspense>
-                  )}
-                  {showForum && (
-                    <Suspense fallback={<ContentCardSkeleton />}>
-                      <ForumCard
-                        workspace={workspace}
-                        tenant={tenant}
-                        user={user}
-                        workspaceURI={workspaceURI}
-                      />
-                    </Suspense>
-                  )}
+          {hasContents && (
+            <div className="space-y-6">
+              <h2 className="font-semibold text-xl">
+                {await t('Latest contents')}
+              </h2>
 
-                  {showResources && (
-                    <Suspense fallback={<ContentCardSkeleton />}>
-                      <ResourcesCard
-                        workspace={workspace}
-                        tenant={tenant}
-                        user={user}
-                        workspaceURI={workspaceURI}
-                      />
-                    </Suspense>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {showEvents && (
+                  <Suspense fallback={<ContentCardSkeleton />}>
+                    <EventsCard
+                      workspace={workspace}
+                      tenant={tenant}
+                      user={user}
+                      workspaceURI={workspaceURI}
+                    />
+                  </Suspense>
+                )}
+                {showForum && (
+                  <Suspense fallback={<ContentCardSkeleton />}>
+                    <ForumCard
+                      workspace={workspace}
+                      tenant={tenant}
+                      user={user}
+                      workspaceURI={workspaceURI}
+                    />
+                  </Suspense>
+                )}
 
-          {showHyperlinks && (
-            <div className="lg:hidden">
-              <HyperlinkCard
-                workspace={workspace}
-                workspaceURI={workspaceURI}
-              />
+                {showResources && (
+                  <Suspense fallback={<ContentCardSkeleton />}>
+                    <ResourcesCard
+                      workspace={workspace}
+                      tenant={tenant}
+                      user={user}
+                      workspaceURI={workspaceURI}
+                    />
+                  </Suspense>
+                )}
+              </div>
             </div>
           )}
         </div>
+
+        {showHyperlinks && (
+          <aside className="space-y-6">
+            <HyperlinkCard workspace={workspace} workspaceURI={workspaceURI} />
+          </aside>
+        )}
       </div>
 
       <div className="lg:hidden h-20" />
