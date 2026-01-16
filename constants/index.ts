@@ -179,6 +179,7 @@ export const NAVIGATION = {
 
 export const SEARCH_PARAMS = {
   TENANT_ID: 'tenant',
+  USER_TYPE: 'type',
 };
 
 export const REPORT = 'Report';

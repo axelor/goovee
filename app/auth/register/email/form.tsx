@@ -102,10 +102,25 @@ const formSchema = z
   );
 
 export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
+  const {data: session} = useSession();
+  const user = session?.user;
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchQuery = new URLSearchParams(searchParams).toString();
+  const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
+  const typeParam = searchParams.get(SEARCH_PARAMS.USER_TYPE);
+  const isValidTypeParam =
+    typeParam === UserType.company || typeParam === UserType.individual;
+  const isTypeLocked = isValidTypeParam;
+  const defaultType = isValidTypeParam
+    ? (typeParam as UserType)
+    : UserType.individual;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: UserType.individual,
+      type: defaultType,
       companyName: '',
       indentificationNumber: '',
       companyNumber: '',
@@ -124,14 +139,6 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
       linkedInLink: '',
     },
   });
-
-  const {data: session} = useSession();
-  const user = session?.user;
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const searchQuery = new URLSearchParams(searchParams).toString();
-  const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
   const {timeRemaining, isExpired, reset} = useCountDown(0);
 
   const showDirectoryControls = form.watch(
@@ -277,7 +284,8 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
                   <FormLabel>{i18n.t('Type')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value?.toString()}>
+                    defaultValue={field.value?.toString()}
+                    disabled={isTypeLocked}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
