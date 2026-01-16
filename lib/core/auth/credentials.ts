@@ -79,7 +79,7 @@ const credentials = {
     {
       pathMatcher: path => path === '/credentials/sign-in',
       window: 60_000,
-      max: 10,
+      max: 5,
     },
   ],
 
