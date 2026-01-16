@@ -30,7 +30,11 @@ export default function Content({
   showGoogleOauth?: boolean;
   showKeycloakOauth?: boolean;
 }) {
-  const [values, setValues] = useState({email: '', password: ''});
+  const [values, setValues] = useState({
+    email: '',
+    password: '',
+    rememberMe: true,
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const {toast} = useToast();
@@ -55,7 +59,7 @@ export default function Content({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const {email, password} = values;
+    const {email, password, rememberMe} = values;
 
     if (!(email && password)) {
       return toast({
@@ -70,6 +74,7 @@ export default function Content({
       email,
       password,
       tenantId,
+      rememberMe,
     });
 
     if (!login.error) {
@@ -156,7 +161,15 @@ export default function Content({
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Checkbox variant="success" id="terms" disabled={submitting} />
+                <Checkbox
+                  variant="success"
+                  id="terms"
+                  disabled={submitting}
+                  checked={values.rememberMe}
+                  onCheckedChange={checked =>
+                    setValues(v => ({...v, rememberMe: !!checked}))
+                  }
+                />
                 <Label htmlFor="terms" className="ml-2">
                   {i18n.t('Remember Me')}
                 </Label>

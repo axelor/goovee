@@ -21,6 +21,7 @@ const credentials = {
           email: z.email(),
           password: z.string(),
           tenantId: z.string(),
+          rememberMe: z.boolean().optional(),
         }),
         metadata: {
           openapi: {
@@ -30,7 +31,7 @@ const credentials = {
         },
       },
       async ctx => {
-        const {email, password, tenantId} = ctx.body;
+        const {email, password, tenantId, rememberMe} = ctx.body;
 
         const user = await findGooveeUserByEmail(email, tenantId);
         if (!user) {
@@ -70,7 +71,7 @@ const credentials = {
               updatedAt: new Date(),
             },
           },
-          false,
+          !rememberMe,
         );
         return session;
       },
