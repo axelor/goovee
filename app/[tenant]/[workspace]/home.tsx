@@ -99,9 +99,7 @@ export async function Home({
       {showNews && (
         <div className="container my-6 mx-auto space-y-6">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="font-semibold text-xl">
-              {await t('Latest news')}
-            </h2>
+            <h2 className="font-semibold text-xl">{await t('Latest news')}</h2>
             <Link
               href={`${workspaceURI}/${SUBAPP_CODES.news}`}
               className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
@@ -171,7 +169,10 @@ export async function Home({
               <h2 className="font-semibold text-xl">
                 {await t('Useful links')}
               </h2>
-              <HyperlinkCard workspace={workspace} workspaceURI={workspaceURI} />
+              <HyperlinkCard
+                workspace={workspace}
+                workspaceURI={workspaceURI}
+              />
             </aside>
           )}
         </div>
