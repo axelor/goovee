@@ -1,0 +1,6 @@
+{
+  "title": "Add type in subscription url",
+  "type": "feat",
+  "description": "Add the option to specify the type of partner to create in the registration page URL",
+  "scope": ["core"]
+}
