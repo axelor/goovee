@@ -23,6 +23,7 @@ import {UserType} from './types';
 import {manager, type Tenant} from '../tenant';
 import type {Partner, PortalWorkspace} from '@/types';
 import {hash} from './utils';
+import {getGooveeEnvironment} from '../environment/utils';
 
 function error(message: string) {
   return {
@@ -611,4 +612,50 @@ async function findActiveAdminContactForWorkspace({
       name: true,
     },
   });
+}
+
+export async function registerByKeycloak({
+  locale,
+  tenantId,
+  email,
+  name,
+  workspaceURI,
+}: {
+  tenantId: Tenant['id'];
+  locale?: string;
+  email: string;
+  name?: string;
+  workspaceURI: string;
+}) {
+  const workspaceURL = `${getGooveeEnvironment().GOOVEE_PUBLIC_HOST}${workspaceURI}`;
+  const localization = await findRegistrationLocalization({
+    locale,
+    tenantId,
+  });
+
+  try {
+    await registerPartner({
+      type: UserType.company,
+      email,
+      companyName: name || email,
+      workspaceURL,
+      tenantId,
+      localizationId: localization?.id,
+    } as any);
+
+    return {
+      success: true,
+      message: await getTranslation(
+        {locale, tenant: tenantId},
+        'Registered successfully',
+      ),
+    };
+  } catch (err) {
+    return error(
+      await getTranslation(
+        {locale, tenant: tenantId},
+        'Error registering, try again',
+      ),
+    );
+  }
 }

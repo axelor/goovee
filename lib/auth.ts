@@ -10,7 +10,7 @@ import {customSession} from 'better-auth/plugins';
 import google from './core/auth/(ee)/google';
 import keycloak from './core/auth/(ee)/keycloak';
 import credentials from './core/auth/credentials';
-import {register, registerByInvite} from './core/auth/orm';
+import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
 
 const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
@@ -41,8 +41,8 @@ const options = {
               user.email,
               data.tenantId,
             );
-            if (!partner && ctx.params?.id === 'google') {
-              if (data.requestSignUp) {
+            if (!partner) {
+              if (ctx.params?.id === 'google' && data.requestSignUp) {
                 const signUp = data.inviteId ? registerByInvite : register;
                 let res;
                 try {
@@ -57,6 +57,34 @@ const options = {
                     message: res.message,
                   });
                 }
+
+                partner = await findGooveeUserByEmail(
+                  user.email,
+                  data.tenantId,
+                );
+              }
+              if (ctx.params?.providerId === 'keycloak') {
+                // implicit signup with keycloak
+                let res;
+                try {
+                  res = await registerByKeycloak({
+                    email: user.email,
+                    name: user.name,
+                    workspaceURI: data.workspaceURI,
+                    tenantId: data.tenantId,
+                    locale: data.locale,
+                  });
+                } catch (err) {
+                  throw new APIError('UNPROCESSABLE_ENTITY', {
+                    message: ERROR_CODES.REGISTRATION_FAILED,
+                  });
+                }
+                if ('error' in res) {
+                  throw new APIError('UNPROCESSABLE_ENTITY', {
+                    message: res.message,
+                  });
+                }
+
                 partner = await findGooveeUserByEmail(
                   user.email,
                   data.tenantId,

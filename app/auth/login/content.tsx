@@ -9,7 +9,7 @@ import {MdOutlineRefresh} from 'react-icons/md';
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
 
 // ---- CORE IMPORTS ---- //
-import {i18n} from '@/locale';
+import {i18n, l10n} from '@/locale';
 import {TextField} from '@/ui/components/text-field';
 import {Checkbox} from '@/ui/components/checkbox';
 import {Label} from '@/ui/components/label';
@@ -107,6 +107,8 @@ export default function Content({
       errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
       additionalData: {
         tenantId,
+        workspaceURI,
+        locale: l10n.getLocale(),
       },
     });
   };
