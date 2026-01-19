@@ -52,9 +52,11 @@ const formSchema = z
 export default function SignUp({
   email,
   inviteId,
+  showGoogleOauth,
 }: {
   email: string;
   inviteId: string;
+  showGoogleOauth?: boolean;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -325,29 +327,33 @@ export default function SignUp({
             </Button>
           </form>
         </Form>
-        <div className="flex items-center gap-4">
-          <div className="grow">
-            <Separator />
-          </div>
-          <h5 className="mb-0 font-medium text-[2rem]">{i18n.t('Or')}</h5>
-          <div className="grow">
-            <Separator />
-          </div>
-        </div>
-        <Button
-          type="button"
-          variant="outline-success"
-          className="w-full rounded-full"
-          onClick={handleSignUpWithGoogle}>
-          <Image
-            alt="Google"
-            src="/images/google.svg"
-            height={24}
-            width={24}
-            className="me-2"
-          />
-          {i18n.t('Sign Up with Google')}
-        </Button>
+        {showGoogleOauth && (
+          <>
+            <div className="flex items-center gap-4">
+              <div className="grow">
+                <Separator />
+              </div>
+              <h5 className="mb-0 font-medium text-[2rem]">{i18n.t('Or')}</h5>
+              <div className="grow">
+                <Separator />
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline-success"
+              className="w-full rounded-full"
+              onClick={handleSignUpWithGoogle}>
+              <Image
+                alt="Google"
+                src="/images/google.svg"
+                height={24}
+                width={24}
+                className="me-2"
+              />
+              {i18n.t('Sign Up with Google')}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

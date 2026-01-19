@@ -11,7 +11,13 @@ import {Button} from '@/ui/components/button';
 import {Separator} from '@/ui/components/separator';
 import type {PortalWorkspace} from '@/types';
 
-export default function Navigation({workspace}: {workspace?: PortalWorkspace}) {
+export default function Navigation({
+  workspace,
+  showGoogleOauth,
+}: {
+  workspace?: PortalWorkspace;
+  showGoogleOauth?: boolean;
+}) {
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
 
@@ -36,29 +42,33 @@ export default function Navigation({workspace}: {workspace?: PortalWorkspace}) {
             <span className="underline">{i18n.t('Log In')}</span>
           </Link>
         </p>
-        <div className="flex items-center gap-4">
-          <div className="grow">
-            <Separator />
-          </div>
-          <h5 className="mb-0 font-medium text-[2rem]">{i18n.t('Or')}</h5>
-          <div className="grow">
-            <Separator />
-          </div>
-        </div>
-        <Button
-          type="button"
-          variant="outline-success"
-          className="w-full rounded-full"
-          onClick={handleSignUpWithGoogle}>
-          <Image
-            alt="Google"
-            src="/images/google.svg"
-            height={24}
-            width={24}
-            className="me-2"
-          />
-          {i18n.t('Sign Up with Google')}
-        </Button>
+        {showGoogleOauth && (
+          <>
+            <div className="flex items-center gap-4">
+              <div className="grow">
+                <Separator />
+              </div>
+              <h5 className="mb-0 font-medium text-[2rem]">{i18n.t('Or')}</h5>
+              <div className="grow">
+                <Separator />
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline-success"
+              className="w-full rounded-full"
+              onClick={handleSignUpWithGoogle}>
+              <Image
+                alt="Google"
+                src="/images/google.svg"
+                height={24}
+                width={24}
+                className="me-2"
+              />
+              {i18n.t('Sign Up with Google')}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
