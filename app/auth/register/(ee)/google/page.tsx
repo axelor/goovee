@@ -4,9 +4,8 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {canRegisterForWorkspace, findWorkspaces} from '@/orm/workspace';
+import {findWorkspaceForRegistration} from '@/orm/workspace';
 import {findPartnerByEmail} from '@/orm/partner';
-import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
 import Form from './form';
@@ -56,20 +55,14 @@ export default async function Page({
     return <UserExists workspaceURL={workspaceURL} />;
   }
 
-  const workspaces = await findWorkspaces({url: workspaceURL, tenantId}).then(
-    clone,
-  );
-
-  const workspace = workspaces.find((w: any) => w.url === workspaceURL);
-
-  const canRegister = await canRegisterForWorkspace({
+  const workspace = await findWorkspaceForRegistration({
     url: workspaceURL,
     tenantId,
   });
 
-  if (!canRegister) {
+  if (!workspace) {
     return notFound();
   }
 
-  return <Form workspace={workspace} />;
+  return <Form workspace={workspace as PortalWorkspace} />;
 }

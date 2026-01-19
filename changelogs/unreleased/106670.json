@@ -1,0 +1,6 @@
+{
+  "title": "Fix registration support for workspace without default guest workspace",
+  "type": "fix",
+  "description": "Remove open workspace check and consider only scope of registration for allowing registration",
+  "scope": ["core"]
+}

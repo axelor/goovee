@@ -1,6 +1,9 @@
 // ---- CORE IMPORTS ---- //
 import {manager, type Tenant} from '@/tenant';
-import {AOSPortalAppConfig} from '@/goovee/.generated/models';
+import {
+  AOSPortalAppConfig,
+  AOSPortalWorkspace,
+} from '@/goovee/.generated/models';
 import {ID, Partner, PortalWorkspace, User} from '@/types';
 import {clone, getPartnerId} from '@/utils';
 import {SelectOptions} from '@goovee/orm';
@@ -788,6 +791,69 @@ export async function findWorkspaceByURL({
   });
 }
 
+export async function findWorkspaceForRegistration({
+  url,
+  tenantId,
+}: {
+  url: PortalWorkspace['url'];
+  tenantId: Tenant['id'];
+}): Promise<AOSPortalWorkspace | null> {
+  if (!(url && tenantId)) {
+    return null;
+  }
+
+  const client = await manager.getClient(tenantId);
+
+  try {
+    const workspace = await client.aOSPortalWorkspace
+      .findOne({
+        where: {
+          url: {
+            like: `${url}%`,
+          },
+          AND: [
+            {
+              OR: [
+                {
+                  allowRegistrationSelect: ALLOW_ALL_REGISTRATION,
+                },
+                {
+                  allowRegistrationSelect: ALLOW_AOS_ONLY_REGISTRATION,
+                },
+              ],
+            },
+          ],
+        },
+        select: {
+          name: true,
+          url: true,
+          allowRegistrationSelect: true,
+          defaultGuestWorkspace: {
+            apps: {
+              select: {
+                background: true,
+                orderForMySpaceMenu: true,
+                showInMySpace: true,
+                code: true,
+                showInTopMenu: true,
+                color: true,
+                icon: true,
+                isInstalled: true,
+                name: true,
+                orderForTopMenu: true,
+              },
+            },
+          },
+        },
+      })
+      .then(clone);
+
+    return workspace;
+  } catch (err) {}
+
+  return null;
+}
+
 export async function canRegisterForWorkspace({
   url,
   tenantId,
@@ -799,39 +865,9 @@ export async function canRegisterForWorkspace({
     return false;
   }
 
-  const client = await manager.getClient(tenantId);
-
-  try {
-    const workspace = await client.aOSPortalWorkspace.findOne({
-      where: {
-        url: {
-          like: `${url}%`,
-        },
-        AND: [
-          {
-            OR: [
-              {
-                allowRegistrationSelect: ALLOW_ALL_REGISTRATION,
-              },
-              {
-                allowRegistrationSelect: ALLOW_AOS_ONLY_REGISTRATION,
-              },
-            ],
-          },
-        ],
-      },
-      select: {
-        id: true,
-        allowRegistrationSelect: true,
-      },
-    });
-
-    if (workspace?.id) {
-      return true;
-    }
-  } catch (err) {}
-
-  return false;
+  return findWorkspaceForRegistration({url, tenantId}).then(workspace =>
+    Boolean(workspace?.id),
+  );
 }
 
 export async function findWorkspaces({

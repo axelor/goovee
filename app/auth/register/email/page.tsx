@@ -1,13 +1,13 @@
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {canRegisterForWorkspace, findWorkspaces} from '@/orm/workspace';
-import {clone} from '@/utils';
+import {findWorkspaceForRegistration} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import Form from './form';
 import {extractSearchParams, isExistingUser} from '../common/utils';
 import {UserExists} from '../common/ui/components';
+import {PortalWorkspace} from '@/types';
 
 export default async function Page({
   searchParams,
@@ -31,20 +31,14 @@ export default async function Page({
     return <UserExists workspaceURL={workspaceURL} />;
   }
 
-  const workspaces = await findWorkspaces({url: workspaceURL, tenantId}).then(
-    clone,
-  );
-
-  const workspace = workspaces.find((w: any) => w.url === workspaceURL);
-
-  const canRegister = await canRegisterForWorkspace({
+  const workspace = await findWorkspaceForRegistration({
     url: workspaceURL,
     tenantId,
   });
 
-  if (!canRegister) {
+  if (!workspace) {
     return notFound();
   }
 
-  return <Form workspace={workspace} />;
+  return <Form workspace={workspace as PortalWorkspace} />;
 }
