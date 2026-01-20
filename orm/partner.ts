@@ -50,6 +50,7 @@ const partnerFields = {
     code: true,
   },
   defaultWorkspace: {
+    id: true,
     workspace: {
       id: true,
     },
@@ -318,7 +319,12 @@ export async function registerContact({
 
   const mainPartner = await client.aOSPartner.findOne({
     where: {id: partnerId},
-    select: {id: true, version: true, companySet: {select: {id: true}}},
+    select: {
+      id: true,
+      version: true,
+      companySet: {select: {id: true}},
+      defaultWorkspace: {id: true},
+    },
   });
 
   if (!mainPartner) {
@@ -357,7 +363,9 @@ export async function registerContact({
 
   if (contactConfig?.id) {
     data.contactWorkspaceConfigSet = {select: [{id: contactConfig.id}]};
-    data.defaultWorkspace = {select: [{id: contactConfig.id}]};
+  }
+  if (mainPartner.defaultWorkspace?.id) {
+    data.defaultWorkspace = {select: {id: mainPartner.defaultWorkspace.id}};
   }
 
   const contact = await client.aOSPartner

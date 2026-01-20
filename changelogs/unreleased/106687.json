@@ -1,0 +1,6 @@
+{
+  "title": "Fix registration for contacts",
+  "type": "fix",
+  "description": "Set partner's default workspace as default workspace for contacts",
+  "scope": ["core"]
+}

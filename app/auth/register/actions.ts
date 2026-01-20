@@ -670,7 +670,11 @@ async function registerAosContactAsAdmin({
             ? {select: {id: localization.id}}
             : undefined,
           contactWorkspaceConfigSet: {select: [{id: contactConfig.id}]},
-          defaultWorkspace: {select: {id: contactConfig.id}},
+          ...(contactPartner.defaultWorkspace?.id && {
+            defaultWorkspace: {
+              select: {id: contactPartner.defaultWorkspace.id},
+            },
+          }),
         },
         select: {id: true},
       });
