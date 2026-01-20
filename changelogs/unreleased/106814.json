@@ -1,0 +1,6 @@
+{
+  "title": "Mattermost user creation",
+  "type": "feat",
+  "description": "Use a new variable environnement to create matterost user",
+  "scope": ["core"]
+}

@@ -31,6 +31,7 @@ import {findOne, isValid} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
 import {findRegistrationLocalization} from '@/orm/localizations';
 import {hash} from '@/auth/utils';
+import {syncOrCreateMattermostUser} from '@/lib/core/mattermost';
 
 function error(message: string) {
   return {
@@ -372,6 +373,31 @@ export async function register({
 
   const localization = await findRegistrationLocalization({locale, tenantId});
 
+  if (password) {
+    const isCompany = type === UserType.company;
+    const $name = isCompany ? companyName : name;
+    const $firstName = isCompany ? companyName : firstName;
+    const mattermostResult = await syncOrCreateMattermostUser({
+      email,
+      password,
+      name: $name || '',
+      firstName: $firstName || '',
+    });
+
+    if (!mattermostResult.success) {
+      console.error('[REGISTER] Mattermost sync/create failed:', {
+        email,
+        error: mattermostResult.error,
+      });
+      return error(
+        await getTranslation(
+          {locale, tenant: tenantId},
+          'Error registering, try again',
+        ),
+      );
+    }
+  }
+
   try {
     const partner = await registerPartner({
       type,
@@ -623,6 +649,41 @@ async function registerAosContactAsAdmin({
 
   const localization = await findRegistrationLocalization({locale, tenantId});
 
+  if (password && password.length < 8) {
+    return {
+      success: false,
+      error: await getTranslation(
+        {tenant: tenantId},
+        'Password must be at least 8 characters',
+      ),
+    };
+  }
+
+  if (password) {
+    const isCompany = type === UserType.company;
+    const $name = isCompany ? companyName : name;
+    const $firstName = isCompany ? companyName : firstName;
+    const mattermostResult = await syncOrCreateMattermostUser({
+      email,
+      password,
+      name: $name || '',
+      firstName: $firstName || '',
+    });
+
+    if (!mattermostResult.success) {
+      console.error('[REGISTER_CONTACT] Mattermost sync/create failed:', {
+        email,
+        error: mattermostResult.error,
+      });
+      return error(
+        await getTranslation(
+          {locale, tenant: tenantId},
+          'Error registering, try again',
+        ),
+      );
+    }
+  }
+
   try {
     const contactConfig = await client.aOSPortalContactWorkspaceConfig.create({
       data: {
@@ -638,16 +699,6 @@ async function registerAosContactAsAdmin({
     });
 
     if (!contactConfig?.id) return registrationError;
-
-    if (password && password.length < 8) {
-      return {
-        success: false,
-        error: await getTranslation(
-          {tenant: tenantId},
-          'Password must be at least 8 characters',
-        ),
-      };
-    }
 
     let result;
 

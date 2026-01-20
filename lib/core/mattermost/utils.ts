@@ -18,3 +18,15 @@ export function getAdminToken(): string {
     ''
   );
 }
+
+export function isCreateMattermostUsersEnabled(): boolean {
+  const envValue =
+    getEnv()?.CREATE_MATTERMOST_USERS || process.env.CREATE_MATTERMOST_USERS;
+  return envValue === 'true';
+}
+
+export function getAosUrl(): string {
+  return (
+    getEnv()?.GOOVEE_PUBLIC_AOS_URL || process.env.GOOVEE_PUBLIC_AOS_URL || ''
+  );
+}

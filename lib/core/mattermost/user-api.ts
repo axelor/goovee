@@ -1,6 +1,17 @@
 import axios from 'axios';
-import {getHost, getAdminToken} from './utils';
-import type {MattermostUser, SyncMattermostPasswordResult} from './types';
+import {
+  getHost,
+  getAdminToken,
+  isCreateMattermostUsersEnabled,
+  getAosUrl,
+} from './utils';
+import type {
+  MattermostUser,
+  SyncMattermostPasswordResult,
+  CreateMattermostUserParams,
+  CreateMattermostUserResult,
+  SyncOrCreateMattermostUserResult,
+} from './types';
 
 async function getMattermostUserByEmail(
   email: string,
@@ -10,31 +21,22 @@ async function getMattermostUserByEmail(
     const token = getAdminToken();
 
     if (!host || !token) {
-      console.error('[MATTERMOST] Host or token not configured');
       return null;
     }
 
-    const {data} = await axios.get<MattermostUser>(
-      `${host}/api/v4/users/email/${encodeURIComponent(email)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    const url = `${host}/api/v4/users/email/${encodeURIComponent(email)}`;
+
+    const {data} = await axios.get<MattermostUser>(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-    );
+    });
 
     return data;
   } catch (error: any) {
     if (error.response?.status === 404) {
       return null;
     }
-
-    console.error('[MATTERMOST] Error fetching user by email:', {
-      email,
-      status: error.response?.status,
-      message: error.message,
-    });
-
     throw error;
   }
 }
@@ -48,7 +50,6 @@ async function updateMattermostPassword(
     const token = getAdminToken();
 
     if (!host || !token) {
-      console.error('[MATTERMOST] Host or token not configured');
       return false;
     }
 
@@ -67,12 +68,6 @@ async function updateMattermostPassword(
 
     return true;
   } catch (error: any) {
-    console.error('[MATTERMOST] Error updating password:', {
-      userId,
-      status: error.response?.status,
-      message: error.response?.data?.message || error.message,
-    });
-
     return false;
   }
 }
@@ -104,24 +99,127 @@ export async function syncMattermostPassword(
       };
     }
 
-    console.log('[MATTERMOST] Password synced successfully:', {
-      email,
-      userId: mattermostUser.id,
-    });
-
     return {
       success: true,
       synced: true,
     };
   } catch (error: any) {
-    console.error('[MATTERMOST] Unexpected error syncing password:', {
-      email,
-      error: error.message,
+    return {
+      success: false,
+      error: error,
+      message: error.message,
+    };
+  }
+}
+
+async function createMattermostUser(
+  params: CreateMattermostUserParams,
+): Promise<CreateMattermostUserResult> {
+  try {
+    const aosUrl = getAosUrl();
+
+    if (!aosUrl) {
+      return {
+        success: false,
+        error: 'AOS_ERROR',
+        message: 'AOS URL not configured',
+      };
+    }
+
+    const url = `${aosUrl}/ws/user/createUser`;
+    const requestBody = {
+      name: params.name,
+      firstName: params.firstName,
+      mail: params.mail,
+      password: params.password,
+      version: 0,
+    };
+
+    await axios.post(url, requestBody, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      auth: {
+        username: process.env.BASIC_AUTH_USERNAME!,
+        password: process.env.BASIC_AUTH_PASSWORD!,
+      },
     });
 
     return {
+      success: true,
+      created: true,
+    };
+  } catch (error: any) {
+    return {
       success: false,
-      error: 'UNKNOWN_ERROR',
+      error: error,
+      message: error.response?.data?.message || error.message,
+    };
+  }
+}
+
+export async function syncOrCreateMattermostUser({
+  email,
+  password,
+  name,
+  firstName,
+}: {
+  email: string;
+  password: string;
+  name: string;
+  firstName?: string;
+}): Promise<SyncOrCreateMattermostUserResult> {
+  if (!isCreateMattermostUsersEnabled()) {
+    return {
+      success: true,
+      action: 'skipped',
+    };
+  }
+
+  try {
+    const existingUser = await getMattermostUserByEmail(email);
+
+    if (existingUser) {
+      const updated = await updateMattermostPassword(existingUser.id, password);
+
+      if (!updated) {
+        return {
+          success: false,
+          error: 'UPDATE_FAILED',
+          message: 'Failed to update Mattermost password',
+        };
+      }
+
+      return {
+        success: true,
+        action: 'synced',
+        userId: existingUser.id,
+      };
+    }
+
+    const createResult = await createMattermostUser({
+      name: name || '',
+      firstName: firstName || '',
+      mail: email,
+      password,
+    });
+
+    if (!createResult.success) {
+      return {
+        success: false,
+        error: createResult.error,
+        message: createResult.message,
+      };
+    }
+
+    return {
+      success: true,
+      action: 'created',
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error,
       message: error.message,
     };
   }

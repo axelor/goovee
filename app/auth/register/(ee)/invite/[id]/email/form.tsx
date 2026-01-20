@@ -32,7 +32,7 @@ import {registerByEmail} from '../action';
 
 const formSchema = z
   .object({
-    firstName: z.string(),
+    firstName: z.string().min(1, {message: i18n.t('First name is required.')}),
     name: z.string().min(1, {message: i18n.t('Last name is required.')}),
     email: z.string().min(1, {message: i18n.t('Email is required')}),
     otp: z.string().min(1, {message: i18n.t('OTP is required')}),
@@ -165,7 +165,7 @@ export default function SignUp({
                 name="firstName"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>{i18n.t('First name')}</FormLabel>
+                    <FormLabel>{i18n.t('First name')} *</FormLabel>
                     <FormControl>
                       <Input
                         {...field}

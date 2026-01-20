@@ -5,10 +5,9 @@ import {getTranslation} from '@/locale/server';
 import {create as createOTP, findOne, isValid} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {shouldCreateMattermostUser} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
 import {manager, type Tenant} from '@/tenant';
-import {syncMattermostPassword} from '@/lib/core/mattermost';
+import {syncOrCreateMattermostUser} from '@/lib/core/mattermost';
 
 function error(message: string) {
   return {
@@ -223,41 +222,37 @@ export async function resetPassword({
 
     const hashedPassword = await hash(password);
 
-    const shouldSyncMattermost = await shouldCreateMattermostUser(
-      user.id,
-      tenantId,
-    );
+    const mattermostResult = await syncOrCreateMattermostUser({
+      email: user.emailAddress?.address || email,
+      password,
+      name: user.name || 'user',
+      firstName: user.firstName || 'user',
+    });
 
-    if (shouldSyncMattermost) {
-      const mattermostResult = await syncMattermostPassword(
-        user.emailAddress?.address || email,
-        password,
+    if (!mattermostResult.success) {
+      console.error(
+        '[MATTERMOST] Password sync/create failed during password reset:',
+        {
+          email: user.emailAddress?.address || email,
+          partnerId: user.id,
+          error: mattermostResult.error,
+          message: mattermostResult.message,
+        },
       );
+      return error(
+        await getTranslation(
+          {tenant: tenantId},
+          'Error resetting password. Try again.',
+        ),
+      );
+    }
 
-      if (mattermostResult.success) {
-        if (mattermostResult.synced) {
-          console.log({
-            email: user.emailAddress?.address || email,
-            partnerId: user.id,
-          });
-        }
-      } else {
-        console.error(
-          '[MATTERMOST] Password sync failed during password reset:',
-          {
-            email: user.emailAddress?.address || email,
-            partnerId: user.id,
-            error: mattermostResult.error,
-            message: mattermostResult.message,
-          },
-        );
-        return error(
-          await getTranslation(
-            {tenant: tenantId},
-            'Error resetting password. Try again.',
-          ),
-        );
-      }
+    if (mattermostResult.action !== 'skipped') {
+      console.log('[RESET_PASSWORD] Mattermost action completed:', {
+        email: user.emailAddress?.address || email,
+        partnerId: user.id,
+        action: mattermostResult.action,
+      });
     }
 
     const client = await manager.getClient(tenantId);
