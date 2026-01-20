@@ -1,0 +1,6 @@
+{
+  "title": "Displaying Google authentication",
+  "type": "fix",
+  "description": "SHOW_GOOGLE_OAUTH variable is not taken into account in certain places, such as during registration.",
+  "scope": ["core"]
+}

@@ -56,5 +56,13 @@ export default async function Page({
     }
   }
 
-  return <Form email={invite?.emailAddress?.address} inviteId={invite.id} />;
+  const showGoogleOauth = process.env.SHOW_GOOGLE_OAUTH === 'true';
+
+  return (
+    <Form
+      email={invite?.emailAddress?.address}
+      inviteId={invite.id}
+      showGoogleOauth={showGoogleOauth}
+    />
+  );
 }

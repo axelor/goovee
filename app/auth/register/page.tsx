@@ -40,5 +40,12 @@ export default async function Page({
     return notFound();
   }
 
-  return <Navigation workspace={workspace as PortalWorkspace} />;
+  const showGoogleOauth = process.env.SHOW_GOOGLE_OAUTH === 'true';
+
+  return (
+    <Navigation
+      workspace={workspace as PortalWorkspace}
+      showGoogleOauth={showGoogleOauth}
+    />
+  );
 }
