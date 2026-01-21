@@ -334,6 +334,7 @@ export async function register({
         await findActiveAdminContactForWorkspace({
           url: workspaceURL,
           tenantId,
+          partnerId: aosPartner.id,
         });
 
       if (existingAdminContact?.id || existingAdminContact?.error) {
@@ -710,7 +711,7 @@ async function findActiveAdminContactForWorkspace({
   tenantId,
 }: {
   url: PortalWorkspace['url'];
-  partnerId?: Partner['id'];
+  partnerId: Partner['id'];
   tenantId: Tenant['id'];
 }) {
   if (!tenantId) return error(await getTranslation({}, 'TenantId is required'));
@@ -740,7 +741,7 @@ async function findActiveAdminContactForWorkspace({
           url,
         },
       },
-      ...(partnerId ? {mainPartner: {id: partnerId}} : {}),
+      mainPartner: {id: partnerId},
     },
     select: {
       id: true,

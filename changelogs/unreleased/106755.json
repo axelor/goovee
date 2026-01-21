@@ -1,0 +1,6 @@
+{
+  "title": "Consider partner scope for admin contact when yesForAll registration e",
+  "type": "fix",
+  "description": "Fix missing partner scope for getting admin contact when registration scope is yesForAll",
+  "scope": ["core"]
+}
