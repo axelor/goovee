@@ -11,13 +11,7 @@ import {clone, getPageInfo, getSkipInfo} from '@/utils';
 import {formatNumber} from '@/locale/server/formatters';
 import type {Partner, PortalWorkspace} from '@/types';
 import {CONTEXT_STATUS} from '@/lib/core/payment/common/orm';
-import {findStripePaymentIntent} from '@/lib/core/payment/stripe/actions';
-import {getAmountFromStripe} from '@/utils/stripe';
-import {getBankDetailsFromInstructions} from '@/lib/core/payment/stripe/utils';
-import type {
-  BankTransferDetailsType,
-  NormalizedBankDetails,
-} from '@/ui/components/payment/types';
+import {buildPendingStripeBankTransferIntents} from '@/lib/core/payment/stripe/service';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Invoice} from '@/subapps/invoices/common/types/invoices';
@@ -239,58 +233,13 @@ export const findInvoice = async ({
     })) || [],
   );
 
-  const pendingStripeBankTransferIntents: BankTransferDetailsType[] = (
-    await Promise.all(
-      resolved?.map(async res => {
-        try {
-          const paymentIntent = await findStripePaymentIntent(
-            res.data?.paymentIntent as string,
-          );
-
-          if (!paymentIntent || !paymentIntent.next_action) return null;
-
-          const instructions =
-            paymentIntent.next_action.display_bank_transfer_instructions;
-          if (!instructions) return null;
-
-          const bankDetails: NormalizedBankDetails | null =
-            getBankDetailsFromInstructions(instructions);
-          if (!bankDetails) return null;
-
-          const paymentIntentAmount = getAmountFromStripe(
-            instructions.amount_remaining!,
-            currencyCode,
-          );
-          const formattedIntentAmount = await formatNumber(
-            paymentIntentAmount,
-            {
-              scale,
-              currency: currencySymbol,
-              type: 'DECIMAL',
-            },
-          );
-          const bankTransferInfo: BankTransferDetailsType = {
-            id: paymentIntent.id,
-            amount: paymentIntentAmount,
-            currency: instructions.currency!,
-            reference: instructions.reference!,
-            bankDetails,
-            contextId: res.id,
-            formattedAmount: String(formattedIntentAmount),
-            initiatedDate: new Date(paymentIntent.created * 1000), // Stripe timestamps are in seconds; JS Date expects milliseconds
-          };
-
-          return bankTransferInfo;
-        } catch (error) {
-          console.error(
-            `Error retrieving payment intent ${res.data?.paymentIntent}:`,
-            error,
-          );
-          return null;
-        }
-      }) || [],
-    )
-  ).filter(Boolean) as BankTransferDetailsType[];
+  const pendingStripeBankTransferIntents =
+    await buildPendingStripeBankTransferIntents({
+      resolvedContexts: resolved,
+      currencyCode,
+      currencySymbol,
+      scale,
+    });
 
   return {
     ...invoice,

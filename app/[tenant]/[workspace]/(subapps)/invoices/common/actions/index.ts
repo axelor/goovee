@@ -43,7 +43,7 @@ import {
 } from '@/subapps/invoices/common/constants/invoices';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {validatePaymentData} from '@/subapps/invoices/common/utils/validations';
-import {updateInvoice} from '@/subapps/invoices/common/webservice';
+import {updateInvoice} from '@/subapps/invoices/common/service';
 
 export async function paypalCreateOrder({
   invoice,

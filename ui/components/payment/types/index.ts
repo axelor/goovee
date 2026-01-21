@@ -1,4 +1,5 @@
 // ---- CORE IMPORTS ---- //
+import {BankAccountType} from '@/lib/core/payment/stripe/utils';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 
 export type PaypalProps = {
@@ -61,7 +62,7 @@ export type BankAddress = {
 };
 
 export interface NormalizedBankDetails {
-  type: 'iban' | 'aba';
+  type: BankAccountType;
   accountHolderName?: string;
   bankName?: string;
   country?: string;

@@ -1,24 +1,44 @@
 import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
-import {COUNTRY_NAMES} from '@/constants/country';
+import {getCountryName} from '@/utils/country';
 import {NormalizedBankDetails} from '@/ui/components/payment/types';
 
-export type BankTransferType = 'eu_bank_transfer' | 'us_bank_transfer';
+export const BANK_TRANSFER_TYPE = {
+  EU: 'eu_bank_transfer',
+  US: 'us_bank_transfer',
+} as const;
 
-export type BankTransferCurrency = 'eur' | 'usd';
+export type BankTransferType =
+  (typeof BANK_TRANSFER_TYPE)[keyof typeof BANK_TRANSFER_TYPE];
+
+export const BANK_TRANSFER_CURRENCY = {
+  EUR: 'eur',
+  USD: 'usd',
+} as const;
+
+export type BankTransferCurrency =
+  (typeof BANK_TRANSFER_CURRENCY)[keyof typeof BANK_TRANSFER_CURRENCY];
+
+export const BANK_ACCOUNT_TYPE = {
+  IBAN: 'iban',
+  ABA: 'aba',
+} as const;
+
+export type BankAccountType =
+  (typeof BANK_ACCOUNT_TYPE)[keyof typeof BANK_ACCOUNT_TYPE];
 
 export type CountryCode = 'FR' | 'DE' | 'ES' | 'IT' | 'NL' | 'BE' | 'US';
 
 type StripeBankTransfer =
   | {
-      type: 'eu_bank_transfer';
+      type: typeof BANK_TRANSFER_TYPE.EU;
       eu_bank_transfer: {
         country: CountryCode;
       };
     }
   | {
-      type: 'us_bank_transfer';
+      type: typeof BANK_TRANSFER_TYPE.US;
     };
 
 const BANK_TRANSFER_CONFIGS: Record<
@@ -29,13 +49,13 @@ const BANK_TRANSFER_CONFIGS: Record<
     default: CountryCode;
   }
 > = {
-  eur: {
-    type: 'eu_bank_transfer',
+  [BANK_TRANSFER_CURRENCY.EUR]: {
+    type: BANK_TRANSFER_TYPE.EU,
     recommendedCountries: ['FR', 'DE', 'ES', 'IT', 'NL', 'BE'],
     default: 'FR',
   },
-  usd: {
-    type: 'us_bank_transfer',
+  [BANK_TRANSFER_CURRENCY.USD]: {
+    type: BANK_TRANSFER_TYPE.US,
     recommendedCountries: ['US'],
     default: 'US',
   },
@@ -74,9 +94,9 @@ export function getBankTransferConfig(
   }
 
   // USD → no country, ever
-  if (normalizedCurrency === 'usd') {
+  if (normalizedCurrency === BANK_TRANSFER_CURRENCY.USD) {
     return {
-      type: 'us_bank_transfer',
+      type: BANK_TRANSFER_TYPE.US,
     };
   }
 
@@ -97,7 +117,7 @@ export function getBankTransferConfig(
     }
 
     return {
-      type: 'eu_bank_transfer',
+      type: BANK_TRANSFER_TYPE.EU,
       eu_bank_transfer: {
         country: countryCode,
       },
@@ -106,7 +126,7 @@ export function getBankTransferConfig(
 
   // EUR fallback → default country for currency
   return {
-    type: 'eu_bank_transfer',
+    type: BANK_TRANSFER_TYPE.EU,
     eu_bank_transfer: {
       country: currencyConfig.default,
     },
@@ -120,14 +140,15 @@ export function getBankDetailsFromInstructions(
   if (!financialAddress) return null;
 
   switch (financialAddress.type) {
-    case 'iban': {
+    case BANK_ACCOUNT_TYPE.IBAN: {
       const iban = financialAddress.iban;
       if (!iban) return null;
+
       return {
-        type: 'iban',
+        type: BANK_ACCOUNT_TYPE.IBAN,
         iban: iban.iban,
-        swiftCode: iban.bic,
-        accountHolderName: iban.account_holder_name,
+        swiftCode: iban.bic ?? undefined,
+        accountHolderName: iban.account_holder_name ?? undefined,
         country: getCountryName(iban.country),
         bankName: iban.bank_name ?? undefined,
         bankAddress: iban.bank_address ?? undefined,
@@ -135,11 +156,12 @@ export function getBankDetailsFromInstructions(
       };
     }
 
-    case 'aba': {
+    case BANK_ACCOUNT_TYPE.ABA: {
       const aba = financialAddress.aba;
       if (!aba) return null;
+
       return {
-        type: 'aba',
+        type: BANK_ACCOUNT_TYPE.ABA,
         routingNumber: aba.routing_number,
         accountNumber: aba.account_number,
         bankName: aba.bank_name ?? undefined,
@@ -150,8 +172,4 @@ export function getBankDetailsFromInstructions(
     default:
       return null;
   }
-}
-
-export function getCountryName(code: string) {
-  return COUNTRY_NAMES[code.toUpperCase()] || code;
 }

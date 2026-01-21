@@ -15,7 +15,14 @@ import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 import {getAmountFromStripe} from '@/utils/stripe';
 
 // --- LOCAL IMPORTS ---- //
-import {updateInvoice} from '@/subapps/invoices/common/webservice';
+import {updateInvoice} from '@/subapps/invoices/common/service';
+
+export const STRIPE_EVENTS = {
+  PAYMENT_INTENT_SUCCEEDED: 'payment_intent.succeeded',
+} as const;
+
+export type StripeEventType =
+  (typeof STRIPE_EVENTS)[keyof typeof STRIPE_EVENTS];
 
 async function handleWebhookPaymentFailure({
   paymentContext,
@@ -60,7 +67,7 @@ export async function POST(req: Request) {
 
   try {
     switch (event.type) {
-      case 'payment_intent.succeeded': {
+      case STRIPE_EVENTS.PAYMENT_INTENT_SUCCEEDED: {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
         const contextId = paymentIntent.metadata.context_id;

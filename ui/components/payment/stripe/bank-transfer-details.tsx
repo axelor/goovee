@@ -22,6 +22,7 @@ import {
   BankAddress,
   NormalizedBankDetails,
 } from '@/ui/components/payment/types';
+import {BANK_ACCOUNT_TYPE} from '@/lib/core/payment/stripe/utils';
 
 interface BankTransferDetailsProps {
   details: {
@@ -141,7 +142,7 @@ export function BankTransferDetails({
             </header>
 
             <div className="space-y-1">
-              {details.bankDetails.type === 'iban' && (
+              {details.bankDetails.type === BANK_ACCOUNT_TYPE.IBAN && (
                 <>
                   {details.bankDetails.accountHolderName && (
                     <DetailRow
@@ -155,8 +156,10 @@ export function BankTransferDetails({
                     <DetailRow
                       label={i18n.t('IBAN')}
                       value={details.bankDetails.iban}
-                      onCopy={val => copyToClipboard(val, 'iban')}
-                      isCopied={copiedField === 'iban'}
+                      onCopy={val =>
+                        copyToClipboard(val, BANK_ACCOUNT_TYPE.IBAN)
+                      }
+                      isCopied={copiedField === BANK_ACCOUNT_TYPE.IBAN}
                     />
                   )}
                   {details.bankDetails.swiftCode && (
@@ -170,7 +173,7 @@ export function BankTransferDetails({
                 </>
               )}
 
-              {details.bankDetails.type === 'aba' && (
+              {details.bankDetails.type === BANK_ACCOUNT_TYPE.ABA && (
                 <>
                   {details.bankDetails.accountHolderName && (
                     <DetailRow
