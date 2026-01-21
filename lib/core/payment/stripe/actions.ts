@@ -1,11 +1,44 @@
-import {stripe} from '.';
 import Stripe from 'stripe';
+
+import {stripe} from '.';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {formatAmountForStripe, getAmountFromStripe} from '@/utils/stripe';
-import {findPaymentContext, createPaymentContext} from '../common/orm';
+import {
+  findPaymentContext,
+  createPaymentContext,
+  updatePaymentContextData,
+  markPaymentAsFailed,
+} from '@/lib/core/payment/common/orm';
 import {PaymentOption} from '@/types';
 import type {Tenant} from '@/tenant';
-import type {PaymentOrder} from '../common/type';
+import {
+  type PaymentContextData,
+  type PaymentOrder,
+} from '@/lib/core/payment/common/type';
+import {getBankDetailsFromInstructions, getBankTransferConfig} from './utils';
+import type {CountryCode} from './utils';
+
+async function getOrCreateStripeCustomer(
+  email: string,
+  internalUserId: string,
+) {
+  const existingCustomers = await stripe.customers.list({
+    email: email,
+    limit: 1,
+  });
+
+  if (existingCustomers.data.length > 0) {
+    const customerId = existingCustomers.data[0].id;
+    return customerId;
+  }
+
+  const newCustomer = await stripe.customers.create({
+    email: email,
+    metadata: {external_id: internalUserId},
+  });
+
+  return newCustomer.id;
+}
 
 export async function createStripeOrder({
   customer,
@@ -141,4 +174,135 @@ export async function findStripeOrder({
     context,
     amount: getAmountFromStripe(lineItems.data?.[0]?.amount_total, currency),
   };
+}
+
+export async function createStripePaymentIntent({
+  customer,
+  currency = DEFAULT_CURRENCY_CODE,
+  amount,
+  context,
+  tenantId,
+  countryCode,
+}: {
+  tenantId: Tenant['id'];
+  customer: {email: string; id: string};
+  currency: string;
+  amount: number;
+  context: PaymentContextData;
+  countryCode: CountryCode;
+}) {
+  if (!(tenantId && amount && customer?.email && currency && countryCode)) {
+    throw new Error(
+      'Name, amount, customer, currency and Country code are required',
+    );
+  }
+
+  try {
+    const bankTransfer = getBankTransferConfig(currency, countryCode);
+
+    const paymentContext = await createPaymentContext({
+      context,
+      mode: PaymentOption.stripe,
+      payer: customer.email,
+      tenantId,
+    });
+
+    const stripeCustomerId = await getOrCreateStripeCustomer(
+      customer.email,
+      customer.id,
+    );
+
+    if (!stripeCustomerId) {
+      throw new Error('Failed to create or retrieve Stripe customer');
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: formatAmountForStripe(amount, currency),
+      currency,
+      customer: stripeCustomerId,
+      // Payment method configuration
+      payment_method_types: ['customer_balance'],
+      payment_method_data: {type: 'customer_balance'},
+      payment_method_options: {
+        customer_balance: {
+          funding_type: 'bank_transfer',
+          bank_transfer: bankTransfer,
+        },
+      },
+      // Metadata for reference
+      metadata: {
+        context_id: paymentContext.id,
+        tenant_id: tenantId,
+      },
+    });
+
+    const confirmedIntent = await stripe.paymentIntents.confirm(
+      paymentIntent.id,
+    );
+    if (!confirmedIntent?.id) {
+      await markPaymentAsFailed({
+        contextId: paymentContext.id,
+        version: paymentContext.version,
+        tenantId,
+      });
+
+      return;
+    }
+
+    // Attach PaymentIntent to the payment context
+    await updatePaymentContextData({
+      id: paymentContext.id,
+      version: paymentContext.version,
+      tenantId,
+      context: {
+        ...context,
+        paymentIntent: confirmedIntent.id,
+      },
+    });
+
+    // Extract bank details from the confirmed intent
+    let bankDetails = null;
+    let paymentReference = confirmedIntent.id;
+
+    if (
+      confirmedIntent.next_action?.type === 'display_bank_transfer_instructions'
+    ) {
+      const instructions =
+        confirmedIntent.next_action.display_bank_transfer_instructions;
+
+      paymentReference = instructions?.reference || confirmedIntent.id;
+      bankDetails = getBankDetailsFromInstructions(instructions);
+    }
+
+    return {
+      id: confirmedIntent.id,
+      amount: confirmedIntent.amount,
+      currency: confirmedIntent.currency,
+      reference: paymentReference,
+      bankDetails,
+    };
+  } catch (error) {
+    console.error('Error creating stripe payment intent:', error);
+
+    if (error instanceof Stripe.errors.StripeError) {
+      throw new Error(error.raw?.message || error.message);
+    }
+
+    throw new Error('Failed to create stripe payment intent');
+  }
+}
+
+export async function findStripePaymentIntent(paymentIntentId: string) {
+  if (!paymentIntentId) {
+    throw new Error('Payment Intent id is required');
+  }
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    return paymentIntent;
+  } catch (error) {
+    console.error('Error:', error);
+    throw new Error('Error retrieving payment intent');
+  }
 }

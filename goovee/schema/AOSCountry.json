@@ -16,6 +16,11 @@
       "type": "ManyToOne",
       "name": "fiscalPosition",
       "target": "AOSFiscalPosition"
+    },
+    {
+      "type": "String",
+      "name": "alpha2Code",
+      "column": "alpha2code"
     }
   ]
 }

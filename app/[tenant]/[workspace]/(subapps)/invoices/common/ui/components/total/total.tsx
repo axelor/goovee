@@ -1,7 +1,7 @@
 'use client';
 
 import {MdArrowBack} from 'react-icons/md';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -20,6 +20,10 @@ import {
 } from '@/ui/components';
 import {formatNumber} from '@/locale/formatters';
 import {useSearchParams} from '@/ui/hooks';
+import {BankTransferList} from '@/ui/components/payment/stripe';
+import {cn} from '@/utils/css';
+import {useToast} from '@/ui/hooks/';
+import type {BankTransferDetailsType} from '@/ui/components/payment/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {TotalProps} from '@/subapps/invoices/common/types/invoices';
@@ -28,7 +32,7 @@ import {
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import {InvoicePayments} from '@/subapps/invoices/common/ui/components';
-import {cn} from '@/utils/css';
+import {cancelStripeBankTransferPaymentIntent} from '@/app/[tenant]/[workspace]/(subapps)/invoices/common/actions';
 
 export function Total({isUnpaid, workspace, invoice, invoiceType}: TotalProps) {
   const {
@@ -38,6 +42,7 @@ export function Total({isUnpaid, workspace, invoice, invoiceType}: TotalProps) {
     taxTotal,
     invoicePaymentList,
     currency,
+    pendingStripeBankTransferIntents,
   } = invoice;
 
   const {searchParams} = useSearchParams();
@@ -62,6 +67,10 @@ export function Total({isUnpaid, workspace, invoice, invoiceType}: TotalProps) {
     Boolean(paymentOptionSet?.length);
 
   const remainingAmountValue = parseFloat(amountRemaining?.value || '0');
+
+  const workspaceURL = workspace?.url!;
+
+  const {toast} = useToast();
 
   const formSchema = z.object({
     amount: z
@@ -115,6 +124,31 @@ export function Total({isUnpaid, workspace, invoice, invoiceType}: TotalProps) {
     );
   };
 
+  const handleStripeIntentCancellation = async (
+    transfer: BankTransferDetailsType,
+  ): Promise<void> => {
+    const {id, contextId} = transfer;
+    try {
+      const response = await cancelStripeBankTransferPaymentIntent({
+        id,
+        contextId,
+        workspaceURL,
+      });
+
+      if (response?.error) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t(response.message),
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: i18n.t('Something went wrong while canceling the bank transfer'),
+      });
+    }
+  };
+
   return (
     <div
       className="flex flex-col bg-card text-card-foreground px-6 py-4 rounded-lg"
@@ -146,6 +180,12 @@ export function Total({isUnpaid, workspace, invoice, invoiceType}: TotalProps) {
             </div>
           ))}
         </div>
+        {pendingStripeBankTransferIntents?.length ? (
+          <BankTransferList
+            bankTransfers={pendingStripeBankTransferIntents}
+            onCancelTransfer={handleStripeIntentCancellation}
+          />
+        ) : null}
         {isUnpaid && (
           <div className="flex flex-col gap-4 font-medium text-xl">
             <div>{i18n.t('Remaining to pay')}:</div>

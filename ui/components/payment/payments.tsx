@@ -21,6 +21,7 @@ export function Payments({
   successMessage = '',
   errorMessage = '',
   skipSuccessToast,
+  onCreateBankTransferIntent,
 }: {
   workspace: PortalWorkspace;
   disabled?: boolean;
@@ -40,6 +41,7 @@ export function Payments({
   successMessage?: string;
   errorMessage?: string;
   skipSuccessToast?: boolean;
+  onCreateBankTransferIntent?: () => Promise<any>;
 }) {
   const config = workspace?.config;
   const allowOnlinePayment = config?.allowOnlinePaymentForEcommerce;
@@ -92,6 +94,7 @@ export function Payments({
           successMessage={successMessage}
           errorMessage={errorMessage}
           skipSuccessToast={skipSuccessToast}
+          onCreateBankTransferIntent={onCreateBankTransferIntent}
         />
       )}
       {allowPaybox && (

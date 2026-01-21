@@ -1,25 +1,40 @@
 'use server';
 
-import axios from 'axios';
 import {headers} from 'next/headers';
 import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
+import {
+  DEFAULT_CURRENCY_CODE,
+  DEFAULT_CURRENCY_SCALE,
+  DEFAULT_CURRENCY_SYMBOL,
+  SUBAPP_CODES,
+  SUBAPP_PAGE,
+} from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/middleware';
 import {findGooveeUserByEmail} from '@/orm/partner';
-import {findSubapp, findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
-import {createStripeOrder, findStripeOrder} from '@/payment/stripe/actions';
-import {markPaymentAsProcessed} from '@/payment/common/orm';
-import {manager, Tenant} from '@/tenant';
+import {
+  createStripePaymentIntent,
+  createStripeOrder,
+  findStripeOrder,
+  findStripePaymentIntent,
+} from '@/payment/stripe/actions';
+import {
+  findPaymentContext,
+  markPaymentAsCancelled,
+  markPaymentAsProcessed,
+} from '@/payment/common/orm';
 import {PartnerKey, PaymentOption} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {isPaymentOptionAvailable} from '@/utils/payment';
-import {ID} from '@goovee/orm';
+import {stripe} from '@/lib/core/payment/stripe';
+import {formatNumber} from '@/lib/core/locale/server/formatters';
+import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/lib/core/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -28,6 +43,7 @@ import {
 } from '@/subapps/invoices/common/constants/invoices';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {validatePaymentData} from '@/subapps/invoices/common/utils/validations';
+import {updateInvoice} from '@/subapps/invoices/common/service';
 
 export async function paypalCreateOrder({
   invoice,
@@ -243,7 +259,6 @@ export async function paypalCaptureOrder({
     }
 
     const updatedInvoice = await updateInvoice({
-      workspaceURL,
       tenantId,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
@@ -326,7 +341,7 @@ export async function createStripeCheckoutSession({
         id: payer?.id!,
         email: payer?.emailAddress?.address!,
       },
-      context: invoice,
+      context: {id: invoice.id, paymentType: PAYMENT_TYPE.CARD},
       name: await t('Invoice Checkout'),
       amount: Number($amount),
       currency: currencyCode,
@@ -335,6 +350,7 @@ export async function createStripeCheckoutSession({
         error: `${workspaceURL}/${SUBAPP_CODES.invoices}/${INVOICE.UNPAID}/${$invoice.id}?stripe_error=true`,
       },
     });
+
     return {
       client_secret: session.client_secret,
       url: session.url,
@@ -481,7 +497,6 @@ export async function validateStripePayment({
     }
 
     const result = await updateInvoice({
-      workspaceURL,
       tenantId,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
@@ -504,6 +519,242 @@ export async function validateStripePayment({
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Stripe payment:', error);
+    return {
+      error: true,
+      message: await t('An error occurred while processing the payment.'),
+    };
+  }
+}
+
+export async function createStripeBankTransferIntent({
+  invoice,
+  amount,
+  workspaceURL,
+}: {
+  invoice: any;
+  amount: string;
+  workspaceURL: string;
+}) {
+  const tenantId = headers().get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('Tenant is missing')};
+  }
+  const validationResult = await validatePaymentData({
+    invoice,
+    amount,
+    workspaceURL,
+    tenantId,
+  });
+  if (validationResult.error) {
+    return validationResult;
+  }
+  const {workspace, user, $amount, $invoice} = validationResult.data;
+
+  const paymentOptions = workspace?.config?.paymentOptionSet;
+
+  const allowStripe = isPaymentOptionAvailable(
+    paymentOptions,
+    PaymentOption.stripe,
+  );
+  if (!allowStripe) {
+    return {
+      error: true,
+      message: await t('Stripe is not available'),
+    };
+  }
+
+  const payer = await findGooveeUserByEmail(user.email, tenantId);
+  if (!payer) {
+    return {
+      error: true,
+      message: await t('Unauthorized user'),
+    };
+  }
+
+  const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
+  const currencySymbol = $invoice?.currency?.symbol || DEFAULT_CURRENCY_SYMBOL;
+  const scale = $invoice?.currency.numberOfDecimals || DEFAULT_CURRENCY_SCALE;
+
+  const country = $invoice.company.address.country;
+
+  const formattedAmount = await formatNumber($amount, {
+    scale,
+    currency: currencySymbol,
+    type: 'DECIMAL',
+  });
+
+  try {
+    const result = await createStripePaymentIntent({
+      tenantId,
+      customer: {
+        id: payer?.id!,
+        email: payer?.emailAddress?.address!,
+      },
+      context: {
+        id: invoice.id,
+        paymentType: PAYMENT_TYPE.BANK_TRANSFER,
+        source: PAYMENT_SOURCE.INVOICES,
+      },
+      amount: Number($amount),
+      currency: currencyCode,
+      countryCode: country.alpha2Code,
+    });
+    return {success: true, data: {...result, formattedAmount}};
+  } catch (error) {
+    console.error('Error creating stripe bank transfer payment intent:', error);
+
+    const message =
+      error?.raw?.message || error?.message || 'Failed to create bank transfer';
+
+    return {
+      error: true,
+      message: await t(message),
+    };
+  }
+}
+
+export async function cancelStripeBankTransferPaymentIntent({
+  id,
+  contextId,
+  workspaceURL,
+}: {
+  id: string;
+  contextId: string;
+  workspaceURL: string;
+}) {
+  if (!id) {
+    return {error: true, message: await t('Missing stripe payment id!')};
+  }
+
+  if (!contextId) {
+    return {error: true, message: await t('Missing payment context id!')};
+  }
+
+  if (!workspaceURL) {
+    return {error: true, message: await t('Workspace not provided!')};
+  }
+
+  const tenantId = headers().get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('Invalid tenant')};
+  }
+
+  try {
+    const session = await getSession();
+    const user = session?.user;
+    if (!user) {
+      return {error: true, message: await t('Unauthorized')};
+    }
+
+    const workspace = await findWorkspace({user, url: workspaceURL, tenantId});
+
+    if (!workspace) {
+      return {error: true, message: await t('Invalid workspace')};
+    }
+
+    const subapp = await findSubappAccess({
+      code: SUBAPP_CODES.invoices,
+      user,
+      url: workspace.url,
+      tenantId,
+    });
+
+    if (!subapp) {
+      return {error: true, message: await t('Unauthorized app access')};
+    }
+
+    if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+      return {
+        error: true,
+        message: await t('Online payment is not available'),
+      };
+    }
+
+    if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+      return {
+        error: true,
+        message: await t('Invoice payment not allowed'),
+      };
+    }
+
+    const paymentOptions = workspace?.config?.paymentOptionSet;
+    if (!paymentOptions?.length) {
+      return {
+        error: true,
+        message: await t('Payment options not selected!'),
+      };
+    }
+
+    const allowStripe = isPaymentOptionAvailable(
+      paymentOptions,
+      PaymentOption.stripe,
+    );
+    if (!allowStripe) {
+      return {
+        error: true,
+        message: await t('Stripe is not available'),
+      };
+    }
+
+    let context;
+    try {
+      const paymentIntent = await findStripePaymentIntent(id);
+      context = paymentIntent.metadata.context_id;
+    } catch (err) {
+      return {
+        error: true,
+        message: await t((err as any)?.message),
+      };
+    }
+    const paymentContext = await findPaymentContext({
+      id: context,
+      tenantId,
+      mode: PaymentOption.stripe,
+      ignoreExpiration: true,
+    });
+
+    if (!paymentContext) {
+      return {
+        error: true,
+        message: await t('Context not found'),
+      };
+    }
+
+    const invoicesWhereClause = getWhereClauseForEntity({
+      user,
+      role: subapp.role,
+      isContactAdmin: subapp.isContactAdmin,
+      partnerKey: PartnerKey.PARTNER,
+    });
+
+    const {data} = paymentContext;
+
+    const $invoice = await findInvoice({
+      id: data.id,
+      params: {where: invoicesWhereClause},
+      workspaceURL,
+      tenantId,
+    });
+
+    if (!$invoice) {
+      return {error: true, message: await t('Invalid invoice!')};
+    }
+
+    await markPaymentAsCancelled({
+      contextId: paymentContext.id,
+      version: paymentContext.version,
+      tenantId,
+    });
+
+    await stripe.paymentIntents.cancel(id, {
+      cancellation_reason: 'requested_by_customer',
+    });
+
+    revalidatePath(
+      `${workspaceURL}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${$invoice.id}`,
+    );
+  } catch (error) {
+    console.error('Error Cancelling:', error);
     return {
       error: true,
       message: await t('An error occurred while processing the payment.'),
@@ -721,7 +972,6 @@ export async function validatePayboxPayment({
     }
 
     const result = await updateInvoice({
-      workspaceURL,
       tenantId,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
@@ -747,123 +997,6 @@ export async function validatePayboxPayment({
     return {
       error: true,
       message: await t('An error occurred while processing the payment.'),
-    };
-  }
-}
-
-async function updateInvoice({
-  workspaceURL,
-  tenantId,
-  amount,
-  invoiceId,
-}: {
-  workspaceURL: string;
-  tenantId: Tenant['id'];
-  amount: string | number;
-  invoiceId: ID;
-}) {
-  if (!amount || !invoiceId) {
-    return {
-      error: true,
-      message: await t(
-        amount ? 'Invoice id is required.' : 'Invoice amount is missing!',
-      ),
-    };
-  }
-
-  const session = await getSession();
-  const user = session?.user;
-
-  if (!user) {
-    return {error: true, message: await t('Unauthorized')};
-  }
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    user,
-    tenantId,
-  });
-  if (!workspace) {
-    return {error: true, message: await t('Invalid workspace.')};
-  }
-
-  const app = await findSubapp({
-    code: SUBAPP_CODES.invoices,
-    url: workspace.url,
-    user,
-    tenantId,
-  });
-
-  if (!app?.isInstalled) {
-    return {error: true, message: await t('Unauthorized app access.')};
-  }
-
-  const {role, isContactAdmin} = app;
-  const invoicesWhereClause = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.PARTNER,
-  });
-
-  const invoice = await findInvoice({
-    id: invoiceId,
-    params: {
-      where: invoicesWhereClause,
-    },
-    workspaceURL,
-    tenantId,
-  });
-
-  if (!invoice) {
-    return {error: true, message: await t('Invalid invoice')};
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {
-      error: true,
-      message: await t('Invalid Tenant'),
-    };
-  }
-
-  const aos = tenant?.config?.aos;
-  if (!aos?.url) {
-    return {error: true, message: await t('Webservice not available.')};
-  }
-
-  const payload = {
-    invoiceId: invoiceId,
-    paidAmount: amount,
-  };
-  try {
-    const {data} = await axios.post(
-      `${aos.url}/ws/portal/invoice/payment`,
-      payload,
-      {
-        auth: {
-          username: aos.auth.username,
-          password: aos.auth.password,
-        },
-      },
-    );
-    if (data?.status === -1) {
-      return {
-        error: true,
-        message: await t(
-          data?.message || 'Unable to update invoice. Please try again later.',
-        ),
-      };
-    }
-
-    return data;
-  } catch (err) {
-    console.error('Invoice update failed:', err);
-    return {
-      error: true,
-      message: await t(
-        'An error occurred while updating your invoice. Please try again later.',
-      ),
     };
   }
 }

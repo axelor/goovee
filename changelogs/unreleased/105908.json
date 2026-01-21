@@ -1,0 +1,6 @@
+{
+  "title": "Add bank-transfer support for Stripe payments",
+  "type": "feat",
+  "description": "Introduced support for Stripe bank transfers, including pending transfer handling, cancellation flow, and UI feedback during async operations.",
+  "scope": ["core"]
+}

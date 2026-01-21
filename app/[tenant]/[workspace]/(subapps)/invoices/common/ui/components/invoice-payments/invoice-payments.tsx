@@ -14,6 +14,7 @@ import {ErrorResponse, SuccessResponse} from '@/types/action';
 
 // ---- LOCAL IMPORTS ---- //
 import {
+  createStripeBankTransferIntent,
   createStripeCheckoutSession,
   payboxCreateOrder,
   paypalCaptureOrder,
@@ -151,6 +152,13 @@ export function InvoicePayments({
         });
       }}
       onStripeValidateSession={handleStripeValidations}
+      onCreateBankTransferIntent={async () => {
+        return await createStripeBankTransferIntent({
+          invoice: {id: invoice.id},
+          amount,
+          workspaceURL,
+        });
+      }}
       onPayboxCreateOrder={async ({uri}) => {
         return await payboxCreateOrder({
           invoice: {id: invoice.id},
