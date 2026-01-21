@@ -1,0 +1,6 @@
+{
+  "title": "Disallow contact registration as admin when partner already registered",
+  "type": "fix",
+  "description": "Contact registeration as admin is now checked against partner activation on portal instead of password because partner could also initially register itself by google or other providers",
+  "scope": ["core"]
+}

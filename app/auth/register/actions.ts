@@ -597,7 +597,7 @@ async function registerAosContactAsAdmin({
 
   if (!contactPartner) return registrationError;
 
-  const isContactPartnerAlreadyRegistered = contactPartner?.password;
+  const isContactPartnerAlreadyRegistered = contactPartner?.isActivatedOnPortal;
 
   const companyRegistrationError = error(
     await getTranslation(
