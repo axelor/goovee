@@ -7,7 +7,6 @@ import {
 } from './utils';
 import type {
   MattermostUser,
-  SyncMattermostPasswordResult,
   CreateMattermostUserParams,
   CreateMattermostUserResult,
   SyncOrCreateMattermostUserResult,
@@ -69,46 +68,6 @@ async function updateMattermostPassword(
     return true;
   } catch (error: any) {
     return false;
-  }
-}
-
-export async function syncMattermostPassword(
-  email: string,
-  newPassword: string,
-): Promise<SyncMattermostPasswordResult> {
-  try {
-    const mattermostUser = await getMattermostUserByEmail(email);
-
-    if (!mattermostUser) {
-      return {
-        success: true,
-        synced: false,
-      };
-    }
-
-    const updated = await updateMattermostPassword(
-      mattermostUser.id,
-      newPassword,
-    );
-
-    if (!updated) {
-      return {
-        success: false,
-        error: 'UPDATE_FAILED',
-        message: 'Failed to update Mattermost password',
-      };
-    }
-
-    return {
-      success: true,
-      synced: true,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error,
-      message: error.message,
-    };
   }
 }
 
