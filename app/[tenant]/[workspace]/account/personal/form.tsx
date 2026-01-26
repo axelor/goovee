@@ -365,25 +365,25 @@ export default function Personal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({field}) => (
-                    <FormItem>
-                      <FormLabel>{i18n.t('First name')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          value={field.value}
-                          placeholder={i18n.t('Enter first Name')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {!isCompany ? (
+              {!isCompany && (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>{i18n.t('First name')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            value={field.value}
+                            placeholder={i18n.t('Enter first Name')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="name"
@@ -401,10 +401,8 @@ export default function Personal({
                       </FormItem>
                     )}
                   />
-                ) : (
-                  <div />
-                )}
-              </div>
+                </div>
+              )}
 
               <div
                 className={cn(

@@ -1,0 +1,6 @@
+{
+  "title": "Field correction in my account",
+  "type": "fix",
+  "description": "add a capital letter and remove the company's first name field",
+  "scope": ["core"]
+}
