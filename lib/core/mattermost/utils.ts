@@ -12,11 +12,7 @@ export function getHost(): string {
 }
 
 export function getAdminToken(): string {
-  return (
-    getEnv()?.GOOVEE_PUBLIC_MATTERMOST_TOKEN ||
-    process.env.GOOVEE_PUBLIC_MATTERMOST_TOKEN ||
-    ''
-  );
+  return getEnv()?.MATTERMOST_TOKEN || process.env.MATTERMOST_TOKEN || '';
 }
 
 export function isCreateMattermostUsersEnabled(): boolean {

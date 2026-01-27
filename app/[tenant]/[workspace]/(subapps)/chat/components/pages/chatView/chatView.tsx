@@ -28,7 +28,7 @@ export const ChatView = ({
   users,
   teamId,
 }: {
-  token: string;
+  token: string | null | undefined;
   user: User;
   userStatus: UserStatus;
   users: User[];

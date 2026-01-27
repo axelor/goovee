@@ -30,7 +30,7 @@ export default async function Chat({params}: {params: {tenant: string}}) {
 
   return (
     <ChatView
-      token={token}
+      token={undefined}
       user={data}
       userStatus={userStatus}
       users={users}
