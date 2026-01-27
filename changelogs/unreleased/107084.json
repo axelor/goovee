@@ -1,0 +1,5 @@
+{
+  "title": "Set image to contain within the card",
+  "type": "fix",
+  "scope": ["directory"]
+}

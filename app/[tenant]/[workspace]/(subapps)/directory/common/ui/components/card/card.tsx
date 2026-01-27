@@ -40,7 +40,7 @@ export function Card(props: CardProps) {
           <Image
             fill
             sizes="40px"
-            className="object-cover"
+            className="object-contain"
             src={getPartnerImageURL(item.picture?.id, tenant, {
               noimage: true,
               noimageSrc: NO_IMAGE_URL,
@@ -89,7 +89,7 @@ export function Card(props: CardProps) {
         <Image
           fill
           sizes="150px"
-          className="object-cover"
+          className="object-contain"
           src={getPartnerImageURL(item.picture?.id, tenant, {
             noimage: true,
             noimageSrc: NO_IMAGE_URL,
