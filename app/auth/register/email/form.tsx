@@ -41,6 +41,7 @@ import {Checkbox} from '@/ui/components/checkbox';
 import {Input} from '@/ui/components/input';
 import {SEARCH_PARAMS} from '@/constants';
 import {cn} from '@/utils/css';
+import {InnerHTML} from '@/ui/components/inner-html';
 import type {PortalWorkspace} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -660,6 +661,13 @@ export default function SignUp({workspace}: {workspace?: PortalWorkspace}) {
                 </>
               )}
             </div>
+            {workspace?.config?.termsOfUseAcceptanceText && (
+              <div className="text-sm text-muted-foreground font-bold">
+                <InnerHTML
+                  content={workspace.config.termsOfUseAcceptanceText}
+                />
+              </div>
+            )}
             <Button variant="success" className="w-full">
               {i18n.t('Sign Up')}
             </Button>

@@ -408,6 +408,10 @@
       "type": "Int",
       "name": "chatDisplayTypeSelect",
       "column": "chat_display_type_select"
+    },
+    {
+      "type": "String",
+      "name": "termsOfUseAcceptanceText"
     }
   ]
 }

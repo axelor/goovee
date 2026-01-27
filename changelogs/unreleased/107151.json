@@ -1,0 +1,6 @@
+{
+  "title": "Add term of use acceptance text before subscription",
+  "type": "feat",
+  "description": "The HTML text termsOfUseAcceptanceText needs to be displayed if necessary in subscription form",
+  "scope": ["core"]
+}

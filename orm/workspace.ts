@@ -4,7 +4,7 @@ import {
   AOSPortalAppConfig,
   AOSPortalWorkspace,
 } from '@/goovee/.generated/models';
-import {ID, Partner, PortalWorkspace, User} from '@/types';
+import {ID, Partner, PortalAppConfig, PortalWorkspace, User} from '@/types';
 import {clone, getPartnerId} from '@/utils';
 import {SelectOptions} from '@goovee/orm';
 import {
@@ -142,6 +142,7 @@ export const portalAppConfigFields: SelectOptions<AOSPortalAppConfig> = {
   homepageHeroBgImage: {id: true},
   isFixedHeader: true,
   chatDisplayTypeSelect: true,
+  termsOfUseAcceptanceText: true,
 };
 
 export async function findWorkspaceMembers({
@@ -797,7 +798,7 @@ export async function findWorkspaceForRegistration({
 }: {
   url: PortalWorkspace['url'];
   tenantId: Tenant['id'];
-}): Promise<AOSPortalWorkspace | null> {
+}): Promise<(AOSPortalWorkspace & {config?: PortalAppConfig}) | null> {
   if (!(url && tenantId)) {
     return null;
   }
@@ -843,12 +844,20 @@ export async function findWorkspaceForRegistration({
                 orderForTopMenu: true,
               },
             },
+            portalAppConfig: {
+              termsOfUseAcceptanceText: true,
+            },
           },
         },
       })
       .then(clone);
 
-    return workspace;
+    if (!workspace) return null;
+
+    return {
+      ...workspace,
+      config: workspace.defaultGuestWorkspace?.portalAppConfig,
+    };
   } catch (err) {}
 
   return null;

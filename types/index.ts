@@ -178,6 +178,7 @@ export interface PortalAppConfig extends Model {
   homepageHeroBgImage?: {id: string};
   isFixedHeader?: boolean;
   chatDisplayTypeSelect?: number;
+  termsOfUseAcceptanceText?: string;
 }
 
 export interface PortalApp extends Model {
