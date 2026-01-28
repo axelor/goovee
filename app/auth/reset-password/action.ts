@@ -7,7 +7,7 @@ import {Scope} from '@/otp/constants';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import NotificationManager, {NotificationType} from '@/notification';
 import {manager, type Tenant} from '@/tenant';
-import {syncOrCreateMattermostUser} from '@/lib/core/mattermost';
+import {withMattermostSync} from '@/lib/core/mattermost';
 
 function error(message: string) {
   return {
@@ -135,6 +135,8 @@ export async function requestResetPassword({
       force: true,
     });
 
+    console.log(result);
+
     const mailService = NotificationManager.getService(NotificationType.mail);
 
     result?.otp &&
@@ -222,37 +224,22 @@ export async function resetPassword({
 
     const hashedPassword = await hash(password);
 
-    const mattermostResult = await syncOrCreateMattermostUser({
-      email: user.emailAddress?.address || email,
-      password,
-      name: user.name || 'user',
-      firstName: user.firstName || 'user',
-    });
-
-    if (!mattermostResult.success) {
-      console.error(
-        '[MATTERMOST] Password sync/create failed during password reset:',
-        {
-          email: user.emailAddress?.address || email,
-          partnerId: user.id,
-          error: mattermostResult.error,
-          message: mattermostResult.message,
-        },
-      );
-      return error(
-        await getTranslation(
+    try {
+      await withMattermostSync({
+        email: user.emailAddress?.address || email,
+        password,
+        name: user.name || 'user',
+        firstName: user.firstName || 'user',
+        context: 'RESET_PASSWORD',
+      });
+    } catch (err: any) {
+      return {
+        message: await getTranslation(
           {tenant: tenantId},
           'Error resetting password. Try again.',
         ),
-      );
-    }
-
-    if (mattermostResult.action !== 'skipped') {
-      console.log('[RESET_PASSWORD] Mattermost action completed:', {
-        email: user.emailAddress?.address || email,
-        partnerId: user.id,
-        action: mattermostResult.action,
-      });
+        success: false,
+      };
     }
 
     const client = await manager.getClient(tenantId);

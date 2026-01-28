@@ -71,6 +71,37 @@ async function updateMattermostPassword(
   }
 }
 
+async function updateMattermostEmail(
+  userId: string,
+  newEmail: string,
+): Promise<boolean> {
+  try {
+    const host = getHost();
+    const token = getAdminToken();
+
+    if (!host || !token) {
+      return false;
+    }
+
+    await axios.put(
+      `${host}/api/v4/users/${userId}/patch`,
+      {
+        email: newEmail,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    return true;
+  } catch (error: any) {
+    return false;
+  }
+}
+
 async function createMattermostUser(
   params: CreateMattermostUserParams,
 ): Promise<CreateMattermostUserResult> {
@@ -181,5 +212,61 @@ export async function syncOrCreateMattermostUser({
       error: error,
       message: error.message,
     };
+  }
+}
+
+export async function withMattermostSync({
+  email,
+  password,
+  name,
+  firstName,
+  context,
+}: {
+  email: string;
+  password: string;
+  name: string;
+  firstName?: string;
+  context: string;
+}): Promise<void> {
+  const result = await syncOrCreateMattermostUser({
+    email,
+    password,
+    name,
+    firstName,
+  });
+
+  if (!result.success) {
+    console.error(`[${context}] Mattermost sync/create failed:`, {
+      email,
+      error: result.error,
+      message: result.message,
+    });
+    throw new Error(result.message || 'Mattermost sync failed');
+  }
+}
+
+export async function withMattermostEmailSync({
+  oldEmail,
+  newEmail,
+  context,
+}: {
+  oldEmail: string;
+  newEmail: string;
+  context: string;
+}): Promise<void> {
+  if (!isCreateMattermostUsersEnabled()) {
+    return;
+  }
+
+  const existingUser = await getMattermostUserByEmail(oldEmail);
+
+  if (!existingUser) {
+    return;
+  }
+
+  const updated = await updateMattermostEmail(existingUser.id, newEmail);
+
+  if (!updated) {
+    throw new Error('Failed to update Mattermost email');
   }
 }

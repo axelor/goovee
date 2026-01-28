@@ -25,6 +25,7 @@ import {findOne, isValid} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
 import {findWorkspace} from '@/orm/workspace';
 import {type PortalWorkspace} from '@/types';
+import {withMattermostEmailSync} from '@/lib/core/mattermost';
 
 const pump = promisify(pipeline);
 
@@ -286,6 +287,19 @@ export async function update({
 
   try {
     if (email !== partner?.emailAddress.address) {
+      try {
+        await withMattermostEmailSync({
+          oldEmail: partner.emailAddress.address,
+          newEmail: email,
+          context: 'UPDATE_EMAIL',
+        });
+      } catch (err: any) {
+        return {
+          message: await t('Error updating email. Try again.'),
+          success: false,
+        };
+      }
+
       const updateEmail = async (emailAddress: any, newEmail: string) => {
         if (!emailAddress) return;
 

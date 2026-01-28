@@ -19,7 +19,7 @@ import {findOne, isValid} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
 
 import {findInviteById} from '../../../common/orm/register';
-import {syncOrCreateMattermostUser} from '@/lib/core/mattermost';
+import {withMattermostSync} from '@/lib/core/mattermost';
 
 function error(message: string) {
   return {
@@ -86,19 +86,19 @@ export async function register({
     localization = await findRegistrationLocalization({locale, tenantId});
   }
   if (password) {
-    const mattermostResult = await syncOrCreateMattermostUser({
-      email,
-      password,
-      name,
-      firstName,
-    });
-
-    if (!mattermostResult.success) {
-      console.error('[INVITE_REGISTER] Mattermost sync/create failed:', {
+    try {
+      await withMattermostSync({
         email,
-        error: mattermostResult.error,
+        password,
+        name,
+        firstName,
+        context: 'INVITE_REGISTER',
       });
-      return error(await t('Error registering contact. Try again.'));
+    } catch (err: any) {
+      return {
+        message: await t('Error registering contact. Try again.'),
+        success: false,
+      };
     }
   }
 
