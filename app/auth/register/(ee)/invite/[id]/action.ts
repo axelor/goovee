@@ -88,6 +88,7 @@ export async function register({
   if (password) {
     try {
       await withMattermostSync({
+        tenantId,
         email,
         password,
         name,

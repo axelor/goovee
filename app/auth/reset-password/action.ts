@@ -135,8 +135,6 @@ export async function requestResetPassword({
       force: true,
     });
 
-    console.log(result);
-
     const mailService = NotificationManager.getService(NotificationType.mail);
 
     result?.otp &&
@@ -226,6 +224,7 @@ export async function resetPassword({
 
     try {
       await withMattermostSync({
+        tenantId,
         email: user.emailAddress?.address || email,
         password,
         name: user.name || 'user',

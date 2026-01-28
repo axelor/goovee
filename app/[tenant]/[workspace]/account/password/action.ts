@@ -71,6 +71,7 @@ export async function changePassword({
 
   try {
     await withMattermostSync({
+      tenantId,
       email: user.email,
       password: newPassword,
       name: partner.name || 'user',

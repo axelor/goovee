@@ -106,7 +106,7 @@ async function createMattermostUser(
   params: CreateMattermostUserParams,
 ): Promise<CreateMattermostUserResult> {
   try {
-    const aosUrl = getAosUrl();
+    const aosUrl = await getAosUrl(params.tenantId);
 
     if (!aosUrl) {
       return {
@@ -149,11 +149,13 @@ async function createMattermostUser(
 }
 
 export async function syncOrCreateMattermostUser({
+  tenantId,
   email,
   password,
   name,
   firstName,
 }: {
+  tenantId: string;
   email: string;
   password: string;
   name: string;
@@ -188,6 +190,7 @@ export async function syncOrCreateMattermostUser({
     }
 
     const createResult = await createMattermostUser({
+      tenantId,
       name: name || '',
       firstName: firstName || '',
       mail: email,
@@ -216,12 +219,14 @@ export async function syncOrCreateMattermostUser({
 }
 
 export async function withMattermostSync({
+  tenantId,
   email,
   password,
   name,
   firstName,
   context,
 }: {
+  tenantId: string;
   email: string;
   password: string;
   name: string;
@@ -229,6 +234,7 @@ export async function withMattermostSync({
   context: string;
 }): Promise<void> {
   const result = await syncOrCreateMattermostUser({
+    tenantId,
     email,
     password,
     name,
@@ -248,7 +254,6 @@ export async function withMattermostSync({
 export async function withMattermostEmailSync({
   oldEmail,
   newEmail,
-  context,
 }: {
   oldEmail: string;
   newEmail: string;

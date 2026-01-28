@@ -1,4 +1,5 @@
 import {getEnv} from '@/environment';
+import {manager, type Tenant} from '@/tenant';
 
 /**
  * Get the Mattermost host URL from environment variables
@@ -21,8 +22,7 @@ export function isCreateMattermostUsersEnabled(): boolean {
   return envValue === 'true';
 }
 
-export function getAosUrl(): string {
-  return (
-    getEnv()?.GOOVEE_PUBLIC_AOS_URL || process.env.GOOVEE_PUBLIC_AOS_URL || ''
-  );
+export async function getAosUrl(tenantId: Tenant['id']): Promise<string> {
+  const tenant = await manager.getTenant(tenantId);
+  return tenant?.config?.aos?.url || process.env.GOOVEE_PUBLIC_AOS_URL || '';
 }

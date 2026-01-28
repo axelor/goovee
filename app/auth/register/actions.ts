@@ -379,6 +379,7 @@ export async function register({
     const $firstName = isCompany ? companyName : firstName;
     try {
       await withMattermostSync({
+        tenantId,
         email,
         password,
         name: $name || '',
@@ -663,6 +664,7 @@ async function registerAosContactAsAdmin({
     const $firstName = isCompany ? companyName : firstName;
     try {
       await withMattermostSync({
+        tenantId,
         email,
         password,
         name: $name || '',

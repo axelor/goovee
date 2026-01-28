@@ -12,6 +12,7 @@ export interface MattermostUser {
 }
 
 export interface CreateMattermostUserParams {
+  tenantId: string;
   name: string;
   firstName: string;
   mail: string;
