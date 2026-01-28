@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 
+// ---- CORE IMPORTS ---- //
 import {stripe} from '.';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {formatAmountForStripe, getAmountFromStripe} from '@/utils/stripe';
@@ -20,13 +21,13 @@ import {
   type PaymentOrder,
 } from '@/lib/core/payment/common/type';
 import {getBankDetailsFromInstructions, getBankTransferConfig} from './utils';
-import type {CountryCode} from './utils';
 import type {BankTransferIntentResult} from '@/ui/components/payment/types';
 import {
   BANK_TRANSFER_STATUS,
   PAYMENT_INTENT_STATUS,
   STRIPE_CANCELLATION_REASONS,
 } from './constants';
+import {CountryCode} from './types';
 
 async function getOrCreateStripeCustomer(
   email: string,

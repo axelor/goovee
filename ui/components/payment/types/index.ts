@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {BANK_TRANSFER_STATUS} from '@/lib/core/payment/stripe/constants';
-import {BankAccountType} from '@/lib/core/payment/stripe/utils';
+import {BankAccountType} from '@/lib/core/payment/stripe/types';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 
 export type PaypalProps = {

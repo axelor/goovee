@@ -22,7 +22,7 @@ import {
   BankAddress,
   NormalizedBankDetails,
 } from '@/ui/components/payment/types';
-import {BANK_ACCOUNT_TYPE} from '@/lib/core/payment/stripe/utils';
+import {BANK_ACCOUNT_TYPE} from '@/lib/core/payment/stripe/constants';
 
 interface BankTransferDetailsProps {
   details: {
