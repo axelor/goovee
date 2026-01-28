@@ -13,9 +13,14 @@ import {
 import {PaymentOption} from '@/types';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 import {getAmountFromStripe} from '@/utils/stripe';
+import {manager} from '@/tenant';
+import {scale} from '@/utils';
+import {DEFAULT_CURRENCY_SCALE} from '@/constants';
 
 // --- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
+import {cancelInvalidPendingBankTransfers} from '@/lib/core/payment/stripe/actions';
+import {STRIPE_PAYMENT_METHOD_TYPE} from '@/lib/core/payment/stripe/constants';
 
 export const STRIPE_EVENTS = {
   PAYMENT_INTENT_SUCCEEDED: 'payment_intent.succeeded',
@@ -82,6 +87,7 @@ export async function POST(req: Request) {
           id: contextId,
           tenantId,
           mode: PaymentOption.stripe,
+          ignoreExpiration: true,
         });
 
         if (!paymentContext) {
@@ -111,16 +117,26 @@ export async function POST(req: Request) {
           paymentIntent.currency,
         );
 
+        const client = await manager.getClient(tenantId);
+
         switch (source) {
           case PAYMENT_SOURCE.INVOICES: {
-            const result = await updateInvoice({
+            const paymentMethodType = paymentIntent.payment_method_types?.[0];
+
+            // Only handle bank transfers
+            if (
+              paymentMethodType !== STRIPE_PAYMENT_METHOD_TYPE.CUSTOMER_BALANCE
+            ) {
+              break;
+            }
+
+            const updateResult = await updateInvoice({
               tenantId,
               amount: paidAmount,
               invoiceId: sourceId,
             });
-
-            if (result?.error) {
-              console.error('Invoice update failed: ', result.error);
+            if (updateResult?.error) {
+              console.error('Invoice update failed:', updateResult.error);
               break;
             }
 
@@ -128,6 +144,35 @@ export async function POST(req: Request) {
               contextId: paymentContext.id,
               version: paymentContext.version,
               tenantId,
+            });
+
+            const invoice = await client.aOSInvoice.findOne({
+              where: {id: sourceId},
+              select: {
+                id: true,
+                amountRemaining: true,
+                currency: {
+                  numberOfDecimals: true,
+                },
+              },
+            });
+
+            if (!invoice) {
+              console.error('Invoice not found:', sourceId);
+              break;
+            }
+
+            const amountRemaining = Number(
+              scale(
+                Number(invoice.amountRemaining),
+                invoice?.currency.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE,
+              ),
+            );
+
+            await cancelInvalidPendingBankTransfers({
+              tenantId,
+              sourceId: invoice.id,
+              amountRemaining,
             });
 
             break;

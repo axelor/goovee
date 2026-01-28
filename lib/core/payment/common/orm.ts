@@ -1,7 +1,7 @@
 // ---- CORE IMPORTS ---- //
 import {PaymentOption} from '@/types';
 import {manager, type Tenant} from '@/tenant';
-import type {PaymentContext} from './type';
+import {PAYMENT_TYPE, type PaymentContext} from './type';
 
 export const CONTEXT_STATUS = {
   pending: 'pending',
@@ -184,4 +184,32 @@ async function updatePaymentStatus({
     },
     select: {id: true},
   });
+}
+
+export async function findPendingStripeBankTransfers({
+  tenantId,
+  id,
+}: {
+  tenantId: Tenant['id'];
+  id: string;
+}) {
+  if (!id || !tenantId) return null;
+
+  const client = await manager.getClient(tenantId);
+
+  const result = await client.paymentContext.find({
+    where: {
+      mode: 'stripe',
+      status: CONTEXT_STATUS.pending,
+      AND: [
+        {data: {path: 'id', eq: id}},
+        {data: {path: 'paymentType', eq: PAYMENT_TYPE.BANK_TRANSFER}},
+        {data: {path: 'paymentIntent', ne: null}},
+      ],
+    },
+    select: {data: true, createdOn: true},
+    orderBy: {createdOn: 'DESC'},
+  });
+
+  return result;
 }

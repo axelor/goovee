@@ -150,7 +150,6 @@ export function getBankDetailsFromInstructions(
         swiftCode: iban.bic ?? undefined,
         accountHolderName: iban.account_holder_name ?? undefined,
         country: getCountryName(iban.country),
-        bankName: iban.bank_name ?? undefined,
         bankAddress: iban.bank_address ?? undefined,
         accountHolderAddress: iban.account_holder_address ?? undefined,
       };

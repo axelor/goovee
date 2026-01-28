@@ -1,4 +1,5 @@
 // ---- CORE IMPORTS ---- //
+import {BANK_TRANSFER_STATUS} from '@/lib/core/payment/stripe/constants';
 import {BankAccountType} from '@/lib/core/payment/stripe/utils';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 
@@ -37,9 +38,24 @@ export type StripeProps = {
   onPaymentSuccess?: () => any;
   skipSuccessToast?: boolean;
   onCreateBankTransferIntent?: () => Promise<
-    ErrorResponse | SuccessResponse<BankTransferDetailsType>
+    ErrorResponse | SuccessResponse<BankTransferIntentResult>
   >;
 };
+
+export type BankTransferIntentResult =
+  | {
+      status: typeof BANK_TRANSFER_STATUS.PAID;
+      id: string;
+    }
+  | ({
+      status: typeof BANK_TRANSFER_STATUS.PENDING;
+    } & {
+      id: string;
+      amount: number;
+      currency: string;
+      reference: string;
+      bankDetails: NormalizedBankDetails;
+    });
 
 export type BankTransferDetailsType = {
   id: string;
