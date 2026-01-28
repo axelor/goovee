@@ -257,7 +257,6 @@ export async function withMattermostEmailSync({
 }: {
   oldEmail: string;
   newEmail: string;
-  context: string;
 }): Promise<void> {
   if (!isCreateMattermostUsersEnabled()) {
     return;

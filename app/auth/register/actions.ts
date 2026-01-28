@@ -26,6 +26,8 @@ import {
   ALLOW_ALL_REGISTRATION,
   ALLOW_AOS_ONLY_REGISTRATION,
   ALLOW_NO_REGISTRATION,
+  REGISTER,
+  REGISTER_CONTACT,
 } from '@/constants';
 import {findOne, isValid} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
@@ -384,7 +386,7 @@ export async function register({
         password,
         name: $name || '',
         firstName: $firstName || '',
-        context: 'REGISTER',
+        context: REGISTER,
       });
     } catch (err: any) {
       return {
@@ -669,7 +671,7 @@ async function registerAosContactAsAdmin({
         password,
         name: $name || '',
         firstName: $firstName || '',
-        context: 'REGISTER_CONTACT',
+        context: REGISTER_CONTACT,
       });
     } catch (err: any) {
       console.log(err);

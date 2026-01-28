@@ -10,6 +10,7 @@ import {findGooveeUserByEmail} from '@/orm/partner';
 import {TENANT_HEADER} from '@/middleware';
 import {manager} from '@/tenant';
 import {withMattermostSync} from '@/lib/core/mattermost';
+import {CHANGE_PASSWORD} from '@/constants';
 
 export async function changePassword({
   oldPassword,
@@ -76,7 +77,7 @@ export async function changePassword({
       password: newPassword,
       name: partner.name || 'user',
       firstName: partner.firstName || 'user',
-      context: 'CHANGE_PASSWORD',
+      context: CHANGE_PASSWORD,
     });
   } catch (err) {
     return {

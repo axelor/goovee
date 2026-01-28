@@ -24,5 +24,5 @@ export function isCreateMattermostUsersEnabled(): boolean {
 
 export async function getAosUrl(tenantId: Tenant['id']): Promise<string> {
   const tenant = await manager.getTenant(tenantId);
-  return tenant?.config?.aos?.url || process.env.GOOVEE_PUBLIC_AOS_URL || '';
+  return tenant?.config?.aos?.url;
 }

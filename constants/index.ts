@@ -257,3 +257,12 @@ export const MAIN_PRICE = {
   ATI: 'at',
   WTI: 'wt',
 };
+
+/**
+ * MATTERMOST UPDATING
+ */
+export const RESET_PASSWORD = 'RESET_PASSWORD';
+export const CHANGE_PASSWORD = 'CHANGE_PASSWORD';
+export const REGISTER_CONTACT = 'REGISTER_CONTACT';
+export const REGISTER = 'REGISTER';
+export const INVITE_REGISTER = 'INVITE_REGISTER';

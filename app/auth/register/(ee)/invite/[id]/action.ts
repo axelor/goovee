@@ -20,6 +20,7 @@ import {Scope} from '@/otp/constants';
 
 import {findInviteById} from '../../../common/orm/register';
 import {withMattermostSync} from '@/lib/core/mattermost';
+import {INVITE_REGISTER} from '@/constants';
 
 function error(message: string) {
   return {
@@ -93,7 +94,7 @@ export async function register({
         password,
         name,
         firstName,
-        context: 'INVITE_REGISTER',
+        context: INVITE_REGISTER,
       });
     } catch (err: any) {
       return {

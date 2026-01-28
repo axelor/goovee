@@ -8,6 +8,7 @@ import {findGooveeUserByEmail} from '@/orm/partner';
 import NotificationManager, {NotificationType} from '@/notification';
 import {manager, type Tenant} from '@/tenant';
 import {withMattermostSync} from '@/lib/core/mattermost';
+import {RESET_PASSWORD} from '@/constants';
 
 function error(message: string) {
   return {
@@ -229,7 +230,7 @@ export async function resetPassword({
         password,
         name: user.name || 'user',
         firstName: user.firstName || 'user',
-        context: 'RESET_PASSWORD',
+        context: RESET_PASSWORD,
       });
     } catch (err: any) {
       return {
