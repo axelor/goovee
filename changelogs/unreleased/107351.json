@@ -1,0 +1,5 @@
+{
+  "title": "Allow existing contact to register via invite",
+  "type": "fix",
+  "scope": ["core"]
+}

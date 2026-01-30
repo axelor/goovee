@@ -297,6 +297,7 @@ export async function registerContact({
   contactConfig,
   partnerId,
   localizationId,
+  existingContact,
 }: {
   name: string;
   firstName?: string;
@@ -306,6 +307,7 @@ export async function registerContact({
   contactConfig?: any;
   partnerId: string;
   localizationId?: Localization['id'];
+  existingContact?: {id: string; version: number} | null;
 }) {
   if (!(name && email && tenantId && partnerId)) {
     return null;
@@ -333,7 +335,7 @@ export async function registerContact({
 
   const companySet = mainPartner.companySet?.map(c => ({id: c.id}));
 
-  const data: any = {
+  const data: CreateArgs<AOSPartner> = {
     partnerTypeSelect: PartnerTypeMap[UserType.individual],
     firstName,
     name,
@@ -359,7 +361,7 @@ export async function registerContact({
       },
     },
     localization: localizationId ? {select: {id: localizationId}} : undefined,
-  } satisfies CreateArgs<AOSPartner>;
+  };
 
   if (contactConfig?.id) {
     data.contactWorkspaceConfigSet = {select: [{id: contactConfig.id}]};
@@ -368,9 +370,25 @@ export async function registerContact({
     data.defaultWorkspace = {select: {id: mainPartner.defaultWorkspace.id}};
   }
 
-  const contact = await client.aOSPartner
-    .create({data, select: {id: true}})
-    .then(clone);
+  let contact;
+  if (existingContact) {
+    delete data.createdFromSelect;
+    contact = await client.aOSPartner
+      .update({
+        data: {
+          ...data,
+          id: existingContact.id,
+          version: existingContact.version,
+        },
+        select: {id: true},
+      })
+      .then(clone);
+  } else {
+    contact = await client.aOSPartner
+      .create({data, select: {id: true}})
+      .then(clone);
+  }
+
   await client.aOSPartner.update({
     data: {
       id: mainPartner.id,
