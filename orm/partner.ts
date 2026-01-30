@@ -297,7 +297,7 @@ export async function registerContact({
   contactConfig,
   partnerId,
   localizationId,
-  existingContact,
+  existingRecord,
 }: {
   name: string;
   firstName?: string;
@@ -307,7 +307,7 @@ export async function registerContact({
   contactConfig?: any;
   partnerId: string;
   localizationId?: Localization['id'];
-  existingContact?: {id: string; version: number} | null;
+  existingRecord?: {id: string; version: number} | null;
 }) {
   if (!(name && email && tenantId && partnerId)) {
     return null;
@@ -371,14 +371,14 @@ export async function registerContact({
   }
 
   let contact;
-  if (existingContact) {
+  if (existingRecord) {
     delete data.createdFromSelect;
     contact = await client.aOSPartner
       .update({
         data: {
           ...data,
-          id: existingContact.id,
-          version: existingContact.version,
+          id: existingRecord.id,
+          version: existingRecord.version,
         },
         select: {id: true},
       })

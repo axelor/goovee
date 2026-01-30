@@ -81,12 +81,12 @@ export async function register({
     );
   }
 
-  const existingContact = await findContactByEmail(email, tenantId);
+  const existingRecord = await findPartnerByEmail(email, tenantId);
 
   if (
-    existingContact &&
-    existingContact.mainPartner &&
-    existingContact.mainPartner.id !== invite.partner.id
+    existingRecord &&
+    existingRecord.mainPartner &&
+    existingRecord.mainPartner.id !== invite.partner.id
   ) {
     return error(await t('Contact already exists with another partner.'));
   }
@@ -124,7 +124,7 @@ export async function register({
       password,
       tenantId,
       contactConfig,
-      existingContact,
+      existingRecord,
       partnerId: invite.partner.id,
       localizationId: localization?.id,
     });
