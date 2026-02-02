@@ -12,6 +12,8 @@ import keycloak from './core/auth/(ee)/keycloak';
 import credentials from './core/auth/credentials';
 import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
 
+const showKeycloakOauth = process.env.SHOW_KEYCLOAK_OAUTH === 'true';
+
 const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
   PARTNER_NOT_FOUND: 'Partner not found',
@@ -148,7 +150,7 @@ const options = {
       },
     },
   },
-  plugins: [keycloak, credentials],
+  plugins: [credentials, ...(showKeycloakOauth ? [keycloak] : [])],
   socialProviders: {google},
 } satisfies BetterAuthOptions;
 
