@@ -9,6 +9,7 @@ import {
   findContactByEmail,
   findContactById,
   findGooveeUserByEmail,
+  findPartnerAllowedToRegister,
   findPartnerByEmail,
   findPartnerById,
   registerPartner,
@@ -265,7 +266,14 @@ export async function register({
     );
   }
 
-  const aosPartner = await findPartnerByEmail(email, tenantId);
+  let aosPartner = await findPartnerByEmail(email, tenantId);
+  if (aosPartner) {
+    // there could be multiple partners with the same email, so we preferrably take the one that is allowed to register
+    const allowedPartner = await findPartnerAllowedToRegister(email, tenantId);
+    if (allowedPartner) {
+      aosPartner = allowedPartner;
+    }
+  }
   const isNewEmail = !aosPartner;
 
   const isAosContact = aosPartner?.isContact;

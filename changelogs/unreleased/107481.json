@@ -1,0 +1,5 @@
+{
+  "title": "Partner and Contact registration with same email address",
+  "type": "fix",
+  "scope": ["core"]
+}
