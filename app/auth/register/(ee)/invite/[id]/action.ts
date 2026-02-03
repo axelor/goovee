@@ -81,7 +81,7 @@ export async function register({
     );
   }
 
-  const existingRecord = await findPartnerByEmail(email, tenantId);
+  const existingRecord = await findContactByEmail(email, tenantId);
 
   if (
     existingRecord &&
