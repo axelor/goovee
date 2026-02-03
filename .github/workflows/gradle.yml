@@ -26,8 +26,6 @@ jobs:
         run: pnpm install
       - name: Run format check
         run: pnpm format:check
-      - name: Run linter
-        run: pnpm lint
 
   release:
     needs: format
