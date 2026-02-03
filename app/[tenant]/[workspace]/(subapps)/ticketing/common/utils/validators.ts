@@ -75,18 +75,20 @@ export const FilterSchema = z.object({
       const [start, end] = data;
       if (!start && !end) return;
       if (!start) {
-        return ctx.addIssue({
+        ctx.addIssue({
           code: 'custom',
           message: 'Start date is required.',
           path: [0],
         });
+        return;
       }
       if (!end) {
-        return ctx.addIssue({
+        ctx.addIssue({
           code: 'custom',
           message: 'End date is required.',
           path: [1],
         });
+        return;
       }
       const [startDate, endDate] = [start, end].map(d => new Date(d).getTime());
       if (startDate >= endDate) {
