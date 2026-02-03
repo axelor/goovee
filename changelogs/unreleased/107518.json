@@ -1,0 +1,5 @@
+{
+  "title": "PIgnore partner on invitation",
+  "type": "fix",
+  "scope": ["core"]
+}
