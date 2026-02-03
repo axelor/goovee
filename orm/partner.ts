@@ -1,4 +1,10 @@
-import type {CreateArgs, Payload, SelectOptions, UpdateArgs} from '@goovee/orm';
+import type {
+  CreateArgs,
+  Payload,
+  SelectOptions,
+  UpdateArgs,
+  WhereOptions,
+} from '@goovee/orm';
 import {getSession} from '@/auth';
 import {UserType} from '@/auth/types';
 import {hash} from '@/auth/utils';
@@ -235,7 +241,7 @@ export async function findContactById(
 export async function findPartnerByEmail(
   email: string,
   tenantId: Tenant['id'],
-  params?: any,
+  params?: {where: WhereOptions<AOSPartner>},
 ) {
   if (!(email && tenantId)) return null;
 
@@ -258,6 +264,19 @@ export async function findPartnerByEmail(
     .then(clone);
 
   return partner;
+}
+
+export async function findPartnerAllowedToRegister(
+  email: string,
+  tenantId: Tenant['id'],
+) {
+  if (!(email && tenantId)) return null;
+
+  return findPartnerByEmail(email, tenantId, {
+    where: {
+      isAllowedToRegister: true,
+    },
+  });
 }
 
 export async function updatePartner({
