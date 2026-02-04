@@ -1,0 +1,6 @@
+{
+  "title": "Extend bank-transfer support",
+  "type": "feat",
+  "description": "Added automatic cleanup of pending bank transfer intents and customer balance deduction.",
+  "scope": ["core", "invoices"]
+}
