@@ -1,5 +1,6 @@
 {
   "title": "Partner and Contact registration with same email address",
   "type": "fix",
+  "description": "If two partners exist with the same email address, we will look for the one who is allowed to register during registration",
   "scope": ["core"]
 }
