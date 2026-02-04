@@ -199,14 +199,21 @@ export async function findEvent({
           salePrice: true,
           saleCurrency: {code: true, symbol: true, numberOfDecimals: true},
         },
-        registrationList: {
-          select: {
-            participantList: {
-              where: {...(user?.email ? {emailAddress: user?.email} : {})},
-              select: {emailAddress: true},
+        ...(user?.email && {
+          registrationList: {
+            where: {
+              participantList: {
+                emailAddress: user?.email,
+              },
+            },
+            select: {
+              invoice: {id: true},
+              participantList: {
+                select: {emailAddress: true},
+              },
             },
           },
-        },
+        }),
         slug: true,
         defaultPrice: true,
         facilityList: {
@@ -235,14 +242,12 @@ export async function findEvent({
     })
     .then(event => {
       if (!event) return null;
-      const isRegistered = user?.email
-        ? Boolean(
-            event?.registrationList?.find(
-              (r: any) => r.participantList.length > 0,
-            ),
-          )
-        : false;
-      return {...event, isRegistered};
+      const userRegistration = user?.email
+        ? event?.registrationList?.[0]
+        : null;
+      const isRegistered = Boolean(userRegistration);
+      const isInvoiced = Boolean(userRegistration?.invoice?.id);
+      return {...event, isRegistered, isInvoiced, userRegistration};
     });
 
   if (!event) return null;
@@ -362,7 +367,7 @@ export async function findEvents({
   user?: User;
   onlyRegisteredEvent?: boolean;
   eventType?: string;
-  orderBy: any;
+  orderBy?: any;
 }) {
   if (!(workspace && tenantId)) {
     return {events: [], pageInfo: {}};

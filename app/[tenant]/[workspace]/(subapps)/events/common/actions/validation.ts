@@ -29,7 +29,9 @@ type ValidationResult = {
   message?: string;
 };
 
-export async function validate(validators: Function[]) {
+export async function validate(
+  validators: (() => Promise<ValidationResult>)[],
+) {
   for (const validator of validators) {
     if (typeof validator !== 'function') {
       throw new Error('Validator is not a function');
@@ -61,7 +63,7 @@ export async function withAuth(
 }
 
 export function withSubapp(code: string, url: string, tenantId: Tenant['id']) {
-  return async function () {
+  return async function (): Promise<ValidationResult> {
     const session = await getSession();
     const user = session?.user;
 
@@ -144,7 +146,7 @@ export async function validateRegistration({
   const result = await validate([
     withSubapp(SUBAPP_CODES.events, workspaceURL, tenantId),
   ]);
-  if (result.error) return result;
+  if (result.error) return error(result.message!);
 
   if (!workspace.config?.allowGuestEventRegistration && !user) {
     return error(

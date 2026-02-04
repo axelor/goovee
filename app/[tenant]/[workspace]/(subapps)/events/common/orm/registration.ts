@@ -195,3 +195,50 @@ export async function findEventRegistration({
 
   return result;
 }
+
+export async function removeRegistration({
+  registration,
+  tenantId,
+}: {
+  registration: {id: string; version: number};
+  tenantId: Tenant['id'];
+}) {
+  const client = await manager.getClient(tenantId);
+  await client.aOSPortalParticipant.deleteAll({
+    where: {
+      registration: {id: registration.id},
+    },
+  });
+  await client.aOSRegistration.delete({
+    id: registration.id,
+    version: registration.version,
+  });
+}
+
+export async function removeParticipantFromRegistration({
+  tenantId,
+  registration,
+  participant,
+}: {
+  tenantId: Tenant['id'];
+  registration: {id: string; version: number};
+  participant: {id: string; version: number};
+}) {
+  const client = await manager.getClient(tenantId);
+  await client.$transaction(async client => {
+    await client.aOSRegistration.update({
+      data: {
+        id: registration.id,
+        version: registration.version,
+        participantList: {
+          remove: [participant.id],
+        },
+      },
+      select: {id: true, participantList: {select: {id: true}}},
+    });
+    await client.aOSPortalParticipant.delete({
+      id: participant.id,
+      version: participant.version + 1, // incrementing version since remove operation increments version
+    });
+  });
+}

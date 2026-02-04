@@ -10,6 +10,7 @@ export const CATEGORIES = 'Categories';
 
 export const REGISTER_TO_EVENT = 'Register to the event';
 export const REGISTER_TAG = '#Registered';
+export const UNSUBSCRIBE = 'Unsubscribe';
 
 export const MY_REGISTRATIONS = 'My registrations';
 export const NO_EVENT = 'No event';

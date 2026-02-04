@@ -36,7 +36,11 @@ import {
 } from '@/subapps/events/common/orm/event';
 import {createInvoice} from '@/subapps/events/common/orm/invoice';
 import {findContacts} from '@/subapps/events/common/orm/partner';
-import {registerParticipants} from '@/subapps/events/common/orm/registration';
+import {
+  registerParticipants,
+  removeParticipantFromRegistration,
+  removeRegistration,
+} from '@/subapps/events/common/orm/registration';
 import {
   error,
   isEventPrivate,
@@ -276,7 +280,7 @@ export async function isValidParticipant(props: {
   ]);
 
   if (result.error) {
-    return result;
+    return error(result.message!);
   }
 
   const event = await findEventConfig({
@@ -493,4 +497,74 @@ export const fetchEvent = async ({
   if (!event) return error(await t('Record not found'));
 
   return {success: true, data: clone(event)};
+};
+
+export const unsubscribeFromEvent = async ({
+  eventId,
+  workspaceURL,
+}: {
+  eventId: string;
+  workspaceURL: string;
+}): ActionResponse<true> => {
+  const tenantId = headers().get(TENANT_HEADER);
+  if (!tenantId) return error(await t('Tenant ID is missing!'));
+
+  if (!eventId) return error(await t('Event ID is missing!'));
+  const session = await getSession();
+  const user = session?.user;
+  if (!user) return error(await t('Unauthorized'));
+
+  const workspace = await findWorkspace({user, url: workspaceURL, tenantId});
+  if (!workspace) return error(await t('Invalid workspace'));
+
+  const subappValidation = await validate([
+    withSubapp(SUBAPP_CODES.events, workspaceURL, tenantId),
+  ]);
+  if (subappValidation.error) return error(subappValidation.message!);
+
+  const event = await findEvent({
+    id: eventId,
+    workspace,
+    tenantId,
+    user,
+  });
+  if (!event) return error(await t('Event not found'));
+
+  if (!event.userRegistration) {
+    return error(await t('You are not registered to this event'));
+  }
+
+  if (event.isInvoiced) {
+    return error(await t('You have already been invoiced. Cannot unsubscribe'));
+  }
+
+  const participant = event.userRegistration.participantList?.find(
+    p => p.emailAddress === user.email,
+  );
+
+  if (!participant) {
+    return error(await t('You are not registered to this event'));
+  }
+
+  const singleParticipant =
+    event.userRegistration.participantList!.length === 1;
+
+  try {
+    if (singleParticipant) {
+      await removeRegistration({
+        tenantId,
+        registration: event.userRegistration,
+      });
+    } else {
+      await removeParticipantFromRegistration({
+        tenantId,
+        registration: event.userRegistration,
+        participant,
+      });
+    }
+    return {success: true, data: true};
+  } catch (err) {
+    console.error(err);
+    return error(await t('Something went wrong'));
+  }
 };

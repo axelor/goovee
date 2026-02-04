@@ -13,6 +13,11 @@
       "name": "event",
       "type": "ManyToOne",
       "target": "AOSPortalEvent"
+    },
+    {
+      "name": "invoice",
+      "type": "ManyToOne",
+      "target": "AOSInvoice"
     }
   ]
 }
