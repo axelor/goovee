@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
 import {stripe} from '@/payment/stripe';
+import {manager} from '@/tenant';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
@@ -38,10 +39,11 @@ async function handleWebhookPaymentFailure({
     reason,
   });
 
+  const client = await manager.getClient(tenantId);
   await markPaymentAsFailed({
     contextId: paymentContext.id,
     version: paymentContext.version,
-    tenantId,
+    client,
   });
 }
 
@@ -72,7 +74,7 @@ export async function POST(req: Request) {
 
         const contextId = paymentIntent.metadata.context_id;
         const tenantId = paymentIntent.metadata.tenant_id;
-
+        const client = await manager.getClient(tenantId);
         if (!contextId || !tenantId) {
           console.error('Missing metadata', paymentIntent.metadata);
           break;
@@ -80,7 +82,7 @@ export async function POST(req: Request) {
 
         const paymentContext = await findPaymentContext({
           id: contextId,
-          tenantId,
+          client,
           mode: PaymentOption.stripe,
         });
 
@@ -127,7 +129,7 @@ export async function POST(req: Request) {
             await markPaymentAsProcessed({
               contextId: paymentContext.id,
               version: paymentContext.version,
-              tenantId,
+              client,
             });
 
             break;

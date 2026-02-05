@@ -36,19 +36,29 @@ import {
 } from '@/subapps/events/common/orm/event';
 import {createInvoice} from '@/subapps/events/common/orm/invoice';
 import {findContacts} from '@/subapps/events/common/orm/partner';
-import {registerParticipants} from '@/subapps/events/common/orm/registration';
+import {
+  registerParticipants,
+  removeParticipantFromRegistration,
+  removeRegistration,
+} from '@/subapps/events/common/orm/registration';
 import {
   error,
+  hasRegistrationEnded,
   isEventPrivate,
   isEventPublic,
 } from '@/subapps/events/common/utils';
-import {generateRegistrationMailAction} from '@/subapps/events/common/utils/mail';
+import {
+  generateCancellationMailAction,
+  generateRegistrationMailAction,
+} from '@/subapps/events/common/utils/mail';
 import {getCalculatedTotalPrice} from '@/subapps/events/common/utils/payments';
 import {
   canEmailBeRegistered,
   isAlreadyRegistered,
 } from '@/subapps/events/common/utils/registration';
 import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
+import {manager} from '@/lib/core/tenant';
+import {PaymentContext} from '@/lib/core/payment/common/type';
 
 export async function getAllEvents({
   limit,
@@ -136,7 +146,7 @@ export async function register({
   });
   if (!$event) return error(await t('Event not found!'));
 
-  let paidAmount, values, context;
+  let paidAmount, values, context: PaymentContext;
   if (payment) {
     const paymentInfo = await getPaymentInfo({
       mode: payment.mode,
@@ -181,34 +191,40 @@ export async function register({
     );
   }
 
-  const registration = await registerParticipants({
-    eventId,
-    participants,
-    workspaceURL,
-    tenantId,
+  const client = await manager.getClient(tenantId);
+  const registration = await client.$transaction(async client => {
+    const registration = await registerParticipants({
+      eventId,
+      participants,
+      workspaceURL,
+      client,
+    });
+
+    if (context) {
+      await markPaymentAsProcessed({
+        contextId: context.id,
+        version: context.version,
+        client,
+      });
+    }
+    if (paidAmount > 0) {
+      await createInvoice({
+        workspace,
+        tenantId,
+        registrationId: registration.id,
+        currencyCode: $event.currency?.code,
+      }).then(res => {
+        if (res.error) {
+          console.error('Invoice creation failed:', res.message);
+          throw new Error(res.message);
+        }
+      });
+    }
+    return registration;
   });
 
-  if (context) {
-    await markPaymentAsProcessed({
-      contextId: context.id,
-      version: context.version,
-      tenantId,
-    });
-  }
-  if (paidAmount > 0) {
-    createInvoice({
-      workspace,
-      tenantId,
-      registrationId: registration.id,
-      currencyCode: $event.currency?.code,
-    }).then(res => {
-      if (res.error) {
-        console.error('Invoice creation failed:', res.message);
-      }
-    });
-  }
   generateRegistrationMailAction({
-    eventId,
+    event: $event,
     participants,
     workspaceURL,
     tenantId,
@@ -276,7 +292,7 @@ export async function isValidParticipant(props: {
   ]);
 
   if (result.error) {
-    return result;
+    return error(result.message!);
   }
 
   const event = await findEventConfig({
@@ -493,4 +509,86 @@ export const fetchEvent = async ({
   if (!event) return error(await t('Record not found'));
 
   return {success: true, data: clone(event)};
+};
+
+export const unsubscribeFromEvent = async ({
+  eventId,
+  workspaceURL,
+}: {
+  eventId: string;
+  workspaceURL: string;
+}): ActionResponse<true> => {
+  const tenantId = headers().get(TENANT_HEADER);
+  if (!tenantId) return error(await t('Tenant ID is missing!'));
+
+  if (!eventId) return error(await t('Event ID is missing!'));
+  const session = await getSession();
+  const user = session?.user;
+  if (!user) return error(await t('Unauthorized'));
+
+  const workspace = await findWorkspace({user, url: workspaceURL, tenantId});
+  if (!workspace) return error(await t('Invalid workspace'));
+
+  const subappValidation = await validate([
+    withSubapp(SUBAPP_CODES.events, workspaceURL, tenantId),
+  ]);
+  if (subappValidation.error) return error(subappValidation.message!);
+
+  const event = await findEvent({
+    id: eventId,
+    workspace,
+    tenantId,
+    user,
+  });
+  if (!event) return error(await t('Event not found'));
+
+  if (!event.userRegistration) {
+    return error(await t('You are not registered to this event'));
+  }
+
+  if (event.isInvoiced) {
+    return error(await t('You have already been invoiced. Cannot unsubscribe'));
+  }
+
+  if (hasRegistrationEnded(event)) {
+    return error(await t('Registration has already ended'));
+  }
+
+  const participant = event.userRegistration.participantList?.find(
+    p => p.emailAddress === user.email,
+  );
+
+  if (!participant) {
+    return error(await t('You are not registered to this event'));
+  }
+
+  const singleParticipant =
+    event.userRegistration.participantList!.length === 1;
+
+  try {
+    if (singleParticipant) {
+      await removeRegistration({
+        tenantId,
+        registration: event.userRegistration,
+      });
+    } else {
+      await removeParticipantFromRegistration({
+        tenantId,
+        registration: event.userRegistration,
+        participant,
+      });
+    }
+
+    generateCancellationMailAction({
+      event,
+      participants: [participant],
+      workspaceURL,
+      tenantId,
+    });
+
+    return {success: true, data: true};
+  } catch (err) {
+    console.error(err);
+    return error(await t('Something went wrong'));
+  }
 };

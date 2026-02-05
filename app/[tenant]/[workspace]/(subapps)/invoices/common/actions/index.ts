@@ -14,6 +14,7 @@ import {
 } from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/middleware';
+import {manager} from '@/tenant';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
@@ -271,10 +272,11 @@ export async function paypalCaptureOrder({
           (await t('Something went wrong while updating invoice!')),
       };
     }
+    const client = await manager.getClient(tenantId);
     await markPaymentAsProcessed({
       contextId: context.id,
       version: context.version,
-      tenantId,
+      client,
     });
     return {success: true, data: $invoice};
   } catch (error) {
@@ -510,10 +512,11 @@ export async function validateStripePayment({
           (await t('Something went wrong while updating invoice!')),
       };
     }
+    const client = await manager.getClient(tenantId);
     await markPaymentAsProcessed({
       contextId: context.id,
       version: context.version,
-      tenantId,
+      client,
     });
     revalidatePath(invalidatePath);
     return {success: true, data: $invoice};
@@ -706,9 +709,10 @@ export async function cancelStripeBankTransferPaymentIntent({
         message: await t((err as any)?.message),
       };
     }
+    const client = await manager.getClient(tenantId);
     const paymentContext = await findPaymentContext({
       id: context,
-      tenantId,
+      client,
       mode: PaymentOption.stripe,
       ignoreExpiration: true,
     });
@@ -743,7 +747,7 @@ export async function cancelStripeBankTransferPaymentIntent({
     await markPaymentAsCancelled({
       contextId: paymentContext.id,
       version: paymentContext.version,
-      tenantId,
+      client,
     });
 
     await stripe.paymentIntents.cancel(id, {
@@ -985,10 +989,11 @@ export async function validatePayboxPayment({
           (await t('Something went wrong while updating invoice!')),
       };
     }
+    const client = await manager.getClient(tenantId);
     await markPaymentAsProcessed({
       contextId: context.id,
       version: context.version,
-      tenantId,
+      client,
     });
     revalidatePath(invalidatePath);
     return {success: true, data: $invoice};

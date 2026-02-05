@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {PaymentOption} from '@/types';
-import {manager, type Tenant} from '@/tenant';
+import type {Client} from '@/goovee/.generated/client';
 import type {PaymentContext} from './type';
 
 export const CONTEXT_STATUS = {
@@ -17,20 +17,17 @@ export async function createPaymentContext({
   context,
   mode,
   payer,
-  tenantId,
+  client,
 }: {
   context: any;
   mode: PaymentOption;
   payer: string;
-  tenantId: Tenant['id'];
+  client: Client;
 }): Promise<{
   id: string;
   version: number;
   data: any;
 }> {
-  const client = await manager.getClient(tenantId);
-
-  if (!client) throw new Error('Client not found');
   const timeStamp = new Date();
 
   const payment = await client.paymentContext.create({
@@ -51,19 +48,15 @@ const CONTEXT_VALIDITY_DURATION = 1000 * 60 * 5; // 5 minutes
 
 export async function findPaymentContext({
   id,
-  tenantId,
+  client,
   mode,
   ignoreExpiration = false,
 }: {
   id: string;
-  tenantId: Tenant['id'];
+  client: Client;
   mode: PaymentOption;
   ignoreExpiration?: boolean;
 }): Promise<PaymentContext | null> {
-  const client = await manager.getClient(tenantId);
-
-  if (!client) throw new Error('Client not found');
-
   const context = await client.paymentContext.findOne({
     where: {
       id,
@@ -93,17 +86,14 @@ export async function findPaymentContext({
 export async function updatePaymentContextData({
   id,
   version,
-  tenantId,
+  client,
   context,
 }: {
   id: string;
   version: number;
-  tenantId: Tenant['id'];
+  client: Client;
   context?: any;
 }) {
-  const client = await manager.getClient(tenantId);
-  if (!client) throw new Error('Client not found');
-
   const result = await client.paymentContext.update({
     data: {
       id,
@@ -120,7 +110,7 @@ export async function updatePaymentContextData({
 export function markPaymentAsProcessed(params: {
   contextId: string;
   version: number;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
   return updatePaymentStatus({
     ...params,
@@ -131,7 +121,7 @@ export function markPaymentAsProcessed(params: {
 export function markPaymentAsPending(params: {
   contextId: string;
   version: number;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
   return updatePaymentStatus({
     ...params,
@@ -142,7 +132,7 @@ export function markPaymentAsPending(params: {
 export function markPaymentAsCancelled(params: {
   contextId: string;
   version: number;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
   return updatePaymentStatus({
     ...params,
@@ -153,7 +143,7 @@ export function markPaymentAsCancelled(params: {
 export function markPaymentAsFailed(params: {
   contextId: string;
   version: number;
-  tenantId: Tenant['id'];
+  client: Client;
 }) {
   return updatePaymentStatus({
     ...params,
@@ -164,17 +154,14 @@ export function markPaymentAsFailed(params: {
 async function updatePaymentStatus({
   contextId,
   version,
-  tenantId,
+  client,
   status,
 }: {
   contextId: string;
   version: number;
-  tenantId: Tenant['id'];
+  client: Client;
   status: ContextStatus;
 }): Promise<void> {
-  const client = await manager.getClient(tenantId);
-  if (!client) throw new Error('Client not found');
-
   await client.paymentContext.update({
     data: {
       id: contextId,

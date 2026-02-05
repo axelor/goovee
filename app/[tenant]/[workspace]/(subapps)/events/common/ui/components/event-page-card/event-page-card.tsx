@@ -26,24 +26,40 @@ import {formatDateTime} from '@/lib/core/locale/formatters';
 import {
   REGISTER_TAG,
   REGISTER_TO_EVENT,
+  UNSUBSCRIBE,
 } from '@/subapps/events/common/constants';
 import {EventDateCard} from '@/subapps/events/common/ui/components';
 import {
   hasRegistrationEnded,
   isLoginNeededForRegistration,
 } from '@/subapps/events/common/utils';
+import type {Event} from '@/subapps/events/common/types';
 import styles from './style.module.css';
+import {PortalWorkspace} from '@/types';
+import {unsubscribeFromEvent} from '../../../actions/actions';
+import {useToast} from '@/ui/hooks';
+import {useRouter} from 'next/navigation';
 
-export const EventPageCard = ({eventDetails, workspace}: any) => {
+export const EventPageCard = ({
+  eventDetails,
+  workspace,
+}: {
+  eventDetails: Event;
+  workspace: PortalWorkspace;
+}) => {
   const {
     formattedDefaultPriceAti,
     formattedDefaultPrice,
     defaultPrice,
     eventAllowRegistration,
     registrationDeadlineDateTime,
+    isInvoiced,
+    isRegistered,
   } = eventDetails || {};
   const {workspaceURI} = useWorkspace();
   const {data: session} = useSession();
+  const router = useRouter();
+  const {toast} = useToast();
   const user = session?.user;
 
   const allowGuestEventRegistration =
@@ -52,17 +68,45 @@ export const EventPageCard = ({eventDetails, workspace}: any) => {
   const allowGuests =
     allowGuestEventRegistration && !isLoginNeededForRegistration(eventDetails);
 
+  const registrationEnded = hasRegistrationEnded(eventDetails);
   const isRegistrationAllow =
-    eventAllowRegistration &&
-    (user || allowGuests) &&
-    !hasRegistrationEnded(eventDetails);
+    eventAllowRegistration && (user || allowGuests) && !registrationEnded;
+
+  const canUnsubscribe =
+    user && isRegistered && !isInvoiced && !registrationEnded;
+
+  async function unsubscribe() {
+    try {
+      const res = await unsubscribeFromEvent({
+        eventId: eventDetails.id,
+        workspaceURL: workspace.url,
+      });
+      if (res.success) {
+        toast({
+          variant: 'success',
+          title: i18n.t('Successfully unsubscribed'),
+        });
+        router.refresh();
+      } else {
+        toast({
+          variant: 'destructive',
+          title: res.message,
+        });
+      }
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: i18n.t('Something went wrong'),
+      });
+    }
+  }
 
   return (
     <Card className="w-full rounded-2xl border-none shadow-none">
       <CardHeader className="p-4 flex flex-col gap-4 space-y-0">
         <CardTitle className="w-full flex items-center justify-between">
           <p className="text-xl font-semibold">{eventDetails?.eventTitle}</p>
-          {eventDetails?.isRegistered && (
+          {isRegistered && (
             <Badge
               variant="outline"
               className="text-[0.625rem] mb-[0.688rem] font-medium py-1 px-2 text-success border-success h-6">
@@ -134,22 +178,29 @@ export const EventPageCard = ({eventDetails, workspace}: any) => {
           )}
         </div>
       </CardContent>
-      {isRegistrationAllow && (
-        <CardFooter className="px-4 pb-4">
-          {
-            <Link
-              href={`${workspaceURI}/${SUBAPP_CODES.events}/${eventDetails?.slug}/register`}
-              className="w-full">
-              <Button
-                size="sm"
-                variant="success"
-                className="w-full text-base font-medium">
-                {i18n.t(REGISTER_TO_EVENT)}
-              </Button>
-            </Link>
-          }
-        </CardFooter>
-      )}
+      <CardFooter className="px-4 pb-4 flex-col gap-4">
+        {canUnsubscribe && (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={unsubscribe}
+            className="w-full text-base font-medium">
+            {i18n.t(UNSUBSCRIBE)}
+          </Button>
+        )}
+        {isRegistrationAllow && (
+          <Link
+            href={`${workspaceURI}/${SUBAPP_CODES.events}/${eventDetails?.slug}/register`}
+            className="w-full">
+            <Button
+              size="sm"
+              variant="success"
+              className="w-full text-base font-medium">
+              {i18n.t(REGISTER_TO_EVENT)}
+            </Button>
+          </Link>
+        )}
+      </CardFooter>
     </Card>
   );
 };

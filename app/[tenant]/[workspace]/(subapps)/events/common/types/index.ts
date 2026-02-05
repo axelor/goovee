@@ -44,10 +44,16 @@ export type Event = {
   registrationList: Array<{
     id: string;
     version: number;
+    invoice?: {
+      id: string;
+      version: number;
+    } | null;
     participantList: Array<{
       id: string;
       version: number;
       emailAddress: string;
+      name: string;
+      surname: string;
     }>;
   }>;
   facilityList: Array<{
@@ -65,6 +71,23 @@ export type Event = {
     additionalFieldSet: any[];
   }>;
   isRegistered: boolean;
+  isInvoiced: boolean;
+  userRegistration?: {
+    id: string;
+    version: number;
+    invoice?: {
+      id: string;
+      version: number;
+    } | null;
+    participantList: Array<{
+      id: string;
+      version: number;
+      emailAddress: string;
+      name: string;
+      surname: string;
+    }>;
+  } | null;
+
   displayWt: string;
   displayAti: string;
   formattedDefaultPrice: string;

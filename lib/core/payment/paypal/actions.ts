@@ -1,7 +1,7 @@
 import PayPalHttpClient from '.';
 import paypal from '@paypal/checkout-server-sdk';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
-import type {Tenant} from '@/tenant';
+import {manager, type Tenant} from '@/tenant';
 import {PaymentOption} from '@/types';
 import {createPaymentContext, findPaymentContext} from '../common/orm';
 import type {PaymentOrder} from '../common/type';
@@ -29,11 +29,12 @@ export async function createPaypalOrder({
 
   request.headers['Prefer'] = 'return=representation';
 
+  const client = await manager.getClient(tenantId);
   const {id: contextId} = await createPaymentContext({
     context,
     mode: PaymentOption.paypal,
     payer: email,
-    tenantId,
+    client,
   });
 
   request.requestBody({
@@ -99,9 +100,10 @@ export async function findPaypalOrder({
     throw new Error('Custom id not found');
   }
 
+  const client = await manager.getClient(tenantId);
   const context = await findPaymentContext({
     id: customId,
-    tenantId,
+    client,
     mode: PaymentOption.paypal,
   });
 

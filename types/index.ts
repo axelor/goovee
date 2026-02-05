@@ -333,8 +333,8 @@ export type Item = {
 
 export type Participant = {
   id?: ID;
-  name: string;
-  surname: string;
+  name?: string | null;
+  surname?: string | null;
   emailAddress: string;
   phone: string;
   contactAttrs?: string;

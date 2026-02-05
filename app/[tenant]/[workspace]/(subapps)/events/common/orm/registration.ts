@@ -9,22 +9,21 @@ import {UserType} from '@/lib/core/auth/types';
 import {PartnerTypeMap} from '@/orm/partner';
 import {CreateArgs} from '@goovee/orm';
 import {Maybe} from '@/types/util';
+import type {Client} from '@/goovee/.generated/client';
 
 export async function registerParticipants({
   eventId,
   participants,
-  tenantId,
+  client,
 }: {
   eventId: ID;
   workspaceURL: string;
   participants: Participant[];
-  tenantId: Tenant['id'];
+  client: Client;
 }): Promise<{id: ID; version: number}> {
-  const c = await manager.getClient(tenantId);
-
   const contacts = await getEventContacts({
     participants,
-    tenantId,
+    client,
   });
 
   const timeStamp = new Date();
@@ -76,7 +75,7 @@ export async function registerParticipants({
     },
   );
 
-  const registration = await c.aOSRegistration.create({
+  const registration = await client.aOSRegistration.create({
     data: {
       event: {select: {id: eventId}},
       participantList: {create: participantList},
@@ -100,10 +99,10 @@ type EventContact = {
 
 export async function getEventContacts({
   participants,
-  tenantId,
+  client,
 }: {
   participants: Participant[];
-  tenantId: Tenant['id'];
+  client: Client;
 }): Promise<EventContact[]> {
   const partners = await Promise.all(
     participants
@@ -117,8 +116,7 @@ export async function getEventContacts({
       ) // Filter out duplicate emails
       .map(async participant => {
         const {emailAddress, name, surname, company, phone} = participant;
-        const c = await manager.getClient(tenantId);
-        const partners = await c.aOSPartner.find({
+        const partners = await client.aOSPartner.find({
           where: {
             emailAddress: {
               OR: [
@@ -135,7 +133,7 @@ export async function getEventContacts({
           return partners.find(p => p.isActivatedOnPortal) ?? partners[0];
         }
 
-        const eventContact = await c.aOSPartner.create({
+        const eventContact = await client.aOSPartner.create({
           data: {
             partnerTypeSelect: PartnerTypeMap[UserType.individual],
             emailAddress: {
@@ -194,4 +192,51 @@ export async function findEventRegistration({
   });
 
   return result;
+}
+
+export async function removeRegistration({
+  registration,
+  tenantId,
+}: {
+  registration: {id: string; version: number};
+  tenantId: Tenant['id'];
+}) {
+  const client = await manager.getClient(tenantId);
+  await client.aOSPortalParticipant.deleteAll({
+    where: {
+      registration: {id: registration.id},
+    },
+  });
+  await client.aOSRegistration.delete({
+    id: registration.id,
+    version: registration.version,
+  });
+}
+
+export async function removeParticipantFromRegistration({
+  tenantId,
+  registration,
+  participant,
+}: {
+  tenantId: Tenant['id'];
+  registration: {id: string; version: number};
+  participant: {id: string; version: number};
+}) {
+  const client = await manager.getClient(tenantId);
+  await client.$transaction(async client => {
+    await client.aOSRegistration.update({
+      data: {
+        id: registration.id,
+        version: registration.version,
+        participantList: {
+          remove: [participant.id],
+        },
+      },
+      select: {id: true, participantList: {select: {id: true}}},
+    });
+    await client.aOSPortalParticipant.delete({
+      id: participant.id,
+      version: participant.version + 1, // incrementing version since remove operation increments version
+    });
+  });
 }

@@ -1,0 +1,6 @@
+{
+  "title": "Allow users to unsubscribe from unpaid events",
+  "type": "feature",
+  "description": "Free events can now be unsubscribed by users until registration deadline. An email will be sent to the user for notification.",
+  "scope": ["events"]
+}
