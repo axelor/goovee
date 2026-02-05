@@ -1005,4 +1005,3 @@ export async function validatePayboxPayment({
     };
   }
 }
-

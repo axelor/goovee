@@ -57,7 +57,6 @@ export async function findPaymentContext({
   mode: PaymentOption;
   ignoreExpiration?: boolean;
 }): Promise<PaymentContext | null> {
-
   const context = await client.paymentContext.findOne({
     where: {
       id,
@@ -95,7 +94,6 @@ export async function updatePaymentContextData({
   client: Client;
   context?: any;
 }) {
-
   const result = await client.paymentContext.update({
     data: {
       id,
@@ -164,7 +162,6 @@ async function updatePaymentStatus({
   client: Client;
   status: ContextStatus;
 }): Promise<void> {
-
   await client.paymentContext.update({
     data: {
       id: contextId,
