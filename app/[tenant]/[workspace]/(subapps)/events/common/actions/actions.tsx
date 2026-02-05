@@ -53,6 +53,8 @@ import {
   isAlreadyRegistered,
 } from '@/subapps/events/common/utils/registration';
 import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
+import {manager} from '@/lib/core/tenant';
+import {PaymentContext} from '@/lib/core/payment/common/type';
 
 export async function getAllEvents({
   limit,
@@ -140,7 +142,7 @@ export async function register({
   });
   if (!$event) return error(await t('Event not found!'));
 
-  let paidAmount, values, context;
+  let paidAmount, values, context: PaymentContext;
   if (payment) {
     const paymentInfo = await getPaymentInfo({
       mode: payment.mode,
@@ -185,32 +187,37 @@ export async function register({
     );
   }
 
-  const registration = await registerParticipants({
-    eventId,
-    participants,
-    workspaceURL,
-    tenantId,
-  });
+  const client = await manager.getClient(tenantId);
+  const registration = await client.$transaction(async client => {
+    const registration = await registerParticipants({
+      eventId,
+      participants,
+      workspaceURL,
+      client,
+    });
 
-  if (context) {
-    await markPaymentAsProcessed({
-      contextId: context.id,
-      version: context.version,
-      tenantId,
-    });
-  }
-  if (paidAmount > 0) {
-    createInvoice({
-      workspace,
-      tenantId,
-      registrationId: registration.id,
-      currencyCode: $event.currency?.code,
-    }).then(res => {
-      if (res.error) {
-        console.error('Invoice creation failed:', res.message);
-      }
-    });
-  }
+    if (context) {
+      await markPaymentAsProcessed({
+        contextId: context.id,
+        version: context.version,
+        client,
+      });
+    }
+    if (paidAmount > 0) {
+      await createInvoice({
+        workspace,
+        tenantId,
+        registrationId: registration.id,
+        currencyCode: $event.currency?.code,
+      }).then(res => {
+        if (res.error) {
+          console.error('Invoice creation failed:', res.message);
+          throw new Error(res.message);
+        }
+      });
+    }
+    return registration;
+  });
   generateRegistrationMailAction({
     eventId,
     participants,

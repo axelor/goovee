@@ -10,7 +10,7 @@ import {
   markPaymentAsFailed,
 } from '@/lib/core/payment/common/orm';
 import {PaymentOption} from '@/types';
-import type {Tenant} from '@/tenant';
+import {manager, type Tenant} from '@/tenant';
 import {
   type PaymentContextData,
   type PaymentOrder,
@@ -77,11 +77,12 @@ export async function createStripeOrder({
   }
 
   try {
+    const client = await manager.getClient(tenantId);
     const {id: contextId} = await createPaymentContext({
       context,
       mode: PaymentOption.stripe,
       payer: customer.email,
-      tenantId,
+      client,
     });
 
     const session: Stripe.Checkout.Session =
@@ -139,9 +140,10 @@ export async function findStripeOrder({
     throw new Error('Context id not found');
   }
 
+  const client = await manager.getClient(tenantId);
   const context = await findPaymentContext({
     id: contextId,
-    tenantId,
+    client,
     mode: PaymentOption.stripe,
   });
 
@@ -200,11 +202,12 @@ export async function createStripePaymentIntent({
   try {
     const bankTransfer = getBankTransferConfig(currency, countryCode);
 
+    const client = await manager.getClient(tenantId);
     const paymentContext = await createPaymentContext({
       context,
       mode: PaymentOption.stripe,
       payer: customer.email,
-      tenantId,
+      client,
     });
 
     const stripeCustomerId = await getOrCreateStripeCustomer(
@@ -243,7 +246,7 @@ export async function createStripePaymentIntent({
       await markPaymentAsFailed({
         contextId: paymentContext.id,
         version: paymentContext.version,
-        tenantId,
+        client,
       });
 
       return;
@@ -253,7 +256,7 @@ export async function createStripePaymentIntent({
     await updatePaymentContextData({
       id: paymentContext.id,
       version: paymentContext.version,
-      tenantId,
+      client,
       context: {
         ...context,
         paymentIntent: confirmedIntent.id,

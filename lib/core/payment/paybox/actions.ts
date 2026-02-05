@@ -1,5 +1,5 @@
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
-import type {Tenant} from '@/tenant';
+import {manager, type Tenant} from '@/tenant';
 import {PaymentOption} from '@/types';
 import {decodeFilter as decode} from '@/utils/url';
 import {getPaymentURL} from '.';
@@ -31,11 +31,12 @@ export async function createPayboxOrder({
     throw new Error('Amount, currency and email is required');
   }
 
+  const client = await manager.getClient(tenantId);
   const {id: contextId} = await createPaymentContext({
     context,
     mode: PaymentOption.paybox,
     payer: email,
-    tenantId,
+    client,
   });
 
   return {
@@ -86,9 +87,10 @@ export async function findPayboxOrder({
     throw new Error('Context id not found');
   }
 
+  const client = await manager.getClient(tenantId);
   const context = await findPaymentContext({
     id: reference.context_id,
-    tenantId,
+    client,
     mode: PaymentOption.paybox,
   });
 

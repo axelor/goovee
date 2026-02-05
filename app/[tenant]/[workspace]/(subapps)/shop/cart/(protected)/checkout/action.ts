@@ -335,10 +335,11 @@ export async function paypalCaptureOrder({
     }
 
     const res = await createOrder({cart, workspaceURL, tenantId});
+    const client = await manager.getClient(tenantId);
     await markPaymentAsProcessed({
       contextId: context.id,
       version: context.version,
-      tenantId,
+      client,
     });
     return res;
   } catch (err) {
@@ -767,10 +768,11 @@ export async function validateStripePayment({
   }
 
   const res = await createOrder({cart, workspaceURL, tenantId});
+  const client = await manager.getClient(tenantId);
   await markPaymentAsProcessed({
     contextId: context.id,
     version: context.version,
-    tenantId,
+    client,
   });
   return res;
 }
@@ -1049,10 +1051,11 @@ export async function validatePayboxPayment({
   }
 
   const res = await createOrder({cart, workspaceURL, tenantId});
+  const client = await manager.getClient(tenantId);
   await markPaymentAsProcessed({
     contextId: context.id,
     version: context.version,
-    tenantId,
+    client,
   });
   return res;
 }
