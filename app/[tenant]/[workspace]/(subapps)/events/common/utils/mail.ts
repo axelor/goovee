@@ -1,18 +1,16 @@
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/lib/core/auth';
 import NotificationManager, {NotificationType} from '@/lib/core/notification';
 import {Participant} from '@/types';
 import {html} from '@/utils/template-string';
-import {findEvent} from '../orm/event';
 import {generateIcs} from './index';
-import {ICalCalendarMethod} from 'ical-generator';
 import {formatDate} from '@/lib/core/locale/server/formatters';
+import type {Event} from '@/subapps/events/common/types';
 
 export async function mailTemplate({
   event,
   participant,
 }: {
-  event: any;
+  event: Event;
   participant: Participant;
 }) {
   const {
@@ -143,7 +141,7 @@ export async function cancellationMailTemplate({
   event,
   participant,
 }: {
-  event: any;
+  event: Event;
   participant: Pick<Participant, 'name' | 'surname'>;
 }) {
   const {
@@ -255,35 +253,20 @@ export async function cancellationMailTemplate({
 }
 
 export const generateRegistrationMailAction = async ({
-  eventId,
+  event,
   participants,
   workspaceURL,
   tenantId,
 }: {
   participants: Participant[];
-  eventId: any;
+  event: Event;
   workspaceURL: string;
   tenantId: string;
 }) => {
-  if (![eventId, participants?.length, workspaceURL, tenantId].every(Boolean)) {
+  if (![event, participants?.length, workspaceURL, tenantId].every(Boolean)) {
     console.error(
-      'Missing required parameters: eventId, participants, workspaceURL, or tenantId.',
+      'Missing required parameters: event, participants, workspaceURL, or tenantId.',
     );
-    return;
-  }
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const event = await findEvent({
-    id: eventId,
-    workspace: {url: workspaceURL},
-    tenantId,
-    user,
-  });
-
-  if (!event) {
-    console.error(`Event with ID ${eventId} not found.`);
     return;
   }
 
@@ -324,35 +307,20 @@ export const generateRegistrationMailAction = async ({
 };
 
 export const generateCancellationMailAction = async ({
-  eventId,
+  event,
   participants,
   workspaceURL,
   tenantId,
 }: {
   participants: Pick<Participant, 'emailAddress' | 'name' | 'surname'>[];
-  eventId: any;
+  event: Event;
   workspaceURL: string;
   tenantId: string;
 }) => {
-  if (![eventId, participants?.length, workspaceURL, tenantId].every(Boolean)) {
+  if (![event, participants?.length, workspaceURL, tenantId].every(Boolean)) {
     console.error(
-      'Missing required parameters: eventId, participants, workspaceURL, or tenantId.',
+      'Missing required parameters: event, participants, workspaceURL, or tenantId.',
     );
-    return;
-  }
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const event = await findEvent({
-    id: eventId,
-    workspace: {url: workspaceURL},
-    tenantId,
-    user,
-  });
-
-  if (!event) {
-    console.error(`Event with ID ${eventId} not found.`);
     return;
   }
 
@@ -363,7 +331,6 @@ export const generateCancellationMailAction = async ({
   }
 
   const subject = `🚫 Registration Cancelled: "${event.eventTitle}"`;
-  const ics = generateIcs(event, participants, ICalCalendarMethod.CANCEL);
 
   const mailPromises = participants.map(async participant => {
     const emailContent = await cancellationMailTemplate({event, participant});
@@ -371,17 +338,6 @@ export const generateCancellationMailAction = async ({
       to: participant.emailAddress,
       subject,
       html: emailContent,
-      icalEvent: {
-        method: 'CANCEL',
-        content: ics,
-      },
-      attachments: [
-        {
-          filename: 'cancel.ics',
-          content: ics,
-          contentType: 'text/calendar; method=CANCEL',
-        },
-      ],
     });
   });
 

@@ -222,8 +222,9 @@ export async function register({
     }
     return registration;
   });
+
   generateRegistrationMailAction({
-    eventId,
+    event: $event,
     participants,
     workspaceURL,
     tenantId,
@@ -579,7 +580,7 @@ export const unsubscribeFromEvent = async ({
     }
 
     generateCancellationMailAction({
-      eventId,
+      event,
       participants: [participant],
       workspaceURL,
       tenantId,
