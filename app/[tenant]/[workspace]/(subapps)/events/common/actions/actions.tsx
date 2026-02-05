@@ -43,6 +43,7 @@ import {
 } from '@/subapps/events/common/orm/registration';
 import {
   error,
+  hasRegistrationEnded,
   isEventPrivate,
   isEventPublic,
 } from '@/subapps/events/common/utils';
@@ -546,6 +547,10 @@ export const unsubscribeFromEvent = async ({
 
   if (event.isInvoiced) {
     return error(await t('You have already been invoiced. Cannot unsubscribe'));
+  }
+
+  if (hasRegistrationEnded(event)) {
+    return error(await t('Registration has already ended'));
   }
 
   const participant = event.userRegistration.participantList?.find(

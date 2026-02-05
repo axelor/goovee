@@ -68,13 +68,14 @@ export const EventPageCard = ({
   const allowGuests =
     allowGuestEventRegistration && !isLoginNeededForRegistration(eventDetails);
 
+  const registrationEnded = hasRegistrationEnded(eventDetails);
   const isRegistrationAllow =
-    eventAllowRegistration &&
-    (user || allowGuests) &&
-    !hasRegistrationEnded(eventDetails);
+    eventAllowRegistration && (user || allowGuests) && !registrationEnded;
+
+  const canUnsubscribe =
+    user && isRegistered && !isInvoiced && !registrationEnded;
 
   async function unsubscribe() {
-    if (!user) return;
     try {
       const res = await unsubscribeFromEvent({
         eventId: eventDetails.id,
@@ -178,7 +179,7 @@ export const EventPageCard = ({
         </div>
       </CardContent>
       <CardFooter className="px-4 pb-4 flex-col gap-4">
-        {user && isRegistered && !isInvoiced && (
+        {canUnsubscribe && (
           <Button
             size="sm"
             variant="destructive"

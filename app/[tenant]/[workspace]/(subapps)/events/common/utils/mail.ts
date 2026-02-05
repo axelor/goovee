@@ -26,7 +26,7 @@ export async function mailTemplate({
   } = event;
 
   const {name, surname, subscriptionSet = []} = participant;
-  const fullName = `${name} ${surname}`.trim();
+  const fullName = `${name || ''} ${surname || ''}`.trim();
 
   const formattedEventStartDateTime = await formatDate(eventStartDateTime, {
     timezone: 'Europe/Paris',
@@ -156,7 +156,7 @@ export async function cancellationMailTemplate({
   } = event;
 
   const {name, surname} = participant;
-  const fullName = `${name} ${surname}`.trim();
+  const fullName = `${name || ''} ${surname || ''}`.trim();
 
   const formattedEventStartDateTime = await formatDate(eventStartDateTime, {
     timezone: 'Europe/Paris',
