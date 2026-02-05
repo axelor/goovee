@@ -52,6 +52,8 @@ export type Event = {
       id: string;
       version: number;
       emailAddress: string;
+      name: string;
+      surname: string;
     }>;
   }>;
   facilityList: Array<{
@@ -81,6 +83,8 @@ export type Event = {
       id: string;
       version: number;
       emailAddress: string;
+      name: string;
+      surname: string;
     }>;
   } | null;
 

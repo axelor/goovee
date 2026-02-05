@@ -83,7 +83,11 @@ export function ical(
   return calendar.toString();
 }
 
-export const generateIcs = (event: any, participants: Participant[]) => {
+export const generateIcs = (
+  event: any,
+  participants: Pick<Participant, 'emailAddress' | 'name' | 'surname'>[],
+  method?: ICalCalendarMethod,
+) => {
   const attendees: any = participants.map(participant => ({
     email: participant.emailAddress,
     name: `${participant.name} ${participant.surname}`,
@@ -92,14 +96,17 @@ export const generateIcs = (event: any, participants: Participant[]) => {
     status: 'NEEDS-ACTION',
   }));
 
-  return ical({
-    start: event.eventStartDateTime,
-    end: getEventEndDate(event),
-    summary: event.eventTitle,
-    location: event.eventPlace,
-    description: event.eventDescription,
-    attendees,
-  });
+  return ical(
+    {
+      start: event.eventStartDateTime,
+      end: getEventEndDate(event),
+      summary: event.eventTitle,
+      location: event.eventPlace,
+      description: event.eventDescription,
+      attendees,
+    },
+    {method},
+  );
 };
 
 export function mapParticipants(

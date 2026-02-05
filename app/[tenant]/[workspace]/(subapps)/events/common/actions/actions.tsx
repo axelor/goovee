@@ -46,7 +46,10 @@ import {
   isEventPrivate,
   isEventPublic,
 } from '@/subapps/events/common/utils';
-import {generateRegistrationMailAction} from '@/subapps/events/common/utils/mail';
+import {
+  generateCancellationMailAction,
+  generateRegistrationMailAction,
+} from '@/subapps/events/common/utils/mail';
 import {getCalculatedTotalPrice} from '@/subapps/events/common/utils/payments';
 import {
   canEmailBeRegistered,
@@ -569,6 +572,14 @@ export const unsubscribeFromEvent = async ({
         participant,
       });
     }
+
+    generateCancellationMailAction({
+      eventId,
+      participants: [participant],
+      workspaceURL,
+      tenantId,
+    });
+
     return {success: true, data: true};
   } catch (err) {
     console.error(err);

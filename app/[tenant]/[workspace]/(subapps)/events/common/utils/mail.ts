@@ -5,6 +5,7 @@ import {Participant} from '@/types';
 import {html} from '@/utils/template-string';
 import {findEvent} from '../orm/event';
 import {generateIcs} from './index';
+import {ICalCalendarMethod} from 'ical-generator';
 import {formatDate} from '@/lib/core/locale/server/formatters';
 
 export async function mailTemplate({
@@ -138,6 +139,121 @@ export async function mailTemplate({
   `;
 }
 
+export async function cancellationMailTemplate({
+  event,
+  participant,
+}: {
+  event: any;
+  participant: Pick<Participant, 'name' | 'surname'>;
+}) {
+  const {
+    eventTitle,
+    eventPlace,
+    eventAllDay,
+    eventStartDateTime,
+    eventEndDateTime,
+    eventLink,
+  } = event;
+
+  const {name, surname} = participant;
+  const fullName = `${name} ${surname}`.trim();
+
+  const formattedEventStartDateTime = await formatDate(eventStartDateTime, {
+    timezone: 'Europe/Paris',
+    dateFormat: 'YYYY-MM-DD HH:mm Z',
+  });
+  const formattedEventEndDateTime = await formatDate(eventEndDateTime, {
+    timezone: 'Europe/Paris',
+    dateFormat: 'YYYY-MM-DD HH:mm Z',
+  });
+  const dateDetails = eventAllDay
+    ? html`<strong>Date:</strong> ${formattedEventStartDateTime}`
+    : html`<strong>Date:</strong> ${formattedEventStartDateTime} -
+        ${formattedEventEndDateTime}`;
+
+  return html`
+    <!doctype html>
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 20px;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+          }
+          .header {
+            background: #e53e3e;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+          }
+          .content {
+            padding: 20px;
+            line-height: 1.6;
+          }
+          .btn-container {
+            text-align: center;
+            margin-top: 20px;
+          }
+          .event-btn {
+            background-color: #e53e3e;
+            color: #fff !important;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            display: inline-block;
+          }
+          .event-btn:hover {
+            background-color: #c53030;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Registration Cancelled</h1>
+          </div>
+          <div class="content">
+            <p>Hi <b>${fullName}</b>,</p>
+            <p>
+              Your registration for the following event has been successfully
+              cancelled:
+            </p>
+            <p>
+              <strong>Event Name:</strong> ${eventTitle}<br />
+              ${dateDetails}<br />
+              ${eventPlace ? `<strong>Location:</strong> ${eventPlace}` : ''}
+            </p>
+            <p>
+              The event has been removed from your calendar. If this was a
+              mistake, you can always register again.
+            </p>
+            <div class="btn-container">
+              <a
+                href="${eventLink}"
+                class="event-btn"
+                target="_blank"
+                rel="noopener noreferrer">
+                View Event
+              </a>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
 export const generateRegistrationMailAction = async ({
   eventId,
   participants,
@@ -204,5 +320,74 @@ export const generateRegistrationMailAction = async ({
     await Promise.all(mailPromises);
   } catch (error) {
     console.error('Error sending registration emails:', error);
+  }
+};
+
+export const generateCancellationMailAction = async ({
+  eventId,
+  participants,
+  workspaceURL,
+  tenantId,
+}: {
+  participants: Pick<Participant, 'emailAddress' | 'name' | 'surname'>[];
+  eventId: any;
+  workspaceURL: string;
+  tenantId: string;
+}) => {
+  if (![eventId, participants?.length, workspaceURL, tenantId].every(Boolean)) {
+    console.error(
+      'Missing required parameters: eventId, participants, workspaceURL, or tenantId.',
+    );
+    return;
+  }
+
+  const session = await getSession();
+  const user = session?.user;
+
+  const event = await findEvent({
+    id: eventId,
+    workspace: {url: workspaceURL},
+    tenantId,
+    user,
+  });
+
+  if (!event) {
+    console.error(`Event with ID ${eventId} not found.`);
+    return;
+  }
+
+  const mailService = NotificationManager.getService(NotificationType.mail);
+  if (!mailService) {
+    console.error('Mail service is not available.');
+    return;
+  }
+
+  const subject = `🚫 Registration Cancelled: "${event.eventTitle}"`;
+  const ics = generateIcs(event, participants, ICalCalendarMethod.CANCEL);
+
+  const mailPromises = participants.map(async participant => {
+    const emailContent = await cancellationMailTemplate({event, participant});
+    return mailService.notify({
+      to: participant.emailAddress,
+      subject,
+      html: emailContent,
+      icalEvent: {
+        method: 'CANCEL',
+        content: ics,
+      },
+      attachments: [
+        {
+          filename: 'cancel.ics',
+          content: ics,
+          contentType: 'text/calendar; method=CANCEL',
+        },
+      ],
+    });
+  });
+
+  try {
+    await Promise.all(mailPromises);
+  } catch (error) {
+    console.error('Error sending cancellation emails:', error);
   }
 };

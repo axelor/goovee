@@ -209,7 +209,11 @@ export async function findEvent({
             select: {
               invoice: {id: true},
               participantList: {
-                select: {emailAddress: true},
+                select: {
+                  emailAddress: true,
+                  name: true,
+                  surname: true,
+                },
               },
             },
           },
