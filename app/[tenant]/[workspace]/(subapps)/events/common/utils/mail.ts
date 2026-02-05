@@ -232,10 +232,7 @@ export async function cancellationMailTemplate({
               ${dateDetails}<br />
               ${eventPlace ? `<strong>Location:</strong> ${eventPlace}` : ''}
             </p>
-            <p>
-              The event has been removed from your calendar. If this was a
-              mistake, you can always register again.
-            </p>
+            <p>If this was a mistake, you can always register again.</p>
             <div class="btn-container">
               <a
                 href="${eventLink}"
