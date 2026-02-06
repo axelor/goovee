@@ -8,7 +8,7 @@ import {
 } from '@/constants';
 
 export default function manifest(): MetadataRoute.Manifest {
-  const manifestJSON = {
+  return {
     name: DEFAULT_APP_TEMPLATE_TITLE,
     short_name: APP_TEMPLATE_TITLE,
     description: APP_DESCRIPTION,
@@ -37,6 +37,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/pwa/icons/icon-192x192.png',
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'maskable',
       },
       {
         src: '/pwa/icons/icon-256x256.png',
@@ -52,6 +53,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/pwa/icons/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
+        purpose: 'maskable',
       },
     ],
     screenshots: [
@@ -69,6 +71,4 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
   };
-
-  return manifestJSON as any;
 }

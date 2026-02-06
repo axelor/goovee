@@ -14,7 +14,7 @@ import {
   APP_TEMPLATE_TITLE,
   DEFAULT_APP_TEMPLATE_TITLE,
 } from '@/constants';
-import ServiceWorker from './service-worker';
+import {SerwistProvider} from './serwist';
 import './globals.css';
 import 'swiper/css';
 import 'swiper/css/free-mode';
@@ -30,6 +30,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
+  applicationName: DEFAULT_APP_TEMPLATE_TITLE,
   title: {
     template: APP_TEMPLATE_TITLE,
     default: DEFAULT_APP_TEMPLATE_TITLE,
@@ -79,8 +80,7 @@ export default async function RootLayout({
         <body className={fontSans.className}>
           <Environment>
             <Locale>
-              <ServiceWorker />
-              {children}
+              <SerwistProvider swUrl="/sw.js">{children}</SerwistProvider>
             </Locale>
             <Toaster />
           </Environment>
