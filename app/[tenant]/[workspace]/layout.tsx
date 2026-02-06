@@ -1,4 +1,5 @@
 import React from 'react';
+import type {Metadata} from 'next';
 import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -16,7 +17,6 @@ import CartContext from './cart-context';
 import Header from './header';
 import Sidebar from './sidebar';
 import MobileMenu from './mobile-menu';
-import AnonymousSignOut from './anonymous-signout';
 import Footer from './footer';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
@@ -32,7 +32,7 @@ export async function generateMetadata(props: {
     workspace: string;
     websiteSlug: string;
   }>;
-}) {
+}): Promise<Metadata> {
   const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
 
@@ -67,13 +67,6 @@ export default async function Layout(props: {
   const user = session?.user;
 
   const {workspaceURL, workspaceURI, workspace} = workspacePathname(params);
-
-  // if (user && !user?.id) {
-  //   /**
-  //    * Remove tenative login using oauth for registration
-  //    */
-  //   return <AnonymousSignOut callbackurl={workspaceURL} />;
-  // }
 
   const $workspace = await findWorkspace({
     user,
