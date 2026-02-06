@@ -1,7 +1,9 @@
-@import './scss/fonts/custom-fonts.scss';
+@use 'sass:meta';
+@use 'scss/fonts/custom-fonts.scss';
+@use '../../../../../../../node_modules/glightbox/dist/css/glightbox';
+
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700');
 
-@import '../../../../../../../node_modules/glightbox/dist/css/glightbox';
 .gv {
   /* Root styles start here */
   --bs-gray-100: #fefefe;
@@ -208,15 +210,25 @@
   flex-direction: column;
 
   /* body styles end here */
-  @import '../../../../../../../node_modules/animate.css/animate';
-  @import '../../../../../../../node_modules/swiper/swiper.min';
-  @import '../../../../../../../node_modules/swiper/modules/free-mode.min';
-  @import '../../../../../../../node_modules/swiper/modules/navigation.min';
-  @import '../../../../../../../node_modules/swiper/modules/pagination.min';
-  @import '../../../../../../../node_modules/swiper/modules/thumbs.min';
-  @import '../plugins/scrollcue/scrollCue';
-  @import '../../../../../../../node_modules/plyr-react/plyr';
-  @import './css/style';
+  @include meta.load-css(
+    '../../../../../../../node_modules/animate.css/animate'
+  );
+  @include meta.load-css('../../../../../../../node_modules/swiper/swiper.min');
+  @include meta.load-css(
+    '../../../../../../../node_modules/swiper/modules/free-mode.min'
+  );
+  @include meta.load-css(
+    '../../../../../../../node_modules/swiper/modules/navigation.min'
+  );
+  @include meta.load-css(
+    '../../../../../../../node_modules/swiper/modules/pagination.min'
+  );
+  @include meta.load-css(
+    '../../../../../../../node_modules/swiper/modules/thumbs.min'
+  );
+  @include meta.load-css('../plugins/scrollcue/scrollCue');
+  @include meta.load-css('../../../../../../../node_modules/plyr-react/plyr');
+  @include meta.load-css('css/style');
 
   /* tailwind override start here */
   .show {
