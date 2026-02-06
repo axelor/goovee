@@ -284,11 +284,6 @@ export async function update({
       return error(await t('Invalid partner'));
     }
   }
-  // WARN: After updating the email address, getSession() will throw an error as it can't find the user in the session
-  // so we translate the messasge beforehand since it internally calls getSession()
-  const successMessage = await t('Settings updated successfully.');
-  const errorMessage = await t('Error updating settings. Try again.');
-
   try {
     const updatedPartner = await updatePartner({
       data: {
@@ -342,16 +337,14 @@ export async function update({
       };
 
       await updateEmail(partner?.emailAddress, email);
-      // WARN: After updating the email address, getSession() will throw an error as it can't find the user in the session
-      // we can not call any function that requires a after this
     }
 
     return {
       success: true,
-      message: successMessage,
+      message: await t('Settings updated successfully.'),
     };
   } catch (err) {
-    return error(errorMessage);
+    return error(await t('Error updating settings. Try again.'));
   }
 }
 
