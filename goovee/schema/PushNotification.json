@@ -1,0 +1,49 @@
+{
+  "name": "PushNotification",
+  "table": "portal_push_notification",
+  "synchronize": true,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "partner",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "workspace",
+      "target": "AOSPortalWorkspace"
+    },
+    {
+      "type": "String",
+      "name": "title"
+    },
+    {
+      "type": "String",
+      "name": "body"
+    },
+    {
+      "type": "String",
+      "name": "url"
+    },
+    {
+      "type": "Boolean",
+      "name": "isRead"
+    },
+    {
+      "type": "String",
+      "name": "typeSelect"
+    },
+    {
+      "type": "String",
+      "name": "relatedId"
+    },
+    {
+      "type": "String",
+      "name": "relatedModel"
+    },
+    {
+      "type": "DateTime",
+      "name": "readAt"
+    }
+  ]
+}

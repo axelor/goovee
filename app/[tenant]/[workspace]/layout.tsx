@@ -18,6 +18,7 @@ import Header from './header';
 import Sidebar from './sidebar';
 import MobileMenu from './mobile-menu';
 import Footer from './footer';
+import {PushProvider} from './push-context';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 const defaultTheme = {
@@ -127,37 +128,39 @@ export default async function Layout(props: {
       workspace={workspace}
       tenant={tenant}
       theme={theme}>
-      <CartContext>
-        <div className="h-full w-full flex min-h-screen">
-          {isLeftNavigation && (
-            <Sidebar
+      <PushProvider>
+        <CartContext>
+          <div className="h-full w-full flex min-h-screen">
+            {isLeftNavigation && (
+              <Sidebar
+                subapps={subapps}
+                workspaces={workspaces}
+                showHome={$workspace?.config?.isHomepageDisplay}
+                workspace={$workspace}
+              />
+            )}
+            <div className="flex flex-col flex-1 max-h-full max-w-full min-w-0">
+              <Header
+                subapps={subapps}
+                isTopNavigation={isTopNavigation}
+                workspaces={workspaces}
+                workspace={$workspace}
+                showCart={showCart}
+              />
+              <div className="flex flex-col flex-grow min-h-0">
+                <div className="flex-grow">{children}</div>
+                <Footer workspace={$workspace} />
+              </div>
+            </div>
+            <MobileMenu
               subapps={subapps}
-              workspaces={workspaces}
-              showHome={$workspace?.config?.isHomepageDisplay}
-              workspace={$workspace}
-            />
-          )}
-          <div className="flex flex-col flex-1 max-h-full max-w-full min-w-0">
-            <Header
-              subapps={subapps}
-              isTopNavigation={isTopNavigation}
               workspaces={workspaces}
               workspace={$workspace}
               showCart={showCart}
             />
-            <div className="flex flex-col flex-grow min-h-0">
-              <div className="flex-grow">{children}</div>
-              <Footer workspace={$workspace} />
-            </div>
           </div>
-          <MobileMenu
-            subapps={subapps}
-            workspaces={workspaces}
-            workspace={$workspace}
-            showCart={showCart}
-          />
-        </div>
-      </CartContext>
+        </CartContext>
+      </PushProvider>
     </Workspace>
   );
 }

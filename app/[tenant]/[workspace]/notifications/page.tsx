@@ -1,5 +1,28 @@
-import Content from './content';
+import {workspacePathname} from '@/utils/workspace';
+import {UnreadNotificationsList} from './unread-list';
+import {t} from '@/locale/server';
+import {getSession} from '@/lib/core/auth';
+import {notFound} from 'next/navigation';
 
-export default function Eshop() {
-  return <Content />;
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+}) {
+  const params = await props.params;
+  const {tenant: tenantId} = params;
+  const {workspaceURL: url} = workspacePathname(params);
+
+  const session = await getSession();
+  const user = session?.user;
+
+  if (!user) notFound();
+
+  return (
+    <div className="px-4 md:px-12 py-2 md:py-4 space-y-6">
+      <h2 className="text-3xl font-bold text-foreground">
+        {t('Notifications')}
+      </h2>
+      <UnreadNotificationsList />
+    </div>
+  );
 }
+

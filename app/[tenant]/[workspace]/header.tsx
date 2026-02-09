@@ -5,7 +5,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
-import {MdNotificationsNone} from 'react-icons/md';
+import {usePushNotifications} from '@/ui/hooks/use-push-notifications';
+import {
+  MdNotificationsNone,
+  MdNotificationsActive,
+  MdNotificationsOff,
+} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -16,6 +21,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  Badge,
 } from '@/ui/components';
 import {i18n} from '@/locale';
 import {DEFAULT_LOGO_URL, SUBAPP_PAGE} from '@/constants';
@@ -55,11 +61,23 @@ function Logo({workspace}: {workspace: PortalWorkspace}) {
 }
 
 function Notification() {
+  const {unreadNotifications} = usePushNotifications();
   const {workspaceURI} = useWorkspace();
 
+  const count = unreadNotifications.length;
+
   return (
-    <Link href={`${workspaceURI}/notifications`} className="inline-flex">
+    <Link
+      href={`${workspaceURI}/notifications`}
+      className="inline-flex relative">
       <MdNotificationsNone className="cursor-pointer text-foreground text-2xl" />
+      {count > 0 && (
+        <Badge
+          variant="destructive"
+          className="absolute -top-1 -right-1 h-4 w-4 min-w-0 p-0 flex items-center justify-center text-[10px] border-2 border-background">
+          {count > 9 ? '9+' : count}
+        </Badge>
+      )}
     </Link>
   );
 }
@@ -146,7 +164,7 @@ export default function Header({
                     </Link>
                   );
                 })}
-            {false && <Notification />}
+            {user && <Notification />}
             {showCartIcon && <Cart />}
             <Account baseURL={workspaceURI} tenant={tenant} />
           </div>

@@ -1,0 +1,29 @@
+{
+  "name": "PushSubscription",
+  "table": "portal_push_subscription",
+  "synchronize": true,
+  "fields": [
+    {
+      "type": "String",
+      "name": "endpoint",
+      "unique": true
+    },
+    {
+      "type": "String",
+      "name": "p256dh"
+    },
+    {
+      "type": "String",
+      "name": "auth"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "partner",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "DateTime",
+      "name": "lastUsedAt"
+    }
+  ]
+}

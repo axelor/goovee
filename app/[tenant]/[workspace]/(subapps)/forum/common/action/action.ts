@@ -40,6 +40,7 @@ import {NOTIFICATION_VALUES} from '@/subapps/forum/common/constants';
 import {sendEmailNotifications} from '@/subapps/forum/common/utils/mail';
 import {ContentType} from '@/subapps/forum/common/types/forum';
 import {getArchivedFilter} from '@/subapps/forum/common/utils';
+import {sendToPartner} from '@/utils/push';
 
 interface FileMeta {
   fileName: string;
@@ -574,6 +575,26 @@ export async function addPost({
     if (!subscribers.error) {
       const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}#post-${post.id}`;
 
+      subscribers.forEach((reciever: any) => {
+        if (reciever.member?.id && reciever.member.emailAddress?.address !== user.email) {
+          sendToPartner({
+            partnerId: reciever.member.id,
+            tenantId,
+            workspaceId: workspace.id,
+            payload: {
+              title: `${user.simpleFullName || user.name} created a new post`,
+              body: post?.title ?? '',
+              url: postLink,
+            },
+            related: {
+              id: post.id,
+              model: ModelMap[SUBAPP_CODES.forum]!,
+              type: 'post',
+            },
+          });
+        }
+      });
+
       sendEmailNotifications({
         type: ContentType.POST,
         title: post?.title ?? '',
@@ -918,13 +939,37 @@ export const createComment: CreateComment = async formData => {
       const post = posts[0];
 
       if (post?.id) {
-        const subscribers: any = await getSubscribersByGroup({
+        const subscribers = await getSubscribersByGroup({
           groupID: post.forumGroup.id,
           workspaceURL,
         });
 
-        if (!subscribers?.error) {
+        if (!('error' in subscribers)) {
           const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}#post-${post.id}`;
+
+          const notificationRecievers = subscribers.filter(
+            sub => sub.member?.emailAddress?.address != user.email,
+          );
+
+          notificationRecievers.forEach(reciever => {
+            if (reciever.member?.id) {
+              sendToPartner({
+                partnerId: reciever.member.id,
+                tenantId,
+                workspaceId: workspace.id,
+                payload: {
+                  title: `${user.simpleFullName || user.name} added a comment`,
+                  body: res[0].note ?? '',
+                  url: postLink,
+                },
+                related: {
+                  id: post.id,
+                  model: ModelMap[SUBAPP_CODES.forum]!,
+                  type: 'comment',
+                },
+              });
+            }
+          });
 
           sendEmailNotifications({
             type: ContentType.COMMENT,
@@ -1087,6 +1132,7 @@ export const getSubscribersByGroup = async ({
       select: {
         notificationSelect: true,
         member: {
+          id: true,
           emailAddress: {
             address: true,
           },

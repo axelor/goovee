@@ -40,32 +40,57 @@ self.addEventListener('push', event => {
   if (!data) return;
 
   const title = data.title || 'Notification';
-  const options = {
+  const options: NotificationOptions = {
     body: data.body || 'New message received',
     icon: '/pwa/icons/icon-192x192.png',
     badge: '/pwa/icons/icon-72x72.png',
     data: {
       url: data.url || '/',
+      notificationId: data.notificationId,
+      tenantId: data.tenantId,
+      workspaceId: data.workspaceId,
     },
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
+
+  // Notify all tabs to refresh their notification count
+  const channel = new BroadcastChannel('push-notifications');
+  channel.postMessage({type: 'REFRESH_NOTIFICATIONS'});
+  channel.close();
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  event.waitUntil(
-    self.clients.matchAll({type: 'window'}).then(clientList => {
-      for (const client of clientList) {
-        if (client.url === event.notification.data.url && 'focus' in client) {
-          return client.focus();
-        }
+  const {url, notificationId, tenantId} = event.notification.data;
+
+  const handleClick = async () => {
+    if (notificationId && tenantId) {
+      try {
+        await fetch(`/api/tenant/${tenantId}/push/notifications/read/${notificationId}`, {
+          method: 'POST',
+        });
+        // Notify all tabs to refresh since it's now read
+        const channel = new BroadcastChannel('push-notifications');
+        channel.postMessage({type: 'REFRESH_NOTIFICATIONS'});
+        channel.close();
+      } catch (err) {
+        console.error('Failed to mark notification as read from SW:', err);
       }
-      if (self.clients.openWindow) {
-        return self.clients.openWindow(event.notification.data.url);
+    }
+
+    const clientList = await self.clients.matchAll({type: 'window'});
+    for (const client of clientList) {
+      if (client.url === url && 'focus' in client) {
+        return client.focus();
       }
-    }),
-  );
+    }
+    if (self.clients.openWindow) {
+      return self.clients.openWindow(url);
+    }
+  };
+
+  event.waitUntil(handleClick());
 });
 
 serwist.addEventListeners();

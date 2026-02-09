@@ -11,6 +11,7 @@ import {t} from '@/locale/server';
 // ---- LOCAL IMPORTS ---- //
 import {Title} from '../common/ui/components';
 import {Preference} from './preference';
+import {DevicePushPreference} from './device-push-preference';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -55,6 +56,7 @@ export default async function Page(props: {
         <div className="space-y-4">
           <Title text={await t('Notifications')} />
           <Separator />
+          <DevicePushPreference />
           <Preference
             title={await t('Events')}
             code={SUBAPP_CODES.events}
