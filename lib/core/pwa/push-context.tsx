@@ -11,6 +11,7 @@ import React, {
 import {useEnvironment} from '@/lib/core/environment';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NotificationDTO} from './types';
+import {authClient} from '@/lib/auth-client';
 
 interface PushContextType {
   permission: NotificationPermission;
@@ -29,6 +30,9 @@ const PushContext = createContext<PushContextType | undefined>(undefined);
 
 export function PushProvider({children}: {children: React.ReactNode}) {
   const env = useEnvironment();
+  const {data: session} = authClient.useSession();
+  const user = session?.user;
+
   const {workspaceID, tenant} = useWorkspace();
 
   const [permission, setPermission] =
@@ -43,7 +47,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
   const hasSynced = React.useRef(false);
 
   const fetchNotifications = useCallback(async () => {
-    if (!tenant) return;
+    if (!tenant || !user) return;
     try {
       const url = new URL(
         `/api/tenant/${tenant}/push/notifications`,
@@ -60,7 +64,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
     } catch (error) {
       console.error('Failed to fetch unread notifications:', error);
     }
-  }, [tenant, workspaceID]);
+  }, [tenant, workspaceID, user]);
 
   const markAsRead = useCallback(
     async (id: string) => {
@@ -145,7 +149,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
     }
 
     // Fetch unread notifications
-    if (tenant) {
+    if (tenant && user) {
       fetchNotifications();
     }
   }, [
@@ -153,6 +157,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
     syncSubscription,
     tenant,
     fetchNotifications,
+    user,
   ]);
 
   const subscribe = useCallback(async () => {
