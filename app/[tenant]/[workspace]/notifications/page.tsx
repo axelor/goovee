@@ -19,7 +19,7 @@ export default async function Page(props: {
   return (
     <div className="px-4 md:px-12 py-2 md:py-4 space-y-6">
       <h2 className="text-3xl font-bold text-foreground">
-        {t('Notifications')}
+        {await t('Notifications')}
       </h2>
       <UnreadNotificationsList />
     </div>
