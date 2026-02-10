@@ -7,6 +7,7 @@ import {findPreferences} from '@/orm/notification';
 import NotificationManager, {NotificationType} from '@/notification';
 import {getTranslation} from '@/locale/server';
 import type {PortalApp} from '@/types';
+import {sendToPartner} from '@/utils/push';
 
 async function findAppByCode({
   code,
@@ -167,6 +168,36 @@ async function sendMail({
   });
 }
 
+async function sendSystemNotification({
+  user,
+  tenantId,
+  mail,
+  app,
+  entity,
+}: {
+  user: any;
+  tenantId: string;
+  mail?: {subject?: string; body?: string};
+  entity: {id: string; version: number; route: string};
+  app: PortalApp;
+}) {
+  sendToPartner({
+    partnerId: user.id,
+    tenantId,
+    workspaceId: user.mainPartner?.workspace?.id,
+    payload: {
+      title:
+        mail?.subject ||
+        (await getTranslation(
+          {locale: user.locale, tenant: tenantId},
+          '{0} - Notifications from Goovee',
+          app.name,
+        )),
+      url: entity.route,
+    },
+  });
+}
+
 async function sendNotifications(data: {
   tenantId: string;
   workspaceUrl: string;
@@ -224,8 +255,12 @@ async function sendNotifications(data: {
     const app: any = await findAppByCode({code, tenantId});
 
     processBatch(users, checkSubscription).then(() =>
-      processBatch(subscribers, ({user, entity}: {user: any; entity: any}) =>
-        sendMail({user, tenantId, mail, entity, app}),
+      processBatch(
+        subscribers,
+        async ({user, entity}: {user: any; entity: any}) => {
+          sendMail({user, tenantId, mail, entity, app});
+          sendSystemNotification({user, tenantId, mail, entity, app});
+        },
       ),
     );
   } catch (err) {}

@@ -50,6 +50,7 @@ import {
   isAlreadyRegistered,
 } from '@/subapps/events/common/utils/registration';
 import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
+import {sendToPartner} from '@/utils/push';
 
 export async function getAllEvents({
   limit,
@@ -166,7 +167,7 @@ export async function register({
     return validationResult;
   }
 
-  const {workspace, participants} = validationResult.data;
+  const {workspace, participants, user} = validationResult.data;
 
   const {priceScale} = $event;
   const {total: expectedAmount} = getCalculatedTotalPrice(values, $event);
@@ -214,6 +215,35 @@ export async function register({
       }
     });
   }
+
+  let userParticipants = registration.participantList?.filter(
+    p => p.contact?.isActivatedOnPortal,
+  );
+
+  if (user) {
+    userParticipants = userParticipants?.filter(
+      p => p.contact?.emailAddress?.address !== user.email,
+    );
+  }
+
+  userParticipants?.forEach(participant => {
+    sendToPartner({
+      partnerId: participant.contact!.id,
+      tenantId,
+      workspaceId: workspace.id,
+      payload: {
+        title: `You have been registered for an event!`,
+        body: `${registration.event!.eventTitle}`,
+        url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
+      },
+      related: {
+        id: eventId,
+        model: ModelMap[SUBAPP_CODES.events]!,
+        type: 'event',
+      },
+    });
+  });
+
   generateRegistrationMailAction({
     eventId,
     participants,

@@ -33,6 +33,7 @@ import type {CreateTicketInfo, UpdateTicketInfo} from '../utils/validators';
 import type {QueryProps} from './helpers';
 import {getProjectAccessFilter, withTicketAccessFilter} from './helpers';
 import {getMailRecipients} from './mail';
+import {sendToPartner} from '@/utils/push';
 
 export type TicketProps<T extends Entity> = QueryProps<T> & {
   projectId: ID;
@@ -276,12 +277,34 @@ export async function createTicket({
     console.error(e);
   }
 
+  const contacts = new Set([
+    newTicket.createdByContact?.id,
+    newTicket.managedByContact?.id,
+  ]);
+
+  contacts.forEach(contactId => {
+    if (contactId && contactId !== auth.userId) {
+      sendToPartner({
+        partnerId: contactId,
+        tenantId: auth.tenantId,
+        workspaceId: auth.workspaceId,
+        payload: {
+          title: `${auth.simpleFullName} created a new ticket`,
+          body: `${auth.simpleFullName} created a new ticket: ${newTicket.name}`,
+          url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+        },
+        related: {
+          id: newTicket.id,
+          model: ModelMap[SUBAPP_CODES.ticketing]!,
+          type: 'ticket',
+        },
+      });
+    }
+  });
+
   getMailRecipients({
     userId: auth.userId,
-    contacts: new Set([
-      newTicket.createdByContact?.id,
-      newTicket.managedByContact?.id,
-    ]),
+    contacts,
     tenantId: auth.tenantId,
     workspaceURL: auth.workspaceURL,
   })
@@ -505,13 +528,35 @@ export async function updateTicket({
     console.error(e);
   }
 
+  const contacts = new Set([
+    newTicket.createdByContact?.id,
+    newTicket.managedByContact?.id,
+    oldTicket?.managedByContact?.id,
+  ]);
+
+  contacts.forEach(contactId => {
+    if (contactId && contactId !== auth.userId) {
+      sendToPartner({
+        partnerId: contactId,
+        tenantId: auth.tenantId,
+        workspaceId: auth.workspaceId,
+        payload: {
+          title: `${auth.simpleFullName} updated a ticket`,
+          body: `${auth.simpleFullName} updated a ticket: ${newTicket.name}`,
+          url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+        },
+        related: {
+          id: newTicket.id,
+          model: ModelMap[SUBAPP_CODES.ticketing]!,
+          type: 'ticket',
+        },
+      });
+    }
+  });
+
   getMailRecipients({
     userId: auth.userId,
-    contacts: new Set([
-      newTicket.createdByContact?.id,
-      newTicket.managedByContact?.id,
-      oldTicket?.managedByContact?.id,
-    ]),
+    contacts,
     tenantId: auth.tenantId,
     workspaceURL: auth.workspaceURL,
   })

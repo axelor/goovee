@@ -41,7 +41,7 @@ self.addEventListener('push', event => {
 
   const title = data.title || 'Notification';
   const options: NotificationOptions = {
-    body: data.body || 'New message received',
+    body: data.body,
     icon: '/pwa/icons/icon-192x192.png',
     badge: '/pwa/icons/icon-72x72.png',
     data: {
@@ -67,9 +67,12 @@ self.addEventListener('notificationclick', event => {
   const handleClick = async () => {
     if (notificationId && tenantId) {
       try {
-        await fetch(`/api/tenant/${tenantId}/push/notifications/read/${notificationId}`, {
-          method: 'POST',
-        });
+        await fetch(
+          `/api/tenant/${tenantId}/push/notifications/read/${notificationId}`,
+          {
+            method: 'POST',
+          },
+        );
         // Notify all tabs to refresh since it's now read
         const channel = new BroadcastChannel('push-notifications');
         channel.postMessage({type: 'REFRESH_NOTIFICATIONS'});

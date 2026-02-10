@@ -4,7 +4,7 @@ import {manager} from '@/tenant';
 
 export async function sendNotification(
   subscription: webpush.PushSubscription,
-  payload: {title: string; body: string; url?: string},
+  payload: {title: string; body?: string; url?: string},
 ): ActionResponse<true> {
   const publicKey = process.env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
@@ -54,7 +54,7 @@ export async function sendToPartner({
   partnerId: string | number;
   tenantId: string;
   workspaceId?: string | number;
-  payload: {title: string; body: string; url?: string};
+  payload: {title: string; body?: string; url?: string};
   related?: {id: string | number; model: string; type?: string};
 }) {
   const client = await manager.getClient(tenantId);

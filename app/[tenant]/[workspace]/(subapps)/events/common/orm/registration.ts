@@ -19,7 +19,7 @@ export async function registerParticipants({
   workspaceURL: string;
   participants: Participant[];
   tenantId: Tenant['id'];
-}): Promise<{id: ID; version: number}> {
+}) {
   const c = await manager.getClient(tenantId);
 
   const contacts = await getEventContacts({
@@ -86,6 +86,12 @@ export async function registerParticipants({
     select: {
       event: {
         slug: true,
+        eventTitle: true,
+      },
+      participantList: {
+        select: {
+          contact: {isActivatedOnPortal: true, emailAddress: {address: true}},
+        },
       },
     },
   });

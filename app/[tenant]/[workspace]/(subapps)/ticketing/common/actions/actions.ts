@@ -50,6 +50,8 @@ import {handleError} from './helpers';
 import type {ActionConfig, MutateProps} from './types';
 import {getMailRecipients} from '../orm/mail';
 import {sendCommentMail} from '../utils/mail';
+import {sendToPartner} from '@/utils/push';
+import sanitize from 'sanitize-html';
 
 export type MutateResponse = {id: string; version: number};
 
@@ -731,13 +733,40 @@ export const createComment: CreateComment = async formData => {
 
     const [comment, parentComment] = res;
 
+    const contacts = new Set([
+      parentComment?.partner?.id,
+      ticket.createdByContact?.id,
+      ticket.managedByContact?.id,
+    ]);
+
+    contacts.forEach(contactId => {
+      if (contactId && contactId !== user.id) {
+        sendToPartner({
+          partnerId: contactId,
+          tenantId,
+          workspaceId: workspace.id,
+          payload: {
+            title: `${user.simpleFullName || user.name} added a comment on ${ticket.name}`,
+            body: sanitize(comment.note || '', {
+              allowedTags: [],
+              allowedAttributes: {},
+            }) //  Remove all HTML tags and attributes
+              .replace(/\s+/g, ' ') // Remove multiple spaces
+              .trim(),
+            url: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
+          },
+          related: {
+            id: ticket.id,
+            model: ModelMap[SUBAPP_CODES.ticketing]!,
+            type: 'comment',
+          },
+        });
+      }
+    });
+
     getMailRecipients({
       userId: auth.userId,
-      contacts: new Set([
-        parentComment?.partner?.id,
-        ticket.createdByContact?.id,
-        ticket.managedByContact?.id,
-      ]),
+      contacts,
       tenantId,
       workspaceURL,
     })
