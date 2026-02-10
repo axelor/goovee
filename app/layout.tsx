@@ -14,7 +14,7 @@ import {
   APP_TEMPLATE_TITLE,
   DEFAULT_APP_TEMPLATE_TITLE,
 } from '@/constants';
-import {SerwistProvider} from './serwist';
+import {SerwistProvider} from '@/pwa/serwist';
 import './globals.css';
 import 'swiper/css';
 import 'swiper/css/free-mode';

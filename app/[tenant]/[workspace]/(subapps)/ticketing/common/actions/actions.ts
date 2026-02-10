@@ -50,7 +50,7 @@ import {handleError} from './helpers';
 import type {ActionConfig, MutateProps} from './types';
 import {getMailRecipients} from '../orm/mail';
 import {sendCommentMail} from '../utils/mail';
-import {sendToPartner} from '@/utils/push';
+import {notifyUser} from '@/pwa/utils';
 import sanitize from 'sanitize-html';
 
 export type MutateResponse = {id: string; version: number};
@@ -741,8 +741,8 @@ export const createComment: CreateComment = async formData => {
 
     contacts.forEach(contactId => {
       if (contactId && contactId !== user.id) {
-        sendToPartner({
-          partnerId: contactId,
+        notifyUser({
+          userId: contactId,
           tenantId,
           workspaceId: workspace.id,
           payload: {

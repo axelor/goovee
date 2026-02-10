@@ -33,7 +33,7 @@ import type {CreateTicketInfo, UpdateTicketInfo} from '../utils/validators';
 import type {QueryProps} from './helpers';
 import {getProjectAccessFilter, withTicketAccessFilter} from './helpers';
 import {getMailRecipients} from './mail';
-import {sendToPartner} from '@/utils/push';
+import {notifyUser} from '@/pwa/utils';
 
 export type TicketProps<T extends Entity> = QueryProps<T> & {
   projectId: ID;
@@ -284,8 +284,8 @@ export async function createTicket({
 
   contacts.forEach(contactId => {
     if (contactId && contactId !== auth.userId) {
-      sendToPartner({
-        partnerId: contactId,
+      notifyUser({
+        userId: contactId,
         tenantId: auth.tenantId,
         workspaceId: auth.workspaceId,
         payload: {
@@ -536,8 +536,8 @@ export async function updateTicket({
 
   contacts.forEach(contactId => {
     if (contactId && contactId !== auth.userId) {
-      sendToPartner({
-        partnerId: contactId,
+      notifyUser({
+        userId: contactId,
         tenantId: auth.tenantId,
         workspaceId: auth.workspaceId,
         payload: {

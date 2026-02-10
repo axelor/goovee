@@ -50,7 +50,7 @@ import {
   isAlreadyRegistered,
 } from '@/subapps/events/common/utils/registration';
 import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
-import {sendToPartner} from '@/utils/push';
+import {notifyUser} from '@/pwa/utils';
 
 export async function getAllEvents({
   limit,
@@ -227,8 +227,8 @@ export async function register({
   }
 
   userParticipants?.forEach(participant => {
-    sendToPartner({
-      partnerId: participant.contact!.id,
+    notifyUser({
+      userId: participant.contact!.id,
       tenantId,
       workspaceId: workspace.id,
       payload: {

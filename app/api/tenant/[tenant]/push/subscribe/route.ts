@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
 import {getSession} from '@/lib/core/auth';
 import {treeifyError} from 'zod';
-import {PushSubscriptionSchema} from '@/types/push';
+import {PushSubscriptionSchema} from '@/pwa/types';
 
 export async function POST(
   request: NextRequest,

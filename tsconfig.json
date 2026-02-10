@@ -40,7 +40,8 @@
       "@/comments": ["./lib/core/comments/index"],
       "@/comments/*": ["./lib/core/comments/*"],
       "@/environment": ["./lib/core/environment/index"],
-      "@/environment/*": ["./lib/core/environment/*"]
+      "@/environment/*": ["./lib/core/environment/*"],
+      "@/pwa/*": ["./lib/core/pwa/*"]
     }
   },
   "include": [

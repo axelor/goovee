@@ -18,7 +18,7 @@ const revision =
   crypto.randomUUID();
 
 module.exports = serwist.withNextConfig(nextConfig => ({
-  swSrc: 'app/sw.ts',
+  swSrc: 'lib/core/pwa/sw.ts',
   swDest: 'public/sw.js',
 
   // If you want to precache any other page that is not

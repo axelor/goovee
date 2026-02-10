@@ -2,7 +2,7 @@ import type {ActionResponse} from '@/types/action';
 import webpush, {WebPushError} from 'web-push';
 import {manager} from '@/tenant';
 
-export async function sendNotification(
+async function sendNotification(
   subscription: webpush.PushSubscription,
   payload: {title: string; body?: string; url?: string},
 ): ActionResponse<true> {
@@ -44,14 +44,14 @@ export async function sendNotification(
   }
 }
 
-export async function sendToPartner({
-  partnerId,
+export async function notifyUser({
+  userId,
   tenantId,
   workspaceId,
   payload,
   related,
 }: {
-  partnerId: string | number;
+  userId: string | number;
   tenantId: string;
   workspaceId?: string | number;
   payload: {title: string; body?: string; url?: string};
@@ -65,7 +65,7 @@ export async function sendToPartner({
   try {
     dbNotification = await client.pushNotification.create({
       data: {
-        partner: {select: {id: partnerId}},
+        partner: {select: {id: userId}},
         workspace: workspaceId ? {select: {id: workspaceId}} : undefined,
         title: payload.title,
         body: payload.body,
@@ -83,7 +83,7 @@ export async function sendToPartner({
 
   // 2. Send the real-time push notification to all active devices
   const subscriptions = await client.pushSubscription.find({
-    where: {partner: {id: partnerId}},
+    where: {partner: {id: userId}},
     select: {id: true, endpoint: true, p256dh: true, auth: true, version: true},
   });
 
@@ -96,28 +96,30 @@ export async function sendToPartner({
     workspaceId,
   };
 
-  for (const sub of subscriptions) {
-    if (!sub.endpoint || !sub.p256dh || !sub.auth) continue;
+  await Promise.all(
+    subscriptions.map(async sub => {
+      if (!sub.endpoint || !sub.p256dh || !sub.auth) return;
 
-    const result = await sendNotification(
-      {
-        endpoint: sub.endpoint,
-        keys: {
-          p256dh: sub.p256dh,
-          auth: sub.auth,
+      const result = await sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
+          },
         },
-      },
-      pushPayload,
-    );
+        pushPayload,
+      );
 
-    if (result.error && result.message === 'expired') {
-      console.log(`Cleaning up expired subscription: ${sub.endpoint}`);
-      await client.pushSubscription.delete({
-        id: sub.id,
-        version: sub.version,
-      });
-    }
-  }
+      if (result.error && result.message === 'expired') {
+        await client.pushSubscription.delete({
+          id: sub.id,
+          version: sub.version,
+        });
+      }
+      return result;
+    }),
+  );
 }
 
 export default webpush;

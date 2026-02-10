@@ -1,13 +1,14 @@
 'use client';
 
-import {usePushNotifications} from '@/ui/hooks/use-push-notifications';
+import {usePushNotifications} from '@/pwa/push-context';
 import {i18n} from '@/locale';
 import {Button, Badge} from '@/ui/components';
 import Link from 'next/link';
 import {formatRelativeTime} from '@/locale/formatters';
 
 export function UnreadNotificationsList() {
-  const {unreadNotifications, markAsRead, markAllAsRead} = usePushNotifications();
+  const {unreadNotifications, markAsRead, markAllAsRead} =
+    usePushNotifications();
 
   if (unreadNotifications.length === 0) {
     return (
@@ -20,7 +21,9 @@ export function UnreadNotificationsList() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">{i18n.t('Unread Notifications')}</h3>
+        <h3 className="text-lg font-medium">
+          {i18n.t('Unread Notifications')}
+        </h3>
         <Button
           variant="outline-success"
           size="sm"
@@ -37,7 +40,9 @@ export function UnreadNotificationsList() {
               <div className="flex items-center gap-2">
                 <p className="font-semibold">{notification.title}</p>
                 {notification.typeSelect && (
-                  <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] py-0 px-1.5 h-4">
                     {notification.typeSelect}
                   </Badge>
                 )}
@@ -46,7 +51,7 @@ export function UnreadNotificationsList() {
                 {notification.body}
               </p>
               <p className="text-[10px] text-muted-foreground/70">
-                {formatRelativeTime(notification.createdOn)}
+                {formatRelativeTime(notification.createdOn!)}
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">

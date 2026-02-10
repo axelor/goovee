@@ -18,7 +18,7 @@ import Header from './header';
 import Sidebar from './sidebar';
 import MobileMenu from './mobile-menu';
 import Footer from './footer';
-import {PushProvider} from './push-context';
+import {PushProvider} from '@/pwa/push-context';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 const defaultTheme = {

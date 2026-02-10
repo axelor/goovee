@@ -40,7 +40,7 @@ import {NOTIFICATION_VALUES} from '@/subapps/forum/common/constants';
 import {sendEmailNotifications} from '@/subapps/forum/common/utils/mail';
 import {ContentType} from '@/subapps/forum/common/types/forum';
 import {getArchivedFilter} from '@/subapps/forum/common/utils';
-import {sendToPartner} from '@/utils/push';
+import {notifyUser} from '@/pwa/utils';
 
 interface FileMeta {
   fileName: string;
@@ -576,9 +576,12 @@ export async function addPost({
       const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}#post-${post.id}`;
 
       subscribers.forEach((reciever: any) => {
-        if (reciever.member?.id && reciever.member.emailAddress?.address !== user.email) {
-          sendToPartner({
-            partnerId: reciever.member.id,
+        if (
+          reciever.member?.id &&
+          reciever.member.emailAddress?.address !== user.email
+        ) {
+          notifyUser({
+            userId: reciever.member.id,
             tenantId,
             workspaceId: workspace.id,
             payload: {
@@ -953,8 +956,8 @@ export const createComment: CreateComment = async formData => {
 
           notificationRecievers.forEach(reciever => {
             if (reciever.member?.id) {
-              sendToPartner({
-                partnerId: reciever.member.id,
+              notifyUser({
+                userId: reciever.member.id,
                 tenantId,
                 workspaceId: workspace.id,
                 payload: {

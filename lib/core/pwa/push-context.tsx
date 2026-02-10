@@ -9,12 +9,13 @@ import React, {
   useMemo,
 } from 'react';
 import {useEnvironment} from '@/lib/core/environment';
-import {useWorkspace} from './workspace-context';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {NotificationDTO} from './types';
 
 interface PushContextType {
   permission: NotificationPermission;
   subscription: PushSubscription | null;
-  unreadNotifications: any[];
+  unreadNotifications: NotificationDTO[];
   isSupported: boolean;
   subscribe: () => Promise<void>;
   unsubscribe: () => Promise<void>;
@@ -35,7 +36,9 @@ export function PushProvider({children}: {children: React.ReactNode}) {
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null,
   );
-  const [unreadNotifications, setUnreadNotifications] = useState<any[]>([]);
+  const [unreadNotifications, setUnreadNotifications] = useState<
+    NotificationDTO[]
+  >([]);
   const [isSupported, setIsSupported] = useState(false);
   const hasSynced = React.useRef(false);
 
@@ -51,7 +54,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
       }
       const response = await fetch(url.toString());
       if (response.ok) {
-        const data = await response.json();
+        const data: NotificationDTO[] = await response.json();
         setUnreadNotifications(data);
       }
     } catch (error) {
@@ -145,7 +148,12 @@ export function PushProvider({children}: {children: React.ReactNode}) {
     if (tenant) {
       fetchNotifications();
     }
-  }, [env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY, syncSubscription, tenant, fetchNotifications]);
+  }, [
+    env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY,
+    syncSubscription,
+    tenant,
+    fetchNotifications,
+  ]);
 
   const subscribe = useCallback(async () => {
     if (!isSupported || !tenant) return;
@@ -212,7 +220,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
 
     // Listen for messages from the Service Worker (e.g. to refresh count when push arrives)
     const channel = new BroadcastChannel('push-notifications');
-    channel.onmessage = (event) => {
+    channel.onmessage = event => {
       if (event.data?.type === 'REFRESH_NOTIFICATIONS') {
         fetchNotifications();
       }

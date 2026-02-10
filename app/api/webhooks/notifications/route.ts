@@ -7,7 +7,7 @@ import {findPreferences} from '@/orm/notification';
 import NotificationManager, {NotificationType} from '@/notification';
 import {getTranslation} from '@/locale/server';
 import type {PortalApp} from '@/types';
-import {sendToPartner} from '@/utils/push';
+import {notifyUser} from '@/pwa/utils';
 
 async function findAppByCode({
   code,
@@ -181,8 +181,8 @@ async function sendSystemNotification({
   entity: {id: string; version: number; route: string};
   app: PortalApp;
 }) {
-  sendToPartner({
-    partnerId: user.id,
+  notifyUser({
+    userId: user.id,
     tenantId,
     workspaceId: user.mainPartner?.workspace?.id,
     payload: {

@@ -5,12 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
-import {usePushNotifications} from '@/ui/hooks/use-push-notifications';
-import {
-  MdNotificationsNone,
-  MdNotificationsActive,
-  MdNotificationsOff,
-} from 'react-icons/md';
+import {usePushNotifications} from '@/pwa/push-context';
+import {MdNotificationsNone} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {
