@@ -12,6 +12,7 @@ import {
 import Link from 'next/link';
 import {formatRelativeTime} from '@/locale/formatters';
 import {Bell} from 'lucide-react';
+import {useOptimistic, startTransition} from 'react';
 
 export function UnreadNotificationsList() {
   const {
@@ -22,6 +23,33 @@ export function UnreadNotificationsList() {
     permission,
     subscribe,
   } = usePushNotifications();
+
+  const [optimisticNotifications, addOptimisticNotification] = useOptimistic(
+    unreadNotifications,
+    (state, action: {type: 'markRead'; id: string} | {type: 'markAllRead'}) => {
+      if (action.type === 'markRead') {
+        return state.filter(n => n.id !== action.id);
+      }
+      if (action.type === 'markAllRead') {
+        return [];
+      }
+      return state;
+    },
+  );
+
+  const handleMarkAsRead = (id: string) => {
+    startTransition(async () => {
+      addOptimisticNotification({type: 'markRead', id});
+      await markAsRead(id);
+    });
+  };
+
+  const handleMarkAllAsRead = () => {
+    startTransition(async () => {
+      addOptimisticNotification({type: 'markAllRead'});
+      await markAllAsRead();
+    });
+  };
 
   const handleEnable = async () => {
     await subscribe();
@@ -60,7 +88,7 @@ export function UnreadNotificationsList() {
           </AlertDescription>
         </Alert>
       )}
-      {unreadNotifications.length === 0 ? (
+      {optimisticNotifications.length === 0 ? (
         <div className="py-10 text-center text-muted-foreground">
           {i18n.t('No unread notifications.')}
         </div>
@@ -73,12 +101,12 @@ export function UnreadNotificationsList() {
             <Button
               variant="outline-success"
               size="sm"
-              onClick={() => markAllAsRead()}>
+              onClick={handleMarkAllAsRead}>
               {i18n.t('Mark all as read')}
             </Button>
           </div>
           <div className="divide-y border rounded-md">
-            {unreadNotifications.map(notification => (
+            {optimisticNotifications.map(notification => (
               <div
                 key={notification.id}
                 className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30">
@@ -107,7 +135,7 @@ export function UnreadNotificationsList() {
                       asChild
                       variant="outline-success"
                       size="sm"
-                      onClick={() => markAsRead(notification.id)}>
+                      onClick={() => handleMarkAsRead(notification.id)}>
                       <Link href={notification.url}>{i18n.t('View')}</Link>
                     </Button>
                   )}
@@ -115,7 +143,7 @@ export function UnreadNotificationsList() {
                     variant="ghost"
                     size="sm"
                     className="text-muted-foreground hover:text-success"
-                    onClick={() => markAsRead(notification.id)}>
+                    onClick={() => handleMarkAsRead(notification.id)}>
                     {i18n.t('Mark as read')}
                   </Button>
                 </div>
