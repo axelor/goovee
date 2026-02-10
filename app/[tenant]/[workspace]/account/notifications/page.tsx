@@ -57,6 +57,8 @@ export default async function Page(props: {
           <Title text={await t('Notifications')} />
           <Separator />
           <DevicePushPreference />
+          <Title text={await t('Email Notifications')} />
+          <Separator />
           <Preference
             title={await t('Events')}
             code={SUBAPP_CODES.events}

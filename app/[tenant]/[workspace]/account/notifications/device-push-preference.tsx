@@ -33,7 +33,7 @@ export function DevicePushPreference() {
               : i18n.t('Receive notifications on this device.')}
           </p>
         </div>
-        <div className="flex justify-end">
+        <div className="flex">
           <Checkbox
             checked={isEnabled}
             disabled={isDenied}
