@@ -204,7 +204,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
     // Listen for permission changes if supported
     if ('permissions' in navigator) {
       navigator.permissions
-        .query({name: 'notifications' as any})
+        .query({name: 'notifications'})
         .then(permissionStatus => {
           permissionStatus.onchange = () => {
             updateState();
