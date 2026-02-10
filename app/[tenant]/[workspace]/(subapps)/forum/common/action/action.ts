@@ -589,11 +589,7 @@ export async function addPost({
               body: post?.title ?? '',
               url: postLink,
             },
-            related: {
-              id: post.id,
-              model: ModelMap[SUBAPP_CODES.forum]!,
-              type: 'post',
-            },
+            tag: subapp.name,
           });
         }
       });
@@ -965,11 +961,7 @@ export const createComment: CreateComment = async formData => {
                   body: res[0].note ?? '',
                   url: postLink,
                 },
-                related: {
-                  id: post.id,
-                  model: ModelMap[SUBAPP_CODES.forum]!,
-                  type: 'comment',
-                },
+                tag: app.name,
               });
             }
           });

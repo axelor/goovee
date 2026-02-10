@@ -31,15 +31,7 @@
     },
     {
       "type": "String",
-      "name": "typeSelect"
-    },
-    {
-      "type": "String",
-      "name": "relatedId"
-    },
-    {
-      "type": "String",
-      "name": "relatedModel"
+      "name": "tag"
     },
     {
       "type": "DateTime",

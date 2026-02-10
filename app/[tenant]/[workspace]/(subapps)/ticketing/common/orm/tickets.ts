@@ -5,6 +5,7 @@ import axios from 'axios';
 import {MAIL_MESSAGE_TYPE, type Track} from '@/comments';
 import {addComment} from '@/comments/orm';
 import {ModelMap, ORDER_BY, SUBAPP_CODES} from '@/constants';
+import {findSubappAccess} from '@/orm/workspace';
 import type {AOSProjectTask} from '@/goovee/.generated/models';
 import {t} from '@/locale/server';
 import {manager, type Tenant} from '@/tenant';
@@ -293,11 +294,7 @@ export async function createTicket({
           body: `${auth.simpleFullName} created a new ticket: ${newTicket.name}`,
           url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
         },
-        related: {
-          id: newTicket.id,
-          model: ModelMap[SUBAPP_CODES.ticketing]!,
-          type: 'ticket',
-        },
+        tag: 'app-ticketing',
       });
     }
   });
@@ -545,11 +542,7 @@ export async function updateTicket({
           body: `${auth.simpleFullName} updated a ticket: ${newTicket.name}`,
           url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
         },
-        related: {
-          id: newTicket.id,
-          model: ModelMap[SUBAPP_CODES.ticketing]!,
-          type: 'ticket',
-        },
+        tag: 'app-ticketing',
       });
     }
   });

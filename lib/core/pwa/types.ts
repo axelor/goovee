@@ -19,9 +19,7 @@ export type NotificationDTO = {
   title: string | null;
   body: string | null;
   url: string | null;
-  typeSelect: string | null;
-  relatedId: string | null;
-  relatedModel: string | null;
+  tag: string | null;
   createdOn: Date | null;
   _count?: string | undefined;
   _cursor?: string | undefined;

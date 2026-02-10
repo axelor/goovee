@@ -755,11 +755,7 @@ export const createComment: CreateComment = async formData => {
               .trim(),
             url: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
           },
-          related: {
-            id: ticket.id,
-            model: ModelMap[SUBAPP_CODES.ticketing]!,
-            type: 'comment',
-          },
+          tag: 'app-ticketing',
         });
       }
     });

@@ -49,13 +49,13 @@ export async function notifyUser({
   tenantId,
   workspaceId,
   payload,
-  related,
+  tag,
 }: {
   userId: string | number;
   tenantId: string;
   workspaceId?: string | number;
   payload: {title: string; body?: string; url?: string};
-  related?: {id: string | number; model: string; type?: string};
+  tag?: string;
 }) {
   const client = await manager.getClient(tenantId);
   if (!client) return;
@@ -71,9 +71,7 @@ export async function notifyUser({
         body: payload.body,
         url: payload.url,
         isRead: false,
-        typeSelect: related?.type,
-        relatedId: related?.id?.toString(),
-        relatedModel: related?.model,
+        tag,
       },
       select: {id: true},
     });

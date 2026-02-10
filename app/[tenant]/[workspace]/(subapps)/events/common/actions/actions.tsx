@@ -236,11 +236,7 @@ export async function register({
         body: `${registration.event!.eventTitle}`,
         url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
       },
-      related: {
-        id: eventId,
-        model: ModelMap[SUBAPP_CODES.events]!,
-        type: 'event',
-      },
+      tag: 'app-events',
     });
   });
 

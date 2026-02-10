@@ -85,14 +85,15 @@ export function UnreadNotificationsList() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{notification.title}</p>
-                    {notification.typeSelect && (
+                    {notification.tag && (
                       <Badge
                         variant="outline"
                         className="text-[10px] py-0 px-1.5 h-4">
-                        {notification.typeSelect}
+                        {i18n.t(notification.tag)}
                       </Badge>
                     )}
                   </div>
+
                   <p className="text-sm text-muted-foreground">
                     {notification.body}
                   </p>

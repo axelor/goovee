@@ -35,9 +35,7 @@ export async function GET(
         body: true,
         url: true,
         createdOn: true,
-        typeSelect: true,
-        relatedId: true,
-        relatedModel: true,
+        tag: true,
       },
       orderBy: {createdOn: 'DESC'},
     });

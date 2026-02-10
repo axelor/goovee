@@ -195,6 +195,7 @@ async function sendSystemNotification({
         )),
       url: entity.route,
     },
+    tag: app.name,
   });
 }
 
