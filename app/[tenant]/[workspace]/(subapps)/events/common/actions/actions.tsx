@@ -167,7 +167,7 @@ export async function register({
     return validationResult;
   }
 
-  const {workspace, participants, user} = validationResult.data;
+  const {workspace, participants, user, subapp} = validationResult.data;
 
   const {priceScale} = $event;
   const {total: expectedAmount} = getCalculatedTotalPrice(values, $event);
@@ -236,7 +236,7 @@ export async function register({
         body: `${registration.event!.eventTitle}`,
         url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
       },
-      tag: 'app-events',
+      tag: subapp.name,
     });
   });
 

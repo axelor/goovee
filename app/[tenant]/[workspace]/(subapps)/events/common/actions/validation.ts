@@ -11,7 +11,7 @@ import {
   isLoginNeededForRegistration,
 } from '@/subapps/events/common/utils';
 import {SUBAPP_CODES} from '@/constants';
-import {PortalWorkspace, Participant, User} from '@/types';
+import {PortalWorkspace, Participant, User, Subapp} from '@/types';
 import {ActionResponse} from '@/types/action';
 import {REQUIRED_FIELDS} from '../constants';
 import {EventConfig, findEventConfig} from '../orm/event';
@@ -118,6 +118,7 @@ export async function validateRegistration({
   event: EventConfig;
   participants: Participant[];
   user?: User;
+  subapp: Subapp;
 }> {
   if (!eventId) return error(await t('Event ID is missing!'));
   if (!values) return error(await t('Values are missing!'));
@@ -141,10 +142,15 @@ export async function validateRegistration({
   const workspace = await findWorkspace({user, url: workspaceURL, tenantId});
   if (!workspace) return error(await t('Invalid workspace'));
 
-  const result = await validate([
-    withSubapp(SUBAPP_CODES.events, workspaceURL, tenantId),
-  ]);
-  if (result.error) return result;
+  const subapp = await findSubappAccess({
+    code: SUBAPP_CODES.events,
+    user,
+    url: workspaceURL,
+    tenantId,
+  });
+  if (!subapp) {
+    return {error: true, message: await t('Unauthorized Access')};
+  }
 
   if (!workspace.config?.allowGuestEventRegistration && !user) {
     return error(
@@ -270,6 +276,7 @@ export async function validateRegistration({
         event,
         participants,
         user,
+        subapp,
       },
     };
   } catch (err) {
