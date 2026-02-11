@@ -866,5 +866,16 @@
   "Bank details are currently unavailable": "Les coordonnées bancaires ne sont pas disponibles pour le moment.",
   "We could not load the bank transfer details at this time.": "Nous n'avons pas pu charger les détails du virement bancaire pour le moment.",
   "Please try again later or contact support if the issue persists.": "Veuillez réessayer plus tard ou contacter l'assistance si le problème persiste.",
-  "Payment completed successfully": "Paiement effectué avec succès"
+  "Payment completed successfully": "Paiement effectué avec succès",
+  "Email Notifications": "Notifications par e-mail",
+  "Notifications are blocked by your browser.": "Les notifications sont bloquées par votre navigateur.",
+  "Push Notifications": "Notifications push",
+  "Enable": "Activer",
+  "Mark all as read": "Marquer tout comme lu",
+  "Notifications Blocked": "Notifications bloquées",
+  "No unread notifications.": "Aucune notification non lue.",
+  "Stay Updated!": "Restez informé !",
+  "Unread Notifications": "Notifications non lues",
+  "View": "Voir",
+  "Receive notifications on this device.": "Recevoir les notifications sur cet appareil."
 }
