@@ -78,7 +78,7 @@ export default async function Page(props: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -90,7 +90,7 @@ export default async function Page(props: {
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const project = await findProject(projectId, auth);
 
@@ -100,7 +100,7 @@ export default async function Page(props: {
     projectId,
     take: +limit,
     skip: getSkip(limit, page),
-    where: getWhere(decodeFilter(filter), auth.userId),
+    where: getWhere(decodeFilter(filter), auth.user.id),
     orderBy: getOrderBy(sort, sortKeyPathMap),
     auth,
   }).then(clone);

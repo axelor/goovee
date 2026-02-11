@@ -13,15 +13,15 @@ export type QueryProps<T extends Entity> = {
 };
 
 export function getProjectAccessFilter(props: AuthProps) {
-  const {userId, isContact, workspaceId} = props;
+  const {user, workspace} = props;
   const where: WhereOptions<AOSProject> = {
     OR: [{archived: false}, {archived: null}],
     isBusinessProject: true,
     projectStatus: {isCompleted: false},
-    portalWorkspace: {id: workspaceId},
-    ...(isContact
-      ? {clientPartner: {mainPartnerContacts: {id: userId}}}
-      : {clientPartner: {id: userId}}),
+    portalWorkspace: {id: workspace.id},
+    ...(user.isContact
+      ? {clientPartner: {mainPartnerContacts: {id: user.id}}}
+      : {clientPartner: {id: user.id}}),
   };
   return where;
 }
@@ -39,16 +39,17 @@ export function getTicketAccessFilter() {
 export function getRestrictedTicketAccessFilter(props: AuthProps) {
   const where: WhereOptions<AOSProjectTask> = {
     OR: [
-      {createdByContact: {id: props.userId}},
-      {managedByContact: {id: props.userId}},
+      {createdByContact: {id: props.user.id}},
+      {managedByContact: {id: props.user.id}},
     ],
   };
   return where;
 }
 
 export function withTicketAccessFilter(props: AuthProps) {
-  const {isContact, role, isContactAdmin} = props;
-  const isRestricted = isContact && !isContactAdmin && role != ROLE.TOTAL;
+  const {user, subapp} = props;
+  const isRestricted =
+    user.isContact && !subapp.isContactAdmin && subapp.role != ROLE.TOTAL;
   return function (where?: WhereOptions<AOSProjectTask>) {
     if (isRestricted) {
       return and<AOSProjectTask>([

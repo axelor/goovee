@@ -3,25 +3,20 @@ import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {Tenant} from '@/tenant';
-import type {PortalWorkspace, User} from '@/types';
+import type {PortalWorkspace, Subapp, User} from '@/types';
 import {Maybe} from '@/types/util';
-import type {ID} from '@goovee/orm';
 import {cache} from 'react';
 
-export type UserAuthProps = {
-  userId: ID;
-  simpleFullName: string;
-  email: string;
-  isContact: boolean;
-  isContactAdmin: boolean;
-  role?: 'total' | 'restricted';
-};
-
-export type WorkspaceAuthProps = {workspaceId: ID; workspaceURL: string};
-export type TenantAuthProps = {tenantId: Tenant['id']};
-export type AuthProps = UserAuthProps & WorkspaceAuthProps & TenantAuthProps;
 export type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
   Required<Pick<PortalWorkspace, 'config'>>;
+
+export type AuthProps = {
+  user: User;
+  subapp: Subapp;
+  workspace: PortalWorkspaceWithConfig;
+  workspaceURL: string;
+  tenantId: Tenant['id'];
+};
 
 export const ensureAuth = cache(async function ensureAuth(
   workspaceURL: Maybe<string>,
@@ -31,18 +26,13 @@ export const ensureAuth = cache(async function ensureAuth(
       error: true;
       message: string;
       forceLogin?: boolean;
-      info?: never;
+      auth?: never;
     }
   | {
       error: false;
       message?: never;
       forceLogin?: never;
-      info: {
-        auth: AuthProps;
-        user: User;
-        subapp: any;
-        workspace: PortalWorkspaceWithConfig;
-      };
+      auth: AuthProps;
     }
 > {
   if (!workspaceURL) {
@@ -93,21 +83,12 @@ export const ensureAuth = cache(async function ensureAuth(
 
   return {
     error: false,
-    info: {
+    auth: {
       user,
       subapp,
       workspace: workspace as PortalWorkspaceWithConfig,
-      auth: {
-        email: user.email,
-        userId: user.id,
-        simpleFullName: user.simpleFullName,
-        workspaceId: workspace.id,
-        workspaceURL: workspaceURL,
-        isContact: user.isContact!,
-        tenantId,
-        role: subapp.role,
-        isContactAdmin: subapp.isContactAdmin,
-      },
+      workspaceURL,
+      tenantId,
     },
   };
 });

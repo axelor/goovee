@@ -77,7 +77,7 @@ export default async function Page(props: {
 
   const {tenant} = params;
 
-  const {error, info, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -89,7 +89,7 @@ export default async function Page(props: {
   }
 
   if (error) notFound();
-  const {auth, workspace} = info;
+  const {workspace} = auth;
 
   const [ticket, statuses, categories, priorities, contacts] =
     await Promise.all([
@@ -186,7 +186,7 @@ export default async function Page(props: {
                   categories={categories}
                   priorities={priorities}
                   contacts={contacts}
-                  userId={auth.userId}
+                  userId={auth.user.id}
                   tenantId={tenant}
                   fields={workspace.config.ticketingFieldSet}
                   formFields={workspace.config.ticketingFormFieldSet}

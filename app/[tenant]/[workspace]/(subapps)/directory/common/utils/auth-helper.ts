@@ -3,15 +3,9 @@ import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {Tenant} from '@/tenant';
-import {PortalApp, PortalWorkspace, User} from '@/types';
+import {Subapp, PortalWorkspace, User} from '@/types';
 import {Maybe} from '@/types/util';
 import {cache} from 'react';
-
-interface Subapp extends Omit<PortalApp, 'installed'> {
-  installed: boolean;
-  isContactAdmin: boolean;
-  role?: 'restricted' | 'total';
-}
 
 export type PortalWorkspaceWithConfig = Omit<PortalWorkspace, 'config'> &
   Required<Pick<PortalWorkspace, 'config'>>;

@@ -91,7 +91,7 @@ export async function createTicket({
     parentId,
   } = data;
   let {managedBy} = data;
-  managedBy = managedBy || String(auth.userId);
+  managedBy = managedBy || String(auth.user.id);
 
   if (!auth.tenantId) {
     throw new Error(await t('TenantId is required'));
@@ -148,7 +148,7 @@ export async function createTicket({
       isPrivate: false,
       isInternal: false,
       progress: '0.00',
-      createdByContact: {select: {id: auth.userId}},
+      createdByContact: {select: {id: auth.user.id}},
       project: {select: {id: projectId}},
       name: subject,
       description: description,
@@ -262,10 +262,10 @@ export async function createTicket({
     if (workspaceUserId) {
       addComment({
         modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: auth.userId,
+        userId: auth.user.id,
         workspaceUserId: workspaceUserId,
         recordId: newTicket.id,
-        subject: `Record Created by ${auth.simpleFullName}`,
+        subject: `Record Created by ${auth.user.simpleFullName}`,
         messageBody: {title: 'Record created', tracks: tracks, tags: []},
         messageType: MAIL_MESSAGE_TYPE.notification,
         tenantId: auth.tenantId,
@@ -284,23 +284,23 @@ export async function createTicket({
   ]);
 
   contacts.forEach(contactId => {
-    if (contactId && contactId !== auth.userId) {
+    if (contactId && contactId !== auth.user.id) {
       notifyUser({
         userId: contactId,
         tenantId: auth.tenantId,
-        workspaceId: auth.workspaceId,
+        workspaceId: auth.workspace.id,
         payload: {
-          title: `${auth.simpleFullName} created a new ticket`,
-          body: `${auth.simpleFullName} created a new ticket: ${newTicket.name}`,
+          title: `${auth.user.simpleFullName} created a new ticket`,
+          body: `${auth.user.simpleFullName} created a new ticket: ${newTicket.name}`,
           url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
         },
-        tag: 'app-ticketing',
+        tag: auth.subapp.name,
       });
     }
   });
 
   getMailRecipients({
-    userId: auth.userId,
+    userId: auth.user.id,
     contacts,
     tenantId: auth.tenantId,
     workspaceURL: auth.workspaceURL,
@@ -308,7 +308,7 @@ export async function createTicket({
     .then(reciepients => {
       if (reciepients.length) {
         return sendTrackMail({
-          author: auth.simpleFullName,
+          author: auth.user.simpleFullName,
           type: 'create',
           tracks,
           projectName: newTicket.project?.name!,
@@ -509,10 +509,10 @@ export async function updateTicket({
     if (workspaceUserId && !fromWS) {
       addComment({
         modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: auth.userId,
+        userId: auth.user.id,
         workspaceUserId: workspaceUserId,
         recordId: newTicket.id,
-        subject: `Record Updated by ${auth.simpleFullName}`,
+        subject: `Record Updated by ${auth.user.simpleFullName}`,
         messageBody: {title: 'Record updated', tracks: tracks, tags: []},
         messageType: MAIL_MESSAGE_TYPE.notification,
         tenantId: auth.tenantId,
@@ -532,23 +532,23 @@ export async function updateTicket({
   ]);
 
   contacts.forEach(contactId => {
-    if (contactId && contactId !== auth.userId) {
+    if (contactId && contactId !== auth.user.id) {
       notifyUser({
         userId: contactId,
         tenantId: auth.tenantId,
-        workspaceId: auth.workspaceId,
+        workspaceId: auth.workspace.id,
         payload: {
-          title: `${auth.simpleFullName} updated a ticket`,
-          body: `${auth.simpleFullName} updated a ticket: ${newTicket.name}`,
+          title: `${auth.user.simpleFullName} updated a ticket`,
+          body: `${auth.user.simpleFullName} updated a ticket: ${newTicket.name}`,
           url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
         },
-        tag: 'app-ticketing',
+        tag: auth.subapp.name,
       });
     }
   });
 
   getMailRecipients({
-    userId: auth.userId,
+    userId: auth.user.id,
     contacts,
     tenantId: auth.tenantId,
     workspaceURL: auth.workspaceURL,
@@ -556,7 +556,7 @@ export async function updateTicket({
     .then(reciepients => {
       if (reciepients.length) {
         return sendTrackMail({
-          author: auth.simpleFullName,
+          author: auth.user.simpleFullName,
           type: 'update',
           tracks,
           projectName: newTicket.project?.name!,
@@ -609,8 +609,8 @@ export async function getMyTicketCount(props: {
       project: {id: projectId},
       status: {isCompleted: false},
       OR: [
-        {managedByContact: {id: auth.userId}},
-        {createdByContact: {id: auth.userId}},
+        {managedByContact: {id: auth.user.id}},
+        {createdByContact: {id: auth.user.id}},
       ],
     }),
   });
@@ -631,7 +631,7 @@ export async function getManagedTicketCount(props: {
     where: withTicketAccessFilter(auth)({
       project: {id: projectId},
       status: {isCompleted: false},
-      managedByContact: {id: auth.userId},
+      managedByContact: {id: auth.user.id},
     }),
   });
 
@@ -652,7 +652,7 @@ export async function getCreatedTicketCount(props: {
     where: withTicketAccessFilter(auth)({
       project: {id: projectId},
       status: {isCompleted: false},
-      createdByContact: {id: auth.userId},
+      createdByContact: {id: auth.user.id},
     }),
   });
 

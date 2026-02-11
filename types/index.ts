@@ -195,6 +195,11 @@ export interface PortalApp extends Model {
   showInTopMenu: boolean;
 }
 
+export interface Subapp extends PortalApp {
+  isContactAdmin: boolean;
+  role?: 'restricted' | 'total';
+}
+
 export interface Product extends Model {
   name: string;
   code: string;
