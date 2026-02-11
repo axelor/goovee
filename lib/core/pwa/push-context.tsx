@@ -30,7 +30,7 @@ const PushContext = createContext<PushContextType | undefined>(undefined);
 
 export function PushProvider({children}: {children: React.ReactNode}) {
   const env = useEnvironment();
-  const {data: session} = authClient.useSession();
+  const {data: session, isPending} = authClient.useSession();
   const user = session?.user;
 
   const {workspaceID, tenant} = useWorkspace();
@@ -128,7 +128,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
       let sub = await registration.pushManager.getSubscription();
 
       // AUTO-HEAL: If permission is granted but subscription is missing, create it
-      if (currentPermission === 'granted' && !sub && tenant) {
+      if (currentPermission === 'granted' && !sub && tenant && user) {
         try {
           sub = await registration.pushManager.subscribe({
             userVisibleOnly: true,
@@ -236,6 +236,13 @@ export function PushProvider({children}: {children: React.ReactNode}) {
       channel.close();
     };
   }, [updateState, fetchNotifications]);
+
+  // Safety cleanup: If we have a subscription but no user, unsubscribe
+  useEffect(() => {
+    if (!user && subscription && !isPending) {
+      unsubscribe();
+    }
+  }, [user, subscription, unsubscribe, isPending]);
 
   const value = useMemo(
     () => ({

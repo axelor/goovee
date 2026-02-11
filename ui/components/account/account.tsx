@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {usePathname, useSearchParams} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import {MdOutlineAccountCircle} from 'react-icons/md';
+import {usePushNotifications} from '@/pwa/push-context';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -53,7 +54,14 @@ export function Account({
     tenant,
   });
 
+  const {unsubscribe} = usePushNotifications();
+
   const handleLogout = async () => {
+    try {
+      await unsubscribe();
+    } catch (error) {
+      console.error('Failed to unsubscribe on logout:', error);
+    }
     await authClient.signOut();
     // Force a hard reload/redirect to ensure auth client picks up the new session cookie
     window.location.href = loginURL;

@@ -38,6 +38,7 @@ import {getPartnerImageURL} from '@/utils/files';
 import type {ID} from '@/types';
 import {cn} from '@/utils/css';
 import {useWorkspace} from '../../workspace-context';
+import {usePushNotifications} from '@/pwa/push-context';
 import {
   Select,
   SelectContent,
@@ -145,6 +146,7 @@ export default function Personal({
   const pathname = usePathname();
   const {toast} = useToast();
   const {tenant, workspaceURL, workspaceURI} = useWorkspace();
+  const {unsubscribe} = usePushNotifications();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<any>(pictureProp);
   const [updatingPicture, setUpdatingPicture] = useState(false);
@@ -214,6 +216,11 @@ export default function Personal({
          * Update session when change in email or main partner for contact
          */
         if (editEmail || isMainPartnerUpdated) {
+          try {
+            await unsubscribe();
+          } catch (error) {
+            console.error('Failed to unsubscribe on session change:', error);
+          }
           await authClient.signOut();
 
           const loginURL = getLoginURL({
