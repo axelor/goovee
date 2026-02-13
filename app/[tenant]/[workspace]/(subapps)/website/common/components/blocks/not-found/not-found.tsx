@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import {i18n} from '@/locale';
-import notFound from '@/public/img/illustrations/404.png';
+import notFound from '../../../assets/img/illustrations/404.png';
 import NextLink from '../../reuseable/links/NextLink';
 import {ArrowRight} from 'lucide-react';
 

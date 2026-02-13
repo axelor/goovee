@@ -1,5 +1,4 @@
 import fs from 'fs';
-import fsPromise from 'fs/promises';
 import path from 'path';
 import {pipeline, Readable} from 'stream';
 import {promisify} from 'util';
@@ -44,11 +43,11 @@ import {
 } from '../utils/helper';
 import {getStoragePath} from '@/storage/index';
 import {Website} from '../templates/site';
+import {getFileFromAssets} from '../assets/file-getter';
 
 const pump = promisify(pipeline);
 
 const disableUpdates = false;
-const demoFileDirectory = '/public';
 const FILE_PREFIX = 'goovee-template-file';
 const SELECT_PREFIX = 'goovee-template-select';
 function getContentTitle({
@@ -632,16 +631,6 @@ async function createMetaJsonRecord(props: {
   return record;
 }
 
-async function getFileFromPublic(filePath: string) {
-  filePath = process.cwd() + `${demoFileDirectory}${filePath}`;
-  const file = await fsPromise.readFile(filePath);
-  if (!file) {
-    console.log(`\x1b[31m✖ File at location ${filePath} not found.\x1b[0m`);
-    throw new Error(`File at location ${filePath} not found`);
-  }
-  return file;
-}
-
 async function createMetaFile({
   client,
   originPath,
@@ -655,7 +644,7 @@ async function createMetaFile({
   fileName: string;
   fileType: string;
 }): Promise<{id: string}> {
-  const buffer = await getFileFromPublic(originPath);
+  const buffer = await getFileFromAssets(originPath);
   await pump(
     Readable.from(buffer),
     fs.createWriteStream(path.resolve(getStoragePath(), metaFilePath)),
