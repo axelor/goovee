@@ -91,6 +91,11 @@
     {
       "name": "archived",
       "type": "Boolean"
+    },
+    {
+      "name": "address",
+      "type": "ManyToOne",
+      "target": "AOSAddress"
     }
   ]
 }

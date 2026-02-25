@@ -93,3 +93,13 @@ export type PayboxProps = {
   onApprove: (result: any) => void;
   skipSuccessToast?: boolean;
 };
+
+export type Up2payProps = {
+  disabled?: boolean;
+  successMessage?: string;
+  errorMessage?: string;
+  cancelMessage?: string;
+  onValidate?: (paymentOption: string) => Promise<boolean>;
+  onCreateOrder: ({uri}: {uri: string}) => Promise<any>;
+  skipSuccessToast?: boolean;
+};

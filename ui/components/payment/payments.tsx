@@ -3,7 +3,7 @@
 // ---- CORE IMPPRTS ---- //
 import {ID, PaymentOption, PortalWorkspace} from '@/types';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
-import {Paybox, Paypal, Stripe} from '@/ui/components/payment';
+import {Paybox, Paypal, Stripe, Up2pay} from '@/ui/components/payment';
 import {isPaymentOptionAvailable} from '@/utils/payment';
 
 export function Payments({
@@ -18,6 +18,7 @@ export function Payments({
   onPaymentSuccess,
   onPayboxCreateOrder,
   onPayboxValidatePayment,
+  onUp2payCreateOrder,
   successMessage = '',
   errorMessage = '',
   skipSuccessToast,
@@ -38,6 +39,7 @@ export function Payments({
   onPayboxValidatePayment: (params: {
     params: any;
   }) => Promise<ErrorResponse | SuccessResponse<{id: ID; version: number}>>;
+  onUp2payCreateOrder?: ({uri}: {uri: string}) => Promise<any>;
   successMessage?: string;
   errorMessage?: string;
   skipSuccessToast?: boolean;
@@ -60,6 +62,11 @@ export function Payments({
   const allowPaybox = isPaymentOptionAvailable(
     paymentOptionSet,
     PaymentOption.paybox,
+  );
+
+  const allowUp2pay = isPaymentOptionAvailable(
+    paymentOptionSet,
+    PaymentOption.up2pay,
   );
 
   if (!allowOnlinePayment) {
@@ -105,6 +112,16 @@ export function Payments({
           onValidatePayment={onPayboxValidatePayment}
           onPaymentSuccess={onPaymentSuccess}
           onApprove={onApprove}
+          successMessage={successMessage}
+          errorMessage={errorMessage}
+          skipSuccessToast={skipSuccessToast}
+        />
+      )}
+      {allowUp2pay && onUp2payCreateOrder && (
+        <Up2pay
+          disabled={disabled}
+          onValidate={() => onValidate(PaymentOption.up2pay)}
+          onCreateOrder={onUp2payCreateOrder}
           successMessage={successMessage}
           errorMessage={errorMessage}
           skipSuccessToast={skipSuccessToast}

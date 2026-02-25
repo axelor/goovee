@@ -173,6 +173,7 @@ export const findInvoice = async ({
               name: true,
             },
           },
+          name: true,
         },
         paymentCondition: {
           name: true,
@@ -187,6 +188,19 @@ export const findInvoice = async ({
           select: {
             paymentDate: true,
             amount: true,
+          },
+        },
+        address: {
+          zip: true,
+          addressl2: true,
+          addressl4: true,
+          addressl6: true,
+          country: {
+            name: true,
+            alpha2Code: true,
+          },
+          city: {
+            name: true,
           },
         },
       },

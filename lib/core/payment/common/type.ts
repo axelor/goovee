@@ -5,6 +5,7 @@ import {ContextStatus} from '@/lib/core/payment/common/orm';
 export type PaymentOrder = {
   amount: number;
   context: PaymentContext;
+  cancelled?: boolean;
 };
 
 export const PAYMENT_TYPE = {

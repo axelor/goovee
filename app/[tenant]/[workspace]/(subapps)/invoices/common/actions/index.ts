@@ -17,6 +17,7 @@ import {TENANT_HEADER} from '@/proxy';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
+import {createUp2payOrder} from '@/payment/up2pay/actions';
 import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
 import {
   createStripePaymentIntent,
@@ -44,6 +45,7 @@ import {
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {validatePaymentData} from '@/subapps/invoices/common/utils/validations';
 import {updateInvoice} from '@/subapps/invoices/common/service';
+import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
 
 export async function paypalCreateOrder({
   invoice,
@@ -1002,6 +1004,107 @@ export async function validatePayboxPayment({
     return {
       error: true,
       message: await t('An error occurred while processing the payment.'),
+    };
+  }
+}
+
+export async function up2payCreateOrder({
+  invoice,
+  amount,
+  workspaceURL,
+  uri,
+}: {
+  invoice: any;
+  amount: string;
+  workspaceURL: string;
+  uri: string;
+}) {
+  if (!uri) {
+    return {
+      error: true,
+      message: await t('Payment gateway URI is missing'),
+    };
+  }
+
+  const tenantId = headers().get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('Tenant is missing')};
+  }
+
+  const validationResult = await validatePaymentData({
+    invoice,
+    amount,
+    workspaceURL,
+    tenantId,
+  });
+
+  if (validationResult.error) {
+    return validationResult;
+  }
+  const {workspace, user, $amount, $invoice, isPartialPayment} =
+    validationResult.data;
+
+  const paymentOptions = workspace?.config?.paymentOptionSet;
+
+  const allowUp2pay = isPaymentOptionAvailable(
+    paymentOptions,
+    PaymentOption.up2pay,
+  );
+  if (!allowUp2pay) {
+    return {
+      error: true,
+      message: await t('Up2Pay is not available'),
+    };
+  }
+
+  const payer = await findGooveeUserByEmail(user.email, tenantId);
+  if (!payer) {
+    return {
+      error: true,
+      message: await t('Unauthorized user'),
+    };
+  }
+
+  const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
+
+  const billingInfo = {
+    firstName: $invoice?.partner?.firstName || '',
+    lastName: $invoice?.partner?.name || '',
+    addressLine1: $invoice?.address?.addressl4 || '',
+    zipCode: $invoice?.address?.zip || '',
+    city: $invoice?.address?.city?.name || '',
+    countryCode: $invoice?.address?.country?.alpha2Code || '',
+  };
+
+  try {
+    const response = await createUp2payOrder({
+      tenantId,
+      amount: $amount,
+      currency: currencyCode,
+      email: payer?.emailAddress?.address!,
+      context: {
+        id: invoice.id,
+        source: PAYMENT_SOURCE.INVOICES,
+        amount: Number($amount),
+      },
+      billingInfo,
+      url: {
+        success: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
+          isPartialPayment
+            ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+            : INVOICE_PAYMENT_OPTIONS.TOTAL
+        }`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}`,
+        cancel: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}`,
+      },
+    });
+
+    return {success: true, order: response};
+  } catch (error) {
+    console.error('[UP2PAY][CREATE ORDER] ', error);
+    return {
+      error: true,
+      message: await t((error as any)?.message),
     };
   }
 }

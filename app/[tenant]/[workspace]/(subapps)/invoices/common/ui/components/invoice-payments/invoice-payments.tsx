@@ -19,6 +19,7 @@ import {
   payboxCreateOrder,
   paypalCaptureOrder,
   paypalCreateOrder,
+  up2payCreateOrder,
   validatePayboxPayment,
   validateStripePayment,
 } from '@/subapps/invoices/common/actions';
@@ -168,6 +169,14 @@ export function InvoicePayments({
         });
       }}
       onPayboxValidatePayment={handlePayboxValidations}
+      onUp2payCreateOrder={async ({uri}) => {
+        return await up2payCreateOrder({
+          invoice: {id: invoice.id},
+          amount,
+          workspaceURL,
+          uri,
+        });
+      }}
       successMessage="Invoice payment completed successfully."
       errorMessage="Failed to process invoice payment."
     />

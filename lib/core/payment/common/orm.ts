@@ -8,6 +8,7 @@ export const CONTEXT_STATUS = {
   processed: 'processed',
   cancelled: 'cancelled',
   failed: 'failed',
+  expired: 'expired',
 } as const;
 
 export type ContextStatus =
@@ -70,13 +71,19 @@ export async function findPaymentContext({
       mode,
       status: CONTEXT_STATUS.pending,
     },
-    select: {data: true, createdOn: true, mode: true, status: true},
+    select: {id: true, version: true, data: true, createdOn: true, mode: true, status: true},
   });
 
   if (!context) return null;
 
   if (!ignoreExpiration) {
     if (context.createdOn!.getTime() + CONTEXT_VALIDITY_DURATION < Date.now()) {
+      await updatePaymentStatus({
+        contextId: context.id,
+        version: context.version,
+        tenantId,
+        status: CONTEXT_STATUS.expired,
+      });
       return null;
     }
   }
@@ -158,6 +165,17 @@ export function markPaymentAsFailed(params: {
   return updatePaymentStatus({
     ...params,
     status: CONTEXT_STATUS.failed,
+  });
+}
+
+export function markPaymentAsExpired(params: {
+  contextId: string;
+  version: number;
+  tenantId: Tenant['id'];
+}) {
+  return updatePaymentStatus({
+    ...params,
+    status: CONTEXT_STATUS.expired,
   });
 }
 
