@@ -1,16 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, {useCallback, useEffect} from 'react';
+import {useRouter, usePathname} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {Separator, Container, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
 import {PortalWorkspace} from '@/types';
 import {formatDate} from '@/lib/core/locale/formatters';
+import {usePaymentSSE, useSearchParams} from '@/ui/hooks';
+import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
 import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
+import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
 interface ContentProps {
@@ -26,7 +30,40 @@ export default function Content({
   invoiceType,
   workspaceURI,
 }: ContentProps) {
-  const {invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
+  const {id, invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
+
+  const router = useRouter();
+  const {searchParams} = useSearchParams();
+  const pathname = usePathname();
+
+  const handlePaymentUpdate = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status !== UP2PAY_REDIRECT_STATUS.SUCCESS) return;
+
+    const clean = new URLSearchParams(searchParams.toString());
+    clean.delete('status');
+    clean.delete('type');
+    clean.delete('montant');
+    clean.delete('ref');
+    clean.delete('erreur');
+    clean.delete('sign');
+
+    const query = clean.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+
+    const t = setTimeout(() => router.refresh(), 1500);
+    return () => clearTimeout(t);
+  }, [pathname, router, searchParams]);
+
+  usePaymentSSE({
+    source: PAYMENT_SOURCE.INVOICES,
+    entityId: isUnpaid ? id : '',
+    onUpdate: handlePaymentUpdate,
+  });
 
   const status = isUnpaid ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
 
