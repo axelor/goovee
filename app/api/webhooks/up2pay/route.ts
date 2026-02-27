@@ -17,6 +17,7 @@ import {decodeFilter as decode} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
+import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
 
 export async function GET(request: Request) {
   console.log('===============================================');
@@ -42,6 +43,9 @@ export async function GET(request: Request) {
     erreur,
     ref,
     montant,
+    sign,
+    message,
+    pem,
   });
 
   if (!(pem && message && sign && ref)) {
@@ -205,6 +209,11 @@ export async function GET(request: Request) {
   console.log('[UP2PAY][WEBHOOK] Payment marked as processed', {
     contextId,
   });
+
+  const source = paymentContext.data?.source;
+  if (source) {
+    notifyPaymentUpdate(source, invoiceId);
+  }
 
   return new NextResponse('OK', {status: 200});
 }
