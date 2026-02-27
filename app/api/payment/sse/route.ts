@@ -1,0 +1,83 @@
+export const dynamic = 'force-dynamic';
+
+import {NextResponse} from 'next/server';
+
+// ---- CORE IMPORTS ---- //
+import {PAYMENT_SOURCE, PaymentSource} from '@/lib/core/payment/common/type';
+import {subscribe, unsubscribe} from '@/lib/core/payment/sse';
+
+const VALID_SOURCES = Object.values(PAYMENT_SOURCE) as string[];
+const KEEP_ALIVE_INTERVAL_MS = 30_000;
+
+export async function GET(request: Request) {
+  const {searchParams} = new URL(request.url);
+  const source = searchParams.get('source');
+  const entityId = searchParams.get('entityId');
+
+  if (!source || !VALID_SOURCES.includes(source) || !entityId) {
+    console.warn('[SSE] Bad request', {
+      source,
+      entityId,
+      validSources: VALID_SOURCES,
+    });
+
+    return new NextResponse('Bad Request', {status: 400});
+  }
+
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      try {
+        subscribe(source as PaymentSource, entityId, controller);
+      } catch (err) {
+        controller.error(err);
+        return;
+      }
+
+      const keepAlive = setInterval(() => {
+        try {
+          controller.enqueue(encoder.encode(':\n\n'));
+        } catch (err) {
+          console.warn('[SSE] Keep-alive failed, clearing interval', {
+            source,
+            entityId,
+            error: err,
+          });
+          clearInterval(keepAlive);
+        }
+      }, KEEP_ALIVE_INTERVAL_MS);
+
+      request.signal.addEventListener('abort', () => {
+        clearInterval(keepAlive);
+
+        try {
+          unsubscribe(source as PaymentSource, entityId, controller);
+        } catch (err) {
+          console.error('[SSE] Unsubscribe failed', {
+            source,
+            entityId,
+            error: err,
+          });
+        }
+
+        try {
+          controller.close();
+        } catch {
+          console.warn('[SSE] Stream already closed', {
+            source,
+            entityId,
+          });
+        }
+      });
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
+}
