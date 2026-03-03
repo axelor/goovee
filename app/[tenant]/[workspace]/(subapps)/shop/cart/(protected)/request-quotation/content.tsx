@@ -30,14 +30,14 @@ export default function Content({
 
   const {clearCart, cart} = useCart();
   const router = useRouter();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
 
   const invoicingAddress = cart?.invoicingAddress;
   const deliveryAddress = cart?.deliveryAddress;
 
-  const callbackURL = `${workspaceURL}/${SUBAPP_CODES.shop}/cart/request-quotation`;
-  const checkoutURL = `${workspaceURL}/${SUBAPP_CODES.shop}/cart`;
+  const callbackURL = `${workspaceURI}/${SUBAPP_CODES.shop}/cart/request-quotation`;
+  const checkoutURL = `${workspaceURI}/${SUBAPP_CODES.shop}/cart`;
 
   const handleRequestQuotation = async () => {
     if (!(cart?.invoicingAddress && cart?.deliveryAddress)) {

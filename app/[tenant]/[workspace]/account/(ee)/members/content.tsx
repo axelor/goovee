@@ -397,7 +397,6 @@ function Invited({invites, availableApps}: any) {
       (await deleteInvite({
         id,
         workspaceURL,
-        workspaceURI,
       })) || ({error: true} as any);
 
     if ('error' in result) {

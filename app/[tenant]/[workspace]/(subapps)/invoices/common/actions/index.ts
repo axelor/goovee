@@ -617,10 +617,12 @@ export async function cancelStripeBankTransferPaymentIntent({
   id,
   contextId,
   workspaceURL,
+  workspaceURI,
 }: {
   id: string;
   contextId: string;
   workspaceURL: string;
+  workspaceURI: string;
 }) {
   if (!id) {
     return {error: true, message: await t('Missing stripe payment id!')};
@@ -751,7 +753,7 @@ export async function cancelStripeBankTransferPaymentIntent({
     });
 
     revalidatePath(
-      `${workspaceURL}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${$invoice.id}`,
+      `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${$invoice.id}`,
     );
   } catch (error) {
     console.error('Error Cancelling:', error);

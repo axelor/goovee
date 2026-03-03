@@ -30,4 +30,5 @@ export type TotalProps = {
   isUnpaid?: boolean;
   workspace?: PortalWorkspace;
   invoiceType: string;
+  workspaceURI: string;
 };

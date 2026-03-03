@@ -17,12 +17,14 @@ interface ContentProps {
   invoice: InvoiceType;
   workspace: PortalWorkspace;
   invoiceType: string;
+  workspaceURI: string;
 }
 
 export default function Content({
   invoice,
   workspace,
   invoiceType,
+  workspaceURI,
 }: ContentProps) {
   const {invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
 
@@ -63,6 +65,7 @@ export default function Content({
             invoiceType={invoiceType}
             isUnpaid={isUnpaid}
             workspace={workspace}
+            workspaceURI={workspaceURI}
           />
         </div>
       </div>

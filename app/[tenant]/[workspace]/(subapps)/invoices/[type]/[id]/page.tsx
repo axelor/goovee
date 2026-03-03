@@ -21,7 +21,7 @@ async function Invoice({
   params: {id: string; type: string; tenant: string; workspace: string};
 }) {
   const {type, id, tenant} = params;
-  const {workspaceURL} = workspacePathname(params);
+  const {workspaceURL, workspaceURI} = workspacePathname(params);
 
   const session = await getSession();
 
@@ -80,6 +80,7 @@ async function Invoice({
       invoiceType={type}
       invoice={clone(invoice)}
       workspace={workspace}
+      workspaceURI={workspaceURI}
     />
   );
 }
