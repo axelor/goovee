@@ -152,6 +152,7 @@ export const CreatePost = ({
         title: values.title,
         content: editorContent,
         workspaceURL,
+        workspaceURI,
         formData,
       });
 

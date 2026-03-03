@@ -38,7 +38,13 @@ export async function PostsContent({
 
   return (
     <div className="w-full mt-6">
-      <ThreadList pageInfo={pageInfo} posts={posts} />
+      <ThreadList
+        pageInfo={pageInfo}
+        posts={posts}
+        memberGroupIDs={memberGroupIDs}
+        selectedGroupId={null}
+        workspace={workspace}
+      />
     </div>
   );
 }

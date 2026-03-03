@@ -1,7 +1,6 @@
 'use client';
 
 import {useRouter} from 'next/navigation';
-import {useState} from 'react';
 import {
   MdOutlinePushPin,
   MdMoreVert,
@@ -28,7 +27,6 @@ import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
-import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -40,13 +38,8 @@ import {
   PIN,
   REMOVE_PIN,
 } from '@/subapps/forum/common/constants';
-import {
-  addGroupNotification,
-  exitGroup,
-  joinGroup,
-  pinGroup,
-} from '@/subapps/forum/common/action/action';
-import {Group} from '@/subapps/forum/common/types/forum';
+import {addGroupNotification} from '@/subapps/forum/common/action/action';
+import {ForumGroup, Group} from '@/subapps/forum/common/types/forum';
 
 export const GroupActionList = ({
   title,
@@ -54,88 +47,22 @@ export const GroupActionList = ({
   isMember = true,
   userId = '',
   groupId,
+  onExit,
+  onJoin,
+  onPin,
 }: {
   title: string;
   groups: any;
   isMember?: boolean;
   userId?: string;
   groupId?: string;
+  onExit?: (group: ForumGroup) => void;
+  onJoin?: (group: ForumGroup) => void;
+  onPin?: (group: ForumGroup) => void;
 }) => {
   const router = useRouter();
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
-  const [loadingGroups, setLoadingGroups] = useState<Set<string>>(new Set());
-
-  const handlePinGroup = async (isPin: boolean, group: any) => {
-    const {id, forumGroup} = group;
-    const response = await pinGroup({
-      id,
-      groupID: forumGroup.id,
-      isPin: !isPin,
-      workspaceURL,
-    });
-
-    if (response.success) {
-      router.push(`${workspaceURI}/${SUBAPP_CODES.forum}`);
-      router.refresh();
-    } else {
-      toast({
-        variant: 'destructive',
-        title: i18n.t(response?.message || 'An error occurred'),
-      });
-    }
-  };
-
-  const handleExit = async (group: Group) => {
-    const {id, forumGroup} = group;
-    const groupId = forumGroup.id;
-    if (loadingGroups.has(groupId)) return;
-
-    setLoadingGroups(prev => new Set(prev).add(groupId));
-    const response = await exitGroup({
-      id,
-      groupID: forumGroup.id,
-      workspaceURL,
-    });
-    setLoadingGroups(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(groupId);
-      return newSet;
-    });
-
-    if (response.success) {
-      router.push(`${workspaceURI}/${SUBAPP_CODES.forum}`);
-      router.refresh();
-    } else {
-      toast({
-        variant: 'destructive',
-        title: i18n.t(response?.message || 'An error occurred'),
-      });
-    }
-  };
-
-  const handleJoinGroup = async (group: Group, userId: string) => {
-    const {id} = group;
-    if (loadingGroups.has(id)) return;
-
-    setLoadingGroups(prev => new Set(prev).add(id));
-    const response = await joinGroup({groupID: id, userId, workspaceURL});
-    setLoadingGroups(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
-
-    if (response.success) {
-      router.push(`${workspaceURI}/${SUBAPP_CODES.forum}`);
-      router.refresh();
-    } else {
-      toast({
-        variant: 'destructive',
-        title: i18n.t(response.message || 'An error occurred'),
-      });
-    }
-  };
 
   const handleNotifications = async (
     group: Group,
@@ -147,10 +74,10 @@ export const GroupActionList = ({
       groupID: forumGroup.id,
       notificationType,
       workspaceURL,
+      workspaceURI,
     });
 
     if (response.success) {
-      router.push(`${workspaceURI}/${SUBAPP_CODES.forum}`);
       router.refresh();
     } else {
       toast({
@@ -176,7 +103,6 @@ export const GroupActionList = ({
           const groupImage = imageId
             ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${id}/image`
             : NO_IMAGE_URL;
-          const isLoading = loadingGroups.has(id);
 
           return (
             <Collapsible key={group?.id}>
@@ -222,7 +148,7 @@ export const GroupActionList = ({
                       )}
                       <div
                         className="flex items-center gap-[0.625rem] px-2"
-                        onClick={() => handlePinGroup(group?.isPin, group)}>
+                        onClick={() => onPin?.(group)}>
                         <MdOutlinePushPin className="w-4 h-4" />
                         <span className="w-full text-xs leading-[1.125rem] font-normal cursor-pointer">
                           {!group?.isPin ? i18n.t(PIN) : i18n.t(REMOVE_PIN)}
@@ -259,13 +185,8 @@ export const GroupActionList = ({
                   )}
                   {isMember ? (
                     <div
-                      className={cn(
-                        'flex items-center gap-[0.625rem] px-2',
-                        isLoading
-                          ? 'opacity-50 pointer-events-none'
-                          : 'cursor-pointer',
-                      )}
-                      onClick={() => !isLoading && handleExit(group)}>
+                      className="flex items-center gap-[0.625rem] px-2 cursor-pointer"
+                      onClick={() => onExit?.(group)}>
                       <MdExitToApp className="w-4 h-4" />
                       <span className="w-full text-xs leading-[1.125rem] font-normal">
                         {i18n.t(LEAVE_THIS_GROUP)}
@@ -273,15 +194,8 @@ export const GroupActionList = ({
                     </div>
                   ) : (
                     <div
-                      className={cn(
-                        'flex items-center gap-[0.625rem] px-2',
-                        isLoading
-                          ? 'opacity-50 pointer-events-none'
-                          : 'cursor-pointer',
-                      )}
-                      onClick={() =>
-                        !isLoading && handleJoinGroup(group, userId)
-                      }>
+                      className="flex items-center gap-[0.625rem] px-2 cursor-pointer"
+                      onClick={() => onJoin?.(group)}>
                       <MdOutlineGroupAdd className="w-4 h-4" />
                       <span className="w-full text-xs leading-[1.125rem] font-normal">
                         {i18n.t(ASK_TO_JOIN)}

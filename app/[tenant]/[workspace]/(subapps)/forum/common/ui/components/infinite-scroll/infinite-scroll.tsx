@@ -15,7 +15,7 @@ import {useToast} from '@/ui/hooks';
 import {Thread} from '@/subapps/forum/common/ui/components';
 import {fetchPosts} from '@/subapps/forum/common/action/action';
 import {Post} from '@/subapps/forum/common/types/forum';
-import {useForum} from '@/subapps/forum/common/ui/context';
+import {PortalWorkspace} from '@/types';
 
 interface PageInfo {
   count: number;
@@ -24,11 +24,17 @@ interface PageInfo {
 interface InfiniteScrollProps {
   initialPosts: Post[];
   pageInfo: PageInfo;
+  memberGroupIDs: string[];
+  selectedGroupId: string | null;
+  workspace: PortalWorkspace | null;
 }
 
 export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   initialPosts,
   pageInfo,
+  memberGroupIDs,
+  selectedGroupId,
+  workspace,
 }) => {
   const {count} = pageInfo;
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -39,11 +45,6 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   const {workspaceURL} = useWorkspace();
   const params = useParams();
   const {toast} = useToast();
-  const {memberGroups, selectedGroup} = useForum();
-
-  const memberGroupIDs = useMemo(() => {
-    return memberGroups.map((group: any) => group.forumGroup?.id);
-  }, [memberGroups]);
 
   const {searchParams} = useSearchParams();
   const sort = useMemo(() => searchParams.get('sort') || '', [searchParams]);
@@ -65,8 +66,8 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         page: nextPage,
         workspaceURL,
         memberGroupIDs,
-        ...(selectedGroup && {
-          groupIDs: [selectedGroup.id],
+        ...(selectedGroupId && {
+          groupIDs: [selectedGroupId],
         }),
       });
 
@@ -103,7 +104,12 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   return (
     <>
       {posts.map(post => (
-        <Thread key={post.id} post={post} showHeader={!params.id} />
+        <Thread
+          key={post.id}
+          post={post}
+          showHeader={!params.id}
+          workspace={workspace}
+        />
       ))}
 
       {posts.length < count && (

@@ -8,6 +8,7 @@ import {
 } from '@/subapps/forum/common/ui/components';
 import type {Post} from '@/subapps/forum/common/types/forum';
 import {Skeleton} from '@/ui/components';
+import {PortalWorkspace} from '@/types';
 
 interface ThreadProps {
   post?: Post;
@@ -15,6 +16,7 @@ interface ThreadProps {
   showCommentsByDefault?: boolean;
   hideCloseComments?: boolean;
   usePopUpStyles?: boolean;
+  workspace?: PortalWorkspace | null;
 }
 
 export const Thread = ({
@@ -23,6 +25,7 @@ export const Thread = ({
   showCommentsByDefault = false,
   hideCloseComments = false,
   usePopUpStyles = false,
+  workspace,
 }: ThreadProps) => {
   const {forumGroup}: any = post || {};
 
@@ -64,6 +67,7 @@ export const Thread = ({
         usePopUpStyles={usePopUpStyles}
         hideCloseComments={hideCloseComments}
         showCommentsByDefault={showCommentsByDefault}
+        workspace={workspace ?? null}
       />
     </div>
   );

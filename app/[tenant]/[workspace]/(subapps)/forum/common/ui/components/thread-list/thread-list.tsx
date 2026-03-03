@@ -15,13 +15,20 @@ import {
   ThreadSkeleton,
 } from '@/subapps/forum/common/ui/components';
 import {Post} from '@/subapps/forum/common/types/forum';
+import {PortalWorkspace} from '@/types';
 
 export const ThreadList = ({
   posts,
   pageInfo,
+  memberGroupIDs,
+  selectedGroupId,
+  workspace,
 }: {
   posts: Post[];
   pageInfo: any;
+  memberGroupIDs: string[];
+  selectedGroupId: string | null;
+  workspace: PortalWorkspace | null;
 }) => {
   const {update, searchParams} = useSearchParams();
   const sort = searchParams.get('sort') ?? 'new';
@@ -53,7 +60,13 @@ export const ThreadList = ({
         <div>{i18n.t('No posts available.')}</div>
       ) : (
         <div className="flex flex-col gap-4">
-          <InfiniteScroll initialPosts={posts} pageInfo={pageInfo} />
+          <InfiniteScroll
+            initialPosts={posts}
+            pageInfo={pageInfo}
+            memberGroupIDs={memberGroupIDs}
+            selectedGroupId={selectedGroupId}
+            workspace={workspace}
+          />
         </div>
       )}
     </div>

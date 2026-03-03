@@ -88,11 +88,13 @@ export async function pinGroup({
   id,
   groupID,
   workspaceURL,
+  workspaceURI,
 }: {
   isPin: boolean;
   id: string;
   groupID: string;
   workspaceURL: string;
+  workspaceURI: string;
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -160,6 +162,7 @@ export async function pinGroup({
       })
       .then(clone);
 
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -177,10 +180,12 @@ export async function exitGroup({
   id,
   groupID,
   workspaceURL,
+  workspaceURI,
 }: {
   id: string;
   groupID: string;
   workspaceURL: string;
+  workspaceURI: string;
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -240,6 +245,7 @@ export async function exitGroup({
         version: memberGroup.version,
       })
       .then(clone);
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -257,10 +263,12 @@ export async function joinGroup({
   groupID,
   userId,
   workspaceURL,
+  workspaceURI,
 }: {
   groupID: any;
   userId: string;
   workspaceURL: string;
+  workspaceURI: string;
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -330,6 +338,7 @@ export async function joinGroup({
       })
       .then(clone);
 
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
     return {
       success: true,
       data: result,
@@ -348,11 +357,13 @@ export async function addGroupNotification({
   groupID,
   notificationType,
   workspaceURL,
+  workspaceURI,
 }: {
   id: string;
   groupID: string;
   notificationType: string;
   workspaceURL: string;
+  workspaceURI: string;
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -420,6 +431,7 @@ export async function addGroupNotification({
       })
       .then(clone);
 
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
     return {success: true, data: response};
   } catch (error) {
     console.log('error >>>', error);
@@ -435,6 +447,7 @@ export async function addPost({
   title,
   content,
   workspaceURL,
+  workspaceURI,
   formData,
 }: any) {
   const tenantId = (await headers()).get(TENANT_HEADER);
@@ -571,7 +584,7 @@ export async function addPost({
         link: postLink,
       });
     }
-    revalidatePath(`${workspaceURL}/${SUBAPP_CODES.forum}`);
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
     return {success: true, data: clone(post)};
   } catch (error) {
     return {

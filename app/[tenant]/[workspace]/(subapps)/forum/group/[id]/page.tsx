@@ -21,7 +21,6 @@ import {
   MENU,
 } from '@/subapps/forum/common/constants';
 import {ForumSkeleton} from '@/subapps/forum/common/ui/components/skeletons';
-import ForumContextProvider from '@/subapps/forum/common/ui/context';
 import {
   NavMenu,
   Tabs,
@@ -100,40 +99,40 @@ async function ForumGroup({
   }
 
   return (
-    <ForumContextProvider
-      value={{
-        memberGroups,
-        nonMemberGroups,
-        selectedGroup,
-        user: $user,
-        workspace,
-      }}>
-      <div className="flex flex-col h-full flex-1">
-        <div className="hidden lg:block">
-          <NavMenu items={MENU} />
-        </div>
-        <Hero />
-        <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-[17.563rem_1fr] gap-5">
-          <GroupControls />
-          <div>
-            <ComposePost />
-            <Tabs activeTab={type} />
-            <Suspense fallback={<ThreadListSkeleton />}>
-              {type === FORUM_CONTENT.POSTS && (
-                <GroupPostsContent
-                  memberGroupIDs={memberGroupIDs}
-                  params={params}
-                  searchParams={searchParams}
-                  tenant={tenant}
-                  user={user}
-                  workspace={workspace}
-                />
-              )}
-            </Suspense>
-          </div>
+    <div className="flex flex-col h-full flex-1">
+      <div className="hidden lg:block">
+        <NavMenu items={MENU} />
+      </div>
+      <Hero selectedGroup={selectedGroup} workspace={workspace} />
+      <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-[17.563rem_1fr] gap-5">
+        <GroupControls
+          memberGroups={memberGroups}
+          nonMemberGroups={nonMemberGroups}
+          user={$user}
+          selectedGroup={selectedGroup}
+        />
+        <div>
+          <ComposePost
+            user={$user}
+            memberGroups={memberGroups}
+            selectedGroup={selectedGroup}
+          />
+          <Tabs activeTab={type} />
+          <Suspense fallback={<ThreadListSkeleton />}>
+            {type === FORUM_CONTENT.POSTS && (
+              <GroupPostsContent
+                memberGroupIDs={memberGroupIDs}
+                params={params}
+                searchParams={searchParams}
+                tenant={tenant}
+                user={user}
+                workspace={workspace}
+              />
+            )}
+          </Suspense>
         </div>
       </div>
-    </ForumContextProvider>
+    </div>
   );
 }
 

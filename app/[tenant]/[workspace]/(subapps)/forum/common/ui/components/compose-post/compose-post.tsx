@@ -10,15 +10,23 @@ import {getPartnerImageURL} from '@/utils/files';
 
 // ---- LOCAL IMPORTS ---- //
 import {UploadPost} from '@/subapps/forum/common/ui/components';
-import {useForum} from '@/subapps/forum/common/ui/context';
+import {ForumGroup} from '@/subapps/forum/common/types/forum';
 import {
   DISABLED_SEARCH_PLACEHOLDER,
   JOIN_GROUP_TO_POST,
   START_A_POST,
 } from '@/subapps/forum/common/constants';
+import {User} from '@/types';
 
-export function ComposePost() {
-  const {user, memberGroups, selectedGroup} = useForum();
+export function ComposePost({
+  user,
+  memberGroups,
+  selectedGroup,
+}: {
+  user: User | null;
+  memberGroups: ForumGroup[];
+  selectedGroup: ForumGroup | null;
+}) {
   const {picture}: any = user || {};
   const {tenant} = useWorkspace();
   const [open, setOpen] = useState(false);

@@ -19,7 +19,6 @@ import {
   findGroupsByMembers,
   findUser,
 } from '@/subapps/forum/common/orm/forum';
-import {ForumSkeleton} from '@/subapps/forum/common/ui/components/skeletons/forum-sekeleton';
 import {
   NavMenu,
   Tabs,
@@ -27,17 +26,16 @@ import {
   GroupControls,
   ThreadListSkeleton,
 } from '@/subapps/forum/common/ui/components';
-import ForumContextProvider from '@/subapps/forum/common/ui/context';
 import {ComposePost} from '@/subapps/forum/common/ui/components';
 import {PostsContent} from './post-content';
 
-async function Forum({
-  params,
-  searchParams,
-}: {
-  params: {type: string; tenant: string; workspace: string};
-  searchParams: {[key: string]: string | undefined};
+export default async function Page(props: {
+  params: Promise<{type: string; tenant: string; workspace: string}>;
+  searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+
   const session = await getSession();
   const user = session?.user as User;
   const userId = user?.id as string;
@@ -87,52 +85,37 @@ async function Forum({
   }).then(clone)) as User;
 
   return (
-    <ForumContextProvider
-      value={{
-        nonMemberGroups,
-        memberGroups,
-        selectedGroup: null,
-        user: $user,
-        workspace,
-      }}>
-      <div className="flex flex-col h-full flex-1">
-        <div className="hidden lg:block">
-          <NavMenu items={MENU} />
-        </div>
-        <Hero />
-        <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
-          <GroupControls />
-          <div className="col-span-2">
-            <ComposePost />
-            <Tabs activeTab={type} />
-            <Suspense fallback={<ThreadListSkeleton />}>
-              {type === FORUM_CONTENT.POSTS && (
-                <PostsContent
-                  searchParams={searchParams}
-                  workspace={workspace}
-                  groupIDs={groupIDs}
-                  memberGroupIDs={memberGroupIDs}
-                  user={user}
-                  tenant={tenant}
-                />
-              )}
-            </Suspense>
-          </div>
+    <div className="flex flex-col h-full flex-1">
+      <div className="hidden lg:block">{/* <NavMenu items={MENU} /> */}</div>
+      <Hero selectedGroup={null} workspace={workspace} />
+      <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+        <GroupControls
+          memberGroups={memberGroups}
+          nonMemberGroups={nonMemberGroups}
+          user={$user}
+          selectedGroup={null}
+        />
+        <div className="col-span-2">
+          <ComposePost
+            user={$user}
+            memberGroups={memberGroups}
+            selectedGroup={null}
+          />
+          <Tabs activeTab={type} />
+          <Suspense fallback={<ThreadListSkeleton />}>
+            {type === FORUM_CONTENT.POSTS && (
+              <PostsContent
+                searchParams={searchParams}
+                workspace={workspace}
+                groupIDs={groupIDs}
+                memberGroupIDs={memberGroupIDs}
+                user={user}
+                tenant={tenant}
+              />
+            )}
+          </Suspense>
         </div>
       </div>
-    </ForumContextProvider>
-  );
-}
-
-export default async function Page(props: {
-  params: Promise<{type: string; tenant: string; workspace: string}>;
-  searchParams: Promise<{[key: string]: string | undefined}>;
-}) {
-  const searchParams = await props.searchParams;
-  const params = await props.params;
-  return (
-    <Suspense fallback={<ForumSkeleton />}>
-      <Forum params={params} searchParams={searchParams} />
-    </Suspense>
+    </div>
   );
 }
