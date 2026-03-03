@@ -150,7 +150,7 @@ const options = {
       },
     },
   },
-  plugins: [credentials, ...(showKeycloakOauth ? [keycloak] : [])],
+  plugins: [credentials, ...(showKeycloakOauth && keycloak ? [keycloak] : [])],
   socialProviders: {google},
 } satisfies BetterAuthOptions;
 
