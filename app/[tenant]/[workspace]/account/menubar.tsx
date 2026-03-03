@@ -22,7 +22,7 @@ type Item = {
 
 function MenuItem({item}: {item: Item}) {
   const pathname = usePathname();
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   return (
     <div
@@ -34,7 +34,7 @@ function MenuItem({item}: {item: Item}) {
           ['bg-success-light text-success']: pathname.includes(item.route),
         },
       )}>
-      <Link key={item.route} href={`${workspaceURL}/account/${item.route}`}>
+      <Link key={item.route} href={`${workspaceURI}/account/${item.route}`}>
         {i18n.t(item.label)}
       </Link>
     </div>

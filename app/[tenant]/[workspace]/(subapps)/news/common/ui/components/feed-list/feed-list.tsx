@@ -23,7 +23,7 @@ export const FeedList = ({
   width?: string;
   navigatingPathFrom: string;
 }) => {
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   return (
     <div
       className={`bg-white h-max p-4 rounded-lg ${
@@ -43,7 +43,7 @@ export const FeedList = ({
             return (
               <React.Fragment key={id}>
                 <Link
-                  href={`${workspaceURL}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
+                  href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
                   className={`w-full flex gap-4 justify-between items-center flex-auto p-2 cursor-pointer`}>
                   <div className="flex w-full gap-4 [overflow-wrap:anywhere]">
                     <Image

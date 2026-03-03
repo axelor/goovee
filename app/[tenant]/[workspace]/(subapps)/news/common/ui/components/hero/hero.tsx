@@ -36,7 +36,7 @@ export function Hero({workspace}: {workspace: PortalWorkspace}) {
 
   const handleClick = (slug: string) => {
     router.push(
-      `${workspaceURL}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${slug}`,
+      `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${slug}`,
     );
   };
 

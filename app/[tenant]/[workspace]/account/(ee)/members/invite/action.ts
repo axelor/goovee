@@ -104,11 +104,13 @@ export async function deleteInvite({
 
 export async function sendInvites({
   workspaceURL,
+  workspaceURI,
   emails,
   role,
   apps,
 }: {
   workspaceURL: PortalWorkspace['url'];
+  workspaceURI: string;
   emails: string;
   role: Role;
   apps: InviteAppsConfig;
@@ -335,7 +337,7 @@ export async function sendInvites({
   if (inviteError) {
     return error(await t('Error sending invites, try again.'));
   } else {
-    revalidatePath(`${workspace.url}/account/members`);
+    revalidatePath(`${workspaceURI}/account/members`);
 
     let message = '';
 

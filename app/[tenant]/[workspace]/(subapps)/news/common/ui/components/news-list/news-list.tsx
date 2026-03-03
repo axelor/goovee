@@ -20,12 +20,12 @@ export const NewsList = ({
   navigatingPathFrom: string;
 }) => {
   const {publicationDateTime, title, image, categorySet, slug} = news;
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   return (
     <Link
       key={id}
-      href={`${workspaceURL}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
+      href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
       className="bg-white rounded-lg flex gap-4 w-full cursor-pointer p-4 relative">
       <Image
         width={150}

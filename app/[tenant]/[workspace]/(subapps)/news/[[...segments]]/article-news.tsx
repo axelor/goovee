@@ -32,6 +32,7 @@ export async function ArticleNews({
   segments,
   tenantId,
   workspaceURL,
+  workspaceURI,
   user,
   slug,
 }: {
@@ -39,6 +40,7 @@ export async function ArticleNews({
   segments: string[];
   tenantId: Tenant['id'];
   workspaceURL: string;
+  workspaceURI: string;
   user: any;
   slug: string;
 }) {
@@ -141,7 +143,12 @@ export async function ArticleNews({
 
       {/* Comments Section */}
       <Suspense fallback={<CommentsSkeleton />}>
-        <CommentsWrapper news={newsObject} workspace={workspace} user={user} />
+        <CommentsWrapper
+          news={newsObject}
+          workspace={workspace}
+          user={user}
+          workspaceURI={workspaceURI}
+        />
       </Suspense>
     </div>
   );

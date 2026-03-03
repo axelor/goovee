@@ -370,7 +370,7 @@ const Content = ({
                 showRepliesInMainThread
                 createComment={createComment}
                 fetchComments={fetchComments}
-                attachmentDownloadUrl={`${workspaceURL}/${SUBAPP_CODES.quotations}/api/comments/attachments/${quotation.id}`}
+                attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.quotations}/api/comments/attachments/${quotation.id}`}
                 trackingField="body"
                 commentField="body"
                 disableReply

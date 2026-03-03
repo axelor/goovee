@@ -72,17 +72,21 @@ export function Sidebar({
         />
         {Boolean(workspaces?.length) && !collapsed ? (
           workspaces.length === 1 ? (
-            <Link href={workspaceURL}>
+            <Link href={workspaceURI}>
               <p>{workspaces[0]?.name || workspaces[0]?.url}</p>
             </Link>
           ) : (
-            <Select defaultValue={workspaceURL} onValueChange={redirect}>
+            <Select defaultValue={workspaceURI} onValueChange={redirect}>
               <SelectTrigger className="grow max-w-100 overflow-hidden p-0 border-0 bg-none! h-[auto]">
                 <SelectValue placeholder="" />
               </SelectTrigger>
               <SelectContent>
                 {workspaces.map((workspace: any) => (
-                  <SelectItem key={workspace.url} value={workspace.url}>
+                  <SelectItem
+                    key={workspace.url}
+                    value={
+                      workspace.url.replace(env.GOOVEE_PUBLIC_HOST, '') || '/'
+                    }>
                     {workspace.name || workspace.url}
                   </SelectItem>
                 ))}

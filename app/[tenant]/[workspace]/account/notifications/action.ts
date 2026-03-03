@@ -13,7 +13,8 @@ const error = (message: string) => {
 };
 
 export async function updatePreference({
-  url,
+  workspaceURL,
+  workspaceURI,
   code,
   data,
   tenant,
@@ -26,10 +27,11 @@ export async function updatePreference({
       activateNotification?: boolean;
     };
   };
-  url: string;
+  workspaceURL: string;
+  workspaceURI: string;
   tenant: string;
 }) {
-  if (!(code && data && url && tenant)) {
+  if (!(code && data && workspaceURL && tenant)) {
     return error(await t('Code, url, tenant and payload is required'));
   }
   const session = await getSession();
@@ -41,7 +43,7 @@ export async function updatePreference({
 
   try {
     const result = await updatePreferences({
-      url,
+      url: workspaceURL,
       code,
       user,
       tenantId: tenant,
@@ -52,7 +54,7 @@ export async function updatePreference({
       throw new Error();
     }
 
-    revalidatePath(`${url}/account/notifications`);
+    revalidatePath(`${workspaceURI}/account/notifications`);
 
     return {
       success: true,

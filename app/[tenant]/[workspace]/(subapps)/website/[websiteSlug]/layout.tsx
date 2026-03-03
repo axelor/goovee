@@ -77,6 +77,7 @@ export default async function Layout(props: {
   const website = await findWebsiteBySlug({
     websiteSlug,
     workspaceURL,
+    workspaceURI,
     user,
     tenantId: tenant,
     mountTypes: layoutMountTypes,

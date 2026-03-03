@@ -227,7 +227,7 @@ export default async function Page(props: {
             commentField="note"
             createComment={createComment}
             fetchComments={fetchComments}
-            attachmentDownloadUrl={`${workspaceURL}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`}
+            attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`}
           />
         </div>
       )}

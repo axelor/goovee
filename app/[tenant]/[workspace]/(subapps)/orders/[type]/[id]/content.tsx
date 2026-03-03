@@ -47,7 +47,7 @@ const Content = ({order, orderType}: {order: any; orderType: OrderType}) => {
   } = order;
   const {status, variant} = getStatus(statusSelect, deliveryState);
 
-  const {workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
 
   const hideDiscount = saleOrderLineList?.every(
     (item: any) => parseFloat(item.discountAmount) === 0,
@@ -100,7 +100,7 @@ const Content = ({order, orderType}: {order: any; orderType: OrderType}) => {
                       </div>
                       <div className="flex justify-end">
                         <DownloadButton
-                          downloadURL={`${workspaceURL}/${SUBAPP_CODES.orders}/api/order/${orderType}/${id}/invoice/${record.id}`}
+                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderType}/${id}/invoice/${record.id}`}
                           title={i18n.t(DOWNLOAD_PDF)}
                           className="border-none p-0"
                         />
@@ -129,7 +129,7 @@ const Content = ({order, orderType}: {order: any; orderType: OrderType}) => {
                       <div className="flex justify-end">
                         <DownloadButton
                           title={i18n.t(DOWNLOAD_PDF)}
-                          downloadURL={`${workspaceURL}/${SUBAPP_CODES.orders}/api/order/${orderType}/${id}/customer-delivery/${record.id}`}
+                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderType}/${id}/customer-delivery/${record.id}`}
                           className="border-none p-0"
                         />
                       </div>

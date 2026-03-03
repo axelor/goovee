@@ -200,6 +200,7 @@ export async function findWebsiteSeoBySlug({
 export async function findWebsiteBySlug({
   websiteSlug,
   workspaceURL,
+  workspaceURI,
   user,
   tenantId,
   mountTypes,
@@ -207,6 +208,7 @@ export async function findWebsiteBySlug({
 }: {
   websiteSlug: Website['slug'];
   workspaceURL: PortalWorkspace['url'];
+  workspaceURI: string;
   user?: User;
   tenantId: Tenant['id'];
   mountTypes?: LayoutMountType[];
@@ -290,15 +292,15 @@ export async function findWebsiteBySlug({
           },
         },
       })
-      .then(lines =>
-        lines?.map(line => ({
+      .then(lines => {
+        return lines?.map(line => ({
           ...line,
           page: line?.page && {
             ...line?.page,
-            url: `${workspaceURL}/${SUBAPP_CODES.website}/${websiteSlug}/${line?.page?.slug}`,
+            url: `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}/${line?.page?.slug}`,
           },
-        })),
-      );
+        }));
+      });
 
     menuListPromise = buildMenuHierarchy(menuList);
   }

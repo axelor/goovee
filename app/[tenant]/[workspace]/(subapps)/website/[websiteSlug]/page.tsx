@@ -30,6 +30,7 @@ export default async function Layout(props: {
   const website = await findWebsiteBySlug({
     websiteSlug,
     workspaceURL,
+    workspaceURI,
     user,
     tenantId: tenant,
   });
@@ -53,7 +54,7 @@ export default async function Layout(props: {
 
   if (websitePageSlug) {
     redirect(
-      `${workspaceURL}/${SUBAPP_CODES.website}/${websiteSlug}/${websitePageSlug}`,
+      `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}/${websitePageSlug}`,
     );
   }
 

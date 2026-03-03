@@ -31,7 +31,7 @@ export const ThreadFooter = ({
   workspace: PortalWorkspace | null;
 }) => {
   const isAllowToComment = useMemo(() => post.isMember, [post]);
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   const enableComment = isCommentEnabled({
     subapp: SUBAPP_CODES.forum,
@@ -55,7 +55,7 @@ export const ThreadFooter = ({
       {...(!isAllowToComment && {
         placeholder: JOIN_GROUP_TO_COMMENT,
       })}
-      attachmentDownloadUrl={`${workspaceURL}/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}`}
+      attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}`}
     />
   ) : (
     <div />

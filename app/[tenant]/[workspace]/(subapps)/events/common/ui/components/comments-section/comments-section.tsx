@@ -15,7 +15,7 @@ import {
 } from '@/subapps/events/common/actions/actions';
 
 export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   return (
     <Card className="rounded-2xl border-none shadow-none p-4 w-full space-y-4 ">
       <h2 className="text-xl font-semibold">{i18n.t('Comments')}</h2>
@@ -35,7 +35,7 @@ export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
         fetchComments={fetchComments}
         trackingField="publicBody"
         commentField="note"
-        attachmentDownloadUrl={`${workspaceURL}/${SUBAPP_CODES.events}/api/comments/attachments/${slug}`}
+        attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.events}/api/comments/attachments/${slug}`}
       />
     </Card>
   );

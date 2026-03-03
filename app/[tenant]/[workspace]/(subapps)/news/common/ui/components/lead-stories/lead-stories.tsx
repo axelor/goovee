@@ -21,7 +21,7 @@ export const LeadStories = ({
   news?: any[];
   navigatingPathFrom: string;
 }) => {
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   return (
     <div className="flex flex-col gap-6">
@@ -69,7 +69,7 @@ export const LeadStories = ({
             }) => (
               <Link
                 key={id}
-                href={`${workspaceURL}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
+                href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
                 className="flex flex-col col-span-2 md:col-span-1 cursor-pointer">
                 <div className="w-full h-[150px]  relative">
                   <Image

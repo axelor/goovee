@@ -37,7 +37,7 @@ export const ThreadBody = ({
 }) => {
   const {title, content, attachmentList, author, postDateT}: any = post || {};
 
-  const {tenant, workspaceURL} = useWorkspace();
+  const {tenant, workspaceURI} = useWorkspace();
 
   const ref = React.useRef(null);
 
@@ -56,7 +56,7 @@ export const ThreadBody = ({
               id: attachment?.metaFile?.id,
               type: attachment?.metaFile?.fileType,
               name: attachment?.metaFile?.fileName,
-              url: `${workspaceURL}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${attachment?.metaFile?.id}`,
+              url: `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${attachment?.metaFile?.id}`,
             });
           }
           return acc;
@@ -64,7 +64,7 @@ export const ThreadBody = ({
         {images: [], files: []},
       ) || {images: [], files: []}
     );
-  }, [attachmentList, post?.id, workspaceURL]);
+  }, [attachmentList, post?.id, workspaceURI]);
 
   return (
     <>

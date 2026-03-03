@@ -22,7 +22,7 @@ import {getLocaleRedirectionURL} from '../common/action';
 import {useToast} from '@/ui/hooks';
 
 export function LanguageSelection({languageList, active}: any) {
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
   const params = useParams();
@@ -34,6 +34,7 @@ export function LanguageSelection({languageList, active}: any) {
   const handleLanguageChange = async (websiteSlug: Website['slug']) => {
     const result = await getLocaleRedirectionURL({
       workspaceURL,
+      workspaceURI,
       websiteSlug,
       websitePageSlug,
     });

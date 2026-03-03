@@ -23,14 +23,15 @@ export function Preference({
   code: PortalApp['code'];
   hideSubscription?: boolean;
 }) {
-  const {tenant, workspaceURL: url} = useWorkspace();
+  const {tenant, workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
 
   const changePreference =
     (root?: boolean) => async (activateNotification: any, record?: any) => {
       const result: any = await updatePreference({
-        url,
+        workspaceURL,
+        workspaceURI,
         tenant,
         code,
         data: {

@@ -119,7 +119,7 @@ export function Hero({
       image={imageURL}
       groupImg={
         selectedGroup?.image?.id &&
-        `${workspaceURL}/${SUBAPP_CODES.forum}/api/group/${selectedGroup?.id}/image`
+        `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${selectedGroup?.id}/image`
       }
       background={workspace?.config?.forumHeroOverlayColorSelect || 'default'}
       blendMode={

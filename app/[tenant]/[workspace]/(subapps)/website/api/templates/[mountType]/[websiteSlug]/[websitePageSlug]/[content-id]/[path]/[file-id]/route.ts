@@ -98,6 +98,7 @@ export async function GET(
     const website = await findWebsiteBySlug({
       websiteSlug,
       workspaceURL,
+      workspaceURI,
       user,
       tenantId,
       mountTypes: [mountType],

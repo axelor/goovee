@@ -8,9 +8,9 @@ export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
   const params = await props.params;
-  const {workspaceURL} = workspacePathname(params);
+  const {workspaceURI} = workspacePathname(params);
 
   return redirect(
-    `${workspaceURL}/${SUBAPP_CODES.orders}${SUBAPP_PAGE.orders}`,
+    `${workspaceURI}/${SUBAPP_CODES.orders}${SUBAPP_PAGE.orders}`,
   );
 }

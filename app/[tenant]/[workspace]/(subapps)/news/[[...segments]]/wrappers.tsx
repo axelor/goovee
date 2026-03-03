@@ -765,12 +765,13 @@ export async function CommentsWrapper({
   workspace,
   user,
   news,
+  workspaceURI,
 }: {
   workspace: PortalWorkspace;
   user: any;
   news: any;
+  workspaceURI: string;
 }) {
-  const workspaceURL = workspace.url;
   const title = await t(COMMENTS);
 
   const enableComment = isCommentEnabled({
@@ -806,7 +807,7 @@ export async function CommentsWrapper({
           commentField="note"
           createComment={createComment}
           fetchComments={fetchComments}
-          attachmentDownloadUrl={`${workspaceURL}/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`}
+          attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`}
         />
       </div>
     </div>

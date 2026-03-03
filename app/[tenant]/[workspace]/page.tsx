@@ -62,5 +62,5 @@ export default async function Page(props: {
   }
 
   const defaultApp = apps[0];
-  return <ClientRedirection url={`${workspaceURL}/${defaultApp.code}`} />;
+  return <ClientRedirection url={`${workspaceURI}/${defaultApp.code}`} />;
 }

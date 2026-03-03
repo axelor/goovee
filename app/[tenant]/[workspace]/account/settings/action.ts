@@ -13,7 +13,13 @@ import {clone} from '@/utils';
 import {SUBAPP_PAGE} from '@/constants';
 import {manager, type Tenant} from '@/tenant';
 
-export async function removeWorkpace({workspaceURL}: {workspaceURL: string}) {
+export async function removeWorkpace({
+  workspaceURL,
+  workspaceURI,
+}: {
+  workspaceURL: string;
+  workspaceURI: string;
+}) {
   if (!workspaceURL) {
     return {
       error: true,
@@ -132,7 +138,7 @@ export async function removeWorkpace({workspaceURL}: {workspaceURL: string}) {
         })
         .then(clone);
     }
-    revalidatePath(`${workspace.url}/${SUBAPP_PAGE.account}`);
+    revalidatePath(`${workspaceURI}/${SUBAPP_PAGE.account}`);
     return {
       success: true,
     };

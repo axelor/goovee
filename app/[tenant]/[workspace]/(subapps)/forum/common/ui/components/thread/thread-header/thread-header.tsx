@@ -6,14 +6,14 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 
 export const ThreadHeader = ({group}: {group: any}) => {
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   return (
     <div className="flex items-center gap-2 px-4 pb-4 border-b">
       <Avatar className="rounded-lg h-6 w-6">
         <AvatarImage
           src={
             group?.image?.id
-              ? `${workspaceURL}/${SUBAPP_CODES.forum}/api/group/${group.id}/image`
+              ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.id}/image`
               : NO_IMAGE_URL
           }
         />

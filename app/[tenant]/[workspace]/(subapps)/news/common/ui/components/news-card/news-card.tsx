@@ -20,12 +20,12 @@ export const NewsCard = ({
   navigatingPathFrom: string;
 }) => {
   const {publicationDateTime, title, image, categorySet, slug} = news;
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
 
   return (
     <Link
       key={id}
-      href={`${workspaceURL}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
+      href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
       className="bg-white rounded-lg flex flex-col cursor-pointer">
       <div className="w-full h-[150px] rounded-t-lg relative">
         <Image

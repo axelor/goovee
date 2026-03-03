@@ -22,6 +22,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useNavigationVisibility} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
+import {useEnvironment} from '@/lib/core/environment';
 
 function MobileSidebar({subapps, workspaces, workspace}: any) {
   const pathname = usePathname();
@@ -31,6 +32,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
   const user = session?.user;
 
   const {workspaceURI, workspaceURL} = useWorkspace();
+  const env = useEnvironment();
   const router = useRouter();
 
   const redirect = (value: any) => {
@@ -57,19 +59,23 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
           className="bg-white overflow-auto flex flex-col">
           {user && Boolean(workspaces?.length) ? (
             workspaces.length === 1 ? (
-              <Link href={workspaceURL}>
+              <Link href={workspaceURI}>
                 <p className="px-6 py-2">
                   {workspaces[0]?.name || workspaces[0]?.url}
                 </p>
               </Link>
             ) : (
-              <Select defaultValue={workspaceURL} onValueChange={redirect}>
+              <Select defaultValue={workspaceURI} onValueChange={redirect}>
                 <SelectTrigger className="grow max-w-100 overflow-hidden px-6 py-2 mt-4 bg-none! h-[auto]">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
                   {workspaces.map((workspace: any) => (
-                    <SelectItem key={workspace.url} value={workspace.url}>
+                    <SelectItem
+                      key={workspace.url}
+                      value={
+                        workspace.url.replace(env.GOOVEE_PUBLIC_HOST, '') || '/'
+                      }>
                       {workspace.name || workspace.url}
                     </SelectItem>
                   ))}

@@ -28,7 +28,7 @@ export const GroupNotification = ({group}: groupNotificationPros) => {
   const [selectedOption, setSelectedOption] = useState<string | null>('');
   const {forumGroup, notificationSelect} = group;
 
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
 
   useEffect(() => {
@@ -44,6 +44,7 @@ export const GroupNotification = ({group}: groupNotificationPros) => {
       groupID: forumGroup.id,
       notificationType,
       workspaceURL,
+      workspaceURI,
     });
 
     if (!response?.success) {
@@ -63,7 +64,7 @@ export const GroupNotification = ({group}: groupNotificationPros) => {
             <AvatarImage
               src={
                 group.forumGroup?.image?.id
-                  ? `${workspaceURL}/${SUBAPP_CODES.forum}/api/group/${group.forumGroup?.id}/image`
+                  ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.forumGroup?.id}/image`
                   : NO_IMAGE_URL
               }
             />

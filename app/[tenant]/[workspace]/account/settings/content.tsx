@@ -27,7 +27,7 @@ import {removeWorkpace} from '@/app/[tenant]/[workspace]/account/settings/action
 export default function Content({workspace}: {workspace: PortalWorkspace}) {
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
 
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
 
@@ -42,7 +42,7 @@ export default function Content({workspace}: {workspace: PortalWorkspace}) {
   const handleConfirmLeave = async () => {
     setIsAlertOpen(false);
     try {
-      const result = await removeWorkpace({workspaceURL});
+      const result = await removeWorkpace({workspaceURL, workspaceURI});
 
       if (result?.success) {
         toast({

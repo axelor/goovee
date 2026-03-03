@@ -26,10 +26,12 @@ import {
 
 export async function getLocaleRedirectionURL({
   workspaceURL,
+  workspaceURI,
   websiteSlug,
   websitePageSlug,
 }: {
   workspaceURL: PortalWorkspace['url'];
+  workspaceURI: string;
   websiteSlug: Website['slug'];
   websitePageSlug: WebsitePage['slug'];
 }) {
@@ -68,6 +70,7 @@ export async function getLocaleRedirectionURL({
   const website = await findWebsiteBySlug({
     websiteSlug,
     workspaceURL,
+    workspaceURI,
     user,
     tenantId,
   });
@@ -113,7 +116,7 @@ export async function getLocaleRedirectionURL({
     };
   }
 
-  const baseURL = `${workspaceURL}/${SUBAPP_CODES.website}/${websiteSlug}`;
+  const baseURL = `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}`;
 
   if (websitePageSlug) {
     const client = await manager.getClient(tenantId);
@@ -145,7 +148,7 @@ export async function getLocaleRedirectionURL({
   return {
     success: true,
     data: {
-      url: `${workspaceURL}/${SUBAPP_CODES.website}/${websiteSlug}`,
+      url: `${workspaceURI}/${SUBAPP_CODES.website}/${websiteSlug}`,
     },
   };
 }

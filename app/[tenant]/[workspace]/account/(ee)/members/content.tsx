@@ -55,7 +55,7 @@ function Members({members, availableApps}: any) {
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
-  const {workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
   const {toast} = useToast();
   const router = useRouter();
 
@@ -76,6 +76,7 @@ function Members({members, availableApps}: any) {
         app,
         value,
         workspaceURL,
+        workspaceURI,
       });
 
       if (!result || 'error' in result) {
@@ -95,6 +96,7 @@ function Members({members, availableApps}: any) {
         app,
         value,
         workspaceURL,
+        workspaceURI,
       });
 
       if (!result || 'error' in result) {
@@ -115,6 +117,7 @@ function Members({members, availableApps}: any) {
       (await deleteMember({
         member: {id, email},
         workspaceURL,
+        workspaceURI,
       })) || ({error: true} as any);
 
     if (!result || 'error' in result) {
@@ -349,6 +352,7 @@ function Invited({invites, availableApps}: any) {
         app,
         value,
         workspaceURL,
+        workspaceURI,
       });
 
       if (result) {
@@ -370,6 +374,7 @@ function Invited({invites, availableApps}: any) {
         app,
         value,
         workspaceURL,
+        workspaceURI,
       });
 
       if (result) {
@@ -392,6 +397,7 @@ function Invited({invites, availableApps}: any) {
       (await deleteInvite({
         id,
         workspaceURL,
+        workspaceURI,
       })) || ({error: true} as any);
 
     if ('error' in result) {

@@ -62,11 +62,13 @@ async function canUpdate({workspaceURL}: {workspaceURL: string}) {
 
 export async function updateInviteApplication({
   workspaceURL,
+  workspaceURI,
   invite,
   app,
   value,
 }: {
   workspaceURL: string;
+  workspaceURI: string;
   invite: {id: string};
   app: {id: string; code: string};
   value: 'yes' | 'no';
@@ -157,6 +159,8 @@ export async function updateInviteApplication({
       select: {id: true},
     });
 
+    revalidatePath(`${workspaceURI}/account/members`);
+
     return {
       success: true,
       data: await findInviteById({id: invite.id, tenantId}),
@@ -169,11 +173,13 @@ export async function updateInviteApplication({
 
 export async function updateInviteAuthentication({
   workspaceURL,
+  workspaceURI,
   invite,
   app,
   value,
 }: {
   workspaceURL: string;
+  workspaceURI: string;
   invite: {id: string};
   app: {id: string; code: string};
   value: Authorization;
@@ -254,6 +260,8 @@ export async function updateInviteAuthentication({
       select: {id: true},
     });
 
+    revalidatePath(`${workspaceURI}/account/members`);
+
     return {
       success: true,
       data: await findInviteById({id: invite.id, tenantId}),
@@ -267,9 +275,11 @@ export async function updateInviteAuthentication({
 export async function deleteMember({
   member,
   workspaceURL,
+  workspaceURI,
 }: {
   member: {id: string; email: string};
   workspaceURL: string;
+  workspaceURI: string;
 }) {
   const canUpdateInvite = await canUpdate({workspaceURL});
 
@@ -326,6 +336,8 @@ export async function deleteMember({
       tenantId,
     }).then(clone);
 
+    revalidatePath(`${workspaceURI}/account/members`);
+
     return {
       success: true,
       data: updatedPartner,
@@ -337,11 +349,13 @@ export async function deleteMember({
 
 export async function updateMemberApplication({
   workspaceURL,
+  workspaceURI,
   member,
   app,
   value,
 }: {
   workspaceURL: string;
+  workspaceURI: string;
   member: {id: string; email: string};
   app: {id: string; code: string};
   value: 'yes' | 'no';
@@ -444,6 +458,8 @@ export async function updateMemberApplication({
       })
       .then(clone);
 
+    revalidatePath(`${workspaceURI}/account/members`);
+
     return {
       success: true,
       data: updatedConfig,
@@ -456,11 +472,13 @@ export async function updateMemberApplication({
 
 export async function updateMemberAuthentication({
   workspaceURL,
+  workspaceURI,
   member,
   app,
   value,
 }: {
   workspaceURL: string;
+  workspaceURI: string;
   member: {id: string; email: string};
   app: {id: string; code: string};
   value: Authorization;
@@ -553,7 +571,7 @@ export async function updateMemberAuthentication({
       })
       .then(clone);
 
-    revalidatePath(`${workspaceURL}/account/members`);
+    revalidatePath(`${workspaceURI}/account/members`);
 
     return {
       success: true,
