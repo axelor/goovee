@@ -52,34 +52,24 @@ export default function Content({
 
     setRequestingQuotation(true);
 
-    const res = await requestQuotation({
-      cart,
-      workspace,
-    });
+    const res = await requestQuotation({cart, workspace});
 
     if (res?.data) {
       toast({
         variant: 'success',
         title: i18n.t('Quotation requested successfully'),
       });
-
       clearCart();
-      setRequestingQuotation(false);
-
-      if (quotationSubapp) {
-        router.replace(
-          `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`,
-        );
-      } else {
-        router.replace(`${workspaceURI}/shop`);
-      }
+      const redirectURL = quotationSubapp
+        ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`
+        : `${workspaceURI}/shop`;
+      router.replace(redirectURL);
     } else {
       toast({
         variant: 'destructive',
         title: i18n.t('Error requesting quotation, try again !'),
       });
-      setRequestingQuotation(false);
-      router.replace(`${workspaceURI}/shop/cart`);
+      router.replace(`${workspaceURI}/${SUBAPP_CODES.shop}/cart`);
     }
   };
 
