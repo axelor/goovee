@@ -96,7 +96,7 @@ export async function findUp2payOrder({
     throw new Error('Bad request');
   }
 
-  const reference: any = decode(params.reference);
+  const reference: any = decode(ref);
   if (!reference?.context_id) {
     throw new Error('Context id not found');
   }
