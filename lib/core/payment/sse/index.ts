@@ -2,7 +2,17 @@ import {PaymentSource} from '@/lib/core/payment/common/type';
 
 type SSEController = ReadableStreamDefaultController<Uint8Array>;
 
-const subscribers = new Map<string, Set<SSEController>>();
+// Use global to survive module re-instantiation under Turbopack / HMR
+declare global {
+  // eslint-disable-next-line no-var
+  var __sseSubscribers: Map<string, Set<SSEController>> | undefined;
+}
+
+if (!global.__sseSubscribers) {
+  global.__sseSubscribers = new Map();
+}
+
+const subscribers = global.__sseSubscribers;
 
 function getKey(source: PaymentSource, entityId: string): string {
   return `${source}:${entityId}`;
