@@ -17,6 +17,8 @@ export function Invoice({invoice, invoiceType}: InvoiceProps) {
   const [docFile, setDocFile] = useState<any>(null);
 
   useEffect(() => {
+    let blobURL: string | null = null;
+
     const fetchInvoice = async () => {
       try {
         const response = await axios.get(
@@ -36,7 +38,7 @@ export function Invoice({invoice, invoiceType}: InvoiceProps) {
           }
         }
 
-        const blobURL = URL.createObjectURL(response.data);
+        blobURL = URL.createObjectURL(response.data);
 
         setDocFile({
           uri: blobURL,
@@ -49,6 +51,12 @@ export function Invoice({invoice, invoiceType}: InvoiceProps) {
     };
 
     fetchInvoice();
+
+    return () => {
+      if (blobURL) {
+        URL.revokeObjectURL(blobURL);
+      }
+    };
   }, [invoice.id, invoiceType, workspaceURI]);
 
   return (
