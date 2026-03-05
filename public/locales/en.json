@@ -837,5 +837,15 @@
   "No upcoming events": "No upcoming events",
   "View all": "View all",
   "Back to Directory": "Back to Directory",
-  "Contact already exists with another partner.": "Contact already exists with another partner."
+  "Contact already exists with another partner.": "Contact already exists with another partner.",
+  "Pay using": "Pay using",
+  "Error processing payment. Try again.": "Error processing payment. Try again.",
+  "Unexpected error occurred. Please try again.": "Unexpected error occurred. Please try again.",
+  "Payment completed successfully": "Payment completed successfully",
+  "Payment cancelled.": "Payment cancelled.",
+  "Payment refused. Please try again.": "Payment refused. Please try again.",
+  "Invoice payment completed successfully.": "Invoice payment completed successfully.",
+  "Failed to process invoice payment.": "Failed to process invoice payment.",
+  "Payment gateway URI is missing": "Payment gateway URI is missing",
+  "Up2Pay is not available": "Up2Pay is not available"
 }

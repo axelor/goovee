@@ -837,5 +837,15 @@
   "No upcoming events": "Aucun événement à venir",
   "View all": "Voir tout",
   "Back to Directory": "Retour à l’annuaire",
-  "Contact already exists with another partner.": "Le contact existe déjà avec un autre partenaire."
+  "Contact already exists with another partner.": "Le contact existe déjà avec un autre partenaire.",
+  "Pay using": "Payer en utilisant",
+  "Error processing payment. Try again.": "Erreur lors du traitement du paiement. Veuillez réessayer.",
+  "Unexpected error occurred. Please try again.": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+  "Payment completed successfully": "Paiement effectué avec succès",
+  "Payment cancelled.": "Paiement annulé.",
+  "Payment refused. Please try again.": "Paiement refusé. Veuillez réessayer.",
+  "Invoice payment completed successfully.": "Paiement de la facture effectué avec succès.",
+  "Failed to process invoice payment.": "Échec du traitement du paiement de la facture.",
+  "Payment gateway URI is missing": "L'URI de la passerelle de paiement est manquante.",
+  "Up2Pay is not available": "Up2Pay n'est pas disponible."
 }
