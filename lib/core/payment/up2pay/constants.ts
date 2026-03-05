@@ -44,7 +44,8 @@ export const UP2PAY_ERROR_MESSAGES: Record<string, string> = Object.entries(
   (acc, [, code]) => {
     const descriptions: Record<string, string> = {
       '00000': 'Success',
-      '00001': 'Connection to authorization center failed or internal error occurred',
+      '00001':
+        'Connection to authorization center failed or internal error occurred',
       '00003': 'Platform error',
       '00004': 'Invalid bearer number or visual cryptogram',
       '00006': 'Access denied or incorrect site/rank/id',

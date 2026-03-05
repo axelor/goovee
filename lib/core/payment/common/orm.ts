@@ -71,7 +71,14 @@ export async function findPaymentContext({
       mode,
       status: CONTEXT_STATUS.pending,
     },
-    select: {id: true, version: true, data: true, createdOn: true, mode: true, status: true},
+    select: {
+      id: true,
+      version: true,
+      data: true,
+      createdOn: true,
+      mode: true,
+      status: true,
+    },
   });
 
   if (!context) return null;
