@@ -15,6 +15,7 @@ import {readPEMFile, verifySignature} from '@/payment/up2pay/crypto';
 import {getParamsWithoutSign} from '@/payment/up2pay/utils';
 import {decodeFilter as decode} from '@/utils/url';
 import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
+import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
@@ -118,10 +119,27 @@ export async function GET(request: Request) {
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  const invoiceId = paymentContext.data?.id;
+  const source = paymentContext.data?.source;
+  if (!source) {
+    console.error(
+      '[UP2PAY][WEBHOOK] Missing payment source in payment context',
+      {
+        contextId,
+      },
+    );
 
-  if (!invoiceId) {
-    console.error('[UP2PAY][WEBHOOK] Missing invoice id in payment context', {
+    await markPaymentAsFailed({
+      contextId: paymentContext.id,
+      version: paymentContext.version,
+      tenantId,
+    });
+
+    return new NextResponse('Bad Request', {status: 400});
+  }
+
+  const entityId = paymentContext.data?.id;
+  if (!entityId) {
+    console.error('[UP2PAY][WEBHOOK] Missing entity id in payment context', {
       contextId,
     });
 
@@ -134,25 +152,47 @@ export async function GET(request: Request) {
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  const result = await updateInvoice({
-    tenantId,
-    amount: paidAmount,
-    invoiceId,
-  });
+  switch (source) {
+    case PAYMENT_SOURCE.INVOICES: {
+      const result = await updateInvoice({
+        tenantId,
+        amount: paidAmount,
+        invoiceId: entityId,
+      });
 
-  if (result?.error) {
-    console.error('[UP2PAY][WEBHOOK] Invoice update failed', {
-      invoiceId,
-      error: result.error,
-    });
+      if (result?.error) {
+        console.error('[UP2PAY][WEBHOOK] Invoice update failed', {
+          entityId,
+          error: result.error,
+        });
 
-    await markPaymentAsFailed({
-      contextId: paymentContext.id,
-      version: paymentContext.version,
-      tenantId,
-    });
+        await markPaymentAsFailed({
+          contextId: paymentContext.id,
+          version: paymentContext.version,
+          tenantId,
+        });
 
-    return new NextResponse('Internal Server Error', {status: 500});
+        return new NextResponse('Internal Server Error', {status: 500});
+      }
+
+      break;
+    }
+
+    case PAYMENT_SOURCE.SHOP:
+    case PAYMENT_SOURCE.EVENTS:
+      console.warn('[UP2PAY][WEBHOOK] Source not implemented:', source);
+      return new NextResponse('OK', {status: 200});
+
+    default:
+      console.error('[UP2PAY][WEBHOOK] Unknown payment source:', source);
+
+      await markPaymentAsFailed({
+        contextId: paymentContext.id,
+        version: paymentContext.version,
+        tenantId,
+      });
+
+      return new NextResponse('Bad Request', {status: 400});
   }
 
   await markPaymentAsProcessed({
@@ -161,10 +201,7 @@ export async function GET(request: Request) {
     tenantId,
   });
 
-  const source = paymentContext.data?.source;
-  if (source) {
-    notifyPaymentUpdate(source, invoiceId);
-  }
+  notifyPaymentUpdate(source, entityId);
 
   return new NextResponse('OK', {status: 200});
 }
