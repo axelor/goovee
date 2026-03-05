@@ -1025,8 +1025,9 @@ export async function up2payCreateOrder({
       message: await t('Payment gateway URI is missing'),
     };
   }
+  const $headers = await headers();
 
-  const tenantId = headers().get(TENANT_HEADER);
+  const tenantId = $headers.get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Tenant is missing')};
   }
