@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {PaymentSource} from '@/lib/core/payment/common/type';
@@ -16,6 +16,9 @@ export function usePaymentSSE({
   entityId,
   onUpdate,
 }: UsePaymentSSEOptions) {
+  const onUpdateRef = useRef(onUpdate);
+  onUpdateRef.current = onUpdate;
+
   useEffect(() => {
     if (!entityId) return;
 
@@ -24,7 +27,7 @@ export function usePaymentSSE({
 
     es.addEventListener('payment', () => {
       es.close();
-      onUpdate();
+      onUpdateRef.current();
     });
 
     es.onerror = error => {
@@ -39,7 +42,7 @@ export function usePaymentSSE({
     return () => {
       es.close();
     };
-  }, [source, entityId, onUpdate]);
+  }, [source, entityId]);
 }
 
 export default usePaymentSSE;
