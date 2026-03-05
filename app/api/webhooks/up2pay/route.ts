@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const parsed = new URL(request.url);
   const params = parsed.searchParams;
 
-  const message = getParamsWithoutSign(parsed.search);
+  const message = decodeURIComponent(getParamsWithoutSign(parsed.search));
   const pem = readPEMFile();
   const sign = params.get('sign');
   const erreur = params.get('erreur');
