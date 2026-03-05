@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useCallback, useEffect} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 import {useRouter, usePathname} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -13,7 +13,11 @@ import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
-import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
+import {
+  INVOICE,
+  INVOICE_TYPE,
+  INVOICE_PAYMENT_OPTIONS,
+} from '@/subapps/invoices/common/constants/invoices';
 import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
@@ -36,28 +40,38 @@ export default function Content({
   const {searchParams} = useSearchParams();
   const pathname = usePathname();
 
+  const paidPathname = pathname.replace(
+    `/${INVOICE.UNPAID}/`,
+    `/${INVOICE.PAID}/`,
+  );
+
+  // Capture isFullPayment from the redirect params before the URL is cleaned
+  const isFullPaymentRef = useRef(
+    searchParams.get('type') === INVOICE_PAYMENT_OPTIONS.TOTAL,
+  );
+
   const handlePaymentUpdate = useCallback(() => {
-    router.refresh();
-  }, [router]);
+    const target = isFullPaymentRef.current ? paidPathname : pathname;
+    router.replace(target);
+  }, [router, paidPathname, pathname]);
 
   useEffect(() => {
     const status = searchParams.get('status');
     if (status !== UP2PAY_REDIRECT_STATUS.SUCCESS) return;
 
-    const clean = new URLSearchParams(searchParams.toString());
-    clean.delete('status');
-    clean.delete('type');
-    clean.delete('montant');
-    clean.delete('ref');
-    clean.delete('erreur');
-    clean.delete('sign');
+    isFullPaymentRef.current =
+      searchParams.get('type') === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
-    const query = clean.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname);
+    // Clean the URL immediately
+    router.replace(pathname);
 
-    const t = setTimeout(() => router.refresh(), 1500);
+    const target = isFullPaymentRef.current ? paidPathname : pathname;
+
+    const t = setTimeout(() => {
+      router.replace(target);
+    }, 1500);
     return () => clearTimeout(t);
-  }, [pathname, router, searchParams]);
+  }, [pathname, router, searchParams, paidPathname]);
 
   usePaymentSSE({
     source: PAYMENT_SOURCE.INVOICES,
