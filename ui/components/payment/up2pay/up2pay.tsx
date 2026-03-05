@@ -11,12 +11,8 @@ import {Up2payProps} from '@/ui/components/payment/types';
 import {PaymentOption} from '@/types';
 import {UP2PAY_REDIRECT_STATUS} from '@/payment/up2pay/constants';
 
-const LOG_PREFIX = '[Up2pay]';
-
 export function Up2pay({
   disabled,
-  // onPaymentSuccess, // handled by webhook
-  // onApprove,        // handled by webhook
   onValidate,
   onCreateOrder,
   successMessage,
