@@ -15,12 +15,6 @@ export async function GET(request: Request) {
   const entityId = searchParams.get('entityId');
 
   if (!source || !VALID_SOURCES.includes(source) || !entityId) {
-    console.warn('[SSE] Bad request', {
-      source,
-      entityId,
-      validSources: VALID_SOURCES,
-    });
-
     return new NextResponse('Bad Request', {status: 400});
   }
 
@@ -38,12 +32,7 @@ export async function GET(request: Request) {
       const keepAlive = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(':\n\n'));
-        } catch (err) {
-          console.warn('[SSE] Keep-alive failed, clearing interval', {
-            source,
-            entityId,
-            error: err,
-          });
+        } catch {
           clearInterval(keepAlive);
         }
       }, KEEP_ALIVE_INTERVAL_MS);
@@ -53,21 +42,14 @@ export async function GET(request: Request) {
 
         try {
           unsubscribe(source as PaymentSource, entityId, controller);
-        } catch (err) {
-          console.error('[SSE] Unsubscribe failed', {
-            source,
-            entityId,
-            error: err,
-          });
+        } catch {
+          // ignore unsubscribe errors on disconnect
         }
 
         try {
           controller.close();
         } catch {
-          console.warn('[SSE] Stream already closed', {
-            source,
-            entityId,
-          });
+          // stream already closed
         }
       });
     },

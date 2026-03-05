@@ -32,7 +32,7 @@ export function unsubscribe(
 
   if (!set) return;
 
-  const existed = set.delete(controller);
+  set.delete(controller);
 
   if (set.size === 0) {
     subscribers.delete(key);
@@ -47,7 +47,6 @@ export function notifyPaymentUpdate(
   const set = subscribers.get(key);
 
   if (!set || set.size === 0) {
-    console.warn('[SSE][NOTIFY] No subscribers to notify', {key});
     return;
   }
 
@@ -58,11 +57,8 @@ export function notifyPaymentUpdate(
     try {
       controller.enqueue(message);
       controller.close();
-    } catch (err) {
-      console.warn('[SSE][NOTIFY] Failed to notify subscriber', {
-        key,
-        error: err,
-      });
+    } catch {
+      // subscriber already closed, skip
     }
   }
 

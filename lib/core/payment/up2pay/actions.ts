@@ -111,7 +111,6 @@ export async function findUp2payOrder({
     throw new Error('Context not found');
   }
 
-  //TODO: THIS NEEDS TO BE HANDLED, AS WHAT IF THERE IS SOME OTHER STATUS CODE as done for webhook
   if (erreur !== UP2PAY_ERRORS.CODE_ERROR_OPERATION_SUCCESSFUL) {
     console.error('[UP2PAY][VERIFY] Payment failed or cancelled', {erreur});
     await markPaymentAsCancelled({
