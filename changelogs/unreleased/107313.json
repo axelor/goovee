@@ -1,0 +1,6 @@
+{
+  "title": "Add Up2Pay payment method for invoices with real-time payment status via SSE",
+  "type": "feature",
+  "description": "Integrated Up2Pay for invoice payments and added SSE to update payment status in real time after webhook processing.",
+  "scope": ["invoices", "core"]
+}
