@@ -47,7 +47,8 @@ async function handleWebhookPaymentFailure({
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const signature = headers().get('Stripe-Signature');
+  const $headers = await headers();
+  const signature = $headers.get('Stripe-Signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   let event: Stripe.Event;

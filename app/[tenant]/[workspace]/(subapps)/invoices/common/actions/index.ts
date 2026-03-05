@@ -535,7 +535,9 @@ export async function createStripeBankTransferIntent({
   amount: string;
   workspaceURL: string;
 }) {
-  const tenantId = headers().get(TENANT_HEADER);
+  const $headers = await headers();
+
+  const tenantId = $headers.get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Tenant is missing')};
   }
@@ -635,8 +637,9 @@ export async function cancelStripeBankTransferPaymentIntent({
   if (!workspaceURL) {
     return {error: true, message: await t('Workspace not provided!')};
   }
+  const $headers = await headers();
+  const tenantId = $headers.get(TENANT_HEADER);
 
-  const tenantId = headers().get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('Invalid tenant')};
   }
