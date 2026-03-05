@@ -1089,13 +1089,13 @@ export async function up2payCreateOrder({
       },
       billingInfo,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
+        success: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
           isPartialPayment
             ? INVOICE_PAYMENT_OPTIONS.PARTIAL
             : INVOICE_PAYMENT_OPTIONS.TOTAL
         }`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}`,
-        cancel: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}`,
+        cancel: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}`,
       },
     });
 
