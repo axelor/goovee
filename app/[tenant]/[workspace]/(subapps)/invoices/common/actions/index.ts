@@ -1061,14 +1061,6 @@ export async function up2payCreateOrder({
     };
   }
 
-  const payer = await findGooveeUserByEmail(user.email, tenantId);
-  if (!payer) {
-    return {
-      error: true,
-      message: await t('Unauthorized user'),
-    };
-  }
-
   const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
   if (!CURRENCY_CODE[currencyCode]) {
     return {
@@ -1093,7 +1085,7 @@ export async function up2payCreateOrder({
       tenantId,
       amount: $amount,
       currency: currencyCode,
-      email: payer?.emailAddress?.address!,
+      email: user.email,
       context: {
         id: invoice.id,
         source: PAYMENT_SOURCE.INVOICES,
