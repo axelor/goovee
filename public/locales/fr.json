@@ -847,5 +847,6 @@
   "Invoice payment completed successfully.": "Paiement de la facture effectué avec succès.",
   "Failed to process invoice payment.": "Échec du traitement du paiement de la facture.",
   "Payment gateway URI is missing": "L'URI de la passerelle de paiement est manquante.",
-  "Up2Pay is not available": "Up2Pay n'est pas disponible."
+  "Up2Pay is not available": "Up2Pay n'est pas disponible.",
+  "Up2Pay only supports EUR. Your invoice currency is not supported.": "Up2Pay accepte uniquement les euros. La devise de votre facture n'est pas prise en charge."
 }

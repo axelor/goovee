@@ -847,5 +847,6 @@
   "Invoice payment completed successfully.": "Invoice payment completed successfully.",
   "Failed to process invoice payment.": "Failed to process invoice payment.",
   "Payment gateway URI is missing": "Payment gateway URI is missing",
-  "Up2Pay is not available": "Up2Pay is not available"
+  "Up2Pay is not available": "Up2Pay is not available",
+  "Up2Pay only supports EUR. Your invoice currency is not supported.": "Up2Pay only supports EUR. Your invoice currency is not supported."
 }

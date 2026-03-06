@@ -45,7 +45,10 @@ import {
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {validatePaymentData} from '@/subapps/invoices/common/utils/validations';
 import {updateInvoice} from '@/subapps/invoices/common/service';
-import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
+import {
+  CURRENCY_CODE,
+  UP2PAY_REDIRECT_STATUS,
+} from '@/lib/core/payment/up2pay/constants';
 
 export async function paypalCreateOrder({
   invoice,
@@ -1067,6 +1070,14 @@ export async function up2payCreateOrder({
   }
 
   const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
+  if (!CURRENCY_CODE[currencyCode]) {
+    return {
+      error: true,
+      message: await t(
+        'Up2Pay only supports EUR. Your invoice currency is not supported.',
+      ),
+    };
+  }
 
   const billingInfo = {
     firstName: $invoice?.partner?.firstName || '',
