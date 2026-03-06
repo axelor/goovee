@@ -77,3 +77,13 @@ export const UP2PAY_REDIRECT_STATUS = {
 export const CURRENCY_CODE: Record<string, number> = {
   EUR: 978,
 };
+
+/** Query params injected by Up2Pay on redirect (PBX_RETOUR) plus app-level params */
+export const UP2PAY_REDIRECT_PARAMS = [
+  'status',
+  'montant',
+  'ref',
+  'erreur',
+  'sign',
+  'type',
+] as const;

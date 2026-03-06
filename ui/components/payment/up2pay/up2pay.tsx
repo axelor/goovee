@@ -9,7 +9,11 @@ import {useSearchParams, useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {Up2payProps} from '@/ui/components/payment/types';
 import {PaymentOption} from '@/types';
-import {UP2PAY_REDIRECT_STATUS} from '@/payment/up2pay/constants';
+import {
+  UP2PAY_REDIRECT_STATUS,
+  UP2PAY_REDIRECT_PARAMS,
+} from '@/payment/up2pay/constants';
+import {clearUp2payParams} from '@/payment/up2pay/utils';
 
 export function Up2pay({
   disabled,
@@ -96,12 +100,8 @@ export function Up2pay({
       });
     }
 
-    // Clean the ?status param from the URL so the toast doesn't re-fire on refresh.
-    // For all statuses we stay on the current page — the webhook handles the DB update
-    // independently, so we don't redirect away prematurely.
-    const cleanParams = new URLSearchParams(searchParams.toString());
-    cleanParams.delete('status');
-    const cleanQuery = cleanParams.toString();
+    // Clean all Up2Pay-injected params from the URL so the toast doesn't re-fire on refresh.
+    const cleanQuery = clearUp2payParams(searchParams, UP2PAY_REDIRECT_PARAMS);
     router.replace(`${pathname}${cleanQuery ? `?${cleanQuery}` : ''}`);
   }, [
     up2payStatus,
