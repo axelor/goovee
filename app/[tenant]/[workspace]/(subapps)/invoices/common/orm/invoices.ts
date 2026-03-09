@@ -107,7 +107,7 @@ type InvoiceType = (typeof INVOICE)[keyof typeof INVOICE];
 
 export const findInvoice = async ({
   id,
-  type = INVOICE.UNPAID,
+  type,
   params,
   tenantId,
   workspaceURL,

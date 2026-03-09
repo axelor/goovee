@@ -10,7 +10,10 @@ import type {Tenant} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
-import {INVOICE_PAYMENT_OPTIONS} from '@/subapps/invoices/common/constants/invoices';
+import {
+  INVOICE,
+  INVOICE_PAYMENT_OPTIONS,
+} from '@/subapps/invoices/common/constants/invoices';
 import {extractAmount} from '@/subapps/invoices/common/utils/invoices';
 
 export async function validatePaymentData({
@@ -76,6 +79,7 @@ export async function validatePaymentData({
   });
 
   const $invoice = await findInvoice({
+    type: INVOICE.UNPAID,
     id: invoice.id,
     params: {where: invoicesWhereClause},
     workspaceURL,

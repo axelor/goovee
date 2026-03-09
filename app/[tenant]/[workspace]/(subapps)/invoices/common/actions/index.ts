@@ -229,6 +229,7 @@ export async function paypalCaptureOrder({
     }
 
     const $invoice = await findInvoice({
+      type: INVOICE.UNPAID,
       id: invoice.id,
       params: {
         where: invoicesWhereClause,
@@ -472,6 +473,7 @@ export async function validateStripePayment({
     });
 
     const $invoice = await findInvoice({
+      type: INVOICE.UNPAID,
       id: invoice.id,
       params: {where: invoicesWhereClause},
       workspaceURL,
@@ -740,6 +742,7 @@ export async function cancelStripeBankTransferPaymentIntent({
     const {data} = paymentContext;
 
     const $invoice = await findInvoice({
+      type: INVOICE.UNPAID,
       id: data.id,
       params: {where: invoicesWhereClause},
       workspaceURL,
@@ -952,6 +955,7 @@ export async function validatePayboxPayment({
     });
 
     const $invoice = await findInvoice({
+      type: INVOICE.UNPAID,
       id: invoice.id,
       params: {where: invoicesWhereClause},
       workspaceURL,
