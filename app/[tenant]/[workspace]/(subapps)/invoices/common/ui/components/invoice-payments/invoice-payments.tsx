@@ -1,7 +1,7 @@
 'use client';
 
 import {useCallback} from 'react';
-import {useRouter, useSearchParams} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ID} from '@/types';
@@ -15,6 +15,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {
   createStripeBankTransferIntent,
   createStripeCheckoutSession,
+  initiatePispPayment,
   payboxCreateOrder,
   paypalCaptureOrder,
   paypalCreateOrder,
@@ -181,12 +182,23 @@ export function InvoicePayments({
       }}
       onPayboxValidatePayment={handlePayboxValidations}
       onUp2payCreateOrder={async ({uri}) => {
+        onPaymentStart?.();
         return await up2payCreateOrder({
           invoice: {id: invoice.id},
           amount,
           workspaceURL,
           uri,
           token,
+        });
+      }}
+      onInitiatePispPayment={async ({uri, localInstrument}) => {
+        onPaymentStart?.();
+        return await initiatePispPayment({
+          invoice: {id: invoice.id},
+          amount,
+          workspaceURL,
+          uri,
+          localInstrument,
         });
       }}
       successMessage="Invoice payment completed successfully."

@@ -3,7 +3,7 @@
 // ---- CORE IMPPRTS ---- //
 import {ID, PaymentOption, PortalWorkspace} from '@/types';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
-import {Paybox, Paypal, Stripe, Up2pay} from '@/ui/components/payment';
+import {Paybox, Paypal, Stripe, Up2pay, HubPISP} from '@/ui/components/payment';
 import {isPaymentOptionAvailable} from '@/utils/payment';
 
 export function Payments({
@@ -19,6 +19,7 @@ export function Payments({
   onPayboxCreateOrder,
   onPayboxValidatePayment,
   onUp2payCreateOrder,
+  onInitiatePispPayment,
   successMessage = '',
   errorMessage = '',
   skipSuccessToast,
@@ -40,6 +41,7 @@ export function Payments({
     params: any;
   }) => Promise<ErrorResponse | SuccessResponse<{id: ID; version: number}>>;
   onUp2payCreateOrder?: ({uri}: {uri: string}) => Promise<any>;
+  onInitiatePispPayment?: ({uri, localInstrument}: {uri: string; localInstrument?: import('@/payment/hubpisp/constants').HubPispLocalInstrument}) => Promise<any>;
   successMessage?: string;
   errorMessage?: string;
   skipSuccessToast?: boolean;
@@ -67,6 +69,11 @@ export function Payments({
   const allowUp2pay = isPaymentOptionAvailable(
     paymentOptionSet,
     PaymentOption.up2pay,
+  );
+
+  const allowHubPisp = isPaymentOptionAvailable(
+    paymentOptionSet,
+    PaymentOption.hubpisp,
   );
 
   if (!allowOnlinePayment) {
@@ -123,6 +130,16 @@ export function Payments({
           onValidate={() => onValidate(PaymentOption.up2pay)}
           onCreateOrder={onUp2payCreateOrder}
           errorMessage={errorMessage}
+        />
+      )}
+      {allowHubPisp && onInitiatePispPayment && (
+        <HubPISP
+          disabled={disabled}
+          onValidate={() => onValidate(PaymentOption.hubpisp)}
+          onCreateOrder={onInitiatePispPayment}
+          successMessage={successMessage}
+          errorMessage={errorMessage}
+          skipSuccessToast={skipSuccessToast}
         />
       )}
     </div>

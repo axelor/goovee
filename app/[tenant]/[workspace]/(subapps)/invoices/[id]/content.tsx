@@ -49,6 +49,7 @@ export default function Content({
     source: PAYMENT_SOURCE.INVOICES,
     entityId: isUnpaid ? id : '',
     onUpdate: handlePaymentUpdate,
+    enabled: sseEnabled,
   });
 
   return (
