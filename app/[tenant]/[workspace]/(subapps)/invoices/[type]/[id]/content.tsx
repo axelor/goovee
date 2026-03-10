@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useEffect, useRef} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {useRouter, usePathname} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -19,6 +19,7 @@ import {
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
+import {HUBPISP_REDIRECT_STATUS} from '@/lib/core/payment/hubpisp/constants';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
 interface ContentProps {
@@ -39,6 +40,11 @@ export default function Content({
   const router = useRouter();
   const {searchParams} = useSearchParams();
   const pathname = usePathname();
+  const [sseEnabled, setSseEnabled] = useState(
+    () =>
+      searchParams.get('hubpisp_status') === HUBPISP_REDIRECT_STATUS.SUCCESS ||
+      searchParams.get('status') === UP2PAY_REDIRECT_STATUS.SUCCESS,
+  );
 
   const paidPathname = pathname.replace(
     `/${INVOICE.UNPAID}/`,
@@ -70,6 +76,7 @@ export default function Content({
     source: PAYMENT_SOURCE.INVOICES,
     entityId: isUnpaid ? id : '',
     onUpdate: handlePaymentUpdate,
+    enabled: sseEnabled,
   });
 
   const status = isUnpaid ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
@@ -110,6 +117,7 @@ export default function Content({
             isUnpaid={isUnpaid}
             workspace={workspace}
             workspaceURI={workspaceURI}
+            onPaymentStart={() => setSseEnabled(true)}
           />
         </div>
       </div>

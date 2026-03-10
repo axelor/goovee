@@ -1,4 +1,5 @@
 // ---- CORE IMPORTS ---- //
+import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
 import {BankAccountType} from '@/lib/core/payment/stripe/utils';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 
@@ -100,4 +101,20 @@ export type Up2payProps = {
   cancelMessage?: string;
   onValidate?: (paymentOption: string) => Promise<boolean>;
   onCreateOrder: ({uri}: {uri: string}) => Promise<any>;
+};
+
+export type HubPispProps = {
+  disabled?: boolean;
+  successMessage?: string;
+  errorMessage?: string;
+  cancelMessage?: string;
+  onValidate?: (paymentOption: string) => Promise<boolean>;
+  onCreateOrder: ({
+    uri,
+    localInstrument,
+  }: {
+    uri: string;
+    localInstrument?: HubPispLocalInstrument;
+  }) => Promise<any>;
+  skipSuccessToast?: boolean;
 };

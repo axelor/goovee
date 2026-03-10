@@ -16,6 +16,7 @@ import {ErrorResponse, SuccessResponse} from '@/types/action';
 import {
   createStripeBankTransferIntent,
   createStripeCheckoutSession,
+  initiatePispPayment,
   payboxCreateOrder,
   paypalCaptureOrder,
   paypalCreateOrder,
@@ -33,6 +34,7 @@ export function InvoicePayments({
   paymentType,
   resetPaymentType,
   resetForm,
+  onPaymentStart,
 }: {
   workspace: any;
   invoice: Invoice;
@@ -40,6 +42,7 @@ export function InvoicePayments({
   paymentType: INVOICE_PAYMENT_OPTIONS | null;
   resetPaymentType: () => void;
   resetForm: () => void;
+  onPaymentStart?: () => void;
 }) {
   const workspaceURL = workspace?.url;
 
@@ -170,11 +173,22 @@ export function InvoicePayments({
       }}
       onPayboxValidatePayment={handlePayboxValidations}
       onUp2payCreateOrder={async ({uri}) => {
+        onPaymentStart?.();
         return await up2payCreateOrder({
           invoice: {id: invoice.id},
           amount,
           workspaceURL,
           uri,
+        });
+      }}
+      onInitiatePispPayment={async ({uri, localInstrument}) => {
+        onPaymentStart?.();
+        return await initiatePispPayment({
+          invoice: {id: invoice.id},
+          amount,
+          workspaceURL,
+          uri,
+          localInstrument,
         });
       }}
       successMessage="Invoice payment completed successfully."

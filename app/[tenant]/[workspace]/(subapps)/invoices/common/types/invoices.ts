@@ -31,4 +31,5 @@ export type TotalProps = {
   workspace?: PortalWorkspace;
   invoiceType: string;
   workspaceURI: string;
+  onPaymentStart?: () => void;
 };
