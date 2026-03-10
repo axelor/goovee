@@ -12,23 +12,30 @@ import {getWhereClauseForEntity} from '@/utils/filters';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
+import {SignOutBanner} from './sign-out-banner';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {InvoiceSkeleton} from '@/subapps/invoices/common/ui/components';
 
+type Params = {id: string; tenant: string; workspace: string};
+type SearchParams = {[key: string]: string | undefined};
+type Session = Awaited<ReturnType<typeof getSession>>;
+
 async function Invoice({
   params,
-  token,
+  searchParams,
+  session,
 }: {
-  params: {id: string; tenant: string; workspace: string};
-  token?: string;
+  params: Params;
+  searchParams: SearchParams;
+  session: Session;
 }) {
   const {id, tenant} = params;
+  const token = searchParams.token;
   const {workspaceURL, workspaceURI} = workspacePathname(params);
 
   let user: User | undefined;
 
   if (!token) {
-    const session = await getSession();
     user = session?.user as User;
     if (!user) return notFound();
   }
@@ -86,21 +93,22 @@ async function Invoice({
 }
 
 export default async function Page(props: {
-  params: Promise<{
-    id: string;
-    tenant: string;
-    workspace: string;
-  }>;
-  searchParams: Promise<{[key: string]: string | undefined}>;
+  params: Promise<Params>;
+  searchParams: Promise<SearchParams>;
 }) {
-  const [params, searchParams] = await Promise.all([
+  const [params, searchParams, session] = await Promise.all([
     props.params,
     props.searchParams,
+    getSession(),
   ]);
   const token = searchParams.token;
+  const user = session?.user;
+  if (token && user) {
+    return <SignOutBanner userName={user.simpleFullName || user.name} />;
+  }
   return (
     <Suspense fallback={<InvoiceSkeleton />}>
-      <Invoice params={params} token={token} />
+      <Invoice params={params} searchParams={searchParams} session={session} />
     </Suspense>
   );
 }
