@@ -1,0 +1,6 @@
+{
+  "title": "Add token-based public access for invoice payment",
+  "type": "feature",
+  "description": "Enable token-based access to view and pay invoices without requiring login.",
+  "scope": ["invoices"]
+}
