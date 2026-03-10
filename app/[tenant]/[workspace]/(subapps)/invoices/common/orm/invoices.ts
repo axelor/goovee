@@ -107,12 +107,14 @@ type InvoiceType = (typeof INVOICE)[keyof typeof INVOICE];
 
 export const findInvoice = async ({
   id,
+  token,
   type,
   params,
   tenantId,
   workspaceURL,
 }: {
-  id: Invoice['id'];
+  id?: Invoice['id'];
+  token?: string;
   type?: InvoiceType;
   params?: {
     where?: object & {
@@ -133,6 +135,7 @@ export const findInvoice = async ({
     .findOne({
       where: {
         id,
+        token,
         ...params?.where,
         ...whereClause,
       },
@@ -164,6 +167,9 @@ export const findInvoice = async ({
         partner: {
           simpleFullName: true,
           fixedPhone: true,
+          emailAddress: {
+            address: true,
+          },
           mainAddress: {
             zip: true,
             addressl2: true,

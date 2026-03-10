@@ -33,6 +33,7 @@ export function InvoicePayments({
   paymentType,
   resetPaymentType,
   resetForm,
+  token,
 }: {
   workspace: any;
   invoice: Invoice;
@@ -40,6 +41,7 @@ export function InvoicePayments({
   paymentType: INVOICE_PAYMENT_OPTIONS | null;
   resetPaymentType: () => void;
   resetForm: () => void;
+  token?: string;
 }) {
   const workspaceURL = workspace?.url;
 
@@ -89,6 +91,7 @@ export function InvoicePayments({
         stripeSessionId,
         workspaceURL,
         invalidatePath: redirectionPath,
+        token,
       });
 
       return response;
@@ -110,6 +113,7 @@ export function InvoicePayments({
         params,
         workspaceURL,
         invalidatePath: redirectionPath,
+        token,
       });
       return response;
     } catch (error) {
@@ -136,12 +140,14 @@ export function InvoicePayments({
           invoice: {id: invoice.id},
           amount,
           workspaceURL,
+          token,
         });
       }}
       onPaypalCaptureOrder={async orderID => {
         return await paypalCaptureOrder({
           orderID,
           workspaceURL,
+          token,
         });
       }}
       onApprove={redirectToInvoice}
@@ -150,6 +156,7 @@ export function InvoicePayments({
           invoice: {id: invoice.id},
           amount,
           workspaceURL,
+          token,
         });
       }}
       onStripeValidateSession={handleStripeValidations}
@@ -158,6 +165,7 @@ export function InvoicePayments({
           invoice: {id: invoice.id},
           amount,
           workspaceURL,
+          token,
         });
       }}
       onPayboxCreateOrder={async ({uri}) => {
@@ -166,6 +174,7 @@ export function InvoicePayments({
           amount,
           workspaceURL,
           uri,
+          token,
         });
       }}
       onPayboxValidatePayment={handlePayboxValidations}
@@ -175,6 +184,7 @@ export function InvoicePayments({
           amount,
           workspaceURL,
           uri,
+          token,
         });
       }}
       successMessage="Invoice payment completed successfully."

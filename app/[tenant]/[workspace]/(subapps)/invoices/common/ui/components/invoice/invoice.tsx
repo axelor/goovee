@@ -1,18 +1,17 @@
 'use client';
 
-import {useEffect, useState} from 'react';
 import axios from 'axios';
+import {useEffect, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {DocViewer, Separator} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {InvoiceProps} from '@/subapps/invoices/common/types/invoices';
 
-export function Invoice({invoice, invoiceType}: InvoiceProps) {
+export function Invoice({invoice, downloadURL}: InvoiceProps) {
   const {workspaceURI} = useWorkspace();
   const [docFile, setDocFile] = useState<any>(null);
 
@@ -21,12 +20,9 @@ export function Invoice({invoice, invoiceType}: InvoiceProps) {
 
     const fetchInvoice = async () => {
       try {
-        const response = await axios.get(
-          `${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${invoiceType}/${invoice.id}`,
-          {
-            responseType: 'blob',
-          },
-        );
+        const response = await axios.get(downloadURL, {
+          responseType: 'blob',
+        });
 
         let fileName = `invoice-${invoice.id}.pdf`;
 
@@ -57,7 +53,7 @@ export function Invoice({invoice, invoiceType}: InvoiceProps) {
         URL.revokeObjectURL(blobURL);
       }
     };
-  }, [invoice.id, invoiceType, workspaceURI]);
+  }, [invoice.id, workspaceURI, downloadURL]);
 
   return (
     <div className="flex flex-col basis-full bg-card text-card-foreground px-6 py-4 gap-4 rounded-lg">

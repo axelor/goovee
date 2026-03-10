@@ -21,6 +21,7 @@ export async function validatePaymentData({
   invoice,
   amount,
   tenantId,
+  token,
 }: {
   workspaceURL: string;
   invoice: {
@@ -28,10 +29,11 @@ export async function validatePaymentData({
   };
   amount: string;
   tenantId: Tenant['id'];
+  token?: string;
 }): Promise<
   ActionResponse<{
     workspace: PortalWorkspace;
-    user: User;
+    user: User | undefined;
     $amount: string | number;
     $invoice?: any;
     isPartialPayment: boolean;
@@ -41,7 +43,7 @@ export async function validatePaymentData({
     return {error: true, message: await t('Workspace not provided')};
   }
 
-  if (!invoice?.id) {
+  if (!token && !invoice?.id) {
     return {error: true, message: await t('Invoice is missing')};
   }
 
@@ -49,39 +51,50 @@ export async function validatePaymentData({
     return {error: true, message: await t('Amount is missing')};
   }
 
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    return {error: true, message: await t('Unauthorized')};
+  let user: User | undefined;
+  if (!token) {
+    const session = await getSession();
+    user = session?.user;
+    if (!user) {
+      return {error: true, message: await t('Unauthorized')};
+    }
   }
 
-  const workspace = await findWorkspace({user, url: workspaceURL, tenantId});
+  const workspace = await findWorkspace({
+    url: workspaceURL,
+    tenantId,
+    user,
+  });
   if (!workspace) {
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const subapp = await findSubappAccess({
-    code: SUBAPP_CODES.invoices,
-    user,
-    url: workspace.url,
-    tenantId,
-  });
-  if (!subapp) {
-    return {error: true, message: await t('Unauthorized app access')};
-  }
+  let invoicesWhereClause = {};
+  if (!token) {
+    const subapp = await findSubappAccess({
+      code: SUBAPP_CODES.invoices,
+      user: user!,
+      url: workspace.url,
+      tenantId,
+    });
+    if (!subapp) {
+      return {error: true, message: await t('Unauthorized app access')};
+    }
 
-  const {role, isContactAdmin} = subapp;
-  const invoicesWhereClause = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.PARTNER,
-  });
+    const {role, isContactAdmin} = subapp;
+    invoicesWhereClause = getWhereClauseForEntity({
+      user: user!,
+      role,
+      isContactAdmin,
+      partnerKey: PartnerKey.PARTNER,
+    });
+  }
 
   const $invoice = await findInvoice({
     type: INVOICE.UNPAID,
-    id: invoice.id,
-    params: {where: invoicesWhereClause},
+    ...(token
+      ? {token}
+      : {id: invoice.id, params: {where: invoicesWhereClause}}),
     workspaceURL,
     tenantId,
   });

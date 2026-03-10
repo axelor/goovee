@@ -40,6 +40,7 @@ export function Total({
   invoice,
   invoiceType,
   workspaceURI,
+  token,
 }: TotalProps) {
   const {
     inTaxTotal,
@@ -287,6 +288,7 @@ export function Total({
               paymentType={paymentType}
               resetPaymentType={resetPaymentType}
               resetForm={resetForm}
+              token={token}
             />
           </div>
         </>

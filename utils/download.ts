@@ -90,14 +90,20 @@ export async function findLatestDMSFileByName({
   relatedId,
   relatedModel,
   name,
+  skipUserCheck,
 }: {
   tenant: string;
   relatedId: any;
   relatedModel: string;
-  user: User;
+  user?: User;
   name: string;
+  skipUserCheck?: boolean;
 }) {
-  if (!tenantId || !user) {
+  if (!tenantId) {
+    return null;
+  }
+
+  if (!skipUserCheck && !user) {
     return null;
   }
 
@@ -117,7 +123,7 @@ export async function findLatestDMSFileByName({
         relatedModel,
         parent: {relatedModel},
         fileName: {like: `%${name}%`},
-        ...(await filterPrivate({tenantId, user})),
+        ...(skipUserCheck ? {} : await filterPrivate({tenantId, user})),
       },
       select: {
         metaFile: {
