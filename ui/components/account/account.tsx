@@ -2,7 +2,7 @@
 
 import {useState} from 'react';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
+import {usePathname, useSearchParams} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import {MdOutlineAccountCircle} from 'react-icons/md';
 
@@ -32,6 +32,7 @@ export function Account({
   tenant?: ID | null;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const {data: session} = authClient.useSession();
   const [confirmationDialog, setConfirmationDialog] = useState(false);
@@ -47,7 +48,7 @@ export function Account({
   const loggedin = !!session;
 
   const loginURL = getLoginURL({
-    callbackurl: pathname,
+    callbackurl: pathname + (searchParams.toString() ? `?${searchParams}` : ''),
     workspaceURI: baseURL,
     tenant,
   });
