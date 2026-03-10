@@ -41,6 +41,7 @@ export function Total({
   invoiceType,
   workspaceURI,
   token,
+  getRedirectionPath,
 }: TotalProps) {
   const {
     inTaxTotal,
@@ -289,6 +290,7 @@ export function Total({
               resetPaymentType={resetPaymentType}
               resetForm={resetForm}
               token={token}
+              getRedirectionPath={getRedirectionPath}
             />
           </div>
         </>

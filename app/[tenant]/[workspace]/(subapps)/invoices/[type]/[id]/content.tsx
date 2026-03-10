@@ -7,6 +7,7 @@ import {useRouter, usePathname} from 'next/navigation';
 import {Separator, Container, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
 import {PortalWorkspace} from '@/types';
+import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {formatDate} from '@/lib/core/locale/formatters';
 import {usePaymentSSE, useSearchParams} from '@/ui/hooks';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
@@ -110,6 +111,11 @@ export default function Content({
             isUnpaid={isUnpaid}
             workspace={workspace}
             workspaceURI={workspaceURI}
+            getRedirectionPath={paymentType =>
+              paymentType === INVOICE_PAYMENT_OPTIONS.PARTIAL
+                ? `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${id}`
+                : `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.paid}/${id}`
+            }
           />
         </div>
       </div>

@@ -32,4 +32,5 @@ export type TotalProps = {
   invoiceType: string;
   workspaceURI: string;
   token?: string;
+  getRedirectionPath: (paymentType: string | null) => string;
 };

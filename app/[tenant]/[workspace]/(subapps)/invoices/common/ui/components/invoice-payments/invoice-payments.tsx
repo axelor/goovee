@@ -1,14 +1,12 @@
 'use client';
 
-import {useCallback, useMemo} from 'react';
+import {useCallback} from 'react';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ID} from '@/types';
 import {Payments} from '@/ui/components/payment';
-import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useToast} from '@/ui/hooks';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 
@@ -34,6 +32,7 @@ export function InvoicePayments({
   resetPaymentType,
   resetForm,
   token,
+  getRedirectionPath,
 }: {
   workspace: any;
   invoice: Invoice;
@@ -42,20 +41,14 @@ export function InvoicePayments({
   resetPaymentType: () => void;
   resetForm: () => void;
   token?: string;
+  getRedirectionPath: (paymentType: INVOICE_PAYMENT_OPTIONS | null) => string;
 }) {
   const workspaceURL = workspace?.url;
 
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
 
-  const redirectionPath = useMemo(() => {
-    if (paymentType === INVOICE_PAYMENT_OPTIONS.PARTIAL) {
-      return `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${invoice.id}`;
-    } else {
-      return `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.paid}/${invoice.id}`;
-    }
-  }, [invoice.id, paymentType, workspaceURI]);
+  const redirectionPath = getRedirectionPath(paymentType);
 
   const redirectToInvoice = useCallback(
     async (result: any) => {

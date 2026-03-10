@@ -68,6 +68,7 @@ export default function Content({
             workspace={workspace}
             workspaceURI={workspaceURI}
             token={token}
+            getRedirectionPath={() => `${workspaceURI}/access/invoice/pay/${token}`}
           />
         </div>
       </div>
