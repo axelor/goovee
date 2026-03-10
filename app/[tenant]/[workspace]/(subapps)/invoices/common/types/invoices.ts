@@ -21,7 +21,7 @@ export type Invoice = {
 };
 
 export type InvoiceProps = {
-  invoice: any;
+  invoiceId: string | number;
   downloadURL: string;
 };
 
@@ -32,5 +32,4 @@ export type TotalProps = {
   invoiceType: string;
   workspaceURI: string;
   token?: string;
-  getRedirectionPath: (paymentType: string | null) => string;
 };

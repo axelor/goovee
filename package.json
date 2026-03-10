@@ -22,7 +22,7 @@
     "analyze": "next experimental-analyze"
   },
   "dependencies": {
-    "@cyntler/react-doc-viewer": "^1.17.0",
+    "@cyntler/react-doc-viewer": "^1.17.1",
     "@excalidraw/excalidraw": "^0.18.0",
     "@goovee/orm": "^0.0.6",
     "@hookform/resolvers": "^5.2.2",

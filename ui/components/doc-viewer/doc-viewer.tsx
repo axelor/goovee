@@ -20,7 +20,6 @@ export function DocViewer({
   return (
     <div className={cn('overflow-auto', className)}>
       <CyntlerDocViewer
-        key={documents.map(d => d.uri).join(',')}
         documents={documents}
         pluginRenderers={DocViewerRenderers}
         config={{

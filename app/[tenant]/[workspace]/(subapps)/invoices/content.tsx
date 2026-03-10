@@ -37,13 +37,11 @@ export default function Content({
   const [sortedInvoices, sortOrder, toggleSortOrder] = useSortBy(invoices);
 
   const handleTabChange = (e: any) => {
-    router.push(`${e.href}`);
+    router.push(`${workspaceURI}/${SUBAPP_CODES.invoices}?type=${e.href}`);
   };
 
   const handleClick = (invoice: any) =>
-    router.push(
-      `${workspaceURI}/${SUBAPP_CODES.invoices}/${invoiceType}/${invoice.id}`,
-    );
+    router.push(`${workspaceURI}/${SUBAPP_CODES.invoices}/${invoice.id}`);
 
   const hasUpcomingInvoices = useMemo(() => {
     return invoices?.some(

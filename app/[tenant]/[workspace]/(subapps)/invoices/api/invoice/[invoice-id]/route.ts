@@ -1,10 +1,13 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {RELATED_MODELS} from '@/constants';
-import {findWorkspace} from '@/orm/workspace';
+import {RELATED_MODELS, SUBAPP_CODES} from '@/constants';
+import {getSession} from '@/lib/core/auth';
+import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {findLatestDMSFileByName, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
+import {getWhereClauseForEntity} from '@/utils/filters';
+import {PartnerKey} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
@@ -15,17 +18,49 @@ export async function GET(
     params: Promise<{
       tenant: string;
       workspace: string;
-      token: string;
+      'invoice-id': string;
     }>;
   },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
-  const {token} = params;
+  const {'invoice-id': invoiceId} = params;
+  const token = request.nextUrl.searchParams.get('token') ?? undefined;
+
+  let invoicesWhereClause = {};
+  let user: any;
+
+  if (!token) {
+    const session = await getSession();
+    user = session?.user;
+
+    if (!user) {
+      return new NextResponse('Unauthorized', {status: 401});
+    }
+
+    const subapp = await findSubappAccess({
+      code: SUBAPP_CODES.invoices,
+      user,
+      url: workspaceURL,
+      tenantId,
+    });
+
+    if (!subapp?.isInstalled) {
+      return new NextResponse('Unauthorized', {status: 401});
+    }
+
+    invoicesWhereClause = getWhereClauseForEntity({
+      user,
+      role: subapp.role,
+      isContactAdmin: subapp.isContactAdmin,
+      partnerKey: PartnerKey.PARTNER,
+    });
+  }
 
   const workspace = await findWorkspace({
     url: workspaceURL,
     tenantId,
+    user,
   });
 
   if (!workspace) {
@@ -33,7 +68,9 @@ export async function GET(
   }
 
   const invoice = await findInvoice({
-    token: token,
+    ...(token
+      ? {token}
+      : {id: invoiceId, params: {where: invoicesWhereClause}}),
     workspaceURL,
     tenantId,
   });
@@ -44,10 +81,10 @@ export async function GET(
 
   const file = await findLatestDMSFileByName({
     tenant: tenantId,
-    relatedId: invoice.id,
+    ...(token ? {skipUserCheck: true} : {user}),
+    relatedId: invoiceId,
     relatedModel: RELATED_MODELS.INVOICE,
     name: invoice.invoiceId || '',
-    skipUserCheck: true,
   });
 
   if (!file) {

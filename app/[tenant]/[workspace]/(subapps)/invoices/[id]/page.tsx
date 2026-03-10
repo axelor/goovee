@@ -17,20 +17,20 @@ import {InvoiceSkeleton} from '@/subapps/invoices/common/ui/components';
 
 async function Invoice({
   params,
+  token,
 }: {
-  params: {id: string; type: string; tenant: string; workspace: string};
+  params: {id: string; tenant: string; workspace: string};
+  token?: string;
 }) {
-  const {type, id, tenant} = params;
+  const {id, tenant} = params;
   const {workspaceURL, workspaceURI} = workspacePathname(params);
 
-  const session = await getSession();
+  let user: User | undefined;
 
-  if (!session) return notFound();
-
-  const user = session?.user as User;
-
-  if (!user) {
-    return notFound();
+  if (!token) {
+    const session = await getSession();
+    user = session?.user as User;
+    if (!user) return notFound();
   }
 
   const workspace = await findWorkspace({
@@ -41,32 +41,32 @@ async function Invoice({
 
   if (!workspace) return notFound();
 
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.invoices,
-    user,
-    url: workspacePathname(params)?.workspaceURL,
-    tenantId: tenant,
-  });
+  let invoicesWhereClause = {};
 
-  if (!app?.isInstalled) {
-    return notFound();
+  if (!token) {
+    const app = await findSubappAccess({
+      code: SUBAPP_CODES.invoices,
+      user: user!,
+      url: workspaceURL,
+      tenantId: tenant,
+    });
+
+    if (!app?.isInstalled) {
+      return notFound();
+    }
+
+    const {role, isContactAdmin} = app;
+
+    invoicesWhereClause = getWhereClauseForEntity({
+      user: user!,
+      role,
+      isContactAdmin,
+      partnerKey: PartnerKey.PARTNER,
+    });
   }
 
-  const {role, isContactAdmin} = app;
-
-  const invoicesWhereClause = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.PARTNER,
-  });
-
   const invoice = await findInvoice({
-    id,
-    type,
-    params: {
-      where: invoicesWhereClause,
-    },
+    ...(token ? {token} : {id, params: {where: invoicesWhereClause}}),
     tenantId: tenant,
     workspaceURL,
   });
@@ -77,10 +77,10 @@ async function Invoice({
 
   return (
     <Content
-      invoiceType={type}
       invoice={clone(invoice)}
       workspace={workspace}
       workspaceURI={workspaceURI}
+      token={token}
     />
   );
 }
@@ -88,15 +88,19 @@ async function Invoice({
 export default async function Page(props: {
   params: Promise<{
     id: string;
-    type: string;
     tenant: string;
     workspace: string;
   }>;
+  searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+  const token = searchParams.token;
   return (
     <Suspense fallback={<InvoiceSkeleton />}>
-      <Invoice params={params} />
+      <Invoice params={params} token={token} />
     </Suspense>
   );
 }

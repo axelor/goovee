@@ -17,8 +17,8 @@ patchedDependencies:
 
 dependencies:
   '@cyntler/react-doc-viewer':
-    specifier: ^1.17.0
-    version: 1.17.0(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
+    specifier: ^1.17.1
+    version: 1.17.1(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
   '@excalidraw/excalidraw':
     specifier: ^0.18.0
     version: 0.18.0(@types/react-dom@19.2.3)(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
@@ -189,10 +189,10 @@ dependencies:
     version: 0.11.7(react-dom@19.2.3)(react@19.2.3)
   draft-js-export-html:
     specifier: ^1.4.1
-    version: 1.4.1(draft-js@0.11.7)(immutable@3.8.2)
+    version: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
   draft-js-import-html:
     specifier: ^1.4.1
-    version: 1.4.1(draft-js@0.11.7)(immutable@3.8.2)
+    version: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
   draftjs-to-html:
     specifier: ^0.9.1
     version: 0.9.1
@@ -204,7 +204,7 @@ dependencies:
     version: 16.9.0
   html-to-draftjs:
     specifier: ^1.5.0
-    version: 1.5.0(draft-js@0.11.7)(immutable@3.8.2)
+    version: 1.5.0(draft-js@0.11.7)(immutable@3.8.3)
   ical-generator:
     specifier: ^8.1.1
     version: 8.1.1(@types/node@20.17.6)(dayjs@1.11.13)
@@ -282,7 +282,7 @@ dependencies:
     version: 19.2.3(react@19.2.3)
   react-draft-wysiwyg:
     specifier: ^1.15.0
-    version: 1.15.0(draft-js@0.11.7)(immutable@3.8.2)(react-dom@19.2.3)(react@19.2.3)
+    version: 1.15.0(draft-js@0.11.7)(immutable@3.8.3)(react-dom@19.2.3)(react@19.2.3)
   react-dropzone:
     specifier: ^14.3.5
     version: 14.3.5(react@19.2.3)
@@ -1693,8 +1693,8 @@ packages:
     resolution: {integrity: sha512-Tbsj02wXCbqGmzdnXNk0SOF19ChhRU70BsroIi4Pm6Ehp56in6vch94mfbdQ17DozxkL3BAVjbZ4Qc1a0HFRAg==}
     dev: false
 
-  /@cyntler/react-doc-viewer@1.17.0(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3):
-    resolution: {integrity: sha512-rx3HGcDpOtyuBuWjPaiMxgC4t476DeZiMS1KkQGY/o49SCjFr1Kh19UeICxYAt2oZ2mifE08xI3hcTQpIZ/jqw==}
+  /@cyntler/react-doc-viewer@1.17.1(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3):
+    resolution: {integrity: sha512-KaH2iuwBP0PiLKu+tiTfq46AadiCdaUQALExAomxkR9TpNaDipTs0HDTneW/oDrnX5bJkb1FhshL/gro8+Q2kg==}
     peerDependencies:
       react: 19.2.3
       react-dom: 19.2.3
@@ -3036,8 +3036,8 @@ packages:
     dev: true
     optional: true
 
-  /@parcel/watcher-android-arm64@2.5.4:
-    resolution: {integrity: sha512-hoh0vx4v+b3BNI7Cjoy2/B0ARqcwVNrzN/n7DLq9ZB4I3lrsvhrkCViJyfTj/Qi5xM9YFiH4AmHGK6pgH1ss7g==}
+  /@parcel/watcher-android-arm64@2.5.6:
+    resolution: {integrity: sha512-YQxSS34tPF/6ZG7r/Ih9xy+kP/WwediEUsqmtf0cuCV5TPPKw/PQHRhueUo6JdeFJaqV3pyjm0GdYjZotbRt/A==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm64]
     os: [android]
@@ -3045,8 +3045,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-darwin-arm64@2.5.4:
-    resolution: {integrity: sha512-kphKy377pZiWpAOyTgQYPE5/XEKVMaj6VUjKT5VkNyUJlr2qZAn8gIc7CPzx+kbhvqHDT9d7EqdOqRXT6vk0zw==}
+  /@parcel/watcher-darwin-arm64@2.5.6:
+    resolution: {integrity: sha512-Z2ZdrnwyXvvvdtRHLmM4knydIdU9adO3D4n/0cVipF3rRiwP+3/sfzpAwA/qKFL6i1ModaabkU7IbpeMBgiVEA==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm64]
     os: [darwin]
@@ -3054,8 +3054,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-darwin-x64@2.5.4:
-    resolution: {integrity: sha512-UKaQFhCtNJW1A9YyVz3Ju7ydf6QgrpNQfRZ35wNKUhTQ3dxJ/3MULXN5JN/0Z80V/KUBDGa3RZaKq1EQT2a2gg==}
+  /@parcel/watcher-darwin-x64@2.5.6:
+    resolution: {integrity: sha512-HgvOf3W9dhithcwOWX9uDZyn1lW9R+7tPZ4sug+NGrGIo4Rk1hAXLEbcH1TQSqxts0NYXXlOWqVpvS1SFS4fRg==}
     engines: {node: '>= 10.0.0'}
     cpu: [x64]
     os: [darwin]
@@ -3063,8 +3063,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-freebsd-x64@2.5.4:
-    resolution: {integrity: sha512-Dib0Wv3Ow/m2/ttvLdeI2DBXloO7t3Z0oCp4bAb2aqyqOjKPPGrg10pMJJAQ7tt8P4V2rwYwywkDhUia/FgS+Q==}
+  /@parcel/watcher-freebsd-x64@2.5.6:
+    resolution: {integrity: sha512-vJVi8yd/qzJxEKHkeemh7w3YAn6RJCtYlE4HPMoVnCpIXEzSrxErBW5SJBgKLbXU3WdIpkjBTeUNtyBVn8TRng==}
     engines: {node: '>= 10.0.0'}
     cpu: [x64]
     os: [freebsd]
@@ -3072,8 +3072,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-linux-arm-glibc@2.5.4:
-    resolution: {integrity: sha512-I5Vb769pdf7Q7Sf4KNy8Pogl/URRCKu9ImMmnVKYayhynuyGYMzuI4UOWnegQNa2sGpsPSbzDsqbHNMyeyPCgw==}
+  /@parcel/watcher-linux-arm-glibc@2.5.6:
+    resolution: {integrity: sha512-9JiYfB6h6BgV50CCfasfLf/uvOcJskMSwcdH1PHH9rvS1IrNy8zad6IUVPVUfmXr+u+Km9IxcfMLzgdOudz9EQ==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm]
     os: [linux]
@@ -3081,8 +3081,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-linux-arm-musl@2.5.4:
-    resolution: {integrity: sha512-kGO8RPvVrcAotV4QcWh8kZuHr9bXi9a3bSZw7kFarYR0+fGliU7hd/zevhjw8fnvIKG3J9EO5G6sXNGCSNMYPQ==}
+  /@parcel/watcher-linux-arm-musl@2.5.6:
+    resolution: {integrity: sha512-Ve3gUCG57nuUUSyjBq/MAM0CzArtuIOxsBdQ+ftz6ho8n7s1i9E1Nmk/xmP323r2YL0SONs1EuwqBp2u1k5fxg==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm]
     os: [linux]
@@ -3090,8 +3090,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-linux-arm64-glibc@2.5.4:
-    resolution: {integrity: sha512-KU75aooXhqGFY2W5/p8DYYHt4hrjHZod8AhcGAmhzPn/etTa+lYCDB2b1sJy3sWJ8ahFVTdy+EbqSBvMx3iFlw==}
+  /@parcel/watcher-linux-arm64-glibc@2.5.6:
+    resolution: {integrity: sha512-f2g/DT3NhGPdBmMWYoxixqYr3v/UXcmLOYy16Bx0TM20Tchduwr4EaCbmxh1321TABqPGDpS8D/ggOTaljijOA==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm64]
     os: [linux]
@@ -3099,8 +3099,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-linux-arm64-musl@2.5.4:
-    resolution: {integrity: sha512-Qx8uNiIekVutnzbVdrgSanM+cbpDD3boB1f8vMtnuG5Zau4/bdDbXyKwIn0ToqFhIuob73bcxV9NwRm04/hzHQ==}
+  /@parcel/watcher-linux-arm64-musl@2.5.6:
+    resolution: {integrity: sha512-qb6naMDGlbCwdhLj6hgoVKJl2odL34z2sqkC7Z6kzir8b5W65WYDpLB6R06KabvZdgoHI/zxke4b3zR0wAbDTA==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm64]
     os: [linux]
@@ -3108,8 +3108,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-linux-x64-glibc@2.5.4:
-    resolution: {integrity: sha512-UYBQvhYmgAv61LNUn24qGQdjtycFBKSK3EXr72DbJqX9aaLbtCOO8+1SkKhD/GNiJ97ExgcHBrukcYhVjrnogA==}
+  /@parcel/watcher-linux-x64-glibc@2.5.6:
+    resolution: {integrity: sha512-kbT5wvNQlx7NaGjzPFu8nVIW1rWqV780O7ZtkjuWaPUgpv2NMFpjYERVi0UYj1msZNyCzGlaCWEtzc+exjMGbQ==}
     engines: {node: '>= 10.0.0'}
     cpu: [x64]
     os: [linux]
@@ -3117,8 +3117,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-linux-x64-musl@2.5.4:
-    resolution: {integrity: sha512-YoRWCVgxv8akZrMhdyVi6/TyoeeMkQ0PGGOf2E4omODrvd1wxniXP+DBynKoHryStks7l+fDAMUBRzqNHrVOpg==}
+  /@parcel/watcher-linux-x64-musl@2.5.6:
+    resolution: {integrity: sha512-1JRFeC+h7RdXwldHzTsmdtYR/Ku8SylLgTU/reMuqdVD7CtLwf0VR1FqeprZ0eHQkO0vqsbvFLXUmYm/uNKJBg==}
     engines: {node: '>= 10.0.0'}
     cpu: [x64]
     os: [linux]
@@ -3126,8 +3126,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-win32-arm64@2.5.4:
-    resolution: {integrity: sha512-iby+D/YNXWkiQNYcIhg8P5hSjzXEHaQrk2SLrWOUD7VeC4Ohu0WQvmV+HDJokZVJ2UjJ4AGXW3bx7Lls9Ln4TQ==}
+  /@parcel/watcher-win32-arm64@2.5.6:
+    resolution: {integrity: sha512-3ukyebjc6eGlw9yRt678DxVF7rjXatWiHvTXqphZLvo7aC5NdEgFufVwjFfY51ijYEWpXbqF5jtrK275z52D4Q==}
     engines: {node: '>= 10.0.0'}
     cpu: [arm64]
     os: [win32]
@@ -3135,8 +3135,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-win32-ia32@2.5.4:
-    resolution: {integrity: sha512-vQN+KIReG0a2ZDpVv8cgddlf67J8hk1WfZMMP7sMeZmJRSmEax5xNDNWKdgqSe2brOKTQQAs3aCCUal2qBHAyg==}
+  /@parcel/watcher-win32-ia32@2.5.6:
+    resolution: {integrity: sha512-k35yLp1ZMwwee3Ez/pxBi5cf4AoBKYXj00CZ80jUz5h8prpiaQsiRPKQMxoLstNuqe2vR4RNPEAEcjEFzhEz/g==}
     engines: {node: '>= 10.0.0'}
     cpu: [ia32]
     os: [win32]
@@ -3144,8 +3144,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher-win32-x64@2.5.4:
-    resolution: {integrity: sha512-3A6efb6BOKwyw7yk9ro2vus2YTt2nvcd56AuzxdMiVOxL9umDyN5PKkKfZ/gZ9row41SjVmTVQNWQhaRRGpOKw==}
+  /@parcel/watcher-win32-x64@2.5.6:
+    resolution: {integrity: sha512-hbQlYcCq5dlAX9Qx+kFb0FHue6vbjlf0FrNzSKdYK2APUf7tGfGxQCk2ihEREmbR6ZMc0MVAD5RIX/41gpUzTw==}
     engines: {node: '>= 10.0.0'}
     cpu: [x64]
     os: [win32]
@@ -3153,8 +3153,8 @@ packages:
     dev: false
     optional: true
 
-  /@parcel/watcher@2.5.4:
-    resolution: {integrity: sha512-WYa2tUVV5HiArWPB3ydlOc4R2ivq0IDrlqhMi3l7mVsFEXNcTfxYFPIHXHXIh/ca/y/V5N4E1zecyxdIBjYnkQ==}
+  /@parcel/watcher@2.5.6:
+    resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
     requiresBuild: true
     dependencies:
@@ -3163,19 +3163,19 @@ packages:
       node-addon-api: 7.1.1
       picomatch: 4.0.3
     optionalDependencies:
-      '@parcel/watcher-android-arm64': 2.5.4
-      '@parcel/watcher-darwin-arm64': 2.5.4
-      '@parcel/watcher-darwin-x64': 2.5.4
-      '@parcel/watcher-freebsd-x64': 2.5.4
-      '@parcel/watcher-linux-arm-glibc': 2.5.4
-      '@parcel/watcher-linux-arm-musl': 2.5.4
-      '@parcel/watcher-linux-arm64-glibc': 2.5.4
-      '@parcel/watcher-linux-arm64-musl': 2.5.4
-      '@parcel/watcher-linux-x64-glibc': 2.5.4
-      '@parcel/watcher-linux-x64-musl': 2.5.4
-      '@parcel/watcher-win32-arm64': 2.5.4
-      '@parcel/watcher-win32-ia32': 2.5.4
-      '@parcel/watcher-win32-x64': 2.5.4
+      '@parcel/watcher-android-arm64': 2.5.6
+      '@parcel/watcher-darwin-arm64': 2.5.6
+      '@parcel/watcher-darwin-x64': 2.5.6
+      '@parcel/watcher-freebsd-x64': 2.5.6
+      '@parcel/watcher-linux-arm-glibc': 2.5.6
+      '@parcel/watcher-linux-arm-musl': 2.5.6
+      '@parcel/watcher-linux-arm64-glibc': 2.5.6
+      '@parcel/watcher-linux-arm64-musl': 2.5.6
+      '@parcel/watcher-linux-x64-glibc': 2.5.6
+      '@parcel/watcher-linux-x64-musl': 2.5.6
+      '@parcel/watcher-win32-arm64': 2.5.6
+      '@parcel/watcher-win32-ia32': 2.5.6
+      '@parcel/watcher-win32-x64': 2.5.6
     dev: false
     optional: true
 
@@ -6707,6 +6707,11 @@ packages:
     requiresBuild: true
     dev: false
 
+  /core-js@3.48.0:
+    resolution: {integrity: sha512-zpEHTy1fjTMZCKLHUZoVeylt9XrzaIN2rbPXEt0k+q7JE5CkCZdo6bNq55bn24a69CH7ErAVLKijxJja4fw+UQ==}
+    requiresBuild: true
+    dev: false
+
   /cose-base@1.0.3:
     resolution: {integrity: sha512-s9whTXInMSgAp/NVXVNuVxVKzGH2qck3aQlVHxDCdAEPgtMKwc4Wq6/QKhgdEdgbLSi9rBTAcPoRa6JpiG4ksg==}
     dependencies:
@@ -7458,48 +7463,48 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /draft-js-export-html@1.4.1(draft-js@0.11.7)(immutable@3.8.2):
+  /draft-js-export-html@1.4.1(draft-js@0.11.7)(immutable@3.8.3):
     resolution: {integrity: sha512-G4VGBSalPowktIE4wp3rFbhjs+Ln9IZ2FhXeHjsZDSw0a2+h+BjKu5Enq+mcsyVb51RW740GBK8Xbf7Iic51tw==}
     peerDependencies:
       draft-js: '>=0.10.0'
       immutable: 3.x.x
     dependencies:
       draft-js: 0.11.7(react-dom@19.2.3)(react@19.2.3)
-      draft-js-utils: 1.4.1(draft-js@0.11.7)(immutable@3.8.2)
-      immutable: 3.8.2
+      draft-js-utils: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
+      immutable: 3.8.3
     dev: false
 
-  /draft-js-import-element@1.4.0(draft-js@0.11.7)(immutable@3.8.2):
+  /draft-js-import-element@1.4.0(draft-js@0.11.7)(immutable@3.8.3):
     resolution: {integrity: sha512-WmYT5PrCm47lGL5FkH6sRO3TTAcn7qNHsD3igiPqLG/RXrqyKrqN4+wBgbcT2lhna/yfWTRtgzAbQsSJoS1Meg==}
     peerDependencies:
       draft-js: '>=0.10.0'
       immutable: 3.x.x
     dependencies:
       draft-js: 0.11.7(react-dom@19.2.3)(react@19.2.3)
-      draft-js-utils: 1.4.1(draft-js@0.11.7)(immutable@3.8.2)
-      immutable: 3.8.2
+      draft-js-utils: 1.4.1(draft-js@0.11.7)(immutable@3.8.3)
+      immutable: 3.8.3
       synthetic-dom: 1.4.0
     dev: false
 
-  /draft-js-import-html@1.4.1(draft-js@0.11.7)(immutable@3.8.2):
+  /draft-js-import-html@1.4.1(draft-js@0.11.7)(immutable@3.8.3):
     resolution: {integrity: sha512-KOZmtgxZriCDgg5Smr3Y09TjubvXe7rHPy/2fuLSsL+aSzwUDwH/aHDA/k47U+WfpmL4qgyg4oZhqx9TYJV0tg==}
     peerDependencies:
       draft-js: '>=0.10.0'
       immutable: 3.x.x
     dependencies:
       draft-js: 0.11.7(react-dom@19.2.3)(react@19.2.3)
-      draft-js-import-element: 1.4.0(draft-js@0.11.7)(immutable@3.8.2)
-      immutable: 3.8.2
+      draft-js-import-element: 1.4.0(draft-js@0.11.7)(immutable@3.8.3)
+      immutable: 3.8.3
     dev: false
 
-  /draft-js-utils@1.4.1(draft-js@0.11.7)(immutable@3.8.2):
+  /draft-js-utils@1.4.1(draft-js@0.11.7)(immutable@3.8.3):
     resolution: {integrity: sha512-xE81Y+z/muC5D5z9qWmKfxEW1XyXfsBzSbSBk2JRsoD0yzMGGHQm/0MtuqHl/EUDkaBJJLjJ2EACycoDMY/OOg==}
     peerDependencies:
       draft-js: '>=0.10.0'
       immutable: 3.x.x
     dependencies:
       draft-js: 0.11.7(react-dom@19.2.3)(react@19.2.3)
-      immutable: 3.8.2
+      immutable: 3.8.3
     dev: false
 
   /draft-js@0.11.7(react-dom@19.2.3)(react@19.2.3):
@@ -7521,14 +7526,14 @@ packages:
     resolution: {integrity: sha512-fFstE6+IayaVFBEvaFt/wN8vdj8FsTRzij7dy7LI9QIwf5LgfHFi9zSpvCg+feJ2tbYVqHxUkjcibwpsTpgFVQ==}
     dev: false
 
-  /draftjs-utils@0.10.2(draft-js@0.11.7)(immutable@3.8.2):
+  /draftjs-utils@0.10.2(draft-js@0.11.7)(immutable@3.8.3):
     resolution: {integrity: sha512-EstHqr3R3JVcilJrBaO/A+01GvwwKmC7e4TCjC7S94ZeMh4IVmf60OuQXtHHpwItK8C2JCi3iljgN5KHkJboUg==}
     peerDependencies:
       draft-js: ^0.11.x
       immutable: 3.x.x || 4.x.x
     dependencies:
       draft-js: 0.11.7(react-dom@19.2.3)(react@19.2.3)
-      immutable: 3.8.2
+      immutable: 3.8.3
     dev: false
 
   /dunder-proto@1.0.1:
@@ -8790,14 +8795,14 @@ packages:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
     dev: true
 
-  /html-to-draftjs@1.5.0(draft-js@0.11.7)(immutable@3.8.2):
+  /html-to-draftjs@1.5.0(draft-js@0.11.7)(immutable@3.8.3):
     resolution: {integrity: sha512-kggLXBNciKDwKf+KYsuE+V5gw4dZ7nHyGMX9m0wy7urzWjKGWyNFetmArRLvRV0VrxKN70WylFsJvMTJx02OBQ==}
     peerDependencies:
       draft-js: ^0.10.x || ^0.11.x
       immutable: 3.x.x || 4.x.x
     dependencies:
       draft-js: 0.11.7(react-dom@19.2.3)(react@19.2.3)
-      immutable: 3.8.2
+      immutable: 3.8.3
     dev: false
 
   /html-url-attributes@3.0.1:
@@ -8930,8 +8935,8 @@ packages:
     resolution: {integrity: sha512-AizQPcaofEtO11RZhPPHBOJRdo/20MKQF9mBLnVkBoyHi1/zXK8fzVdnEpSV9gxqtnh6Qomfp3F0xT5qP/vThw==}
     engines: {node: '>=0.8.0'}
 
-  /immutable@3.8.2:
-    resolution: {integrity: sha512-15gZoQ38eYjEjxkorfbcgBKBL6R7T459OuK+CpcWt7O3KF4uPCx2tD0uFETlUDIyo+1789crbMhTvQBSR5yBMg==}
+  /immutable@3.8.3:
+    resolution: {integrity: sha512-AUY/VyX0E5XlibOmWt10uabJzam1zlYjwiEgQSDc5+UIkFNaF9WM0JxXKaNMGf+F/ffUF+7kRKXM9A7C0xXqMg==}
     engines: {node: '>=0.10.0'}
     dev: false
 
@@ -11162,7 +11167,7 @@ packages:
   /plyr@3.8.4:
     resolution: {integrity: sha512-DrzLbK9Wol3zeiuZCleD9aUOl0KAaBHR9H6WVVVYPZ4Ya+LYxUFTgSF1jooHcMQCv96Ws96wCaZzIoP3bES8pQ==}
     dependencies:
-      core-js: 3.47.0
+      core-js: 3.48.0
       custom-event-polyfill: 1.0.7
       loadjs: 4.3.0
       rangetouch: 2.0.1
@@ -11517,7 +11522,7 @@ packages:
       scheduler: 0.27.0
     dev: false
 
-  /react-draft-wysiwyg@1.15.0(draft-js@0.11.7)(immutable@3.8.2)(react-dom@19.2.3)(react@19.2.3):
+  /react-draft-wysiwyg@1.15.0(draft-js@0.11.7)(immutable@3.8.3)(react-dom@19.2.3)(react@19.2.3):
     resolution: {integrity: sha512-p1cYZcWc6/ALFBVksbFoCM3b29fGQDlZLIMrXng0TU/UElxIOF2/AWWo4L5auIYVhmqKTZ0NkNjnXOzGGuxyeA==}
     peerDependencies:
       draft-js: ^0.10.x || ^0.11.x
@@ -11527,9 +11532,9 @@ packages:
     dependencies:
       classnames: 2.5.1
       draft-js: 0.11.7(react-dom@19.2.3)(react@19.2.3)
-      draftjs-utils: 0.10.2(draft-js@0.11.7)(immutable@3.8.2)
-      html-to-draftjs: 1.5.0(draft-js@0.11.7)(immutable@3.8.2)
-      immutable: 3.8.2
+      draftjs-utils: 0.10.2(draft-js@0.11.7)(immutable@3.8.3)
+      html-to-draftjs: 1.5.0(draft-js@0.11.7)(immutable@3.8.3)
+      immutable: 3.8.3
       linkify-it: 2.2.0
       prop-types: 15.8.1
       react: 19.2.3
@@ -12072,7 +12077,7 @@ packages:
       immutable: 4.3.7
       source-map-js: 1.2.1
     optionalDependencies:
-      '@parcel/watcher': 2.5.4
+      '@parcel/watcher': 2.5.6
     dev: false
 
   /scheduler@0.27.0:

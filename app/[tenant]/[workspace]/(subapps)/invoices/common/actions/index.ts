@@ -10,7 +10,6 @@ import {
   DEFAULT_CURRENCY_SCALE,
   DEFAULT_CURRENCY_SYMBOL,
   SUBAPP_CODES,
-  SUBAPP_PAGE,
 } from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
@@ -366,8 +365,8 @@ export async function createStripeCheckoutSession({
       amount: Number($amount),
       currency: currencyCode,
       url: {
-        success: `${workspaceURL}/${SUBAPP_CODES.invoices}/${INVOICE.UNPAID}/${$invoice.id}?stripe_session_id={CHECKOUT_SESSION_ID}&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}`,
-        error: `${workspaceURL}/${SUBAPP_CODES.invoices}/${INVOICE.UNPAID}/${$invoice.id}?stripe_error=true`,
+        success: `${workspaceURL}/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_session_id={CHECKOUT_SESSION_ID}&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`,
+        error: `${workspaceURL}/${SUBAPP_CODES.invoices}/${$invoice.id}?stripe_error=true${token ? `&token=${token}` : ''}`,
       },
     });
 
@@ -387,12 +386,12 @@ export async function createStripeCheckoutSession({
 export async function validateStripePayment({
   stripeSessionId,
   workspaceURL,
-  invalidatePath,
+  workspaceURI,
   token,
 }: {
   stripeSessionId: string;
   workspaceURL: string;
-  invalidatePath: string;
+  workspaceURI: string;
   token?: string;
 }) {
   if (!stripeSessionId) {
@@ -549,7 +548,7 @@ export async function validateStripePayment({
       version: context.version,
       tenantId,
     });
-    revalidatePath(invalidatePath);
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Stripe payment:', error);
@@ -793,7 +792,7 @@ export async function cancelStripeBankTransferPaymentIntent({
     });
 
     revalidatePath(
-      `${workspaceURI}/${SUBAPP_CODES.invoices}/${SUBAPP_PAGE.unpaid}/${$invoice.id}`,
+      `${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`,
     );
   } catch (error) {
     console.error('Error Cancelling:', error);
@@ -868,8 +867,8 @@ export async function payboxCreateOrder({
       email: payerEmail,
       context: invoice,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_error=true`,
+        success: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_error=true${token ? `&token=${token}` : ''}`,
       },
     });
 
@@ -885,12 +884,12 @@ export async function payboxCreateOrder({
 export async function validatePayboxPayment({
   params,
   workspaceURL,
-  invalidatePath,
+  workspaceURI,
   token,
 }: {
   params: any;
   workspaceURL: string;
-  invalidatePath: string;
+  workspaceURI: string;
   token?: string;
 }) {
   if (!params) {
@@ -1046,7 +1045,7 @@ export async function validatePayboxPayment({
       version: context.version,
       tenantId,
     });
-    revalidatePath(invalidatePath);
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error validating Paybox payment:', error);
@@ -1148,9 +1147,9 @@ export async function up2payCreateOrder({
           isPartialPayment
             ? INVOICE_PAYMENT_OPTIONS.PARTIAL
             : INVOICE_PAYMENT_OPTIONS.TOTAL
-        }`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}`,
-        cancel: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}`,
+        }${token ? `&token=${token}` : ''}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}${token ? `&token=${token}` : ''}`,
+        cancel: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}${token ? `&token=${token}` : ''}`,
       },
     });
 

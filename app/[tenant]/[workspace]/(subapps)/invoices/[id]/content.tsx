@@ -1,21 +1,28 @@
 'use client';
 
+import {useCallback, useEffect} from 'react';
+import {useRouter, usePathname} from 'next/navigation';
+
 // ---- CORE IMPORTS ---- //
-import {formatDate} from '@/lib/core/locale/formatters';
+import {Separator, Container, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
 import {PortalWorkspace} from '@/types';
-import {Chip, Container, Separator} from '@/ui/components';
+import {SUBAPP_CODES} from '@/constants';
+import {formatDate} from '@/lib/core/locale/formatters';
+import {usePaymentSSE, useSearchParams} from '@/ui/hooks';
+import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
-import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
-import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
+import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
+import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
+import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
 interface ContentProps {
   invoice: InvoiceType;
   workspace: PortalWorkspace;
   workspaceURI: string;
-  token: string;
+  token?: string;
 }
 
 export default function Content({
@@ -24,9 +31,38 @@ export default function Content({
   workspaceURI,
   token,
 }: ContentProps) {
-  const {invoiceId, dueDate, invoiceDate, isUnpaid, amountRemaining} = invoice;
+  const {id, invoiceId, dueDate, invoiceDate, isUnpaid, amountRemaining} =
+    invoice;
+
+  const router = useRouter();
+  const {searchParams} = useSearchParams();
+  const pathname = usePathname();
+
   const invoiceType =
     Number(amountRemaining.value) > 0 ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status !== UP2PAY_REDIRECT_STATUS.SUCCESS) return;
+
+    // Clean the URL immediately, then refresh data
+    router.replace(pathname);
+
+    const t = setTimeout(() => {
+      router.refresh();
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [pathname, router, searchParams]);
+
+  const handlePaymentUpdate = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
+  usePaymentSSE({
+    source: PAYMENT_SOURCE.INVOICES,
+    entityId: isUnpaid ? id : '',
+    onUpdate: handlePaymentUpdate,
+  });
 
   return (
     <Container title={`${i18n.t('Invoice number')} ${invoiceId}`}>
@@ -55,8 +91,8 @@ export default function Content({
       <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-12 gap-4 mb-6 rounded-lg">
         <div className="col-span-12 lg:col-span-9">
           <Invoice
-            invoice={invoice}
-            downloadURL={`${workspaceURI}/access/invoice/api/${token}`}
+            invoiceId={id}
+            downloadURL={`${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`}
           />
         </div>
 
@@ -68,7 +104,6 @@ export default function Content({
             workspace={workspace}
             workspaceURI={workspaceURI}
             token={token}
-            getRedirectionPath={() => `${workspaceURI}/access/invoice/pay/${token}`}
           />
         </div>
       </div>

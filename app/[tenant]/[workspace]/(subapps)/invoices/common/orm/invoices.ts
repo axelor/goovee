@@ -134,8 +134,8 @@ export const findInvoice = async ({
   const invoice: any = await client.aOSInvoice
     .findOne({
       where: {
-        id,
-        token,
+        ...(id && {id}),
+        ...(token && {portalToken: token}),
         ...params?.where,
         ...whereClause,
       },

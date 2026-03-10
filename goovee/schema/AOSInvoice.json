@@ -89,6 +89,10 @@
       "type": "Int"
     },
     {
+      "name": "portalToken",
+      "type": "String"
+    },
+    {
       "name": "archived",
       "type": "Boolean"
     },
