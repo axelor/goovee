@@ -13,7 +13,6 @@ import {PaymentOption} from '@/types';
 import {UP2PAY_ERRORS, UP2PAY_ERROR_MESSAGES} from '@/payment/up2pay/constants';
 import {readPEMFile, verifySignature} from '@/payment/up2pay/crypto';
 import {getParamsWithoutSign} from '@/payment/up2pay/utils';
-import {decodeFilter as decode} from '@/utils/url';
 import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 
@@ -38,19 +37,21 @@ export async function GET(request: Request) {
   const isSignatureValid = verifySignature(message, sign, pem);
 
   if (!isSignatureValid) {
-    console.error('[UP2PAY][WEBHOOK] Invalid signature');
+    console.error('[UP2PAY][WEBHOOK] Invalid signature', {ref, sign});
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  const decoded = decode(ref) as
-    | {context_id?: string; tenant_id?: string; amount?: number}
-    | undefined;
-  const contextId = decoded?.context_id;
-  const tenantId = decoded?.tenant_id;
-  const expectedAmount = decoded?.amount;
+  // contextId and tenantId are encoded in ref as: name-sequence~contextId~tenantId
+  const tildeIndex = ref.indexOf('~');
+  const tildeParts =
+    tildeIndex !== -1 ? ref.slice(tildeIndex + 1).split('~') : [];
+  const contextId = tildeParts.length === 2 ? tildeParts[0] : null;
+  const tenantId = tildeParts.length === 2 ? tildeParts[1] : null;
 
-  if (!(contextId && tenantId && expectedAmount)) {
-    console.error('[UP2PAY][WEBHOOK] Invalid ref format');
+  if (!(contextId && tenantId)) {
+    console.error('[UP2PAY][WEBHOOK] Missing contextId or tenantId in ref', {
+      ref,
+    });
     return new NextResponse('Bad Request', {status: 400});
   }
 
@@ -99,6 +100,7 @@ export async function GET(request: Request) {
     return new NextResponse('OK', {status: 200});
   }
 
+  const expectedAmount = paymentContext.data?.amount;
   const paidAmount = montant
     ? Number(montant) / 100
     : paymentContext.data?.amount;

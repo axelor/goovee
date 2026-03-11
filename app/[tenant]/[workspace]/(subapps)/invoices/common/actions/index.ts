@@ -1086,6 +1086,8 @@ export async function up2payCreateOrder({
       amount: $amount,
       currency: currencyCode,
       email: user.email,
+      name: $invoice?.partner?.name || '',
+      reference: $invoice?.invoiceId,
       context: {
         id: invoice.id,
         source: PAYMENT_SOURCE.INVOICES,

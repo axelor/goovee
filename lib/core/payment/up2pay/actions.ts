@@ -11,12 +11,13 @@ import {UP2PAY_ERRORS} from './constants';
 import {readPEMFile, verifySignature} from './crypto';
 import {getParamsWithoutSign} from './utils';
 import type {PaymentOrder} from '../common/type';
-import {decodeFilter as decode} from '@/utils/url';
 
 export async function createUp2payOrder({
   amount,
   email,
+  name,
   currency = DEFAULT_CURRENCY_CODE,
+  reference,
   context,
   url,
   tenantId,
@@ -24,7 +25,9 @@ export async function createUp2payOrder({
 }: {
   amount: string | number;
   email: string;
+  name: string;
   currency: string;
+  reference: string;
   context: any;
   url: {
     success: string;
@@ -45,7 +48,7 @@ export async function createUp2payOrder({
     throw new Error('Amount, currency and email is required');
   }
 
-  const {id: contextId} = await createPaymentContext({
+  const paymentContext = await createPaymentContext({
     context,
     mode: PaymentOption.up2pay,
     payer: email,
@@ -55,8 +58,10 @@ export async function createUp2payOrder({
   const paymentUrl = getPaymentURL({
     amount,
     email,
-    contextId,
+    contextId: paymentContext.id,
     tenantId,
+    name,
+    reference,
     currency,
     url,
     billingInfo,
@@ -69,9 +74,11 @@ export async function createUp2payOrder({
 
 export async function findUp2payOrder({
   params,
+  contextId,
   tenantId,
 }: {
   params: any;
+  contextId: string;
   tenantId: Tenant['id'];
 }): Promise<PaymentOrder> {
   if (!params) {
@@ -83,7 +90,6 @@ export async function findUp2payOrder({
   const pem = readPEMFile();
   const sign = params.sign;
   const erreur = params.erreur;
-  const ref = params.ref;
   const montant = params.montant;
 
   if (!(pem && message && sign)) {
@@ -96,12 +102,6 @@ export async function findUp2payOrder({
     throw new Error('Bad request');
   }
 
-  const reference: any = decode(ref);
-  if (!reference?.context_id) {
-    throw new Error('Context id not found');
-  }
-
-  const contextId = reference.context_id;
   const context = await findPaymentContext({
     id: contextId,
     tenantId,

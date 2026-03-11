@@ -1,5 +1,4 @@
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
-import {encodeFilter as encode} from '@/utils/url';
 import {formatAmountForUp2pay, hasKeys, join} from './utils';
 import {createHMAC} from './crypto';
 import {CURRENCY_CODE} from './constants';
@@ -14,6 +13,8 @@ export function getPaymentURL({
   currency,
   url,
   billingInfo,
+  name,
+  reference,
 }: {
   amount: string | number;
   email: string;
@@ -33,6 +34,8 @@ export function getPaymentURL({
     city?: string;
     countryCode?: string;
   };
+  name: string;
+  reference: string;
 }) {
   const baseURL = process.env.UP2PAY_PAYBOX;
 
@@ -43,19 +46,13 @@ export function getPaymentURL({
   const shoppingCart = `<?xml version="1.0" encoding="utf-8"?><shoppingcart><total><totalQuantity>1</totalQuantity></total></shoppingcart>`;
   const billing = `<?xml version="1.0" encoding="utf-8"?><Billing><Address><FirstName>${billingInfo?.firstName || ''}</FirstName><LastName>${billingInfo?.lastName || ''}</LastName><Address1>${billingInfo?.addressLine1 || ''}</Address1><ZipCode>${billingInfo?.zipCode || ''}</ZipCode><City>${billingInfo?.city || ''}</City><CountryCode>${billingInfo?.countryCode || '250'}</CountryCode></Address></Billing>`;
 
-  const endcodedReference = encode({
-    context_id: contextId,
-    tenant_id: tenantId,
-    amount,
-  });
-
   const payload: any = {
     PBX_SITE: process.env.UP2PAY_SITE,
     PBX_RANG: process.env.UP2PAY_RANG,
     PBX_IDENTIFIANT: process.env.UP2PAY_IDENTIFIANT,
     PBX_TOTAL: formatAmountForUp2pay(amount),
     PBX_DEVISE: CURRENCY_CODE[currency] || defaultCurrencyCode,
-    PBX_CMD: endcodedReference,
+    PBX_CMD: `${name}-${reference}~${contextId}~${tenantId}`,
     PBX_PORTEUR: email,
     PBX_RETOUR: 'montant:M;ref:R;erreur:E;sign=K',
     PBX_HASH: 'SHA512',
