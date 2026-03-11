@@ -850,5 +850,6 @@
   "Up2Pay is not available": "Up2Pay is not available",
   "Up2Pay only supports EUR. Your invoice currency is not supported.": "Up2Pay only supports EUR. Your invoice currency is not supported.",
   "You are signed in as {0}. Sign out to access via token.": "You are signed in as {0}. Sign out to access via token.",
-  "Sign out": "Sign out"
+  "Sign out": "Sign out",
+  "Token is either invalid or expired.": "Token is either invalid or expired."
 }

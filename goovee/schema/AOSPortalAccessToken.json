@@ -1,0 +1,20 @@
+{
+  "name": "AOSPortalAccessToken",
+  "table": "portal_portal_access_token",
+  "synchronize": false,
+  "fields": [
+    {
+      "name": "token",
+      "type": "String"
+    },
+    {
+      "name": "expiresOn",
+      "type": "DateTime"
+    },
+    {
+      "name": "invoice",
+      "type": "ManyToOne",
+      "target": "AOSInvoice"
+    }
+  ]
+}

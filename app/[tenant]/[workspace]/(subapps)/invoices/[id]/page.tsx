@@ -13,6 +13,7 @@ import {getWhereClauseForEntity} from '@/utils/filters';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {SignOutBanner} from './sign-out-banner';
+import {TokenInvalid} from './token-invalid';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {InvoiceSkeleton} from '@/subapps/invoices/common/ui/components';
 
@@ -79,6 +80,7 @@ async function Invoice({
   });
 
   if (!invoice) {
+    if (token) return <TokenInvalid />;
     return notFound();
   }
 

@@ -135,7 +135,12 @@ export const findInvoice = async ({
     .findOne({
       where: {
         ...(id && {id}),
-        ...(token && {portalToken: token}),
+        ...(token && {
+          portalTokenList: {
+            token,
+            OR: [{expiresOn: null}, {expiresOn: {gt: new Date()}}],
+          },
+        }),
         ...params?.where,
         ...whereClause,
       },
