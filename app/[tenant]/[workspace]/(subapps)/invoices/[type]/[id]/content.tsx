@@ -62,16 +62,9 @@ export default function Content({
     isFullPaymentRef.current =
       searchParams.get('type') === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
-    // Clean the URL immediately
+    // Clean the URL immediately — SSE will trigger navigation once webhook confirms
     router.replace(pathname);
-
-    const target = isFullPaymentRef.current ? paidPathname : pathname;
-
-    const t = setTimeout(() => {
-      router.replace(target);
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [pathname, router, searchParams, paidPathname]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   usePaymentSSE({
     source: PAYMENT_SOURCE.INVOICES,

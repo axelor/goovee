@@ -19,10 +19,8 @@ export function Up2pay({
   disabled,
   onValidate,
   onCreateOrder,
-  successMessage,
   errorMessage,
   cancelMessage,
-  skipSuccessToast,
 }: Up2payProps) {
   const {toast} = useToast();
   const {searchParams} = useSearchParams();
@@ -78,17 +76,7 @@ export function Up2pay({
 
     notifiedRef.current = true;
 
-    // Show UI feedback based on the redirect status.
-    // Actual payment validation (DB update, invoice marking) is handled
-    // exclusively by the webhook at /api/webhooks/up2pay — not here.
-    if (up2payStatus === UP2PAY_REDIRECT_STATUS.SUCCESS) {
-      if (!skipSuccessToast) {
-        toast({
-          variant: 'success',
-          title: i18n.t(successMessage || 'Payment completed successfully'),
-        });
-      }
-    } else if (up2payStatus === UP2PAY_REDIRECT_STATUS.CANCELLED) {
+    if (up2payStatus === UP2PAY_REDIRECT_STATUS.CANCELLED) {
       toast({
         variant: 'destructive',
         title: i18n.t(cancelMessage || 'Payment cancelled.'),
@@ -106,10 +94,8 @@ export function Up2pay({
   }, [
     up2payStatus,
     toast,
-    successMessage,
     errorMessage,
     cancelMessage,
-    skipSuccessToast,
     pathname,
     router,
     searchParams,
@@ -119,7 +105,7 @@ export function Up2pay({
     <Button
       disabled={disabled}
       onClick={handleCreateUp2payOrder}
-      className="relative h-[50px] w-full rounded-md overflow-hidden flex items-center justify-center gap-2.5 font-semibold text-white text-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+      className="relative h-[50px] w-full rounded-md overflow-hidden flex items-center justify-center gap-1 font-semibold text-white text-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
       style={{
         background: 'linear-gradient(135deg, #6DC040 0%, #00594C 65%)',
       }}>

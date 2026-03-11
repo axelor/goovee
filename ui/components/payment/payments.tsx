@@ -122,9 +122,7 @@ export function Payments({
           disabled={disabled}
           onValidate={() => onValidate(PaymentOption.up2pay)}
           onCreateOrder={onUp2payCreateOrder}
-          successMessage={successMessage}
           errorMessage={errorMessage}
-          skipSuccessToast={skipSuccessToast}
         />
       )}
     </div>
