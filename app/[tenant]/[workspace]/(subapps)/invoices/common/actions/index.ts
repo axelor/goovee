@@ -244,7 +244,7 @@ export async function paypalCaptureOrder({
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: invoice.id,
-      ...(token ? {} : {params: {where: invoicesWhereClause}}),
+      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
       tenantId,
     });
@@ -501,7 +501,7 @@ export async function validateStripePayment({
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: invoice.id,
-      ...(token ? {} : {params: {where: invoicesWhereClause}}),
+      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
       tenantId,
     });
@@ -655,11 +655,13 @@ export async function cancelStripeBankTransferPaymentIntent({
   contextId,
   workspaceURL,
   workspaceURI,
+  token,
 }: {
   id: string;
   contextId: string;
   workspaceURL: string;
   workspaceURI: string;
+  token?: string;
 }) {
   if (!id) {
     return {error: true, message: await t('Missing stripe payment id!')};
@@ -680,10 +682,15 @@ export async function cancelStripeBankTransferPaymentIntent({
   }
 
   try {
-    const session = await getSession();
-    const user = session?.user;
-    if (!user) {
-      return {error: true, message: await t('Unauthorized')};
+    let user;
+    let invoicesWhereClause = {};
+
+    if (!token) {
+      const session = await getSession();
+      user = session?.user;
+      if (!user) {
+        return {error: true, message: await t('Unauthorized')};
+      }
     }
 
     const workspace = await findWorkspace({user, url: workspaceURL, tenantId});
@@ -692,15 +699,24 @@ export async function cancelStripeBankTransferPaymentIntent({
       return {error: true, message: await t('Invalid workspace')};
     }
 
-    const subapp = await findSubappAccess({
-      code: SUBAPP_CODES.invoices,
-      user,
-      url: workspace.url,
-      tenantId,
-    });
+    if (!token) {
+      const subapp = await findSubappAccess({
+        code: SUBAPP_CODES.invoices,
+        user,
+        url: workspace.url,
+        tenantId,
+      });
 
-    if (!subapp) {
-      return {error: true, message: await t('Unauthorized app access')};
+      if (!subapp) {
+        return {error: true, message: await t('Unauthorized app access')};
+      }
+
+      invoicesWhereClause = getWhereClauseForEntity({
+        user,
+        role: subapp.role,
+        isContactAdmin: subapp.isContactAdmin,
+        partnerKey: PartnerKey.PARTNER,
+      });
     }
 
     if (!workspace?.config?.allowOnlinePaymentForInvoices) {
@@ -760,19 +776,12 @@ export async function cancelStripeBankTransferPaymentIntent({
       };
     }
 
-    const invoicesWhereClause = getWhereClauseForEntity({
-      user,
-      role: subapp.role,
-      isContactAdmin: subapp.isContactAdmin,
-      partnerKey: PartnerKey.PARTNER,
-    });
-
     const {data} = paymentContext;
 
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: data.id,
-      params: {where: invoicesWhereClause},
+      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
       tenantId,
     });
@@ -791,9 +800,7 @@ export async function cancelStripeBankTransferPaymentIntent({
       cancellation_reason: 'requested_by_customer',
     });
 
-    revalidatePath(
-      `${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`,
-    );
+    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
   } catch (error) {
     console.error('Error Cancelling:', error);
     return {
@@ -998,7 +1005,7 @@ export async function validatePayboxPayment({
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: invoice.id,
-      ...(token ? {} : {params: {where: invoicesWhereClause}}),
+      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
       tenantId,
     });

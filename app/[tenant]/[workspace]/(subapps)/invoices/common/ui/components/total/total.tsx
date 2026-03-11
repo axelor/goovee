@@ -141,6 +141,7 @@ export function Total({
         contextId,
         workspaceURL,
         workspaceURI,
+        token,
       });
 
       if (response?.error) {

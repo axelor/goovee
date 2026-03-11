@@ -91,10 +91,9 @@ export async function validatePaymentData({
   }
 
   const $invoice = await findInvoice({
+    id: invoice.id,
     type: INVOICE.UNPAID,
-    ...(token
-      ? {token}
-      : {id: invoice.id, params: {where: invoicesWhereClause}}),
+    ...(token ? {token} : {params: {where: invoicesWhereClause}}),
     workspaceURL,
     tenantId,
   });

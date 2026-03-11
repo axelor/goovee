@@ -68,9 +68,8 @@ export async function GET(
   }
 
   const invoice = await findInvoice({
-    ...(token
-      ? {token}
-      : {id: invoiceId, params: {where: invoicesWhereClause}}),
+    id: invoiceId,
+    ...(token ? {token} : {params: {where: invoicesWhereClause}}),
     workspaceURL,
     tenantId,
   });

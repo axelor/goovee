@@ -74,7 +74,8 @@ async function Invoice({
   }
 
   const invoice = await findInvoice({
-    ...(token ? {token} : {id, params: {where: invoicesWhereClause}}),
+    id,
+    ...(token ? {token} : {params: {where: invoicesWhereClause}}),
     tenantId: tenant,
     workspaceURL,
   });

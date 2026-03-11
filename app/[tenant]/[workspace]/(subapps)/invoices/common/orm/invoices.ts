@@ -113,7 +113,7 @@ export const findInvoice = async ({
   tenantId,
   workspaceURL,
 }: {
-  id?: Invoice['id'];
+  id: Invoice['id'];
   token?: string;
   type?: InvoiceType;
   params?: {
