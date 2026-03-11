@@ -1,7 +1,7 @@
 'use client';
 
 import {useCallback, useEffect} from 'react';
-import {useRouter, usePathname} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {Separator, Container, Chip} from '@/ui/components';
@@ -36,23 +36,20 @@ export default function Content({
 
   const router = useRouter();
   const {searchParams} = useSearchParams();
-  const pathname = usePathname();
 
   const invoiceType =
     Number(amountRemaining.value) > 0 ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
 
+  const status = searchParams.get('status');
+
   useEffect(() => {
-    const status = searchParams.get('status');
     if (status !== UP2PAY_REDIRECT_STATUS.SUCCESS) return;
 
     // Clean the URL immediately, then refresh data
-    router.replace(pathname);
-
-    const t = setTimeout(() => {
-      router.refresh();
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [pathname, router, searchParams]);
+    router.replace(
+      `${workspaceURI}/${SUBAPP_CODES.invoices}/${id}${token ? `?token=${token}` : ''}`,
+    );
+  }, [id, token, workspaceURI, router, status]);
 
   const handlePaymentUpdate = useCallback(() => {
     router.refresh();
