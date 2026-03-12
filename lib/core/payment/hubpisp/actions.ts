@@ -11,7 +11,7 @@ import {createPaymentLink, syncPaymentLinkStatus} from '.';
 import {HUBPISP_DEFAULT_EXPIRE_IN, HubPispLocalInstrument} from './constants';
 import type {PageConsentInfo} from './types';
 
-export async function createHubPispOrder({
+export async function createHubPispPaymentLink({
   amount,
   tenantId,
   email,
