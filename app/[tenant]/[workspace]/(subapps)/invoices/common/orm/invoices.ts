@@ -12,6 +12,7 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {Partner, PortalWorkspace} from '@/types';
 import {CONTEXT_STATUS} from '@/lib/core/payment/common/orm';
 import {buildPendingStripeBankTransferIntents} from '@/lib/core/payment/stripe/service';
+import {findPendingHubPispPayments} from '@/lib/core/payment/hubpisp/orm';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Invoice} from '@/subapps/invoices/common/types/invoices';
@@ -255,6 +256,13 @@ export const findInvoice = async ({
       scale,
     });
 
+  const pendingHubPispContexts = await findPendingHubPispPayments({
+    tenantId,
+    entityId: invoice.id,
+    currencySymbol,
+    scale,
+  });
+
   return {
     ...invoice,
     exTaxTotal: await formatNumber(exTaxTotal, {
@@ -284,6 +292,7 @@ export const findInvoice = async ({
     invoicePaymentList: $invoicePaymentList,
     isUnpaid: Number(invoice.amountRemaining) !== 0,
     pendingStripeBankTransferIntents,
+    pendingHubPispContexts,
   };
 };
 

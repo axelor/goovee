@@ -4,6 +4,7 @@ import {
   createPaymentContext,
   findPaymentContext,
   markPaymentAsExpired,
+  updatePaymentContextData,
 } from '../common/orm';
 import type {PaymentOrder} from '../common/type';
 import {createPaymentLink, syncPaymentLinkStatus} from '.';
@@ -44,7 +45,7 @@ export async function createHubPispOrder({
     throw new Error('amount must be a positive number');
   }
 
-  const {id: contextId} = await createPaymentContext({
+  const {id: contextId, version} = await createPaymentContext({
     context,
     mode: PaymentOption.hubpisp,
     payer: email,
@@ -62,6 +63,13 @@ export async function createHubPispOrder({
     pageConsentInfo,
     psuInfo,
     localInstrument,
+  });
+
+  await updatePaymentContextData({
+    id: contextId,
+    version,
+    tenantId,
+    context: {...context, resourceId},
   });
 
   return {resourceId, consentHref, contextId};
