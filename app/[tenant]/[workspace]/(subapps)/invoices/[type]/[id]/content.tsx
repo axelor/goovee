@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useRef} from 'react';
 import {useRouter, usePathname} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -8,8 +8,7 @@ import {Separator, Container, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
 import {PortalWorkspace} from '@/types';
 import {formatDate} from '@/lib/core/locale/formatters';
-import {usePaymentSSE, useSearchParams} from '@/ui/hooks';
-import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
+import {useSearchParams} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
@@ -18,8 +17,6 @@ import {
   INVOICE_TYPE,
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
-import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
-import {HUBPISP_REDIRECT_STATUS} from '@/lib/core/payment/hubpisp/constants';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
 interface ContentProps {
@@ -40,11 +37,6 @@ export default function Content({
   const router = useRouter();
   const {searchParams} = useSearchParams();
   const pathname = usePathname();
-  const [sseEnabled, setSseEnabled] = useState(
-    () =>
-      searchParams.get('hubpisp_status') === HUBPISP_REDIRECT_STATUS.SUCCESS ||
-      searchParams.get('status') === UP2PAY_REDIRECT_STATUS.SUCCESS,
-  );
 
   const paidPathname = pathname.replace(
     `/${INVOICE.UNPAID}/`,
@@ -60,24 +52,6 @@ export default function Content({
     const target = isFullPaymentRef.current ? paidPathname : pathname;
     router.replace(target);
   }, [router, paidPathname, pathname]);
-
-  useEffect(() => {
-    const status = searchParams.get('status');
-    if (status !== UP2PAY_REDIRECT_STATUS.SUCCESS) return;
-
-    isFullPaymentRef.current =
-      searchParams.get('type') === INVOICE_PAYMENT_OPTIONS.TOTAL;
-
-    // Clean the URL immediately — SSE will trigger navigation once webhook confirms
-    router.replace(pathname);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  usePaymentSSE({
-    source: PAYMENT_SOURCE.INVOICES,
-    entityId: isUnpaid ? id : '',
-    onUpdate: handlePaymentUpdate,
-    enabled: sseEnabled,
-  });
 
   const status = isUnpaid ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
 
@@ -117,7 +91,7 @@ export default function Content({
             isUnpaid={isUnpaid}
             workspace={workspace}
             workspaceURI={workspaceURI}
-            onPaymentStart={() => setSseEnabled(true)}
+            onPaymentUpdate={handlePaymentUpdate}
           />
         </div>
       </div>

@@ -11,6 +11,7 @@ import {useToast} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
+import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -34,7 +35,7 @@ export function InvoicePayments({
   paymentType,
   resetPaymentType,
   resetForm,
-  onPaymentStart,
+  onPaymentUpdate,
 }: {
   workspace: any;
   invoice: Invoice;
@@ -42,7 +43,7 @@ export function InvoicePayments({
   paymentType: INVOICE_PAYMENT_OPTIONS | null;
   resetPaymentType: () => void;
   resetForm: () => void;
-  onPaymentStart?: () => void;
+  onPaymentUpdate?: () => void;
 }) {
   const workspaceURL = workspace?.url;
 
@@ -173,7 +174,6 @@ export function InvoicePayments({
       }}
       onPayboxValidatePayment={handlePayboxValidations}
       onUp2payCreateOrder={async ({uri}) => {
-        onPaymentStart?.();
         return await up2payCreateOrder({
           invoice: {id: invoice.id},
           amount,
@@ -182,7 +182,6 @@ export function InvoicePayments({
         });
       }}
       onInitiatePispPayment={async ({uri, localInstrument}) => {
-        onPaymentStart?.();
         return await initiatePispPayment({
           invoice: {id: invoice.id},
           amount,
@@ -193,6 +192,15 @@ export function InvoicePayments({
       }}
       successMessage="Invoice payment completed successfully."
       errorMessage="Failed to process invoice payment."
+      sse={
+        onPaymentUpdate
+          ? {
+              source: PAYMENT_SOURCE.INVOICES,
+              entityId: invoice.id,
+              onPaymentUpdate,
+            }
+          : undefined
+      }
     />
   );
 }

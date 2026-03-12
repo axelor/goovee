@@ -13,7 +13,7 @@ import {
   DialogTitle,
   Spinner,
 } from '@/ui/components';
-import {useSearchParams, useToast} from '@/ui/hooks';
+import {usePaymentSSE, useSearchParams, useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {HubPispProps} from '@/ui/components/payment/types';
 import {PaymentOption} from '@/types';
@@ -29,6 +29,7 @@ export function HubPISP({
   onCreateOrder,
   errorMessage,
   cancelMessage,
+  sse,
 }: HubPispProps) {
   const [showTransferOptions, setShowTransferOptions] = useState(false);
   const [loadingInstrument, setLoadingInstrument] =
@@ -41,6 +42,17 @@ export function HubPISP({
   const {searchParams} = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+
+  const [sseEnabled, setSseEnabled] = useState(
+    () =>
+      searchParams.get('hubpisp_status') === HUBPISP_REDIRECT_STATUS.SUCCESS,
+  );
+
+  usePaymentSSE({
+    source: sse && sseEnabled ? sse.source : undefined,
+    entityId: sse && sseEnabled ? sse.entityId : '',
+    onUpdate: sse && sseEnabled ? sse.onPaymentUpdate : () => {},
+  });
 
   const handlePaymentClick = async (event: React.MouseEvent) => {
     event.preventDefault();
@@ -70,6 +82,7 @@ export function HubPISP({
           title: result.message,
         });
       } else if (result?.order?.consentHref) {
+        setSseEnabled(true);
         router.push(result.order.consentHref);
       } else {
         console.error(
@@ -102,7 +115,11 @@ export function HubPISP({
       return;
     }
 
-    if (!Object.values(HUBPISP_REDIRECT_STATUS).includes(hubpispStatus)) {
+    if (
+      !Object.values(HUBPISP_REDIRECT_STATUS).includes(
+        hubpispStatus as (typeof HUBPISP_REDIRECT_STATUS)[keyof typeof HUBPISP_REDIRECT_STATUS],
+      )
+    ) {
       return;
     }
 

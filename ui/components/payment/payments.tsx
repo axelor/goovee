@@ -5,6 +5,7 @@ import {ID, PaymentOption, PortalWorkspace} from '@/types';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 import {Paybox, Paypal, Stripe, Up2pay, HubPISP} from '@/ui/components/payment';
 import {isPaymentOptionAvailable} from '@/utils/payment';
+import type {PaymentSSEProps} from '@/ui/components/payment/types';
 
 export function Payments({
   workspace,
@@ -24,6 +25,7 @@ export function Payments({
   errorMessage = '',
   skipSuccessToast,
   onCreateBankTransferIntent,
+  sse,
 }: {
   workspace: PortalWorkspace;
   disabled?: boolean;
@@ -46,6 +48,7 @@ export function Payments({
   errorMessage?: string;
   skipSuccessToast?: boolean;
   onCreateBankTransferIntent?: () => Promise<any>;
+  sse?: PaymentSSEProps;
 }) {
   const config = workspace?.config;
   const allowOnlinePayment = config?.allowOnlinePaymentForEcommerce;
@@ -130,6 +133,7 @@ export function Payments({
           onValidate={() => onValidate(PaymentOption.up2pay)}
           onCreateOrder={onUp2payCreateOrder}
           errorMessage={errorMessage}
+          sse={sse}
         />
       )}
       {allowHubPisp && onInitiatePispPayment && (
@@ -138,6 +142,7 @@ export function Payments({
           onValidate={() => onValidate(PaymentOption.hubpisp)}
           onCreateOrder={onInitiatePispPayment}
           errorMessage={errorMessage}
+          sse={sse}
         />
       )}
     </div>

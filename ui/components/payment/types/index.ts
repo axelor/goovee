@@ -2,6 +2,13 @@
 import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
 import {BankAccountType} from '@/lib/core/payment/stripe/utils';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
+import {PaymentSource} from '@/lib/core/payment/common/type';
+
+export type PaymentSSEProps = {
+  source: PaymentSource;
+  entityId: string | number;
+  onPaymentUpdate: () => void;
+};
 
 export type PaypalProps = {
   disabled?: boolean;
@@ -101,6 +108,7 @@ export type Up2payProps = {
   cancelMessage?: string;
   onValidate?: (paymentOption: string) => Promise<boolean>;
   onCreateOrder: ({uri}: {uri: string}) => Promise<any>;
+  sse?: PaymentSSEProps;
 };
 
 export type HubPispProps = {
@@ -115,4 +123,5 @@ export type HubPispProps = {
     uri: string;
     localInstrument?: HubPispLocalInstrument;
   }) => Promise<any>;
+  sse?: PaymentSSEProps;
 };
