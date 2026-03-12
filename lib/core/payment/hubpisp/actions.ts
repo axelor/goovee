@@ -4,12 +4,13 @@ import {
   createPaymentContext,
   findPaymentContext,
   markPaymentAsExpired,
+  markPaymentAsFailed,
   updatePaymentContextData,
 } from '../common/orm';
 import type {PaymentOrder} from '../common/type';
 import {createPaymentLink, syncPaymentLinkStatus} from '.';
 import {HUBPISP_DEFAULT_EXPIRE_IN, HubPispLocalInstrument} from './constants';
-import type {PageConsentInfo} from './types';
+import type {HubPispContextData, PageConsentInfo, PsuInfo} from './types';
 
 export async function createHubPispPaymentLink({
   amount,
@@ -18,7 +19,6 @@ export async function createHubPispPaymentLink({
   context,
   currency,
   remittanceInformation,
-  endToEnd,
   localInstrument,
   successfulReportUrl,
   unsuccessfulReportUrl,
@@ -28,15 +28,14 @@ export async function createHubPispPaymentLink({
   amount: number;
   tenantId: Tenant['id'];
   email: string;
-  context: any;
+  context: HubPispContextData;
   currency: string;
   remittanceInformation?: string;
-  endToEnd?: string;
   localInstrument?: HubPispLocalInstrument;
   successfulReportUrl?: string;
   unsuccessfulReportUrl?: string;
   pageConsentInfo?: PageConsentInfo;
-  psuInfo?: import('./types').PsuInfo;
+  psuInfo?: PsuInfo;
 }): Promise<{resourceId: string; consentHref: string; contextId: string}> {
   if (!tenantId || !currency || !email) {
     throw new Error('tenantId, currency and email are required');
@@ -52,18 +51,33 @@ export async function createHubPispPaymentLink({
     tenantId,
   });
 
-  const {resourceId, consentHref} = await createPaymentLink({
-    amount,
-    currency,
-    remittanceInformation,
-    endToEnd,
-    expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
-    successfulReportUrl,
-    unsuccessfulReportUrl,
-    pageConsentInfo,
-    psuInfo,
-    localInstrument,
-  });
+  const endToEnd = `${contextId}-${tenantId}`;
+  if (endToEnd.length > 35) {
+    await markPaymentAsFailed({contextId, version, tenantId});
+    throw new Error(
+      `endToEnd value exceeds 35 characters: "${endToEnd}" (${endToEnd.length} chars)`,
+    );
+  }
+
+  let resourceId: string;
+  let consentHref: string;
+  try {
+    ({resourceId, consentHref} = await createPaymentLink({
+      amount,
+      currency,
+      remittanceInformation,
+      endToEnd,
+      expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
+      successfulReportUrl,
+      unsuccessfulReportUrl,
+      pageConsentInfo,
+      psuInfo,
+      localInstrument,
+    }));
+  } catch (err) {
+    await markPaymentAsFailed({contextId, version, tenantId});
+    throw err;
+  }
 
   await updatePaymentContextData({
     id: contextId,

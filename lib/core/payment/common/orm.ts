@@ -43,7 +43,7 @@ export async function createPaymentContext({
       updatedOn: timeStamp,
       status: CONTEXT_STATUS.pending,
     },
-    select: {id: true, data: true},
+    select: {id: true, version: true, data: true},
   });
   return payment;
 }
