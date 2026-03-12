@@ -137,9 +137,7 @@ export function Payments({
           disabled={disabled}
           onValidate={() => onValidate(PaymentOption.hubpisp)}
           onCreateOrder={onInitiatePispPayment}
-          successMessage={successMessage}
           errorMessage={errorMessage}
-          skipSuccessToast={skipSuccessToast}
         />
       )}
     </div>

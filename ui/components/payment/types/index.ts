@@ -105,7 +105,6 @@ export type Up2payProps = {
 
 export type HubPispProps = {
   disabled?: boolean;
-  successMessage?: string;
   errorMessage?: string;
   cancelMessage?: string;
   onValidate?: (paymentOption: string) => Promise<boolean>;
@@ -116,5 +115,4 @@ export type HubPispProps = {
     uri: string;
     localInstrument?: HubPispLocalInstrument;
   }) => Promise<any>;
-  skipSuccessToast?: boolean;
 };
