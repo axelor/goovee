@@ -16,7 +16,7 @@ import {TENANT_HEADER} from '@/proxy';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createUp2payOrder} from '@/payment/up2pay/actions';
-import {createHubPispOrder} from '@/payment/hubpisp/actions';
+import {createHubPispPaymentLink} from '@/payment/hubpisp/actions';
 import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
 import {
   createStripePaymentIntent,
@@ -1263,7 +1263,7 @@ export async function initiatePispPayment({
 
     const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
 
-    const response = await createHubPispOrder({
+    const response = await createHubPispPaymentLink({
       amount: Number($amount),
       tenantId,
       email: user.email,
