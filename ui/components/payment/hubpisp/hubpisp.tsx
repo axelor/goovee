@@ -27,13 +27,13 @@ export function HubPISP({
   disabled,
   onValidate,
   onCreateOrder,
-  successMessage,
   errorMessage,
   cancelMessage,
-  skipSuccessToast,
 }: HubPispProps) {
   const [showTransferOptions, setShowTransferOptions] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingInstrument, setLoadingInstrument] =
+    useState<HubPispLocalInstrument | null>(null);
+  const isLoading = loadingInstrument !== null;
 
   const notifiedRef = useRef(false);
 
@@ -56,7 +56,7 @@ export function HubPISP({
   const handleInitiatePispPayment = async (
     localInstrument?: HubPispLocalInstrument,
   ) => {
-    setIsLoading(true);
+    setLoadingInstrument(localInstrument ?? HUBPISP_LOCAL_INSTRUMENT.SCT);
 
     try {
       const result = await onCreateOrder({
@@ -89,7 +89,7 @@ export function HubPISP({
         title: i18n.t('Unexpected error occurred. Please try again.'),
       });
     } finally {
-      setIsLoading(false);
+      setLoadingInstrument(null);
     }
   };
 
@@ -108,14 +108,7 @@ export function HubPISP({
 
     notifiedRef.current = true;
 
-    if (hubpispStatus === HUBPISP_REDIRECT_STATUS.SUCCESS) {
-      if (!skipSuccessToast) {
-        toast({
-          variant: 'success',
-          title: i18n.t(successMessage || 'Payment initiated successfully'),
-        });
-      }
-    } else if (hubpispStatus === HUBPISP_REDIRECT_STATUS.CANCELLED) {
+    if (hubpispStatus === HUBPISP_REDIRECT_STATUS.CANCELLED) {
       toast({
         variant: 'destructive',
         title: i18n.t(cancelMessage || 'Payment cancelled.'),
@@ -136,10 +129,8 @@ export function HubPISP({
   }, [
     hubpispStatus,
     toast,
-    successMessage,
     errorMessage,
     cancelMessage,
-    skipSuccessToast,
     pathname,
     router,
     searchParams,
@@ -191,7 +182,7 @@ export function HubPISP({
                       </div>
                     </div>
 
-                    {isLoading && (
+                    {loadingInstrument === HUBPISP_LOCAL_INSTRUMENT.INST && (
                       <div className="flex items-center justify-center pt-1">
                         <Spinner className="h-5 w-5 text-primary" />
                       </div>
@@ -205,16 +196,24 @@ export function HubPISP({
                       : 'cursor-pointer hover:bg-gray-50'
                   }`}
                   onClick={() => !isLoading && handleInitiatePispPayment()}>
-                  <div className="flex items-center">
-                    <div className="mr-3 text-xl">🏦</div>
-                    <div>
-                      <h4 className="font-medium">
-                        {i18n.t('Standard transfer (SCT)')}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {i18n.t('1-3 business days')}
-                      </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center flex-1">
+                      <div className="mr-3 text-xl">🏦</div>
+                      <div>
+                        <h4 className="font-medium">
+                          {i18n.t('Standard transfer (SCT)')}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {i18n.t('1-3 business days')}
+                        </p>
+                      </div>
                     </div>
+
+                    {loadingInstrument === HUBPISP_LOCAL_INSTRUMENT.SCT && (
+                      <div className="flex items-center justify-center pt-1">
+                        <Spinner className="h-5 w-5 text-primary" />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
