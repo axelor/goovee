@@ -1,4 +1,11 @@
-import {HubPispLocalInstrument} from './constants';
+// ---- CORE IMPORTS ---- //
+import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
+import type {PaymentContextData} from '@/lib/core/payment/common/type';
+
+export type HubPispContextData = PaymentContextData & {
+  amount?: number;
+  resourceId?: string;
+};
 
 export type PsuInfo = {
   name: string;

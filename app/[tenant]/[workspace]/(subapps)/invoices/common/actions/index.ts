@@ -1262,7 +1262,6 @@ export async function initiatePispPayment({
     };
 
     const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
-
     const response = await createHubPispPaymentLink({
       amount: Number($amount),
       tenantId,
@@ -1270,10 +1269,9 @@ export async function initiatePispPayment({
       context: {
         id: invoice.id,
         source: PAYMENT_SOURCE.INVOICES,
-        amount,
+        amount: Number($amount),
       },
       currency: currencyCode,
-      endToEnd: invoice.id,
       remittanceInformation: `Invoice-${invoice.id}`,
       successfulReportUrl,
       unsuccessfulReportUrl,
