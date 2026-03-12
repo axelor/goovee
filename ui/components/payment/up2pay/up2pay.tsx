@@ -1,11 +1,11 @@
 'use client';
 
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useRouter, usePathname} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {Button} from '@/ui/components';
-import {useSearchParams, useToast} from '@/ui/hooks';
+import {usePaymentSSE, useSearchParams, useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {Up2payProps} from '@/ui/components/payment/types';
 import {PaymentOption} from '@/types';
@@ -21,12 +21,23 @@ export function Up2pay({
   onCreateOrder,
   errorMessage,
   cancelMessage,
+  sse,
 }: Up2payProps) {
   const {toast} = useToast();
   const {searchParams} = useSearchParams();
   const router = useRouter();
   const notifiedRef = useRef(false);
   const pathname = usePathname();
+
+  const isSuccessRedirect =
+    searchParams.get('status') === UP2PAY_REDIRECT_STATUS.SUCCESS;
+  const [sseEnabled, setSseEnabled] = useState(isSuccessRedirect);
+
+  usePaymentSSE({
+    source: sse && sseEnabled ? sse.source : undefined,
+    entityId: sse && sseEnabled ? sse.entityId : '',
+    onUpdate: sse && sseEnabled ? sse.onPaymentUpdate : () => {},
+  });
 
   const handleCreateUp2payOrder = async (event: any) => {
     event.preventDefault();
@@ -48,6 +59,7 @@ export function Up2pay({
           title: result.message,
         });
       } else if (result?.order?.url) {
+        setSseEnabled(true);
         router.push(result.order.url);
       } else {
         toast({

@@ -34,4 +34,5 @@ export type TotalProps = {
   invoiceType: string;
   workspaceURI: string;
   token?: string;
+  onPaymentUpdate?: () => void;
 };

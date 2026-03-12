@@ -9,8 +9,7 @@ import {i18n} from '@/locale';
 import {PortalWorkspace} from '@/types';
 import {SUBAPP_CODES} from '@/constants';
 import {formatDate} from '@/lib/core/locale/formatters';
-import {usePaymentSSE, useToast} from '@/ui/hooks';
-import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
+import {useToast} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
@@ -44,13 +43,6 @@ export default function Content({
       variant: 'success',
     });
   }, [router, toast]);
-
-  usePaymentSSE({
-    source: PAYMENT_SOURCE.INVOICES,
-    entityId: isUnpaid ? id : '',
-    onUpdate: handlePaymentUpdate,
-    enabled: sseEnabled,
-  });
 
   return (
     <Container title={`${i18n.t('Invoice number')} ${invoiceId}`}>
@@ -92,6 +84,7 @@ export default function Content({
             workspace={workspace}
             workspaceURI={workspaceURI}
             token={token}
+            onPaymentUpdate={handlePaymentUpdate}
           />
         </div>
       </div>

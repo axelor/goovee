@@ -6,23 +6,21 @@ import {useEffect, useRef} from 'react';
 import {PaymentSource} from '@/lib/core/payment/common/type';
 
 interface UsePaymentSSEOptions {
-  source: PaymentSource;
+  source: PaymentSource | undefined;
   entityId: string | number;
   onUpdate: () => void;
-  enabled?: boolean;
 }
 
 export function usePaymentSSE({
   source,
   entityId,
   onUpdate,
-  enabled = true,
 }: UsePaymentSSEOptions) {
   const onUpdateRef = useRef(onUpdate);
   onUpdateRef.current = onUpdate;
 
   useEffect(() => {
-    if (!entityId || !enabled) return;
+    if (!entityId || !source) return;
 
     const url = `/api/payment/sse?source=${source}&entityId=${entityId}`;
     const es = new EventSource(url);
@@ -44,7 +42,7 @@ export function usePaymentSSE({
     return () => {
       es.close();
     };
-  }, [source, entityId, enabled]);
+  }, [source, entityId]);
 }
 
 export default usePaymentSSE;
