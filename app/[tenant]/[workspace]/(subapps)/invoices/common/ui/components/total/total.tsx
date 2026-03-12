@@ -21,6 +21,7 @@ import {
 import {formatNumber} from '@/locale/formatters';
 import {useSearchParams} from '@/ui/hooks';
 import {BankTransferList} from '@/ui/components/payment/stripe';
+import {HubPispPendingList} from '@/ui/components/payment/hubpisp';
 import {cn} from '@/utils/css';
 import {useToast} from '@/ui/hooks/';
 import type {BankTransferDetailsType} from '@/ui/components/payment/types';
@@ -50,8 +51,8 @@ export function Total({
     invoicePaymentList,
     currency,
     pendingStripeBankTransferIntents,
+    pendingHubPispContexts,
   } = invoice;
-
   const {searchParams} = useSearchParams();
   const type = searchParams.get('type') as INVOICE_PAYMENT_OPTIONS;
 
@@ -194,6 +195,9 @@ export function Total({
             bankTransfers={pendingStripeBankTransferIntents}
             onCancelTransfer={handleStripeIntentCancellation}
           />
+        ) : null}
+        {pendingHubPispContexts?.length ? (
+          <HubPispPendingList pendingContexts={pendingHubPispContexts} />
         ) : null}
         {isUnpaid && (
           <div className="flex flex-col gap-4 font-medium text-xl">
