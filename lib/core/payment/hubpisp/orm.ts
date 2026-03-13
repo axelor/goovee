@@ -34,9 +34,18 @@ export async function findPendingHubPispPayments({
     where: {
       mode: PaymentOption.hubpisp,
       status: CONTEXT_STATUS.pending,
-      AND: [{data: {path: 'id', eq: entityId}}],
+      AND: [
+        {data: {path: 'id', eq: entityId}},
+        {data: {path: 'resourceId', ne: null}},
+        {data: {path: 'amount', ne: null}},
+      ],
     },
-    select: {id: true, version: true, data: true, createdOn: true},
+    select: {
+      id: true,
+      version: true,
+      data: true,
+      createdOn: true,
+    },
     orderBy: {createdOn: 'DESC'},
   });
 
@@ -52,7 +61,8 @@ export async function findPendingHubPispPayments({
   for (const ctx of resolvedResults) {
     const data = ctx.data;
     const resourceId = data?.resourceId as string | undefined;
-    if (!resourceId) continue;
+    const amount = data?.amount as string | undefined;
+    if (!resourceId || !amount) continue;
 
     try {
       const linkStatus = await fetchPaymentLinkStatus(resourceId);
@@ -70,7 +80,7 @@ export async function findPendingHubPispPayments({
       // If the API call fails, still show the entry using DB data
     }
 
-    const rawAmount = Number(data?.amount ?? 0);
+    const rawAmount = Number(amount);
     const formattedAmount = String(
       await formatNumber(rawAmount, {
         scale,
