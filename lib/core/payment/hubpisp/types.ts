@@ -1,5 +1,8 @@
 // ---- CORE IMPORTS ---- //
-import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
+import {
+  HubPispLocalInstrument,
+  HubPispConsentStatus,
+} from '@/lib/core/payment/hubpisp/constants';
 import type {PaymentContextData} from '@/lib/core/payment/common/type';
 
 export type HubPispContextData = PaymentContextData & {
@@ -40,11 +43,46 @@ export type CreatePaymentLinkResult = {
   consentHref: string;
 };
 
+export type PaymentLinkStatusPsuInfo = {
+  country: string | null;
+  email: string | null;
+  name: string | null;
+  phone: string | null;
+  number: string | null;
+  street: string | null;
+  complement: string | null;
+  city: string | null;
+  zip: string | null;
+};
+
+export type PaymentLinkStatusPaymentDetails = {
+  amount: number;
+  consentInfo?: {
+    expireIn: number;
+    unit: string;
+  };
+  currency: string;
+  description: string | null;
+  endToEnd?: string;
+  localInstrument?: HubPispLocalInstrument;
+  psuInfo?: PaymentLinkStatusPsuInfo;
+  remittanceInformation?: string;
+  successfulReportUrl?: string;
+  unsuccessfulReportUrl?: string;
+};
+
 export type PaymentLinkStatusResult = {
   resourceId: string;
-  consentStatus: string;
+  createdAt?: string;
+  expireAt?: string;
+  executedAt?: string;
+  processedAt?: string;
+  consentStatus: HubPispConsentStatus;
   paymentRequestResourceId?: string;
-  [key: string]: unknown;
+  client?: {
+    name: string;
+  };
+  paymentDetails?: PaymentLinkStatusPaymentDetails;
 };
 
 export type PaymentRequestStatusResult = {
