@@ -1,0 +1,6 @@
+{
+  "title": "Add HUB PISP (BPCE PS) payment method for invoices",
+  "type": "feature",
+  "description": "Integrated BPCE PS HUB PISP as a payment method for invoices. Supports SCT and SCT Inst transfers with webhook-based payment confirmation.",
+  "scope": ["core", "invoices"]
+}
