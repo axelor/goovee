@@ -43,7 +43,13 @@ export function Payments({
     params: any;
   }) => Promise<ErrorResponse | SuccessResponse<{id: ID; version: number}>>;
   onUp2payCreateOrder?: ({uri}: {uri: string}) => Promise<any>;
-  onInitiatePispPayment?: ({uri, localInstrument}: {uri: string; localInstrument?: import('@/payment/hubpisp/constants').HubPispLocalInstrument}) => Promise<any>;
+  onInitiatePispPayment?: ({
+    uri,
+    localInstrument,
+  }: {
+    uri: string;
+    localInstrument?: import('@/payment/hubpisp/constants').HubPispLocalInstrument;
+  }) => Promise<any>;
   successMessage?: string;
   errorMessage?: string;
   skipSuccessToast?: boolean;

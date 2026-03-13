@@ -21,7 +21,6 @@ export const HUBPISP_TRANSACTION_STATUS = {
 export type HubPispTransactionStatus =
   (typeof HUBPISP_TRANSACTION_STATUS)[keyof typeof HUBPISP_TRANSACTION_STATUS];
 
-
 export const HUBPISP_REDIRECT_STATUS = {
   SUCCESS: 'success',
   CANCELLED: 'cancelled',
