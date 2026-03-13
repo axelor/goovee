@@ -203,7 +203,7 @@ export async function fetchPaymentLinkStatus(
   }
 
   const data = await response.json();
-  return data;
+  return data as PaymentLinkStatusResult;
 }
 
 /**
