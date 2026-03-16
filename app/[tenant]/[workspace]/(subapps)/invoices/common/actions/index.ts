@@ -1181,12 +1181,14 @@ export async function initiatePispPayment({
   workspaceURL,
   uri,
   localInstrument,
+  token,
 }: {
   invoice: any;
   amount: string;
   workspaceURL: string;
   uri: string;
   localInstrument?: HubPispLocalInstrument;
+  token?: string;
 }) {
   if (!uri) {
     return {
@@ -1221,6 +1223,7 @@ export async function initiatePispPayment({
     amount,
     workspaceURL,
     tenantId,
+    token,
   });
 
   if (validationResult.error) {
@@ -1243,29 +1246,35 @@ export async function initiatePispPayment({
   }
 
   const host = process.env.GOOVEE_PUBLIC_HOST;
+  const tokenSuffix = token ? `&token=${token}` : '';
 
-  const successfulReportUrl = `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.SUCCESS}`;
-  const unsuccessfulReportUrl = `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.CANCELLED}`;
+  const successfulReportUrl = `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.SUCCESS}${tokenSuffix}`;
+  const unsuccessfulReportUrl = `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.CANCELLED}${tokenSuffix}`;
 
   const pageConsentInfo = {
     pageTimeout: 1200,
     pageTimeoutUnit: 'SECONDS' as const,
     pageUserTimeout: 300,
     pageUserTimeoutUnit: 'SECONDS' as const,
-    pageTimeOutReturnURL: `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.EXPIRED}`,
+    pageTimeOutReturnURL: `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.EXPIRED}${tokenSuffix}`,
   };
+
+  const pispEmail = token
+    ? $invoice?.partner?.emailAddress?.address
+    : user?.email;
 
   try {
     const psuInfo = {
-      name: `${$invoice?.partner?.firstName || ''} ${$invoice?.partner?.name || ''}`,
-      email: user?.email,
+      name: [$invoice?.partner?.firstName, $invoice?.partner?.name]
+        .filter(Boolean)
+        .join(' '),
+      email: pispEmail,
     };
-
     const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
     const response = await createHubPispPaymentLink({
       amount: Number($amount),
       tenantId,
-      email: user.email,
+      email: pispEmail,
       context: {
         id: invoice.id,
         source: PAYMENT_SOURCE.INVOICES,
