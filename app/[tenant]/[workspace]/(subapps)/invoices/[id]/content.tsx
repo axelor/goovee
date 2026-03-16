@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useEffect} from 'react';
+import {useCallback} from 'react';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -9,13 +9,12 @@ import {i18n} from '@/locale';
 import {PortalWorkspace} from '@/types';
 import {SUBAPP_CODES} from '@/constants';
 import {formatDate} from '@/lib/core/locale/formatters';
-import {usePaymentSSE, useSearchParams} from '@/ui/hooks';
+import {usePaymentSSE, useToast} from '@/ui/hooks';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
 import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
-import {UP2PAY_REDIRECT_STATUS} from '@/lib/core/payment/up2pay/constants';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
 interface ContentProps {
@@ -31,29 +30,20 @@ export default function Content({
   workspaceURI,
   token,
 }: ContentProps) {
-  const {id, invoiceId, dueDate, invoiceDate, isUnpaid, amountRemaining} =
-    invoice;
+  const {id, invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
 
   const router = useRouter();
-  const {searchParams} = useSearchParams();
+  const {toast} = useToast();
 
-  const invoiceType =
-    Number(amountRemaining.value) > 0 ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
-
-  const status = searchParams.get('status');
-
-  useEffect(() => {
-    if (status !== UP2PAY_REDIRECT_STATUS.SUCCESS) return;
-
-    // Clean the URL immediately, then refresh data
-    router.replace(
-      `${workspaceURI}/${SUBAPP_CODES.invoices}/${id}${token ? `?token=${token}` : ''}`,
-    );
-  }, [id, token, workspaceURI, router, status]);
+  const invoiceType = isUnpaid ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
 
   const handlePaymentUpdate = useCallback(() => {
     router.refresh();
-  }, [router]);
+    toast({
+      title: i18n.t('Payment completed successfully'),
+      variant: 'success',
+    });
+  }, [router, toast]);
 
   usePaymentSSE({
     source: PAYMENT_SOURCE.INVOICES,

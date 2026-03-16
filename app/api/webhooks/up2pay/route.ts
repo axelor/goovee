@@ -31,6 +31,12 @@ export async function GET(request: Request) {
   const montant = params.get('montant');
 
   if (!(pem && message && sign && ref)) {
+    console.error('[UP2PAY][WEBHOOK] Missing required params', {
+      hasPem: !!pem,
+      hasMessage: !!message,
+      hasSign: !!sign,
+      hasRef: !!ref,
+    });
     return new NextResponse('Bad Request', {status: 400});
   }
 
@@ -71,6 +77,7 @@ export async function GET(request: Request) {
   }
 
   if (paymentContext.status === CONTEXT_STATUS.processed) {
+    console.log('[UP2PAY][WEBHOOK] Already processed, skipping', {contextId});
     return new NextResponse('OK', {status: 200});
   }
 
@@ -202,7 +209,6 @@ export async function GET(request: Request) {
     version: paymentContext.version,
     tenantId,
   });
-
   notifyPaymentUpdate(source, entityId);
 
   return new NextResponse('OK', {status: 200});
