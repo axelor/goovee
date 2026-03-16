@@ -1,14 +1,15 @@
 'use client';
 
-import {useEffect, useRef} from 'react';
+import {useEffect, useLayoutEffect, useRef} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {PaymentSource} from '@/lib/core/payment/common/type';
+import {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 
 interface UsePaymentSSEOptions {
   source: PaymentSource | undefined;
   entityId: string | number;
-  onUpdate: () => void;
+  onUpdate: (status: PaymentUpdateStatus) => void;
 }
 
 export function usePaymentSSE({
@@ -17,7 +18,9 @@ export function usePaymentSSE({
   onUpdate,
 }: UsePaymentSSEOptions) {
   const onUpdateRef = useRef(onUpdate);
-  onUpdateRef.current = onUpdate;
+  useLayoutEffect(() => {
+    onUpdateRef.current = onUpdate;
+  });
 
   useEffect(() => {
     if (!entityId || !source) return;
@@ -25,9 +28,11 @@ export function usePaymentSSE({
     const url = `/api/payment/sse?source=${source}&entityId=${entityId}`;
     const es = new EventSource(url);
 
-    es.addEventListener('payment', () => {
+    es.addEventListener('payment', (event: MessageEvent) => {
       es.close();
-      onUpdateRef.current();
+      const status: PaymentUpdateStatus =
+        JSON.parse(event.data)?.status ?? 'success';
+      onUpdateRef.current(status);
     });
 
     es.onerror = error => {

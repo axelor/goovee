@@ -2,6 +2,7 @@
 import {ID, PortalWorkspace} from '@/types';
 import {BankTransferDetailsType} from '@/ui/components/payment/types';
 import type {PendingHubPispContext} from '@/lib/core/payment/hubpisp/orm';
+import type {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 
 export type Invoice = {
   id: ID;
@@ -34,5 +35,5 @@ export type TotalProps = {
   invoiceType: string;
   workspaceURI: string;
   token?: string;
-  onPaymentUpdate?: () => void;
+  onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
 };

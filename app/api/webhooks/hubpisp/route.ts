@@ -32,10 +32,12 @@ import {updateInvoice} from '@/subapps/invoices/common/service';
 async function triggerPaymentProcessing({
   paymentContext,
   transactionStatus,
+  statusReasonInformation,
   tenantId,
 }: {
   paymentContext: PaymentContext;
   transactionStatus: string;
+  statusReasonInformation?: string;
   tenantId: string;
 }): Promise<NextResponse> {
   switch (transactionStatus) {
@@ -43,24 +45,36 @@ async function triggerPaymentProcessing({
       console.warn('[HUBPISP][WEBHOOK] Payment cancelled by user', {
         contextId: paymentContext.id,
         transactionStatus,
+        statusReasonInformation,
       });
       await markPaymentAsCancelled({
         contextId: paymentContext.id,
         version: paymentContext.version,
         tenantId,
       });
+      notifyPaymentUpdate(
+        paymentContext.data.source,
+        paymentContext.data.id,
+        'cancelled',
+      );
       return new NextResponse('OK', {status: 200});
 
     case HUBPISP_TRANSACTION_STATUS.RJCT:
       console.warn('[HUBPISP][WEBHOOK] Payment rejected', {
         contextId: paymentContext.id,
         transactionStatus,
+        statusReasonInformation,
       });
       await markPaymentAsFailed({
         contextId: paymentContext.id,
         version: paymentContext.version,
         tenantId,
       });
+      notifyPaymentUpdate(
+        paymentContext.data.source,
+        paymentContext.data.id,
+        'failed',
+      );
       return new NextResponse('OK', {status: 200});
 
     case HUBPISP_TRANSACTION_STATUS.ACSC:
@@ -270,10 +284,14 @@ export async function POST(request: Request) {
     });
     return new NextResponse('Internal Server Error', {status: 500});
   }
-
+  console.log('paymentRequest >>>', JSON.stringify(paymentRequest, null, 2));
   const transactionStatus =
     paymentRequest?.creditTransferTransaction?.[0]?.transactionStatus ||
     paymentRequest?.transactionStatus;
+
+  const statusReasonInformation = (paymentRequest
+    ?.creditTransferTransaction?.[0]?.statusReasonInformation ||
+    paymentRequest?.statusReasonInformation) as string | undefined;
 
   if (!transactionStatus) {
     console.error(
@@ -288,6 +306,7 @@ export async function POST(request: Request) {
   return triggerPaymentProcessing({
     paymentContext,
     transactionStatus,
+    statusReasonInformation,
     tenantId,
   });
 }

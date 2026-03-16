@@ -11,6 +11,7 @@ import {i18n} from '@/locale';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
+import {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -45,7 +46,7 @@ export function InvoicePayments({
   resetPaymentType: () => void;
   resetForm: () => void;
   token?: string;
-  onPaymentUpdate?: () => void;
+  onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
 }) {
   const workspaceURL = workspace?.url;
   const {workspaceURI} = useWorkspace();
@@ -200,6 +201,7 @@ export function InvoicePayments({
           workspaceURL,
           uri,
           localInstrument,
+          token,
         });
       }}
       successMessage="Invoice payment completed successfully."

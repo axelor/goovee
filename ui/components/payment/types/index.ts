@@ -3,11 +3,12 @@ import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
 import {BankAccountType} from '@/lib/core/payment/stripe/utils';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 import {PaymentSource} from '@/lib/core/payment/common/type';
+import {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 
 export type PaymentSSEProps = {
   source: PaymentSource;
   entityId: string | number;
-  onPaymentUpdate: () => void;
+  onPaymentUpdate: (status: PaymentUpdateStatus) => void;
 };
 
 export type PaypalProps = {

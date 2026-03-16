@@ -43,9 +43,12 @@ export function HubPISP({
   const router = useRouter();
   const pathname = usePathname();
 
+  const hubpispStatus = searchParams.get('hubpisp_status');
+
   const [sseEnabled, setSseEnabled] = useState(
     () =>
-      searchParams.get('hubpisp_status') === HUBPISP_REDIRECT_STATUS.SUCCESS,
+      hubpispStatus === HUBPISP_REDIRECT_STATUS.SUCCESS ||
+      hubpispStatus === HUBPISP_REDIRECT_STATUS.CANCELLED,
   );
 
   usePaymentSSE({
@@ -105,8 +108,6 @@ export function HubPISP({
       setLoadingInstrument(null);
     }
   };
-
-  const hubpispStatus = searchParams.get('hubpisp_status');
 
   useEffect(() => {
     if (!hubpispStatus) return;

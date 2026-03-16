@@ -49,9 +49,12 @@ export function unsubscribe(
   }
 }
 
+export type PaymentUpdateStatus = 'success' | 'failed' | 'cancelled';
+
 export function notifyPaymentUpdate(
   source: PaymentSource,
   entityId: string | number,
+  status: PaymentUpdateStatus = 'success',
 ): void {
   const key = getKey(source, String(entityId));
   const set = subscribers.get(key);
@@ -61,7 +64,9 @@ export function notifyPaymentUpdate(
   }
 
   const encoder = new TextEncoder();
-  const message = encoder.encode('event: payment\ndata: {}\n\n');
+  const message = encoder.encode(
+    `event: payment\ndata: ${JSON.stringify({status})}\n\n`,
+  );
 
   for (const controller of set) {
     try {

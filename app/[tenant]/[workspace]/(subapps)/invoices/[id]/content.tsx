@@ -10,6 +10,7 @@ import {PortalWorkspace} from '@/types';
 import {SUBAPP_CODES} from '@/constants';
 import {formatDate} from '@/lib/core/locale/formatters';
 import {useToast} from '@/ui/hooks';
+import {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
@@ -36,13 +37,23 @@ export default function Content({
 
   const invoiceType = isUnpaid ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
 
-  const handlePaymentUpdate = useCallback(() => {
-    router.refresh();
-    toast({
-      title: i18n.t('Payment completed successfully'),
-      variant: 'success',
-    });
-  }, [router, toast]);
+  const handlePaymentUpdate = useCallback(
+    (status: PaymentUpdateStatus) => {
+      router.refresh();
+      if (status === 'success') {
+        toast({
+          title: i18n.t('Payment completed successfully'),
+          variant: 'success',
+        });
+      } else {
+        toast({
+          title: i18n.t('Payment failed. Please try again.'),
+          variant: 'destructive',
+        });
+      }
+    },
+    [router, toast],
+  );
 
   return (
     <Container title={`${i18n.t('Invoice number')} ${invoiceId}`}>
