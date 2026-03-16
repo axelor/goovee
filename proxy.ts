@@ -15,7 +15,7 @@ export const config = {
      * 4. all root files inside /public (e.g. /favicon.ico)
      * 5. all files inside /public/images fonts, img, pwa,and media
      */
-    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|images/|img/|fonts/|css/|media/|pwa/).*)',
+    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|images/|img/|fonts/|css/|media/|pwa/|locales/).*)',
   ],
 };
 
