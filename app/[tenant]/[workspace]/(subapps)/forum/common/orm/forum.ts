@@ -476,7 +476,12 @@ export async function findRecentlyActivePosts({
                 'name', au.name,
                 'fullName', au.full_name
             )
-        ) AS comment
+        ) AS comment,
+        JSON_BUILD_OBJECT(
+            'id', forumGroup.id,
+            'version', forumGroup.version,
+            'name', forumGroup.name
+        ) AS "forumGroup"
     FROM portal_forum_post post
     JOIN LatestComment lc ON post.id = lc."postId" AND lc.rn = 1
     LEFT JOIN portal_forum_group forumGroup ON post.forum_group = forumGroup.id

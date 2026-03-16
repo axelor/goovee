@@ -78,6 +78,7 @@ export interface RecentlyActivePost {
   id: ID;
   version: Version;
   title: string;
+  forumGroup: {id: ID; version: Version; name: string};
   comment: {
     id: ID;
     version: Version;

@@ -1,0 +1,6 @@
+{
+  "title": "Fix forum card redirect to navigate to the specific post",
+  "type": "fix",
+  "description": "Forum card on the home page now redirects to the specific forum post instead of the forum listing page.",
+  "scope": ["core"]
+}
