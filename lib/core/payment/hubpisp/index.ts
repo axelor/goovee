@@ -18,6 +18,7 @@ import {
 import type {
   CreatePaymentLinkParams,
   CreatePaymentLinkResult,
+  GetPaymentLinkStatusResult,
   PaymentLinkStatusResult,
 } from './types';
 
@@ -207,24 +208,23 @@ export async function fetchPaymentLinkStatus(
 }
 
 /**
- * Fetches the payment link status and returns it only when it has reached
- * PROCESSED (bank selected). Throws if the link has EXPIRED.
- * Returns null for non-terminal in-progress states (PENDING, EXECUTED).
+ * Fetches the payment link status and returns a discriminated union
+ * based on consentStatus: 'PROCESSED' | 'EXPIRED' | 'PENDING' | 'EXECUTED'.
  */
-export async function syncPaymentLinkStatus(
+export async function getPaymentLinkStatus(
   resourceId: string,
-): Promise<PaymentLinkStatusResult | null> {
-  const linkStatus = await fetchPaymentLinkStatus(resourceId);
-  const consentStatus = linkStatus?.consentStatus;
+): Promise<GetPaymentLinkStatusResult> {
+  const data = await fetchPaymentLinkStatus(resourceId);
+  const consentStatus = data.consentStatus;
 
   if (consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {
     console.warn('[HUBPISP][SYNC_LINK] Payment link is EXPIRED', {resourceId});
-    throw new Error(`Payment link expired (resourceId: ${resourceId})`);
+    return {consentStatus: HUBPISP_CONSENT_STATUS.EXPIRED};
   }
 
-  if (consentStatus !== HUBPISP_CONSENT_STATUS.PROCESSED) {
-    return null;
+  if (consentStatus === HUBPISP_CONSENT_STATUS.PROCESSED) {
+    return {consentStatus: HUBPISP_CONSENT_STATUS.PROCESSED, data};
   }
 
-  return linkStatus;
+  return {consentStatus};
 }

@@ -14,9 +14,12 @@ import {
 import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
 import {
   fetchPaymentLinkStatus,
-  syncPaymentLinkStatus,
+  getPaymentLinkStatus,
 } from '@/lib/core/payment/hubpisp';
-import {HUBPISP_TRANSACTION_STATUS} from '@/lib/core/payment/hubpisp/constants';
+import {
+  HUBPISP_CONSENT_STATUS,
+  HUBPISP_TRANSACTION_STATUS,
+} from '@/lib/core/payment/hubpisp/constants';
 import {fetchPaymentRequestStatus} from '@/lib/core/payment/hubpisp/paymentRequest';
 import type {
   PaymentLinkStatusResult,
@@ -245,14 +248,10 @@ export async function POST(request: Request) {
     return new NextResponse('OK', {status: 200});
   }
 
-  let linkStatus: PaymentLinkStatusResult | null;
-  try {
-    linkStatus = await syncPaymentLinkStatus(resourceId);
-  } catch (err) {
-    console.warn('[HUBPISP][WEBHOOK] Payment link expired', {
-      resourceId,
-      error: (err as Error).message,
-    });
+  const linkStatusResult = await getPaymentLinkStatus(resourceId);
+
+  if (linkStatusResult.consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {
+    console.warn('[HUBPISP][WEBHOOK] Payment link expired', {resourceId});
     await markPaymentAsExpired({
       contextId: paymentContext.id,
       version: paymentContext.version,
@@ -261,12 +260,13 @@ export async function POST(request: Request) {
     return new NextResponse('OK', {status: 200});
   }
 
-  if (!linkStatus) {
+  if (linkStatusResult.consentStatus !== HUBPISP_CONSENT_STATUS.PROCESSED) {
     console.log('[HUBPISP][WEBHOOK] Payment link not yet processed, waiting');
     return new NextResponse('OK', {status: 200});
   }
 
-  const paymentRequestResourceId = linkStatus?.paymentRequestResourceId;
+  const linkStatus = linkStatusResult.data;
+  const paymentRequestResourceId = linkStatus.paymentRequestResourceId;
   if (!paymentRequestResourceId) {
     console.error('[HUBPISP][WEBHOOK] Missing paymentRequestResourceId', {
       contextId: paymentContext.id,
@@ -284,7 +284,7 @@ export async function POST(request: Request) {
     });
     return new NextResponse('Internal Server Error', {status: 500});
   }
-  console.log('paymentRequest >>>', JSON.stringify(paymentRequest, null, 2));
+
   const transactionStatus =
     paymentRequest?.creditTransferTransaction?.[0]?.transactionStatus ||
     paymentRequest?.transactionStatus;

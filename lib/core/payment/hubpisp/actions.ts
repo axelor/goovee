@@ -8,8 +8,12 @@ import {
   updatePaymentContextData,
 } from '../common/orm';
 import type {PaymentOrder} from '../common/type';
-import {createPaymentLink, syncPaymentLinkStatus} from '.';
-import {HUBPISP_DEFAULT_EXPIRE_IN, HubPispLocalInstrument} from './constants';
+import {createPaymentLink, getPaymentLinkStatus} from '.';
+import {
+  HUBPISP_CONSENT_STATUS,
+  HUBPISP_DEFAULT_EXPIRE_IN,
+  HubPispLocalInstrument,
+} from './constants';
 import type {HubPispContextData, PageConsentInfo, PsuInfo} from './types';
 
 export async function createHubPispPaymentLink({
@@ -113,22 +117,19 @@ export async function findHubPispOrder({
     throw new Error('Payment context not found');
   }
 
-  let linkStatus;
-  try {
-    linkStatus = await syncPaymentLinkStatus(resourceId);
-  } catch (err) {
-    console.warn('[HUBPISP][FIND_ORDER] Payment link expired', {
-      resourceId,
-      error: (err as Error).message,
-    });
+  const linkStatusResult = await getPaymentLinkStatus(resourceId);
+
+  if (linkStatusResult.consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {
+    console.warn('[HUBPISP][FIND_ORDER] Payment link expired', {resourceId});
     await markPaymentAsExpired({
       contextId: context.id,
       version: context.version,
       tenantId,
     });
-    throw err;
+    throw new Error(`Payment link expired (resourceId: ${resourceId})`);
   }
-  if (!linkStatus) {
+
+  if (linkStatusResult.consentStatus !== HUBPISP_CONSENT_STATUS.PROCESSED) {
     console.warn('[HUBPISP][FIND_ORDER] Payment link not yet processed', {
       resourceId,
     });

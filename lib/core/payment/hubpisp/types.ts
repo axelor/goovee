@@ -1,5 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {
+  HUBPISP_CONSENT_STATUS,
   HubPispLocalInstrument,
   HubPispConsentStatus,
 } from '@/lib/core/payment/hubpisp/constants';
@@ -84,6 +85,18 @@ export type PaymentLinkStatusResult = {
   };
   paymentDetails?: PaymentLinkStatusPaymentDetails;
 };
+
+export type GetPaymentLinkStatusResult =
+  | {
+      consentStatus: (typeof HUBPISP_CONSENT_STATUS)['PROCESSED'];
+      data: PaymentLinkStatusResult;
+    }
+  | {consentStatus: (typeof HUBPISP_CONSENT_STATUS)['EXPIRED']}
+  | {
+      consentStatus:
+        | (typeof HUBPISP_CONSENT_STATUS)['PENDING']
+        | (typeof HUBPISP_CONSENT_STATUS)['EXECUTED'];
+    };
 
 export type PaymentRequestStatusResult = {
   transactionStatus?: string;
