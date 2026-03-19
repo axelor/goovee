@@ -1279,6 +1279,7 @@ export async function initiatePispPayment({
         id: invoice.id,
         source: PAYMENT_SOURCE.INVOICES,
         amount: Number($amount),
+        localInstrument,
       },
       currency: currencyCode,
       remittanceInformation: `Invoice-${invoice.id}`,
