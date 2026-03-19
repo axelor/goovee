@@ -14,16 +14,21 @@ if (!global.__sseSubscribers) {
 
 const subscribers = global.__sseSubscribers;
 
-function getKey(source: PaymentSource, entityId: string): string {
-  return `${source}:${entityId}`;
+function getKey(
+  source: PaymentSource,
+  entityId: string,
+  contextId: string,
+): string {
+  return `${source}:${entityId}:${contextId}`;
 }
 
 export function subscribe(
   source: PaymentSource,
   entityId: string,
+  contextId: string,
   controller: SSEController,
 ): void {
-  const key = getKey(source, entityId);
+  const key = getKey(source, entityId, contextId);
 
   if (!subscribers.has(key)) {
     subscribers.set(key, new Set());
@@ -35,9 +40,10 @@ export function subscribe(
 export function unsubscribe(
   source: PaymentSource,
   entityId: string,
+  contextId: string,
   controller: SSEController,
 ): void {
-  const key = getKey(source, entityId);
+  const key = getKey(source, entityId, contextId);
   const set = subscribers.get(key);
 
   if (!set) return;
@@ -54,9 +60,10 @@ export type PaymentUpdateStatus = 'success' | 'failed' | 'cancelled';
 export function notifyPaymentUpdate(
   source: PaymentSource,
   entityId: string | number,
+  contextId: string,
   status: PaymentUpdateStatus = 'success',
 ): void {
-  const key = getKey(source, String(entityId));
+  const key = getKey(source, String(entityId), contextId);
   const set = subscribers.get(key);
 
   if (!set || set.size === 0) {

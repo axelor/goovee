@@ -13,8 +13,9 @@ export async function GET(request: Request) {
   const {searchParams} = new URL(request.url);
   const source = searchParams.get('source');
   const entityId = searchParams.get('entityId');
+  const contextId = searchParams.get('contextId');
 
-  if (!source || !VALID_SOURCES.includes(source) || !entityId) {
+  if (!source || !VALID_SOURCES.includes(source) || !entityId || !contextId) {
     return new NextResponse('Bad Request', {status: 400});
   }
 
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       try {
-        subscribe(source as PaymentSource, entityId, controller);
+        subscribe(source as PaymentSource, entityId, contextId, controller);
       } catch (err) {
         controller.error(err);
         return;
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
         clearInterval(keepAlive);
 
         try {
-          unsubscribe(source as PaymentSource, entityId, controller);
+          unsubscribe(source as PaymentSource, entityId, contextId, controller);
         } catch {
           // ignore unsubscribe errors on disconnect
         }
