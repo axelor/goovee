@@ -6,186 +6,22 @@ import {NextResponse} from 'next/server';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
-  markPaymentAsCancelled,
   markPaymentAsExpired,
-  markPaymentAsFailed,
-  markPaymentAsProcessed,
 } from '@/lib/core/payment/common/orm';
-import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
 import {
   fetchPaymentLinkStatus,
   getPaymentLinkStatus,
 } from '@/lib/core/payment/hubpisp';
-import {
-  HUBPISP_CONSENT_STATUS,
-  HUBPISP_TRANSACTION_STATUS,
-} from '@/lib/core/payment/hubpisp/constants';
+import {HUBPISP_CONSENT_STATUS} from '@/lib/core/payment/hubpisp/constants';
 import {fetchPaymentRequestStatus} from '@/lib/core/payment/hubpisp/paymentRequest';
+import {pollPaymentRequestStatus} from '@/lib/core/payment/hubpisp/poll';
+import {applyTransactionStatus} from '@/lib/core/payment/hubpisp/process';
 import type {
   PaymentLinkStatusResult,
   PaymentRequestStatusResult,
 } from '@/lib/core/payment/hubpisp/types';
-import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
-import type {PaymentContext} from '@/lib/core/payment/common/type';
 import {PaymentOption} from '@/types';
-
-// ---- LOCAL IMPORTS ---- //
-import {updateInvoice} from '@/subapps/invoices/common/service';
-
-async function triggerPaymentProcessing({
-  paymentContext,
-  transactionStatus,
-  statusReasonInformation,
-  tenantId,
-}: {
-  paymentContext: PaymentContext;
-  transactionStatus: string;
-  statusReasonInformation?: string;
-  tenantId: string;
-}): Promise<NextResponse> {
-  switch (transactionStatus) {
-    case HUBPISP_TRANSACTION_STATUS.CANC:
-      console.warn('[HUBPISP][WEBHOOK] Payment cancelled by user', {
-        contextId: paymentContext.id,
-        transactionStatus,
-        statusReasonInformation,
-      });
-      await markPaymentAsCancelled({
-        contextId: paymentContext.id,
-        version: paymentContext.version,
-        tenantId,
-      });
-      notifyPaymentUpdate(
-        paymentContext.data.source,
-        paymentContext.data.id,
-        paymentContext.id,
-        'cancelled',
-      );
-      return new NextResponse('OK', {status: 200});
-
-    case HUBPISP_TRANSACTION_STATUS.RJCT:
-      console.warn('[HUBPISP][WEBHOOK] Payment rejected', {
-        contextId: paymentContext.id,
-        transactionStatus,
-        statusReasonInformation,
-      });
-      await markPaymentAsFailed({
-        contextId: paymentContext.id,
-        version: paymentContext.version,
-        tenantId,
-      });
-      notifyPaymentUpdate(
-        paymentContext.data.source,
-        paymentContext.data.id,
-        paymentContext.id,
-        'failed',
-      );
-      return new NextResponse('OK', {status: 200});
-
-    case HUBPISP_TRANSACTION_STATUS.ACSC:
-      break;
-
-    default:
-      console.log(
-        '[HUBPISP][WEBHOOK] Non-terminal status, waiting for next webhook',
-        {
-          contextId: paymentContext.id,
-          transactionStatus,
-        },
-      );
-      return new NextResponse('OK', {status: 200});
-  }
-
-  const source = paymentContext.data?.source;
-  const entityId = paymentContext.data?.id;
-  const paidAmount = paymentContext.data?.amount;
-
-  if (!source) {
-    console.error(
-      '[HUBPISP][WEBHOOK] Missing payment source in payment context',
-      {contextId: paymentContext.id},
-    );
-    await markPaymentAsFailed({
-      contextId: paymentContext.id,
-      version: paymentContext.version,
-      tenantId,
-    });
-    return new NextResponse('Bad Request', {status: 400});
-  }
-
-  if (!entityId) {
-    console.error('[HUBPISP][WEBHOOK] Missing entity id in payment context', {
-      contextId: paymentContext.id,
-    });
-    await markPaymentAsFailed({
-      contextId: paymentContext.id,
-      version: paymentContext.version,
-      tenantId,
-    });
-    return new NextResponse('Bad Request', {status: 400});
-  }
-
-  switch (source) {
-    case PAYMENT_SOURCE.INVOICES: {
-      if (!paidAmount) {
-        console.error('[HUBPISP][WEBHOOK] Missing amount in context', {
-          contextId: paymentContext.id,
-        });
-        await markPaymentAsFailed({
-          contextId: paymentContext.id,
-          version: paymentContext.version,
-          tenantId,
-        });
-        return new NextResponse('Bad Request', {status: 400});
-      }
-
-      const result = await updateInvoice({
-        tenantId,
-        amount: paidAmount,
-        invoiceId: entityId,
-      });
-
-      if (result?.error) {
-        console.error('[HUBPISP][WEBHOOK] Invoice update failed', {
-          invoiceId: entityId,
-          error: result.error,
-        });
-        await markPaymentAsFailed({
-          contextId: paymentContext.id,
-          version: paymentContext.version,
-          tenantId,
-        });
-        return new NextResponse('Internal Server Error', {status: 500});
-      }
-
-      break;
-    }
-
-    case PAYMENT_SOURCE.SHOP:
-    case PAYMENT_SOURCE.EVENTS:
-      console.warn('[HUBPISP][WEBHOOK] Source not implemented:', source);
-      return new NextResponse('OK', {status: 200});
-
-    default:
-      console.error('[HUBPISP][WEBHOOK] Unknown payment source:', source);
-      await markPaymentAsFailed({
-        contextId: paymentContext.id,
-        version: paymentContext.version,
-        tenantId,
-      });
-      return new NextResponse('Bad Request', {status: 400});
-  }
-
-  await markPaymentAsProcessed({
-    contextId: paymentContext.id,
-    version: paymentContext.version,
-    tenantId,
-  });
-
-  notifyPaymentUpdate(source, entityId, paymentContext.id);
-
-  return new NextResponse('OK', {status: 200});
-}
+import type {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
 
 export async function POST(request: Request) {
   const resourceId = request.headers.get('ResourceID');
@@ -276,6 +112,10 @@ export async function POST(request: Request) {
     return new NextResponse('OK', {status: 200});
   }
 
+  const localInstrument = paymentContext.data?.localInstrument as
+    | HubPispLocalInstrument
+    | undefined;
+
   let paymentRequest: PaymentRequestStatusResult;
   try {
     paymentRequest = await fetchPaymentRequestStatus(paymentRequestResourceId);
@@ -296,19 +136,40 @@ export async function POST(request: Request) {
     paymentRequest?.statusReasonInformation) as string | undefined;
 
   if (!transactionStatus) {
-    console.error(
-      '[HUBPISP][WEBHOOK] Missing transactionStatus in payment request',
-      {
-        paymentRequestResourceId,
-      },
+    console.log(
+      '[HUBPISP][WEBHOOK] Missing transactionStatus, starting background poll',
+      {paymentRequestResourceId},
     );
+    pollPaymentRequestStatus({
+      paymentRequestResourceId,
+      contextId: paymentContext.id,
+      tenantId,
+      localInstrument,
+    });
     return new NextResponse('OK', {status: 200});
   }
 
-  return triggerPaymentProcessing({
+  const isTerminal = await applyTransactionStatus({
     paymentContext,
     transactionStatus,
     statusReasonInformation,
     tenantId,
+    logPrefix: '[HUBPISP][WEBHOOK]',
   });
+
+  if (!isTerminal) {
+    // Non-terminal status received synchronously — hand off to poller
+    console.log(
+      '[HUBPISP][WEBHOOK] Non-terminal status, starting background poll',
+      {contextId: paymentContext.id, transactionStatus},
+    );
+    pollPaymentRequestStatus({
+      paymentRequestResourceId,
+      contextId: paymentContext.id,
+      tenantId,
+      localInstrument,
+    });
+  }
+
+  return new NextResponse('OK', {status: 200});
 }
