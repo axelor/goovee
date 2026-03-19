@@ -45,6 +45,11 @@ export default function Content({
           title: i18n.t('Payment completed successfully'),
           variant: 'success',
         });
+      } else if (status === 'cancelled') {
+        toast({
+          title: i18n.t('Payment cancelled.'),
+          variant: 'destructive',
+        });
       } else {
         toast({
           title: i18n.t('Payment failed. Please try again.'),
