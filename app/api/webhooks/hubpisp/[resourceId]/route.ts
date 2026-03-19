@@ -23,13 +23,11 @@ import type {
 import {PaymentOption} from '@/types';
 import type {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
 
-export async function POST(request: Request) {
-  const resourceId = request.headers.get('ResourceID');
-
-  if (!resourceId) {
-    console.error('[HUBPISP][WEBHOOK] Missing ResourceID header');
-    return new NextResponse('Bad Request', {status: 400});
-  }
+export async function POST(
+  _request: Request,
+  {params}: {params: Promise<{resourceId: string}>},
+) {
+  const {resourceId} = await params;
 
   let linkData: PaymentLinkStatusResult;
   try {
@@ -158,7 +156,6 @@ export async function POST(request: Request) {
   });
 
   if (!isTerminal) {
-    // Non-terminal status received synchronously — hand off to poller
     console.log(
       '[HUBPISP][WEBHOOK] Non-terminal status, starting background poll',
       {contextId: paymentContext.id, transactionStatus},
