@@ -45,16 +45,30 @@ export function HubPISP({
 
   const hubpispStatus = searchParams.get('hubpisp_status');
 
+  const sseContextKey = sse ? `hubpisp_context_id:${sse.entityId}` : null;
+
   const [sseEnabled, setSseEnabled] = useState(
     () =>
       hubpispStatus === HUBPISP_REDIRECT_STATUS.SUCCESS ||
       hubpispStatus === HUBPISP_REDIRECT_STATUS.CANCELLED,
   );
 
+  const [contextId, setContextId] = useState<string | undefined>(() => {
+    if (!sseContextKey) return undefined;
+    return sessionStorage.getItem(sseContextKey) ?? undefined;
+  });
+
   usePaymentSSE({
     source: sse && sseEnabled ? sse.source : undefined,
     entityId: sse && sseEnabled ? sse.entityId : '',
-    onUpdate: sse && sseEnabled ? sse.onPaymentUpdate : () => {},
+    contextId: sseEnabled ? contextId : undefined,
+    onUpdate:
+      sse && sseEnabled
+        ? status => {
+            if (sseContextKey) sessionStorage.removeItem(sseContextKey);
+            sse.onPaymentUpdate(status);
+          }
+        : () => {},
   });
 
   const handlePaymentClick = async (event: React.MouseEvent) => {
@@ -85,6 +99,10 @@ export function HubPISP({
           title: result.message,
         });
       } else if (result?.order?.consentHref) {
+        if (sseContextKey && result.order.contextId) {
+          sessionStorage.setItem(sseContextKey, result.order.contextId);
+          setContextId(result.order.contextId);
+        }
         setSseEnabled(true);
         router.push(result.order.consentHref);
       } else {

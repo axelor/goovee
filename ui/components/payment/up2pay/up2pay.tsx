@@ -33,10 +33,24 @@ export function Up2pay({
     searchParams.get('status') === UP2PAY_REDIRECT_STATUS.SUCCESS;
   const [sseEnabled, setSseEnabled] = useState(isSuccessRedirect);
 
+  const sseContextKey = sse ? `up2pay_context_id:${sse.entityId}` : null;
+
+  const [contextId, setContextId] = useState<string | undefined>(() => {
+    if (!sseContextKey) return undefined;
+    return sessionStorage.getItem(sseContextKey) ?? undefined;
+  });
+
   usePaymentSSE({
     source: sse && sseEnabled ? sse.source : undefined,
     entityId: sse && sseEnabled ? sse.entityId : '',
-    onUpdate: sse && sseEnabled ? sse.onPaymentUpdate : () => {},
+    contextId: sseEnabled ? contextId : undefined,
+    onUpdate:
+      sse && sseEnabled
+        ? status => {
+            if (sseContextKey) sessionStorage.removeItem(sseContextKey);
+            sse.onPaymentUpdate(status);
+          }
+        : () => {},
   });
 
   const handleCreateUp2payOrder = async (event: any) => {
@@ -59,6 +73,10 @@ export function Up2pay({
           title: result.message,
         });
       } else if (result?.order?.url) {
+        if (sseContextKey && result.order.contextId) {
+          sessionStorage.setItem(sseContextKey, result.order.contextId);
+          setContextId(result.order.contextId);
+        }
         setSseEnabled(true);
         router.push(result.order.url);
       } else {

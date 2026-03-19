@@ -58,6 +58,7 @@ async function triggerPaymentProcessing({
       notifyPaymentUpdate(
         paymentContext.data.source,
         paymentContext.data.id,
+        paymentContext.id,
         'cancelled',
       );
       return new NextResponse('OK', {status: 200});
@@ -76,6 +77,7 @@ async function triggerPaymentProcessing({
       notifyPaymentUpdate(
         paymentContext.data.source,
         paymentContext.data.id,
+        paymentContext.id,
         'failed',
       );
       return new NextResponse('OK', {status: 200});
@@ -180,7 +182,7 @@ async function triggerPaymentProcessing({
     tenantId,
   });
 
-  notifyPaymentUpdate(source, entityId);
+  notifyPaymentUpdate(source, entityId, paymentContext.id);
 
   return new NextResponse('OK', {status: 200});
 }
