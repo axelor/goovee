@@ -47,16 +47,18 @@ export function HubPISP({
 
   const sseContextKey = sse ? `hubpisp_context_id:${sse.entityId}` : null;
 
-  const [sseEnabled, setSseEnabled] = useState(
-    () =>
-      hubpispStatus === HUBPISP_REDIRECT_STATUS.SUCCESS ||
-      hubpispStatus === HUBPISP_REDIRECT_STATUS.CANCELLED,
-  );
-
   const [contextId, setContextId] = useState<string | undefined>(() => {
     if (!sseContextKey) return undefined;
     return sessionStorage.getItem(sseContextKey) ?? undefined;
   });
+
+  const [sseEnabled, setSseEnabled] = useState(
+    () =>
+      hubpispStatus === HUBPISP_REDIRECT_STATUS.SUCCESS ||
+      hubpispStatus === HUBPISP_REDIRECT_STATUS.CANCELLED ||
+      (sseContextKey !== null &&
+        sessionStorage.getItem(sseContextKey) !== null),
+  );
 
   usePaymentSSE({
     source: sse && sseEnabled ? sse.source : undefined,
