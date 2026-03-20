@@ -14,6 +14,11 @@ const BADGE_CLASS: Record<HubPispLocalInstrument, string> = {
   [HUBPISP_LOCAL_INSTRUMENT.SCT]: 'bg-green-100 text-green-700',
 };
 
+const BADGE_LABEL: Record<HubPispLocalInstrument, string> = {
+  [HUBPISP_LOCAL_INSTRUMENT.INST]: 'SCTInst',
+  [HUBPISP_LOCAL_INSTRUMENT.SCT]: 'SCT',
+};
+
 type HubPispPendingListProps = {
   pendingContexts: PendingHubPispContext[];
 };
@@ -42,7 +47,7 @@ export function HubPispPendingList({pendingContexts}: HubPispPendingListProps) {
               {context.localInstrument && (
                 <span
                   className={`rounded px-2 py-0.5 text-xs font-semibold ${BADGE_CLASS[context.localInstrument]}`}>
-                  {context.localInstrument}
+                  {BADGE_LABEL[context.localInstrument]}
                 </span>
               )}
             </div>
