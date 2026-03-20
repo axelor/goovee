@@ -161,7 +161,6 @@ export async function POST(
     transactionStatus,
     statusReasonInformation,
     tenantId,
-    logPrefix: '[HUBPISP][WEBHOOK]',
   });
 
   if (!isTerminal) {

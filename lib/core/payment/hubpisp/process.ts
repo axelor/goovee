@@ -23,17 +23,15 @@ export async function applyTransactionStatus({
   transactionStatus,
   statusReasonInformation,
   tenantId,
-  logPrefix,
 }: {
   paymentContext: PaymentContext;
   transactionStatus: string;
   statusReasonInformation?: string;
   tenantId: string;
-  logPrefix: string;
 }): Promise<boolean> {
   switch (transactionStatus) {
     case HUBPISP_TRANSACTION_STATUS.CANC:
-      console.warn(`${logPrefix} Payment cancelled`, {
+      console.warn(`'[HUBPISP][WEBHOOK]' Payment cancelled`, {
         contextId: paymentContext.id,
         statusReasonInformation,
       });
@@ -51,7 +49,7 @@ export async function applyTransactionStatus({
       return true;
 
     case HUBPISP_TRANSACTION_STATUS.RJCT:
-      console.warn(`${logPrefix} Payment rejected`, {
+      console.warn(`'[HUBPISP][WEBHOOK]' Payment rejected`, {
         contextId: paymentContext.id,
         statusReasonInformation,
       });
@@ -69,7 +67,7 @@ export async function applyTransactionStatus({
       return true;
 
     case HUBPISP_TRANSACTION_STATUS.ACSC:
-      await processAcscPayment({paymentContext, tenantId, logPrefix});
+      await processAcscPayment({paymentContext, tenantId});
       return true;
 
     default:
@@ -80,11 +78,9 @@ export async function applyTransactionStatus({
 export async function processAcscPayment({
   paymentContext,
   tenantId,
-  logPrefix,
 }: {
   paymentContext: PaymentContext;
   tenantId: string;
-  logPrefix: string;
 }): Promise<void> {
   const source = paymentContext.data?.source;
   const entityId = paymentContext.data?.id;
@@ -99,7 +95,7 @@ export async function processAcscPayment({
       });
 
       if (result?.error) {
-        console.error(`${logPrefix} Invoice update failed`, {
+        console.error(`'[HUBPISP][WEBHOOK]' Invoice update failed`, {
           invoiceId: entityId,
           error: result.error,
         });
@@ -115,11 +111,11 @@ export async function processAcscPayment({
 
     case PAYMENT_SOURCE.SHOP:
     case PAYMENT_SOURCE.EVENTS:
-      console.warn(`${logPrefix} Source not implemented:`, source);
+      console.warn(`'[HUBPISP][WEBHOOK]' Source not implemented:`, source);
       return;
 
     default:
-      console.error(`${logPrefix} Unknown payment source:`, source);
+      console.error(`'[HUBPISP][WEBHOOK]' Unknown payment source:`, source);
       await markPaymentAsFailed({
         contextId: paymentContext.id,
         version: paymentContext.version,

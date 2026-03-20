@@ -128,7 +128,6 @@ export async function pollPaymentRequestStatus({
       transactionStatus,
       statusReasonInformation,
       tenantId,
-      logPrefix: '[HUBPISP][POLL]',
     });
 
     if (isTerminal) return;
