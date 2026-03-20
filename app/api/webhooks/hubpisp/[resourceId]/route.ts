@@ -7,6 +7,7 @@ import {
   CONTEXT_STATUS,
   findPaymentContext,
   markPaymentAsExpired,
+  updatePaymentContextData,
 } from '@/lib/core/payment/common/orm';
 import {
   fetchPaymentLinkStatus,
@@ -109,6 +110,14 @@ export async function POST(
     });
     return new NextResponse('OK', {status: 200});
   }
+
+  // Persist paymentRequestResourceId so startup polling can resume it after a server restart.
+  await updatePaymentContextData({
+    id: paymentContext.id,
+    version: paymentContext.version,
+    tenantId,
+    context: {...paymentContext.data, paymentRequestResourceId},
+  });
 
   const localInstrument = paymentContext.data?.localInstrument as
     | HubPispLocalInstrument
