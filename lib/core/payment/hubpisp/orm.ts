@@ -8,11 +8,14 @@ import {
 import {fetchPaymentLinkStatus} from '@/lib/core/payment/hubpisp';
 import {HUBPISP_CONSENT_STATUS} from '@/lib/core/payment/hubpisp/constants';
 import {PaymentOption} from '@/types';
+import type {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
 
 export type PendingHubPispContext = {
   contextId: string;
   amount: string;
   initiatedDate: Date;
+  localInstrument: HubPispLocalInstrument;
+  resourceId: string;
 };
 
 export async function findPendingHubPispPayments({
@@ -60,7 +63,7 @@ export async function findPendingHubPispPayments({
 
   for (const ctx of resolvedResults) {
     const data = ctx.data;
-    const resourceId = data?.resourceId as string | undefined;
+    const resourceId = data?.resourceId as string;
     const amount = data?.amount as string | undefined;
     if (!resourceId || !amount) continue;
 
@@ -93,6 +96,8 @@ export async function findPendingHubPispPayments({
       contextId: ctx.id,
       amount: formattedAmount,
       initiatedDate: ctx.createdOn!,
+      localInstrument: data?.localInstrument as HubPispLocalInstrument,
+      resourceId,
     });
   }
 

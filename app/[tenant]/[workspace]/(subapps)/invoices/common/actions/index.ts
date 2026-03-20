@@ -35,6 +35,15 @@ import {isPaymentOptionAvailable} from '@/utils/payment';
 import {stripe} from '@/lib/core/payment/stripe';
 import {formatNumber} from '@/lib/core/locale/server/formatters';
 import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/lib/core/payment/common/type';
+import {
+  CURRENCY_CODE,
+  UP2PAY_REDIRECT_STATUS,
+} from '@/lib/core/payment/up2pay/constants';
+import {
+  HUBPISP_LOCAL_INSTRUMENT,
+  HUBPISP_REDIRECT_STATUS,
+  HubPispLocalInstrument,
+} from '@/lib/core/payment/hubpisp/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -44,14 +53,6 @@ import {
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {validatePaymentData} from '@/subapps/invoices/common/utils/validations';
 import {updateInvoice} from '@/subapps/invoices/common/service';
-import {
-  CURRENCY_CODE,
-  UP2PAY_REDIRECT_STATUS,
-} from '@/lib/core/payment/up2pay/constants';
-import {
-  HUBPISP_REDIRECT_STATUS,
-  HubPispLocalInstrument,
-} from '@/lib/core/payment/hubpisp/constants';
 
 export async function paypalCreateOrder({
   invoice,
@@ -1279,7 +1280,7 @@ export async function initiatePispPayment({
         id: invoice.id,
         source: PAYMENT_SOURCE.INVOICES,
         amount: Number($amount),
-        localInstrument,
+        localInstrument: localInstrument ?? HUBPISP_LOCAL_INSTRUMENT.SCT,
       },
       currency: currencyCode,
       remittanceInformation: `Invoice-${invoice.id}`,

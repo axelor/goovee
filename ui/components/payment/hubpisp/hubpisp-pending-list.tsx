@@ -3,7 +3,16 @@
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/lib/core/locale';
 import {formatDate} from '@/lib/core/locale/formatters';
+import {
+  HUBPISP_LOCAL_INSTRUMENT,
+  type HubPispLocalInstrument,
+} from '@/lib/core/payment/hubpisp/constants';
 import type {PendingHubPispContext} from '@/lib/core/payment/hubpisp/orm';
+
+const BADGE_CLASS: Record<HubPispLocalInstrument, string> = {
+  [HUBPISP_LOCAL_INSTRUMENT.INST]: 'bg-blue-100 text-blue-700',
+  [HUBPISP_LOCAL_INSTRUMENT.SCT]: 'bg-green-100 text-green-700',
+};
 
 type HubPispPendingListProps = {
   pendingContexts: PendingHubPispContext[];
@@ -18,19 +27,27 @@ export function HubPispPendingList({pendingContexts}: HubPispPendingListProps) {
 
       <div className="mt-2 space-y-2">
         {pendingContexts.map(context => (
-          <HubPispPendingItem key={context.contextId} context={context} />
+          <div
+            key={context.contextId}
+            className="rounded border border-purple-200 bg-white bg-opacity-50">
+            <div className="flex items-center justify-between p-2">
+              <div>
+                <div className="font-medium">{context.amount}</div>
+                <div className="text-xs text-gray-500">
+                  {formatDate(context.initiatedDate, {
+                    dateFormat: 'YYYY-MM-DD',
+                  })}
+                </div>
+              </div>
+              {context.localInstrument && (
+                <span
+                  className={`rounded px-2 py-0.5 text-xs font-semibold ${BADGE_CLASS[context.localInstrument]}`}>
+                  {context.localInstrument}
+                </span>
+              )}
+            </div>
+          </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-function HubPispPendingItem({context}: {context: PendingHubPispContext}) {
-  return (
-    <div className="border border-purple-200 rounded bg-white bg-opacity-50 p-2">
-      <div className="font-medium">{context.amount}</div>
-      <div className="text-xs text-gray-500">
-        {formatDate(context.initiatedDate, {dateFormat: 'YYYY-MM-DD'})}
       </div>
     </div>
   );
