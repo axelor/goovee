@@ -1,0 +1,5 @@
+{
+  "title": "Secure tenant config endpoint in multi-tenancy mode",
+  "type": "security",
+  "scope": ["core"]
+}
