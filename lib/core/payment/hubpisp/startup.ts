@@ -4,6 +4,12 @@ import {findAllPendingHubPispContexts} from './orm';
 import {pollPaymentRequestStatus} from './poll';
 import {pollPaymentLinkStatus} from './pollLink';
 
+function getRemainingExpireIn(createdOn: Date): number | null {
+  const elapsedSeconds = (Date.now() - createdOn.getTime()) / 1000;
+  const remaining = HUBPISP_DEFAULT_EXPIRE_IN - elapsedSeconds;
+  return remaining > 0 ? remaining : null;
+}
+
 /**
  * On server startup, resumes background polling for any HUB PISP payment
  * contexts that were still pending when the server last stopped.
@@ -49,17 +55,26 @@ export async function resumeHubPispPolling({
         localInstrument: ctx.localInstrument,
       });
     } else {
+      const remainingExpireIn = getRemainingExpireIn(ctx.createdOn);
+      if (!remainingExpireIn) {
+        console.log(
+          '[HUBPISP][STARTUP] Payment link already expired, skipping',
+          {contextId: ctx.contextId, resourceId: ctx.resourceId},
+        );
+        continue;
+      }
       console.log('[HUBPISP][STARTUP] Resuming payment link poll', {
         contextId: ctx.contextId,
         resourceId: ctx.resourceId,
         localInstrument: ctx.localInstrument,
+        remainingExpireIn,
       });
       pollPaymentLinkStatus({
         resourceId: ctx.resourceId,
         contextId: ctx.contextId,
         tenantId: ctx.tenantId,
         localInstrument: ctx.localInstrument,
-        expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
+        expireIn: remainingExpireIn,
       });
     }
   }

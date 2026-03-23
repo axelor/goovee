@@ -148,10 +148,21 @@ export async function pollPaymentLinkStatus({
   }
 
   console.warn(
-    '[HUBPISP][POLL_LINK] Deadline reached without PROCESSED state',
-    {
-      contextId,
-      resourceId,
-    },
+    '[HUBPISP][POLL_LINK] Deadline reached without PROCESSED state, marking expired',
+    {contextId, resourceId},
   );
+
+  const paymentContext = await findPaymentContext({
+    id: contextId,
+    tenantId,
+    mode: PaymentOption.hubpisp,
+    ignoreExpiration: true,
+  });
+  if (paymentContext?.status === CONTEXT_STATUS.pending) {
+    await markPaymentAsExpired({
+      contextId: paymentContext.id,
+      version: paymentContext.version,
+      tenantId,
+    });
+  }
 }

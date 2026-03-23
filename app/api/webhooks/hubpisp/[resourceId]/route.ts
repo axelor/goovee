@@ -9,10 +9,7 @@ import {
   markPaymentAsExpired,
   updatePaymentContextData,
 } from '@/lib/core/payment/common/orm';
-import {
-  fetchPaymentLinkStatus,
-  getPaymentLinkStatus,
-} from '@/lib/core/payment/hubpisp';
+import {fetchPaymentLinkStatus} from '@/lib/core/payment/hubpisp';
 import {HUBPISP_CONSENT_STATUS} from '@/lib/core/payment/hubpisp/constants';
 import {fetchPaymentRequestStatus} from '@/lib/core/payment/hubpisp/paymentRequest';
 import {pollPaymentRequestStatus} from '@/lib/core/payment/hubpisp/poll';
@@ -78,16 +75,18 @@ export async function POST(
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  if (paymentContext.status === CONTEXT_STATUS.processed) {
-    console.log('[HUBPISP][WEBHOOK] Context already processed, skipping', {
+  if (
+    paymentContext.status === CONTEXT_STATUS.processed ||
+    paymentContext.data?.paymentRequestResourceId
+  ) {
+    console.log('[HUBPISP][WEBHOOK] Context already handled, skipping', {
       contextId: paymentContext.id,
     });
     return new NextResponse('OK', {status: 200});
   }
 
-  const linkStatusResult = await getPaymentLinkStatus(resourceId);
-
-  if (linkStatusResult.consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {
+  const consentStatus = linkData.consentStatus;
+  if (consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {
     console.warn('[HUBPISP][WEBHOOK] Payment link expired', {resourceId});
     await markPaymentAsExpired({
       contextId: paymentContext.id,
@@ -97,13 +96,12 @@ export async function POST(
     return new NextResponse('OK', {status: 200});
   }
 
-  if (linkStatusResult.consentStatus !== HUBPISP_CONSENT_STATUS.PROCESSED) {
+  if (consentStatus !== HUBPISP_CONSENT_STATUS.PROCESSED) {
     console.log('[HUBPISP][WEBHOOK] Payment link not yet processed, waiting');
     return new NextResponse('OK', {status: 200});
   }
 
-  const linkStatus = linkStatusResult.data;
-  const paymentRequestResourceId = linkStatus.paymentRequestResourceId;
+  const paymentRequestResourceId = linkData.paymentRequestResourceId;
   if (!paymentRequestResourceId) {
     console.error('[HUBPISP][WEBHOOK] Missing paymentRequestResourceId', {
       contextId: paymentContext.id,

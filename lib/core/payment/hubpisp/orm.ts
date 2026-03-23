@@ -110,6 +110,7 @@ export type PendingHubPispStartupContext = {
   resourceId: string;
   paymentRequestResourceId: string | null;
   localInstrument?: HubPispLocalInstrument;
+  createdOn: Date;
 };
 
 /**
@@ -134,6 +135,7 @@ export async function findAllPendingHubPispContexts({
     select: {
       id: true,
       data: true,
+      createdOn: true,
     },
   });
 
@@ -148,6 +150,7 @@ export async function findAllPendingHubPispContexts({
       paymentRequestResourceId:
         (ctx.data?.paymentRequestResourceId as string) ?? null,
       localInstrument: ctx.data?.localInstrument as HubPispLocalInstrument,
+      createdOn: ctx.createdOn!,
     }))
     .filter(ctx => Boolean(ctx.resourceId));
 }
