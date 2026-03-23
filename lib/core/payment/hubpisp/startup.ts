@@ -1,15 +1,18 @@
 // ---- CORE IMPORTS ---- //
+import {HUBPISP_DEFAULT_EXPIRE_IN} from './constants';
 import {findAllPendingHubPispContexts} from './orm';
 import {pollPaymentRequestStatus} from './poll';
+import {pollPaymentLinkStatus} from './pollLink';
 
 /**
  * On server startup, resumes background polling for any HUB PISP payment
  * contexts that were still pending when the server last stopped.
  *
- * This covers the server-restart edge case: if a poll was running during a
- * restart (especially relevant for SCT payments with a 24h polling window),
- * the in-memory loop is lost. This function re-queues all contexts that have
- * a paymentRequestResourceId but haven't reached a terminal state yet.
+ * Two cases are handled:
+ * 1. Contexts with a paymentRequestResourceId — the link was PROCESSED before the restart.
+ *    Resume pollPaymentRequestStatus to detect the final bank transfer status.
+ * 2. Contexts with no paymentRequestResourceId — the server stopped before the link became
+ *    PROCESSED. Resume pollPaymentLinkStatus to detect when it does.
  */
 export async function resumeHubPispPolling({
   tenantId,
@@ -33,16 +36,31 @@ export async function resumeHubPispPolling({
   }
 
   for (const ctx of pendingContexts) {
-    console.log('[HUBPISP][STARTUP] Resuming poll', {
-      contextId: ctx.contextId,
-      paymentRequestResourceId: ctx.paymentRequestResourceId,
-      localInstrument: ctx.localInstrument,
-    });
-    pollPaymentRequestStatus({
-      paymentRequestResourceId: ctx.paymentRequestResourceId,
-      contextId: ctx.contextId,
-      tenantId: ctx.tenantId,
-      localInstrument: ctx.localInstrument,
-    });
+    if (ctx.paymentRequestResourceId) {
+      console.log('[HUBPISP][STARTUP] Resuming payment request poll', {
+        contextId: ctx.contextId,
+        paymentRequestResourceId: ctx.paymentRequestResourceId,
+        localInstrument: ctx.localInstrument,
+      });
+      pollPaymentRequestStatus({
+        paymentRequestResourceId: ctx.paymentRequestResourceId,
+        contextId: ctx.contextId,
+        tenantId: ctx.tenantId,
+        localInstrument: ctx.localInstrument,
+      });
+    } else {
+      console.log('[HUBPISP][STARTUP] Resuming payment link poll', {
+        contextId: ctx.contextId,
+        resourceId: ctx.resourceId,
+        localInstrument: ctx.localInstrument,
+      });
+      pollPaymentLinkStatus({
+        resourceId: ctx.resourceId,
+        contextId: ctx.contextId,
+        tenantId: ctx.tenantId,
+        localInstrument: ctx.localInstrument,
+        expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
+      });
+    }
   }
 }

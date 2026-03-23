@@ -104,27 +104,32 @@ export async function findPendingHubPispPayments({
   return contexts;
 }
 
-export type PendingHubPispPollContext = {
+export type PendingHubPispStartupContext = {
   contextId: string;
   tenantId: string;
   resourceId: string;
-  paymentRequestResourceId: string;
+  paymentRequestResourceId: string | null;
   localInstrument?: HubPispLocalInstrument;
 };
 
-/** Returns all pending HUB PISP contexts with an active bank transfer, used to resume polling on restart. */
+/**
+ * Returns all pending HUB PISP contexts that have a resourceId, used to resume polling on restart.
+ * Callers split the result by whether paymentRequestResourceId is set:
+ * - set: resume pollPaymentRequestStatus
+ * - null: resume pollPaymentLinkStatus
+ */
 export async function findAllPendingHubPispContexts({
   tenantId,
 }: {
   tenantId: string;
-}): Promise<PendingHubPispPollContext[]> {
+}): Promise<PendingHubPispStartupContext[]> {
   const client = await manager.getClient(tenantId);
 
   const results = await client.paymentContext.find({
     where: {
       mode: PaymentOption.hubpisp,
       status: CONTEXT_STATUS.pending,
-      AND: [{data: {path: 'paymentRequestResourceId', ne: null}}],
+      AND: [{data: {path: 'resourceId', ne: null}}],
     },
     select: {
       id: true,
@@ -140,8 +145,9 @@ export async function findAllPendingHubPispContexts({
       contextId: ctx.id,
       tenantId,
       resourceId: ctx.data?.resourceId as string,
-      paymentRequestResourceId: ctx.data?.paymentRequestResourceId as string,
+      paymentRequestResourceId:
+        (ctx.data?.paymentRequestResourceId as string) ?? null,
       localInstrument: ctx.data?.localInstrument as HubPispLocalInstrument,
     }))
-    .filter(ctx => Boolean(ctx.paymentRequestResourceId));
+    .filter(ctx => Boolean(ctx.resourceId));
 }
