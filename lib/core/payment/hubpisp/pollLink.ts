@@ -147,8 +147,11 @@ export async function pollPaymentLinkStatus({
     return;
   }
 
-  console.warn('[HUBPISP][POLL_LINK] Deadline reached without PROCESSED state', {
-    contextId,
-    resourceId,
-  });
+  console.warn(
+    '[HUBPISP][POLL_LINK] Deadline reached without PROCESSED state',
+    {
+      contextId,
+      resourceId,
+    },
+  );
 }
