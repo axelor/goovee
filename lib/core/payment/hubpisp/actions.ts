@@ -15,6 +15,7 @@ import {
   HubPispLocalInstrument,
 } from './constants';
 import type {HubPispContextData, PageConsentInfo, PsuInfo} from './types';
+import {pollPaymentLinkStatus} from './pollLink';
 
 export async function createHubPispPaymentLink({
   amount,
@@ -88,6 +89,14 @@ export async function createHubPispPaymentLink({
     version,
     tenantId,
     context: {...context, resourceId},
+  });
+
+  pollPaymentLinkStatus({
+    resourceId,
+    contextId,
+    tenantId,
+    localInstrument,
+    expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
   });
 
   return {resourceId, consentHref, contextId};
