@@ -25,7 +25,19 @@ import type {
 export async function createPaymentLink(
   params: CreatePaymentLinkParams,
 ): Promise<CreatePaymentLinkResult> {
-  const currency = params.currency;
+  const {
+    currency,
+    amount,
+    expireIn,
+    requestedExecutionDate: rawExecutionDate,
+    localInstrument,
+    endToEnd,
+    remittanceInformation,
+    successfulReportUrl,
+    unsuccessfulReportUrl,
+    psuInfo,
+    pageConsentInfo: pci,
+  } = params;
 
   const baseUrl = process.env.HUBPISP_API_URL;
   const keyId = process.env.HUBPISP_CERT_FINGERPRINT;
@@ -52,66 +64,36 @@ export async function createPaymentLink(
   const token = await getPispAccessToken();
 
   const requestedExecutionDate =
-    params.requestedExecutionDate ?? buildParisISOString(Date.now() + 15_000);
+    rawExecutionDate ?? buildParisISOString(Date.now() + 15_000);
 
-  const body: Record<string, unknown> = {
-    amount: params.amount,
-    currency: currency,
+  const body = {
+    amount,
+    currency,
     beneficiary: {
-      creditor: {
-        name: beneficiaryName,
-      },
-      creditorAccount: {
-        iban,
-      },
-      ...(bicFi ? {creditorAgent: {bic: bicFi}} : {}),
+      creditor: {name: beneficiaryName},
+      creditorAccount: {iban},
+      creditorAgent: bicFi ? {bic: bicFi} : undefined,
     },
     requestedExecutionDate,
     consentInfo: {
-      expireIn: params.expireIn ?? HUBPISP_DEFAULT_EXPIRE_IN,
+      expireIn: expireIn ?? HUBPISP_DEFAULT_EXPIRE_IN,
       unit: 'SECONDS',
     },
-    ...(params.localInstrument
-      ? {localInstrument: params.localInstrument}
-      : {}),
-    ...(params.endToEnd ? {endToEnd: params.endToEnd.slice(0, 35)} : {}),
-    ...(params.remittanceInformation
-      ? {remittanceInformation: params.remittanceInformation.slice(0, 100)}
-      : {}),
-    ...(params.successfulReportUrl
-      ? {successfulReportUrl: params.successfulReportUrl}
-      : {}),
-    ...(params.unsuccessfulReportUrl
-      ? {unsuccessfulReportUrl: params.unsuccessfulReportUrl}
-      : {}),
-    ...(params.psuInfo ? {psuInfo: params.psuInfo} : {}),
-    ...(params.pageConsentInfo
+    localInstrument,
+    endToEnd: endToEnd?.slice(0, 35),
+    remittanceInformation: remittanceInformation?.slice(0, 100),
+    successfulReportUrl,
+    unsuccessfulReportUrl,
+    psuInfo,
+    pageConsentInfo: pci
       ? {
-          pageConsentInfo: {
-            ...(params.pageConsentInfo.pageTimeout != null
-              ? {pageTimeout: params.pageConsentInfo.pageTimeout}
-              : {}),
-            ...(params.pageConsentInfo.pageTimeoutUnit
-              ? {pageTimeoutUnit: params.pageConsentInfo.pageTimeoutUnit}
-              : {}),
-            ...(params.pageConsentInfo.pageUserTimeout != null
-              ? {pageUserTimeout: params.pageConsentInfo.pageUserTimeout}
-              : {}),
-            ...(params.pageConsentInfo.pageUserTimeoutUnit
-              ? {
-                  pageUserTimeoutUnit:
-                    params.pageConsentInfo.pageUserTimeoutUnit,
-                }
-              : {}),
-            ...(params.pageConsentInfo.pageTimeOutReturnURL
-              ? {
-                  pageTimeOutReturnURL:
-                    params.pageConsentInfo.pageTimeOutReturnURL,
-                }
-              : {}),
-          },
+          pageTimeout: pci.pageTimeout ?? undefined,
+          pageTimeoutUnit: pci.pageTimeoutUnit,
+          pageUserTimeout: pci.pageUserTimeout ?? undefined,
+          pageUserTimeoutUnit: pci.pageUserTimeoutUnit,
+          pageTimeOutReturnURL: pci.pageTimeOutReturnURL,
         }
-      : {}),
+      : undefined,
   };
 
   const bodyString = JSON.stringify(body);
