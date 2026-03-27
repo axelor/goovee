@@ -3,11 +3,10 @@ on:
   push:
     branches:
       - '**'
-    tags:
-      - '**'
   pull_request:
     branches:
       - '**'
+  workflow_dispatch:
 
 jobs:
   format:
@@ -15,29 +14,62 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
-      - uses: pnpm/action-setup@v3
-        with:
-          version: latest
+          node-version-file: 'package.json'
+          cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run format check
         run: pnpm format:check
 
+  # To re-release an existing version:
+  #   gh release delete v1.x.x --yes
+  #   git push origin :refs/tags/v1.x.x
+  #   git tag -d v1.x.x
+  # Then push to main or release/* again to trigger a new release.
   release:
     needs: format
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-    name: Release tag
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+    name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Create GitHub release
-        id: create-new-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Get version from package.json
+        id: version
+        run: echo "value=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Check if tag already exists
+        id: tag_check
+        run: |
+          if git tag -l "v${{ steps.version.outputs.value }}" | grep -q .; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Read release notes
+        if: steps.tag_check.outputs.exists == 'false'
+        id: notes
+        run: |
+          echo "value<<EOF" >> $GITHUB_OUTPUT
+          cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        if: steps.tag_check.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.value }}
+          name: Release v${{ steps.version.outputs.value }}
+          body: ${{ steps.notes.outputs.value }}
+          make_latest: ${{ github.ref == 'refs/heads/main' }}

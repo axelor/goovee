@@ -173,6 +173,10 @@ function appendToChangelog(content) {
   const final = content + '\n\n' + existing;
   fs.writeFileSync(OUTPUT_FILE, final.trim() + '\n', 'utf-8');
   console.log(`✅ Changelog written to ${OUTPUT_FILE}`);
+
+  const releaseNotesFile = path.resolve(ROOT, 'RELEASE_NOTES.md');
+  fs.writeFileSync(releaseNotesFile, content.trim() + '\n', 'utf-8');
+  console.log(`✅ Release notes written to ${releaseNotesFile}`);
 }
 
 function deleteProcessedFiles(entries) {
