@@ -583,7 +583,7 @@ export async function addPost({
           notifyUser({
             userId: reciever.member.id,
             tenantId,
-            workspaceId: workspace.id,
+            workspaceURL,
             payload: {
               title: `${user.simpleFullName || user.name} created a new post`,
               body: post?.title ?? '',
@@ -955,7 +955,7 @@ export const createComment: CreateComment = async formData => {
               notifyUser({
                 userId: reciever.member.id,
                 tenantId,
-                workspaceId: workspace.id,
+                workspaceURL,
                 payload: {
                   title: `${user.simpleFullName || user.name} added a comment`,
                   body: res[0].note ?? '',

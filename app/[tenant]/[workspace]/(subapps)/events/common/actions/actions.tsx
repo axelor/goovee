@@ -230,7 +230,7 @@ export async function register({
     notifyUser({
       userId: participant.contact!.id,
       tenantId,
-      workspaceId: workspace.id,
+      workspaceURL,
       payload: {
         title: `You have been registered for an event!`,
         body: `${registration.event!.eventTitle}`,

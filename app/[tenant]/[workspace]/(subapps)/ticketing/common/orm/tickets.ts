@@ -288,7 +288,7 @@ export async function createTicket({
       notifyUser({
         userId: contactId,
         tenantId: auth.tenantId,
-        workspaceId: auth.workspace.id,
+        workspaceURL: auth.workspaceURL,
         payload: {
           title: `${auth.user.simpleFullName} created a new ticket`,
           body: `${auth.user.simpleFullName} created a new ticket: ${newTicket.name}`,
@@ -536,7 +536,7 @@ export async function updateTicket({
       notifyUser({
         userId: contactId,
         tenantId: auth.tenantId,
-        workspaceId: auth.workspace.id,
+        workspaceURL: auth.workspaceURL,
         payload: {
           title: `${auth.user.simpleFullName} updated a ticket`,
           body: `${auth.user.simpleFullName} updated a ticket: ${newTicket.name}`,

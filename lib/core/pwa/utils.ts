@@ -47,13 +47,13 @@ async function sendNotification(
 export async function notifyUser({
   userId,
   tenantId,
-  workspaceId,
+  workspaceURL,
   payload,
   tag,
 }: {
   userId: string | number;
   tenantId: string;
-  workspaceId?: string | number;
+  workspaceURL?: string;
   payload: {title: string; body?: string; url?: string};
   tag?: string;
 }) {
@@ -66,7 +66,7 @@ export async function notifyUser({
     dbNotification = await client.pushNotification.create({
       data: {
         partner: {select: {id: userId}},
-        workspace: workspaceId ? {select: {id: workspaceId}} : undefined,
+        workspace: workspaceURL ? {select: {url: workspaceURL}} : undefined,
         title: payload.title,
         body: payload.body,
         url: payload.url,
@@ -91,7 +91,7 @@ export async function notifyUser({
     ...payload,
     notificationId: dbNotification?.id,
     tenantId,
-    workspaceId,
+    workspaceURL,
   };
 
   await Promise.all(

@@ -743,7 +743,7 @@ export const createComment: CreateComment = async formData => {
         notifyUser({
           userId: contactId,
           tenantId,
-          workspaceId: workspace.id,
+          workspaceURL,
           payload: {
             title: `${user.simpleFullName || user.name} added a comment on ${ticket.name}`,
             body: sanitize(comment.note || '', {

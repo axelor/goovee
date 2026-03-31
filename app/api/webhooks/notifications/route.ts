@@ -174,17 +174,19 @@ async function sendSystemNotification({
   mail,
   app,
   entity,
+  url,
 }: {
   user: any;
   tenantId: string;
   mail?: {subject?: string; body?: string};
   entity: {id: string; version: number; route: string};
   app: PortalApp;
+  url: string;
 }) {
   notifyUser({
     userId: user.id,
     tenantId,
-    workspaceId: user.mainPartner?.workspace?.id,
+    workspaceURL: url,
     payload: {
       title:
         mail?.subject ||
@@ -260,7 +262,14 @@ async function sendNotifications(data: {
         subscribers,
         async ({user, entity}: {user: any; entity: any}) => {
           sendMail({user, tenantId, mail, entity, app});
-          sendSystemNotification({user, tenantId, mail, entity, app});
+          sendSystemNotification({
+            user,
+            tenantId,
+            mail,
+            entity,
+            app,
+            url: workspaceUrl,
+          });
         },
       ),
     );
