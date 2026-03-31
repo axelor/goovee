@@ -578,7 +578,7 @@ export async function addPost({
       subscribers.forEach((reciever: any) => {
         if (
           reciever.member?.id &&
-          reciever.member.emailAddress?.address !== user.email
+          reciever.member.id !== user.id // exclude the post author
         ) {
           notifyUser({
             userId: reciever.member.id,
@@ -923,7 +923,7 @@ export const createComment: CreateComment = async formData => {
   }
 
   try {
-    const res = await addComment({
+    const [comment, parentComment] = await addComment({
       modelName,
       userId: user.id,
       workspaceUserId: workspaceUser.id,
@@ -934,7 +934,7 @@ export const createComment: CreateComment = async formData => {
       ...rest,
     });
 
-    if (res) {
+    if (comment) {
       const post = posts[0];
 
       if (post?.id) {
@@ -947,45 +947,87 @@ export const createComment: CreateComment = async formData => {
           const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
 
           const notificationRecievers = subscribers.filter(
-            sub => sub.member?.emailAddress?.address != user.email,
+            sub => sub.member?.id !== user.id, // exclude the commenter
           );
 
-          notificationRecievers.forEach(reciever => {
-            if (reciever.member?.id) {
+          const isReply = Boolean(parentComment);
+
+          if (isReply) {
+            if (parentComment?.partner?.id) {
               notifyUser({
-                userId: reciever.member.id,
+                userId: parentComment.partner.id,
                 tenantId,
                 workspaceURL,
                 payload: {
-                  title: `${user.simpleFullName || user.name} added a comment`,
-                  body: res[0].note ?? '',
+                  title: `${user.simpleFullName || user.name} replied to your comment`,
+                  body: comment.note ?? '',
                   url: postLink,
                 },
                 tag: app.name,
               });
-            }
-          });
 
-          sendEmailNotifications({
-            type: ContentType.COMMENT,
-            title: post.title,
-            content: res[0].note ?? '',
-            author: {
-              id: res[0]?.partner?.id ?? '',
-              simpleFullName: res[0]?.partner?.simpleFullName ?? 'Unknown User',
-            },
-            postAuthor: {
-              id: post?.author?.id ?? '',
-            },
-            group: post.forumGroup,
-            subscribers,
-            link: postLink,
-          });
+              const replySubscriber = notificationRecievers.find(
+                sub => sub.member?.id === parentComment.partner!.id,
+              );
+
+              if (replySubscriber) {
+                sendEmailNotifications({
+                  type: ContentType.COMMENT,
+                  title: post.title,
+                  content: comment.note ?? '',
+                  author: {
+                    id: comment?.partner?.id ?? '',
+                    simpleFullName:
+                      comment?.partner?.simpleFullName ?? 'Unknown User',
+                  },
+                  postAuthor: {
+                    id: post?.author?.id ?? '',
+                  },
+                  group: post.forumGroup,
+                  subscribers: [replySubscriber],
+                  link: postLink,
+                });
+              }
+            }
+          } else {
+            notificationRecievers.forEach(reciever => {
+              if (reciever.member?.id) {
+                notifyUser({
+                  userId: reciever.member.id,
+                  tenantId,
+                  workspaceURL,
+                  payload: {
+                    title: `${user.simpleFullName || user.name} added a comment`,
+                    body: comment.note ?? '',
+                    url: postLink,
+                  },
+                  tag: app.name,
+                });
+              }
+            });
+
+            sendEmailNotifications({
+              type: ContentType.COMMENT,
+              title: post.title,
+              content: comment.note ?? '',
+              author: {
+                id: comment?.partner?.id ?? '',
+                simpleFullName:
+                  comment?.partner?.simpleFullName ?? 'Unknown User',
+              },
+              postAuthor: {
+                id: post?.author?.id ?? '',
+              },
+              group: post.forumGroup,
+              subscribers: notificationRecievers,
+              link: postLink,
+            });
+          }
         }
       }
     }
 
-    return {success: true, data: clone(res)};
+    return {success: true, data: clone([comment, parentComment])};
   } catch (e) {
     return {
       error: true,

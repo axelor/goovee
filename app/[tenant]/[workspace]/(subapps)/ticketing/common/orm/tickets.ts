@@ -283,8 +283,10 @@ export async function createTicket({
     newTicket.managedByContact?.id,
   ]);
 
+  contacts.delete(String(auth.user.id)); // exclude the ticket creator — they performed the action
+
   contacts.forEach(contactId => {
-    if (contactId && contactId !== auth.user.id) {
+    if (contactId) {
       notifyUser({
         userId: contactId,
         tenantId: auth.tenantId,
@@ -300,7 +302,6 @@ export async function createTicket({
   });
 
   getMailRecipients({
-    userId: auth.user.id,
     contacts,
     tenantId: auth.tenantId,
     workspaceURL: auth.workspaceURL,
@@ -311,7 +312,7 @@ export async function createTicket({
           author: auth.user.simpleFullName,
           type: 'create',
           tracks,
-          projectName: newTicket.project?.name!,
+          projectName: newTicket.project?.name || '',
           ticketName: newTicket.name,
           ticketLink: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
           reciepients,
@@ -531,8 +532,10 @@ export async function updateTicket({
     oldTicket?.managedByContact?.id,
   ]);
 
+  contacts.delete(String(auth.user.id)); // exclude the user who performed the update
+
   contacts.forEach(contactId => {
-    if (contactId && contactId !== auth.user.id) {
+    if (contactId) {
       notifyUser({
         userId: contactId,
         tenantId: auth.tenantId,
@@ -548,7 +551,6 @@ export async function updateTicket({
   });
 
   getMailRecipients({
-    userId: auth.user.id,
     contacts,
     tenantId: auth.tenantId,
     workspaceURL: auth.workspaceURL,
@@ -559,7 +561,7 @@ export async function updateTicket({
           author: auth.user.simpleFullName,
           type: 'update',
           tracks,
-          projectName: newTicket.project?.name!,
+          projectName: newTicket.project?.name || '',
           ticketName: newTicket.name,
           ticketLink: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
           reciepients,

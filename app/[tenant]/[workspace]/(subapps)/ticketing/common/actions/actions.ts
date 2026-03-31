@@ -732,35 +732,55 @@ export const createComment: CreateComment = async formData => {
 
     const [comment, parentComment] = res;
 
-    const contacts = new Set([
-      parentComment?.partner?.id,
-      ticket.createdByContact?.id,
-      ticket.managedByContact?.id,
-    ]);
+    const commentBody = sanitize(comment.note || '', {
+      allowedTags: [],
+      allowedAttributes: {},
+    })
+      .replace(/\s+/g, ' ')
+      .trim();
 
-    contacts.forEach(contactId => {
-      if (contactId && contactId !== user.id) {
+    const ticketUrl = `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
+    const userName = user.simpleFullName || user.name;
+
+    const contacts = parentComment
+      ? new Set([parentComment?.partner?.id])
+      : new Set([ticket.createdByContact?.id, ticket.managedByContact?.id]);
+
+    contacts.delete(user.id); // remove the commenter from the list
+
+    if (parentComment) {
+      if (parentComment.partner?.id) {
         notifyUser({
-          userId: contactId,
+          userId: parentComment.partner.id,
           tenantId,
           workspaceURL,
           payload: {
-            title: `${user.simpleFullName || user.name} added a comment on ${ticket.name}`,
-            body: sanitize(comment.note || '', {
-              allowedTags: [],
-              allowedAttributes: {},
-            }) //  Remove all HTML tags and attributes
-              .replace(/\s+/g, ' ') // Remove multiple spaces
-              .trim(),
-            url: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
+            title: `${userName} replied to your comment on ${ticket.name}`,
+            body: commentBody,
+            url: ticketUrl,
           },
           tag: subapp.name,
         });
       }
-    });
+    } else {
+      contacts.forEach(contactId => {
+        if (contactId) {
+          notifyUser({
+            userId: contactId,
+            tenantId,
+            workspaceURL,
+            payload: {
+              title: `${userName} added a comment on ${ticket.name}`,
+              body: commentBody,
+              url: ticketUrl,
+            },
+            tag: subapp.name,
+          });
+        }
+      });
+    }
 
     getMailRecipients({
-      userId: auth.user.id,
       contacts,
       tenantId,
       workspaceURL,
