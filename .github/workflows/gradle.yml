@@ -72,4 +72,5 @@ jobs:
           tag_name: v${{ steps.version.outputs.value }}
           name: Release v${{ steps.version.outputs.value }}
           body: ${{ steps.notes.outputs.value }}
+          target_commitish: ${{ github.sha }}
           make_latest: ${{ github.ref == 'refs/heads/main' }}
