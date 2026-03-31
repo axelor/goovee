@@ -3,7 +3,7 @@ import {manager} from '@/tenant';
 import {getSession} from '@/lib/core/auth';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   props: {params: Promise<{tenant: string}>},
 ) {
   const params = await props.params;
@@ -19,14 +19,10 @@ export async function GET(
     return new NextResponse('Bad request', {status: 400});
   }
 
-  const {searchParams} = new URL(request.url);
-  const workspaceID = searchParams.get('workspaceID');
-
   try {
     const notifications = await client.pushNotification.find({
       where: {
         partner: {id: session.user.id},
-        workspace: workspaceID ? {id: workspaceID} : undefined,
         isRead: false,
       },
       select: {

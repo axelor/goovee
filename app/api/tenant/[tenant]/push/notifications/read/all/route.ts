@@ -3,11 +3,11 @@ import {manager} from '@/tenant';
 import {getSession} from '@/lib/core/auth';
 
 export async function POST(
-  request: NextRequest,
-  props: {params: Promise<{tenant: string; workspaceId: string}>},
+  _request: NextRequest,
+  props: {params: Promise<{tenant: string}>},
 ) {
   const params = await props.params;
-  const {tenant, workspaceId} = params;
+  const {tenant} = params;
 
   const session = await getSession();
   if (!session?.user) {
@@ -27,7 +27,6 @@ export async function POST(
       },
       where: {
         partner: {id: session.user.id},
-        workspace: {id: workspaceId},
         isRead: false,
       },
     });

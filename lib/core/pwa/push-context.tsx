@@ -9,7 +9,6 @@ import React, {
   useMemo,
 } from 'react';
 import {useEnvironment} from '@/lib/core/environment';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NotificationDTO} from './types';
 import {authClient} from '@/lib/auth-client';
 
@@ -28,12 +27,16 @@ interface PushContextType {
 
 const PushContext = createContext<PushContextType | undefined>(undefined);
 
-export function PushProvider({children}: {children: React.ReactNode}) {
+export function PushProvider({
+  children,
+  tenant,
+}: {
+  children: React.ReactNode;
+  tenant: string;
+}) {
   const env = useEnvironment();
   const {data: session, isPending} = authClient.useSession();
   const user = session?.user;
-
-  const {workspaceID, tenant} = useWorkspace();
 
   const [permission, setPermission] =
     useState<NotificationPermission>('default');
@@ -49,14 +52,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
   const fetchNotifications = useCallback(async () => {
     if (!tenant || !user) return;
     try {
-      const url = new URL(
-        `/api/tenant/${tenant}/push/notifications`,
-        window.location.origin,
-      );
-      if (workspaceID) {
-        url.searchParams.append('workspaceID', workspaceID.toString());
-      }
-      const response = await fetch(url.toString());
+      const response = await fetch(`/api/tenant/${tenant}/push/notifications`);
       if (response.ok) {
         const data: NotificationDTO[] = await response.json();
         setUnreadNotifications(data);
@@ -64,7 +60,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
     } catch (error) {
       console.error('Failed to fetch unread notifications:', error);
     }
-  }, [tenant, workspaceID, user]);
+  }, [tenant, user]);
 
   const markAsRead = useCallback(
     async (id: string) => {
@@ -85,10 +81,10 @@ export function PushProvider({children}: {children: React.ReactNode}) {
   );
 
   const markAllAsRead = useCallback(async () => {
-    if (!tenant || !workspaceID) return;
+    if (!tenant) return;
     try {
       const response = await fetch(
-        `/api/tenant/${tenant}/push/notifications/read/workspace/${workspaceID}`,
+        `/api/tenant/${tenant}/push/notifications/read/all`,
         {method: 'POST'},
       );
       if (response.ok) {
@@ -97,7 +93,7 @@ export function PushProvider({children}: {children: React.ReactNode}) {
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
     }
-  }, [tenant, workspaceID]);
+  }, [tenant]);
 
   const syncSubscription = useCallback(
     async (sub: PushSubscription) => {
