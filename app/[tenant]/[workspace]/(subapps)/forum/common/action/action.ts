@@ -573,7 +573,7 @@ export async function addPost({
     });
 
     if (!subscribers.error) {
-      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}#post-${post.id}`;
+      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
 
       subscribers.forEach((reciever: any) => {
         if (
@@ -944,7 +944,7 @@ export const createComment: CreateComment = async formData => {
         });
 
         if (!('error' in subscribers)) {
-          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}#post-${post.id}`;
+          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
 
           const notificationRecievers = subscribers.filter(
             sub => sub.member?.emailAddress?.address != user.email,
