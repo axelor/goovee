@@ -26,7 +26,7 @@ export async function GroupPostsContent({
   user: User;
   tenant: string;
 }) {
-  const {sort, limit, search} = searchParams;
+  const {sort, limit, search, searchid} = searchParams;
   const groupId = params.id as string;
 
   const {posts, pageInfo} = await findPostsByGroupId({
@@ -35,6 +35,7 @@ export async function GroupPostsContent({
     sort,
     limit: limit ? Number(limit) : DEFAULT_LIMIT,
     search,
+    ids: searchid ? [searchid] : undefined,
     tenantId: tenant,
     user,
     memberGroupIDs,

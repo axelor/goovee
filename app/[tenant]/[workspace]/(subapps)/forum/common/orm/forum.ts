@@ -304,6 +304,7 @@ export async function findPostsByGroupId({
   sort = null,
   limit,
   search = '',
+  ids,
   tenantId,
   user,
   memberGroupIDs = [],
@@ -313,6 +314,7 @@ export async function findPostsByGroupId({
   sort?: any;
   limit?: number;
   search?: string | undefined;
+  ids?: string[];
   tenantId: Tenant['id'];
   user?: User;
   memberGroupIDs?: Array<string>;
@@ -329,6 +331,7 @@ export async function findPostsByGroupId({
     sort,
     limit,
     search,
+    ids,
     groupIDs: [id],
     tenantId,
     user,
