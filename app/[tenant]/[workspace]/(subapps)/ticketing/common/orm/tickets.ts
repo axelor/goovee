@@ -35,6 +35,7 @@ import type {QueryProps} from './helpers';
 import {getProjectAccessFilter, withTicketAccessFilter} from './helpers';
 import {getMailRecipients} from './mail';
 import {notifyUser} from '@/pwa/utils';
+import {NotificationTag} from '@/pwa/tags';
 
 export type TicketProps<T extends Entity> = QueryProps<T> & {
   projectId: ID;
@@ -295,8 +296,8 @@ export async function createTicket({
           title: `${auth.user.simpleFullName} created a new ticket`,
           body: `${auth.user.simpleFullName} created a new ticket: ${newTicket.name}`,
           url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+          tag: NotificationTag.ticketUpdate(newTicket.id),
         },
-        tag: auth.subapp.name,
       });
     }
   });
@@ -544,8 +545,8 @@ export async function updateTicket({
           title: `${auth.user.simpleFullName} updated a ticket`,
           body: `${auth.user.simpleFullName} updated a ticket: ${newTicket.name}`,
           url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+          tag: NotificationTag.ticketUpdate(newTicket.id),
         },
-        tag: auth.subapp.name,
       });
     }
   });

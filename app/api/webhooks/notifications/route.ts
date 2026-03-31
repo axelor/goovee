@@ -8,6 +8,7 @@ import NotificationManager, {NotificationType} from '@/notification';
 import {getTranslation} from '@/locale/server';
 import type {PortalApp} from '@/types';
 import {notifyUser} from '@/pwa/utils';
+import {NotificationTag} from '@/pwa/tags';
 
 async function findAppByCode({
   code,
@@ -196,8 +197,8 @@ async function sendSystemNotification({
           app.name,
         )),
       url: entity.route,
+      tag: NotificationTag.system(app.name),
     },
-    tag: app.name,
   });
 }
 

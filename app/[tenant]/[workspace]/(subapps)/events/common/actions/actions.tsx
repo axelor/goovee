@@ -51,6 +51,7 @@ import {
 } from '@/subapps/events/common/utils/registration';
 import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
 import {notifyUser} from '@/pwa/utils';
+import {NotificationTag} from '@/pwa/tags';
 
 export async function getAllEvents({
   limit,
@@ -235,8 +236,8 @@ export async function register({
         title: `You have been registered for an event!`,
         body: `${registration.event!.eventTitle}`,
         url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
+        tag: NotificationTag.event(registration.event!.id),
       },
-      tag: subapp.name,
     });
   });
 

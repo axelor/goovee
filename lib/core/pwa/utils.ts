@@ -2,9 +2,26 @@ import type {ActionResponse} from '@/types/action';
 import webpush, {WebPushError} from 'web-push';
 import {manager} from '@/tenant';
 
+type NotificationPayload = {
+  title: string;
+  body?: string;
+  url?: string;
+  tag?: string;
+  badge?: string;
+  dir?: 'auto' | 'ltr' | 'rtl';
+  icon?: string;
+  lang?: string;
+  requireInteraction?: boolean;
+  silent?: boolean | null;
+  // internal fields added by notifyUser before sending
+  notificationId?: string;
+  tenantId?: string;
+  workspaceURL?: string;
+};
+
 async function sendNotification(
   subscription: webpush.PushSubscription,
-  payload: {title: string; body?: string; url?: string},
+  payload: NotificationPayload,
 ): ActionResponse<true> {
   const publicKey = process.env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
@@ -49,18 +66,47 @@ export async function notifyUser({
   tenantId,
   workspaceURL,
   payload,
-  tag,
+  getReplacementTitle,
 }: {
   userId: string | number;
   tenantId: string;
   workspaceURL?: string;
-  payload: {title: string; body?: string; url?: string};
-  tag?: string;
+  payload: Omit<
+    NotificationPayload,
+    'notificationId' | 'tenantId' | 'workspaceURL'
+  >;
+  /**
+   * When provided, called with the total unread count for this tag (including
+   * the notification being created). Use this to produce grouped titles like
+   * "You have 3 new comments on X" that replace previous push notifications
+   * in the OS tray via the tag mechanism.
+   */
+  getReplacementTitle?: (count: number) => string;
 }) {
   const client = await manager.getClient(tenantId);
   if (!client) return;
 
-  // 1. Store the notification in the database for history/unread count
+  // 1. Count existing unread notifications for this tag to build a grouped title
+  let unreadCount = 1;
+  if (getReplacementTitle) {
+    try {
+      unreadCount =
+        Number(
+          await client.pushNotification.count({
+            where: {partner: {id: userId}, tag: payload.tag, isRead: false},
+          }),
+        ) + 1; // +1 for the notification we are about to create
+    } catch {
+      // non-fatal — fall back to singular title
+    }
+  }
+
+  const pushTitle =
+    getReplacementTitle && unreadCount > 1
+      ? getReplacementTitle(unreadCount)
+      : payload.title;
+
+  // 2. Store the notification in the database for history/unread count
   let dbNotification;
   try {
     dbNotification = await client.pushNotification.create({
@@ -71,7 +117,7 @@ export async function notifyUser({
         body: payload.body,
         url: payload.url,
         isRead: false,
-        tag,
+        tag: payload.tag,
       },
       select: {id: true},
     });
@@ -79,7 +125,7 @@ export async function notifyUser({
     console.error('Failed to store notification record:', error);
   }
 
-  // 2. Send the real-time push notification to all active devices
+  // 3. Send the real-time push notification to all active devices
   const subscriptions = await client.pushSubscription.find({
     where: {partner: {id: userId}},
     select: {id: true, endpoint: true, p256dh: true, auth: true, version: true},
@@ -87,8 +133,9 @@ export async function notifyUser({
 
   if (!subscriptions?.length) return;
 
-  const pushPayload = {
+  const pushPayload: NotificationPayload = {
     ...payload,
+    title: pushTitle,
     notificationId: dbNotification?.id,
     tenantId,
     workspaceURL,

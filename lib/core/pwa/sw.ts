@@ -30,15 +30,24 @@ self.addEventListener('push', event => {
   if (!data) return;
 
   const title = data.title || 'Notification';
-  const options: NotificationOptions = {
+  const options: NotificationOptions & {renotify?: boolean} = {
     body: data.body,
-    icon: '/pwa/icons/icon-192x192.png',
-    badge: '/pwa/icons/icon-72x72.png',
+    icon: data.icon ?? '/pwa/icons/icon-192x192.png',
+    badge: data.badge ?? '/pwa/icons/icon-72x72.png',
+    dir: data.dir,
+    lang: data.lang,
+    requireInteraction: data.requireInteraction,
+    silent: data.silent,
+    // Notifications sharing the same tag replace each other in the OS tray
+    // instead of stacking. renotify ensures the user is still alerted.
+    // Note: renotify is not supported in all browsers (e.g. Firefox ignores it).
+    tag: data.tag,
+    renotify: Boolean(data.tag),
     data: {
       url: data.url || '/',
       notificationId: data.notificationId,
       tenantId: data.tenantId,
-      workspaceId: data.workspaceId,
+      workspaceURL: data.workspaceURL,
     },
   };
 
@@ -52,17 +61,16 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const {url, notificationId, tenantId} = event.notification.data;
 
   const handleClick = async () => {
-    if (notificationId && tenantId) {
+    const {url, notificationId, tenantId} = event.notification.data;
+    const tag = event.notification.tag;
+    if (tenantId) {
       try {
-        await fetch(
-          `/api/tenant/${tenantId}/push/notifications/read/${notificationId}`,
-          {
-            method: 'POST',
-          },
-        );
+        const readUrl = tag
+          ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
+          : `/api/tenant/${tenantId}/push/notifications/read/${notificationId}`;
+        await fetch(readUrl, {method: 'POST'});
         // Notify all tabs to refresh since it's now read
         const channel = new BroadcastChannel('push-notifications');
         channel.postMessage({type: 'REFRESH_NOTIFICATIONS'});

@@ -41,6 +41,7 @@ import {sendEmailNotifications} from '@/subapps/forum/common/utils/mail';
 import {ContentType} from '@/subapps/forum/common/types/forum';
 import {getArchivedFilter} from '@/subapps/forum/common/utils';
 import {notifyUser} from '@/pwa/utils';
+import {NotificationTag} from '@/pwa/tags';
 
 interface FileMeta {
   fileName: string;
@@ -588,8 +589,8 @@ export async function addPost({
               title: `${user.simpleFullName || user.name} created a new post`,
               body: post?.title ?? '',
               url: postLink,
+              tag: NotificationTag.forumNewPost(post.id),
             },
-            tag: subapp.name,
           });
         }
       });
@@ -962,8 +963,10 @@ export const createComment: CreateComment = async formData => {
                   title: `${user.simpleFullName || user.name} replied to your comment`,
                   body: comment.note ?? '',
                   url: postLink,
+                  tag: NotificationTag.forumReply(parentComment.id),
                 },
-                tag: app.name,
+                getReplacementTitle: count =>
+                  `You have ${count} new replies to your comment`,
               });
 
               const replySubscriber = notificationRecievers.find(
@@ -1000,8 +1003,10 @@ export const createComment: CreateComment = async formData => {
                     title: `${user.simpleFullName || user.name} added a comment`,
                     body: comment.note ?? '',
                     url: postLink,
+                    tag: NotificationTag.forumPostComment(post.id),
                   },
-                  tag: app.name,
+                  getReplacementTitle: count =>
+                    `You have ${count} new comments on "${post.title}"`,
                 });
               }
             });

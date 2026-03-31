@@ -51,6 +51,7 @@ import type {ActionConfig, MutateProps} from './types';
 import {getMailRecipients} from '../orm/mail';
 import {sendCommentMail} from '../utils/mail';
 import {notifyUser} from '@/pwa/utils';
+import {NotificationTag} from '@/pwa/tags';
 import sanitize from 'sanitize-html';
 
 export type MutateResponse = {id: string; version: number};
@@ -758,8 +759,10 @@ export const createComment: CreateComment = async formData => {
             title: `${userName} replied to your comment on ${ticket.name}`,
             body: commentBody,
             url: ticketUrl,
+            tag: NotificationTag.ticketReply(parentComment.id),
           },
-          tag: subapp.name,
+          getReplacementTitle: count =>
+            `You have ${count} new replies to your comment on "${ticket.name}"`,
         });
       }
     } else {
@@ -773,8 +776,10 @@ export const createComment: CreateComment = async formData => {
               title: `${userName} added a comment on ${ticket.name}`,
               body: commentBody,
               url: ticketUrl,
+              tag: NotificationTag.ticketComment(ticket.id),
             },
-            tag: subapp.name,
+            getReplacementTitle: count =>
+              `You have ${count} new comments on "${ticket.name}"`,
           });
         }
       });
