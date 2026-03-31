@@ -175,19 +175,23 @@ async function sendSystemNotification({
   mail,
   app,
   entity,
-  url,
+  workspace,
 }: {
   user: any;
   tenantId: string;
   mail?: {subject?: string; body?: string};
   entity: {id: string; version: number; route: string};
   app: PortalApp;
-  url: string;
+  workspace: {
+    id: string;
+    name: string;
+    url: string;
+  };
 }) {
   notifyUser({
     userId: user.id,
     tenantId,
-    workspaceURL: url,
+    workspaceURL: workspace.url,
     payload: {
       title:
         mail?.subject ||
@@ -197,14 +201,18 @@ async function sendSystemNotification({
           app.name,
         )),
       url: entity.route,
-      tag: NotificationTag.system(app.name),
+      tag: NotificationTag.system(app.name, workspace.id),
     },
   });
 }
 
 async function sendNotifications(data: {
   tenantId: string;
-  workspaceUrl: string;
+  workspace: {
+    id: string;
+    name: string;
+    url: string;
+  };
   code: string;
   record: {id: string};
   mail?: {
@@ -212,7 +220,7 @@ async function sendNotifications(data: {
     body?: string;
   };
 }) {
-  const {tenantId, workspaceUrl, code, record, mail} = data;
+  const {tenantId, workspace, code, record, mail} = data;
 
   try {
     const client = await manager.getClient(tenantId);
@@ -240,7 +248,7 @@ async function sendNotifications(data: {
         user: user as any,
         tenantId,
         code,
-        url: workspaceUrl,
+        url: workspace.url,
       });
 
       if (!preference?.activateNotification) return;
@@ -269,7 +277,7 @@ async function sendNotifications(data: {
             mail,
             entity,
             app,
-            url: workspaceUrl,
+            workspace,
           });
         },
       ),
@@ -337,7 +345,21 @@ export async function POST(request: Request) {
     return response('Unauthorized', 401);
   }
 
-  sendNotifications(payload);
+  const client = await manager.getClient(tenantId);
+  if (!client) {
+    return response('Unauthorized', 401);
+  }
+
+  const workspace = await client.aOSPortalWorkspace.findOne({
+    where: {url: workspaceUrl},
+    select: {id: true, name: true, url: true},
+  });
+
+  if (!workspace) {
+    return response('Invalid Workspace', 401);
+  }
+
+  sendNotifications({...payload, workspace});
 
   return response('Success', 200);
 }

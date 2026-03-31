@@ -86,16 +86,14 @@ export async function notifyUser({
   const client = await manager.getClient(tenantId);
   if (!client) return;
 
-  // 1. Count existing unread notifications for this tag to build a grouped title
-  let unreadCount = 1;
-  if (getReplacementTitle) {
+  let unreadCount = 1; // +1 for the notification we are about to create
+  if (getReplacementTitle && payload.tag) {
     try {
-      unreadCount =
-        Number(
-          await client.pushNotification.count({
-            where: {partner: {id: userId}, tag: payload.tag, isRead: false},
-          }),
-        ) + 1; // +1 for the notification we are about to create
+      unreadCount += Number(
+        await client.pushNotification.count({
+          where: {partner: {id: userId}, tag: payload.tag, isRead: false},
+        }),
+      );
     } catch {
       // non-fatal — fall back to singular title
     }
