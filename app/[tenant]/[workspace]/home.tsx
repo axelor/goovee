@@ -350,7 +350,7 @@ async function ForumCard({
             return (
               <Link
                 key={post.id}
-                href={`${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}#post-${post.id}`}
+                href={`${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`}
                 className="block group">
                 <div className="flex flex-col space-y-1 rounded-md border p-3 hover:bg-muted/50 transition-colors">
                   <InnerHTML
