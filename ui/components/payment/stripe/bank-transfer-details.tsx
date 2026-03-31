@@ -22,7 +22,7 @@ import {
   BankAddress,
   NormalizedBankDetails,
 } from '@/ui/components/payment/types';
-import {BANK_ACCOUNT_TYPE} from '@/lib/core/payment/stripe/utils';
+import {BANK_ACCOUNT_TYPE} from '@/lib/core/payment/stripe/constants';
 
 interface BankTransferDetailsProps {
   details: {
@@ -110,6 +110,43 @@ export function BankTransferDetails({
 
   const showAddresses =
     details.bankDetails.bankAddress || details.bankDetails.accountHolderAddress;
+
+  if (!details?.bankDetails) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{i18n.t('Bank Transfer Payment')}</DialogTitle>
+            <DialogDescription>
+              ⚠️ {i18n.t('Bank details are currently unavailable')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p>
+              {i18n.t(
+                'We could not load the bank transfer details at this time.',
+              )}
+            </p>
+            <p>
+              {i18n.t(
+                'Please try again later or contact support if the issue persists.',
+              )}
+            </p>
+          </div>
+
+          <footer className="flex pt-6 border-t border-border mt-4">
+            <Button
+              onClick={() => onOpenChange(false)}
+              variant="outline"
+              className="flex-1">
+              {i18n.t('Close')}
+            </Button>
+          </footer>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -443,6 +443,7 @@
   "Record not found": "Enregistrement non trouvé",
   "Reference": "Référence",
   "Record not found: The requested data does not exist.": "Enregistrement non trouvé : Les données demandées n’existent pas.",
+  "Remaining": "Restant",
   "Register": "S’inscrire",
   "Register other people to this event": "Inscrire d’autres personnes à cet événement",
   "Registered successfully": "Inscription réussie",
@@ -837,5 +838,12 @@
   "No upcoming events": "Aucun événement à venir",
   "View all": "Voir tout",
   "Back to Directory": "Retour à l’annuaire",
-  "Contact already exists with another partner.": "Le contact existe déjà avec un autre partenaire."
+  "Contact already exists with another partner.": "Le contact existe déjà avec un autre partenaire.",
+  "Confirm Bank Transfer": "Confirmer le virement bancaire",
+  "Bank transfers may immediately use your existing Stripe balance.": "Les virements bancaires peuvent utiliser immédiatement votre solde Stripe existant.",
+  "If you already have sufficient balance, this payment will be completed instantly and funds will be deducted.": "Si votre solde est suffisant, ce paiement sera effectué instantanément et les fonds seront débités.",
+  "Bank details are currently unavailable": "Les coordonnées bancaires ne sont pas disponibles pour le moment.",
+  "We could not load the bank transfer details at this time.": "Nous n'avons pas pu charger les détails du virement bancaire pour le moment.",
+  "Please try again later or contact support if the issue persists.": "Veuillez réessayer plus tard ou contacter l'assistance si le problème persiste.",
+  "Payment completed successfully": "Paiement effectué avec succès"
 }

@@ -29,8 +29,6 @@ export function buildWhereClause({
     ],
   };
 
-  const isPaid = type === INVOICE.PAID;
-
   const whereClause: any = {
     ...params?.where,
     statusSelect: {eq: INVOICE_STATUS.VENTILATED},
@@ -42,8 +40,12 @@ export function buildWhereClause({
   whereClause.AND = [
     ...(whereClause.AND || []),
     workspaceConditions,
-    isPaid ? {amountRemaining: {eq: 0}} : {amountRemaining: {ne: 0}},
-  ];
+    type
+      ? type === INVOICE.PAID
+        ? {amountRemaining: {eq: 0}}
+        : {amountRemaining: {ne: 0}}
+      : false,
+  ].filter(Boolean);
 
   return whereClause;
 }

@@ -10,8 +10,8 @@ import {
 import {clone, getPageInfo, getSkipInfo} from '@/utils';
 import {formatNumber} from '@/locale/server/formatters';
 import type {Partner, PortalWorkspace} from '@/types';
-import {CONTEXT_STATUS} from '@/lib/core/payment/common/orm';
 import {buildPendingStripeBankTransferIntents} from '@/lib/core/payment/stripe/service';
+import {findPendingStripeBankTransfers} from '@/lib/core/payment/stripe/orm';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Invoice} from '@/subapps/invoices/common/types/invoices';
@@ -107,7 +107,7 @@ type InvoiceType = (typeof INVOICE)[keyof typeof INVOICE];
 
 export const findInvoice = async ({
   id,
-  type = INVOICE.UNPAID,
+  type,
   params,
   tenantId,
   workspaceURL,
@@ -224,7 +224,7 @@ export const findInvoice = async ({
   }
 
   const pendingStripeBankTransferPayments =
-    await findPendingStripeBankTransfers({tenantId, invoiceId: invoice.id});
+    await findPendingStripeBankTransfers({tenantId, id: invoice.id});
 
   const resolved = await Promise.all(
     pendingStripeBankTransferPayments?.map(async ctx => ({
@@ -272,31 +272,3 @@ export const findInvoice = async ({
     pendingStripeBankTransferIntents,
   };
 };
-
-async function findPendingStripeBankTransfers({
-  tenantId,
-  invoiceId,
-}: {
-  tenantId: Tenant['id'];
-  invoiceId: Invoice['id'];
-}) {
-  if (!invoiceId) return null;
-
-  const client = await manager.getClient(tenantId);
-
-  const result = await client.paymentContext.find({
-    where: {
-      mode: 'stripe',
-      status: CONTEXT_STATUS.pending,
-      AND: [
-        {data: {path: 'id', eq: invoiceId}},
-        {data: {path: 'paymentType', eq: 'bank_transfer'}},
-        {data: {path: 'paymentIntent', ne: null}},
-      ],
-    },
-    select: {data: true, createdOn: true},
-    orderBy: {createdOn: 'DESC'},
-  });
-
-  return result;
-}

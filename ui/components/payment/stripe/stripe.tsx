@@ -17,11 +17,13 @@ import {
 import {i18n} from '@/locale';
 import {useSearchParams, useToast} from '@/ui/hooks';
 import type {
-  BankTransferDetailsType,
+  NormalizedBankDetails,
   StripeProps,
 } from '@/ui/components/payment/types';
 import {PaymentOption} from '@/types';
 import {BankTransferDetails} from './bank-transfer-details';
+import {BankTransferConfirmDialog} from './bank-transfer-confirmation-dialog';
+import {BANK_TRANSFER_STATUS} from '@/lib/core/payment/stripe/constants';
 
 export function Stripe({
   disabled,
@@ -38,10 +40,15 @@ export function Stripe({
   const {toast} = useToast();
   const [verifying, setVerifying] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
-  const [bankTransferDetails, setBankTransferDetails] =
-    useState<BankTransferDetailsType | null>(null);
+  const [bankTransferDetails, setBankTransferDetails] = useState<{
+    id: string;
+    reference: string;
+    formattedAmount: string;
+    bankDetails: NormalizedBankDetails;
+  } | null>(null);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showBankTransferConfirm, setShowBankTransferConfirm] = useState(false);
 
   const {searchParams} = useSearchParams();
   const validateRef = useRef(false);
@@ -56,7 +63,9 @@ export function Stripe({
     router.refresh();
   };
 
-  const handlePaymentClick = async (event: any) => {
+  const handlePaymentClick = async (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     event.preventDefault();
 
     if (onValidate) {
@@ -104,7 +113,7 @@ export function Stripe({
           return;
         }
 
-        const result: any = await onValidateSession({
+        const result = await onValidateSession({
           stripeSessionId,
         });
         if (result.error) {
@@ -113,11 +122,12 @@ export function Stripe({
             title: i18n.t(result.message || errorMessage),
           });
         } else {
-          !skipSuccessToast &&
+          if (!skipSuccessToast) {
             toast({
               variant: 'success',
               title: i18n.t(successMessage),
             });
+          }
           if (onPaymentSuccess) {
             onPaymentSuccess();
           }
@@ -164,8 +174,24 @@ export function Stripe({
         return;
       }
 
-      setBankTransferDetails(result.data);
-      setShowBankDetails(true);
+      const data = result.data;
+
+      // CASE 1: Auto-paid via customer's balance
+      if (data.status === BANK_TRANSFER_STATUS.PAID) {
+        setShowPaymentOptions(false);
+        return;
+      }
+
+      // CASE 2: Pending bank transfer
+      if (data.status === BANK_TRANSFER_STATUS.PENDING && data.bankDetails) {
+        setBankTransferDetails({
+          id: data.id,
+          reference: data.reference,
+          formattedAmount: data.formattedAmount!,
+          bankDetails: data.bankDetails,
+        });
+        setShowBankDetails(true);
+      }
     } catch (err) {
       console.error(err);
       toast({
@@ -175,6 +201,20 @@ export function Stripe({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleBankTransferDialogOpenChange = (open: boolean) => {
+    if (isLoading) return;
+    setShowBankTransferConfirm(open);
+  };
+
+  const handleBankTransferCancel = () => {
+    setShowBankTransferConfirm(false);
+  };
+
+  const handleBankTransferConfirm = async () => {
+    setShowBankTransferConfirm(false);
+    await handleBankTransferPayment();
   };
 
   const stripeSessionId = searchParams.get('stripe_session_id');
@@ -242,7 +282,9 @@ export function Stripe({
                         ? 'cursor-default bg-gray-50 opacity-75'
                         : 'cursor-pointer hover:bg-gray-50'
                     }`}
-                    onClick={() => !isLoading && handleBankTransferPayment()}>
+                    onClick={() =>
+                      !isLoading && setShowBankTransferConfirm(true)
+                    }>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center flex-1">
                         <div className="mr-3 text-xl">🏦</div>
@@ -271,6 +313,15 @@ export function Stripe({
           </DialogHeader>
         </DialogContent>
       </Dialog>
+      {showBankTransferConfirm && (
+        <BankTransferConfirmDialog
+          open={showBankTransferConfirm}
+          isLoading={isLoading}
+          onOpenChange={handleBankTransferDialogOpenChange}
+          onCancel={handleBankTransferCancel}
+          onConfirm={handleBankTransferConfirm}
+        />
+      )}
       {showBankDetails && bankTransferDetails && (
         <BankTransferDetails
           open={showBankDetails}

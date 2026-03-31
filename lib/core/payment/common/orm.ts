@@ -1,7 +1,7 @@
 // ---- CORE IMPORTS ---- //
 import {PaymentOption} from '@/types';
 import {manager, type Tenant} from '@/tenant';
-import type {PaymentContext} from './type';
+import {type PaymentContext} from './type';
 
 export const CONTEXT_STATUS = {
   pending: 'pending',

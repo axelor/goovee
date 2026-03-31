@@ -443,6 +443,7 @@
   "Record not found": "Record not found",
   "Reference": "Reference",
   "Record not found: The requested data does not exist.": "Record not found: The requested data does not exist.",
+  "Remaining": "Remaining",
   "Register": "Register",
   "Register other people to this event": "Register other people to this event",
   "Registered successfully": "Registered successfully",
@@ -837,5 +838,12 @@
   "No upcoming events": "No upcoming events",
   "View all": "View all",
   "Back to Directory": "Back to Directory",
-  "Contact already exists with another partner.": "Contact already exists with another partner."
+  "Contact already exists with another partner.": "Contact already exists with another partner.",
+  "Confirm Bank Transfer": "Confirm Bank Transfer",
+  "Bank transfers may immediately use your existing Stripe balance.": "Bank transfers may immediately use your existing Stripe balance.",
+  "If you already have sufficient balance, this payment will be completed instantly and funds will be deducted.": "If you already have sufficient balance, this payment will be completed instantly and funds will be deducted.",
+  "Bank details are currently unavailable": "Bank details are currently unavailable",
+  "We could not load the bank transfer details at this time.": "We could not load the bank transfer details at this time.",
+  "Please try again later or contact support if the issue persists.": "Please try again later or contact support if the issue persists.",
+  "Payment completed successfully": "Payment completed successfully"
 }

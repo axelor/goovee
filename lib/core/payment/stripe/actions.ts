@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
 
+// ---- CORE IMPORTS ---- //
 import {stripe} from '.';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {formatAmountForStripe, getAmountFromStripe} from '@/utils/stripe';
@@ -8,7 +9,10 @@ import {
   createPaymentContext,
   updatePaymentContextData,
   markPaymentAsFailed,
+  markPaymentAsCancelled,
+  CONTEXT_STATUS,
 } from '@/lib/core/payment/common/orm';
+import {findPendingStripeBankTransfers} from './orm';
 import {PaymentOption} from '@/types';
 import type {Tenant} from '@/tenant';
 import {
@@ -16,7 +20,13 @@ import {
   type PaymentOrder,
 } from '@/lib/core/payment/common/type';
 import {getBankDetailsFromInstructions, getBankTransferConfig} from './utils';
-import type {CountryCode} from './utils';
+import type {BankTransferIntentResult} from '@/ui/components/payment/types';
+import {
+  BANK_TRANSFER_STATUS,
+  PAYMENT_INTENT_STATUS,
+  STRIPE_CANCELLATION_REASONS,
+} from './constants';
+import {CountryCode} from './types';
 
 async function getOrCreateStripeCustomer(
   email: string,
@@ -91,6 +101,9 @@ export async function createStripeOrder({
         client_reference_id: customer?.id,
         customer_email: customer?.email,
         metadata: {context_id: contextId},
+        payment_intent_data: {
+          metadata: {context_id: contextId, tenant_id: tenantId},
+        },
         line_items: [
           {
             quantity: 1,
@@ -190,7 +203,7 @@ export async function createStripePaymentIntent({
   amount: number;
   context: PaymentContextData;
   countryCode: CountryCode;
-}) {
+}): Promise<BankTransferIntentResult> {
   if (!(tenantId && amount && customer?.email && currency && countryCode)) {
     throw new Error(
       'Name, amount, customer, currency and Country code are required',
@@ -245,8 +258,7 @@ export async function createStripePaymentIntent({
         version: paymentContext.version,
         tenantId,
       });
-
-      return;
+      throw new Error('Payment confirmation failed');
     }
 
     // Attach PaymentIntent to the payment context
@@ -260,32 +272,45 @@ export async function createStripePaymentIntent({
       },
     });
 
-    // Extract bank details from the confirmed intent
-    let bankDetails = null;
-    let paymentReference = confirmedIntent.id;
+    // Payment succeeded immediately because the amount was covered by the customer's balance
+    if (confirmedIntent.status === PAYMENT_INTENT_STATUS.SUCCEEDED) {
+      return {
+        status: BANK_TRANSFER_STATUS.PAID,
+        id: confirmedIntent.id,
+      } satisfies BankTransferIntentResult;
+    }
 
+    // Extract bank details from the confirmed intent
     if (
       confirmedIntent.next_action?.type === 'display_bank_transfer_instructions'
     ) {
       const instructions =
         confirmedIntent.next_action.display_bank_transfer_instructions;
 
-      paymentReference = instructions?.reference || confirmedIntent.id;
-      bankDetails = getBankDetailsFromInstructions(instructions);
-    }
+      const paymentReference = instructions?.reference || confirmedIntent.id;
 
-    return {
-      id: confirmedIntent.id,
-      amount: confirmedIntent.amount,
-      currency: confirmedIntent.currency,
-      reference: paymentReference,
-      bankDetails,
-    };
+      const bankDetails = getBankDetailsFromInstructions(instructions);
+      if (!bankDetails) {
+        throw new Error('Failed to extract bank transfer details');
+      }
+
+      return {
+        status: BANK_TRANSFER_STATUS.PENDING,
+        id: confirmedIntent.id,
+        amount: confirmedIntent.amount,
+        currency: confirmedIntent.currency,
+        reference: paymentReference,
+        bankDetails,
+      };
+    }
+    throw new Error(
+      `Unexpected PaymentIntent state: ${confirmedIntent.status}`,
+    );
   } catch (error) {
     console.error('Error creating stripe payment intent:', error);
 
     if (error instanceof Stripe.errors.StripeError) {
-      throw new Error(error.raw?.message || error.message);
+      throw new Error((error.raw as any)?.message || error.message);
     }
 
     throw new Error('Failed to create stripe payment intent');
@@ -305,4 +330,156 @@ export async function findStripePaymentIntent(paymentIntentId: string) {
     console.error('Error:', error);
     throw new Error('Error retrieving payment intent');
   }
+}
+
+export async function cancelStripePaymentIntent({
+  id,
+  cancellationReason,
+  tenantId,
+}: {
+  id: string;
+  cancellationReason: Stripe.PaymentIntentCancelParams.CancellationReason;
+  tenantId: Tenant['id'];
+}) {
+  if (!id) {
+    throw new Error('Payment intent id is required');
+  }
+
+  if (!tenantId) {
+    throw new Error('Tenant id is required to cancel payment intent');
+  }
+
+  if (!cancellationReason) {
+    throw new Error('Cancellation reason is required');
+  }
+
+  try {
+    const paymentIntent = await findStripePaymentIntent(id);
+    if (paymentIntent.status === PAYMENT_INTENT_STATUS.CANCELED) {
+      throw new Error('Payment intent already canceled');
+    }
+
+    if (paymentIntent.status === PAYMENT_INTENT_STATUS.SUCCEEDED) {
+      throw new Error('Payment intent already succeeded');
+    }
+
+    const contextId = paymentIntent.metadata?.context_id;
+    if (!contextId) {
+      throw new Error('Context id not found in payment intent metadata');
+    }
+
+    const paymentContext = await findPaymentContext({
+      id: contextId,
+      tenantId,
+      mode: PaymentOption.stripe,
+      ignoreExpiration: true,
+    });
+    if (!paymentContext) {
+      throw new Error('Payment context not found');
+    }
+
+    if (paymentContext.status === CONTEXT_STATUS.cancelled) {
+      throw new Error('Payment context already cancelled');
+    }
+
+    const canceledIntent = await stripe.paymentIntents.cancel(
+      id,
+      {
+        cancellation_reason: cancellationReason,
+      },
+      {
+        idempotencyKey: `cancel_pi_${id}_ctx_${paymentContext.id}`,
+      },
+    );
+
+    await markPaymentAsCancelled({
+      contextId: paymentContext.id,
+      version: paymentContext.version,
+      tenantId,
+    });
+
+    return {
+      canceled: true,
+      status: canceledIntent.status,
+    };
+  } catch (error) {
+    console.error('Error cancelling Stripe PaymentIntent', {
+      id,
+      error,
+    });
+
+    throw new Error('Failed to cancel payment intent');
+  }
+}
+
+export async function cancelInvalidPendingBankTransfers({
+  tenantId,
+  sourceId,
+  amountRemaining,
+}: {
+  tenantId: string;
+  sourceId: string;
+  amountRemaining: number;
+}) {
+  if (!sourceId) {
+    throw new Error('Source id is required');
+  }
+
+  if (!tenantId) {
+    throw new Error('Tenant id is required');
+  }
+
+  const pendingContexts = await findPendingStripeBankTransfers({
+    tenantId,
+    id: sourceId,
+  });
+
+  if (!pendingContexts?.length) return;
+
+  const resolvedContexts = await Promise.all(
+    pendingContexts.map(async ctx => ({
+      ...ctx,
+      data: await ctx.data,
+    })),
+  );
+
+  await Promise.allSettled(
+    resolvedContexts.map(async ctx => {
+      const paymentIntentId = ctx.data?.paymentIntent;
+      if (!paymentIntentId) return;
+
+      let paymentIntent;
+      try {
+        paymentIntent = await findStripePaymentIntent(String(paymentIntentId));
+      } catch {
+        return;
+      }
+
+      if (!paymentIntent) {
+        return;
+      }
+
+      const intentAmount = getAmountFromStripe(
+        paymentIntent.amount,
+        paymentIntent.currency,
+      );
+
+      const shouldCancel =
+        amountRemaining === 0 ||
+        (amountRemaining > 0 && intentAmount > amountRemaining);
+
+      if (!shouldCancel) return;
+
+      const cancellationReason =
+        amountRemaining === 0
+          ? STRIPE_CANCELLATION_REASONS.DUPLICATE
+          : STRIPE_CANCELLATION_REASONS.REQUESTED_BY_CUSTOMER;
+
+      await cancelStripePaymentIntent({
+        id: String(paymentIntentId),
+        cancellationReason,
+        tenantId,
+      });
+    }),
+  );
 }

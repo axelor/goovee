@@ -11,14 +11,19 @@ import {
   markPaymentAsProcessed,
 } from '@/lib/core/payment/common/orm';
 import {PaymentOption} from '@/types';
-import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
+import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/lib/core/payment/common/type';
 import {getAmountFromStripe} from '@/utils/stripe';
+import {manager} from '@/tenant';
+import {scale} from '@/utils';
+import {DEFAULT_CURRENCY_SCALE} from '@/constants';
+import {cancelInvalidPendingBankTransfers} from '@/lib/core/payment/stripe/actions';
 
 // --- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
 
 export const STRIPE_EVENTS = {
   PAYMENT_INTENT_SUCCEEDED: 'payment_intent.succeeded',
+  PAYMENT_INTENT_PARTIALLY_FUNDED: 'payment_intent.partially_funded',
 } as const;
 
 export type StripeEventType =
@@ -61,8 +66,11 @@ export async function POST(req: Request) {
     }
 
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error('Stripe webhook verification failed', err.message);
+  } catch (err) {
+    console.error(
+      'Stripe webhook verification failed',
+      err instanceof Error ? err.message : err,
+    );
     return new NextResponse('Webhook verification failed', {status: 400});
   }
 
@@ -93,6 +101,7 @@ export async function POST(req: Request) {
           id: contextId,
           tenantId,
           mode: PaymentOption.stripe,
+          ignoreExpiration: true,
         });
 
         if (!paymentContext) {
@@ -110,6 +119,13 @@ export async function POST(req: Request) {
             status: 200,
             headers: {'Content-Type': 'application/json'},
           });
+        }
+
+        // Only process bank transfer payments here — card payments are validated
+        // directly in the respective source app actions (not via webhook).
+        if (paymentContext.data?.paymentType !== PAYMENT_TYPE.BANK_TRANSFER) {
+          console.log('Skipping non-bank-transfer payment intent');
+          break;
         }
 
         const source = paymentContext.data.source;
@@ -130,16 +146,38 @@ export async function POST(req: Request) {
           paymentIntent.currency,
         );
 
+        const client = await manager.getClient(tenantId);
+
         switch (source) {
           case PAYMENT_SOURCE.INVOICES: {
-            const result = await updateInvoice({
+            const invoice = await client.aOSInvoice.findOne({
+              where: {id: sourceId},
+              select: {
+                id: true,
+                amountRemaining: true,
+                currency: {
+                  numberOfDecimals: true,
+                },
+              },
+            });
+
+            if (!invoice) {
+              console.error('Invoice not found for received payment', {
+                sourceId,
+              });
+              return new NextResponse('Invoice not found', {status: 500});
+            }
+
+            const updateResult = await updateInvoice({
               tenantId,
               amount: paidAmount,
               invoiceId: sourceId,
             });
 
-            if (result?.error) {
-              console.error('Invoice update failed: ', result.error);
+            if (updateResult?.error) {
+              // Do NOT mark as failed — payment was already received by Stripe.
+              // Return 500 so Stripe retries the webhook for this transient error.
+              console.error('Invoice update failed: ', updateResult.error);
               return new NextResponse('Invoice update failed', {status: 500});
             }
 
@@ -147,6 +185,33 @@ export async function POST(req: Request) {
               contextId: paymentContext.id,
               version: paymentContext.version,
               tenantId,
+            });
+
+            // Once the payment is applied, reload the invoice to ensure the remaining balance
+            // is accurate, and cancel any pending bank transfers that are no longer necessary.
+            const updatedInvoice = await client.aOSInvoice.findOne({
+              where: {id: sourceId},
+              select: {
+                id: true,
+                amountRemaining: true,
+                currency: {
+                  numberOfDecimals: true,
+                },
+              },
+            });
+
+            const amountRemaining = Number(
+              scale(
+                Number(updatedInvoice?.amountRemaining ?? 0),
+                updatedInvoice?.currency?.numberOfDecimals ??
+                  DEFAULT_CURRENCY_SCALE,
+              ),
+            );
+
+            await cancelInvalidPendingBankTransfers({
+              tenantId,
+              sourceId: invoice.id,
+              amountRemaining,
             });
 
             break;
@@ -159,6 +224,49 @@ export async function POST(req: Request) {
 
           default:
             console.warn('Unknown payment source:', source);
+        }
+
+        break;
+      }
+
+      case STRIPE_EVENTS.PAYMENT_INTENT_PARTIALLY_FUNDED: {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+        const contextId = paymentIntent.metadata.context_id;
+        const tenantId = paymentIntent.metadata.tenant_id;
+
+        if (!contextId || !tenantId) {
+          console.error('[PARTIAL_PAYMENT] Missing payment metadata', {
+            eventId: event.id,
+            metadata: paymentIntent.metadata,
+          });
+          break;
+        }
+
+        const paymentContext = await findPaymentContext({
+          id: contextId,
+          tenantId,
+          mode: PaymentOption.stripe,
+          ignoreExpiration: true,
+        });
+
+        if (!paymentContext) {
+          console.error('[PARTIAL_PAYMENT] Payment context not found', {
+            eventId: event.id,
+            contextId,
+          });
+
+          return new NextResponse('Payment context not found', {status: 500});
+        }
+
+        const source = paymentContext.data?.source;
+        const sourceId = paymentContext.data?.id;
+
+        if (!source || !sourceId) {
+          console.error('[PARTIAL_PAYMENT] Missing source in payment context', {
+            contextId,
+          });
+          break;
         }
 
         break;

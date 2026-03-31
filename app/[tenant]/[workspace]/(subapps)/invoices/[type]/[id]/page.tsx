@@ -1,5 +1,5 @@
 import {Suspense} from 'react';
-import {notFound} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
@@ -14,6 +14,7 @@ import {getWhereClauseForEntity} from '@/utils/filters';
 import Content from './content';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {InvoiceSkeleton} from '@/subapps/invoices/common/ui/components';
+import {INVOICE} from '@/subapps/invoices/common/constants/invoices';
 
 async function Invoice({
   params,
@@ -63,7 +64,6 @@ async function Invoice({
 
   const invoice = await findInvoice({
     id,
-    type,
     params: {
       where: invoicesWhereClause,
     },
@@ -73,6 +73,16 @@ async function Invoice({
 
   if (!invoice) {
     return notFound();
+  }
+
+  if (type === INVOICE.UNPAID && !invoice.isUnpaid) {
+    redirect(`${workspaceURI}/${SUBAPP_CODES.invoices}/${INVOICE.PAID}/${id}`);
+  }
+
+  if (type === INVOICE.PAID && invoice.isUnpaid) {
+    redirect(
+      `${workspaceURI}/${SUBAPP_CODES.invoices}/${INVOICE.UNPAID}/${id}`,
+    );
   }
 
   return (

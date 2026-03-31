@@ -1,0 +1,6 @@
+{
+  "title": "Improve Stripe bank transfer reconciliation",
+  "type": "feature",
+  "description": "Overhauled Stripe bank transfer flow with a new confirmation dialog, atomic intent cancellation that keeps payment context in sync, automatic cleanup of stale pending intents when an invoice is settled by card or customer balance, and correct amount normalization across currencies with non-standard decimal precision.",
+  "scope": ["core", "invoices"]
+}

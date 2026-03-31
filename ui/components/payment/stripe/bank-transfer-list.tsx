@@ -64,6 +64,8 @@ function BankTransferItem({transfer, onCancel}: BankTransferItemProps) {
   const [bankTransferDetails, setBankTransferDetails] =
     useState<BankTransferDetailsType | null>(null);
 
+  const hasRemaining = transfer.amount < transfer.totalAmount;
+
   const handleCopyReference = () => {
     navigator.clipboard.writeText(transfer.reference);
   };
@@ -91,8 +93,18 @@ function BankTransferItem({transfer, onCancel}: BankTransferItemProps) {
   return (
     <div className="border border-yellow-200 rounded bg-white bg-opacity-50">
       <div className="flex items-center justify-between p-2">
-        <div>
-          <div className="font-medium">{transfer.formattedAmount}</div>
+        <div className="flex flex-col">
+          <div className="font-medium">{transfer.formattedTotalAmount}</div>
+          {hasRemaining && (
+            <div className="inline-flex items-center flex-wrap gap-1">
+              <span className="text-xs font-medium">
+                {i18n.t('Remaining')}:
+              </span>
+              <span className="font-semibold text-xs">
+                {transfer.formattedAmount}
+              </span>
+            </div>
+          )}
           <div className="text-xs text-gray-500">
             {formatDate(transfer.initiatedDate, {
               dateFormat: 'YYYY-MM-DD',

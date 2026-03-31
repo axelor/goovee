@@ -45,24 +45,34 @@ export const buildPendingStripeBankTransferIntents = async <
         const bankDetails = getBankDetailsFromInstructions(instructions);
         if (!bankDetails) return null;
 
+        const totalAmount = getAmountFromStripe(
+          paymentIntent.amount,
+          currencyCode,
+        );
         const amount = getAmountFromStripe(
           instructions.amount_remaining!,
           currencyCode,
         );
 
+        const formattedTotalAmount = await formatNumber(totalAmount, {
+          scale,
+          currency: currencySymbol,
+          type: 'DECIMAL',
+        });
         const formattedAmount = await formatNumber(amount, {
           scale,
           currency: currencySymbol,
           type: 'DECIMAL',
         });
-
         return {
           id: paymentIntent.id,
+          totalAmount,
           amount,
           currency: instructions.currency!,
           reference: instructions.reference!,
           bankDetails,
           contextId: res.id,
+          formattedTotalAmount: String(formattedTotalAmount),
           formattedAmount: String(formattedAmount),
           initiatedDate: new Date(paymentIntent.created * 1000), // Stripe timestamps are in seconds; JS Date expects milliseconds
         };

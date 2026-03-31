@@ -3,82 +3,14 @@ import Stripe from 'stripe';
 // ---- CORE IMPORTS ---- //
 import {getCountryName} from '@/utils/country';
 import {NormalizedBankDetails} from '@/ui/components/payment/types';
-
-export const BANK_TRANSFER_TYPE = {
-  EU: 'eu_bank_transfer',
-  US: 'us_bank_transfer',
-} as const;
-
-export type BankTransferType =
-  (typeof BANK_TRANSFER_TYPE)[keyof typeof BANK_TRANSFER_TYPE];
-
-export const BANK_TRANSFER_CURRENCY = {
-  EUR: 'eur',
-  USD: 'usd',
-} as const;
-
-export type BankTransferCurrency =
-  (typeof BANK_TRANSFER_CURRENCY)[keyof typeof BANK_TRANSFER_CURRENCY];
-
-export const BANK_ACCOUNT_TYPE = {
-  IBAN: 'iban',
-  ABA: 'aba',
-} as const;
-
-export type BankAccountType =
-  (typeof BANK_ACCOUNT_TYPE)[keyof typeof BANK_ACCOUNT_TYPE];
-
-export type CountryCode = 'FR' | 'DE' | 'ES' | 'IT' | 'NL' | 'BE' | 'US';
-
-type StripeBankTransfer =
-  | {
-      type: typeof BANK_TRANSFER_TYPE.EU;
-      eu_bank_transfer: {
-        country: CountryCode;
-      };
-    }
-  | {
-      type: typeof BANK_TRANSFER_TYPE.US;
-    };
-
-const BANK_TRANSFER_CONFIGS: Record<
-  BankTransferCurrency,
-  {
-    type: BankTransferType;
-    recommendedCountries: CountryCode[];
-    default: CountryCode;
-  }
-> = {
-  [BANK_TRANSFER_CURRENCY.EUR]: {
-    type: BANK_TRANSFER_TYPE.EU,
-    recommendedCountries: ['FR', 'DE', 'ES', 'IT', 'NL', 'BE'],
-    default: 'FR',
-  },
-  [BANK_TRANSFER_CURRENCY.USD]: {
-    type: BANK_TRANSFER_TYPE.US,
-    recommendedCountries: ['US'],
-    default: 'US',
-  },
-};
-
-const COUNTRY_TO_BANK_TRANSFER: Record<
-  CountryCode,
-  {currency: BankTransferCurrency; type: BankTransferType}
-> = Object.entries(BANK_TRANSFER_CONFIGS).reduce(
-  (acc, [currency, config]) => {
-    config.recommendedCountries.forEach(country => {
-      acc[country] = {
-        currency: currency as BankTransferCurrency,
-        type: config.type,
-      };
-    });
-    return acc;
-  },
-  {} as Record<
-    CountryCode,
-    {currency: BankTransferCurrency; type: BankTransferType}
-  >,
-);
+import {BankTransferCurrency, CountryCode, StripeBankTransfer} from './types';
+import {
+  BANK_ACCOUNT_TYPE,
+  BANK_TRANSFER_CONFIGS,
+  BANK_TRANSFER_CURRENCY,
+  BANK_TRANSFER_TYPE,
+  COUNTRY_TO_BANK_TRANSFER,
+} from './constants';
 
 export function getBankTransferConfig(
   currency: string,
@@ -150,7 +82,6 @@ export function getBankDetailsFromInstructions(
         swiftCode: iban.bic ?? undefined,
         accountHolderName: iban.account_holder_name ?? undefined,
         country: getCountryName(iban.country),
-        bankName: iban.bank_name ?? undefined,
         bankAddress: iban.bank_address ?? undefined,
         accountHolderAddress: iban.account_holder_address ?? undefined,
       };
