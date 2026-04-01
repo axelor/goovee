@@ -1,23 +1,7 @@
 import type {ActionResponse} from '@/types/action';
 import webpush, {WebPushError} from 'web-push';
 import {manager} from '@/tenant';
-
-type NotificationPayload = {
-  title: string;
-  body?: string;
-  url?: string;
-  tag?: string;
-  badge?: string;
-  dir?: 'auto' | 'ltr' | 'rtl';
-  icon?: string;
-  lang?: string;
-  requireInteraction?: boolean;
-  silent?: boolean | null;
-  // internal fields added by notifyUser before sending
-  notificationId?: string;
-  tenantId?: string;
-  workspaceURL?: string;
-};
+import type {NotificationDTO, NotificationPayload} from './types';
 
 async function sendNotification(
   subscription: webpush.PushSubscription,
@@ -73,7 +57,7 @@ export async function notifyUser({
   workspaceURL?: string;
   payload: Omit<
     NotificationPayload,
-    'notificationId' | 'tenantId' | 'workspaceURL'
+    'tenantId' | 'workspaceURL' | 'notification'
   >;
   /**
    * When provided, called with the total unread count for this tag (including
@@ -105,7 +89,7 @@ export async function notifyUser({
       : payload.title;
 
   // 2. Store the notification in the database for history/unread count
-  let dbNotification;
+  let dbNotification: NotificationDTO | undefined;
   try {
     dbNotification = await client.pushNotification.create({
       data: {
@@ -117,7 +101,14 @@ export async function notifyUser({
         isRead: false,
         tag: payload.tag,
       },
-      select: {id: true},
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        url: true,
+        createdOn: true,
+        tag: true,
+      },
     });
   } catch (error) {
     console.error('Failed to store notification record:', error);
@@ -134,9 +125,9 @@ export async function notifyUser({
   const pushPayload: NotificationPayload = {
     ...payload,
     title: pushTitle,
-    notificationId: dbNotification?.id,
     tenantId,
     workspaceURL,
+    notification: dbNotification,
   };
 
   await Promise.all(

@@ -48,6 +48,9 @@ export async function POST(
     };
 
     if (existing) {
+      // Intentionally reassign if the endpoint belongs to a different user —
+      // notifications are routed by partner ID, so each user only ever receives
+      // their own. Reassignment just means this device/browser switched hands.
       await client.pushSubscription.update({
         data: {
           ...data,

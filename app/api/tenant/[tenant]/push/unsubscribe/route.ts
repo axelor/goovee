@@ -4,6 +4,10 @@ import {treeifyError, z} from 'zod';
 
 const UnsubscribeSchema = z.object({
   endpoint: z.url(),
+  keys: z.object({
+    p256dh: z.string(),
+    auth: z.string(),
+  }),
 });
 
 export async function POST(
@@ -28,11 +32,11 @@ export async function POST(
     );
   }
 
-  const {endpoint} = result.data;
+  const {endpoint, keys} = result.data;
 
   try {
     const existing = await client.pushSubscription.findOne({
-      where: {endpoint},
+      where: {endpoint, p256dh: keys.p256dh, auth: keys.auth},
       select: {id: true, version: true},
     });
 

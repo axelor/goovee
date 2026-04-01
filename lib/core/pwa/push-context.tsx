@@ -48,6 +48,7 @@ export function PushProvider({
   >([]);
   const [isSupported, setIsSupported] = useState(false);
   const hasSynced = React.useRef(false);
+  const broadcastChannel = React.useRef<BroadcastChannel | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     if (!tenant || !user) return;
@@ -72,6 +73,10 @@ export function PushProvider({
         );
         if (response.ok) {
           setUnreadNotifications(prev => prev.filter(n => n.id !== id));
+          broadcastChannel.current?.postMessage({
+            type: 'CLOSE_NOTIFICATION',
+            notificationId: id,
+          });
         }
       } catch (error) {
         console.error('Failed to mark notification as read:', error);
@@ -89,6 +94,9 @@ export function PushProvider({
       );
       if (response.ok) {
         setUnreadNotifications([]);
+        broadcastChannel.current?.postMessage({
+          type: 'CLOSE_ALL_NOTIFICATIONS',
+        });
       }
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
@@ -113,7 +121,7 @@ export function PushProvider({
     [tenant],
   );
 
-  const updateState = useCallback(async () => {
+  const refreshPushNotifications = useCallback(async () => {
     const supported = 'serviceWorker' in navigator && 'PushManager' in window;
     setIsSupported(supported);
 
@@ -181,18 +189,16 @@ export function PushProvider({
 
   const unsubscribe = useCallback(async () => {
     if (subscription && tenant) {
-      const endpoint = subscription.endpoint;
-      await subscription.unsubscribe();
-      setSubscription(null);
-
       try {
+        await subscription.unsubscribe();
         await fetch(`/api/tenant/${tenant}/push/unsubscribe`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({endpoint}),
+          body: JSON.stringify(subscription),
         });
+        setSubscription(null);
       } catch (error) {
         console.error('Failed to unsubscribe from push notifications:', error);
       }
@@ -200,7 +206,7 @@ export function PushProvider({
   }, [subscription, tenant]);
 
   useEffect(() => {
-    updateState();
+    refreshPushNotifications();
 
     // Listen for permission changes if supported
     if ('permissions' in navigator) {
@@ -208,7 +214,7 @@ export function PushProvider({
         .query({name: 'notifications'})
         .then(permissionStatus => {
           permissionStatus.onchange = () => {
-            updateState();
+            refreshPushNotifications();
           };
         })
         .catch(err =>
@@ -216,22 +222,30 @@ export function PushProvider({
         );
     }
 
-    // Also update on window focus to ensure we have the latest state
-    window.addEventListener('focus', updateState);
-
     // Listen for messages from the Service Worker (e.g. to refresh count when push arrives)
-    const channel = new BroadcastChannel('push-notifications');
-    channel.onmessage = event => {
-      if (event.data?.type === 'REFRESH_NOTIFICATIONS') {
-        fetchNotifications();
+    broadcastChannel.current = new BroadcastChannel('push-notifications');
+    broadcastChannel.current.onmessage = event => {
+      if (event.data?.type === 'NEW_NOTIFICATION' && event.data.notification) {
+        setUnreadNotifications(prev =>
+          prev.some(n => n.id === event.data.notification.id)
+            ? prev
+            : [event.data.notification, ...prev],
+        );
+      } else if (event.data?.type === 'MARK_READ') {
+        const {notification, tag} = event.data;
+        setUnreadNotifications(prev =>
+          tag
+            ? prev.filter(n => n.tag !== tag)
+            : prev.filter(n => n.id !== notification?.id),
+        );
       }
     };
 
     return () => {
-      window.removeEventListener('focus', updateState);
-      channel.close();
+      broadcastChannel.current?.close();
+      broadcastChannel.current = null;
     };
-  }, [updateState, fetchNotifications]);
+  }, [refreshPushNotifications]);
 
   // Safety cleanup: If we have a subscription but no user, unsubscribe
   useEffect(() => {
@@ -251,7 +265,7 @@ export function PushProvider({
       syncSubscription,
       markAsRead,
       markAllAsRead,
-      refresh: updateState,
+      refresh: refreshPushNotifications,
     }),
     [
       permission,
@@ -263,7 +277,7 @@ export function PushProvider({
       syncSubscription,
       markAsRead,
       markAllAsRead,
-      updateState,
+      refreshPushNotifications,
     ],
   );
 

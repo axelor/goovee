@@ -21,8 +21,20 @@ export type NotificationDTO = {
   url: string | null;
   tag: string | null;
   createdOn: Date | null;
-  _count?: string | undefined;
-  _cursor?: string | undefined;
-  _hasNext?: boolean | undefined;
-  _hasPrev?: boolean | undefined;
+};
+
+export type NotificationPayload = {
+  title: string;
+  body?: string;
+  url?: string;
+  tag?: string;
+  badge?: string;
+  dir?: 'auto' | 'ltr' | 'rtl';
+  icon?: string;
+  lang?: string;
+  requireInteraction?: boolean;
+  silent?: boolean | null;
+  tenantId?: string;
+  workspaceURL?: string;
+  notification?: NotificationDTO;
 };

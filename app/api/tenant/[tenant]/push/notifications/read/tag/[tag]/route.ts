@@ -20,29 +20,12 @@ export async function POST(
   }
 
   try {
-    const unread = await client.pushNotification.find({
+    const updated = await client.pushNotification.updateAll({
+      set: {isRead: true, readAt: new Date()},
       where: {tag, partner: {id: session.user.id}, isRead: false},
-      select: {id: true, version: true},
     });
 
-    if (!unread.length) {
-      return NextResponse.json({success: true, updated: 0});
-    }
-
-    await Promise.all(
-      unread.map(n =>
-        client.pushNotification.update({
-          data: {
-            id: n.id,
-            version: n.version,
-            isRead: true,
-            readAt: new Date(),
-          },
-        }),
-      ),
-    );
-
-    return NextResponse.json({success: true, updated: unread.length});
+    return NextResponse.json({success: true, updated});
   } catch (error: unknown) {
     console.error('Mark as read by tag error:', error);
     if (error instanceof Error) {

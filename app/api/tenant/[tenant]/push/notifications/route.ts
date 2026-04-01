@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
 import {getSession} from '@/lib/core/auth';
+import {NotificationDTO} from '@/lib/core/pwa/types';
 
 export async function GET(
   _request: NextRequest,
@@ -20,21 +21,23 @@ export async function GET(
   }
 
   try {
-    const notifications = await client.pushNotification.find({
-      where: {
-        partner: {id: session.user.id},
-        isRead: false,
+    const notifications: NotificationDTO[] = await client.pushNotification.find(
+      {
+        where: {
+          partner: {id: session.user.id},
+          isRead: false,
+        },
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          url: true,
+          createdOn: true,
+          tag: true,
+        },
+        orderBy: {createdOn: 'DESC'},
       },
-      select: {
-        id: true,
-        title: true,
-        body: true,
-        url: true,
-        createdOn: true,
-        tag: true,
-      },
-      orderBy: {createdOn: 'DESC'},
-    });
+    );
 
     return NextResponse.json(notifications);
   } catch (error: unknown) {
