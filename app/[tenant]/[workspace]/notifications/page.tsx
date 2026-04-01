@@ -1,16 +1,9 @@
-import {workspacePathname} from '@/utils/workspace';
 import {UnreadNotificationsList} from './unread-list';
 import {t} from '@/locale/server';
 import {getSession} from '@/lib/core/auth';
 import {notFound} from 'next/navigation';
 
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  const {tenant: tenantId} = params;
-  const {workspaceURL: url} = workspacePathname(params);
-
+export default async function Page() {
   const session = await getSession();
   const user = session?.user;
 

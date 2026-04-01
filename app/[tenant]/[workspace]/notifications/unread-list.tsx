@@ -2,13 +2,7 @@
 
 import {usePushNotifications} from '@/pwa/push-context';
 import {i18n} from '@/locale';
-import {
-  Button,
-  Badge,
-  Alert,
-  AlertTitle,
-  AlertDescription,
-} from '@/ui/components';
+import {Button, Alert, AlertTitle, AlertDescription} from '@/ui/components';
 import Link from 'next/link';
 import {formatRelativeTime} from '@/locale/formatters';
 import {Bell} from 'lucide-react';
@@ -113,13 +107,6 @@ export function UnreadNotificationsList() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{notification.title}</p>
-                    {notification.tag && (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] py-0 px-1.5 h-4">
-                        {i18n.t(notification.tag)}
-                      </Badge>
-                    )}
                   </div>
 
                   <p className="text-sm text-muted-foreground">
