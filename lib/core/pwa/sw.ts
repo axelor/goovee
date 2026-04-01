@@ -5,6 +5,7 @@ import {defaultCache} from '@serwist/next/worker';
 import type {PrecacheEntry, SerwistGlobalConfig} from 'serwist';
 import {Serwist} from 'serwist';
 import type {NotificationPayload} from './types';
+import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the
@@ -26,7 +27,7 @@ const serwist = new Serwist({
   runtimeCaching: defaultCache,
 });
 
-const channel = new BroadcastChannel('push-notifications');
+const channel = new BroadcastChannel(PUSH_CHANNEL);
 
 self.addEventListener('push', event => {
   const data: NotificationPayload | undefined = event.data?.json();
@@ -58,7 +59,7 @@ self.addEventListener('push', event => {
 
   // Forward the new notification to all tabs so they can update state without a refetch
   channel.postMessage({
-    type: 'NEW_NOTIFICATION',
+    type: MSG_TYPE.NEW,
     notification: data.notification,
   });
 });
@@ -76,7 +77,7 @@ self.addEventListener('notificationclick', event => {
           : `/api/tenant/${tenantId}/push/notifications/read/${notification?.id}`;
         await fetch(readUrl, {method: 'POST'});
         // Notify all tabs to remove this notification from their unread state
-        channel.postMessage({type: 'MARK_READ', notification, tag});
+        channel.postMessage({type: MSG_TYPE.READ, notification, tag});
       } catch (err) {
         console.error('Failed to mark notification as read from SW:', err);
       }
@@ -99,7 +100,7 @@ self.addEventListener('notificationclick', event => {
 });
 
 channel.onmessage = async event => {
-  if (event.data?.type === 'CLOSE_NOTIFICATION') {
+  if (event.data?.type === MSG_TYPE.CLOSE) {
     const {notificationId} = event.data;
     if (notificationId) {
       const notifications = await self.registration.getNotifications();
@@ -107,7 +108,7 @@ channel.onmessage = async event => {
         .filter(n => n.data?.notification?.id === notificationId)
         .forEach(n => n.close());
     }
-  } else if (event.data?.type === 'CLOSE_ALL_NOTIFICATIONS') {
+  } else if (event.data?.type === MSG_TYPE.CLOSE_ALL) {
     const notifications = await self.registration.getNotifications();
     notifications.forEach(n => n.close());
   }

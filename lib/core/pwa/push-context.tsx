@@ -11,6 +11,7 @@ import React, {
 import {useEnvironment} from '@/lib/core/environment';
 import {NotificationDTO} from './types';
 import {authClient} from '@/lib/auth-client';
+import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
 
 interface PushContextType {
   permission: NotificationPermission;
@@ -74,7 +75,7 @@ export function PushProvider({
         if (response.ok) {
           setUnreadNotifications(prev => prev.filter(n => n.id !== id));
           broadcastChannel.current?.postMessage({
-            type: 'CLOSE_NOTIFICATION',
+            type: MSG_TYPE.CLOSE,
             notificationId: id,
           });
         }
@@ -95,7 +96,7 @@ export function PushProvider({
       if (response.ok) {
         setUnreadNotifications([]);
         broadcastChannel.current?.postMessage({
-          type: 'CLOSE_ALL_NOTIFICATIONS',
+          type: MSG_TYPE.CLOSE_ALL,
         });
       }
     } catch (error) {
@@ -228,15 +229,15 @@ export function PushProvider({
     }
 
     // Listen for messages from the Service Worker (e.g. to refresh count when push arrives)
-    broadcastChannel.current = new BroadcastChannel('push-notifications');
+    broadcastChannel.current = new BroadcastChannel(PUSH_CHANNEL);
     broadcastChannel.current.onmessage = event => {
-      if (event.data?.type === 'NEW_NOTIFICATION' && event.data.notification) {
+      if (event.data?.type === MSG_TYPE.NEW && event.data.notification) {
         setUnreadNotifications(prev =>
           prev.some(n => n.id === event.data.notification.id)
             ? prev
             : [event.data.notification, ...prev],
         );
-      } else if (event.data?.type === 'MARK_READ') {
+      } else if (event.data?.type === MSG_TYPE.READ) {
         const {notification, tag} = event.data;
         setUnreadNotifications(prev =>
           tag
