@@ -160,12 +160,21 @@ export async function notifyUser({
         pushPayload,
       );
 
-      if (result.error && result.message === 'expired') {
-        await client.pushSubscription.delete({
-          id: sub.id,
-          version: sub.version,
-        });
+      if (result.error) {
+        if (result.message === 'expired') {
+          await client.pushSubscription.delete({
+            id: sub.id,
+            version: sub.version,
+          });
+        } else {
+          console.error('Error sending notification:', {
+            result,
+            subId: sub.id,
+            notificationId: pushPayload.notification?.id,
+          });
+        }
       }
+
       return result;
     }),
   );
