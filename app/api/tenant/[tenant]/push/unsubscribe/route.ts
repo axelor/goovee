@@ -1,14 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
-import {treeifyError, z} from 'zod';
-
-const UnsubscribeSchema = z.object({
-  endpoint: z.url(),
-  keys: z.object({
-    p256dh: z.string(),
-    auth: z.string(),
-  }),
-});
+import {treeifyError} from 'zod';
+import {PushSubscriptionSchema} from '@/lib/core/pwa/types';
 
 export async function POST(
   request: NextRequest,
@@ -23,7 +16,7 @@ export async function POST(
   }
 
   const json = await request.json();
-  const result = UnsubscribeSchema.safeParse(json);
+  const result = PushSubscriptionSchema.safeParse(json);
 
   if (!result.success) {
     return NextResponse.json(
