@@ -26,6 +26,8 @@ module.exports = serwist.withNextConfig(nextConfig => ({
   // delete `revision`.
   // additionalPrecacheEntries: [{url: '/precached', revision}],
 
+  maximumFileSizeToCacheInBytes: 2.5 * 1024 * 1024, // 2.5 MB
+
   globIgnores: [
     `${nextConfig.distDir}/server/pages/**/*.json`,
     `${nextConfig.distDir}/server/app/ignored.html`,
