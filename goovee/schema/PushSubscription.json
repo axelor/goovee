@@ -24,6 +24,10 @@
     {
       "type": "DateTime",
       "name": "lastUsedAt"
+    },
+    {
+      "type": "DateTime",
+      "name": "expiresAt"
     }
   ]
 }

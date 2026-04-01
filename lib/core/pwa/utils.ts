@@ -117,7 +117,14 @@ export async function notifyUser({
   // 3. Send the real-time push notification to all active devices
   const subscriptions = await client.pushSubscription.find({
     where: {partner: {id: userId}},
-    select: {id: true, endpoint: true, p256dh: true, auth: true, version: true},
+    select: {
+      id: true,
+      endpoint: true,
+      p256dh: true,
+      auth: true,
+      version: true,
+      expiresAt: true,
+    },
   });
 
   if (!subscriptions?.length) return;
@@ -133,6 +140,14 @@ export async function notifyUser({
   await Promise.all(
     subscriptions.map(async sub => {
       if (!sub.endpoint || !sub.p256dh || !sub.auth) return;
+
+      if (sub.expiresAt && sub.expiresAt < new Date()) {
+        await client.pushSubscription.delete({
+          id: sub.id,
+          version: sub.version,
+        });
+        return;
+      }
 
       const result = await sendNotification(
         {

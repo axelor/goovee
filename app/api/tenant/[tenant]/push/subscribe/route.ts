@@ -45,6 +45,9 @@ export async function POST(
       auth: subscription.keys?.auth,
       partner: {select: {id: session.user.id}},
       lastUsedAt: new Date(),
+      expiresAt: subscription.expirationTime
+        ? new Date(subscription.expirationTime)
+        : null,
     };
 
     if (existing) {
