@@ -83,8 +83,10 @@ self.addEventListener('notificationclick', event => {
     }
 
     const clientList = await self.clients.matchAll({type: 'window'});
+    const targetUrl = new URL(url, self.location.origin);
+
     for (const client of clientList) {
-      if (client.url === url && 'focus' in client) {
+      if (client.url === targetUrl.href && 'focus' in client) {
         return client.focus();
       }
     }
