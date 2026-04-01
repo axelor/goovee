@@ -47,7 +47,7 @@ export function PushProvider({
     NotificationDTO[]
   >([]);
   const [isSupported, setIsSupported] = useState(false);
-  const hasSynced = React.useRef(false);
+  const lastSyncedUserId = React.useRef<string | number | null>(null);
   const broadcastChannel = React.useRef<BroadcastChannel | null>(null);
 
   const fetchNotifications = useCallback(async () => {
@@ -145,10 +145,15 @@ export function PushProvider({
 
       setSubscription(sub);
 
-      // AUTO-SYNC: If we have a sub and haven't synced yet this session, ping the server
-      if (sub && currentPermission === 'granted' && !hasSynced.current) {
+      // AUTO-SYNC: If we have a sub and haven't synced for this user yet, ping the server
+      if (
+        sub &&
+        currentPermission === 'granted' &&
+        user &&
+        lastSyncedUserId.current !== user.id
+      ) {
         syncSubscription(sub);
-        hasSynced.current = true;
+        lastSyncedUserId.current = user.id;
       }
     }
 
