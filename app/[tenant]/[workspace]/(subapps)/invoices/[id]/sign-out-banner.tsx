@@ -4,11 +4,18 @@ import {useRouter} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import {i18n} from '@/locale';
 import {Button} from '@/ui/components';
+import {usePushNotifications} from '@/pwa/push-context';
 
 export function SignOutBanner({userName}: {userName: string | null}) {
   const router = useRouter();
+  const {unsubscribe} = usePushNotifications();
 
   const handleSignOut = async () => {
+    try {
+      await unsubscribe();
+    } catch (error) {
+      console.error('Failed to unsubscribe on logout:', error);
+    }
     await authClient.signOut();
     router.refresh();
   };
