@@ -232,7 +232,6 @@ export async function register({
     const contact = participant.contact!;
     const tr = getTranslation.bind(null, {
       locale: contact.localization?.code || DEFAULT_LOCALE,
-      user: contact,
       tenant: tenantId,
     });
     notifyUser({
@@ -424,7 +423,6 @@ export const createComment: CreateComment = async formData => {
       const eventUrl = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
-        user: parentComment.partner,
         tenant: tenantId,
       });
       notifyUser({

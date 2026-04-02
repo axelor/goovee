@@ -755,7 +755,6 @@ export const createComment: CreateComment = async formData => {
       if (partner) {
         const tr = getTranslation.bind(null, {
           locale: partner.localization?.code || DEFAULT_LOCALE,
-          user: partner,
           tenant: tenantId,
         });
         notifyUser({
@@ -784,7 +783,6 @@ export const createComment: CreateComment = async formData => {
       for (const contact of contacts) {
         const tr = getTranslation.bind(null, {
           locale: contact.localization?.code || DEFAULT_LOCALE,
-          user: contact,
           tenant: tenantId,
         });
         notifyUser({

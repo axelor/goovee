@@ -584,7 +584,6 @@ export async function addPost({
         ) {
           const tr = getTranslation.bind(null, {
             locale: reciever.member.localization?.code || DEFAULT_LOCALE,
-            user: reciever.member,
             tenant: tenantId,
           });
           notifyUser({
@@ -968,7 +967,6 @@ export const createComment: CreateComment = async formData => {
               const tr = getTranslation.bind(null, {
                 locale:
                   parentComment.partner.localization?.code || DEFAULT_LOCALE,
-                user: parentComment.partner,
                 tenant: tenantId,
               });
               notifyUser({
@@ -1016,7 +1014,6 @@ export const createComment: CreateComment = async formData => {
               if (reciever.member?.id) {
                 const tr = getTranslation.bind(null, {
                   locale: reciever.member.localization?.code || DEFAULT_LOCALE,
-                  user: reciever.member,
                   tenant: tenantId,
                 });
                 notifyUser({

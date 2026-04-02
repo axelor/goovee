@@ -41,7 +41,6 @@ export async function sendCommentMail(props: {
   reciepients.forEach(async partner => {
     const t = getTranslation.bind(null, {
       locale: partner.localization?.code || DEFAULT_LOCALE,
-      user: partner,
       tenant,
     });
 
@@ -130,7 +129,6 @@ export async function sendTrackMail(props: {
   reciepients.forEach(async partner => {
     const t = getTranslation.bind(null, {
       locale: partner.localization?.code || DEFAULT_LOCALE,
-      user: partner,
       tenant,
     });
 

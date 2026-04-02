@@ -38,7 +38,6 @@ export async function notifyInvoicePaymentSuccess({
 
     const tr = getTranslation.bind(null, {
       locale: user.localization?.code || DEFAULT_LOCALE,
-      user,
       tenant: tenantId,
     });
     notifyUser({

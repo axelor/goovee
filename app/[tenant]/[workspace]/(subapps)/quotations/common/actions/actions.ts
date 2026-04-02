@@ -108,7 +108,6 @@ export const createComment: CreateComment = async formData => {
       const quotationUrl = `${workspaceURI}/${SUBAPP_CODES.quotations}/${rest.recordId}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
-        user: parentComment.partner,
         tenant: tenantId,
       });
       notifyUser({

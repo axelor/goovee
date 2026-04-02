@@ -213,7 +213,6 @@ export const createComment: CreateComment = async formData => {
       const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
-        user: parentComment.partner,
         tenant: tenantId,
       });
       notifyUser({

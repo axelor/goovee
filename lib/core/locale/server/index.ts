@@ -27,7 +27,7 @@ export async function getTranslation(
     tenant = (await headers()).get(TENANT_HEADER) as string;
   }
 
-  if (!user) {
+  if (!user && !locale) {
     const session = await getSession();
     const $user: any = session?.user;
     if ($user?.locale) {

@@ -289,7 +289,6 @@ export async function createTicket({
   for (const contact of contacts) {
     const tr = getTranslation.bind(null, {
       locale: contact.localization?.code || DEFAULT_LOCALE,
-      user: contact,
       tenant: auth.tenantId,
     });
     notifyUser({
@@ -546,7 +545,6 @@ export async function updateTicket({
   for (const contact of contacts) {
     const tr = getTranslation.bind(null, {
       locale: contact.localization?.code || DEFAULT_LOCALE,
-      user: contact,
       tenant: auth.tenantId,
     });
     notifyUser({
