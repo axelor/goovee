@@ -201,11 +201,7 @@ export async function register({
       workspace?.config?.paymentOptionSet,
       payment!.mode,
     );
-    if (!paymentModeId) {
-      return error(
-        await t('Payment mode is not available for the selected payment.'),
-      );
-    }
+
     createInvoice({
       workspace,
       tenantId,

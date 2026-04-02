@@ -399,7 +399,6 @@
   "Payment Method": "Méthode de paiement",
   "Payment amount mistmatch": "Montant du paiement non correspondant",
   "Payment not successfull": "Paiement non réussi",
-  "Payment mode is not available for the selected payment.": "Le mode de paiement sélectionné n'est pas disponible.",
   "Paypal is not available": "Paypal n'est pas disponible",
   "Pending Stripe Bank transfers": "Virements bancaires Stripe en attente",
   "Personal Settings": "Paramètres personnels",

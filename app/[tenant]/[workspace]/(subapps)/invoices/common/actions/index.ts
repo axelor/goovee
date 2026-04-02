@@ -104,14 +104,6 @@ export async function paypalCreateOrder({
   }
 
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.paypal);
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   const payerEmail = token
     ? $invoice?.partner?.emailAddress?.address
@@ -387,14 +379,6 @@ export async function createStripeCheckoutSession({
   const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
 
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.stripe);
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   try {
     const session = await createStripeOrder({
@@ -706,14 +690,6 @@ export async function createStripeBankTransferIntent({
   });
 
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.stripe);
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   try {
     const result = await createStripePaymentIntent({
@@ -962,14 +938,6 @@ export async function payboxCreateOrder({
   const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
 
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.paybox);
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   try {
     const response = await createPayboxOrder({
@@ -1248,14 +1216,6 @@ export async function up2payCreateOrder({
   };
 
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.up2pay);
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   try {
     const response = await createUp2payOrder({
@@ -1382,14 +1342,6 @@ export async function initiatePispPayment({
     : user?.email;
 
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.hubpisp);
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   try {
     const psuInfo = {

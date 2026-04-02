@@ -20,7 +20,7 @@ export async function createInvoice({
   tenantId: Tenant['id'];
   registrationId: ID;
   currencyCode: string;
-  paymentModeId: number;
+  paymentModeId?: number;
 }): ActionResponse<any> {
   const tenant = await manager.getTenant(tenantId);
   const aos = tenant?.config?.aos;

@@ -59,7 +59,7 @@ async function createOrder({
   cart: any;
   workspaceURL: string;
   tenantId: Tenant['id'];
-  paymentModeId: number;
+  paymentModeId?: number;
 }) {
   if (!cart?.items?.length) {
     return {
@@ -341,14 +341,6 @@ export async function paypalCaptureOrder({
       workspace?.config?.paymentOptionSet,
       PaymentOption.paypal,
     );
-    if (!paymentModeId) {
-      return {
-        error: true,
-        message: await t(
-          'Payment mode is not available for the selected payment.',
-        ),
-      };
-    }
 
     const res = await createOrder({
       cart,
@@ -791,14 +783,6 @@ export async function validateStripePayment({
     workspace?.config?.paymentOptionSet,
     PaymentOption.stripe,
   );
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   const res = await createOrder({cart, workspaceURL, tenantId, paymentModeId});
   await markPaymentAsProcessed({
@@ -1086,14 +1070,6 @@ export async function validatePayboxPayment({
     workspace?.config?.paymentOptionSet,
     PaymentOption.paybox,
   );
-  if (!paymentModeId) {
-    return {
-      error: true,
-      message: await t(
-        'Payment mode is not available for the selected payment.',
-      ),
-    };
-  }
 
   const res = await createOrder({cart, workspaceURL, tenantId, paymentModeId});
   await markPaymentAsProcessed({

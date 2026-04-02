@@ -399,7 +399,6 @@
   "Payment Method": "Payment Method",
   "Payment amount mistmatch": "Payment amount mistmatch",
   "Payment not successfull": "Payment not successfull",
-  "Payment mode is not available for the selected payment.": "Payment mode is not available for the selected payment.",
   "Paypal is not available": "Paypal is not available",
   "Pending Stripe Bank transfers": "Pending Stripe Bank transfers",
   "Personal Settings": "Personal Settings",
