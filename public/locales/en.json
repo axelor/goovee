@@ -877,5 +877,19 @@
   "Stay Updated!": "Stay Updated!",
   "Unread Notifications": "Unread Notifications",
   "View": "View",
-  "Receive notifications on this device.": "Receive notifications on this device."
+  "Receive notifications on this device.": "Receive notifications on this device.",
+  "{0} replied to your comment on {1}": "{0} replied to your comment on {1}",
+  "You have {0} new replies to your comment on \"{1}\"": "You have {0} new replies to your comment on \"{1}\"",
+  "{0} replied to your comment": "{0} replied to your comment",
+  "You have {0} new replies to your comment": "You have {0} new replies to your comment",
+  "{0} added a comment on {1}": "{0} added a comment on {1}",
+  "You have {0} new comments on \"{1}\"": "You have {0} new comments on \"{1}\"",
+  "{0} added a comment": "{0} added a comment",
+  "{0} created a new post": "{0} created a new post",
+  "{0} created a new ticket": "{0} created a new ticket",
+  "{0} created a new ticket: {1}": "{0} created a new ticket: {1}",
+  "{0} updated a ticket": "{0} updated a ticket",
+  "{0} updated a ticket: {1}": "{0} updated a ticket: {1}",
+  "You have been registered for an event!": "You have been registered for an event!",
+  "Payment received for invoice {0}": "Payment received for invoice {0}"
 }

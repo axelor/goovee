@@ -8,7 +8,8 @@ import {promisify} from 'util';
 import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
-import {t} from '@/locale/server';
+import {t, getTranslation} from '@/locale/server';
+import {DEFAULT_LOCALE} from '@/locale/contants';
 import {clone} from '@/utils';
 import {ModelMap, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
@@ -576,24 +577,32 @@ export async function addPost({
     if (!subscribers.error) {
       const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
 
-      subscribers.forEach((reciever: any) => {
+      for (const reciever of subscribers as any[]) {
         if (
           reciever.member?.id &&
           reciever.member.id !== user.id // exclude the post author
         ) {
+          const tr = getTranslation.bind(null, {
+            locale: reciever.member.localization?.code || DEFAULT_LOCALE,
+            user: reciever.member,
+            tenant: tenantId,
+          });
           notifyUser({
             userId: reciever.member.id,
             tenantId,
             workspaceURL,
             payload: {
-              title: `${user.simpleFullName || user.name} created a new post`,
+              title: await tr(
+                '{0} created a new post',
+                user.simpleFullName || user.name || '',
+              ),
               body: post?.title ?? '',
               url: postLink,
               tag: NotificationTag.forumNewPost(post.id),
             },
           });
         }
-      });
+      }
 
       sendEmailNotifications({
         type: ContentType.POST,
@@ -956,18 +965,27 @@ export const createComment: CreateComment = async formData => {
 
           if (isReply) {
             if (parentComment?.partner?.id) {
+              const tr = getTranslation.bind(null, {
+                locale:
+                  parentComment.partner.localization?.code || DEFAULT_LOCALE,
+                user: parentComment.partner,
+                tenant: tenantId,
+              });
               notifyUser({
                 userId: parentComment.partner.id,
                 tenantId,
                 workspaceURL,
                 payload: {
-                  title: `${user.simpleFullName || user.name} replied to your comment`,
+                  title: await tr(
+                    '{0} replied to your comment',
+                    user.simpleFullName || user.name || '',
+                  ),
                   body: comment.note ?? '',
                   url: postLinkRelative,
                   tag: NotificationTag.forumReply(parentComment.id),
                 },
                 getReplacementTitle: count =>
-                  `You have ${count} new replies to your comment`,
+                  tr('You have {0} new replies to your comment', String(count)),
               });
 
               const replySubscriber = notificationRecievers.find(
@@ -994,23 +1012,35 @@ export const createComment: CreateComment = async formData => {
               }
             }
           } else {
-            notificationRecievers.forEach(reciever => {
+            for (const reciever of notificationRecievers) {
               if (reciever.member?.id) {
+                const tr = getTranslation.bind(null, {
+                  locale: reciever.member.localization?.code || DEFAULT_LOCALE,
+                  user: reciever.member,
+                  tenant: tenantId,
+                });
                 notifyUser({
                   userId: reciever.member.id,
                   tenantId,
                   workspaceURL,
                   payload: {
-                    title: `${user.simpleFullName || user.name} added a comment`,
+                    title: await tr(
+                      '{0} added a comment',
+                      user.simpleFullName || user.name || '',
+                    ),
                     body: comment.note ?? '',
                     url: postLinkRelative,
                     tag: NotificationTag.forumPostComment(post.id),
                   },
                   getReplacementTitle: count =>
-                    `You have ${count} new comments on "${post.title}"`,
+                    tr(
+                      'You have {0} new comments on "{1}"',
+                      String(count),
+                      post.title,
+                    ),
                 });
               }
-            });
+            }
 
             sendEmailNotifications({
               type: ContentType.COMMENT,
@@ -1180,6 +1210,7 @@ export const getSubscribersByGroup = async ({
             address: true,
           },
           simpleFullName: true,
+          localization: {code: true},
         },
       },
     });

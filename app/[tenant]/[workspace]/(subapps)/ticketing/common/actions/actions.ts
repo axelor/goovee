@@ -6,8 +6,9 @@ import {ZodIssueCode} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {TENANT_HEADER} from '@/proxy';
-import {t} from '@/locale/server';
-import {clone} from '@/utils';
+import {t, getTranslation} from '@/locale/server';
+import {DEFAULT_LOCALE} from '@/locale/contants';
+import {clone, uniqueById} from '@/utils';
 import type {ID} from '@goovee/orm';
 import type {Cloned} from '@/types/util';
 import type {ActionResponse} from '@/types/action';
@@ -710,8 +711,8 @@ export const createComment: CreateComment = async formData => {
     select: {
       name: true,
       project: {id: true, name: true},
-      managedByContact: {id: true},
-      createdByContact: {id: true},
+      managedByContact: {id: true, localization: {code: true}},
+      createdByContact: {id: true, localization: {code: true}},
     },
   });
 
@@ -743,46 +744,71 @@ export const createComment: CreateComment = async formData => {
     const ticketUrl = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
     const userName = user.simpleFullName || user.name;
 
-    const contacts = parentComment
-      ? new Set([parentComment?.partner?.id])
-      : new Set([ticket.createdByContact?.id, ticket.managedByContact?.id]);
-
-    contacts.delete(user.id); // remove the commenter from the list
+    const contacts = uniqueById(
+      parentComment?.partner
+        ? [parentComment.partner]
+        : [ticket.createdByContact, ticket.managedByContact],
+    ).filter(c => c.id !== user.id); // exclude the commenter from the list
 
     if (parentComment) {
-      if (parentComment.partner?.id) {
+      const [partner] = contacts;
+      if (partner) {
+        const tr = getTranslation.bind(null, {
+          locale: partner.localization?.code || DEFAULT_LOCALE,
+          user: partner,
+          tenant: tenantId,
+        });
         notifyUser({
-          userId: parentComment.partner.id,
+          userId: partner.id,
           tenantId,
           workspaceURL,
           payload: {
-            title: `${userName} replied to your comment on ${ticket.name}`,
+            title: await tr(
+              '{0} replied to your comment on {1}',
+              userName,
+              ticket.name,
+            ),
             body: commentBody,
             url: ticketUrl,
             tag: NotificationTag.ticketReply(parentComment.id),
           },
           getReplacementTitle: count =>
-            `You have ${count} new replies to your comment on "${ticket.name}"`,
+            tr(
+              'You have {0} new replies to your comment on "{1}"',
+              String(count),
+              ticket.name,
+            ),
         });
       }
     } else {
-      contacts.forEach(contactId => {
-        if (contactId) {
-          notifyUser({
-            userId: contactId,
-            tenantId,
-            workspaceURL,
-            payload: {
-              title: `${userName} added a comment on ${ticket.name}`,
-              body: commentBody,
-              url: ticketUrl,
-              tag: NotificationTag.ticketComment(ticket.id),
-            },
-            getReplacementTitle: count =>
-              `You have ${count} new comments on "${ticket.name}"`,
-          });
-        }
-      });
+      for (const contact of contacts) {
+        const tr = getTranslation.bind(null, {
+          locale: contact.localization?.code || DEFAULT_LOCALE,
+          user: contact,
+          tenant: tenantId,
+        });
+        notifyUser({
+          userId: contact.id,
+          tenantId,
+          workspaceURL,
+          payload: {
+            title: await tr(
+              '{0} added a comment on {1}',
+              userName,
+              String(ticket.name),
+            ),
+            body: commentBody,
+            url: ticketUrl,
+            tag: NotificationTag.ticketComment(ticket.id),
+          },
+          getReplacementTitle: count =>
+            tr(
+              'You have {0} new comments on "{1}"',
+              String(count),
+              String(ticket.name),
+            ),
+        });
+      }
     }
 
     getMailRecipients({

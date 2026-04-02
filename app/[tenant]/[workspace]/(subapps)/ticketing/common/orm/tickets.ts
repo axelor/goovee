@@ -7,8 +7,10 @@ import {addComment} from '@/comments/orm';
 import {ModelMap, ORDER_BY, SUBAPP_CODES} from '@/constants';
 import {findSubappAccess} from '@/orm/workspace';
 import type {AOSProjectTask} from '@/goovee/.generated/models';
-import {t} from '@/locale/server';
+import {t, getTranslation} from '@/locale/server';
+import {DEFAULT_LOCALE} from '@/locale/contants';
 import {manager, type Tenant} from '@/tenant';
+import {uniqueById} from '@/utils';
 import {sql} from '@/utils/template-string';
 
 // ---- LOCAL IMPORTS ---- //
@@ -179,10 +181,10 @@ export async function createTicket({
       isPrivate: true,
       isInternal: true,
       progress: true,
-      createdByContact: {name: true},
+      createdByContact: {id: true, name: true, localization: {code: true}},
       project: {name: true},
       ...(managedBy && {
-        managedByContact: {name: true},
+        managedByContact: {id: true, name: true, localization: {code: true}},
       }),
       ...(category && {projectTaskCategory: {name: true}}),
       ...(priority && {priority: {name: true}}),
@@ -279,28 +281,36 @@ export async function createTicket({
     console.error(e);
   }
 
-  const contacts = new Set([
-    newTicket.createdByContact?.id,
-    newTicket.managedByContact?.id,
-  ]);
+  const contacts = uniqueById([
+    newTicket.createdByContact,
+    newTicket.managedByContact,
+  ]).filter(c => String(c.id) !== String(auth.user.id)); // exclude the ticket creator — they performed the action
 
-  contacts.delete(String(auth.user.id)); // exclude the ticket creator — they performed the action
-
-  contacts.forEach(contactId => {
-    if (contactId) {
-      notifyUser({
-        userId: contactId,
-        tenantId: auth.tenantId,
-        workspaceURL: auth.workspaceURL,
-        payload: {
-          title: `${auth.user.simpleFullName} created a new ticket`,
-          body: `${auth.user.simpleFullName} created a new ticket: ${newTicket.name}`,
-          url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
-          tag: NotificationTag.ticketUpdate(newTicket.id),
-        },
-      });
-    }
-  });
+  for (const contact of contacts) {
+    const tr = getTranslation.bind(null, {
+      locale: contact.localization?.code || DEFAULT_LOCALE,
+      user: contact,
+      tenant: auth.tenantId,
+    });
+    notifyUser({
+      userId: contact.id,
+      tenantId: auth.tenantId,
+      workspaceURL: auth.workspaceURL,
+      payload: {
+        title: await tr(
+          '{0} created a new ticket',
+          auth.user.simpleFullName ?? '',
+        ),
+        body: await tr(
+          '{0} created a new ticket: {1}',
+          auth.user.simpleFullName ?? '',
+          String(newTicket.name),
+        ),
+        url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+        tag: NotificationTag.ticketUpdate(newTicket.id),
+      },
+    });
+  }
 
   getMailRecipients({
     contacts,
@@ -337,8 +347,8 @@ const updateSelect = {
   priority: {name: true},
   status: {name: true},
   assignment: true,
-  managedByContact: {name: true},
-  createdByContact: {name: true},
+  managedByContact: {id: true, name: true, localization: {code: true}},
+  createdByContact: {id: true, name: true, localization: {code: true}},
 } satisfies SelectOptions<AOSProjectTask>;
 
 export type UTicket = Payload<AOSProjectTask, {select: typeof updateSelect}>;
@@ -527,29 +537,34 @@ export async function updateTicket({
     console.error(e);
   }
 
-  const contacts = new Set([
-    newTicket.createdByContact?.id,
-    newTicket.managedByContact?.id,
-    oldTicket?.managedByContact?.id,
-  ]);
+  const contacts = uniqueById([
+    newTicket.createdByContact,
+    newTicket.managedByContact,
+    oldTicket?.managedByContact,
+  ]).filter(c => String(c.id) !== String(auth.user.id)); // exclude the user who performed the update
 
-  contacts.delete(String(auth.user.id)); // exclude the user who performed the update
-
-  contacts.forEach(contactId => {
-    if (contactId) {
-      notifyUser({
-        userId: contactId,
-        tenantId: auth.tenantId,
-        workspaceURL: auth.workspaceURL,
-        payload: {
-          title: `${auth.user.simpleFullName} updated a ticket`,
-          body: `${auth.user.simpleFullName} updated a ticket: ${newTicket.name}`,
-          url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
-          tag: NotificationTag.ticketUpdate(newTicket.id),
-        },
-      });
-    }
-  });
+  for (const contact of contacts) {
+    const tr = getTranslation.bind(null, {
+      locale: contact.localization?.code || DEFAULT_LOCALE,
+      user: contact,
+      tenant: auth.tenantId,
+    });
+    notifyUser({
+      userId: contact.id,
+      tenantId: auth.tenantId,
+      workspaceURL: auth.workspaceURL,
+      payload: {
+        title: await tr('{0} updated a ticket', auth.user.simpleFullName ?? ''),
+        body: await tr(
+          '{0} updated a ticket: {1}',
+          auth.user.simpleFullName ?? '',
+          String(newTicket.name),
+        ),
+        url: `${auth.workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+        tag: NotificationTag.ticketUpdate(newTicket.id),
+      },
+    });
+  }
 
   getMailRecipients({
     contacts,

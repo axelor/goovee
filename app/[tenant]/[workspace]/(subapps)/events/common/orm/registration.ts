@@ -90,7 +90,11 @@ export async function registerParticipants({
       },
       participantList: {
         select: {
-          contact: {isActivatedOnPortal: true, emailAddress: {address: true}},
+          contact: {
+            isActivatedOnPortal: true,
+            emailAddress: {address: true},
+            localization: {code: true},
+          },
         },
       },
     },

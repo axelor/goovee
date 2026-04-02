@@ -13,7 +13,8 @@ import {
 } from '@/comments';
 import {addComment, findComments} from '@/comments/orm';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
-import {t, tattr} from '@/locale/server';
+import {t, tattr, getTranslation} from '@/locale/server';
+import {DEFAULT_LOCALE} from '@/locale/contants';
 import {TENANT_HEADER} from '@/proxy';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {ID, PaymentOption, PortalWorkspace, User} from '@/types';
@@ -227,19 +228,25 @@ export async function register({
     );
   }
 
-  userParticipants?.forEach(participant => {
+  for (const participant of userParticipants ?? []) {
+    const contact = participant.contact!;
+    const tr = getTranslation.bind(null, {
+      locale: contact.localization?.code || DEFAULT_LOCALE,
+      user: contact,
+      tenant: tenantId,
+    });
     notifyUser({
-      userId: participant.contact!.id,
+      userId: contact.id,
       tenantId,
       workspaceURL,
       payload: {
-        title: `You have been registered for an event!`,
+        title: await tr('You have been registered for an event!'),
         body: `${registration.event!.eventTitle}`,
         url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
         tag: NotificationTag.event(registration.event!.id),
       },
     });
-  });
+  }
 
   generateRegistrationMailAction({
     eventId,
@@ -415,18 +422,31 @@ export const createComment: CreateComment = async formData => {
     if (parentComment?.partner?.id) {
       const userName = user.simpleFullName || user.name;
       const eventUrl = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
+      const tr = getTranslation.bind(null, {
+        locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
+        user: parentComment.partner,
+        tenant: tenantId,
+      });
       notifyUser({
         userId: parentComment.partner.id,
         tenantId,
         workspaceURL,
         payload: {
-          title: `${userName} replied to your comment on ${event.eventTitle}`,
+          title: await tr(
+            '{0} replied to your comment on {1}',
+            userName,
+            event.eventTitle ?? '',
+          ),
           body: comment.note ?? '',
           url: eventUrl,
           tag: NotificationTag.eventReply(parentComment.id),
         },
         getReplacementTitle: count =>
-          `You have ${count} new replies to your comment on "${event.eventTitle}"`,
+          tr(
+            'You have {0} new replies to your comment on "{1}"',
+            String(count),
+            event.eventTitle ?? '',
+          ),
       });
     }
 

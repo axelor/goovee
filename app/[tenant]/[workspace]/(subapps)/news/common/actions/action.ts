@@ -4,7 +4,8 @@ import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
-import {t} from '@/locale/server';
+import {t, getTranslation} from '@/locale/server';
+import {DEFAULT_LOCALE} from '@/locale/contants';
 import {getSession} from '@/auth';
 import {ModelMap, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
@@ -210,18 +211,31 @@ export const createComment: CreateComment = async formData => {
     if (parentComment?.partner?.id) {
       const userName = user.simpleFullName || user.name;
       const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}`;
+      const tr = getTranslation.bind(null, {
+        locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
+        user: parentComment.partner,
+        tenant: tenantId,
+      });
       notifyUser({
         userId: parentComment.partner.id,
         tenantId,
         workspaceURL,
         payload: {
-          title: `${userName} replied to your comment on ${newsItem.title}`,
+          title: await tr(
+            '{0} replied to your comment on {1}',
+            userName ?? '',
+            newsItem.title ?? '',
+          ),
           body: comment.note ?? '',
           url: newsUrl,
           tag: NotificationTag.newsReply(parentComment.id),
         },
         getReplacementTitle: count =>
-          `You have ${count} new replies to your comment on "${newsItem.title}"`,
+          tr(
+            'You have {0} new replies to your comment on "{1}"',
+            String(count),
+            newsItem.title ?? '',
+          ),
       });
     }
 

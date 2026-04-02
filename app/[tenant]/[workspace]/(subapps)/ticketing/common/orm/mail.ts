@@ -8,15 +8,15 @@ export async function getMailRecipients({
   workspaceURL,
   tenantId,
 }: {
-  contacts: Set<Maybe<ID>>;
+  contacts: Array<{id: Maybe<ID>}>;
   workspaceURL: string;
   tenantId: Tenant['id'];
 }): Promise<NotificationPartner[]> {
   const reciepients = await Promise.all(
-    Array.from(contacts).map(
+    contacts.map(
       contact =>
-        contact &&
-        findPartnerNotificationEmail({id: contact, workspaceURL, tenantId}),
+        contact.id &&
+        findPartnerNotificationEmail({id: contact.id, workspaceURL, tenantId}),
     ),
   );
 

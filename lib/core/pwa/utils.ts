@@ -65,7 +65,7 @@ export async function notifyUser({
    * "You have 3 new comments on X" that replace previous push notifications
    * in the OS tray via the tag mechanism.
    */
-  getReplacementTitle?: (count: number) => string;
+  getReplacementTitle?: (count: number) => string | Promise<string>;
 }) {
   const client = await manager.getClient(tenantId);
   if (!client) return;
@@ -83,9 +83,9 @@ export async function notifyUser({
     }
   }
 
-  const pushTitle =
+  const pushTitle: string =
     getReplacementTitle && unreadCount > 1
-      ? getReplacementTitle(unreadCount)
+      ? await getReplacementTitle(unreadCount)
       : payload.title;
 
   // 2. Store the notification in the database for history/unread count

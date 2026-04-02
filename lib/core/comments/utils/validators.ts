@@ -72,12 +72,17 @@ const UserSchema = z.object({
   fullName: z.string().nullish(),
 });
 
+const LocalizationSchema = z.object({
+  code: z.string().nullish(),
+});
+
 const PartnerSchema = z.object({
   id: IDSchema,
   version: z.number(),
   picture: PictureSchema.nullish(),
   simpleFullName: z.string().nullish(),
   name: z.string().nullish(),
+  localization: LocalizationSchema.nullish(),
 });
 
 const MailMessageSchema = z.object({

@@ -97,3 +97,14 @@ export function htmlToNormalString(htmlString: string) {
 export function getPartnerId(user: User): number {
   return Number(user.isContact ? user.mainPartnerId : user.id);
 }
+
+export function uniqueById<T extends {id: unknown}>(
+  items: (T | null | undefined)[],
+): T[] {
+  const seen = new Set();
+  return items.filter((item): item is T => {
+    if (!item?.id || seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}

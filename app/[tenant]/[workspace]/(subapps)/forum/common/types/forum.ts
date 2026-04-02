@@ -95,14 +95,15 @@ export enum ContentType {
 }
 
 export interface Subscriber {
-  notificationSelect: string;
+  notificationSelect: string | null;
   member: {
     id: string | number;
     emailAddress: {
-      address: string;
-    };
-    simpleFullName: string;
-  };
+      address: string | null;
+    } | null;
+    simpleFullName: string | null;
+    localization?: {code: string | null} | null;
+  } | null;
 }
 
 export interface NotificationParams {
