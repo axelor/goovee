@@ -401,7 +401,7 @@ export const createComment: CreateComment = async formData => {
   }
 
   try {
-    const res = await addComment({
+    const [comment, parentComment] = await addComment({
       modelName,
       userId: user.id,
       workspaceUserId: workspaceUser.id,
@@ -412,7 +412,25 @@ export const createComment: CreateComment = async formData => {
       ...rest,
     });
 
-    return {success: true, data: clone(res)};
+    if (parentComment?.partner?.id) {
+      const userName = user.simpleFullName || user.name;
+      const eventUrl = `${workspaceURL}/${SUBAPP_CODES.events}/${event.slug}`;
+      notifyUser({
+        userId: parentComment.partner.id,
+        tenantId,
+        workspaceURL,
+        payload: {
+          title: `${userName} replied to your comment on ${event.eventTitle}`,
+          body: comment.note ?? '',
+          url: eventUrl,
+          tag: NotificationTag.eventReply(parentComment.id),
+        },
+        getReplacementTitle: count =>
+          `You have ${count} new replies to your comment on "${event.eventTitle}"`,
+      });
+    }
+
+    return {success: true, data: clone([comment, parentComment])};
   } catch (e) {
     return {
       error: true,

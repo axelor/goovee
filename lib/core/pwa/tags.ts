@@ -26,6 +26,15 @@ export const NotificationTag = {
   /** Ticket created or updated */
   ticketUpdate: (ticketId: ID) => `ticket:${ticketId}:update`,
 
+  /** Reply to an event comment */
+  eventReply: (commentId: ID) => `event:comment:${commentId}:reply`,
+
+  /** Reply to a quotation comment */
+  quotationReply: (commentId: ID) => `quotation:comment:${commentId}:reply`,
+
+  /** Reply to a news comment */
+  newsReply: (commentId: ID) => `news:comment:${commentId}:reply`,
+
   /** Event registration confirmation */
   event: (eventId: ID) => `event:${eventId}`,
 

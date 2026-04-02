@@ -20,6 +20,8 @@ import {
 import {zodParseFormData} from '@/utils/formdata';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey} from '@/types';
+import {notifyUser} from '@/pwa/utils';
+import {NotificationTag} from '@/pwa/tags';
 
 // ---- LOCAL IMPORTS ---- //
 import {findQuotation} from '../orm/quotations';
@@ -89,7 +91,7 @@ export const createComment: CreateComment = async formData => {
   }
 
   try {
-    const res = await addComment({
+    const [comment, parentComment] = await addComment({
       modelName,
       userId: user.id,
       workspaceUserId: workspaceUser.id,
@@ -100,7 +102,25 @@ export const createComment: CreateComment = async formData => {
       ...rest,
     });
 
-    return {success: true, data: clone(res)};
+    if (parentComment?.partner?.id) {
+      const userName = user.simpleFullName || user.name;
+      const quotationUrl = `${workspaceURL}/${SUBAPP_CODES.quotations}/${rest.recordId}`;
+      notifyUser({
+        userId: parentComment.partner.id,
+        tenantId,
+        workspaceURL,
+        payload: {
+          title: `${userName} replied to your comment on ${quotation.saleOrderSeq}`,
+          body: comment.body ?? '',
+          url: quotationUrl,
+          tag: NotificationTag.quotationReply(parentComment.id),
+        },
+        getReplacementTitle: count =>
+          `You have ${count} new replies to your comment on "${quotation.saleOrderSeq}"`,
+      });
+    }
+
+    return {success: true, data: clone([comment, parentComment])};
   } catch (e) {
     return {
       error: true,

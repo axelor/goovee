@@ -19,6 +19,8 @@ import {
   isCommentEnabled,
 } from '@/comments';
 import {zodParseFormData} from '@/utils/formdata';
+import {notifyUser} from '@/pwa/utils';
+import {NotificationTag} from '@/pwa/tags';
 
 // ---- LOCAL IMPORTS ---- //
 import {findNews} from '@/subapps/news/common/orm/news';
@@ -191,8 +193,10 @@ export const createComment: CreateComment = async formData => {
     return {error: true, message: await t('Record not found')};
   }
 
+  const newsItem = news[0];
+
   try {
-    const res = await addComment({
+    const [comment, parentComment] = await addComment({
       modelName,
       userId: user.id,
       workspaceUserId: workspaceUser.id,
@@ -203,7 +207,25 @@ export const createComment: CreateComment = async formData => {
       ...rest,
     });
 
-    return {success: true, data: clone(res)};
+    if (parentComment?.partner?.id) {
+      const userName = user.simpleFullName || user.name;
+      const newsUrl = `${workspaceURL}/${SUBAPP_CODES.news}/${newsItem.slug}`;
+      notifyUser({
+        userId: parentComment.partner.id,
+        tenantId,
+        workspaceURL,
+        payload: {
+          title: `${userName} replied to your comment on ${newsItem.title}`,
+          body: comment.note ?? '',
+          url: newsUrl,
+          tag: NotificationTag.newsReply(parentComment.id),
+        },
+        getReplacementTitle: count =>
+          `You have ${count} new replies to your comment on "${newsItem.title}"`,
+      });
+    }
+
+    return {success: true, data: clone([comment, parentComment])};
   } catch (e) {
     return {
       error: true,
