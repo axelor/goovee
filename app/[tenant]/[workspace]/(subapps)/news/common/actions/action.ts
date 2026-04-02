@@ -6,7 +6,7 @@ import {headers} from 'next/headers';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
-import {ModelMap, ORDER_BY, SUBAPP_CODES} from '@/constants';
+import {ModelMap, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {TENANT_HEADER} from '@/proxy';
 import {type Tenant} from '@/tenant';
@@ -209,7 +209,7 @@ export const createComment: CreateComment = async formData => {
 
     if (parentComment?.partner?.id) {
       const userName = user.simpleFullName || user.name;
-      const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${newsItem.slug}`;
+      const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}`;
       notifyUser({
         userId: parentComment.partner.id,
         tenantId,
