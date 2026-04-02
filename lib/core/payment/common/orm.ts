@@ -78,6 +78,7 @@ export async function findPaymentContext({
       createdOn: true,
       mode: true,
       status: true,
+      payer: true,
     },
   });
 
@@ -101,6 +102,7 @@ export async function findPaymentContext({
     data: await context.data,
     mode: context.mode as PaymentOption,
     status: context.status as ContextStatus,
+    payer: context.payer,
   };
 }
 

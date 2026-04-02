@@ -21,9 +21,9 @@ import {
   notifyPaymentUpdate,
   PAYMENT_UPDATE_STATUS,
 } from '@/lib/core/payment/sse';
-
 // --- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
+import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
 
 export const STRIPE_EVENTS = {
   PAYMENT_INTENT_SUCCEEDED: 'payment_intent.succeeded',
@@ -220,6 +220,13 @@ export async function POST(req: Request) {
             });
 
             notifyPaymentUpdate(source, sourceId, paymentContext.id);
+            if (paymentContext.payer) {
+              notifyInvoicePaymentSuccess({
+                invoiceId: sourceId,
+                payer: paymentContext.payer,
+                tenantId,
+              });
+            }
 
             break;
           }

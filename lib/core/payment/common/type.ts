@@ -38,4 +38,5 @@ export type PaymentContext = {
   data: any;
   mode: PaymentOption;
   status: ContextStatus;
+  payer?: string | null;
 };

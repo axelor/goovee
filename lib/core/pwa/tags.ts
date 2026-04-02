@@ -35,6 +35,9 @@ export const NotificationTag = {
   /** Reply to a news comment */
   newsReply: (commentId: ID) => `news:comment:${commentId}:reply`,
 
+  /** Invoice payment received (bank transfer) */
+  invoicePayment: (invoiceId: ID) => `invoice:${invoiceId}:payment`,
+
   /** Event registration confirmation */
   event: (eventId: ID) => `event:${eventId}`,
 

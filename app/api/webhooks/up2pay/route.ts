@@ -14,9 +14,9 @@ import {UP2PAY_ERRORS, UP2PAY_ERROR_MESSAGES} from '@/payment/up2pay/constants';
 import {readPEMFile, verifySignature} from '@/payment/up2pay/crypto';
 import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
-
 // ---- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
+import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
 
 export async function GET(request: Request) {
   const parsed = new URL(request.url);
@@ -195,6 +195,13 @@ export async function GET(request: Request) {
         return new NextResponse('Internal Server Error', {status: 500});
       }
 
+      if (paymentContext.payer) {
+        notifyInvoicePaymentSuccess({
+          invoiceId: entityId,
+          payer: paymentContext.payer,
+          tenantId,
+        });
+      }
       break;
     }
 

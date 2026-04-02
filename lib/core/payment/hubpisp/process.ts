@@ -10,6 +10,7 @@ import {HUBPISP_TRANSACTION_STATUS} from './constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
+import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
 
 /**
  * Applies a terminal transaction status (ACSC / CANC / RJCT) to the payment context:
@@ -106,6 +107,14 @@ export async function processAcscPayment({
           tenantId,
         });
         return;
+      }
+
+      if (paymentContext.payer) {
+        notifyInvoicePaymentSuccess({
+          invoiceId: entityId,
+          payer: paymentContext.payer,
+          tenantId,
+        });
       }
       break;
     }
