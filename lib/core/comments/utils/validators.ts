@@ -43,6 +43,7 @@ export const FetchCommentsPropsSchema = z.object({
 export const CreateCommentPropsSchema = z.object({
   data: formSchema,
   workspaceURL: z.string(),
+  workspaceURI: z.string(),
   recordId: IDSchema,
   parentId: IDSchema.optional(),
   showRepliesInMainThread: z.boolean().optional(),

@@ -47,7 +47,7 @@ export function useComments(props: UseCommentsProps) {
   const [fetching, setFetching] = useState(false);
   const [creating, setCreating] = useState(false);
   const [totalComments, setTotalComments] = useState(0);
-  const {workspaceURL} = useWorkspace();
+  const {workspaceURL, workspaceURI} = useWorkspace();
   const {toast} = useToast();
 
   const loadComments = useCallback(
@@ -107,6 +107,7 @@ export function useComments(props: UseCommentsProps) {
         const createCommentProps: CreateCommentProps = {
           data: commentData,
           workspaceURL,
+          workspaceURI,
           recordId,
           parentId: parent,
           showRepliesInMainThread,
@@ -153,6 +154,7 @@ export function useComments(props: UseCommentsProps) {
     },
     [
       workspaceURL,
+      workspaceURI,
       recordId,
       toast,
       newCommentOnTop,

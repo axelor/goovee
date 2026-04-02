@@ -677,7 +677,7 @@ export const createComment: CreateComment = async formData => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {workspaceURL, ...rest} = zodParseFormData(
+  const {workspaceURL, workspaceURI, ...rest} = zodParseFormData(
     formData,
     CreateCommentPropsSchema,
   );
@@ -740,7 +740,7 @@ export const createComment: CreateComment = async formData => {
       .replace(/\s+/g, ' ')
       .trim();
 
-    const ticketUrl = `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
+    const ticketUrl = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
     const userName = user.simpleFullName || user.name;
 
     const contacts = parentComment

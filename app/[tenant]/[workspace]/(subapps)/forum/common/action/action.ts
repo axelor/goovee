@@ -859,7 +859,7 @@ export const createComment: CreateComment = async formData => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {workspaceURL, ...rest} = zodParseFormData(
+  const {workspaceURL, workspaceURI, ...rest} = zodParseFormData(
     formData,
     CreateCommentPropsSchema,
   );
@@ -946,6 +946,7 @@ export const createComment: CreateComment = async formData => {
 
         if (!('error' in subscribers)) {
           const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
+          const postLinkRelative = `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
 
           const notificationRecievers = subscribers.filter(
             sub => sub.member?.id !== user.id, // exclude the commenter
@@ -962,7 +963,7 @@ export const createComment: CreateComment = async formData => {
                 payload: {
                   title: `${user.simpleFullName || user.name} replied to your comment`,
                   body: comment.note ?? '',
-                  url: postLink,
+                  url: postLinkRelative,
                   tag: NotificationTag.forumReply(parentComment.id),
                 },
                 getReplacementTitle: count =>
@@ -1002,7 +1003,7 @@ export const createComment: CreateComment = async formData => {
                   payload: {
                     title: `${user.simpleFullName || user.name} added a comment`,
                     body: comment.note ?? '',
-                    url: postLink,
+                    url: postLinkRelative,
                     tag: NotificationTag.forumPostComment(post.id),
                   },
                   getReplacementTitle: count =>

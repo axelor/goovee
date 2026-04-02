@@ -356,7 +356,7 @@ export const createComment: CreateComment = async formData => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {workspaceURL, ...rest} = zodParseFormData(
+  const {workspaceURL, workspaceURI, ...rest} = zodParseFormData(
     formData,
     CreateCommentPropsSchema,
   );
@@ -414,7 +414,7 @@ export const createComment: CreateComment = async formData => {
 
     if (parentComment?.partner?.id) {
       const userName = user.simpleFullName || user.name;
-      const eventUrl = `${workspaceURL}/${SUBAPP_CODES.events}/${event.slug}`;
+      const eventUrl = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
       notifyUser({
         userId: parentComment.partner.id,
         tenantId,
