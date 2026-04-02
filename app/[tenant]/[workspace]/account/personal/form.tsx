@@ -2,7 +2,6 @@
 
 import {useMemo, useRef, useState} from 'react';
 import {usePathname, useRouter} from 'next/navigation';
-import {authClient} from '@/lib/auth-client';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -38,7 +37,7 @@ import {getPartnerImageURL} from '@/utils/files';
 import type {ID} from '@/types';
 import {cn} from '@/utils/css';
 import {useWorkspace} from '../../workspace-context';
-import {usePushNotifications} from '@/pwa/push-context';
+import {useSignOut} from '@/ui/hooks';
 import {
   Select,
   SelectContent,
@@ -146,7 +145,7 @@ export default function Personal({
   const pathname = usePathname();
   const {toast} = useToast();
   const {tenant, workspaceURL, workspaceURI} = useWorkspace();
-  const {unsubscribe} = usePushNotifications();
+  const signOut = useSignOut();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<any>(pictureProp);
   const [updatingPicture, setUpdatingPicture] = useState(false);
@@ -216,12 +215,7 @@ export default function Personal({
          * Update session when change in email or main partner for contact
          */
         if (editEmail || isMainPartnerUpdated) {
-          try {
-            await unsubscribe();
-          } catch (error) {
-            console.error('Failed to unsubscribe on session change:', error);
-          }
-          await authClient.signOut();
+          await signOut();
 
           const loginURL = getLoginURL({
             callbackurl: pathname,
