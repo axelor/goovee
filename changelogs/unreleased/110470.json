@@ -2,5 +2,5 @@
   "title": "Send payment mode when registering invoice payment",
   "type": "feature",
   "description": "The portal currently sends only the invoice ID and the paid amount when registering a payment on AOS. AOS has no way to know which payment provider was used. Now that each PortalPaymentConfig has a linked PaymentMode on the AOS side (see AOS ticket), Goovee must resolve and send the corresponding payment mode ID.",
-  "scope": ["core", "invoices"]
+  "scope": ["core", "invoices", "events", "orders"]
 }

@@ -1,0 +1,15 @@
+{
+  "name": "AOSPaymentMode",
+  "table": "account_payment_mode",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "name"
+    },
+    {
+      "type": "String",
+      "name": "code"
+    }
+  ]
+}
