@@ -57,19 +57,19 @@ export async function Home({
 
   const showNews =
     workspace.config?.isHomepageDisplayNews &&
-    apps.some(app => app.code === SUBAPP_CODES.news);
+    apps.some(app => app.code === SUBAPP_CODES.news && app.isInstalled);
 
   const showEvents =
     workspace.config?.isHomepageDisplayEvents &&
-    apps.some(app => app.code === SUBAPP_CODES.events);
+    apps.some(app => app.code === SUBAPP_CODES.events && app.isInstalled);
 
   const showForum =
     workspace.config?.isHomepageDisplayMessage &&
-    apps.some(app => app.code === SUBAPP_CODES.forum);
+    apps.some(app => app.code === SUBAPP_CODES.forum && app.isInstalled);
 
   const showResources =
     workspace.config?.isHomepageDisplayResources &&
-    apps.some(app => app.code === SUBAPP_CODES.resources);
+    apps.some(app => app.code === SUBAPP_CODES.resources && app.isInstalled);
 
   const hasContents = showEvents || showForum || showResources;
 
