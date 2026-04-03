@@ -962,7 +962,10 @@ export const createComment: CreateComment = async formData => {
           const isReply = Boolean(parentComment);
 
           if (isReply) {
-            if (parentComment?.partner?.id) {
+            if (
+              parentComment?.partner?.id &&
+              parentComment.partner.id !== user.id
+            ) {
               const tr = getTranslation.bind(null, {
                 locale:
                   parentComment.partner.localization?.code || DEFAULT_LOCALE,

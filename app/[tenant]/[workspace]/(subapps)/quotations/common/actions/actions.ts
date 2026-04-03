@@ -103,7 +103,7 @@ export const createComment: CreateComment = async formData => {
       ...rest,
     });
 
-    if (parentComment?.partner?.id) {
+    if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name;
       const quotationUrl = `${workspaceURI}/${SUBAPP_CODES.quotations}/${rest.recordId}`;
       const tr = getTranslation.bind(null, {

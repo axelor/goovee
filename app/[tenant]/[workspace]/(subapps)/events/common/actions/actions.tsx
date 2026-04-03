@@ -418,7 +418,7 @@ export const createComment: CreateComment = async formData => {
       ...rest,
     });
 
-    if (parentComment?.partner?.id) {
+    if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name;
       const eventUrl = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
       const tr = getTranslation.bind(null, {
