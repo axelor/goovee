@@ -978,7 +978,7 @@ export const createComment: CreateComment = async formData => {
                     user.simpleFullName || user.name || '',
                   ),
                   body: comment.note ?? '',
-                  url: `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#comment-${parentComment.id}`,
+                  url: `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
                   tag: NotificationTag.forumReply(parentComment.id),
                 },
                 getReplacementTitle: count =>
@@ -1025,7 +1025,7 @@ export const createComment: CreateComment = async formData => {
                       user.simpleFullName || user.name || '',
                     ),
                     body: comment.note ?? '',
-                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#comment-${comment.id}`,
+                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
                     tag: NotificationTag.forumPostComment(post.id),
                   },
                   getReplacementTitle: count =>
