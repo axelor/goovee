@@ -210,7 +210,7 @@ export const createComment: CreateComment = async formData => {
 
     if (parentComment?.partner?.id) {
       const userName = user.simpleFullName || user.name;
-      const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}`;
+      const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}?#comment-${parentComment.id}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,

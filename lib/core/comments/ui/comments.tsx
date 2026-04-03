@@ -1,7 +1,7 @@
 'use client';
 
 import {authClient} from '@/lib/auth-client';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {
   MdAdd,
   MdClose,
@@ -91,6 +91,7 @@ export function Comments(props: CommentsProps) {
   const inputOnTop = inputPosition === 'top';
   const [showComments, setShowComments] = useState(showCommentsByDefault);
   const [sortBy, setSortBy] = useState<SORT_TYPE>(sortByProp);
+  const hasScrolled = useRef(false);
 
   const {comments, totalComments, loadMore, onCreate, hasMore} = useComments({
     recordId,
@@ -107,6 +108,42 @@ export function Comments(props: CommentsProps) {
   const isDisabled = !isLoggedIn || disabled;
 
   const {tenant} = useWorkspace();
+
+  /* Scroll to the comment referenced in the URL hash (#comment-{id}) on first load. */
+  useEffect(() => {
+    if (hasScrolled.current || !comments.length) return;
+
+    const match = window.location.hash.match(/^#comment-(.+)$/);
+    if (!match) return;
+
+    const commentId = match[1];
+
+    const isLoaded = comments.some(
+      c =>
+        String(c.id) === commentId ||
+        c.childMailMessages?.some(child => String(child.id) === commentId),
+    );
+
+    if (!isLoaded) return;
+
+    hasScrolled.current = true;
+    setShowComments(true);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const element = document.getElementById(`comment-${commentId}`);
+        if (!element) return;
+        element.classList.add(
+          'transition-colors',
+          'duration-500',
+          'ease-out',
+          'bg-success-light',
+        );
+        element.scrollIntoView({behavior: 'smooth', block: 'center'});
+        setTimeout(() => element.classList.remove('bg-success-light'), 1000);
+      });
+    });
+  }, [comments]);
 
   const toggleComments = () => {
     if (comments.length > 0) {

@@ -768,7 +768,7 @@ export const createComment: CreateComment = async formData => {
               ticket.name,
             ),
             body: commentBody,
-            url: ticketUrl,
+            url: `${ticketUrl}#comment-${parentComment.id}`,
             tag: NotificationTag.ticketReply(parentComment.id),
           },
           getReplacementTitle: count =>
@@ -796,7 +796,7 @@ export const createComment: CreateComment = async formData => {
               String(ticket.name),
             ),
             body: commentBody,
-            url: ticketUrl,
+            url: `${ticketUrl}#comment-${comment.id}`,
             tag: NotificationTag.ticketComment(ticket.id),
           },
           getReplacementTitle: count =>
