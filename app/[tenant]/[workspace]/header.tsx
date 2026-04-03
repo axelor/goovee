@@ -5,8 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
-import {usePushNotifications} from '@/pwa/push-context';
-import {MdNotificationsNone} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -17,7 +15,6 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-  Badge,
 } from '@/ui/components';
 import {i18n} from '@/locale';
 import {DEFAULT_LOGO_URL, SUBAPP_PAGE} from '@/constants';
@@ -30,6 +27,7 @@ import Cart from '@/app/[tenant]/[workspace]/cart';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
+import {Notification} from './notification';
 
 function Logo({workspace}: {workspace: PortalWorkspace}) {
   const {workspaceURI} = useWorkspace();
@@ -52,28 +50,6 @@ function Logo({workspace}: {workspace: PortalWorkspace}) {
           />
         </div>
       </div>
-    </Link>
-  );
-}
-
-function Notification() {
-  const {unreadNotifications} = usePushNotifications();
-  const {workspaceURI} = useWorkspace();
-
-  const count = unreadNotifications.length;
-
-  return (
-    <Link
-      href={`${workspaceURI}/notifications`}
-      className="inline-flex relative">
-      <MdNotificationsNone className="cursor-pointer text-foreground text-2xl" />
-      {count > 0 && (
-        <Badge
-          variant="destructive"
-          className="absolute -top-1 -right-1 h-4 w-4 min-w-0 p-0 flex items-center justify-center text-[10px] border-2 border-background">
-          {count > 9 ? '9+' : count}
-        </Badge>
-      )}
     </Link>
   );
 }

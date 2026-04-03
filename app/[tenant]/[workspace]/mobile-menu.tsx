@@ -23,6 +23,7 @@ import {i18n} from '@/locale';
 import {useNavigationVisibility} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
 import {useEnvironment} from '@/lib/core/environment';
+import {Notification} from './notification';
 
 function MobileSidebar({subapps, workspaces, workspace}: any) {
   const pathname = usePathname();
@@ -196,6 +197,8 @@ export function MobileMenu({subapps, workspaces, workspace, showCart}: any) {
           />
         )}
         {showCart && <Cart />}
+
+        {user && <Notification />}
         <Account baseURL={workspaceURI} tenant={tenant} />
       </div>
     </nav>
