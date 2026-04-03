@@ -891,5 +891,6 @@
   "{0} updated a ticket": "{0} updated a ticket",
   "{0} updated a ticket: {1}": "{0} updated a ticket: {1}",
   "You have been registered for an event!": "You have been registered for an event!",
-  "Payment received for invoice {0}": "Payment received for invoice {0}"
+  "Payment received for invoice {0}": "Payment received for invoice {0}",
+  "Enable push notifications to receive real-time updates even when you are not on the site.": "Enable push notifications to receive real-time updates even when you are not on the site."
 }

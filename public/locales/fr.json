@@ -891,5 +891,6 @@
   "{0} updated a ticket": "{0} a mis à jour un ticket",
   "{0} updated a ticket: {1}": "{0} a mis à jour un ticket : {1}",
   "You have been registered for an event!": "Vous avez été inscrit à un événement !",
-  "Payment received for invoice {0}": "Paiement reçu pour la facture {0}"
+  "Payment received for invoice {0}": "Paiement reçu pour la facture {0}",
+  "Enable push notifications to receive real-time updates even when you are not on the site.": "Activez les notifications push pour recevoir des mises à jour en temps réel même lorsque vous n'êtes pas sur le site."
 }
