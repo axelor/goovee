@@ -121,7 +121,7 @@ export const createComment: CreateComment = async formData => {
             quotation.saleOrderSeq ?? '',
           ),
           body: comment.body ?? '',
-          url: `${quotationUrl}#comment-${parentComment.id}`,
+          url: `${quotationUrl}#comment-${comment.id}`,
           tag: NotificationTag.quotationReply(parentComment.id),
         },
         getReplacementTitle: count =>

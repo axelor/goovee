@@ -436,7 +436,7 @@ export const createComment: CreateComment = async formData => {
             event.eventTitle ?? '',
           ),
           body: comment.note ?? '',
-          url: `${eventUrl}#comment-${parentComment.id}`,
+          url: `${eventUrl}#comment-${comment.id}`,
           tag: NotificationTag.eventReply(parentComment.id),
         },
         getReplacementTitle: count =>
