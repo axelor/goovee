@@ -182,7 +182,10 @@ export async function POST(req: Request) {
             if (updateResult?.error) {
               // Do NOT mark as failed — payment was already received by Stripe.
               // Return 500 so Stripe retries the webhook for this transient error.
-              console.error('Invoice update failed: ', updateResult.error);
+              console.error(
+                '[STRIPE][WEBHOOK] Invoice update failed: ',
+                updateResult.message,
+              );
               return new NextResponse('Invoice update failed', {status: 500});
             }
 
