@@ -18,24 +18,28 @@ import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 // ---- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
 
-async function forwardToLegacy(request: Request): Promise<NextResponse | null> {
-  const url = process.env.UP2PAY_LEGACY_FORWARD_URL;
-  if (!url) return null;
+/**
+ * Fire-and-forget forward of the IPN to the legacy ERP.
+ * Only called when Goovee cannot process the IPN (unrecognized ref format or unknown payment context).
+ * Controlled by UP2PAY_LEGACY_FORWARD_URL — if not set, no forwarding occurs.
+ */
+function forwardToLegacy(request: Request): void {
+  const legacyUrl = process.env.UP2PAY_LEGACY_FORWARD_URL;
+  if (!legacyUrl) return;
 
   const params = new URL(request.url).searchParams;
-  const forwardUrl = `${url}?${params.toString()}`;
+  const forwardUrl = `${legacyUrl}?${params.toString()}`;
 
-  try {
-    const res = await fetch(forwardUrl, {method: 'GET'});
-    console.log('[UP2PAY][WEBHOOK] Forwarded to legacy ERP', {
-      status: res.status,
-      forwardUrl,
-    });
-    return new NextResponse('OK', {status: 200});
-  } catch (err) {
-    console.error('[UP2PAY][WEBHOOK] Legacy forward failed', {error: err});
-    return new NextResponse('OK', {status: 200});
-  }
+  fetch(forwardUrl, {method: 'GET'})
+    .then(res =>
+      console.log('[UP2PAY][WEBHOOK] Forwarded to legacy ERP', {
+        status: res.status,
+        forwardUrl,
+      }),
+    )
+    .catch(err =>
+      console.error('[UP2PAY][WEBHOOK] Legacy forward failed', {error: err}),
+    );
 }
 
 export async function GET(request: Request) {
@@ -85,13 +89,13 @@ export async function GET(request: Request) {
   const tenantId = tildeParts.length === 2 ? tildeParts[1] : null;
 
   if (!(contextId && tenantId)) {
-    const forwarded = await forwardToLegacy(request);
-    if (forwarded) return forwarded;
-
-    console.error('[UP2PAY][WEBHOOK] Missing contextId or tenantId in ref', {
-      ref,
-    });
-    return new NextResponse('Bad Request', {status: 400});
+    // Ref does not match Goovee format — likely a legacy invoice, forward to legacy ERP.
+    console.error(
+      '[UP2PAY][WEBHOOK] Ref does not match Goovee format, forwarding to legacy',
+      {ref},
+    );
+    forwardToLegacy(request);
+    return new NextResponse('OK', {status: 200});
   }
 
   const paymentContext = await findPaymentContext({
@@ -102,14 +106,16 @@ export async function GET(request: Request) {
   });
 
   if (!paymentContext) {
-    const forwarded = await forwardToLegacy(request);
-    if (forwarded) return forwarded;
-
-    console.error('[UP2PAY][WEBHOOK] Payment context not found', {
-      contextId,
-      tenantId,
-    });
-    return new NextResponse('Bad Request', {status: 400});
+    // Payment context not found — forward to legacy ERP.
+    console.error(
+      '[UP2PAY][WEBHOOK] Payment context not found, forwarding to legacy',
+      {
+        contextId,
+        tenantId,
+      },
+    );
+    forwardToLegacy(request);
+    return new NextResponse('OK', {status: 200});
   }
 
   if (paymentContext.status === CONTEXT_STATUS.processed) {
