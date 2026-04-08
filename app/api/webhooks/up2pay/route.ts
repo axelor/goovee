@@ -18,6 +18,26 @@ import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 // ---- LOCAL IMPORTS ---- //
 import {updateInvoice} from '@/subapps/invoices/common/service';
 
+async function forwardToLegacy(request: Request): Promise<NextResponse | null> {
+  const url = process.env.UP2PAY_LEGACY_FORWARD_URL;
+  if (!url) return null;
+
+  const params = new URL(request.url).searchParams;
+  const forwardUrl = `${url}?${params.toString()}`;
+
+  try {
+    const res = await fetch(forwardUrl, {method: 'GET'});
+    console.log('[UP2PAY][WEBHOOK] Forwarded to legacy ERP', {
+      status: res.status,
+      forwardUrl,
+    });
+    return new NextResponse('OK', {status: 200});
+  } catch (err) {
+    console.error('[UP2PAY][WEBHOOK] Legacy forward failed', {error: err});
+    return new NextResponse('OK', {status: 200});
+  }
+}
+
 export async function GET(request: Request) {
   const parsed = new URL(request.url);
   const params = parsed.searchParams;
@@ -65,6 +85,9 @@ export async function GET(request: Request) {
   const tenantId = tildeParts.length === 2 ? tildeParts[1] : null;
 
   if (!(contextId && tenantId)) {
+    const forwarded = await forwardToLegacy(request);
+    if (forwarded) return forwarded;
+
     console.error('[UP2PAY][WEBHOOK] Missing contextId or tenantId in ref', {
       ref,
     });
@@ -79,6 +102,9 @@ export async function GET(request: Request) {
   });
 
   if (!paymentContext) {
+    const forwarded = await forwardToLegacy(request);
+    if (forwarded) return forwarded;
+
     console.error('[UP2PAY][WEBHOOK] Payment context not found', {
       contextId,
       tenantId,
