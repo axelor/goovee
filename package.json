@@ -19,6 +19,7 @@
     "website:seed:website": "npm run website:run $npm_package_scripts_website_common_dir/scripts/seed-website.ts",
     "changelogs:validate": "node ./changelogs/validate",
     "changelogs:generate": "node ./changelogs/generate",
+    "prepare:bump": "node ./prepare-bump.js",
     "prepare:release": "node ./prepare-release.js",
     "analyze": "next experimental-analyze"
   },
