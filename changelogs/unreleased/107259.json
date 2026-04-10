@@ -1,0 +1,6 @@
+{
+  "title": "Add PWA support and real-time push notifications",
+  "type": "feature",
+  "description": "Implemented PWA via Serwist with asset precaching and stale-while-revalidate caching. Added a web push notification system covering registrations, tickets, forum posts, comments, replies, quotations, news, and invoice payments. Includes a /notifications center, multi-device sync, auto-healing on permission grant, and notification grouping via tags.",
+  "scope": ["core"]
+}
