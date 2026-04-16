@@ -1,0 +1,6 @@
+{
+  "title": "Forward Up2Pay IPN callback to legacy ERP when invoice is unknown",
+  "type": "feature",
+  "description": "Add automatic forwarding of unrecognized Up2Pay IPNs to the legacy system (Consonance Web) via a new UP2PAY_LEGACY_FORWARD_URL environment variable, while preserving normal processing for recognized payments.",
+  "scope": ["core", "invoices"]
+}
