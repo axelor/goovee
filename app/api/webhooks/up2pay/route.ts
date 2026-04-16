@@ -23,9 +23,9 @@ import {updateInvoice} from '@/subapps/invoices/common/service';
  * Only called when Goovee cannot process the IPN (unrecognized ref format or unknown payment context).
  * Controlled by UP2PAY_LEGACY_FORWARD_URL — if not set, no forwarding occurs.
  */
-function forwardToLegacy(request: Request): void {
+function forwardToLegacy(request: Request): boolean {
   const legacyUrl = process.env.UP2PAY_LEGACY_FORWARD_URL;
-  if (!legacyUrl) return;
+  if (!legacyUrl) return false;
 
   const params = new URL(request.url).searchParams;
   const forwardUrl = `${legacyUrl}?${params.toString()}`;
@@ -40,6 +40,8 @@ function forwardToLegacy(request: Request): void {
     .catch(err =>
       console.error('[UP2PAY][WEBHOOK] Legacy forward failed', {error: err}),
     );
+
+  return true;
 }
 
 export async function GET(request: Request) {
@@ -94,8 +96,10 @@ export async function GET(request: Request) {
       '[UP2PAY][WEBHOOK] Ref does not match Goovee format, forwarding to legacy',
       {ref},
     );
-    forwardToLegacy(request);
-    return new NextResponse('OK', {status: 200});
+    const forwarded = forwardToLegacy(request);
+    return new NextResponse(forwarded ? 'OK' : 'Bad Request', {
+      status: forwarded ? 200 : 400,
+    });
   }
 
   const paymentContext = await findPaymentContext({
@@ -114,8 +118,10 @@ export async function GET(request: Request) {
         tenantId,
       },
     );
-    forwardToLegacy(request);
-    return new NextResponse('OK', {status: 200});
+    const forwarded = forwardToLegacy(request);
+    return new NextResponse(forwarded ? 'OK' : 'Bad Request', {
+      status: forwarded ? 200 : 400,
+    });
   }
 
   if (paymentContext.status === CONTEXT_STATUS.processed) {
