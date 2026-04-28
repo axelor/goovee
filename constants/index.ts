@@ -74,6 +74,7 @@ export enum SUBAPP_CODES {
   directory = 'directory',
   survey = 'survey',
   website = 'website',
+  marketplace = 'market-place',
 }
 
 export enum CHAT_TYPE {
