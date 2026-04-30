@@ -1,9 +1,16 @@
 import {notFound} from 'next/navigation';
 import Link from 'next/link';
-import {FaChevronRight} from 'react-icons/fa';
 
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/ui/components';
 
 import {ProductView} from '../../common/ui/components';
 import type {MarketplaceProduct} from '../../common/types';
@@ -213,27 +220,36 @@ export default async function Page(props: {
     <div>
       <div className="bg-card border-b">
         <div className="container portal-container py-3">
-          <nav className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-            <Link
-              href={`${workspaceURI}/marketplace`}
-              className="hover:underline">
-              {await t('Marketplace')}
-            </Link>
-            {product.portalCategorySet?.[0] && (
-              <>
-                <FaChevronRight className="text-primary text-[0.6rem]" />
-                <Link
-                  href={`${workspaceURI}/marketplace/category/${product.portalCategorySet[0].slug}`}
-                  className="hover:underline">
-                  {product.portalCategorySet[0].name}
-                </Link>
-              </>
-            )}
-            <FaChevronRight className="text-primary text-[0.6rem]" />
-            <span className="text-foreground font-medium truncate max-w-[24ch]">
-              {product.name}
-            </span>
-          </nav>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`${workspaceURI}/marketplace`}>
+                    {await t('Marketplace')}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {product.portalCategorySet?.[0] && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link
+                        href={`${workspaceURI}/marketplace/category/${product.portalCategorySet[0].slug}`}>
+                        {product.portalCategorySet[0].name}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="truncate max-w-[24ch]">
+                  {product.name}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </div>
 

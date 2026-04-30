@@ -1,5 +1,6 @@
 import {HiOutlineUser} from 'react-icons/hi';
 import {MdOutlineCategory, MdDownload, MdShoppingBag} from 'react-icons/md';
+import {Button} from '@/ui/components';
 
 import type {MarketplaceProduct} from '../../../types';
 import {ProductViewTabs} from './product-view-tabs';
@@ -78,15 +79,15 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
             </div>
 
             {hasPurchased || product.salePrice === 0 ? (
-              <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2">
+              <Button className="w-full gap-2">
                 <MdDownload className="text-lg" />
                 Download
-              </button>
+              </Button>
             ) : (
-              <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2">
+              <Button className="w-full gap-2">
                 <MdShoppingBag className="text-lg" />
                 Buy — {price}
-              </button>
+              </Button>
             )}
 
             {hasPurchased && (

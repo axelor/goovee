@@ -1,11 +1,20 @@
 import Link from 'next/link';
 import {MdAdd, MdEdit, MdOpenInNew, MdDelete} from 'react-icons/md';
-import {FaChevronRight} from 'react-icons/fa';
 
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
+import {
+  Badge,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  Button,
+} from '@/ui/components';
 
-import {STATUS_COLORS, STATUS_LABELS} from '../common/constants';
+import {STATUS_LABELS} from '../common/constants';
 import type {MarketplaceProduct} from '../common/types';
 
 // ---- DUMMY DATA ---- //
@@ -75,6 +84,17 @@ const DUMMY_SELLER_PRODUCTS: MarketplaceProduct[] = [
 ];
 // ---- END DUMMY DATA ---- //
 
+const STATUS_BADGE_VARIANT: Record<
+  MarketplaceProduct['marketplaceStatusSelect'],
+  'default' | 'secondary' | 'outline' | 'success' | 'destructive'
+> = {
+  draft: 'secondary',
+  submitted: 'outline',
+  approved: 'outline',
+  published: 'success',
+  rejected: 'destructive',
+};
+
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
@@ -85,28 +105,32 @@ export default async function Page(props: {
     <div className="container portal-container py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-            <Link
-              href={`${workspaceURI}/marketplace`}
-              className="hover:underline">
-              {await t('Marketplace')}
-            </Link>
-            <FaChevronRight className="text-primary text-[0.6rem]" />
-            <span className="text-foreground font-medium">
-              {await t('My products')}
-            </span>
-          </nav>
+          <Breadcrumb className="mb-2">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`${workspaceURI}/marketplace`}>
+                    {await t('Marketplace')}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{await t('My products')}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <h1 className="text-2xl font-bold">{await t('My products')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {await t('Manage the software you sell on the marketplace')}
           </p>
         </div>
-        <Link
-          href={`${workspaceURI}/marketplace/my-products/create`}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-          <MdAdd className="text-lg" />
-          {await t('New listing')}
-        </Link>
+        <Button asChild>
+          <Link href={`${workspaceURI}/marketplace/my-products/create`}>
+            <MdAdd className="text-lg" />
+            {await t('New listing')}
+          </Link>
+        </Button>
       </div>
 
       {DUMMY_SELLER_PRODUCTS.length === 0 ? (
@@ -122,12 +146,12 @@ export default async function Page(props: {
               {await t('Start selling your software on the marketplace')}
             </p>
           </div>
-          <Link
-            href={`${workspaceURI}/marketplace/my-products/create`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mt-2">
-            <MdAdd className="text-lg" />
-            {await t('Create your first listing')}
-          </Link>
+          <Button asChild className="mt-2">
+            <Link href={`${workspaceURI}/marketplace/my-products/create`}>
+              <MdAdd className="text-lg" />
+              {await t('Create your first listing')}
+            </Link>
+          </Button>
         </div>
       ) : (
         <div className="bg-card rounded-2xl overflow-hidden shadow-sm">
@@ -187,19 +211,21 @@ export default async function Page(props: {
 
                     <td className="px-4 py-4 hidden md:table-cell">
                       {product.portalCategorySet?.[0] ? (
-                        <span className="text-xs bg-muted px-2 py-1 rounded-full">
+                        <Badge variant="secondary">
                           {product.portalCategorySet[0].name}
-                        </span>
+                        </Badge>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </td>
 
                     <td className="px-4 py-4 hidden sm:table-cell">
-                      <span
-                        className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLORS[product.marketplaceStatusSelect]}`}>
+                      <Badge
+                        variant={
+                          STATUS_BADGE_VARIANT[product.marketplaceStatusSelect]
+                        }>
                         {STATUS_LABELS[product.marketplaceStatusSelect]}
-                      </span>
+                      </Badge>
                     </td>
 
                     <td className="px-4 py-4 hidden lg:table-cell text-muted-foreground text-xs">
@@ -213,27 +239,31 @@ export default async function Page(props: {
                     </td>
 
                     <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
                         {product.marketplaceStatusSelect === 'published' && (
-                          <Link
-                            href={`${workspaceURI}/marketplace/product/${product.slug}`}
-                            title="View public listing"
-                            className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-                            <MdOpenInNew className="text-base" />
-                          </Link>
+                          <Button variant="ghost" size="icon" asChild>
+                            <Link
+                              href={`${workspaceURI}/marketplace/product/${product.slug}`}
+                              title="View public listing">
+                              <MdOpenInNew className="text-base" />
+                            </Link>
+                          </Button>
                         )}
-                        <Link
-                          href={`${workspaceURI}/marketplace/my-products/${product.id}`}
-                          title="Edit"
-                          className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
-                          <MdEdit className="text-base" />
-                        </Link>
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link
+                            href={`${workspaceURI}/marketplace/my-products/${product.id}`}
+                            title="Edit">
+                            <MdEdit className="text-base" />
+                          </Link>
+                        </Button>
                         {canDelete && (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             title="Delete draft"
-                            className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors text-muted-foreground hover:text-destructive">
+                            className="hover:text-destructive">
                             <MdDelete className="text-base" />
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </td>

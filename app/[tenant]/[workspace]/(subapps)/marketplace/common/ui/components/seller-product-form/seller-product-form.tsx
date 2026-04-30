@@ -3,14 +3,15 @@
 import {useState, useRef} from 'react';
 import {MdAdd, MdDelete, MdUploadFile, MdImage} from 'react-icons/md';
 import {HiOutlineCheckCircle} from 'react-icons/hi';
+import Link from 'next/link';
 
 import {cn} from '@/utils/css';
+import {Button} from '@/ui/components';
 import type {MarketplaceCategory, VersionDraftRow} from '../../../types';
 
 type SellerProductFormProps = {
   categories: MarketplaceCategory[];
   workspaceURI: string;
-  /** Populated when editing an existing product */
   initialValues?: {
     name?: string;
     description?: string;
@@ -75,14 +76,10 @@ export function SellerProductForm({
       v
         .map(r => {
           if (r._key !== key) return r;
-          if (field === 'isLatest') {
-            // only one can be latest
-            return {...r, isLatest: true};
-          }
+          if (field === 'isLatest') return {...r, isLatest: true};
           return {...r, [field]: value};
         })
         .map(r => {
-          // if isLatest was set on this row, clear others
           if (field === 'isLatest' && value === true && r._key !== key) {
             return {...r, isLatest: false};
           }
@@ -128,7 +125,7 @@ export function SellerProductForm({
 
   return (
     <div className="flex flex-col gap-8 max-w-3xl">
-      {/* Section 1 — Basic Info */}
+      {/* Basic Info */}
       <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
         <h2 className="font-semibold text-base">Basic information</h2>
 
@@ -193,7 +190,7 @@ export function SellerProductForm({
         </div>
       </section>
 
-      {/* Section 2 — Pricing */}
+      {/* Pricing */}
       <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
         <h2 className="font-semibold text-base">Pricing</h2>
 
@@ -230,7 +227,7 @@ export function SellerProductForm({
         )}
       </section>
 
-      {/* Section 3 — Media */}
+      {/* Cover image */}
       <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
         <h2 className="font-semibold text-base">Cover image</h2>
 
@@ -264,19 +261,21 @@ export function SellerProductForm({
         </div>
       </section>
 
-      {/* Section 4 — Versions */}
+      {/* Versions */}
       <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-base">
             Software versions <span className="text-destructive">*</span>
           </h2>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={addVersion}
-            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border hover:bg-muted transition-colors">
+            className="gap-1.5">
             <MdAdd />
             Add version
-          </button>
+          </Button>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -295,28 +294,25 @@ export function SellerProductForm({
         </div>
       </section>
 
-      {/* Footer actions */}
+      {/* Footer */}
       <div className="flex items-center justify-between pt-2 pb-8">
-        <a
-          href={`${workspaceURI}/marketplace/my-products`}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          Cancel
-        </a>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={`${workspaceURI}/marketplace/my-products`}>Cancel</Link>
+        </Button>
         <div className="flex gap-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
             disabled={!!submitting}
-            onClick={() => handleSubmit('draft')}
-            className="px-5 py-2.5 text-sm font-medium rounded-xl border hover:bg-muted transition-colors disabled:opacity-50">
+            onClick={() => handleSubmit('draft')}>
             {submitting === 'draft' ? 'Saving...' : 'Save as draft'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={!!submitting}
-            onClick={() => handleSubmit('submitted')}
-            className="px-5 py-2.5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50">
+            onClick={() => handleSubmit('submitted')}>
             {submitting === 'submitted' ? 'Submitting...' : 'Submit for review'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -351,12 +347,14 @@ function VersionRow({
           Version {index + 1}
         </span>
         {!isOnly && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={onRemove}
-            className="text-muted-foreground hover:text-destructive transition-colors">
+            className="h-7 w-7 text-muted-foreground hover:text-destructive">
             <MdDelete className="text-base" />
-          </button>
+          </Button>
         )}
       </div>
 
@@ -395,7 +393,6 @@ function VersionRow({
         />
       </div>
 
-      {/* File upload */}
       <div
         className="flex items-center gap-3 border border-dashed rounded-lg px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
         onClick={() => fileRef.current?.click()}>
@@ -421,7 +418,6 @@ function VersionRow({
         />
       </div>
 
-      {/* Mark as latest */}
       <label className="flex items-center gap-2 cursor-pointer w-fit">
         <input
           type="checkbox"

@@ -5,6 +5,15 @@ import {MdStorefront, MdAdd} from 'react-icons/md';
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  Button,
+} from '@/ui/components';
 import {ProductList} from '../../common/ui/components';
 import type {
   MarketplaceCategory,
@@ -149,17 +158,21 @@ export default async function Page(props: {
               <MdStorefront className="text-xl text-primary" />
             </div>
             <div>
-              <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                <Link
-                  href={`${workspaceURI}/marketplace`}
-                  className="hover:underline">
-                  {await t('Marketplace')}
-                </Link>
-                <span>/</span>
-                <span className="text-foreground font-medium">
-                  {category.name}
-                </span>
-              </nav>
+              <Breadcrumb className="mb-1">
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link href={`${workspaceURI}/marketplace`}>
+                        {await t('Marketplace')}
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{category.name}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
               <h1 className="text-xl font-bold">{category.name}</h1>
               {category.subtitle && (
                 <p className="text-sm text-muted-foreground">
@@ -168,12 +181,12 @@ export default async function Page(props: {
               )}
             </div>
           </div>
-          <Link
-            href={`${workspaceURI}/marketplace/my-products`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0">
-            <MdAdd className="text-lg" />
-            {await t('Sell your software')}
-          </Link>
+          <Button asChild className="shrink-0">
+            <Link href={`${workspaceURI}/marketplace/my-products`}>
+              <MdAdd className="text-lg" />
+              {await t('Sell your software')}
+            </Link>
+          </Button>
         </div>
       </div>
 

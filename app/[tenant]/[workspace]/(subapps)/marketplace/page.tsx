@@ -4,6 +4,7 @@ import {MdStorefront, MdAdd} from 'react-icons/md';
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
 
+import {Button} from '@/ui/components';
 import {ProductList} from './common/ui/components';
 import type {
   MarketplaceCategory,
@@ -220,12 +221,12 @@ export default async function Page(props: {
               </p>
             </div>
           </div>
-          <Link
-            href={`${workspaceURI}/marketplace/my-products`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0">
-            <MdAdd className="text-lg" />
-            {await t('Sell your software')}
-          </Link>
+          <Button asChild className="shrink-0">
+            <Link href={`${workspaceURI}/marketplace/my-products`}>
+              <MdAdd className="text-lg" />
+              {await t('Sell your software')}
+            </Link>
+          </Button>
         </div>
       </div>
 

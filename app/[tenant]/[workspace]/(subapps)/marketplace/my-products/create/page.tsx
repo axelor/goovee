@@ -1,8 +1,15 @@
 import Link from 'next/link';
-import {FaChevronRight} from 'react-icons/fa';
 
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/ui/components';
 
 import {SellerProductForm} from '../../common/ui/components';
 import type {MarketplaceCategory} from '../../common/types';
@@ -56,21 +63,29 @@ export default async function Page(props: {
 
   return (
     <div className="container portal-container py-8">
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6 flex-wrap">
-        <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
-          {await t('Marketplace')}
-        </Link>
-        <FaChevronRight className="text-primary text-[0.6rem]" />
-        <Link
-          href={`${workspaceURI}/marketplace/my-products`}
-          className="hover:underline">
-          {await t('My products')}
-        </Link>
-        <FaChevronRight className="text-primary text-[0.6rem]" />
-        <span className="text-foreground font-medium">
-          {await t('New listing')}
-        </span>
-      </nav>
+      <Breadcrumb className="mb-6">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`${workspaceURI}/marketplace`}>
+                {await t('Marketplace')}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`${workspaceURI}/marketplace/my-products`}>
+                {await t('My products')}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{await t('New listing')}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold">
