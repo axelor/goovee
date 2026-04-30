@@ -18,6 +18,7 @@ import {
   Input,
   Textarea,
 } from '@/ui/components';
+import {packIntoFormData} from '@/utils/formdata';
 import type {MarketplaceCategory} from '../../../types';
 import {
   SellerProductSchema,
@@ -88,25 +89,17 @@ export function SellerProductForm({
     data: SellerProductFormData,
     status: 'draft' | 'submitted',
   ) => {
-    const fd = new FormData();
-    fd.set('name', data.name);
-    fd.set('description', data.description ?? '');
-    fd.set('longDescription', data.longDescription ?? '');
-    fd.set('marketplaceStatusSelect', status);
-    fd.set('isFree', String(data.isFree));
-    if (!data.isFree && data.salePrice != null) {
-      fd.set('salePrice', String(data.salePrice));
-    }
-    data.categoryIds.forEach(id => fd.append('categoryIds', id));
-    data.versions.forEach((v, i) => {
-      fd.set(`versions[${i}][version]`, v.version);
-      fd.set(`versions[${i}][releaseNotes]`, v.releaseNotes ?? '');
-      fd.set(`versions[${i}][releaseDate]`, v.releaseDate ?? '');
-      fd.set(`versions[${i}][isLatest]`, String(v.isLatest));
-      if (v.file) fd.set(`versions[${i}][file]`, v.file);
+    const fd = packIntoFormData({
+      name: data.name,
+      description: data.description,
+      longDescription: data.longDescription,
+      isFree: data.isFree,
+      salePrice: data.isFree ? 0 : data.salePrice,
+      categoryIds: data.categoryIds,
+      marketplaceStatusSelect: status,
+      versions: data.versions,
+      picture: coverRef.current?.files?.[0] ?? null,
     });
-    if (coverRef.current?.files?.[0])
-      fd.set('picture', coverRef.current.files[0]);
     await onSubmit?.(fd, status);
   };
 
