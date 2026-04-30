@@ -38,7 +38,7 @@ export function ProductList({
             <ul className="flex flex-col gap-1">
               <li>
                 <Link
-                  href={`${workspaceURI}/market-place`}
+                  href={`${workspaceURI}/marketplace`}
                   className={cn(
                     'block text-sm px-3 py-2 rounded-lg hover:bg-muted transition-colors',
                     {'bg-primary/10 text-primary font-medium': !activeCategory},
@@ -49,7 +49,7 @@ export function ProductList({
               {categories.map(cat => (
                 <li key={cat.id}>
                   <Link
-                    href={`${workspaceURI}/market-place/category/${cat.slug}`}
+                    href={`${workspaceURI}/marketplace/category/${cat.slug}`}
                     className={cn(
                       'block text-sm px-3 py-2 rounded-lg hover:bg-muted transition-colors',
                       {'bg-primary/10 text-primary font-medium': activeCategory?.id === cat.id},
@@ -106,7 +106,7 @@ function ProductListRow({product, workspaceURI}: {product: MarketplaceProduct; w
 
   return (
     <Link
-      href={`${workspaceURI}/market-place/product/${product.slug}`}
+      href={`${workspaceURI}/marketplace/product/${product.slug}`}
       className="flex gap-4 bg-card rounded-xl p-4 hover:shadow-md transition-shadow">
       <div className="w-20 h-20 rounded-lg bg-muted shrink-0 overflow-hidden flex items-center justify-center">
         {product.thumbnailImage ? (

@@ -18,7 +18,7 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
 
   return (
     <div className="flex flex-col rounded-2xl bg-card text-card-foreground overflow-hidden hover:shadow-md transition-shadow">
-      <Link href={`${workspaceURI}/market-place/product/${product.slug}`}>
+      <Link href={`${workspaceURI}/marketplace/product/${product.slug}`}>
         <div className="relative h-44 bg-muted flex items-center justify-center overflow-hidden">
           {product.thumbnailImage ? (
             <img
@@ -68,7 +68,7 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
           {price}
         </span>
         <Link
-          href={`${workspaceURI}/market-place/product/${product.slug}`}
+          href={`${workspaceURI}/marketplace/product/${product.slug}`}
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
           View details
         </Link>

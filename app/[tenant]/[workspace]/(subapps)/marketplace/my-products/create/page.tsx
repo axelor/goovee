@@ -30,11 +30,11 @@ async function CreateProductPage({
     <div className="container portal-container py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6 flex-wrap">
-        <Link href={`${workspaceURI}/market-place`} className="hover:underline">
+        <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
           {await t('Marketplace')}
         </Link>
         <FaChevronRight className="text-primary text-[0.6rem]" />
-        <Link href={`${workspaceURI}/market-place/my-products`} className="hover:underline">
+        <Link href={`${workspaceURI}/marketplace/my-products`} className="hover:underline">
           {await t('My products')}
         </Link>
         <FaChevronRight className="text-primary text-[0.6rem]" />

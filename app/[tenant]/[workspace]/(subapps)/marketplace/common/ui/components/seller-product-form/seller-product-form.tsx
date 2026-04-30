@@ -288,7 +288,7 @@ export function SellerProductForm({
       {/* Footer actions */}
       <div className="flex items-center justify-between pt-2 pb-8">
         <a
-          href={`${workspaceURI}/market-place/my-products`}
+          href={`${workspaceURI}/marketplace/my-products`}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           Cancel
         </a>

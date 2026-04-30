@@ -71,7 +71,7 @@ async function MyProductsPage({
       <div className="flex items-center justify-between mb-8">
         <div>
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-            <Link href={`${workspaceURI}/market-place`} className="hover:underline">
+            <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
               {await t('Marketplace')}
             </Link>
             <FaChevronRight className="text-primary text-[0.6rem]" />
@@ -85,7 +85,7 @@ async function MyProductsPage({
           </p>
         </div>
         <Link
-          href={`${workspaceURI}/market-place/my-products/create`}
+          href={`${workspaceURI}/marketplace/my-products/create`}
           className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
           <MdAdd className="text-lg" />
           {await t('New listing')}
@@ -105,7 +105,7 @@ async function MyProductsPage({
             </p>
           </div>
           <Link
-            href={`${workspaceURI}/market-place/my-products/create`}
+            href={`${workspaceURI}/marketplace/my-products/create`}
             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mt-2">
             <MdAdd className="text-lg" />
             {await t('Create your first listing')}
@@ -192,14 +192,14 @@ async function MyProductsPage({
                       <div className="flex items-center justify-end gap-2">
                         {product.marketplaceStatusSelect === 'published' && (
                           <Link
-                            href={`${workspaceURI}/market-place/product/${product.slug}`}
+                            href={`${workspaceURI}/marketplace/product/${product.slug}`}
                             title="View public listing"
                             className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                             <MdOpenInNew className="text-base" />
                           </Link>
                         )}
                         <Link
-                          href={`${workspaceURI}/market-place/my-products/${product.id}`}
+                          href={`${workspaceURI}/marketplace/my-products/${product.id}`}
                           title="Edit"
                           className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                           <MdEdit className="text-base" />

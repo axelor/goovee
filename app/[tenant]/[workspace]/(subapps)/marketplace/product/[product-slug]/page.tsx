@@ -144,14 +144,14 @@ async function ProductDetailPage({
       <div className="bg-card border-b">
         <div className="container portal-container py-3">
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-            <Link href={`${workspaceURI}/market-place`} className="hover:underline">
+            <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
               {await t('Marketplace')}
             </Link>
             {product.portalCategorySet?.[0] && (
               <>
                 <FaChevronRight className="text-primary text-[0.6rem]" />
                 <Link
-                  href={`${workspaceURI}/market-place/category/${product.portalCategorySet[0].slug}`}
+                  href={`${workspaceURI}/marketplace/category/${product.portalCategorySet[0].slug}`}
                   className="hover:underline">
                   {product.portalCategorySet[0].name}
                 </Link>
