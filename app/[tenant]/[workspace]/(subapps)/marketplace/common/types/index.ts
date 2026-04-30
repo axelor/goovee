@@ -42,9 +42,11 @@ export type VersionDraftRow = {
   fileName: string;
 };
 
+export type ProductView = 'grid' | 'list';
+
 export type SearchParams = {
   search?: string;
-  view?: string;
+  view?: ProductView;
   page?: string;
   sort?: string;
 };

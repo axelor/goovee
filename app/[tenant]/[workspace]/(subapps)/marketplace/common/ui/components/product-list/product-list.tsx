@@ -2,7 +2,7 @@ import Link from 'next/link';
 import {MdDownload} from 'react-icons/md';
 
 import {cn} from '@/utils/css';
-import type {MarketplaceCategory, MarketplaceProduct} from '../../../types';
+import type {MarketplaceCategory, MarketplaceProduct, ProductView} from '../../../types';
 import {ProductCard} from '../product-card';
 import {ProductSearch} from '../product-search';
 
@@ -10,7 +10,7 @@ type ProductListProps = {
   products: MarketplaceProduct[];
   categories: MarketplaceCategory[];
   workspaceURI: string;
-  view: string;
+  view: ProductView;
   activeCategory?: MarketplaceCategory;
 };
 

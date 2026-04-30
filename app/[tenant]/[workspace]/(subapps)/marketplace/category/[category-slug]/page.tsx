@@ -6,7 +6,7 @@ import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
 
 import {ProductList} from '../../common/ui/components';
-import type {MarketplaceCategory, MarketplaceProduct} from '../../common/types';
+import type {MarketplaceCategory, MarketplaceProduct, ProductView} from '../../common/types';
 
 // ---- DUMMY DATA ---- //
 const DUMMY_CATEGORIES: MarketplaceCategory[] = [
@@ -69,12 +69,12 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; 'category-slug': string}>;
-  searchParams: Promise<{view?: string}>;
+  searchParams: Promise<{view?: ProductView}>;
 }) {
   const [params, searchParams] = await Promise.all([props.params, props.searchParams]);
   const {workspaceURI} = workspacePathname(params);
   const categorySlug = params['category-slug'];
-  const view = searchParams.view ?? 'grid';
+  const view: ProductView = searchParams.view === 'list' ? 'list' : 'grid';
 
   const category = DUMMY_CATEGORIES.find(c => c.slug === categorySlug);
   if (!category) notFound();
