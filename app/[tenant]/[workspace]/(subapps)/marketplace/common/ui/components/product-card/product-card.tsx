@@ -63,7 +63,7 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
       <div className="px-4 pb-4 flex items-center justify-between">
         <span
           className={cn('font-semibold text-sm', {
-            'text-green-600': isFree,
+            'text-success-dark': isFree,
             'text-foreground': !isFree,
           })}>
           {price ?? t('Free')}

@@ -359,6 +359,7 @@ export function SellerProductForm({
             </Button>
             <Button
               type="button"
+              variant="success"
               disabled={submitting}
               onClick={form.handleSubmit(data =>
                 handleSubmit(data, 'submitted'),
@@ -484,7 +485,7 @@ function VersionRow({
           </p>
         </div>
         {fileName && (
-          <span className="text-xs text-green-600 font-medium shrink-0">
+          <span className="text-xs text-success-dark font-medium shrink-0">
             ✓ Ready
           </span>
         )}

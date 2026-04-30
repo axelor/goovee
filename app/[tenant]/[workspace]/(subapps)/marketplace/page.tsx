@@ -221,7 +221,7 @@ export default async function Page(props: {
               </p>
             </div>
           </div>
-          <Button asChild className="shrink-0">
+          <Button variant="success" asChild className="shrink-0">
             <Link href={`${workspaceURI}/marketplace/my-products`}>
               <MdAdd className="text-lg" />
               {await t('Sell your software')}

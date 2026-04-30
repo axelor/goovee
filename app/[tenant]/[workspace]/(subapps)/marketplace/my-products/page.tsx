@@ -12,6 +12,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
   Button,
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/ui/components';
 
 import {STATUS_LABELS} from '../common/constants';
@@ -125,7 +130,7 @@ export default async function Page(props: {
             {await t('Manage the software you sell on the marketplace')}
           </p>
         </div>
-        <Button asChild>
+        <Button variant="success" asChild>
           <Link href={`${workspaceURI}/marketplace/my-products/create`}>
             <MdAdd className="text-lg" />
             {await t('New listing')}
@@ -146,7 +151,7 @@ export default async function Page(props: {
               {await t('Start selling your software on the marketplace')}
             </p>
           </div>
-          <Button asChild className="mt-2">
+          <Button variant="success" asChild className="mt-2">
             <Link href={`${workspaceURI}/marketplace/my-products/create`}>
               <MdAdd className="text-lg" />
               {await t('Create your first listing')}
@@ -155,30 +160,28 @@ export default async function Page(props: {
         </div>
       ) : (
         <div className="bg-card rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="text-left px-5 py-3 font-medium text-muted-foreground">
-                  {await t('Product')}
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{await t('Product')}</TableHead>
+                <TableHead className="hidden md:table-cell">
                   {await t('Category')}
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">
+                </TableHead>
+                <TableHead className="hidden sm:table-cell">
                   {await t('Status')}
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
                   {await t('Versions')}
-                </th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">
+                </TableHead>
+                <TableHead className="hidden lg:table-cell">
                   {await t('Price')}
-                </th>
-                <th className="text-right px-5 py-3 font-medium text-muted-foreground">
+                </TableHead>
+                <TableHead className="text-right">
                   {await t('Actions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
               {DUMMY_SELLER_PRODUCTS.map(product => {
                 const price =
                   product.salePrice === 0
@@ -270,8 +273,8 @@ export default async function Page(props: {
                   </tr>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

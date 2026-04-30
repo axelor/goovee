@@ -80,19 +80,19 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
             </div>
 
             {hasPurchased || isFree ? (
-              <Button className="w-full gap-2">
+              <Button variant="success" className="w-full gap-2">
                 <MdDownload className="text-lg" />
                 {t('Download')}
               </Button>
             ) : (
-              <Button className="w-full gap-2">
+              <Button variant="success" className="w-full gap-2">
                 <MdShoppingBag className="text-lg" />
                 {t('Buy — {0}', price ?? '')}
               </Button>
             )}
 
             {hasPurchased && (
-              <p className="text-xs text-green-600 font-medium text-center">
+              <p className="text-xs text-success-dark font-medium text-center">
                 {t('✓ You own this software')}
               </p>
             )}

@@ -62,7 +62,7 @@ export function VersionList({
                 href={`./api/download/${productId}/${v.id}`}
                 className={cn(
                   'inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg',
-                  'bg-primary text-primary-foreground hover:bg-primary/90 transition-colors',
+                  'bg-success text-success-foreground hover:bg-success/90 transition-colors',
                 )}>
                 <MdDownload className="text-base" />
                 {i18n.t('Download')}
