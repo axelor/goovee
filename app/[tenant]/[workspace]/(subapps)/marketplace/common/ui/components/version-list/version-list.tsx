@@ -1,6 +1,7 @@
 import {MdDownload} from 'react-icons/md';
 import {HiOutlineCheckCircle} from 'react-icons/hi';
 
+import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import type {MarketplaceProductVersion} from '../../../types';
 
@@ -18,7 +19,7 @@ export function VersionList({
   if (!versions.length) {
     return (
       <p className="text-sm text-muted-foreground py-4">
-        No versions available.
+        {i18n.t('No versions available.')}
       </p>
     );
   }
@@ -35,7 +36,7 @@ export function VersionList({
               {v.isLatest && (
                 <span className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">
                   <HiOutlineCheckCircle className="text-sm" />
-                  Latest
+                  {i18n.t('Latest')}
                 </span>
               )}
               {v.releaseDate && (
@@ -64,12 +65,12 @@ export function VersionList({
                   'bg-primary text-primary-foreground hover:bg-primary/90 transition-colors',
                 )}>
                 <MdDownload className="text-base" />
-                Download
+                {i18n.t('Download')}
               </a>
             ) : (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-muted text-muted-foreground cursor-not-allowed">
                 <MdDownload className="text-base" />
-                Purchase to download
+                {i18n.t('Purchase to download')}
               </span>
             )}
           </div>
@@ -78,5 +79,3 @@ export function VersionList({
     </div>
   );
 }
-
-export default VersionList;

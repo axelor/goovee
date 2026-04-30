@@ -1,5 +1,6 @@
 import {HiOutlineUser} from 'react-icons/hi';
 import {MdOutlineCategory, MdDownload, MdShoppingBag} from 'react-icons/md';
+import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 
 import type {MarketplaceProduct} from '../../../types';
@@ -11,10 +12,10 @@ type ProductViewProps = {
 };
 
 export function ProductView({product, hasPurchased = false}: ProductViewProps) {
-  const price =
-    product.salePrice === 0
-      ? 'Free'
-      : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
+  const isFree = product.salePrice === 0;
+  const price = isFree
+    ? null
+    : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
 
   const latestVersion = product.marketplaceVersionList?.find(v => v.isLatest);
 
@@ -33,7 +34,7 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
             ) : (
               <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <MdDownload className="text-5xl" />
-                <span className="text-sm">No image</span>
+                <span className="text-sm">{t('No image')}</span>
               </div>
             )}
           </div>
@@ -49,7 +50,7 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
             {product.defaultSupplierPartner && (
               <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                 <HiOutlineUser />
-                by{' '}
+                {t('by')}{' '}
                 <span className="font-medium text-foreground">
                   {product.defaultSupplierPartner.name}
                 </span>
@@ -70,29 +71,29 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
             ) : null}
 
             <div className="border-t pt-4">
-              <p className="text-3xl font-bold">{price}</p>
+              <p className="text-3xl font-bold">{price ?? t('Free')}</p>
               {latestVersion && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Latest: v{latestVersion.version}
+                  {t('Latest: v{0}', latestVersion.version)}
                 </p>
               )}
             </div>
 
-            {hasPurchased || product.salePrice === 0 ? (
+            {hasPurchased || isFree ? (
               <Button className="w-full gap-2">
                 <MdDownload className="text-lg" />
-                Download
+                {t('Download')}
               </Button>
             ) : (
               <Button className="w-full gap-2">
                 <MdShoppingBag className="text-lg" />
-                Buy — {price}
+                {t('Buy — {0}', price ?? '')}
               </Button>
             )}
 
             {hasPurchased && (
               <p className="text-xs text-green-600 font-medium text-center">
-                ✓ You own this software
+                {t('✓ You own this software')}
               </p>
             )}
           </div>
@@ -117,5 +118,3 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
     </div>
   );
 }
-
-export default ProductView;

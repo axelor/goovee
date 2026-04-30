@@ -2,6 +2,7 @@
 
 import {useState} from 'react';
 
+import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import type {MarketplaceProduct} from '../../../types';
 import {VersionList} from '../version-list';
@@ -30,8 +31,11 @@ export function ProductViewTabs({product, hasPurchased}: ProductViewTabsProps) {
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}>
             {t === 'versions'
-              ? `Versions (${product.marketplaceVersionList?.length ?? 0})`
-              : 'Description'}
+              ? i18n.t(
+                  'Versions ({0})',
+                  String(product.marketplaceVersionList?.length ?? 0),
+                )
+              : i18n.t('Description')}
           </button>
         ))}
       </div>
@@ -45,7 +49,7 @@ export function ProductViewTabs({product, hasPurchased}: ProductViewTabsProps) {
             />
           ) : (
             <p className="text-sm text-muted-foreground">
-              {product.description ?? 'No description provided.'}
+              {product.description ?? i18n.t('No description provided.')}
             </p>
           )
         ) : (
@@ -59,5 +63,3 @@ export function ProductViewTabs({product, hasPurchased}: ProductViewTabsProps) {
     </div>
   );
 }
-
-export default ProductViewTabs;

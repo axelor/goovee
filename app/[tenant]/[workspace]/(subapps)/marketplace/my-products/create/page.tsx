@@ -11,7 +11,7 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components';
 
-import {SellerProductForm} from '../../common/ui/components';
+import {SellerProductForm} from '../../common/ui/components/seller-product-form';
 import type {MarketplaceCategory} from '../../common/types';
 
 // ---- DUMMY DATA ---- //

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {MdDownload} from 'react-icons/md';
 
+import {t} from '@/locale/server';
 import {cn} from '@/utils/css';
 import type {
   MarketplaceCategory,
@@ -34,7 +35,7 @@ export function ProductList({
           {/* Sidebar */}
           <aside className="hidden lg:block w-56 shrink-0">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Categories
+              {t('Categories')}
             </p>
             <ul className="flex flex-col gap-1">
               <li>
@@ -44,7 +45,7 @@ export function ProductList({
                     'block text-sm px-3 py-2 rounded-lg hover:bg-muted transition-colors',
                     {'bg-primary/10 text-primary font-medium': !activeCategory},
                   )}>
-                  All software
+                  {t('All software')}
                 </Link>
               </li>
               {categories.map(cat => (
@@ -80,7 +81,7 @@ export function ProductList({
 
             {products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
-                <p className="text-sm">No software found.</p>
+                <p className="text-sm">{t('No software found.')}</p>
               </div>
             ) : view === 'list' ? (
               <div className="flex flex-col gap-3">
@@ -117,10 +118,10 @@ function ProductListRow({
   product: MarketplaceProduct;
   workspaceURI: string;
 }) {
-  const price =
-    product.salePrice === 0
-      ? 'Free'
-      : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
+  const isFree = product.salePrice === 0;
+  const price = isFree
+    ? null
+    : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
 
   return (
     <Link
@@ -141,7 +142,7 @@ function ProductListRow({
         <h5 className="font-semibold text-sm line-clamp-1">{product.name}</h5>
         {product.defaultSupplierPartner && (
           <p className="text-xs text-muted-foreground mt-0.5">
-            by {product.defaultSupplierPartner.name}
+            {t('by')} {product.defaultSupplierPartner.name}
           </p>
         )}
         {product.description && (
@@ -151,10 +152,8 @@ function ProductListRow({
         )}
       </div>
       <div className="shrink-0 text-right">
-        <span className="font-semibold text-sm">{price}</span>
+        <span className="font-semibold text-sm">{price ?? t('Free')}</span>
       </div>
     </Link>
   );
 }
-
-export default ProductList;

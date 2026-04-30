@@ -2,6 +2,7 @@ import Link from 'next/link';
 import {MdDownload} from 'react-icons/md';
 import {HiOutlineUser} from 'react-icons/hi';
 
+import {t} from '@/locale/server';
 import {cn} from '@/utils/css';
 import type {MarketplaceProduct} from '../../../types';
 
@@ -11,10 +12,10 @@ type ProductCardProps = {
 };
 
 export function ProductCard({product, workspaceURI}: ProductCardProps) {
-  const price =
-    product.salePrice === 0
-      ? 'Free'
-      : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
+  const isFree = product.salePrice === 0;
+  const price = isFree
+    ? null
+    : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
 
   return (
     <div className="flex flex-col rounded-2xl bg-card text-card-foreground overflow-hidden hover:shadow-md transition-shadow">
@@ -29,7 +30,7 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <MdDownload className="text-4xl" />
-              <span className="text-xs">No image</span>
+              <span className="text-xs">{t('No image')}</span>
             </div>
           )}
           {product.portalCategorySet?.[0] && (
@@ -62,19 +63,17 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
       <div className="px-4 pb-4 flex items-center justify-between">
         <span
           className={cn('font-semibold text-sm', {
-            'text-green-600': product.salePrice === 0,
-            'text-foreground': product.salePrice > 0,
+            'text-green-600': isFree,
+            'text-foreground': !isFree,
           })}>
-          {price}
+          {price ?? t('Free')}
         </span>
         <Link
           href={`${workspaceURI}/marketplace/product/${product.slug}`}
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-          View details
+          {t('View details')}
         </Link>
       </div>
     </div>
   );
 }
-
-export default ProductCard;

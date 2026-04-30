@@ -5,7 +5,7 @@ import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
 
 import {Button} from '@/ui/components';
-import {ProductList} from './common/ui/components';
+import {ProductList} from './common/ui/components/product-list';
 import type {
   MarketplaceCategory,
   MarketplaceProduct,

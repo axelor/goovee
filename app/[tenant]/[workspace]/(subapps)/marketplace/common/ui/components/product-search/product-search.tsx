@@ -4,6 +4,7 @@ import {useRouter, usePathname, useSearchParams} from 'next/navigation';
 import {BiSearch} from 'react-icons/bi';
 import {MdGridView, MdOutlineList} from 'react-icons/md';
 
+import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 
 export function ProductSearch() {
@@ -32,7 +33,7 @@ export function ProductSearch() {
         <input
           name="search"
           defaultValue={searchParams.get('search') ?? ''}
-          placeholder="Search software..."
+          placeholder={i18n.t('Search software...')}
           className="w-full pl-9 pr-4 py-2 text-sm rounded-full border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </form>
@@ -51,5 +52,3 @@ export function ProductSearch() {
     </div>
   );
 }
-
-export default ProductSearch;

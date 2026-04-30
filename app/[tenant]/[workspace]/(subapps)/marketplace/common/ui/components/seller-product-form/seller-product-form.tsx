@@ -18,6 +18,7 @@ import {
   Input,
   Textarea,
 } from '@/ui/components';
+import {i18n} from '@/locale';
 import {packIntoFormData} from '@/utils/formdata';
 import type {MarketplaceCategory} from '../../../types';
 import {
@@ -114,7 +115,9 @@ export function SellerProductForm({
       <form className="flex flex-col gap-8">
         {/* Basic Info */}
         <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
-          <h2 className="font-semibold text-base">Basic information</h2>
+          <h2 className="font-semibold text-base">
+            {i18n.t('Basic information')}
+          </h2>
 
           <FormField
             control={form.control}
@@ -122,10 +125,13 @@ export function SellerProductForm({
             render={({field}) => (
               <FormItem>
                 <FormLabel>
-                  Name <span className="text-destructive">*</span>
+                  {i18n.t('Name')} <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g. Axelor CRM Connector" />
+                  <Input
+                    {...field}
+                    placeholder={i18n.t('e.g. Axelor CRM Connector')}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -138,7 +144,8 @@ export function SellerProductForm({
             render={({field}) => (
               <FormItem>
                 <FormLabel>
-                  Categories <span className="text-destructive">*</span>
+                  {i18n.t('Categories')}{' '}
+                  <span className="text-destructive">*</span>
                 </FormLabel>
                 <div className="flex flex-wrap gap-2">
                   {categories.map(cat => {
@@ -173,12 +180,14 @@ export function SellerProductForm({
             name="description"
             render={({field}) => (
               <FormItem>
-                <FormLabel>Short description</FormLabel>
+                <FormLabel>{i18n.t('Short description')}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
                     rows={2}
-                    placeholder="One-line summary shown on product cards"
+                    placeholder={i18n.t(
+                      'One-line summary shown on product cards',
+                    )}
                     className="resize-none"
                   />
                 </FormControl>
@@ -192,12 +201,14 @@ export function SellerProductForm({
             name="longDescription"
             render={({field}) => (
               <FormItem>
-                <FormLabel>Full description</FormLabel>
+                <FormLabel>{i18n.t('Full description')}</FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
                     rows={6}
-                    placeholder="Detailed description shown on the product detail page (HTML supported)"
+                    placeholder={i18n.t(
+                      'Detailed description shown on the product detail page (HTML supported)',
+                    )}
                     className="resize-none font-mono"
                   />
                 </FormControl>
@@ -209,7 +220,7 @@ export function SellerProductForm({
 
         {/* Pricing */}
         <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
-          <h2 className="font-semibold text-base">Pricing</h2>
+          <h2 className="font-semibold text-base">{i18n.t('Pricing')}</h2>
 
           <FormField
             control={form.control}
@@ -223,7 +234,7 @@ export function SellerProductForm({
                   />
                 </FormControl>
                 <FormLabel className="font-normal cursor-pointer">
-                  This product is free
+                  {i18n.t('This product is free')}
                 </FormLabel>
               </FormItem>
             )}
@@ -236,7 +247,8 @@ export function SellerProductForm({
               render={({field}) => (
                 <FormItem>
                   <FormLabel>
-                    Price <span className="text-destructive">*</span>
+                    {i18n.t('Price')}{' '}
+                    <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <div className="relative w-48">
@@ -262,24 +274,24 @@ export function SellerProductForm({
 
         {/* Cover image */}
         <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
-          <h2 className="font-semibold text-base">Cover image</h2>
+          <h2 className="font-semibold text-base">{i18n.t('Cover image')}</h2>
           <div
             className="relative w-full h-48 rounded-xl border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/50 transition-colors overflow-hidden"
             onClick={() => coverRef.current?.click()}>
             {coverPreviewRef.current ? (
               <img
                 src={coverPreviewRef.current}
-                alt="Cover preview"
+                alt={i18n.t('Cover preview')}
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
               <>
                 <MdImage className="text-3xl text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Click to upload cover image
+                  {i18n.t('Click to upload cover image')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PNG, JPG up to 5MB
+                  {i18n.t('PNG, JPG up to 5MB')}
                 </p>
               </>
             )}
@@ -297,7 +309,8 @@ export function SellerProductForm({
         <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-base">
-              Software versions <span className="text-destructive">*</span>
+              {i18n.t('Software versions')}{' '}
+              <span className="text-destructive">*</span>
             </h2>
             <Button
               type="button"
@@ -306,7 +319,7 @@ export function SellerProductForm({
               onClick={() => append(makeVersionRow())}
               className="gap-1.5">
               <MdAdd />
-              Add version
+              {i18n.t('Add version')}
             </Button>
           </div>
 
@@ -332,7 +345,9 @@ export function SellerProductForm({
         {/* Footer */}
         <div className="flex items-center justify-between pt-2 pb-8">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`${workspaceURI}/marketplace/my-products`}>Cancel</Link>
+            <Link href={`${workspaceURI}/marketplace/my-products`}>
+              {i18n.t('Cancel')}
+            </Link>
           </Button>
           <div className="flex gap-3">
             <Button
@@ -340,7 +355,7 @@ export function SellerProductForm({
               variant="outline"
               disabled={submitting}
               onClick={form.handleSubmit(data => handleSubmit(data, 'draft'))}>
-              {submitting ? 'Saving...' : 'Save as draft'}
+              {submitting ? i18n.t('Saving...') : i18n.t('Save as draft')}
             </Button>
             <Button
               type="button"
@@ -348,7 +363,9 @@ export function SellerProductForm({
               onClick={form.handleSubmit(data =>
                 handleSubmit(data, 'submitted'),
               )}>
-              {submitting ? 'Submitting...' : 'Submit for review'}
+              {submitting
+                ? i18n.t('Submitting...')
+                : i18n.t('Submit for review')}
             </Button>
           </div>
         </div>
@@ -380,7 +397,7 @@ function VersionRow({
     <div className="border rounded-xl p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Version {index + 1}
+          {i18n.t('Version {0}', String(index + 1))}
         </span>
         {!isOnly && (
           <Button
@@ -401,12 +418,13 @@ function VersionRow({
           render={({field}) => (
             <FormItem>
               <FormLabel className="text-xs">
-                Version string <span className="text-destructive">*</span>
+                {i18n.t('Version string')}{' '}
+                <span className="text-destructive">*</span>
               </FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="e.g. 1.0.0"
+                  placeholder={i18n.t('e.g. 1.0.0')}
                   className="font-mono"
                 />
               </FormControl>
@@ -420,7 +438,9 @@ function VersionRow({
           name={`versions.${index}.releaseDate`}
           render={({field}) => (
             <FormItem>
-              <FormLabel className="text-xs">Release date</FormLabel>
+              <FormLabel className="text-xs">
+                {i18n.t('Release date')}
+              </FormLabel>
               <FormControl>
                 <Input {...field} type="date" />
               </FormControl>
@@ -435,12 +455,12 @@ function VersionRow({
         name={`versions.${index}.releaseNotes`}
         render={({field}) => (
           <FormItem>
-            <FormLabel className="text-xs">Release notes</FormLabel>
+            <FormLabel className="text-xs">{i18n.t('Release notes')}</FormLabel>
             <FormControl>
               <Textarea
                 {...field}
                 rows={2}
-                placeholder="What changed in this version?"
+                placeholder={i18n.t('What changed in this version?')}
                 className="resize-none"
               />
             </FormControl>
@@ -455,10 +475,12 @@ function VersionRow({
         <MdUploadFile className="text-xl text-muted-foreground shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium truncate">
-            {fileName || 'Upload software file'}
+            {fileName || i18n.t('Upload software file')}
           </p>
           <p className="text-xs text-muted-foreground">
-            {fileName ? 'Click to change file' : 'ZIP, EXE, DMG, JAR, etc.'}
+            {fileName
+              ? i18n.t('Click to change file')
+              : i18n.t('ZIP, EXE, DMG, JAR, etc.')}
           </p>
         </div>
         {fileName && (
@@ -486,11 +508,9 @@ function VersionRow({
           />
         </FormControl>
         <FormLabel className="text-xs text-muted-foreground font-normal cursor-pointer">
-          Mark as latest version
+          {i18n.t('Mark as latest version')}
         </FormLabel>
       </FormItem>
     </div>
   );
 }
-
-export default SellerProductForm;

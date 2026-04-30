@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components';
 
-import {ProductView} from '../../common/ui/components';
+import {ProductView} from '../../common/ui/components/product-view';
 import type {MarketplaceProduct} from '../../common/types';
 
 // ---- DUMMY DATA ---- //
