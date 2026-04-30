@@ -38,10 +38,14 @@ export function ProductSearch() {
       </form>
       <div className="flex items-center gap-2 text-muted-foreground">
         <button onClick={() => updateParam('view', 'grid')}>
-          <MdGridView className={cn('text-xl', {'text-primary': view === 'grid'})} />
+          <MdGridView
+            className={cn('text-xl', {'text-primary': view === 'grid'})}
+          />
         </button>
         <button onClick={() => updateParam('view', 'list')}>
-          <MdOutlineList className={cn('text-xl', {'text-primary': view === 'list'})} />
+          <MdOutlineList
+            className={cn('text-xl', {'text-primary': view === 'list'})}
+          />
         </button>
       </div>
     </div>

@@ -10,7 +10,11 @@ type VersionListProps = {
   hasPurchased?: boolean;
 };
 
-export function VersionList({versions, productId, hasPurchased = false}: VersionListProps) {
+export function VersionList({
+  versions,
+  productId,
+  hasPurchased = false,
+}: VersionListProps) {
   if (!versions.length) {
     return (
       <p className="text-sm text-muted-foreground py-4">
@@ -25,7 +29,9 @@ export function VersionList({versions, productId, hasPurchased = false}: Version
         <div key={v.id} className="py-4 flex items-start gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-sm font-semibold">{v.version}</span>
+              <span className="font-mono text-sm font-semibold">
+                {v.version}
+              </span>
               {v.isLatest && (
                 <span className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary font-medium px-2 py-0.5 rounded-full">
                   <HiOutlineCheckCircle className="text-sm" />

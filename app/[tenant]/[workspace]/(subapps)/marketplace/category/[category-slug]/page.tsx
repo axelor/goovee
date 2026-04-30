@@ -6,16 +6,50 @@ import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
 
 import {ProductList} from '../../common/ui/components';
-import type {MarketplaceCategory, MarketplaceProduct, ProductView} from '../../common/types';
+import type {
+  MarketplaceCategory,
+  MarketplaceProduct,
+  ProductView,
+} from '../../common/types';
 
 // ---- DUMMY DATA ---- //
 const DUMMY_CATEGORIES: MarketplaceCategory[] = [
-  {id: '1', name: 'CRM & Sales', slug: 'crm-sales', subtitle: 'Customer relationship tools'},
-  {id: '2', name: 'Finance & Accounting', slug: 'finance-accounting', subtitle: 'Financial management'},
-  {id: '3', name: 'HR & Payroll', slug: 'hr-payroll', subtitle: 'Human resources software'},
-  {id: '4', name: 'Project Management', slug: 'project-management', subtitle: 'Plan and track projects'},
-  {id: '5', name: 'Integrations', slug: 'integrations', subtitle: 'Connect your tools'},
-  {id: '6', name: 'Analytics', slug: 'analytics', subtitle: 'Data and reporting'},
+  {
+    id: '1',
+    name: 'CRM & Sales',
+    slug: 'crm-sales',
+    subtitle: 'Customer relationship tools',
+  },
+  {
+    id: '2',
+    name: 'Finance & Accounting',
+    slug: 'finance-accounting',
+    subtitle: 'Financial management',
+  },
+  {
+    id: '3',
+    name: 'HR & Payroll',
+    slug: 'hr-payroll',
+    subtitle: 'Human resources software',
+  },
+  {
+    id: '4',
+    name: 'Project Management',
+    slug: 'project-management',
+    subtitle: 'Plan and track projects',
+  },
+  {
+    id: '5',
+    name: 'Integrations',
+    slug: 'integrations',
+    subtitle: 'Connect your tools',
+  },
+  {
+    id: '6',
+    name: 'Analytics',
+    slug: 'analytics',
+    subtitle: 'Data and reporting',
+  },
 ];
 
 const DUMMY_PRODUCTS: MarketplaceProduct[] = [
@@ -30,7 +64,13 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '1', name: 'CRM & Sales', slug: 'crm-sales'}],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v1', version: '2.1.0', releaseNotes: 'Bug fixes', releaseDate: '2026-04-15', isLatest: true},
+      {
+        id: 'v1',
+        version: '2.1.0',
+        releaseNotes: 'Bug fixes',
+        releaseDate: '2026-04-15',
+        isLatest: true,
+      },
     ],
     createdOn: '2026-03-01',
   },
@@ -42,10 +82,18 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     salePrice: 99,
     saleCurrency: {id: '1', symbol: '€'},
     defaultSupplierPartner: {id: '102', name: 'FinTools GmbH'},
-    portalCategorySet: [{id: '2', name: 'Finance & Accounting', slug: 'finance-accounting'}],
+    portalCategorySet: [
+      {id: '2', name: 'Finance & Accounting', slug: 'finance-accounting'},
+    ],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v3', version: '1.4.2', releaseNotes: 'SEPA support', releaseDate: '2026-04-01', isLatest: true},
+      {
+        id: 'v3',
+        version: '1.4.2',
+        releaseNotes: 'SEPA support',
+        releaseDate: '2026-04-01',
+        isLatest: true,
+      },
     ],
     createdOn: '2026-02-10',
   },
@@ -60,7 +108,13 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '3', name: 'HR & Payroll', slug: 'hr-payroll'}],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v4', version: '3.0.1', releaseNotes: 'Initial release', releaseDate: '2026-01-20', isLatest: true},
+      {
+        id: 'v4',
+        version: '3.0.1',
+        releaseNotes: 'Initial release',
+        releaseDate: '2026-01-20',
+        isLatest: true,
+      },
     ],
     createdOn: '2026-01-20',
   },
@@ -71,10 +125,13 @@ export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; 'category-slug': string}>;
   searchParams: Promise<{view?: ProductView}>;
 }) {
-  const [params, searchParams] = await Promise.all([props.params, props.searchParams]);
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
   const {workspaceURI} = workspacePathname(params);
   const categorySlug = params['category-slug'];
-  const view: ProductView = searchParams.view === 'list' ? 'list' : 'grid';
+  const view = searchParams.view === 'list' ? 'list' : 'grid';
 
   const category = DUMMY_CATEGORIES.find(c => c.slug === categorySlug);
   if (!category) notFound();
@@ -93,15 +150,21 @@ export default async function Page(props: {
             </div>
             <div>
               <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
+                <Link
+                  href={`${workspaceURI}/marketplace`}
+                  className="hover:underline">
                   {await t('Marketplace')}
                 </Link>
                 <span>/</span>
-                <span className="text-foreground font-medium">{category.name}</span>
+                <span className="text-foreground font-medium">
+                  {category.name}
+                </span>
               </nav>
               <h1 className="text-xl font-bold">{category.name}</h1>
               {category.subtitle && (
-                <p className="text-sm text-muted-foreground">{category.subtitle}</p>
+                <p className="text-sm text-muted-foreground">
+                  {category.subtitle}
+                </p>
               )}
             </div>
           </div>

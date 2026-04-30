@@ -30,9 +30,29 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '1', name: 'CRM & Sales', slug: 'crm-sales'}],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v1', version: '2.1.0', releaseNotes: 'Bug fixes and performance improvements. Removed deprecated API calls.', releaseDate: '2026-04-15', isLatest: true},
-      {id: 'v2', version: '2.0.0', releaseNotes: 'Complete rewrite with new REST API layer. Breaking changes — see migration guide.', releaseDate: '2026-03-01', isLatest: false},
-      {id: 'v3', version: '1.3.5', releaseNotes: 'Security patch. Upgrade recommended.', releaseDate: '2026-01-10', isLatest: false},
+      {
+        id: 'v1',
+        version: '2.1.0',
+        releaseNotes:
+          'Bug fixes and performance improvements. Removed deprecated API calls.',
+        releaseDate: '2026-04-15',
+        isLatest: true,
+      },
+      {
+        id: 'v2',
+        version: '2.0.0',
+        releaseNotes:
+          'Complete rewrite with new REST API layer. Breaking changes — see migration guide.',
+        releaseDate: '2026-03-01',
+        isLatest: false,
+      },
+      {
+        id: 'v3',
+        version: '1.3.5',
+        releaseNotes: 'Security patch. Upgrade recommended.',
+        releaseDate: '2026-01-10',
+        isLatest: false,
+      },
     ],
     createdOn: '2026-03-01',
   },
@@ -46,11 +66,26 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     salePrice: 99,
     saleCurrency: {id: '1', symbol: '€'},
     defaultSupplierPartner: {id: '102', name: 'FinTools GmbH'},
-    portalCategorySet: [{id: '2', name: 'Finance & Accounting', slug: 'finance-accounting'}],
+    portalCategorySet: [
+      {id: '2', name: 'Finance & Accounting', slug: 'finance-accounting'},
+    ],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v3', version: '1.4.2', releaseNotes: 'SEPA XML export support. Fixed tax rounding on multi-line invoices.', releaseDate: '2026-04-01', isLatest: true},
-      {id: 'v4', version: '1.4.0', releaseNotes: 'Multi-currency support.', releaseDate: '2026-02-15', isLatest: false},
+      {
+        id: 'v3',
+        version: '1.4.2',
+        releaseNotes:
+          'SEPA XML export support. Fixed tax rounding on multi-line invoices.',
+        releaseDate: '2026-04-01',
+        isLatest: true,
+      },
+      {
+        id: 'v4',
+        version: '1.4.0',
+        releaseNotes: 'Multi-currency support.',
+        releaseDate: '2026-02-15',
+        isLatest: false,
+      },
     ],
     createdOn: '2026-02-10',
   },
@@ -66,7 +101,13 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '3', name: 'HR & Payroll', slug: 'hr-payroll'}],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v4', version: '3.0.1', releaseNotes: 'Initial open source release.', releaseDate: '2026-01-20', isLatest: true},
+      {
+        id: 'v4',
+        version: '3.0.1',
+        releaseNotes: 'Initial open source release.',
+        releaseDate: '2026-01-20',
+        isLatest: true,
+      },
     ],
     createdOn: '2026-01-20',
   },
@@ -79,11 +120,25 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     salePrice: 29,
     saleCurrency: {id: '1', symbol: '€'},
     defaultSupplierPartner: {id: '104', name: 'Devcraft Studio'},
-    portalCategorySet: [{id: '4', name: 'Project Management', slug: 'project-management'}],
+    portalCategorySet: [
+      {id: '4', name: 'Project Management', slug: 'project-management'},
+    ],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v5', version: '1.1.0', releaseNotes: 'Drag-and-drop rescheduling, dependency arrows.', releaseDate: '2026-03-15', isLatest: true},
-      {id: 'v6', version: '1.0.0', releaseNotes: 'Initial release.', releaseDate: '2026-02-01', isLatest: false},
+      {
+        id: 'v5',
+        version: '1.1.0',
+        releaseNotes: 'Drag-and-drop rescheduling, dependency arrows.',
+        releaseDate: '2026-03-15',
+        isLatest: true,
+      },
+      {
+        id: 'v6',
+        version: '1.0.0',
+        releaseNotes: 'Initial release.',
+        releaseDate: '2026-02-01',
+        isLatest: false,
+      },
     ],
     createdOn: '2026-03-15',
   },
@@ -99,7 +154,13 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '5', name: 'Integrations', slug: 'integrations'}],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v6', version: '1.0.0', releaseNotes: 'First release — supports approval and alert events.', releaseDate: '2026-04-10', isLatest: true},
+      {
+        id: 'v6',
+        version: '1.0.0',
+        releaseNotes: 'First release — supports approval and alert events.',
+        releaseDate: '2026-04-10',
+        isLatest: true,
+      },
     ],
     createdOn: '2026-04-10',
   },
@@ -115,8 +176,20 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '6', name: 'Analytics', slug: 'analytics'}],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v7', version: '2.0.0', releaseNotes: 'New chart engine, 8 new widget types.', releaseDate: '2026-04-20', isLatest: true},
-      {id: 'v8', version: '1.5.0', releaseNotes: 'Performance improvements.', releaseDate: '2026-03-10', isLatest: false},
+      {
+        id: 'v7',
+        version: '2.0.0',
+        releaseNotes: 'New chart engine, 8 new widget types.',
+        releaseDate: '2026-04-20',
+        isLatest: true,
+      },
+      {
+        id: 'v8',
+        version: '1.5.0',
+        releaseNotes: 'Performance improvements.',
+        releaseDate: '2026-03-10',
+        isLatest: false,
+      },
     ],
     createdOn: '2026-04-20',
   },
@@ -141,7 +214,9 @@ export default async function Page(props: {
       <div className="bg-card border-b">
         <div className="container portal-container py-3">
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-            <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
+            <Link
+              href={`${workspaceURI}/marketplace`}
+              className="hover:underline">
               {await t('Marketplace')}
             </Link>
             {product.portalCategorySet?.[0] && (

@@ -2,7 +2,11 @@ import Link from 'next/link';
 import {MdDownload} from 'react-icons/md';
 
 import {cn} from '@/utils/css';
-import type {MarketplaceCategory, MarketplaceProduct, ProductView} from '../../../types';
+import type {
+  MarketplaceCategory,
+  MarketplaceProduct,
+  ProductView,
+} from '../../../types';
 import {ProductCard} from '../product-card';
 import {ProductSearch} from '../product-search';
 
@@ -49,7 +53,10 @@ export function ProductList({
                     href={`${workspaceURI}/marketplace/category/${cat.slug}`}
                     className={cn(
                       'block text-sm px-3 py-2 rounded-lg hover:bg-muted transition-colors',
-                      {'bg-primary/10 text-primary font-medium': activeCategory?.id === cat.id},
+                      {
+                        'bg-primary/10 text-primary font-medium':
+                          activeCategory?.id === cat.id,
+                      },
                     )}>
                     {cat.name}
                   </Link>
@@ -78,13 +85,21 @@ export function ProductList({
             ) : view === 'list' ? (
               <div className="flex flex-col gap-3">
                 {products.map(p => (
-                  <ProductListRow key={p.id} product={p} workspaceURI={workspaceURI} />
+                  <ProductListRow
+                    key={p.id}
+                    product={p}
+                    workspaceURI={workspaceURI}
+                  />
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {products.map(p => (
-                  <ProductCard key={p.id} product={p} workspaceURI={workspaceURI} />
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    workspaceURI={workspaceURI}
+                  />
                 ))}
               </div>
             )}
@@ -95,7 +110,13 @@ export function ProductList({
   );
 }
 
-function ProductListRow({product, workspaceURI}: {product: MarketplaceProduct; workspaceURI: string}) {
+function ProductListRow({
+  product,
+  workspaceURI,
+}: {
+  product: MarketplaceProduct;
+  workspaceURI: string;
+}) {
   const price =
     product.salePrice === 0
       ? 'Free'

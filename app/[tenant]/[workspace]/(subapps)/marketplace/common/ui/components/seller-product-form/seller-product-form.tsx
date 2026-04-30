@@ -50,7 +50,9 @@ export function SellerProductForm({
       : [makeVersionRow()],
   );
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState<'draft' | 'submitted' | null>(null);
+  const [submitting, setSubmitting] = useState<'draft' | 'submitted' | null>(
+    null,
+  );
   const coverRef = useRef<HTMLInputElement>(null);
 
   const toggleCategory = (id: string) => {
@@ -64,22 +66,28 @@ export function SellerProductForm({
   const removeVersion = (key: string) =>
     setVersions(v => v.filter(r => r._key !== key));
 
-  const updateVersion = (key: string, field: keyof VersionDraftRow, value: unknown) =>
+  const updateVersion = (
+    key: string,
+    field: keyof VersionDraftRow,
+    value: unknown,
+  ) =>
     setVersions(v =>
-      v.map(r => {
-        if (r._key !== key) return r;
-        if (field === 'isLatest') {
-          // only one can be latest
-          return {...r, isLatest: true};
-        }
-        return {...r, [field]: value};
-      }).map(r => {
-        // if isLatest was set on this row, clear others
-        if (field === 'isLatest' && value === true && r._key !== key) {
-          return {...r, isLatest: false};
-        }
-        return r;
-      }),
+      v
+        .map(r => {
+          if (r._key !== key) return r;
+          if (field === 'isLatest') {
+            // only one can be latest
+            return {...r, isLatest: true};
+          }
+          return {...r, [field]: value};
+        })
+        .map(r => {
+          // if isLatest was set on this row, clear others
+          if (field === 'isLatest' && value === true && r._key !== key) {
+            return {...r, isLatest: false};
+          }
+          return r;
+        }),
     );
 
   const handleVersionFile = (key: string, file: File | null) => {
@@ -109,7 +117,8 @@ export function SellerProductForm({
       fd.set(`versions[${i}][isLatest]`, String(v.isLatest));
       if (v.file) fd.set(`versions[${i}][file]`, v.file);
     });
-    if (coverRef.current?.files?.[0]) fd.set('picture', coverRef.current.files[0]);
+    if (coverRef.current?.files?.[0])
+      fd.set('picture', coverRef.current.files[0]);
     try {
       await onSubmit?.(fd, status);
     } finally {
@@ -240,7 +249,9 @@ export function SellerProductForm({
               <p className="text-sm text-muted-foreground">
                 Click to upload cover image
               </p>
-              <p className="text-xs text-muted-foreground">PNG, JPG up to 5MB</p>
+              <p className="text-xs text-muted-foreground">
+                PNG, JPG up to 5MB
+              </p>
             </>
           )}
           <input
@@ -257,8 +268,7 @@ export function SellerProductForm({
       <section className="bg-card rounded-2xl p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-base">
-            Software versions{' '}
-            <span className="text-destructive">*</span>
+            Software versions <span className="text-destructive">*</span>
           </h2>
           <button
             type="button"
@@ -399,7 +409,9 @@ function VersionRow({
           </p>
         </div>
         {row.fileName && (
-          <span className="text-xs text-green-600 font-medium shrink-0">✓ Ready</span>
+          <span className="text-xs text-green-600 font-medium shrink-0">
+            ✓ Ready
+          </span>
         )}
         <input
           ref={fileRef}

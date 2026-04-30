@@ -19,7 +19,12 @@ export type MarketplaceProduct = {
   portalImageList?: {id: string; picture: {id: string}}[] | null;
   defaultSupplierPartner?: {id: string; name: string} | null;
   portalCategorySet?: {id: string; name: string; slug: string}[] | null;
-  marketplaceStatusSelect: 'draft' | 'submitted' | 'approved' | 'published' | 'rejected';
+  marketplaceStatusSelect:
+    | 'draft'
+    | 'submitted'
+    | 'approved'
+    | 'published'
+    | 'rejected';
   marketplaceVersionList?: MarketplaceProductVersion[] | null;
   createdOn?: string | null;
 };

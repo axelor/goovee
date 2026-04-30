@@ -21,8 +21,20 @@ const DUMMY_SELLER_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '1', name: 'CRM & Sales', slug: 'crm-sales'}],
     marketplaceStatusSelect: 'published',
     marketplaceVersionList: [
-      {id: 'v1', version: '2.1.0', releaseNotes: '', releaseDate: '2026-04-15', isLatest: true},
-      {id: 'v2', version: '2.0.0', releaseNotes: '', releaseDate: '2026-03-01', isLatest: false},
+      {
+        id: 'v1',
+        version: '2.1.0',
+        releaseNotes: '',
+        releaseDate: '2026-04-15',
+        isLatest: true,
+      },
+      {
+        id: 'v2',
+        version: '2.0.0',
+        releaseNotes: '',
+        releaseDate: '2026-03-01',
+        isLatest: false,
+      },
     ],
     createdOn: '2026-03-01',
   },
@@ -37,7 +49,13 @@ const DUMMY_SELLER_PRODUCTS: MarketplaceProduct[] = [
     portalCategorySet: [{id: '5', name: 'Integrations', slug: 'integrations'}],
     marketplaceStatusSelect: 'submitted',
     marketplaceVersionList: [
-      {id: 'v6', version: '1.0.0', releaseNotes: '', releaseDate: '2026-04-10', isLatest: true},
+      {
+        id: 'v6',
+        version: '1.0.0',
+        releaseNotes: '',
+        releaseDate: '2026-04-10',
+        isLatest: true,
+      },
     ],
     createdOn: '2026-04-10',
   },
@@ -68,7 +86,9 @@ export default async function Page(props: {
       <div className="flex items-center justify-between mb-8">
         <div>
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-            <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
+            <Link
+              href={`${workspaceURI}/marketplace`}
+              className="hover:underline">
               {await t('Marketplace')}
             </Link>
             <FaChevronRight className="text-primary text-[0.6rem]" />
@@ -95,7 +115,9 @@ export default async function Page(props: {
             📦
           </div>
           <div className="text-center">
-            <p className="font-semibold">{await t("You haven't listed any products yet")}</p>
+            <p className="font-semibold">
+              {await t("You haven't listed any products yet")}
+            </p>
             <p className="text-sm text-muted-foreground mt-1">
               {await t('Start selling your software on the marketplace')}
             </p>
@@ -138,12 +160,17 @@ export default async function Page(props: {
                   product.salePrice === 0
                     ? 'Free'
                     : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
-                const versionCount = product.marketplaceVersionList?.length ?? 0;
-                const latestVersion = product.marketplaceVersionList?.find(v => v.isLatest);
+                const versionCount =
+                  product.marketplaceVersionList?.length ?? 0;
+                const latestVersion = product.marketplaceVersionList?.find(
+                  v => v.isLatest,
+                );
                 const canDelete = product.marketplaceStatusSelect === 'draft';
 
                 return (
-                  <tr key={product.id} className="hover:bg-muted/30 transition-colors">
+                  <tr
+                    key={product.id}
+                    className="hover:bg-muted/30 transition-colors">
                     <td className="px-5 py-4">
                       <p className="font-medium line-clamp-1">{product.name}</p>
                       {product.description && (
@@ -176,7 +203,9 @@ export default async function Page(props: {
                     </td>
 
                     <td className="px-4 py-4 hidden lg:table-cell text-muted-foreground text-xs">
-                      {versionCount === 0 ? '—' : `${versionCount} version${versionCount !== 1 ? 's' : ''}`}
+                      {versionCount === 0
+                        ? '—'
+                        : `${versionCount} version${versionCount !== 1 ? 's' : ''}`}
                     </td>
 
                     <td className="px-4 py-4 hidden lg:table-cell font-medium text-xs">
