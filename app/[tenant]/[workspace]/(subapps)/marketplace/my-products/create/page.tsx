@@ -1,4 +1,3 @@
-import {Suspense} from 'react';
 import Link from 'next/link';
 import {FaChevronRight} from 'react-icons/fa';
 
@@ -19,16 +18,14 @@ const DUMMY_CATEGORIES: MarketplaceCategory[] = [
 ];
 // ---- END DUMMY DATA ---- //
 
-async function CreateProductPage({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
 }) {
+  const params = await props.params;
   const {workspaceURI} = workspacePathname(params);
 
   return (
     <div className="container portal-container py-8">
-      {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-6 flex-wrap">
         <Link href={`${workspaceURI}/marketplace`} className="hover:underline">
           {await t('Marketplace')}
@@ -50,31 +47,7 @@ async function CreateProductPage({
         </p>
       </div>
 
-      <SellerProductForm
-        categories={DUMMY_CATEGORIES}
-        workspaceURI={workspaceURI}
-      />
+      <SellerProductForm categories={DUMMY_CATEGORIES} workspaceURI={workspaceURI} />
     </div>
-  );
-}
-
-function PageSkeleton() {
-  return (
-    <div className="container portal-container py-8 flex flex-col gap-6 max-w-3xl">
-      {Array.from({length: 4}).map((_, i) => (
-        <div key={i} className="rounded-2xl bg-muted h-48 animate-pulse" />
-      ))}
-    </div>
-  );
-}
-
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  return (
-    <Suspense fallback={<PageSkeleton />}>
-      <CreateProductPage params={params} />
-    </Suspense>
   );
 }

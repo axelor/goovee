@@ -1,5 +1,5 @@
 import {HiOutlineUser} from 'react-icons/hi';
-import {MdOutlineShoppingCart, MdOutlineCategory} from 'react-icons/md';
+import {MdOutlineCategory, MdDownload, MdShoppingBag} from 'react-icons/md';
 
 import type {MarketplaceProduct} from '../../../types';
 import {ProductViewTabs} from './product-view-tabs';
@@ -31,7 +31,7 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
               />
             ) : (
               <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                <MdOutlineShoppingCart className="text-5xl" />
+                <MdDownload className="text-5xl" />
                 <span className="text-sm">No image</span>
               </div>
             )}
@@ -77,13 +77,17 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
               )}
             </div>
 
-            <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-              {hasPurchased
-                ? 'View downloads'
-                : product.salePrice === 0
-                ? 'Get for free'
-                : 'Add to cart'}
-            </button>
+            {hasPurchased || product.salePrice === 0 ? (
+              <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2">
+                <MdDownload className="text-lg" />
+                Download
+              </button>
+            ) : (
+              <button className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2">
+                <MdShoppingBag className="text-lg" />
+                Buy — {price}
+              </button>
+            )}
 
             {hasPurchased && (
               <p className="text-xs text-green-600 font-medium text-center">

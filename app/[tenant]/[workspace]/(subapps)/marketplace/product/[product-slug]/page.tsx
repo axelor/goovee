@@ -1,4 +1,3 @@
-import {Suspense} from 'react';
 import {notFound} from 'next/navigation';
 import Link from 'next/link';
 import {FaChevronRight} from 'react-icons/fa';
@@ -124,11 +123,10 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
 ];
 // ---- END DUMMY DATA ---- //
 
-async function ProductDetailPage({
-  params,
-}: {
-  params: {tenant: string; workspace: string; 'product-slug': string};
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string; 'product-slug': string}>;
 }) {
+  const params = await props.params;
   const {workspaceURI} = workspacePathname(params);
   const slug = params['product-slug'];
 
@@ -140,7 +138,6 @@ async function ProductDetailPage({
 
   return (
     <div>
-      {/* Breadcrumb strip */}
       <div className="bg-card border-b">
         <div className="container portal-container py-3">
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
@@ -167,30 +164,5 @@ async function ProductDetailPage({
 
       <ProductView product={product} hasPurchased={hasPurchased} />
     </div>
-  );
-}
-
-function PageSkeleton() {
-  return (
-    <div className="container portal-container py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 flex flex-col gap-4">
-        <div className="w-full h-64 rounded-2xl bg-muted animate-pulse" />
-        <div className="h-6 w-32 rounded-lg bg-muted animate-pulse" />
-        <div className="h-4 w-full rounded bg-muted animate-pulse" />
-        <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
-      </div>
-      <div className="bg-muted rounded-2xl h-64 animate-pulse" />
-    </div>
-  );
-}
-
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string; 'product-slug': string}>;
-}) {
-  const params = await props.params;
-  return (
-    <Suspense fallback={<PageSkeleton />}>
-      <ProductDetailPage params={params} />
-    </Suspense>
   );
 }

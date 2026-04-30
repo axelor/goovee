@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {MdOutlineShoppingCart} from 'react-icons/md';
+import {MdDownload} from 'react-icons/md';
 import {HiOutlineUser} from 'react-icons/hi';
 
 import {cn} from '@/utils/css';
@@ -28,7 +28,7 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
             />
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <MdOutlineShoppingCart className="text-4xl" />
+              <MdDownload className="text-4xl" />
               <span className="text-xs">No image</span>
             </div>
           )}

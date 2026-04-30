@@ -1,4 +1,3 @@
-import {Suspense} from 'react';
 import Link from 'next/link';
 import {MdAdd, MdEdit, MdOpenInNew, MdDelete} from 'react-icons/md';
 import {FaChevronRight} from 'react-icons/fa';
@@ -58,16 +57,14 @@ const DUMMY_SELLER_PRODUCTS: MarketplaceProduct[] = [
 ];
 // ---- END DUMMY DATA ---- //
 
-async function MyProductsPage({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
 }) {
+  const params = await props.params;
   const {workspaceURI} = workspacePathname(params);
 
   return (
     <div className="container portal-container py-8">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
@@ -93,7 +90,6 @@ async function MyProductsPage({
       </div>
 
       {DUMMY_SELLER_PRODUCTS.length === 0 ? (
-        /* Empty state */
         <div className="flex flex-col items-center justify-center py-24 gap-4 border-2 border-dashed rounded-2xl">
           <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center text-3xl">
             📦
@@ -112,7 +108,6 @@ async function MyProductsPage({
           </Link>
         </div>
       ) : (
-        /* Products table */
         <div className="bg-card rounded-2xl overflow-hidden shadow-sm">
           <table className="w-full text-sm">
             <thead>
@@ -221,25 +216,5 @@ async function MyProductsPage({
         </div>
       )}
     </div>
-  );
-}
-
-function PageSkeleton() {
-  return (
-    <div className="container portal-container py-8 flex flex-col gap-4">
-      <div className="h-8 w-48 rounded-lg bg-muted animate-pulse" />
-      <div className="rounded-2xl bg-muted h-64 animate-pulse" />
-    </div>
-  );
-}
-
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  return (
-    <Suspense fallback={<PageSkeleton />}>
-      <MyProductsPage params={params} />
-    </Suspense>
   );
 }

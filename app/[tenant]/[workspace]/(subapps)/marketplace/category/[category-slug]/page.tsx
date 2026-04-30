@@ -1,4 +1,3 @@
-import {Suspense} from 'react';
 import {notFound} from 'next/navigation';
 import Link from 'next/link';
 import {MdStorefront, MdAdd} from 'react-icons/md';
@@ -9,7 +8,7 @@ import {workspacePathname} from '@/utils/workspace';
 import {ProductList} from '../../common/ui/components';
 import type {MarketplaceCategory, MarketplaceProduct} from '../../common/types';
 
-// ---- DUMMY DATA (shared shape — replace with ORM calls) ---- //
+// ---- DUMMY DATA ---- //
 const DUMMY_CATEGORIES: MarketplaceCategory[] = [
   {id: '1', name: 'CRM & Sales', slug: 'crm-sales', subtitle: 'Customer relationship tools'},
   {id: '2', name: 'Finance & Accounting', slug: 'finance-accounting', subtitle: 'Financial management'},
@@ -68,13 +67,14 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
 ];
 // ---- END DUMMY DATA ---- //
 
-async function CategoryPage({
-  params,
-}: {
-  params: {tenant: string; workspace: string; 'category-slug': string};
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string; 'category-slug': string}>;
+  searchParams: Promise<{view?: string}>;
 }) {
+  const [params, searchParams] = await Promise.all([props.params, props.searchParams]);
   const {workspaceURI} = workspacePathname(params);
   const categorySlug = params['category-slug'];
+  const view = searchParams.view ?? 'grid';
 
   const category = DUMMY_CATEGORIES.find(c => c.slug === categorySlug);
   if (!category) notFound();
@@ -85,7 +85,6 @@ async function CategoryPage({
 
   return (
     <div>
-      {/* Hero strip */}
       <div className="bg-card border-b">
         <div className="container portal-container py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -119,32 +118,9 @@ async function CategoryPage({
         products={products}
         categories={DUMMY_CATEGORIES}
         workspaceURI={workspaceURI}
+        view={view}
         activeCategory={category}
       />
     </div>
-  );
-}
-
-function PageSkeleton() {
-  return (
-    <div className="container portal-container py-8 flex flex-col gap-4">
-      <div className="h-8 w-48 rounded-lg bg-muted animate-pulse" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-        {Array.from({length: 3}).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-muted h-64 animate-pulse" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string; 'category-slug': string}>;
-}) {
-  const params = await props.params;
-  return (
-    <Suspense fallback={<PageSkeleton />}>
-      <CategoryPage params={params} />
-    </Suspense>
   );
 }

@@ -1,4 +1,3 @@
-import {Suspense} from 'react';
 import Link from 'next/link';
 import {MdStorefront, MdAdd} from 'react-icons/md';
 
@@ -113,16 +112,16 @@ const DUMMY_PRODUCTS: MarketplaceProduct[] = [
 ];
 // ---- END DUMMY DATA ---- //
 
-async function MarketplaceHome({
-  params,
-}: {
-  params: {tenant: string; workspace: string};
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+  searchParams: Promise<{view?: string}>;
 }) {
+  const [params, searchParams] = await Promise.all([props.params, props.searchParams]);
   const {workspaceURI} = workspacePathname(params);
+  const view = searchParams.view ?? 'grid';
 
   return (
     <div>
-      {/* Hero */}
       <div className="bg-card border-b">
         <div className="container portal-container py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -145,31 +144,12 @@ async function MarketplaceHome({
         </div>
       </div>
 
-      <ProductList products={DUMMY_PRODUCTS} categories={DUMMY_CATEGORIES} workspaceURI={workspaceURI} />
+      <ProductList
+        products={DUMMY_PRODUCTS}
+        categories={DUMMY_CATEGORIES}
+        workspaceURI={workspaceURI}
+        view={view}
+      />
     </div>
-  );
-}
-
-function PageSkeleton() {
-  return (
-    <div className="container portal-container py-8 flex flex-col gap-4">
-      <div className="h-8 w-48 rounded-lg bg-muted animate-pulse" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-        {Array.from({length: 6}).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-muted h-64 animate-pulse" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string}>;
-}) {
-  const params = await props.params;
-  return (
-    <Suspense fallback={<PageSkeleton />}>
-      <MarketplaceHome params={params} />
-    </Suspense>
   );
 }

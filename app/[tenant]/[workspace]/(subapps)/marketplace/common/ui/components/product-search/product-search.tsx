@@ -6,10 +6,12 @@ import {MdGridView, MdOutlineList} from 'react-icons/md';
 
 import {cn} from '@/utils/css';
 
-export function ProductSearch({defaultSearch, defaultView}: {defaultSearch: string; defaultView: string}) {
+export function ProductSearch() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const view = searchParams.get('view') ?? 'grid';
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
@@ -29,17 +31,17 @@ export function ProductSearch({defaultSearch, defaultView}: {defaultSearch: stri
         <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-lg" />
         <input
           name="search"
-          defaultValue={defaultSearch}
+          defaultValue={searchParams.get('search') ?? ''}
           placeholder="Search software..."
           className="w-full pl-9 pr-4 py-2 text-sm rounded-full border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </form>
       <div className="flex items-center gap-2 text-muted-foreground">
         <button onClick={() => updateParam('view', 'grid')}>
-          <MdGridView className={cn('text-xl', {'text-primary': defaultView === 'grid'})} />
+          <MdGridView className={cn('text-xl', {'text-primary': view === 'grid'})} />
         </button>
         <button onClick={() => updateParam('view', 'list')}>
-          <MdOutlineList className={cn('text-xl', {'text-primary': defaultView === 'list'})} />
+          <MdOutlineList className={cn('text-xl', {'text-primary': view === 'list'})} />
         </button>
       </div>
     </div>

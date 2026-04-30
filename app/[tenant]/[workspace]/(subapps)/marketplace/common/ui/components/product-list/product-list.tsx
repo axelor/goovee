@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import {MdOutlineShoppingCart} from 'react-icons/md';
+import {MdDownload} from 'react-icons/md';
 
 import {cn} from '@/utils/css';
-import type {MarketplaceCategory, MarketplaceProduct, SearchParams} from '../../../types';
+import type {MarketplaceCategory, MarketplaceProduct} from '../../../types';
 import {ProductCard} from '../product-card';
 import {ProductSearch} from '../product-search';
 
@@ -10,23 +10,20 @@ type ProductListProps = {
   products: MarketplaceProduct[];
   categories: MarketplaceCategory[];
   workspaceURI: string;
+  view: string;
   activeCategory?: MarketplaceCategory;
-  searchParams?: SearchParams;
 };
 
 export function ProductList({
   products,
   categories,
   workspaceURI,
+  view,
   activeCategory,
-  searchParams = {},
 }: ProductListProps) {
-  const view = searchParams.view ?? 'grid';
-  const search = searchParams.search ?? '';
-
   return (
     <div>
-      <ProductSearch defaultSearch={search} defaultView={view} />
+      <ProductSearch />
 
       <div className="container portal-container py-8">
         <div className="flex gap-8">
@@ -78,16 +75,16 @@ export function ProductList({
               <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
                 <p className="text-sm">No software found.</p>
               </div>
-            ) : view === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {products.map(p => (
-                  <ProductCard key={p.id} product={p} workspaceURI={workspaceURI} />
-                ))}
-              </div>
-            ) : (
+            ) : view === 'list' ? (
               <div className="flex flex-col gap-3">
                 {products.map(p => (
                   <ProductListRow key={p.id} product={p} workspaceURI={workspaceURI} />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {products.map(p => (
+                  <ProductCard key={p.id} product={p} workspaceURI={workspaceURI} />
                 ))}
               </div>
             )}
@@ -116,7 +113,7 @@ function ProductListRow({product, workspaceURI}: {product: MarketplaceProduct; w
             className="w-full h-full object-cover"
           />
         ) : (
-          <MdOutlineShoppingCart className="text-2xl text-muted-foreground" />
+          <MdDownload className="text-2xl text-muted-foreground" />
         )}
       </div>
       <div className="flex-1 min-w-0">
