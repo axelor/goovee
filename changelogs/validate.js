@@ -13,6 +13,11 @@ const VALID_TYPES = new Set([
   'security',
 ]);
 
+function formatError(filePath, message) {
+  const relPath = path.relative(process.cwd(), filePath);
+  return `::error file=${relPath},line=1,col=1::${message}`;
+}
+
 function validateChangelog(filePath) {
   const errors = [];
 
@@ -20,7 +25,7 @@ function validateChangelog(filePath) {
   try {
     content = fs.readFileSync(filePath, 'utf-8');
   } catch (err) {
-    errors.push(`[${filePath}] Could not read file: ${err.message}`);
+    errors.push(formatError(filePath, `Could not read file: ${err.message}`));
     return errors;
   }
 
@@ -28,20 +33,23 @@ function validateChangelog(filePath) {
   try {
     json = JSON.parse(content);
   } catch (err) {
-    errors.push(`[${filePath}] Invalid JSON: ${err.message}`);
+    errors.push(formatError(filePath, `Invalid JSON: ${err.message}`));
     return errors;
   }
 
   const requiredFields = ['title', 'type', 'scope'];
   for (const field of requiredFields) {
     if (!(field in json)) {
-      errors.push(`[${filePath}] Missing required field: '${field}'`);
+      errors.push(formatError(filePath, `Missing required field: '${field}'`));
     }
   }
 
   if ('type' in json && !VALID_TYPES.has(json.type)) {
     errors.push(
-      `[${filePath}] Invalid 'type': '${json.type}' (must be one of ${Array.from(VALID_TYPES).join(', ')})`,
+      formatError(
+        filePath,
+        `Invalid 'type': '${json.type}' (must be one of ${Array.from(VALID_TYPES).join(', ')})`,
+      ),
     );
   }
 
@@ -51,12 +59,16 @@ function validateChangelog(filePath) {
       json.scope.length === 0 ||
       !json.scope.every(s => typeof s === 'string')
     ) {
-      errors.push(`[${filePath}] 'scope' must be a non-empty array of strings`);
+      errors.push(
+        formatError(filePath, `'scope' must be a non-empty array of strings`),
+      );
     }
   }
 
   if ('description' in json && typeof json.description !== 'string') {
-    errors.push(`[${filePath}] 'description' must be a string if provided`);
+    errors.push(
+      formatError(filePath, `'description' must be a string if provided`),
+    );
   }
 
   return errors;
@@ -80,8 +92,7 @@ function main() {
   });
 
   if (allErrors.length > 0) {
-    console.error('❌ Validation failed with the following issues:\n');
-    allErrors.forEach(err => console.error(` - ${err}`));
+    allErrors.forEach(err => console.error(err));
     process.exit(1);
   } else {
     console.log('✅ All changelog entries are valid.');
