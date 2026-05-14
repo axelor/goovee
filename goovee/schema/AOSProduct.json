@@ -129,6 +129,61 @@
     {
       "name": "slug",
       "type": "String"
+    },
+    {
+      "type": "Boolean",
+      "name": "isMarketPlace"
+    },
+    {
+      "type": "String",
+      "name": "marketplaceTypeSelect"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceCreatedBy",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceUpdatedBy",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currentVersion",
+      "target": "AOSMarketplaceProductVersion"
+    },
+    {
+      "type": "String",
+      "name": "marketplaceCoverStyle"
+    },
+    {
+      "type": "String",
+      "name": "marketplaceIconCode"
+    },
+    {
+      "type": "String",
+      "name": "documentationUrl"
+    },
+    {
+      "type": "String",
+      "name": "supportIssuesUrl"
+    },
+    {
+      "type": "String",
+      "name": "supportContactUrl"
+    },
+    {
+      "type": "Decimal",
+      "name": "averageRating"
+    },
+    {
+      "type": "Int",
+      "name": "ratingCount"
+    },
+    {
+      "type": "Int",
+      "name": "installCount"
     }
   ]
 }

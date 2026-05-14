@@ -219,6 +219,11 @@
       "name": "jobTitleFunction",
       "type": "ManyToOne",
       "target": "AOSFunction"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "favouriteProducts",
+      "target": "AOSProduct"
     }
   ]
 }

@@ -1,0 +1,44 @@
+{
+  "name": "AOSMarketplaceProductVersion",
+  "table": "portal_marketplace_product_version",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "product",
+      "target": "AOSProduct"
+    },
+    {
+      "type": "String",
+      "name": "versionNumber",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "dateOfSubmission"
+    },
+    {
+      "type": "DateTime",
+      "name": "dateOfApproval"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "bundleFile",
+      "target": "AOSMetaFile",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "fileSize"
+    },
+    {
+      "type": "String",
+      "name": "changelog"
+    },
+    {
+      "type": "String",
+      "name": "statusSelect",
+      "default": "draft"
+    }
+  ]
+}
