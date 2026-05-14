@@ -1,8 +1,9 @@
 import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
 import type {Client} from '@/goovee/.generated/client';
-import type {AOSProduct, AOSProductCategory} from '@/goovee/.generated/models';
+import type {AOSProduct, AOSProductCategory, AOSMarketplaceReview, AOSMarketplaceProductVersion} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
+import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
 
 // ---- TYPES ---- //
 export type QueryProps<T extends Entity> = {
@@ -17,6 +18,7 @@ export type SingleProduct = NonNullable<
   Awaited<ReturnType<typeof findProduct>>
 >;
 export type ListCategory = Awaited<ReturnType<typeof findProductCategories>>[number];
+export type ListReview = Awaited<ReturnType<typeof findProductReviews>>[number];
 
 // ---- PRODUCT CATEGORIES ---- //
 
@@ -146,6 +148,11 @@ export async function findProduct(
         id: true,
         name: true,
       },
+      defaultSupplierPartner: {
+        id: true,
+        simpleFullName: true,
+        picture: {id: true},
+      },
       portalCategorySet: {
         select: {id: true, name: true},
       },
@@ -153,6 +160,78 @@ export async function findProduct(
   });
 
   return product;
+}
+
+// ---- PRODUCT VERSIONS ---- //
+
+export async function findProductVersions(
+  productId: ID,
+  client: Client,
+  props?: QueryProps<AOSMarketplaceProductVersion>,
+) {
+  const {where, take, skip, orderBy} = props ?? {};
+
+  const versions = await client.aOSMarketplaceProductVersion.find({
+    ...(take ? {take} : {}),
+    ...(skip ? {skip} : {}),
+    ...(orderBy ? {orderBy} : {}),
+    where: and<AOSMarketplaceProductVersion>([
+      {product: {id: productId}},
+      {statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED},
+      where,
+    ]),
+    select: {
+      id: true,
+      versionNumber: true,
+      dateOfApproval: true,
+      changelog: true,
+      statusSelect: true,
+      bundleFile: {id: true},
+    },
+    orderBy: {dateOfApproval: 'DESC'},
+  });
+
+  return versions;
+}
+
+export type ListProductVersion = Awaited<ReturnType<typeof findProductVersions>>[number];
+
+// ---- PRODUCT REVIEWS ---- //
+
+export async function findProductReviews(
+  productId: ID,
+  client: Client,
+  props?: QueryProps<AOSMarketplaceReview>,
+) {
+  const {where, take, skip, orderBy} = props ?? {};
+
+  const reviews = await client.aOSMarketplaceReview.find({
+    ...(take ? {take} : {}),
+    ...(skip ? {skip} : {}),
+    ...(orderBy ? {orderBy} : {}),
+    where: and<AOSMarketplaceReview>([
+      {product: {id: productId}},
+      where,
+    ]),
+    select: {
+      id: true,
+      rating: true,
+      reviewComment: true,
+      createdOn: true,
+      author: {
+        id: true,
+        simpleFullName: true,
+        picture: {id: true},
+      },
+      reviewedVersion: {
+        id: true,
+        versionNumber: true,
+      },
+    },
+    orderBy: {createdOn: 'DESC'},
+  });
+
+  return reviews;
 }
 
 // ---- CREATE PRODUCT ---- //

@@ -150,6 +150,11 @@
     },
     {
       "type": "ManyToOne",
+      "name": "defaultSupplierPartner",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "ManyToOne",
       "name": "currentVersion",
       "target": "AOSMarketplaceProductVersion"
     },
