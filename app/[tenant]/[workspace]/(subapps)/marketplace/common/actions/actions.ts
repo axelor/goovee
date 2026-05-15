@@ -2,11 +2,13 @@
 
 import type {ActionResponse} from '@/types/action';
 import {headers} from 'next/headers';
+import {redirect} from 'next/navigation';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
+import {getLoginURL} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {ensureAuth} from '../utils/auth-helper';
@@ -16,6 +18,8 @@ import {findProductAccess} from '../orm/orm';
 const AddToFavoritesSchema = z.object({
   productId: z.string().min(1),
   workspaceURL: z.string().min(1),
+  workspaceURI: z.string().min(1),
+  returnUrl: z.string().min(1),
 });
 
 type AddToFavoritesInput = z.infer<typeof AddToFavoritesSchema>;
@@ -42,10 +46,24 @@ export async function addProductToFavorites(
     };
   }
 
-  const {productId, workspaceURL} = result.data;
+  const {productId, workspaceURL, workspaceURI, returnUrl} = result.data;
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error) return {error: true, message};
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId);
+  if (forceLogin) {
+    redirect(
+      getLoginURL({
+        callbackurl: returnUrl,
+        workspaceURI,
+        tenant: tenantId,
+      }),
+    );
+  }
+  if (error) {
+    return {
+      error: true,
+      message: await t('Unauthorized'),
+    };
+  }
 
   const client = auth.tenant.client;
   const partnerId = auth.user.id;

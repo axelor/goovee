@@ -252,6 +252,7 @@ export default async function ProductPage(props: {
 
               <AddToFavoriteButton
                 productId={product.id}
+                workspaceURL={workspaceURL}
                 workspaceURI={workspaceURI}
                 isFavorite={isFavorited}
               />
