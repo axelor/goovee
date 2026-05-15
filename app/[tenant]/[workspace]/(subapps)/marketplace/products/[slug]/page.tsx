@@ -403,10 +403,14 @@ export default async function ProductPage(props: {
                     <span className="font-semibold text-foreground">N/A</span>
                   )}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Size</span>
-                  <span className="font-semibold text-foreground">1.2 MB</span>
-                </div>
+                {product.currentVersion?.bundleFile?.sizeText && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Size</span>
+                    <span className="font-semibold text-foreground">
+                      {product.currentVersion.bundleFile.sizeText}
+                    </span>
+                  </div>
+                )}
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground block mb-2">
                     Compatibility

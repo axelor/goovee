@@ -28,10 +28,6 @@
       "required": true
     },
     {
-      "type": "Int",
-      "name": "fileSize"
-    },
-    {
       "type": "String",
       "name": "changelog"
     },

@@ -218,6 +218,9 @@ export async function findProduct({
         statusSelect: true,
         changelog: true,
         dateOfApproval: true,
+        bundleFile: {
+          sizeText: true,
+        },
         compatibilitySet: {
           select: {
             title: true,
