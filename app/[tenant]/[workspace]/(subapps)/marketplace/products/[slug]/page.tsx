@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {Star, Download, FileText, Heart} from 'lucide-react';
+import {Star, Download, FileText} from 'lucide-react';
 import {notFound} from 'next/navigation';
 import {SUBAPP_CODES} from '@/constants';
 import {formatNumber} from '@/locale/server/formatters';
@@ -27,10 +27,15 @@ import {OverviewTab} from './components/overview-tab';
 import {VersionsTab} from './components/versions-tab';
 import {ReviewsTab} from './components/reviews-tab';
 import {SupportTab} from './components/support-tab';
+import {AddToFavoriteButton} from './components/add-to-favorite-button';
 
 export default async function ProductPage(props: {
   params: Promise<{tenant: string; workspace: string; slug: string}>;
-  searchParams: Promise<{tab?: string; reviewPage?: string; versionPage?: string}>;
+  searchParams: Promise<{
+    tab?: string;
+    reviewPage?: string;
+    versionPage?: string;
+  }>;
 }) {
   const [params, searchParams] = await Promise.all([
     props.params,
@@ -45,17 +50,30 @@ export default async function ProductPage(props: {
 
   const client = auth.tenant.client;
 
-  const [product, versionCount] = await Promise.all([
-    findProduct(params.slug, client),
+  const [product, versionCount, userFavorites] = await Promise.all([
+    findProduct({
+      slug: params.slug,
+      client,
+      workspace: auth.workspace,
+    }),
     client.aOSMarketplaceProductVersion.count({
       where: {
         product: {slug: params.slug},
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       },
     }),
+    auth.user
+      ? client.aOSPartner.findOne({
+          where: {id: auth.user.id},
+          select: {favouriteProducts: {select: {id: true}}},
+        })
+      : null,
   ]);
 
   if (!product) notFound();
+
+  const isFavorited =
+    userFavorites?.favouriteProducts?.some(p => p.id === product.id) ?? false;
 
   const currentTab = (searchParams.tab || 'overview') as
     | 'overview'
@@ -63,11 +81,16 @@ export default async function ProductPage(props: {
     | 'reviews'
     | 'support';
 
-  const reviewPage = searchParams.reviewPage ? parseInt(searchParams.reviewPage as string) : 1;
-  const versionPage = searchParams.versionPage ? parseInt(searchParams.versionPage as string) : 1;
+  const reviewPage = searchParams.reviewPage
+    ? parseInt(searchParams.reviewPage)
+    : 1;
+  const versionPage = searchParams.versionPage
+    ? parseInt(searchParams.versionPage)
+    : 1;
 
   const bgGradient =
-    GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
+    GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] ||
+    DEFAULT_GRADIENT;
 
   const rating = Number(product.averageRating || 0);
   const ratingCount = Number(product.ratingCount || 0);
@@ -120,7 +143,10 @@ export default async function ProductPage(props: {
             <div className="flex items-center justify-center">
               <div
                 className={`w-40 h-40 rounded-2xl bg-gradient-to-br ${bgGradient} flex items-center justify-center`}>
-                <ProductIcon code={product.marketplaceIconCode} className="w-24 h-24" />
+                <ProductIcon
+                  code={product.marketplaceIconCode}
+                  className="w-24 h-24"
+                />
               </div>
             </div>
 
@@ -131,12 +157,16 @@ export default async function ProductPage(props: {
                 <Badge variant="outline">{categoryName}</Badge>
                 <Badge variant="success">Free · Open source</Badge>
                 {product.currentVersion?.versionNumber && (
-                  <Badge variant="outline">{product.currentVersion.versionNumber}</Badge>
+                  <Badge variant="outline">
+                    {product.currentVersion.versionNumber}
+                  </Badge>
                 )}
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                {product.name}
+              </h1>
 
               {/* Description */}
               <p className="text-muted-foreground leading-relaxed text-sm">
@@ -147,7 +177,9 @@ export default async function ProductPage(props: {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground">by</span>
-                  <span className="font-semibold text-foreground">Axelor Labs</span>
+                  <span className="font-semibold text-foreground">
+                    Axelor Labs
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-4 text-sm flex-wrap">
@@ -183,25 +215,44 @@ export default async function ProductPage(props: {
                   </div>
 
                   {/* Updated */}
-                  <span className="text-muted-foreground">Updated 12 days ago</span>
+                  <span className="text-muted-foreground">
+                    Updated 12 days ago
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Right: Buttons and Links */}
             <div className="flex flex-col gap-3 justify-center">
-              <Button size="lg" className="gap-2 rounded-full">
-                <Download size={18} />
-                Download ZIP
+              <Button
+                size="lg"
+                className="gap-2 rounded-full"
+                asChild
+                disabled={!product.currentVersion?.id}>
+                <a
+                  href={
+                    product.currentVersion?.id
+                      ? `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`
+                      : '#'
+                  }
+                  download>
+                  <Download size={18} />
+                  Download ZIP
+                </a>
               </Button>
 
-              <Button variant="outline" size="lg" className="gap-2 rounded-full">
-                <Heart size={18} />
-                Add to favorites
-              </Button>
+              <AddToFavoriteButton
+                productId={product.id}
+                workspaceURI={workspaceURI}
+                isFavorite={isFavorited}
+              />
 
               {product.documentationUrl && (
-                <Button asChild variant="ghost" size="lg" className="gap-2 rounded-full">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="lg"
+                  className="gap-2 rounded-full">
                   <Link
                     href={product.documentationUrl}
                     target="_blank"
@@ -225,7 +276,7 @@ export default async function ProductPage(props: {
               'py-4 font-medium transition-colors border-b-2 -mb-px',
               currentTab === 'overview'
                 ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
+                : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
             Overview
           </Link>
@@ -235,7 +286,7 @@ export default async function ProductPage(props: {
               'py-4 font-medium transition-colors border-b-2 -mb-px',
               currentTab === 'versions'
                 ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
+                : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
             Versions ({versionCount})
           </Link>
@@ -245,7 +296,7 @@ export default async function ProductPage(props: {
               'py-4 font-medium transition-colors border-b-2 -mb-px',
               currentTab === 'reviews'
                 ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
+                : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
             Reviews ({ratingCount})
           </Link>
@@ -255,7 +306,7 @@ export default async function ProductPage(props: {
               'py-4 font-medium transition-colors border-b-2 -mb-px',
               currentTab === 'support'
                 ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
+                : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
             Support
           </Link>
@@ -303,11 +354,17 @@ export default async function ProductPage(props: {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Updated</span>
-                  <span className="font-semibold text-foreground">12 days ago</span>
+                  <span className="font-semibold text-foreground">
+                    12 days ago
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Published</span>
-                  <span className="font-semibold text-foreground">Mar 2025</span>
+                  <span className="text-sm text-muted-foreground">
+                    Published
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    Mar 2025
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Size</span>
@@ -330,8 +387,12 @@ export default async function ProductPage(props: {
                   </div>
                 </div>
                 <div className="border-t border-border pt-4">
-                  <span className="text-sm text-muted-foreground">Category</span>
-                  <p className="font-semibold text-foreground">{categoryName}</p>
+                  <span className="text-sm text-muted-foreground">
+                    Category
+                  </span>
+                  <p className="font-semibold text-foreground">
+                    {categoryName}
+                  </p>
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">License</span>
@@ -381,7 +442,9 @@ export default async function ProductPage(props: {
                         className="text-muted-foreground group-hover:text-foreground flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">Issues</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Issues
+                        </p>
                         <p className="text-xs text-muted-foreground truncate">
                           Report bugs and request features
                         </p>
@@ -400,7 +463,9 @@ export default async function ProductPage(props: {
                         className="text-muted-foreground group-hover:text-foreground flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">Contact</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Contact
+                        </p>
                         <p className="text-xs text-muted-foreground truncate">
                           Get in touch for support
                         </p>
@@ -414,7 +479,9 @@ export default async function ProductPage(props: {
             {/* About Author Card */}
             {product.defaultSupplierPartner && (
               <div className="bg-card rounded-lg border border-border p-8 space-y-4">
-                <h3 className="text-lg font-bold text-foreground">About the author</h3>
+                <h3 className="text-lg font-bold text-foreground">
+                  About the author
+                </h3>
                 <div className="flex items-start gap-4">
                   <Avatar className="rounded-full h-12 w-12 flex-shrink-0">
                     <AvatarImage
@@ -423,14 +490,20 @@ export default async function ProductPage(props: {
                           ? `/api/tenant/${tenant}/partner/image/${product.defaultSupplierPartner.picture.id}`
                           : NO_IMAGE_URL
                       }
-                      alt={product.defaultSupplierPartner.simpleFullName || 'Author'}
+                      alt={
+                        product.defaultSupplierPartner.simpleFullName ||
+                        'Author'
+                      }
+                      size={48}
                     />
                   </Avatar>
                   <div className="flex-1">
                     <p className="font-semibold text-foreground">
                       {product.defaultSupplierPartner.simpleFullName}
                     </p>
-                    <p className="text-xs text-muted-foreground">Verified contributor</p>
+                    <p className="text-xs text-muted-foreground">
+                      Verified contributor
+                    </p>
                   </div>
                 </div>
                 <Button variant="outline" className="w-full rounded-full">

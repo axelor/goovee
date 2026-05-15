@@ -54,7 +54,11 @@ export function ReviewsSection({
 
   const getRatingPercentage = (rating: number) => {
     return ratingCount > 0
-      ? Math.round((ratingDistribution[rating as keyof typeof ratingDistribution] / ratingCount) * 100)
+      ? Math.round(
+          (ratingDistribution[rating as keyof typeof ratingDistribution] /
+            ratingCount) *
+            100,
+        )
       : 0;
   };
 
@@ -101,10 +105,15 @@ export function ReviewsSection({
 
           {/* Right: Rating Breakdown */}
           <div className="flex-1 space-y-3">
-            {[5, 4, 3, 2, 1].map((rating) => (
+            {[5, 4, 3, 2, 1].map(rating => (
               <div key={rating} className="flex items-center gap-3">
-                <span className="text-sm font-medium text-foreground w-6">{rating}</span>
-                <Star size={12} className="fill-amber-400 text-amber-400 flex-shrink-0" />
+                <span className="text-sm font-medium text-foreground w-6">
+                  {rating}
+                </span>
+                <Star
+                  size={12}
+                  className="fill-amber-400 text-amber-400 flex-shrink-0"
+                />
                 <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-amber-400 rounded-full"
@@ -135,7 +144,9 @@ export function ReviewsSection({
               <PaginationPrevious asChild>
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${productSlug}?tab=reviews${currentPage > 1 ? `&reviewPage=${currentPage - 1}` : ''}`}
-                  className={cn({['pointer-events-none opacity-50']: currentPage <= 1})}>
+                  className={cn({
+                    ['pointer-events-none opacity-50']: currentPage <= 1,
+                  })}>
                   <ChevronLeft className="h-4 w-4" />
                   <span className="sr-only">Previous</span>
                 </Link>
@@ -167,7 +178,10 @@ export function ReviewsSection({
               <PaginationNext asChild>
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${productSlug}?tab=reviews${currentPage < totalPages ? `&reviewPage=${currentPage + 1}` : ''}`}
-                  className={cn({['pointer-events-none opacity-50']: currentPage >= totalPages})}>
+                  className={cn({
+                    ['pointer-events-none opacity-50']:
+                      currentPage >= totalPages,
+                  })}>
                   <span className="sr-only">Next</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>

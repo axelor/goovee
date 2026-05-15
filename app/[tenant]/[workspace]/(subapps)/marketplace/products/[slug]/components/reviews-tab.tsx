@@ -14,7 +14,11 @@ import {
 } from '@/ui/components/pagination';
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {getPaginationButtons} from '@/utils/pagination';
-import {findProductReviews, type SingleProduct, type ListReview} from '../../../common/orm/orm';
+import {
+  findProductReviews,
+  type SingleProduct,
+  type ListReview,
+} from '../../../common/orm/orm';
 import {ReviewDate} from './review-date';
 import type {Client} from '@/goovee/.generated/client';
 
@@ -26,11 +30,19 @@ interface ReviewsTabProps {
   reviewPage: number;
 }
 
-export async function ReviewsTab({product, workspaceURI, tenant, client, reviewPage}: ReviewsTabProps) {
+export async function ReviewsTab({
+  product,
+  workspaceURI,
+  tenant,
+  client,
+  reviewPage,
+}: ReviewsTabProps) {
   const REVIEWS_PAGE_SIZE = 5;
 
   // Fetch paginated reviews
-  const reviewsResult = await findProductReviews(product.id, client, {
+  const reviewsResult = await findProductReviews({
+    productId: product.id,
+    client,
     take: REVIEWS_PAGE_SIZE,
     skip: (reviewPage - 1) * REVIEWS_PAGE_SIZE,
   });
@@ -53,15 +65,21 @@ export async function ReviewsTab({product, workspaceURI, tenant, client, reviewP
     1: 0,
   };
 
-  ratingAggregates.forEach((item) => {
+  ratingAggregates.forEach(item => {
     if (item.groupBy.rating) {
-      ratingDistribution[item.groupBy.rating as keyof typeof ratingDistribution] = item.count.id;
+      ratingDistribution[
+        item.groupBy.rating as keyof typeof ratingDistribution
+      ] = item.count.id;
     }
   });
 
   const getRatingPercentage = (rating: number) => {
     return totalReviewCount > 0
-      ? Math.round((ratingDistribution[rating as keyof typeof ratingDistribution] / totalReviewCount) * 100)
+      ? Math.round(
+          (ratingDistribution[rating as keyof typeof ratingDistribution] /
+            totalReviewCount) *
+            100,
+        )
       : 0;
   };
 
@@ -69,7 +87,7 @@ export async function ReviewsTab({product, workspaceURI, tenant, client, reviewP
     if (!name) return '?';
     return name
       .split(' ')
-      .map((word) => word[0])
+      .map(word => word[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -130,10 +148,15 @@ export async function ReviewsTab({product, workspaceURI, tenant, client, reviewP
 
           {/* Right: Rating Breakdown */}
           <div className="flex-1 space-y-3">
-            {[5, 4, 3, 2, 1].map((rating) => (
+            {[5, 4, 3, 2, 1].map(rating => (
               <div key={rating} className="flex items-center gap-3">
-                <span className="text-sm font-medium text-foreground w-6">{rating}</span>
-                <Star size={12} className="fill-amber-400 text-amber-400 flex-shrink-0" />
+                <span className="text-sm font-medium text-foreground w-6">
+                  {rating}
+                </span>
+                <Star
+                  size={12}
+                  className="fill-amber-400 text-amber-400 flex-shrink-0"
+                />
                 <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-amber-400 rounded-full"
@@ -156,27 +179,32 @@ export async function ReviewsTab({product, workspaceURI, tenant, client, reviewP
           const avatarBgColor = getAvatarColor(initials);
           const hasImage = review.author.picture && review.author.picture.id;
           return (
-            <div key={review.id} className="bg-card rounded-lg border border-border p-6 space-y-3">
+            <div
+              key={review.id}
+              className="bg-card rounded-lg border border-border p-6 space-y-3">
               <div className="flex items-start gap-3">
                 {hasImage ? (
                   <Avatar className="rounded-full h-10 w-10 flex-shrink-0">
                     <AvatarImage
                       src={`/api/tenant/${tenant}/partner/image/${review.author.picture?.id}`}
                       alt={review.author.simpleFullName || 'Reviewer'}
+                      size={40}
                     />
                   </Avatar>
                 ) : (
                   <div
                     className={cn(
                       'rounded-full h-10 w-10 flex items-center justify-center font-semibold text-sm flex-shrink-0',
-                      avatarBgColor
+                      avatarBgColor,
                     )}>
                     {initials}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-bold text-foreground text-sm">{review.author.simpleFullName}</p>
+                    <p className="font-bold text-foreground text-sm">
+                      {review.author.simpleFullName}
+                    </p>
                     <ReviewDate createdOn={review.createdOn} />
                   </div>
                   <div className="flex gap-0.5 mt-1">
@@ -195,7 +223,9 @@ export async function ReviewsTab({product, workspaceURI, tenant, client, reviewP
                 </div>
               </div>
               {review.reviewComment && (
-                <p className="text-muted-foreground text-sm leading-relaxed">{review.reviewComment}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {review.reviewComment}
+                </p>
               )}
             </div>
           );
@@ -210,7 +240,9 @@ export async function ReviewsTab({product, workspaceURI, tenant, client, reviewP
               <PaginationPrevious asChild>
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage > 1 ? `&reviewPage=${reviewPage - 1}` : ''}`}
-                  className={cn({['pointer-events-none opacity-50']: reviewPage <= 1})}>
+                  className={cn({
+                    ['pointer-events-none opacity-50']: reviewPage <= 1,
+                  })}>
                   <ChevronLeft className="h-4 w-4" />
                   <span className="sr-only">Previous</span>
                 </Link>
@@ -242,7 +274,10 @@ export async function ReviewsTab({product, workspaceURI, tenant, client, reviewP
               <PaginationNext asChild>
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage < totalReviewPages ? `&reviewPage=${reviewPage + 1}` : ''}`}
-                  className={cn({['pointer-events-none opacity-50']: reviewPage >= totalReviewPages})}>
+                  className={cn({
+                    ['pointer-events-none opacity-50']:
+                      reviewPage >= totalReviewPages,
+                  })}>
                   <span className="sr-only">Next</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>

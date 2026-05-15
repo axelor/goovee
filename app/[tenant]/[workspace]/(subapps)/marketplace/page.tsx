@@ -60,10 +60,16 @@ export default async function Page(props: {
   const client = auth.tenant.client;
 
   // Fetch categories
-  const categories = await findProductCategories(client, {take: 100});
+  const categories = await findProductCategories({
+    client,
+    workspace: auth.workspace,
+    take: 100,
+  });
 
   // Fetch products with pagination and filtering
-  const products = await findProducts(client, {
+  const products = await findProducts({
+    client,
+    workspace: auth.workspace,
     take: +limit,
     skip: getSkip(limit, page),
     where: category

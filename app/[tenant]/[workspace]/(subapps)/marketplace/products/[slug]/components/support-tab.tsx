@@ -8,7 +8,10 @@ interface SupportTabProps {
 }
 
 export function SupportTab({product}: SupportTabProps) {
-  const hasAnyLink = product.documentationUrl || product.supportIssuesUrl || product.supportContactUrl;
+  const hasAnyLink =
+    product.documentationUrl ||
+    product.supportIssuesUrl ||
+    product.supportContactUrl;
 
   if (!hasAnyLink) {
     return (
@@ -35,7 +38,10 @@ export function SupportTab({product}: SupportTabProps) {
 
         <div className="grid grid-cols-2 gap-4">
           {product.documentationUrl && (
-            <Button asChild variant="outline" className="gap-2 rounded-full h-11">
+            <Button
+              asChild
+              variant="outline"
+              className="gap-2 rounded-full h-11">
               <Link
                 href={product.documentationUrl}
                 target="_blank"
@@ -47,7 +53,10 @@ export function SupportTab({product}: SupportTabProps) {
           )}
 
           {product.supportIssuesUrl && (
-            <Button asChild variant="outline" className="gap-2 rounded-full h-11">
+            <Button
+              asChild
+              variant="outline"
+              className="gap-2 rounded-full h-11">
               <Link
                 href={product.supportIssuesUrl}
                 target="_blank"
@@ -59,7 +68,10 @@ export function SupportTab({product}: SupportTabProps) {
           )}
 
           {product.supportContactUrl && (
-            <Button asChild variant="outline" className="gap-2 rounded-full h-11">
+            <Button
+              asChild
+              variant="outline"
+              className="gap-2 rounded-full h-11">
               <Link
                 href={product.supportContactUrl}
                 target="_blank"
@@ -71,7 +83,10 @@ export function SupportTab({product}: SupportTabProps) {
           )}
 
           {product.supportIssuesUrl && (
-            <Button asChild variant="outline" className="gap-2 rounded-full h-11">
+            <Button
+              asChild
+              variant="outline"
+              className="gap-2 rounded-full h-11">
               <Link
                 href={product.supportIssuesUrl}
                 target="_blank"

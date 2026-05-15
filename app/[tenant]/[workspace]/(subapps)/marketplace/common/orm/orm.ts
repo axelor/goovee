@@ -1,9 +1,22 @@
-import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
+import type {
+  Entity,
+  OrderByArg,
+  WhereOptions,
+  Payload,
+  SelectOptions,
+} from '@goovee/orm';
 import type {Client} from '@/goovee/.generated/client';
-import type {AOSProduct, AOSProductCategory, AOSMarketplaceReview, AOSMarketplaceProductVersion} from '@/goovee/.generated/models';
+import type {
+  AOSProduct,
+  AOSProductCategory,
+  AOSMarketplaceReview,
+  AOSMarketplaceProductVersion,
+} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
+import {withProductAccessFilter, withCategoryAccessFilter} from './helpers';
+import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 
 // ---- TYPES ---- //
 export type QueryProps<T extends Entity> = {
@@ -17,26 +30,53 @@ export type ListProduct = Awaited<ReturnType<typeof findProducts>>[number];
 export type SingleProduct = NonNullable<
   Awaited<ReturnType<typeof findProduct>>
 >;
-export type ListCategory = Awaited<ReturnType<typeof findProductCategories>>[number];
+export type ListCategory = Awaited<
+  ReturnType<typeof findProductCategories>
+>[number];
 export type ListReview = Awaited<ReturnType<typeof findProductReviews>>[number];
+
+// ---- ACCESS CONTROL ---- //
+export async function findProductAccess<T extends SelectOptions<AOSProduct>>({
+  recordId: productId,
+  client,
+  workspace,
+  select,
+}: {
+  recordId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  select?: T;
+}): Promise<Payload<AOSProduct, {select: T}> | null> {
+  const product = await client.aOSProduct.findOne({
+    where: withProductAccessFilter(workspace)({
+      id: productId,
+    }),
+    select: select as T,
+  });
+
+  return product;
+}
 
 // ---- PRODUCT CATEGORIES ---- //
 
-export async function findProductCategories(
-  client: Client,
-  props?: QueryProps<AOSProductCategory>,
-) {
-  const {where, take, skip, orderBy} = props ?? {};
-
+export async function findProductCategories({
+  client,
+  workspace,
+  where,
+  take,
+  skip,
+  orderBy,
+}: {
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+} & QueryProps<AOSProductCategory>) {
   const categories = await client.aOSProductCategory.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
-    where: and<AOSProductCategory>([
-      {forMarketPlace: true},
-      {OR: [{archived: false}, {archived: null}]},
-      where,
-    ]),
+    where: withCategoryAccessFilter(workspace)({
+      ...where,
+    }),
     select: {
       id: true,
       name: true,
@@ -48,16 +88,19 @@ export async function findProductCategories(
   return categories;
 }
 
-export async function findProductCategory(
-  categoryId: ID,
-  client: Client,
-) {
+export async function findProductCategory({
+  categoryId,
+  client,
+  workspace,
+}: {
+  categoryId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+}) {
   const category = await client.aOSProductCategory.findOne({
-    where: {
+    where: withCategoryAccessFilter(workspace)({
       id: categoryId,
-      forMarketPlace: true,
-      OR: [{archived: false}, {archived: null}],
-    },
+    }),
     select: {
       id: true,
       name: true,
@@ -71,21 +114,24 @@ export async function findProductCategory(
 
 // ---- PRODUCTS ---- //
 
-export async function findProducts(
-  client: Client,
-  props?: QueryProps<AOSProduct>,
-) {
-  const {where, take, skip, orderBy} = props ?? {};
-
+export async function findProducts({
+  client,
+  workspace,
+  where,
+  take,
+  skip,
+  orderBy,
+}: {
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+} & QueryProps<AOSProduct>) {
   const products = await client.aOSProduct.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
-    where: and<AOSProduct>([
-      {isMarketPlace: true},
-      {OR: [{archived: false}, {archived: null}]},
-      where,
-    ]),
+    where: withProductAccessFilter(workspace)({
+      ...where,
+    }),
     select: {
       id: true,
       slug: true,
@@ -110,16 +156,19 @@ export async function findProducts(
   return products;
 }
 
-export async function findProduct(
-  slug: string,
-  client: Client,
-) {
+export async function findProduct({
+  slug,
+  client,
+  workspace,
+}: {
+  slug: string;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+}) {
   const product = await client.aOSProduct.findOne({
-    where: {
+    where: withProductAccessFilter(workspace)({
       slug,
-      isMarketPlace: true,
-      OR: [{archived: false}, {archived: null}],
-    },
+    }),
     select: {
       id: true,
       name: true,
@@ -164,13 +213,17 @@ export async function findProduct(
 
 // ---- PRODUCT VERSIONS ---- //
 
-export async function findProductVersions(
-  productId: ID,
-  client: Client,
-  props?: QueryProps<AOSMarketplaceProductVersion>,
-) {
-  const {where, take, skip, orderBy} = props ?? {};
-
+export async function findProductVersions({
+  productId,
+  client,
+  where,
+  take,
+  skip,
+  orderBy,
+}: {
+  productId: ID;
+  client: Client;
+} & QueryProps<AOSMarketplaceProductVersion>) {
   const versions = await client.aOSMarketplaceProductVersion.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
@@ -194,25 +247,28 @@ export async function findProductVersions(
   return versions;
 }
 
-export type ListProductVersion = Awaited<ReturnType<typeof findProductVersions>>[number];
+export type ListProductVersion = Awaited<
+  ReturnType<typeof findProductVersions>
+>[number];
 
 // ---- PRODUCT REVIEWS ---- //
 
-export async function findProductReviews(
-  productId: ID,
-  client: Client,
-  props?: QueryProps<AOSMarketplaceReview>,
-) {
-  const {where, take, skip, orderBy} = props ?? {};
-
+export async function findProductReviews({
+  productId,
+  client,
+  where,
+  take,
+  skip,
+  orderBy,
+}: {
+  productId: ID;
+  client: Client;
+} & QueryProps<AOSMarketplaceReview>) {
   const reviews = await client.aOSMarketplaceReview.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
-    where: and<AOSMarketplaceReview>([
-      {product: {id: productId}},
-      where,
-    ]),
+    where: and<AOSMarketplaceReview>([{product: {id: productId}}, where]),
     select: {
       id: true,
       rating: true,

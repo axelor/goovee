@@ -14,7 +14,11 @@ import {
   PaginationPrevious,
 } from '@/ui/components/pagination';
 import {getPaginationButtons} from '@/utils/pagination';
-import {findProductVersions, type SingleProduct, type ListProductVersion} from '../../../common/orm/orm';
+import {
+  findProductVersions,
+  type SingleProduct,
+  type ListProductVersion,
+} from '../../../common/orm/orm';
 import type {Client} from '@/goovee/.generated/client';
 
 interface VersionsTabProps {
@@ -25,10 +29,18 @@ interface VersionsTabProps {
   currentVersionId?: string;
 }
 
-export async function VersionsTab({product, workspaceURI, client, versionPage, currentVersionId}: VersionsTabProps) {
+export async function VersionsTab({
+  product,
+  workspaceURI,
+  client,
+  versionPage,
+  currentVersionId,
+}: VersionsTabProps) {
   const VERSIONS_PAGE_SIZE = 10;
 
-  const versionsResult = await findProductVersions(product.id, client, {
+  const versionsResult = await findProductVersions({
+    productId: product.id,
+    client,
     take: VERSIONS_PAGE_SIZE,
     skip: (versionPage - 1) * VERSIONS_PAGE_SIZE,
   });
@@ -53,11 +65,15 @@ export async function VersionsTab({product, workspaceURI, client, versionPage, c
 
       <div className="space-y-4">
         {versionsResult.map((version: ListProductVersion) => (
-          <div key={version.id} className="bg-card rounded-lg border border-border p-6">
+          <div
+            key={version.id}
+            className="bg-card rounded-lg border border-border p-6">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-foreground">{version.versionNumber}</h3>
+                  <h3 className="font-semibold text-foreground">
+                    {version.versionNumber}
+                  </h3>
                   {version.id === currentVersionId && (
                     <Badge variant="success">Latest</Badge>
                   )}
@@ -68,9 +84,17 @@ export async function VersionsTab({product, workspaceURI, client, versionPage, c
                     : 'Not released yet'}
                 </p>
               </div>
-              <Button variant="outline" size="sm" className="gap-2 flex-shrink-0 rounded-full">
-                <Download size={16} />
-                Download
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 flex-shrink-0 rounded-full"
+                asChild>
+                <a
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                  download>
+                  <Download size={16} />
+                  Download
+                </a>
               </Button>
             </div>
           </div>
@@ -84,7 +108,9 @@ export async function VersionsTab({product, workspaceURI, client, versionPage, c
               <PaginationPrevious asChild>
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions${versionPage > 1 ? `&versionPage=${versionPage - 1}` : ''}`}
-                  className={cn({['pointer-events-none opacity-50']: versionPage <= 1})}>
+                  className={cn({
+                    ['pointer-events-none opacity-50']: versionPage <= 1,
+                  })}>
                   <ChevronLeft className="h-4 w-4" />
                   <span className="sr-only">Previous</span>
                 </Link>
@@ -116,7 +142,10 @@ export async function VersionsTab({product, workspaceURI, client, versionPage, c
               <PaginationNext asChild>
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions${versionPage < totalVersionPages ? `&versionPage=${versionPage + 1}` : ''}`}
-                  className={cn({['pointer-events-none opacity-50']: versionPage >= totalVersionPages})}>
+                  className={cn({
+                    ['pointer-events-none opacity-50']:
+                      versionPage >= totalVersionPages,
+                  })}>
                   <span className="sr-only">Next</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>

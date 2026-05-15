@@ -23,7 +23,7 @@ export function ReviewCard({review, tenant}: ReviewCardProps) {
     if (!name) return '?';
     return name
       .split(' ')
-      .map((word) => word[0])
+      .map(word => word[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -53,16 +53,23 @@ export function ReviewCard({review, tenant}: ReviewCardProps) {
             <AvatarImage
               src={`/api/tenant/${tenant}/partner/image/${review.author.picture?.id}`}
               alt={review.author.simpleFullName || 'Reviewer'}
+              size={40}
             />
           </Avatar>
         ) : (
-          <div className={cn('rounded-full h-10 w-10 flex items-center justify-center font-semibold text-sm flex-shrink-0', avatarBgColor)}>
+          <div
+            className={cn(
+              'rounded-full h-10 w-10 flex items-center justify-center font-semibold text-sm flex-shrink-0',
+              avatarBgColor,
+            )}>
             {initials}
           </div>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="font-bold text-foreground text-sm">{review.author.simpleFullName}</p>
+            <p className="font-bold text-foreground text-sm">
+              {review.author.simpleFullName}
+            </p>
             {review.createdOn && (
               <TooltipProvider>
                 <Tooltip>
@@ -97,7 +104,9 @@ export function ReviewCard({review, tenant}: ReviewCardProps) {
         </div>
       </div>
       {review.reviewComment && (
-        <p className="text-muted-foreground text-sm leading-relaxed">{review.reviewComment}</p>
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          {review.reviewComment}
+        </p>
       )}
     </div>
   );
