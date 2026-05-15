@@ -75,9 +75,26 @@ export async function VersionsTab({
                   <Badge variant="success">Latest</Badge>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Compatible with Axelor 7.4, 7.3, 7.2
-              </p>
+              {version.compatibilitySet &&
+              version.compatibilitySet.length > 0 ? (
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <span className="text-xs text-muted-foreground">
+                    Compatible:
+                  </span>
+                  {version.compatibilitySet.map(axelorVersion => (
+                    <Badge
+                      key={axelorVersion.id}
+                      variant="outline"
+                      className="text-xs">
+                      {axelorVersion.title}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1">
+                  No compatible versions specified
+                </p>
+              )}
             </div>
             <Button
               variant="outline"

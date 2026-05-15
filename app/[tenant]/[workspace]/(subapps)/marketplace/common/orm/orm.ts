@@ -218,6 +218,14 @@ export async function findProduct({
         statusSelect: true,
         changelog: true,
         dateOfApproval: true,
+        compatibilitySet: {
+          select: {
+            title: true,
+          },
+          orderBy: {
+            releasedOn: 'DESC',
+          },
+        },
       },
       productCategory: {
         id: true,
@@ -270,6 +278,14 @@ export async function findProductVersions({
       changelog: true,
       statusSelect: true,
       bundleFile: {id: true},
+      compatibilitySet: {
+        select: {
+          title: true,
+        },
+        orderBy: {
+          releasedOn: 'DESC',
+        },
+      },
     },
     orderBy: {dateOfApproval: 'DESC'},
   });

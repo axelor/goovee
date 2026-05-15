@@ -150,9 +150,16 @@ export default async function ProductPage(props: {
                     {product.currentVersion.versionNumber}
                   </Badge>
                 )}
-                <Badge variant="outline">Axelor 7.4</Badge>
-                <Badge variant="outline">Axelor 7.3</Badge>
-                <Badge variant="outline">Axelor 7.2</Badge>
+                {product.currentVersion?.compatibilitySet &&
+                  product.currentVersion.compatibilitySet.length > 0 && (
+                    <>
+                      {product.currentVersion.compatibilitySet.map(version => (
+                        <Badge key={version.id} variant="outline">
+                          {version.title}
+                        </Badge>
+                      ))}
+                    </>
+                  )}
               </div>
 
               {/* Title */}
@@ -404,17 +411,22 @@ export default async function ProductPage(props: {
                   <span className="text-sm text-muted-foreground block mb-2">
                     Compatibility
                   </span>
-                  <div className="flex gap-2 flex-wrap">
-                    <span className="inline-block px-2 py-1 bg-muted rounded text-xs text-foreground">
-                      Axelor 7.4
-                    </span>
-                    <span className="inline-block px-2 py-1 bg-muted rounded text-xs text-foreground">
-                      Axelor 7.3
-                    </span>
-                    <span className="inline-block px-2 py-1 bg-muted rounded text-xs text-foreground">
-                      Axelor 7.2
-                    </span>
-                  </div>
+                  {product.currentVersion?.compatibilitySet &&
+                  product.currentVersion.compatibilitySet.length > 0 ? (
+                    <div className="flex gap-2 flex-wrap">
+                      {product.currentVersion.compatibilitySet.map(version => (
+                        <span
+                          key={version.id}
+                          className="inline-block px-2 py-1 bg-muted rounded text-xs text-foreground">
+                          {version.title}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      No compatible versions specified
+                    </p>
+                  )}
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">

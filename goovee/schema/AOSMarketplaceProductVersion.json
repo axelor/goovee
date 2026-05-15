@@ -39,6 +39,11 @@
       "type": "String",
       "name": "statusSelect",
       "default": "draft"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "compatibilitySet",
+      "target": "AOSMarketplaceAxelorVersion"
     }
   ]
 }
