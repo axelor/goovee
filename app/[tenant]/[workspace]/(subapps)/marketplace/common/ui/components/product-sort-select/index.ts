@@ -1,2 +1,1 @@
-export {ProductSortSelect} from './product-sort-select';
-export type {ProductSortSelectProps} from './product-sort-select';
+export * from './product-sort-select';

@@ -173,6 +173,7 @@ export async function findProduct({
       id: true,
       name: true,
       description: true,
+      longDescription: true,
       code: true,
       slug: true,
       picture: {id: true},
@@ -200,6 +201,7 @@ export async function findProduct({
       defaultSupplierPartner: {
         id: true,
         simpleFullName: true,
+        name: true,
         picture: {id: true},
       },
       portalCategorySet: {

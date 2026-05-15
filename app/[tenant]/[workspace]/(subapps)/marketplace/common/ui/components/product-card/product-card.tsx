@@ -1,81 +1,104 @@
 import Link from 'next/link';
-import {MdDownload} from 'react-icons/md';
-import {HiOutlineUser} from 'react-icons/hi';
+import {Star, Download} from 'lucide-react';
+import {SUBAPP_CODES} from '@/constants';
+import {formatNumber} from '@/locale/server/formatters';
+import {InnerHTML} from '@/ui/components/inner-html';
+import type {ListProduct} from '../../../orm/orm';
+import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constant/gradients';
+import {ProductIcon} from '../product-icon';
 
-import {t} from '@/locale/server';
-import {cn} from '@/utils/css';
-import type {MarketplaceProduct} from '../../../types';
-
-type ProductCardProps = {
-  product: MarketplaceProduct;
+export interface ProductCardProps {
+  product: ListProduct;
   workspaceURI: string;
-};
+}
 
 export function ProductCard({product, workspaceURI}: ProductCardProps) {
-  const isFree = product.salePrice === 0;
-  const price = isFree
-    ? null
-    : `${product.saleCurrency?.symbol ?? '€'}${product.salePrice.toFixed(2)}`;
+  const {
+    slug,
+    name,
+    description,
+    currentVersion,
+    averageRating = 0,
+    installCount = 0,
+    marketplaceIconCode,
+    marketplaceCoverStyle,
+  } = product;
+
+  const bgGradient =
+    GRADIENT_MAP[marketplaceCoverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
 
   return (
-    <div className="flex flex-col rounded-2xl bg-card text-card-foreground overflow-hidden hover:shadow-md transition-shadow">
-      <Link href={`${workspaceURI}/marketplace/product/${product.slug}`}>
-        <div className="relative h-44 bg-muted flex items-center justify-center overflow-hidden">
-          {product.thumbnailImage ? (
-            <img
-              src={`/file/${product.thumbnailImage.id}`}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <MdDownload className="text-4xl" />
-              <span className="text-xs">{t('No image')}</span>
+    <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${slug}`}>
+      <div className="bg-card rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow flex flex-col h-full">
+        {/* Header with gradient and icon */}
+        <div
+          className={`h-[140px] bg-gradient-to-br ${bgGradient} flex items-center justify-center relative`}>
+          <ProductIcon code={marketplaceIconCode} className="w-16 h-16" />
+          <div className="absolute top-3 right-3 bg-success-light px-2.5 py-1 rounded-full">
+            <span className="text-xs font-medium text-success">Free</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 flex flex-col justify-between flex-1">
+          {/* Title and version */}
+          <div className="pb-1.5">
+            <div className="flex items-start justify-between mb-1.5 gap-2">
+              <h3 className="text-sm font-semibold text-foreground line-clamp-1">
+                {name}
+              </h3>
+              {currentVersion?.versionNumber && (
+                <span className="text-xs text-muted-foreground flex-shrink-0">
+                  {currentVersion.versionNumber}
+                </span>
+              )}
             </div>
-          )}
-          {product.portalCategorySet?.[0] && (
-            <span className="absolute top-3 left-3 text-xs font-medium bg-background/90 rounded-full px-2 py-1">
-              {product.portalCategorySet[0].name}
-            </span>
-          )}
+          </div>
+
+          {/* Description */}
+          <div className="pb-3 flex-grow">
+            <InnerHTML
+              content={description || undefined}
+              as="p"
+              className="text-xs text-muted-foreground line-clamp-2"
+            />
+          </div>
+
+          {/* Footer with rating and download count */}
+          <div className="border-t border-border pt-3 flex items-center justify-between">
+            {/* Rating */}
+            <div className="flex items-center gap-1">
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => {
+                  const rating = Number(averageRating || 0);
+                  return (
+                    <Star
+                      key={i}
+                      size={12}
+                      className={
+                        i < Math.round(rating)
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'fill-gray-200 text-gray-200'
+                      }
+                    />
+                  );
+                })}
+              </div>
+              <span className="text-xs text-muted-foreground ml-1">
+                {Number(averageRating || 0).toFixed(1)}
+              </span>
+            </div>
+
+            {/* Download count */}
+            <div className="flex items-center gap-1">
+              <Download size={12} className="text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {formatNumber(installCount || 0)}
+              </span>
+            </div>
+          </div>
         </div>
-
-        <div className="p-4 flex flex-col gap-2 flex-1">
-          <h5 className="font-semibold text-sm line-clamp-2 leading-snug">
-            {product.name}
-          </h5>
-
-          {product.defaultSupplierPartner && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <HiOutlineUser className="shrink-0" />
-              {product.defaultSupplierPartner.simpleFullName ||
-                product.defaultSupplierPartner.name ||
-                ''}
-            </p>
-          )}
-
-          {product.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2">
-              {product.description}
-            </p>
-          )}
-        </div>
-      </Link>
-
-      <div className="px-4 pb-4 flex items-center justify-between">
-        <span
-          className={cn('font-semibold text-sm', {
-            'text-success-dark': isFree,
-            'text-foreground': !isFree,
-          })}>
-          {price ?? t('Free')}
-        </span>
-        <Link
-          href={`${workspaceURI}/marketplace/product/${product.slug}`}
-          className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-          {t('View details')}
-        </Link>
       </div>
-    </div>
+    </Link>
   );
 }

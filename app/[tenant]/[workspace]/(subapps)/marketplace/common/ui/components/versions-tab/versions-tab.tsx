@@ -18,7 +18,7 @@ import {
   findProductVersions,
   type SingleProduct,
   type ListProductVersion,
-} from '../../../common/orm/orm';
+} from '../../../orm/orm';
 import type {Client} from '@/goovee/.generated/client';
 
 interface VersionsTabProps {

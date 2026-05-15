@@ -18,8 +18,8 @@ import {
   findProductReviews,
   type SingleProduct,
   type ListReview,
-} from '../../../common/orm/orm';
-import {ReviewDate} from './review-date';
+} from '../../../orm/orm';
+import {ReviewDate} from '../review-date';
 import type {Client} from '@/goovee/.generated/client';
 
 interface ReviewsTabProps {

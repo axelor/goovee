@@ -7,6 +7,7 @@ import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
 import {cn} from '@/utils/css';
 import {Badge, Button} from '@/ui/components';
+import {InnerHTML} from '@/ui/components/inner-html';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,11 +24,11 @@ import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constant/gradients';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constant/statuses';
 import {ProductIcon} from '../../common/ui/components/product-icon';
 import {ensureAuth} from '../../common/utils/auth-helper';
-import {OverviewTab} from './components/overview-tab';
-import {VersionsTab} from './components/versions-tab';
-import {ReviewsTab} from './components/reviews-tab';
-import {SupportTab} from './components/support-tab';
-import {AddToFavoriteButton} from './components/add-to-favorite-button';
+import {OverviewTab} from '../../common/ui/components/overview-tab';
+import {VersionsTab} from '../../common/ui/components/versions-tab';
+import {ReviewsTab} from '../../common/ui/components/reviews-tab';
+import {SupportTab} from '../../common/ui/components/support-tab';
+import {AddToFavoriteButton} from '../../common/ui/components/add-to-favorite-button';
 
 export default async function ProductPage(props: {
   params: Promise<{tenant: string; workspace: string; slug: string}>;
@@ -173,9 +174,11 @@ export default async function ProductPage(props: {
               </h1>
 
               {/* Description */}
-              <p className="text-muted-foreground leading-relaxed text-sm">
-                {product.description}
-              </p>
+              <InnerHTML
+                content={product.description || undefined}
+                as="p"
+                className="text-muted-foreground leading-relaxed text-sm"
+              />
 
               {/* Creator, Rating, Stats */}
               <div className="space-y-3 pt-2">

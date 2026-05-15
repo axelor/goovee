@@ -17,7 +17,7 @@ import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
 
-import {NewProductCard} from './common/ui/components/new-product-card';
+import {ProductCard} from './common/ui/components/product-card';
 import {ProductSortSelect} from './common/ui/components/product-sort-select';
 import {
   findProducts,
@@ -155,7 +155,7 @@ export default async function Page(props: {
         {products.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
             {products.map((product: ListProduct) => (
-              <NewProductCard
+              <ProductCard
                 key={product.id}
                 product={product}
                 workspaceURI={workspaceURI}

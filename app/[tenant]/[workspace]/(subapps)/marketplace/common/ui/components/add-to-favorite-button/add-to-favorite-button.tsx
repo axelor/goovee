@@ -3,7 +3,7 @@
 import {useState} from 'react';
 import {Heart} from 'lucide-react';
 import {Button} from '@/ui/components';
-import {addProductToFavorites} from '../../../common/actions/actions';
+import {addProductToFavorites} from '../../../actions/actions';
 
 interface AddToFavoriteButtonProps {
   productId: string;

@@ -13,8 +13,8 @@ import {
   PaginationPrevious,
 } from '@/ui/components/pagination';
 import {getPaginationButtons} from '@/utils/pagination';
-import type {ListReview} from '../../../common/orm/orm';
-import {ReviewCard} from './review-card';
+import type {ListReview} from '../../../orm/orm';
+import {ReviewCard} from '../review-card';
 
 interface ReviewsSectionProps {
   reviews: ListReview[];
@@ -39,7 +39,6 @@ export function ReviewsSection({
   workspaceURI,
   tenantId,
 }: ReviewsSectionProps) {
-  // Calculate rating distribution
   const ratingDistribution = {
     5: 0,
     4: 0,

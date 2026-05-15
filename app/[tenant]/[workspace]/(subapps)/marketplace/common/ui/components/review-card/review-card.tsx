@@ -11,7 +11,7 @@ import {
   Avatar,
   AvatarImage,
 } from '@/ui/components';
-import type {ListReview} from '../../../common/orm/orm';
+import type {ListReview} from '../../../orm/orm';
 
 interface ReviewCardProps {
   review: ListReview;
