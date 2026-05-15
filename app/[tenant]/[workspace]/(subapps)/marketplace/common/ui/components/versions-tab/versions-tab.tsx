@@ -63,7 +63,7 @@ export async function VersionsTab({
         {versionsResult.map((version: ListProductVersion, index) => (
           <div
             key={version.id}
-            className={cn('flex justify-between items-start p-5', {
+            className={cn('flex justify-between items-center p-5', {
               'border-b border-border': index < versionsResult.length - 1,
             })}>
             <div className="flex-1">

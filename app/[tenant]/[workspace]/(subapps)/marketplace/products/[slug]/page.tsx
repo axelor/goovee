@@ -284,11 +284,11 @@ export default async function ProductPage(props: {
 
       {/* Tabs */}
       <div className="border-b border-border sticky top-0 backdrop-blur-sm z-10">
-        <div className="container flex gap-8">
+        <div className="container flex">
           <Link
             href={tabNavLink(ProductTab.Overview)}
             className={cn(
-              'py-4 font-medium transition-colors border-b-2 -mb-px',
+              'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               currentTab === ProductTab.Overview
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
@@ -298,7 +298,7 @@ export default async function ProductPage(props: {
           <Link
             href={tabNavLink(ProductTab.Versions)}
             className={cn(
-              'py-4 font-medium transition-colors border-b-2 -mb-px',
+              'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               currentTab === ProductTab.Versions
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
@@ -312,7 +312,7 @@ export default async function ProductPage(props: {
           <Link
             href={tabNavLink(ProductTab.Reviews)}
             className={cn(
-              'py-4 font-medium transition-colors border-b-2 -mb-px',
+              'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               currentTab === ProductTab.Reviews
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
@@ -322,7 +322,7 @@ export default async function ProductPage(props: {
           <Link
             href={tabNavLink(ProductTab.Support)}
             className={cn(
-              'py-4 font-medium transition-colors border-b-2 -mb-px',
+              'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               currentTab === ProductTab.Support
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
