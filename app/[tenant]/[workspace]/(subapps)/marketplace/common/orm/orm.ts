@@ -57,6 +57,30 @@ export async function findProductAccess<T extends SelectOptions<AOSProduct>>({
   return product;
 }
 
+export async function isProductFavorited({
+  userId,
+  productId,
+  client,
+}: {
+  userId: ID;
+  productId: ID;
+  client: Client;
+}): Promise<boolean> {
+  const favorite = await client.aOSPartner.findOne({
+    where: {
+      id: userId,
+      favouriteProducts: {
+        id: productId,
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return !!favorite;
+}
+
 // ---- PRODUCT CATEGORIES ---- //
 
 export async function findProductCategories({
@@ -176,6 +200,7 @@ export async function findProduct({
       longDescription: true,
       code: true,
       slug: true,
+      createdOn: true,
       picture: {id: true},
       thumbnailImage: {id: true},
       marketplaceTypeSelect: true,

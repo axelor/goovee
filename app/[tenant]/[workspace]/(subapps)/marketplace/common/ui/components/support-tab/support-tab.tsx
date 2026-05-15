@@ -15,19 +15,14 @@ export function SupportTab({product}: SupportTabProps) {
 
   if (!hasAnyLink) {
     return (
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">Support</h2>
-        <div className="text-center py-12 bg-card rounded-lg border border-border">
-          <p className="text-muted-foreground">No support links available</p>
-        </div>
+      <div className="text-center py-12 bg-card rounded-lg border border-border">
+        <p className="text-muted-foreground">No support links available</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Support</h2>
-
       <div className="bg-card rounded-lg border border-border p-8 space-y-6">
         <div className="space-y-3">
           <h3 className="text-xl font-semibold text-foreground">Need help?</h3>

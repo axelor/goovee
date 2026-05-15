@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import {Suspense} from 'react';
 import {Star, Download, FileText} from 'lucide-react';
 import {notFound} from 'next/navigation';
 import {SUBAPP_CODES} from '@/constants';
@@ -19,9 +20,10 @@ import {
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {NO_IMAGE_URL} from '@/constants';
 
-import {findProduct} from '../../common/orm/orm';
+import {findProduct, isProductFavorited} from '../../common/orm/orm';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constant/gradients';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constant/statuses';
+import {ProductTab} from '../../common/constant/tabs';
 import {ProductIcon} from '../../common/ui/components/product-icon';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {OverviewTab} from '../../common/ui/components/overview-tab';
@@ -29,6 +31,9 @@ import {VersionsTab} from '../../common/ui/components/versions-tab';
 import {ReviewsTab} from '../../common/ui/components/reviews-tab';
 import {SupportTab} from '../../common/ui/components/support-tab';
 import {AddToFavoriteButton} from '../../common/ui/components/add-to-favorite-button';
+import {ClientDate} from '../../common/ui/components/client-date';
+import type {Client} from '@/goovee/.generated/client';
+import type {ID} from '@/types';
 
 export default async function ProductPage(props: {
   params: Promise<{tenant: string; workspace: string; slug: string}>;
@@ -48,43 +53,22 @@ export default async function ProductPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
     allowGuest: true,
   });
-  if (error || forceLogin) notFound();
+  if (error) notFound();
 
   const client = auth.tenant.client;
 
-  const [product, versionCount, userFavorites] = await Promise.all([
-    findProduct({
-      slug: params.slug,
-      client,
-      workspace: auth.workspace,
-    }),
-    client.aOSMarketplaceProductVersion.count({
-      where: {
-        product: {slug: params.slug},
-        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-      },
-    }),
-    auth.user
-      ? client.aOSPartner.findOne({
-          where: {id: auth.user.id},
-          select: {favouriteProducts: {select: {id: true}}},
-        })
-      : null,
-  ]);
+  const product = await findProduct({
+    slug: params.slug,
+    client,
+    workspace: auth.workspace,
+  });
 
   if (!product) notFound();
 
-  const isFavorited =
-    userFavorites?.favouriteProducts?.some(p => p.id === product.id) ?? false;
-
-  const currentTab = (searchParams.tab || 'overview') as
-    | 'overview'
-    | 'versions'
-    | 'reviews'
-    | 'support';
+  const currentTab = (searchParams.tab || ProductTab.Overview) as ProductTab;
 
   const reviewPage = searchParams.reviewPage
     ? parseInt(searchParams.reviewPage)
@@ -105,7 +89,7 @@ export default async function ProductPage(props: {
     `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=${tab}`;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Breadcrumb */}
       <div className="container my-6">
         <Breadcrumb>
@@ -143,14 +127,14 @@ export default async function ProductPage(props: {
       {/* Product Header Card */}
       <div className="container py-8">
         <div className="bg-card rounded-2xl border border-border p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-[120px_1fr_240px] gap-8">
             {/* Left: Icon */}
             <div className="flex items-center justify-center">
               <div
-                className={`w-40 h-40 rounded-2xl bg-gradient-to-br ${bgGradient} flex items-center justify-center`}>
+                className={`w-32 h-32 rounded-2xl bg-gradient-to-br ${bgGradient} flex items-center justify-center`}>
                 <ProductIcon
                   code={product.marketplaceIconCode}
-                  className="w-24 h-24"
+                  className="w-16 h-16"
                 />
               </div>
             </div>
@@ -166,6 +150,9 @@ export default async function ProductPage(props: {
                     {product.currentVersion.versionNumber}
                   </Badge>
                 )}
+                <Badge variant="outline">Axelor 7.4</Badge>
+                <Badge variant="outline">Axelor 7.3</Badge>
+                <Badge variant="outline">Axelor 7.2</Badge>
               </div>
 
               {/* Title */}
@@ -181,9 +168,9 @@ export default async function ProductPage(props: {
               />
 
               {/* Creator, Rating, Stats */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground">by</span>
+              <div className="flex items-center gap-4 text-sm pt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">by</span>
                   <span className="font-semibold text-foreground">
                     {product.defaultSupplierPartner?.simpleFullName ||
                       product.defaultSupplierPartner?.name ||
@@ -191,43 +178,48 @@ export default async function ProductPage(props: {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-4 text-sm flex-wrap">
-                  {/* Rating */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={16}
-                          className={
-                            i < Math.round(rating)
-                              ? 'fill-amber-400 text-amber-400'
-                              : 'fill-gray-200 text-gray-200'
-                          }
-                        />
-                      ))}
-                    </div>
-                    <span className="font-semibold text-foreground">
-                      {rating.toFixed(1)}
-                    </span>
-                    <span className="text-muted-foreground">
-                      ({ratingCount} {ratingCount === 1 ? 'review' : 'reviews'})
-                    </span>
+                {/* Rating */}
+                <div className="flex items-center gap-1">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={
+                          i < Math.round(rating)
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'fill-gray-200 text-gray-200'
+                        }
+                      />
+                    ))}
                   </div>
-
-                  {/* Installs */}
-                  <div className="flex items-center gap-1">
-                    <Download size={16} className="text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {formatNumber(product.installCount || 0)} installs
-                    </span>
-                  </div>
-
-                  {/* Updated */}
+                  <span className="font-semibold text-foreground">
+                    {rating.toFixed(1)}
+                  </span>
+                  <span className="text-muted-foreground">(</span>
                   <span className="text-muted-foreground">
-                    Updated 12 days ago
+                    {ratingCount} {ratingCount === 1 ? 'review' : 'reviews'}
+                  </span>
+                  <span className="text-muted-foreground">)</span>
+                </div>
+
+                {/* Installs */}
+                <div className="flex items-center gap-1">
+                  <Download size={16} className="text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    {formatNumber(product.installCount || 0)} installs
                   </span>
                 </div>
+
+                {/* Updated */}
+                {product.currentVersion?.dateOfApproval && (
+                  <ClientDate
+                    date={product.currentVersion.dateOfApproval}
+                    displayType="relative"
+                    prefix="Updated"
+                    lowercase
+                  />
+                )}
               </div>
             </div>
 
@@ -250,12 +242,18 @@ export default async function ProductPage(props: {
                 </a>
               </Button>
 
-              <AddToFavoriteButton
-                productId={product.id}
-                workspaceURL={workspaceURL}
-                workspaceURI={workspaceURI}
-                isFavorite={isFavorited}
-              />
+              <Suspense
+                fallback={
+                  <div className="h-11 rounded-full bg-muted animate-pulse" />
+                }>
+                <FavoriteButton
+                  productId={product.id}
+                  workspaceURL={workspaceURL}
+                  workspaceURI={workspaceURI}
+                  userId={auth.user?.id}
+                  client={client}
+                />
+              </Suspense>
 
               {product.documentationUrl && (
                 <Button
@@ -278,43 +276,47 @@ export default async function ProductPage(props: {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-10">
+      <div className="border-b border-border sticky top-0 backdrop-blur-sm z-10">
         <div className="container flex gap-8">
           <Link
-            href={tabNavLink('overview')}
+            href={tabNavLink(ProductTab.Overview)}
             className={cn(
               'py-4 font-medium transition-colors border-b-2 -mb-px',
-              currentTab === 'overview'
+              currentTab === ProductTab.Overview
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
             Overview
           </Link>
           <Link
-            href={tabNavLink('versions')}
+            href={tabNavLink(ProductTab.Versions)}
             className={cn(
               'py-4 font-medium transition-colors border-b-2 -mb-px',
-              currentTab === 'versions'
+              currentTab === ProductTab.Versions
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            Versions ({versionCount})
+            Versions (
+            <Suspense fallback="...">
+              <VersionCountBadge slug={params.slug} client={client} />
+            </Suspense>
+            )
           </Link>
           <Link
-            href={tabNavLink('reviews')}
+            href={tabNavLink(ProductTab.Reviews)}
             className={cn(
               'py-4 font-medium transition-colors border-b-2 -mb-px',
-              currentTab === 'reviews'
+              currentTab === ProductTab.Reviews
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
             Reviews ({ratingCount})
           </Link>
           <Link
-            href={tabNavLink('support')}
+            href={tabNavLink(ProductTab.Support)}
             className={cn(
               'py-4 font-medium transition-colors border-b-2 -mb-px',
-              currentTab === 'support'
+              currentTab === ProductTab.Support
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
@@ -328,10 +330,10 @@ export default async function ProductPage(props: {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Changes with tabs */}
           <div className="lg:col-span-2">
-            {currentTab === 'overview' && (
+            {currentTab === ProductTab.Overview && (
               <OverviewTab product={product} tenantId={tenantId} />
             )}
-            {currentTab === 'versions' && (
+            {currentTab === ProductTab.Versions && (
               <VersionsTab
                 product={product}
                 workspaceURI={workspaceURI}
@@ -340,7 +342,7 @@ export default async function ProductPage(props: {
                 currentVersionId={product.currentVersion?.id}
               />
             )}
-            {currentTab === 'reviews' && (
+            {currentTab === ProductTab.Reviews && (
               <ReviewsTab
                 product={product}
                 workspaceURI={workspaceURI}
@@ -349,7 +351,9 @@ export default async function ProductPage(props: {
                 reviewPage={reviewPage}
               />
             )}
-            {currentTab === 'support' && <SupportTab product={product} />}
+            {currentTab === ProductTab.Support && (
+              <SupportTab product={product} />
+            )}
           </div>
 
           {/* Static Sidebar - Always Visible */}
@@ -366,17 +370,31 @@ export default async function ProductPage(props: {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Updated</span>
-                  <span className="font-semibold text-foreground">
-                    12 days ago
-                  </span>
+                  {product.currentVersion?.dateOfApproval ? (
+                    <ClientDate
+                      date={product.currentVersion.dateOfApproval}
+                      displayType="relative"
+                      showTooltip={true}
+                      className="font-semibold text-foreground"
+                    />
+                  ) : (
+                    <span className="font-semibold text-foreground">N/A</span>
+                  )}
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
                     Published
                   </span>
-                  <span className="font-semibold text-foreground">
-                    Mar 2025
-                  </span>
+                  {product.createdOn ? (
+                    <ClientDate
+                      date={product.createdOn}
+                      displayType="simple"
+                      format="MMM YYYY"
+                      className="font-semibold text-foreground"
+                    />
+                  ) : (
+                    <span className="font-semibold text-foreground">N/A</span>
+                  )}
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Size</span>
@@ -412,81 +430,6 @@ export default async function ProductPage(props: {
                 </div>
               </div>
             </div>
-
-            {/* Support Links Card */}
-            {(product.documentationUrl ||
-              product.supportIssuesUrl ||
-              product.supportContactUrl) && (
-              <div className="bg-card rounded-lg border border-border p-8 space-y-4">
-                <h3 className="text-lg font-bold text-foreground">
-                  Support & Resources
-                </h3>
-                <div className="space-y-3">
-                  {product.documentationUrl && (
-                    <a
-                      href={product.documentationUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors group">
-                      <FileText
-                        size={20}
-                        className="text-muted-foreground group-hover:text-foreground flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">
-                          Documentation
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          Read guides and API docs
-                        </p>
-                      </div>
-                    </a>
-                  )}
-
-                  {product.supportIssuesUrl && (
-                    <a
-                      href={product.supportIssuesUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors group">
-                      <FileText
-                        size={20}
-                        className="text-muted-foreground group-hover:text-foreground flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">
-                          Issues
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          Report bugs and request features
-                        </p>
-                      </div>
-                    </a>
-                  )}
-
-                  {product.supportContactUrl && (
-                    <a
-                      href={product.supportContactUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors group">
-                      <FileText
-                        size={20}
-                        className="text-muted-foreground group-hover:text-foreground flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">
-                          Contact
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          Get in touch for support
-                        </p>
-                      </div>
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* About Author Card */}
             {product.defaultSupplierPartner && (
@@ -528,4 +471,52 @@ export default async function ProductPage(props: {
       </div>
     </div>
   );
+}
+
+async function FavoriteButton({
+  productId,
+  workspaceURL,
+  workspaceURI,
+  userId,
+  client,
+}: {
+  productId: ID;
+  workspaceURL: string;
+  workspaceURI: string;
+  userId?: ID;
+  client: Client;
+}) {
+  const isFavorited = userId
+    ? await isProductFavorited({
+        userId,
+        productId,
+        client,
+      })
+    : false;
+
+  return (
+    <AddToFavoriteButton
+      productId={productId}
+      workspaceURL={workspaceURL}
+      workspaceURI={workspaceURI}
+      isFavorite={isFavorited}
+    />
+  );
+}
+
+async function VersionCountBadge({
+  slug,
+  client,
+}: {
+  slug: string;
+  client: Client;
+}) {
+  const versionCount = await client.aOSMarketplaceProductVersion.count({
+    where: {
+      product: {slug},
+      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+    },
+  });
+
+  return <>{versionCount}</>;
 }

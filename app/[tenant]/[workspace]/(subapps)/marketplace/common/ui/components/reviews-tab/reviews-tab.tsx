@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {Star, ChevronLeft, ChevronRight} from 'lucide-react';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
+import {getSkip} from '../../../../../ticketing/common/utils/search-param';
 import {
   Pagination,
   PaginationContent,
@@ -19,7 +20,7 @@ import {
   type SingleProduct,
   type ListReview,
 } from '../../../orm/orm';
-import {ReviewDate} from '../review-date';
+import {ClientDate} from '../client-date';
 import type {Client} from '@/goovee/.generated/client';
 
 interface ReviewsTabProps {
@@ -37,14 +38,14 @@ export async function ReviewsTab({
   client,
   reviewPage,
 }: ReviewsTabProps) {
-  const REVIEWS_PAGE_SIZE = 5;
+  const REVIEWS_PAGE_SIZE = 4;
 
   // Fetch paginated reviews
   const reviewsResult = await findProductReviews({
     productId: product.id,
     client,
     take: REVIEWS_PAGE_SIZE,
-    skip: (reviewPage - 1) * REVIEWS_PAGE_SIZE,
+    skip: getSkip(REVIEWS_PAGE_SIZE, reviewPage),
   });
 
   const totalReviewCount = product.ratingCount || 0;
@@ -107,19 +108,14 @@ export async function ReviewsTab({
 
   if (totalReviewCount === 0) {
     return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-foreground">Reviews</h2>
-        <div className="text-center py-12 bg-card rounded-lg border border-border">
-          <p className="text-muted-foreground">No reviews yet</p>
-        </div>
+      <div className="text-center py-12 bg-card rounded-lg border border-border">
+        <p className="text-muted-foreground">No reviews yet</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Reviews</h2>
-
       {/* Rating Summary Card */}
       <div className="bg-card rounded-lg border border-border p-6 space-y-6">
         <div className="flex gap-8">
@@ -205,7 +201,15 @@ export async function ReviewsTab({
                     <p className="font-bold text-foreground text-sm">
                       {review.author.simpleFullName}
                     </p>
-                    <ReviewDate createdOn={review.createdOn} />
+                    {review.createdOn && (
+                      <ClientDate
+                        date={review.createdOn}
+                        displayType="relative"
+                        showTooltip={true}
+                        prefix="•"
+                        className="text-xs text-muted-foreground"
+                      />
+                    )}
                   </div>
                   <div className="flex gap-0.5 mt-1">
                     {[...Array(5)].map((_, i) => (

@@ -1,16 +1,9 @@
 'use client';
 
 import {Star} from 'lucide-react';
-import {formatRelativeTime, formatDateTime} from '@/locale/formatters';
 import {cn} from '@/utils/css';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-  Avatar,
-  AvatarImage,
-} from '@/ui/components';
+import {Avatar, AvatarImage} from '@/ui/components';
+import {ClientDate} from '../client-date';
 import type {ListReview} from '../../../orm/orm';
 
 interface ReviewCardProps {
@@ -71,21 +64,13 @@ export function ReviewCard({review, tenantId}: ReviewCardProps) {
               {review.author.simpleFullName}
             </p>
             {review.createdOn && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="text-xs text-muted-foreground cursor-help">
-                      • {formatRelativeTime(review.createdOn)}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" align="start" className="text-xs">
-                    {formatDateTime(review.createdOn, {
-                      dateFormat: 'MMMM DD YYYY',
-                      timeFormat: 'h:mm a',
-                    })}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <ClientDate
+                date={review.createdOn}
+                displayType="relative"
+                showTooltip={true}
+                prefix="•"
+                className="text-xs text-muted-foreground"
+              />
             )}
           </div>
           <div className="flex gap-0.5 mt-1">

@@ -5,6 +5,7 @@ import {ChevronLeft, ChevronRight, Download} from 'lucide-react';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
 import {Badge, Button} from '@/ui/components';
+import {getSkip} from '../../../../../ticketing/common/utils/search-param';
 import {
   Pagination,
   PaginationContent,
@@ -36,13 +37,13 @@ export async function VersionsTab({
   versionPage,
   currentVersionId,
 }: VersionsTabProps) {
-  const VERSIONS_PAGE_SIZE = 10;
+  const VERSIONS_PAGE_SIZE = 8;
 
   const versionsResult = await findProductVersions({
     productId: product.id,
     client,
     take: VERSIONS_PAGE_SIZE,
-    skip: (versionPage - 1) * VERSIONS_PAGE_SIZE,
+    skip: getSkip(VERSIONS_PAGE_SIZE, versionPage),
   });
 
   const totalVersionCount = Number(versionsResult?.[0]?._count ?? 0);
@@ -50,59 +51,52 @@ export async function VersionsTab({
 
   if (totalVersionCount === 0) {
     return (
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">Versions</h2>
-        <div className="text-center py-12 bg-card rounded-lg border border-border">
-          <p className="text-muted-foreground">No versions available</p>
-        </div>
+      <div className="text-center py-12 bg-card rounded-lg border border-border">
+        <p className="text-muted-foreground">No versions available</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Versions</h2>
-
-      <div className="space-y-4">
-        {versionsResult.map((version: ListProductVersion) => (
+    <>
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
+        {versionsResult.map((version: ListProductVersion, index) => (
           <div
             key={version.id}
-            className="bg-card rounded-lg border border-border p-6">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-foreground">
-                    {version.versionNumber}
-                  </h3>
-                  {version.id === currentVersionId && (
-                    <Badge variant="success">Latest</Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {version.dateOfApproval
-                    ? `Released ${new Date(version.dateOfApproval as unknown as string).toLocaleDateString()}`
-                    : 'Not released yet'}
-                </p>
+            className={cn('flex justify-between items-start p-5', {
+              'border-b border-border': index < versionsResult.length - 1,
+            })}>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h3 className="font-semibold text-foreground">
+                  {version.versionNumber}
+                </h3>
+                {version.id === currentVersionId && (
+                  <Badge variant="success">Latest</Badge>
+                )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 flex-shrink-0 rounded-full"
-                asChild>
-                <a
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
-                  download>
-                  <Download size={16} />
-                  Download
-                </a>
-              </Button>
+              <p className="text-sm text-muted-foreground mt-1">
+                Compatible with Axelor 7.4, 7.3, 7.2
+              </p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 flex-shrink-0 rounded-full"
+              asChild>
+              <a
+                href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                download>
+                <Download size={16} />
+                Download
+              </a>
+            </Button>
           </div>
         ))}
       </div>
 
       {totalVersionPages > 1 && (
-        <Pagination className="mt-8">
+        <Pagination className="mt-6">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious asChild>
@@ -154,6 +148,6 @@ export async function VersionsTab({
           </PaginationContent>
         </Pagination>
       )}
-    </div>
+    </>
   );
 }
