@@ -142,7 +142,10 @@ function ProductListRow({
         <h5 className="font-semibold text-sm line-clamp-1">{product.name}</h5>
         {product.defaultSupplierPartner && (
           <p className="text-xs text-muted-foreground mt-0.5">
-            {t('by')} {product.defaultSupplierPartner.name}
+            {t('by')}{' '}
+            {product.defaultSupplierPartner.simpleFullName ||
+              product.defaultSupplierPartner.name ||
+              ''}
           </p>
         )}
         {product.description && (

@@ -17,7 +17,12 @@ export type MarketplaceProduct = {
   thumbnailImage?: {id: string} | null;
   picture?: {id: string} | null;
   portalImageList?: {id: string; picture: {id: string}}[] | null;
-  defaultSupplierPartner?: {id: string; name: string} | null;
+  defaultSupplierPartner?: {
+    id: string;
+    simpleFullName?: string;
+    name?: string;
+    picture?: {id: string} | null;
+  } | null;
   portalCategorySet?: {id: string; name: string; slug: string}[] | null;
   marketplaceStatusSelect:
     | 'draft'

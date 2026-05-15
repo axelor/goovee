@@ -182,7 +182,9 @@ export default async function ProductPage(props: {
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground">by</span>
                   <span className="font-semibold text-foreground">
-                    Axelor Labs
+                    {product.defaultSupplierPartner?.simpleFullName ||
+                      product.defaultSupplierPartner?.name ||
+                      ''}
                   </span>
                 </div>
 

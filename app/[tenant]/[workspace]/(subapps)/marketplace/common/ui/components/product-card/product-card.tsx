@@ -48,7 +48,9 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
           {product.defaultSupplierPartner && (
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <HiOutlineUser className="shrink-0" />
-              {product.defaultSupplierPartner.name}
+              {product.defaultSupplierPartner.simpleFullName ||
+                product.defaultSupplierPartner.name ||
+                ''}
             </p>
           )}
 

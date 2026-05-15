@@ -52,7 +52,9 @@ export function ProductView({product, hasPurchased = false}: ProductViewProps) {
                 <HiOutlineUser />
                 {t('by')}{' '}
                 <span className="font-medium text-foreground">
-                  {product.defaultSupplierPartner.name}
+                  {product.defaultSupplierPartner.simpleFullName ||
+                    product.defaultSupplierPartner.name ||
+                    ''}
                 </span>
               </p>
             )}
