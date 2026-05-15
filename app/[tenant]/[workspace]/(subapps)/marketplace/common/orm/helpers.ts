@@ -1,5 +1,6 @@
 import type {AOSProduct, AOSProductCategory} from '@/goovee/.generated/models';
 import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
+import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {and} from '@/utils/orm';
 
@@ -38,5 +39,28 @@ export function getCategoryAccessFilter(workspace: PortalWorkspaceWithConfig) {
 export function withCategoryAccessFilter(workspace: PortalWorkspaceWithConfig) {
   return function (where?: WhereOptions<AOSProductCategory>) {
     return and<AOSProductCategory>([where, getCategoryAccessFilter(workspace)]);
+  };
+}
+
+export function getMyProductAccessFilter(
+  workspace: PortalWorkspaceWithConfig,
+  userId: ID,
+) {
+  const where = and<AOSProduct>([
+    {defaultSupplierPartner: {id: userId}},
+    getProductAccessFilter(workspace),
+  ]);
+  return where;
+}
+
+export function withMyProductAccessFilter(
+  workspace: PortalWorkspaceWithConfig,
+  userId: ID,
+) {
+  return function (where?: WhereOptions<AOSProduct>) {
+    return and<AOSProduct>([
+      where,
+      getMyProductAccessFilter(workspace, userId),
+    ]);
   };
 }

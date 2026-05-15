@@ -1,0 +1,187 @@
+import Link from 'next/link';
+import {Suspense} from 'react';
+import {SUBAPP_CODES} from '@/constants';
+import {workspacePathname} from '@/utils/workspace';
+import {Button} from '@/ui/components';
+import {ensureAuth} from '../common/utils/auth-helper';
+import {notFound} from 'next/navigation';
+import {OverviewTab} from '../common/ui/components/my-contributions-tab/my-contributions-overview-tab';
+import {SkillsTab} from '../common/ui/components/my-contributions-tab/skills-tab';
+import {AppsTab} from '../common/ui/components/my-contributions-tab/apps-tab';
+import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
+import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-count-badge';
+import {MyContributionsTab} from '../common/constant/tabs';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/ui/components/breadcrumb';
+
+export default async function MyContributionsPage(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+  searchParams: Promise<{tab?: string; skillsPage?: string; appsPage?: string}>;
+}) {
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+  const {
+    workspaceURL,
+    workspaceURI,
+    tenant: tenantId,
+  } = workspacePathname(params);
+
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
+    allowGuest: false,
+  });
+  if (error) notFound();
+
+  const currentTab = (searchParams.tab ||
+    MyContributionsTab.Overview) as MyContributionsTab;
+  const skillsPage = searchParams.skillsPage
+    ? parseInt(searchParams.skillsPage)
+    : 1;
+  const appsPage = searchParams.appsPage ? parseInt(searchParams.appsPage) : 1;
+
+  const tabNavLink = (tab: string) =>
+    `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions?tab=${tab}`;
+
+  return (
+    <div className="min-h-screen container pb-6">
+      {/* Breadcrumb */}
+      <div className="my-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                asChild
+                className="text-foreground-muted cursor-pointer truncate text-md">
+                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
+                  Marketplace
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="sm:truncate text-lg font-semibold">
+                My contributions
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      {/* Header */}
+      <div className="py-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground">
+              My contributions
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Manage the plugins and apps you've published on the Axelor
+              marketplace.
+            </p>
+          </div>
+          <Button size="lg" className="gap-2 rounded-full">
+            <span>+</span>
+            Publish new
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="pb-6">
+        <div className="border-b border-border flex">
+          <Link
+            href={tabNavLink(MyContributionsTab.Overview)}
+            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+              currentTab === MyContributionsTab.Overview
+                ? 'text-primary border-primary'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
+            }`}>
+            Overview
+          </Link>
+          <Link
+            href={tabNavLink(MyContributionsTab.Skills)}
+            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+              currentTab === MyContributionsTab.Skills
+                ? 'text-primary border-primary'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
+            }`}>
+            Skills (
+            <Suspense fallback="...">
+              <SkillsCountBadge
+                userId={auth.user.id}
+                client={auth.tenant.client}
+                workspace={auth.workspace}
+              />
+            </Suspense>
+            )
+          </Link>
+          <Link
+            href={tabNavLink(MyContributionsTab.Apps)}
+            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+              currentTab === MyContributionsTab.Apps
+                ? 'text-primary border-primary'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
+            }`}>
+            Apps (
+            <Suspense fallback="...">
+              <AppsCountBadge
+                userId={auth.user.id}
+                client={auth.tenant.client}
+                workspace={auth.workspace}
+              />
+            </Suspense>
+            )
+          </Link>
+          <Link
+            href={tabNavLink(MyContributionsTab.Revenue)}
+            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+              currentTab === MyContributionsTab.Revenue
+                ? 'text-primary border-primary'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
+            }`}>
+            Revenue
+          </Link>
+          <Link
+            href={tabNavLink(MyContributionsTab.Profile)}
+            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+              currentTab === MyContributionsTab.Profile
+                ? 'text-primary border-primary'
+                : 'text-muted-foreground hover:text-foreground border-transparent'
+            }`}>
+            Profile
+          </Link>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div>
+        {currentTab === MyContributionsTab.Overview && <OverviewTab />}
+        {currentTab === MyContributionsTab.Skills && (
+          <SkillsTab
+            userId={auth.user.id}
+            client={auth.tenant.client}
+            workspace={auth.workspace}
+            workspaceURI={workspaceURI}
+            page={skillsPage}
+          />
+        )}
+        {currentTab === MyContributionsTab.Apps && (
+          <AppsTab
+            userId={auth.user.id}
+            client={auth.tenant.client}
+            workspace={auth.workspace}
+            workspaceURI={workspaceURI}
+            page={appsPage}
+          />
+        )}
+      </div>
+    </div>
+  );
+}

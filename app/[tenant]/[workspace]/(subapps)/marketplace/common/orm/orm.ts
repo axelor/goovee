@@ -15,7 +15,12 @@ import type {
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
-import {withProductAccessFilter, withCategoryAccessFilter} from './helpers';
+import {MARKETPLACE_TYPE} from '../constant/marketplace-types';
+import {
+  withProductAccessFilter,
+  withCategoryAccessFilter,
+  withMyProductAccessFilter,
+} from './helpers';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 
 // ---- TYPES ---- //
@@ -399,4 +404,77 @@ export async function updateProduct(
   });
 
   return product;
+}
+
+// ---- MY PRODUCTS (USER CONTRIBUTIONS) ---- //
+
+export async function findMyProducts({
+  userId,
+  client,
+  workspace,
+  type,
+  where,
+  take,
+  skip,
+  orderBy,
+}: {
+  userId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  type?: MARKETPLACE_TYPE;
+} & QueryProps<AOSProduct>) {
+  const products = await client.aOSProduct.find({
+    ...(take ? {take} : {}),
+    ...(skip ? {skip} : {}),
+    ...(orderBy ? {orderBy} : {}),
+    where: withMyProductAccessFilter(
+      workspace,
+      userId,
+    )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      code: true,
+      picture: {id: true},
+      thumbnailImage: {id: true},
+      marketplaceTypeSelect: true,
+      marketplaceCoverStyle: true,
+      marketplaceIconCode: true,
+      averageRating: true,
+      ratingCount: true,
+      installCount: true,
+      currentVersion: {
+        id: true,
+        versionNumber: true,
+        statusSelect: true,
+      },
+    },
+  });
+
+  return products;
+}
+
+export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
+
+export async function countMyProducts({
+  userId,
+  client,
+  workspace,
+  type,
+}: {
+  userId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  type?: MARKETPLACE_TYPE;
+}): Promise<number> {
+  const count = await client.aOSProduct.count({
+    where: withMyProductAccessFilter(
+      workspace,
+      userId,
+    )(type && {marketplaceTypeSelect: type}),
+  });
+
+  return Number(count);
 }

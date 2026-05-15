@@ -4,3 +4,11 @@ export enum ProductTab {
   Reviews = 'reviews',
   Support = 'support',
 }
+
+export enum MyContributionsTab {
+  Overview = 'overview',
+  Skills = 'skills',
+  Apps = 'apps',
+  Revenue = 'revenue',
+  Profile = 'profile',
+}
