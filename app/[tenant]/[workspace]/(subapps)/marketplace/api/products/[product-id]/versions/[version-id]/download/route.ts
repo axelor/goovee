@@ -18,10 +18,10 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant} = workspacePathname(params);
+  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'product-id': productId, 'version-id': versionId} = params;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenant, {
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
     allowGuest: true,
   });
   if (error) {

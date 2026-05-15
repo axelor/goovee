@@ -25,7 +25,7 @@ interface ReviewsSectionProps {
   currentPage: number;
   productSlug: string;
   workspaceURI: string;
-  tenant: string;
+  tenantId: string;
 }
 
 export function ReviewsSection({
@@ -37,7 +37,7 @@ export function ReviewsSection({
   currentPage,
   productSlug,
   workspaceURI,
-  tenant,
+  tenantId,
 }: ReviewsSectionProps) {
   // Calculate rating distribution
   const ratingDistribution = {
@@ -132,7 +132,7 @@ export function ReviewsSection({
       {/* Reviews List */}
       <div className="space-y-4">
         {reviews.map((review: ListReview) => (
-          <ReviewCard key={review.id} review={review} tenant={tenant} />
+          <ReviewCard key={review.id} review={review} tenantId={tenantId} />
         ))}
       </div>
 

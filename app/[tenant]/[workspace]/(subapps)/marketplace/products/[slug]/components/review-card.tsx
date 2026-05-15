@@ -15,10 +15,10 @@ import type {ListReview} from '../../../common/orm/orm';
 
 interface ReviewCardProps {
   review: ListReview;
-  tenant: string;
+  tenantId: string;
 }
 
-export function ReviewCard({review, tenant}: ReviewCardProps) {
+export function ReviewCard({review, tenantId}: ReviewCardProps) {
   const getInitials = (name: string | null | undefined) => {
     if (!name) return '?';
     return name
@@ -51,7 +51,7 @@ export function ReviewCard({review, tenant}: ReviewCardProps) {
         {hasImage ? (
           <Avatar className="rounded-full h-10 w-10 flex-shrink-0">
             <AvatarImage
-              src={`/api/tenant/${tenant}/partner/image/${review.author.picture?.id}`}
+              src={`/api/tenant/${tenantId}/partner/image/${review.author.picture?.id}`}
               alt={review.author.simpleFullName || 'Reviewer'}
               size={40}
             />

@@ -205,6 +205,9 @@ export async function findProduct({
       portalCategorySet: {
         select: {id: true, name: true},
       },
+      portalImageList: {
+        select: {picture: {id: true}},
+      },
     },
   });
 

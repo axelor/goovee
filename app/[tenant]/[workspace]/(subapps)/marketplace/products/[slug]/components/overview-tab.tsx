@@ -1,21 +1,40 @@
+import Image from 'next/image';
 import type {SingleProduct} from '../../../common/orm/orm';
 
 interface OverviewTabProps {
   product: SingleProduct;
+  tenantId: string;
 }
 
-export async function OverviewTab({product}: OverviewTabProps) {
+export async function OverviewTab({product, tenantId}: OverviewTabProps) {
+  const images = (product.portalImageList || []).filter(img => img.picture?.id);
+
   return (
     <div className="space-y-8">
       {/* Screenshots */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-foreground">Screenshots</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="aspect-video bg-muted rounded-lg border border-border"></div>
-          <div className="aspect-video bg-muted rounded-lg border border-border"></div>
-          <div className="aspect-video bg-muted rounded-lg border border-border"></div>
+      {images.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-foreground">Screenshots</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {images.map(
+              image =>
+                image.picture?.id && (
+                  <div
+                    key={image.picture.id}
+                    className="aspect-video bg-muted rounded-lg border border-border overflow-hidden">
+                    <Image
+                      src={`/api/tenant/${tenantId}/product/image/${image.picture.id}`}
+                      alt="Product screenshot"
+                      width={600}
+                      height={400}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ),
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* About Section */}
       <div className="bg-card rounded-lg border border-border p-8 space-y-4">

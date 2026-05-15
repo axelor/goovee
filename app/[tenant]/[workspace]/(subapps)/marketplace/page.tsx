@@ -40,9 +40,13 @@ export default async function Page(props: {
     props.params,
     props.searchParams,
   ]);
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {
+    workspaceURL,
+    workspaceURI,
+    tenant: tenantId,
+  } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant, {
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
     allowGuest: true,
   });
   if (forceLogin) {
@@ -50,7 +54,7 @@ export default async function Page(props: {
       getLoginURL({
         callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}`,
         workspaceURI,
-        tenant,
+        tenant: tenantId,
       }),
     );
   }

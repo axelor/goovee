@@ -41,9 +41,13 @@ export default async function ProductPage(props: {
     props.params,
     props.searchParams,
   ]);
-  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {
+    workspaceURL,
+    workspaceURI,
+    tenant: tenantId,
+  } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant, {
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
     allowGuest: true,
   });
   if (error || forceLogin) notFound();
@@ -318,7 +322,9 @@ export default async function ProductPage(props: {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Changes with tabs */}
           <div className="lg:col-span-2">
-            {currentTab === 'overview' && <OverviewTab product={product} />}
+            {currentTab === 'overview' && (
+              <OverviewTab product={product} tenantId={tenantId} />
+            )}
             {currentTab === 'versions' && (
               <VersionsTab
                 product={product}
@@ -332,7 +338,7 @@ export default async function ProductPage(props: {
               <ReviewsTab
                 product={product}
                 workspaceURI={workspaceURI}
-                tenant={tenant}
+                tenantId={tenantId}
                 client={client}
                 reviewPage={reviewPage}
               />
@@ -487,7 +493,7 @@ export default async function ProductPage(props: {
                     <AvatarImage
                       src={
                         product.defaultSupplierPartner.picture?.id
-                          ? `/api/tenant/${tenant}/partner/image/${product.defaultSupplierPartner.picture.id}`
+                          ? `/api/tenant/${tenantId}/partner/image/${product.defaultSupplierPartner.picture.id}`
                           : NO_IMAGE_URL
                       }
                       alt={

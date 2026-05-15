@@ -25,7 +25,7 @@ import type {Client} from '@/goovee/.generated/client';
 interface ReviewsTabProps {
   product: SingleProduct;
   workspaceURI: string;
-  tenant: string;
+  tenantId: string;
   client: Client;
   reviewPage: number;
 }
@@ -33,7 +33,7 @@ interface ReviewsTabProps {
 export async function ReviewsTab({
   product,
   workspaceURI,
-  tenant,
+  tenantId,
   client,
   reviewPage,
 }: ReviewsTabProps) {
@@ -186,7 +186,7 @@ export async function ReviewsTab({
                 {hasImage ? (
                   <Avatar className="rounded-full h-10 w-10 flex-shrink-0">
                     <AvatarImage
-                      src={`/api/tenant/${tenant}/partner/image/${review.author.picture?.id}`}
+                      src={`/api/tenant/${tenantId}/partner/image/${review.author.picture?.id}`}
                       alt={review.author.simpleFullName || 'Reviewer'}
                       size={40}
                     />
