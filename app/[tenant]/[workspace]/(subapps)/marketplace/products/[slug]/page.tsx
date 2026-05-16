@@ -127,8 +127,8 @@ export default async function ProductPage(props: {
 
       {/* Product Header Card */}
       <div className="container py-8">
-        <div className="bg-card rounded-2xl border border-border p-8">
-          <div className="grid grid-cols-1 md:grid-cols-[120px_1fr_240px] gap-8">
+        <div className="bg-card rounded-2xl border border-border p-4 sm:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[120px_1fr_240px] gap-6 md:gap-8">
             {/* Left: Icon */}
             <div className="flex items-center justify-center">
               <div
@@ -164,7 +164,7 @@ export default async function ProductPage(props: {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 {product.name}
               </h1>
 
@@ -176,7 +176,7 @@ export default async function ProductPage(props: {
               />
 
               {/* Creator, Rating, Stats */}
-              <div className="flex items-center gap-4 text-sm pt-2">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm pt-2">
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">by</span>
                   <span className="font-semibold text-foreground">
@@ -272,7 +272,7 @@ export default async function ProductPage(props: {
 
       {/* Tabs */}
       <div className="border-b border-border sticky top-0 backdrop-blur-sm z-10">
-        <div className="container flex">
+        <div className="container flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Link
             href={tabNavLink(ProductTab.Overview)}
             className={cn(
@@ -354,7 +354,7 @@ export default async function ProductPage(props: {
           {/* Static Sidebar - Always Visible */}
           <div className="space-y-6">
             {/* Details Card */}
-            <div className="bg-card rounded-lg border border-border p-8 space-y-6">
+            <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-6">
               <h3 className="text-lg font-bold text-foreground">Details</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -437,7 +437,7 @@ export default async function ProductPage(props: {
 
             {/* About Author Card */}
             {product.defaultSupplierPartner && (
-              <div className="bg-card rounded-lg border border-border p-8 space-y-4">
+              <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
                 <h3 className="text-lg font-bold text-foreground">
                   About the author
                 </h3>

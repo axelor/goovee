@@ -23,7 +23,7 @@ export function SupportTab({product}: SupportTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-lg border border-border p-8 space-y-6">
+      <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-6">
         <div className="space-y-3">
           <h3 className="text-xl font-semibold text-foreground">Need help?</h3>
           <p className="text-sm text-muted-foreground">
@@ -31,7 +31,7 @@ export function SupportTab({product}: SupportTabProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {product.documentationUrl && (
             <Button
               asChild

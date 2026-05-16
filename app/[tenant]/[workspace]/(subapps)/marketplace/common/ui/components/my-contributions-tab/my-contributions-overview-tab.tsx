@@ -123,9 +123,9 @@ export function OverviewTab() {
       />
 
       {/* Revenue Chart and Pending Actions */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Revenue Chart */}
-        <div className="col-span-2 bg-card rounded-lg border border-border p-6 space-y-4">
+        <div className="lg:col-span-2 bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-foreground">
               Revenue · last 12 months
@@ -138,7 +138,7 @@ export function OverviewTab() {
         </div>
 
         {/* Pending Actions */}
-        <div className="bg-card rounded-lg border border-border p-6 space-y-4">
+        <div className="bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
           <h3 className="text-xl font-semibold text-foreground">
             Pending actions
           </h3>
@@ -171,7 +171,7 @@ export function OverviewTab() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-card rounded-lg border border-border p-6 space-y-4">
+      <div className="bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
         <h3 className="text-xl font-semibold text-foreground">
           Recent activity
         </h3>

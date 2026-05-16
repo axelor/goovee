@@ -79,9 +79,9 @@ export function ReviewsSection({
 
       {/* Rating Summary Card */}
       <div className="bg-card rounded-lg border border-border p-6 space-y-6">
-        <div className="flex gap-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
           {/* Left: Average Rating */}
-          <div className="flex flex-col items-center gap-3 border-r border-border pr-8">
+          <div className="flex flex-col items-center gap-3 sm:border-r sm:border-border sm:pr-8">
             <div className="text-5xl font-bold text-foreground">
               {(Number(averageRating) || 0).toFixed(1)}
             </div>

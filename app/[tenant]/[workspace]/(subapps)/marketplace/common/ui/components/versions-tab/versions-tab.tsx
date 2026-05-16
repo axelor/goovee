@@ -62,9 +62,12 @@ export async function VersionsTab({
         {versionsResult.map((version: ListProductVersion, index) => (
           <div
             key={version.id}
-            className={cn('flex justify-between items-center p-5', {
-              'border-b border-border': index < versionsResult.length - 1,
-            })}>
+            className={cn(
+              'flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center p-4 sm:p-5',
+              {
+                'border-b border-border': index < versionsResult.length - 1,
+              },
+            )}>
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h3 className="font-semibold text-foreground">

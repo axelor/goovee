@@ -18,7 +18,7 @@ export async function OverviewTab({product, tenantId}: OverviewTabProps) {
       {images.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">Screenshots</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {images.map(
               image =>
                 image.picture?.id && (
@@ -40,7 +40,7 @@ export async function OverviewTab({product, tenantId}: OverviewTabProps) {
       )}
 
       {/* About Section */}
-      <div className="bg-card rounded-lg border border-border p-8 space-y-4">
+      <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
         <h2 className="text-xl font-bold text-foreground">About this plugin</h2>
         <RichTextViewer
           content={product.longDescription || product.description || undefined}
