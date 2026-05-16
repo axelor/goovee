@@ -1,7 +1,7 @@
 import {findMyProducts} from '../../../orm/orm';
 import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
 import {ProductsListTab} from './products-list-tab';
-import {getSkip} from '../../../../../ticketing/common/utils/search-param';
+import {getSkip, getTotal} from '@/utils/pagination';
 import type {Client} from '@/goovee/.generated/client';
 import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../../../utils/auth-helper';
@@ -32,7 +32,7 @@ export async function SkillsTab({
     skip: getSkip(PAGE_SIZE, page),
   });
 
-  const totalCount = Number(skills?.[0]?._count ?? 0);
+  const totalCount = getTotal(skills);
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (

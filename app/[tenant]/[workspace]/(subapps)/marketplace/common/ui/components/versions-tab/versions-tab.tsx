@@ -5,7 +5,7 @@ import {ChevronLeft, ChevronRight, Download} from 'lucide-react';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
 import {Badge, Button} from '@/ui/components';
-import {getSkip} from '../../../../../ticketing/common/utils/search-param';
+import {getSkip, getPaginationButtons, getTotal} from '@/utils/pagination';
 import {
   Pagination,
   PaginationContent,
@@ -14,7 +14,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
-import {getPaginationButtons} from '@/utils/pagination';
 import {
   findProductVersions,
   type SingleProduct,
@@ -46,7 +45,7 @@ export async function VersionsTab({
     skip: getSkip(VERSIONS_PAGE_SIZE, versionPage),
   });
 
-  const totalVersionCount = Number(versionsResult?.[0]?._count ?? 0);
+  const totalVersionCount = getTotal(versionsResult);
   const totalVersionPages = Math.ceil(totalVersionCount / VERSIONS_PAGE_SIZE);
 
   if (totalVersionCount === 0) {

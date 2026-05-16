@@ -4,7 +4,7 @@ import Link from 'next/link';
 import {Star, ChevronLeft, ChevronRight} from 'lucide-react';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
-import {getSkip} from '../../../../../ticketing/common/utils/search-param';
+import {getSkip, getPaginationButtons} from '@/utils/pagination';
 import {
   Pagination,
   PaginationContent,
@@ -14,7 +14,6 @@ import {
   PaginationPrevious,
 } from '@/ui/components/pagination';
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
-import {getPaginationButtons} from '@/utils/pagination';
 import {
   findProductReviews,
   type SingleProduct,

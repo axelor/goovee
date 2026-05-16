@@ -26,9 +26,12 @@ import {
   type ListCategory,
 } from './common/orm/orm';
 import {ensureAuth} from './common/utils/auth-helper';
-import {getPaginationButtons} from '@/utils/pagination';
-import {getSkip} from '@/app/[tenant]/[workspace]/(subapps)/ticketing/common/utils/search-param';
-import {getPages} from '@/app/[tenant]/[workspace]/(subapps)/ticketing/common/utils';
+import {
+  getPaginationButtons,
+  getSkip,
+  getPages,
+  getTotal,
+} from '@/utils/pagination';
 
 const PAGE_SIZE = 12;
 
@@ -81,7 +84,7 @@ export default async function Page(props: {
       : undefined,
   });
 
-  const totalCount = Number(products?.[0]?._count ?? 0);
+  const totalCount = getTotal(products);
   const totalPages = getPages(products, limit);
 
   return (
