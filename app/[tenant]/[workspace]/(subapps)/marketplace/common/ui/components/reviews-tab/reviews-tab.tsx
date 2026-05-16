@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import {Star, ChevronLeft, ChevronRight} from 'lucide-react';
+import {Rating} from '../rating';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
 import {getSkip, getPaginationButtons} from '@/utils/pagination';
@@ -123,19 +124,7 @@ export async function ReviewsTab({
             <div className="text-5xl font-bold text-foreground">
               {(Number(product.averageRating) || 0).toFixed(1)}
             </div>
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={16}
-                  className={
-                    i < Math.round(Number(product.averageRating) || 0)
-                      ? 'fill-amber-400 text-amber-400'
-                      : 'fill-gray-200 text-gray-200'
-                  }
-                />
-              ))}
-            </div>
+            <Rating value={product.averageRating} showValue={false} size={16} />
             <p className="text-sm text-muted-foreground">
               {totalReviewCount} {totalReviewCount === 1 ? 'review' : 'reviews'}
             </p>
@@ -210,19 +199,12 @@ export async function ReviewsTab({
                       />
                     )}
                   </div>
-                  <div className="flex gap-0.5 mt-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={12}
-                        className={
-                          i < review.rating
-                            ? 'fill-amber-400 text-amber-400'
-                            : 'fill-gray-200 text-gray-200'
-                        }
-                      />
-                    ))}
-                  </div>
+                  <Rating
+                    value={review.rating}
+                    showValue={false}
+                    size={12}
+                    className="mt-1"
+                  />
                 </div>
               </div>
               {review.reviewComment && (

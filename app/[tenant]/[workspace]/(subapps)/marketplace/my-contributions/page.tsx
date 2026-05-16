@@ -91,9 +91,9 @@ export default async function MyContributionsPage(props: {
 
       {/* Header */}
       <div className="py-6">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               My contributions
             </h1>
             <p className="text-muted-foreground text-sm">
@@ -111,7 +111,7 @@ export default async function MyContributionsPage(props: {
 
       {/* Tabs */}
       <div className="pb-6">
-        <div className="border-b border-border flex">
+        <div className="border-b border-border flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Link
             href={tabNavLink(MyContributionsTab.Overview)}
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${

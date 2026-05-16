@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import {Star, ChevronLeft, ChevronRight} from 'lucide-react';
+import {Rating} from '../rating';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
 import {
@@ -84,19 +85,7 @@ export function ReviewsSection({
             <div className="text-5xl font-bold text-foreground">
               {(Number(averageRating) || 0).toFixed(1)}
             </div>
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={16}
-                  className={
-                    i < Math.round(Number(averageRating) || 0)
-                      ? 'fill-amber-400 text-amber-400'
-                      : 'fill-gray-200 text-gray-200'
-                  }
-                />
-              ))}
-            </div>
+            <Rating value={averageRating} showValue={false} size={16} />
             <p className="text-sm text-muted-foreground">
               {ratingCount} {ratingCount === 1 ? 'review' : 'reviews'}
             </p>

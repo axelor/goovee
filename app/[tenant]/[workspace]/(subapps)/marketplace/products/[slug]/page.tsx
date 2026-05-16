@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {Suspense} from 'react';
-import {Star, Download, FileText} from 'lucide-react';
+import {Download, FileText} from 'lucide-react';
 import {notFound} from 'next/navigation';
 import {SUBAPP_CODES} from '@/constants';
 import {formatNumber} from '@/locale/server/formatters';
@@ -25,6 +25,7 @@ import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constant/gradients';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constant/statuses';
 import {ProductTab} from '../../common/constant/tabs';
 import {ProductIcon} from '../../common/ui/components/product-icon';
+import {Rating} from '../../common/ui/components/rating';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {OverviewTab} from '../../common/ui/components/overview-tab';
 import {VersionsTab} from '../../common/ui/components/versions-tab';
@@ -186,29 +187,16 @@ export default async function ProductPage(props: {
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center gap-1">
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        className={
-                          i < Math.round(rating)
-                            ? 'fill-amber-400 text-amber-400'
-                            : 'fill-gray-200 text-gray-200'
-                        }
-                      />
-                    ))}
-                  </div>
-                  <span className="font-semibold text-foreground">
-                    {rating.toFixed(1)}
-                  </span>
-                  <span className="text-muted-foreground">(</span>
-                  <span className="text-muted-foreground">
-                    {ratingCount} {ratingCount === 1 ? 'review' : 'reviews'}
-                  </span>
-                  <span className="text-muted-foreground">)</span>
-                </div>
+                <Rating
+                  value={rating}
+                  formattedValue={await formatNumber(rating, {
+                    type: 'DECIMAL',
+                    scale: 1,
+                  })}
+                  count={ratingCount}
+                  size={16}
+                  valueClassName="font-semibold text-foreground"
+                />
 
                 {/* Installs */}
                 <div className="flex items-center gap-1">

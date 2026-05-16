@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import {Star, Download} from 'lucide-react';
+import {Download} from 'lucide-react';
+import {Rating} from '../rating';
 import {SUBAPP_CODES} from '@/constants';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
@@ -66,28 +67,11 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
 
           {/* Footer with rating and download count */}
           <div className="border-t border-border pt-3 flex items-center justify-between">
-            {/* Rating */}
-            <div className="flex items-center gap-1">
-              <div className="flex gap-0.5">
-                {[...Array(5)].map((_, i) => {
-                  const rating = Number(averageRating || 0);
-                  return (
-                    <Star
-                      key={i}
-                      size={12}
-                      className={
-                        i < Math.round(rating)
-                          ? 'fill-amber-400 text-amber-400'
-                          : 'fill-gray-200 text-gray-200'
-                      }
-                    />
-                  );
-                })}
-              </div>
-              <span className="text-xs text-muted-foreground ml-1">
-                {Number(averageRating || 0).toFixed(1)}
-              </span>
-            </div>
+            <Rating
+              value={averageRating}
+              size={12}
+              valueClassName="text-xs text-muted-foreground"
+            />
 
             {/* Download count */}
             <div className="flex items-center gap-1">
