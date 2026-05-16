@@ -1,7 +1,13 @@
 import Link from 'next/link';
-import {Pencil, ExternalLink, ChevronLeft, ChevronRight} from 'lucide-react';
-import {ListMyProduct} from '../../../orm/orm';
+import {ExternalLink, ChevronLeft, ChevronRight} from 'lucide-react';
+import {clone} from '@/utils';
+import {
+  ListMyProduct,
+  type CompatibilityVersion,
+  type ListCategory,
+} from '../../../orm/orm';
 import {ProductIcon} from '../product-icon';
+import {EditProductLauncher} from './edit-product-launcher';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
@@ -21,6 +27,9 @@ type ProductsListTabProps = {
   products: ListMyProduct[];
   title: string;
   workspaceURI: string;
+  workspaceURL: string;
+  categories: ListCategory[];
+  compatibilityVersions: CompatibilityVersion[];
   page?: number;
   totalPages?: number;
   paramName?: string;
@@ -30,6 +39,9 @@ export function ProductsListTab({
   products,
   title,
   workspaceURI,
+  workspaceURL,
+  categories,
+  compatibilityVersions,
   page = 1,
   totalPages = 1,
   paramName,
@@ -125,9 +137,13 @@ export function ProductsListTab({
 
               {/* Actions */}
               <div className="flex justify-end gap-1">
-                <button className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
+                <EditProductLauncher
+                  productId={product.id}
+                  workspaceURI={workspaceURI}
+                  workspaceURL={workspaceURL}
+                  categories={clone(categories)}
+                  compatibilityVersions={clone(compatibilityVersions)}
+                />
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
                   className="p-1.5 rounded-full hover:bg-muted transition-colors">

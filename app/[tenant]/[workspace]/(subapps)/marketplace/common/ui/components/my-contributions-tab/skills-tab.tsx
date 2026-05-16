@@ -1,4 +1,8 @@
-import {findMyProducts} from '../../../orm/orm';
+import {
+  findMyProducts,
+  type CompatibilityVersion,
+  type ListCategory,
+} from '../../../orm/orm';
 import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
 import {ProductsListTab} from './products-list-tab';
 import {getSkip, getTotal} from '@/utils/pagination';
@@ -11,6 +15,9 @@ type SkillsTabProps = {
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   workspaceURI: string;
+  workspaceURL: string;
+  categories: ListCategory[];
+  compatibilityVersions: CompatibilityVersion[];
   page: number;
 };
 
@@ -21,6 +28,9 @@ export async function SkillsTab({
   client,
   workspace,
   workspaceURI,
+  workspaceURL,
+  categories,
+  compatibilityVersions,
   page,
 }: SkillsTabProps) {
   const skills = await findMyProducts({
@@ -40,6 +50,9 @@ export async function SkillsTab({
       products={skills}
       title="Skills"
       workspaceURI={workspaceURI}
+      workspaceURL={workspaceURL}
+      categories={categories}
+      compatibilityVersions={compatibilityVersions}
       page={page}
       totalPages={totalPages}
       paramName="skillsPage"

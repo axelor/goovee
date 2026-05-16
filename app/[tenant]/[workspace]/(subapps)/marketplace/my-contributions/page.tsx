@@ -2,12 +2,18 @@ import Link from 'next/link';
 import {Suspense} from 'react';
 import {SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
-import {Button} from '@/ui/components';
+import {clone} from '@/utils';
+// clone is applied at server→client boundaries only.
 import {ensureAuth} from '../common/utils/auth-helper';
 import {notFound} from 'next/navigation';
 import {OverviewTab} from '../common/ui/components/my-contributions-tab/my-contributions-overview-tab';
 import {SkillsTab} from '../common/ui/components/my-contributions-tab/skills-tab';
 import {AppsTab} from '../common/ui/components/my-contributions-tab/apps-tab';
+import {
+  findProductCategories,
+  findCompatibilityVersions,
+} from '../common/orm/orm';
+import {PublishNewLauncher} from './client-launcher';
 import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
 import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-count-badge';
 import {MyContributionsTab} from '../common/constant/tabs';
@@ -38,6 +44,15 @@ export default async function MyContributionsPage(props: {
     allowGuest: false,
   });
   if (error) notFound();
+
+  const [categories, compatibilityVersions] = await Promise.all([
+    findProductCategories({
+      client: auth.tenant.client,
+      workspace: auth.workspace,
+      take: 100,
+    }),
+    findCompatibilityVersions(auth.tenant.client),
+  ]);
 
   const currentTab = (searchParams.tab ||
     MyContributionsTab.Overview) as MyContributionsTab;
@@ -86,10 +101,11 @@ export default async function MyContributionsPage(props: {
               marketplace.
             </p>
           </div>
-          <Button size="lg" className="gap-2 rounded-full">
-            <span>+</span>
-            Publish new
-          </Button>
+          <PublishNewLauncher
+            workspaceURI={workspaceURI}
+            categories={clone(categories)}
+            compatibilityVersions={clone(compatibilityVersions)}
+          />
         </div>
       </div>
 
@@ -169,6 +185,9 @@ export default async function MyContributionsPage(props: {
             client={auth.tenant.client}
             workspace={auth.workspace}
             workspaceURI={workspaceURI}
+            workspaceURL={workspaceURL}
+            categories={categories}
+            compatibilityVersions={compatibilityVersions}
             page={skillsPage}
           />
         )}
@@ -178,6 +197,9 @@ export default async function MyContributionsPage(props: {
             client={auth.tenant.client}
             workspace={auth.workspace}
             workspaceURI={workspaceURI}
+            workspaceURL={workspaceURL}
+            categories={categories}
+            compatibilityVersions={compatibilityVersions}
             page={appsPage}
           />
         )}

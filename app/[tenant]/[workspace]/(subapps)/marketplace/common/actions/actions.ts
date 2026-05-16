@@ -14,6 +14,41 @@ import {getLoginURL} from '@/utils/url';
 import {ensureAuth} from '../utils/auth-helper';
 import {findProductAccess} from '../orm/orm';
 
+// ---- LOAD PRODUCT FOR EDITING ---- //
+import {clone} from '@/utils';
+import type {Cloned} from '@/types/util';
+import {findMyProductWithVersions} from '../orm/orm';
+import type {MyProductWithVersions} from '../orm/orm';
+
+export async function loadMyProductForEdit({
+  productId,
+  workspaceURL,
+}: {
+  productId: string;
+  workspaceURL: string;
+}): ActionResponse<Cloned<MyProductWithVersions>> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error || !auth.user) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+
+  const product = await findMyProductWithVersions({
+    productId,
+    userId: auth.user.id,
+    client: auth.tenant.client,
+    workspace: auth.workspace,
+  });
+  if (!product) {
+    return {error: true, message: await t('Product not found')};
+  }
+  return {success: true, data: clone(product)};
+}
+
 // ---- VALIDATION SCHEMAS ---- //
 const AddToFavoritesSchema = z.object({
   productId: z.string().min(1),

@@ -1,4 +1,8 @@
-import {findMyProducts} from '../../../orm/orm';
+import {
+  findMyProducts,
+  type CompatibilityVersion,
+  type ListCategory,
+} from '../../../orm/orm';
 import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
 import {ProductsListTab} from './products-list-tab';
 import {getSkip, getTotal} from '@/utils/pagination';
@@ -11,6 +15,9 @@ type AppsTabProps = {
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   workspaceURI: string;
+  workspaceURL: string;
+  categories: ListCategory[];
+  compatibilityVersions: CompatibilityVersion[];
   page: number;
 };
 
@@ -21,6 +28,9 @@ export async function AppsTab({
   client,
   workspace,
   workspaceURI,
+  workspaceURL,
+  categories,
+  compatibilityVersions,
   page,
 }: AppsTabProps) {
   const apps = await findMyProducts({
@@ -40,6 +50,9 @@ export async function AppsTab({
       products={apps}
       title="Apps"
       workspaceURI={workspaceURI}
+      workspaceURL={workspaceURL}
+      categories={categories}
+      compatibilityVersions={compatibilityVersions}
       page={page}
       totalPages={totalPages}
       paramName="appsPage"

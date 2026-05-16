@@ -458,6 +458,70 @@ export async function findMyProducts({
 
 export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
 
+export async function findMyProductWithVersions({
+  productId,
+  userId,
+  client,
+  workspace,
+}: {
+  productId: ID;
+  userId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+}) {
+  const product = await client.aOSProduct.findOne({
+    where: withMyProductAccessFilter(workspace, userId)({id: productId}),
+    select: {
+      id: true,
+      version: true,
+      name: true,
+      code: true,
+      slug: true,
+      description: true,
+      longDescription: true,
+      marketplaceTypeSelect: true,
+      marketplaceCoverStyle: true,
+      marketplaceIconCode: true,
+      documentationUrl: true,
+      supportIssuesUrl: true,
+      supportContactUrl: true,
+      productCategory: {id: true, name: true},
+      currentVersion: {id: true},
+      versionList: {
+        select: {
+          id: true,
+          version: true,
+          versionNumber: true,
+          changelog: true,
+          statusSelect: true,
+          bundleFile: {id: true, fileName: true, sizeText: true},
+          compatibilitySet: {
+            select: {id: true, title: true, name: true},
+          },
+        },
+        orderBy: {versionNumber: 'DESC'},
+      },
+    },
+  });
+
+  return product;
+}
+
+export type MyProductWithVersions = NonNullable<
+  Awaited<ReturnType<typeof findMyProductWithVersions>>
+>;
+
+export async function findCompatibilityVersions(client: Client) {
+  return client.aOSMarketplaceAxelorVersion.find({
+    select: {id: true, title: true, name: true, releasedOn: true},
+    orderBy: {releasedOn: 'DESC'},
+  });
+}
+
+export type CompatibilityVersion = Awaited<
+  ReturnType<typeof findCompatibilityVersions>
+>[number];
+
 export async function countMyProducts({
   userId,
   client,

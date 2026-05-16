@@ -193,6 +193,12 @@
     {
       "type": "Int",
       "name": "installCount"
+    },
+    {
+      "type": "OneToMany",
+      "name": "versionList",
+      "target": "AOSMarketplaceProductVersion",
+      "mappedBy": "product"
     }
   ]
 }
