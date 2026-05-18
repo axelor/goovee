@@ -3,7 +3,8 @@ import {Suspense} from 'react';
 import {Download, FileText} from 'lucide-react';
 import {notFound} from 'next/navigation';
 import {SUBAPP_CODES} from '@/constants';
-import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../../common/constant/route-types';
+import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constant/route-types';
+import {MARKETPLACE_TYPE} from '../../common/constant/marketplace-types';
 import {formatNumber} from '@/locale/server/formatters';
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
@@ -85,7 +86,12 @@ export default async function ProductPage(props: {
 
   const rating = Number(product.averageRating || 0);
   const ratingCount = Number(product.ratingCount || 0);
-  const categoryName = product.productCategory?.name || 'Skills';
+  const categoryName = product.productCategory?.name ?? null;
+  const isApp = product.marketplaceTypeSelect === MARKETPLACE_TYPE.APP;
+  const hubSegment = isApp
+    ? MARKETPLACE_TYPE_SEGMENT.APPS
+    : MARKETPLACE_TYPE_SEGMENT.SKILLS;
+  const hubLabel = isApp ? await t('Apps Studio') : await t('Skills Hub');
 
   const tabNavLink = (tab: string) =>
     `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=${tab}`;
@@ -101,22 +107,26 @@ export default async function ProductPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
-                  {await t('Skills Hub')}
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${hubSegment}`}>
+                  {hubLabel}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                asChild
-                className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}?category=${product.productCategory?.id}`}>
-                  {categoryName}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+            {categoryName && product.productCategory?.id && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-foreground-muted cursor-pointer truncate text-md">
+                    <Link
+                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${hubSegment}?category=${product.productCategory.id}`}>
+                      {categoryName}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              </>
+            )}
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="sm:truncate text-lg font-semibold">
@@ -146,7 +156,9 @@ export default async function ProductPage(props: {
             <div className="space-y-4">
               {/* Category and Status */}
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline">{categoryName}</Badge>
+                {categoryName && (
+                  <Badge variant="outline">{categoryName}</Badge>
+                )}
                 <Badge variant="success">Free · Open source</Badge>
                 {product.currentVersion?.versionNumber && (
                   <Badge variant="outline">
@@ -427,7 +439,7 @@ export default async function ProductPage(props: {
                     Category
                   </span>
                   <p className="font-semibold text-foreground">
-                    {categoryName}
+                    {categoryName ?? '—'}
                   </p>
                 </div>
                 <div className="border-t border-border pt-4">
