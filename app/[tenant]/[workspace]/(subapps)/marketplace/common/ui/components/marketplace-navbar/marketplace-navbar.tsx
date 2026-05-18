@@ -1,12 +1,13 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 
 import {Portal} from '@/ui/components';
 import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
+import {authClient} from '@/lib/auth-client';
 import {useResponsive} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -17,11 +18,17 @@ import {MARKETPLACE_LINKS} from '../../../constant/marketplace-links';
 function NavLinks() {
   const {workspaceURI} = useWorkspace();
   const pathname = usePathname();
+  const {data: session} = authClient.useSession();
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+
+  const links = useMemo(
+    () => MARKETPLACE_LINKS.filter(item => !item.requiresAuth || session?.user),
+    [session?.user],
+  );
 
   return (
     <nav className="flex">
-      {MARKETPLACE_LINKS.map(item => {
+      {links.map(item => {
         const href = `${marketplaceBase}/${item.segment}`;
         const active = pathname.startsWith(href);
         return (

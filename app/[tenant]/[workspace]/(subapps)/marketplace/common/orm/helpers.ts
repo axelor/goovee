@@ -1,8 +1,12 @@
-import type {AOSProduct, AOSProductCategory} from '@/goovee/.generated/models';
+import type {
+  AOSProduct,
+  AOSProductCategory,
+  AOSMarketplaceProductVersion,
+} from '@/goovee/.generated/models';
 import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
 import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import {and} from '@/utils/orm';
+import {and, or} from '@/utils/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
 
 export type QueryProps<T extends Entity> = {
@@ -80,6 +84,37 @@ export function withMyProductAccessFilter(
     return and<AOSProduct>([
       where,
       getMyProductAccessFilter(workspace, userId),
+    ]);
+  };
+}
+
+/**
+ * Restricts a version query to bundles the caller is allowed to download.
+ * Anyone in the workspace can download published versions; the product
+ * owner can additionally download their own drafts. Owner access is
+ * delegated to {@link getMyProductAccessFilter} so any future rules on
+ * my-product access apply here automatically.
+ */
+export function withBundleAccessFilter({
+  workspace,
+  userId,
+  productId,
+}: {
+  workspace: PortalWorkspaceWithConfig;
+  userId?: ID;
+  productId: ID;
+}) {
+  return function (where?: WhereOptions<AOSMarketplaceProductVersion>) {
+    return and<AOSMarketplaceProductVersion>([
+      where,
+      {product: {id: productId}},
+      or<AOSMarketplaceProductVersion>([
+        {
+          statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+          product: getProductAccessFilter(workspace),
+        },
+        userId && {product: getMyProductAccessFilter(workspace, userId)},
+      ]),
     ]);
   };
 }

@@ -6,7 +6,8 @@ import {workspacePathname} from '@/utils/workspace';
 import {clone} from '@/utils';
 // clone is applied at server→client boundaries only.
 import {ensureAuth} from '../common/utils/auth-helper';
-import {notFound} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
+import {getLoginURL} from '@/utils/url';
 import {OverviewTab} from '../common/ui/components/my-contributions-tab/my-contributions-overview-tab';
 import {SkillsTab} from '../common/ui/components/my-contributions-tab/skills-tab';
 import {AppsTab} from '../common/ui/components/my-contributions-tab/apps-tab';
@@ -41,9 +42,18 @@ export default async function MyContributionsPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
+  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
     allowGuest: false,
   });
+  if (forceLogin) {
+    redirect(
+      getLoginURL({
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions`,
+        workspaceURI,
+        tenant: tenantId,
+      }),
+    );
+  }
   if (error) notFound();
 
   const [categories, compatibilityVersions] = await Promise.all([

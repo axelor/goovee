@@ -3,7 +3,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
-import {findProductAccess} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/orm/orm';
+import {withBundleAccessFilter} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/orm/helpers';
 import {ensureAuth} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/utils/auth-helper';
 
 export async function GET(
@@ -28,24 +28,14 @@ export async function GET(
     return new NextResponse('Unauthorized', {status: 401});
   }
 
-  const {workspace} = auth;
   const {client} = auth.tenant;
 
-  const product = await findProductAccess({
-    recordId: productId,
-    client,
-    workspace,
-    select: {id: true},
-  });
-  if (!product) {
-    return new NextResponse('Forbidden', {status: 403});
-  }
-
   const version = await client.aOSMarketplaceProductVersion.findOne({
-    where: {
-      id: versionId,
-      product: {id: productId},
-    },
+    where: withBundleAccessFilter({
+      workspace: auth.workspace,
+      userId: auth.user?.id,
+      productId,
+    })({id: versionId}),
     select: {
       id: true,
       bundleFile: {id: true},
