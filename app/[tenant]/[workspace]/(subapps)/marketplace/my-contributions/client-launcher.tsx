@@ -11,6 +11,7 @@ import type {CompatibilityVersion, ListCategory} from '../common/orm/orm';
 
 type Props = {
   workspaceURI: string;
+  workspaceURL: string;
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   defaultType?: MARKETPLACE_TYPE;
@@ -18,6 +19,7 @@ type Props = {
 
 export function PublishNewLauncher({
   workspaceURI,
+  workspaceURL,
   categories,
   compatibilityVersions,
   defaultType,
@@ -37,6 +39,7 @@ export function PublishNewLauncher({
         onOpenChange={setOpen}
         mode="create"
         workspaceURI={workspaceURI}
+        workspaceURL={workspaceURL}
         categories={categories}
         compatibilityVersions={compatibilityVersions}
         defaultType={defaultType}

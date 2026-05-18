@@ -23,7 +23,7 @@ const nextConfig = {
   experimental: {
     taint: true,
     serverActions: {
-      bodySizeLimit: '5mb',
+      bodySizeLimit: '25mb',
     },
   },
   reactStrictMode: false,

@@ -103,6 +103,7 @@ export default async function MyContributionsPage(props: {
           </div>
           <PublishNewLauncher
             workspaceURI={workspaceURI}
+            workspaceURL={workspaceURL}
             categories={clone(categories)}
             compatibilityVersions={clone(compatibilityVersions)}
           />

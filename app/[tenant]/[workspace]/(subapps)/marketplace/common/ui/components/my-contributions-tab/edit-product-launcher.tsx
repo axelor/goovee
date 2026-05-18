@@ -1,5 +1,3 @@
-'use client';
-
 import {useState} from 'react';
 import {Pencil, Loader2} from 'lucide-react';
 import {i18n} from '@/locale';
@@ -67,6 +65,7 @@ export function EditProductLauncher({
           onOpenChange={setOpen}
           mode="edit"
           workspaceURI={workspaceURI}
+          workspaceURL={workspaceURL}
           categories={categories}
           compatibilityVersions={compatibilityVersions}
           initial={product}

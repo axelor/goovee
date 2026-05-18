@@ -15,10 +15,25 @@ import {ensureAuth} from '../utils/auth-helper';
 import {findProductAccess} from '../orm/orm';
 
 // ---- LOAD PRODUCT FOR EDITING ---- //
+import fs from 'fs';
+import path from 'path';
+import {Readable} from 'stream';
+import type {ReadableStream as NodeReadableStream} from 'stream/web';
+import {pipeline} from 'stream/promises';
+import {manager} from '@/tenant';
 import {clone} from '@/utils';
+import {getFileSizeText} from '@/utils/files';
+import {zodParseFormData} from '@/utils/formdata';
 import type {Cloned} from '@/types/util';
 import {findMyProductWithVersions} from '../orm/orm';
 import type {MyProductWithVersions} from '../orm/orm';
+import type {Client} from '@/goovee/.generated/client';
+import {
+  productSchema,
+  versionSchema,
+  MAX_BUNDLE_SIZE,
+} from '../ui/components/product-form/schema';
+import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
 
 export async function loadMyProductForEdit({
   productId,
@@ -47,6 +62,278 @@ export async function loadMyProductForEdit({
     return {error: true, message: await t('Product not found')};
   }
   return {success: true, data: clone(product)};
+}
+
+// ---- SAVE PRODUCT (create or update) ---- //
+type SaveProductInput = z.infer<typeof productSchema> & {workspaceURL: string};
+
+export async function saveProduct(
+  input: SaveProductInput,
+): ActionResponse<{productId: string}> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+
+  const {workspaceURL, ...rest} = input;
+  const parsed = productSchema.safeParse(rest);
+  if (!parsed.success) {
+    return {
+      error: true,
+      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+    };
+  }
+  const payload = parsed.data;
+
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error || !auth.user) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+  const {client} = auth.tenant;
+
+  if (payload.id) {
+    const existing = await findMyProductWithVersions({
+      productId: payload.id,
+      userId: auth.user.id,
+      client,
+      workspace: auth.workspace,
+    });
+    if (!existing) {
+      return {error: true, message: await t('Product not found')};
+    }
+  }
+
+  const productData = {
+    name: payload.name,
+    description: payload.description ?? null,
+    longDescription: payload.longDescription || null,
+    marketplaceTypeSelect: payload.marketplaceTypeSelect,
+    marketplaceCoverStyle: payload.marketplaceCoverStyle,
+    marketplaceIconCode: payload.marketplaceIconCode,
+    documentationUrl: payload.documentationUrl || null,
+    supportIssuesUrl: payload.supportIssuesUrl || null,
+    supportContactUrl: payload.supportContactUrl || null,
+    productCategory: {select: {id: payload.productCategoryId}},
+  };
+
+  try {
+    let productId: string;
+    if (payload.id) {
+      const current = await client.aOSProduct.findOne({
+        where: {id: payload.id},
+        select: {id: true, version: true},
+      });
+      if (!current) {
+        return {error: true, message: await t('Product not found')};
+      }
+      await client.aOSProduct.update({
+        data: {id: payload.id, version: current.version, ...productData},
+        select: {id: true},
+      });
+      productId = payload.id;
+    } else {
+      const code = `mkt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const slug = slugify(payload.name);
+      const created = await client.aOSProduct.create({
+        data: {
+          ...productData,
+          code,
+          slug,
+          isMarketPlace: true,
+          defaultSupplierPartner: {select: {id: auth.user.id}},
+          marketplaceCreatedBy: {select: {id: auth.user.id}},
+        },
+        select: {id: true},
+      });
+      productId = created.id;
+    }
+    return {success: true, data: {productId}};
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : await t('An error occurred');
+    return {error: true, message};
+  }
+}
+
+// ---- SAVE VERSION (create or update) ---- //
+export async function saveVersion(
+  formData: FormData,
+): ActionResponse<{versionId: string}> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+
+  let payload;
+  try {
+    payload = zodParseFormData(
+      formData,
+      versionSchema.safeExtend({workspaceURL: z.string().min(1)}),
+    );
+  } catch (e) {
+    const message =
+      e instanceof z.ZodError
+        ? (e.issues[0]?.message ?? (await t('Invalid input')))
+        : await t('Invalid input');
+    return {error: true, message};
+  }
+
+  const {error, auth} = await ensureAuth(payload.workspaceURL, tenantId);
+  if (error || !auth.user) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+  const {client} = auth.tenant;
+
+  if (payload.bundleFile && payload.bundleFile.size > MAX_BUNDLE_SIZE) {
+    return {error: true, message: await t('Bundle exceeds 20 MB limit')};
+  }
+
+  const existingProduct = await findMyProductWithVersions({
+    productId: payload.productId,
+    userId: auth.user.id,
+    client,
+    workspace: auth.workspace,
+  });
+  if (!existingProduct) {
+    return {error: true, message: await t('Product not found')};
+  }
+
+  const tenant = await manager.getTenant(tenantId);
+  const storage = tenant?.config.aos.storage;
+  if (!storage) {
+    return {error: true, message: await t('Storage not configured')};
+  }
+  if (!fs.existsSync(storage)) fs.mkdirSync(storage, {recursive: true});
+
+  try {
+    let uploadedFileId: string | null = null;
+    if (payload.bundleFile) {
+      uploadedFileId = await uploadBundle(payload.bundleFile, storage, client);
+    }
+
+    const compatRefs = payload.compatibilitySetIds.map(id => ({id}));
+    let versionId: string;
+
+    if (payload.id) {
+      const current = await client.aOSMarketplaceProductVersion.findOne({
+        where: {id: payload.id},
+        select: {
+          id: true,
+          version: true,
+          compatibilitySet: {select: {id: true}},
+        },
+      });
+      if (!current) {
+        return {error: true, message: await t('Version not found')};
+      }
+      const existingCompat = (current.compatibilitySet ?? []).map(c => c.id);
+      await client.aOSMarketplaceProductVersion.update({
+        data: {
+          id: payload.id,
+          version: current.version,
+          versionNumber: payload.versionNumber,
+          changelog: payload.changelog || null,
+          statusSelect: payload.statusSelect,
+          ...(uploadedFileId && {
+            bundleFile: {select: {id: uploadedFileId}},
+          }),
+          compatibilitySet: {
+            ...(existingCompat.length && {remove: existingCompat}),
+            ...(compatRefs.length && {select: compatRefs}),
+          },
+        },
+        select: {id: true},
+      });
+      versionId = payload.id;
+    } else {
+      if (!uploadedFileId) {
+        return {error: true, message: await t('Bundle file is required')};
+      }
+      const created = await client.aOSMarketplaceProductVersion.create({
+        data: {
+          versionNumber: payload.versionNumber,
+          changelog: payload.changelog || null,
+          statusSelect: payload.statusSelect,
+          bundleFile: {select: {id: uploadedFileId}},
+          compatibilitySet: {select: compatRefs},
+          product: {select: {id: payload.productId}},
+          ...(payload.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED && {
+            dateOfApproval: new Date(),
+          }),
+        },
+        select: {id: true},
+      });
+      versionId = created.id;
+    }
+
+    // Promote currentVersion to the newest published version.
+    const publishedNewest = await client.aOSMarketplaceProductVersion.findOne({
+      where: {
+        product: {id: payload.productId},
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
+      orderBy: {versionNumber: 'DESC'},
+      select: {id: true},
+    });
+    if (publishedNewest) {
+      const productNow = await client.aOSProduct.findOne({
+        where: {id: payload.productId},
+        select: {id: true, version: true},
+      });
+      if (productNow) {
+        await client.aOSProduct.update({
+          data: {
+            id: payload.productId,
+            version: productNow.version,
+            currentVersion: {select: {id: publishedNewest.id}},
+          },
+          select: {id: true},
+        });
+      }
+    }
+
+    return {success: true, data: {versionId}};
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : await t('An error occurred');
+    return {error: true, message};
+  }
+}
+
+async function uploadBundle(file: File, storage: string, client: Client) {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const fileName = `${Date.now()}-${safeName}`;
+  await pipeline(
+    Readable.fromWeb(
+      file.stream() as unknown as NodeReadableStream<Uint8Array>,
+    ),
+    fs.createWriteStream(path.resolve(storage, fileName)),
+  );
+  const meta = await client.aOSMetaFile
+    .create({
+      data: {
+        fileName: file.name,
+        filePath: fileName,
+        fileType: file.type || 'application/zip',
+        fileSize: String(file.size),
+        sizeText: getFileSizeText(file.size),
+        description: '',
+      },
+      select: {id: true},
+    })
+    .then(clone);
+  return meta.id;
+}
+
+function slugify(value: string) {
+  return (
+    value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || `product-${Date.now()}`
+  );
 }
 
 // ---- VALIDATION SCHEMAS ---- //
