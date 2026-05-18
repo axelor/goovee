@@ -105,6 +105,9 @@ export default function Header({
         )}>
         <Logo workspace={workspace} />
 
+        {/** Subapp-injected header nav slot (filled via Portal). */}
+        <div id="subapp-header-nav" className="ml-8 hidden" />
+
         <div className="grow" />
         {isLarge && (
           <div className="flex items-center gap-8">

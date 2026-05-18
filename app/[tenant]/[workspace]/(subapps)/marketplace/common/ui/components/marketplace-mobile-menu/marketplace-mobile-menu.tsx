@@ -13,13 +13,7 @@ import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import styles from './index.module.scss';
-import {MARKETPLACE_TYPE_SEGMENT} from '../../../constant/route-types';
-
-const LINKS = [
-  {id: 1, title: 'Skills', segment: MARKETPLACE_TYPE_SEGMENT.SKILLS},
-  {id: 2, title: 'Apps Studio', segment: MARKETPLACE_TYPE_SEGMENT.APPS},
-  {id: 3, title: 'My contributions', segment: 'my-contributions'},
-];
+import {MARKETPLACE_LINKS} from '../../../constant/marketplace-links';
 
 function Menu({icon, color}: {icon: string; color?: string}) {
   const [open, setOpen] = useState(false);
@@ -50,7 +44,7 @@ function Menu({icon, color}: {icon: string; color?: string}) {
             {i18n.t('Marketplace menu')}
           </SheetTitle>
           <nav className="flex flex-col">
-            {LINKS.map(item => {
+            {MARKETPLACE_LINKS.map(item => {
               const href = `${marketplaceBase}/${item.segment}`;
               const active = pathname.startsWith(href);
               return (
