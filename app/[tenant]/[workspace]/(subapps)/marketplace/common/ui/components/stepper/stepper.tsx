@@ -26,7 +26,11 @@ export function Stepper({steps, current, onChange, className}: StepperProps) {
     <ol className={cn('inline-flex items-center gap-4', className)}>
       {steps.map((step, i) => {
         const state: 'completed' | 'active' | 'pending' =
-          i < currentIndex ? 'completed' : i === currentIndex ? 'active' : 'pending';
+          i < currentIndex
+            ? 'completed'
+            : i === currentIndex
+              ? 'active'
+              : 'pending';
         const isLast = i === steps.length - 1;
         return (
           <Fragment key={step.id}>
@@ -43,7 +47,8 @@ export function Stepper({steps, current, onChange, className}: StepperProps) {
                 <span
                   className={cn(
                     'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold',
-                    state === 'completed' && 'bg-success text-success-foreground',
+                    state === 'completed' &&
+                      'bg-success text-success-foreground',
                     state === 'active' && 'bg-primary text-primary-foreground',
                     state === 'pending' &&
                       'bg-muted text-muted-foreground border border-border',

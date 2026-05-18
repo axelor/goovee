@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import {Suspense} from 'react';
 import {SUBAPP_CODES} from '@/constants';
+import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constant/route-types';
 import {workspacePathname} from '@/utils/workspace';
 import {clone} from '@/utils';
 // clone is applied at server→client boundaries only.
@@ -74,7 +75,8 @@ export default async function MyContributionsPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
+                <Link
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
                   Marketplace
                 </Link>
               </BreadcrumbLink>

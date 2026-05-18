@@ -96,74 +96,32 @@ export function ProductForm({
   return (
     <Form {...form}>
       <div className="bg-muted/30 p-6" data-vaul-no-drag>
-      <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-foreground">
-          {i18n.t('Product details')}
-        </h3>
+        <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-foreground">
+            {i18n.t('Product details')}
+          </h3>
 
-        <FormField
-          control={control}
-          name="marketplaceTypeSelect"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>{i18n.t('Type')} *</FormLabel>
-              <FormControl>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={mode === 'edit'}>
-                  <SelectTrigger className="w-full md:w-[260px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={MARKETPLACE_TYPE.SKILL}>
-                      {i18n.t('Skill')}
-                    </SelectItem>
-                    <SelectItem value={MARKETPLACE_TYPE.APP}>
-                      {i18n.t('App')}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
           <FormField
             control={control}
-            name="name"
+            name="marketplaceTypeSelect"
             render={({field}) => (
               <FormItem>
-                <FormLabel>{i18n.t('Name')} *</FormLabel>
+                <FormLabel>{i18n.t('Type')} *</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder={i18n.t('e.g. BPM Workflow Generator')}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="productCategoryId"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>{i18n.t('Category')} *</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={i18n.t('Select')} />
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={mode === 'edit'}>
+                    <SelectTrigger className="w-full md:w-[260px]">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map(c => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value={MARKETPLACE_TYPE.SKILL}>
+                        {i18n.t('Skill')}
+                      </SelectItem>
+                      <SelectItem value={MARKETPLACE_TYPE.APP}>
+                        {i18n.t('App')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -171,161 +129,202 @@ export function ProductForm({
               </FormItem>
             )}
           />
-        </div>
 
-        <FormField
-          control={control}
-          name="description"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>{i18n.t('Short description')} *</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={i18n.t('One-line summary, ~140 characters')}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
+            <FormField
+              control={control}
+              name="name"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{i18n.t('Name')} *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={i18n.t('e.g. BPM Workflow Generator')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="productCategoryId"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{i18n.t('Category')} *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={i18n.t('Select')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(c => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-        <FormField
-          control={control}
-          name="longDescription"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>{i18n.t('Long description')}</FormLabel>
-              <FormControl>
-                <RichTextEditor
-                  content={field.value}
-                  onChange={field.onChange}
-                  classNames={{
-                    wrapperClassName: 'overflow-visible',
-                    toolbarClassName: 'mt-0',
-                    editorClassName: 'px-4',
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={control}
+            name="description"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>{i18n.t('Short description')} *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={i18n.t('One-line summary, ~140 characters')}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={control}
-          name="marketplaceCoverStyle"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>{i18n.t('Cover style')} *</FormLabel>
-              <FormControl>
-                <div className="grid grid-cols-5 gap-2 md:grid-cols-10">
-                  {COVER_CODES.map(code => {
-                    const selected = field.value === code;
-                    return (
-                      <button
-                        key={code}
-                        type="button"
-                        onClick={() => field.onChange(code)}
-                        className={cn(
-                          'aspect-square rounded-lg bg-gradient-to-br transition-all',
-                          GRADIENT_MAP[code],
-                          selected
-                            ? 'ring-2 ring-primary ring-offset-2'
-                            : 'hover:ring-2 hover:ring-foreground/20',
-                        )}
-                        aria-label={code}
-                      />
-                    );
-                  })}
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={control}
+            name="longDescription"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>{i18n.t('Long description')}</FormLabel>
+                <FormControl>
+                  <RichTextEditor
+                    content={field.value}
+                    onChange={field.onChange}
+                    classNames={{
+                      wrapperClassName: 'overflow-visible',
+                      toolbarClassName: 'mt-0',
+                      editorClassName: 'px-4',
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={control}
-          name="marketplaceIconCode"
-          render={({field}) => (
-            <FormItem>
-              <FormLabel>{i18n.t('Icon')} *</FormLabel>
-              <FormControl>
-                <div className="flex flex-wrap gap-2">
-                  {ICON_CODES.map(code => {
-                    const selected = field.value === code;
-                    return (
-                      <button
-                        key={code}
-                        type="button"
-                        onClick={() => field.onChange(code)}
-                        className={cn(
-                          'flex h-12 w-12 items-center justify-center rounded-lg border transition-all',
-                          selected
-                            ? 'border-palette-indigo bg-palette-indigo/10 text-palette-indigo ring-1 ring-palette-indigo'
-                            : 'border-border bg-background text-foreground hover:ring-1 hover:ring-foreground/20',
-                        )}>
-                        <ProductIcon
-                          code={code}
+          <FormField
+            control={control}
+            name="marketplaceCoverStyle"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>{i18n.t('Cover style')} *</FormLabel>
+                <FormControl>
+                  <div className="grid grid-cols-5 gap-2 md:grid-cols-10">
+                    {COVER_CODES.map(code => {
+                      const selected = field.value === code;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => field.onChange(code)}
                           className={cn(
-                            'h-5 w-5',
-                            selected && 'text-palette-indigo',
+                            'aspect-square rounded-lg bg-gradient-to-br transition-all',
+                            GRADIENT_MAP[code],
+                            selected
+                              ? 'ring-2 ring-primary ring-offset-2'
+                              : 'hover:ring-2 hover:ring-foreground/20',
                           )}
+                          aria-label={code}
                         />
-                      </button>
-                    );
-                  })}
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                      );
+                    })}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <FormField
             control={control}
-            name="documentationUrl"
+            name="marketplaceIconCode"
             render={({field}) => (
               <FormItem>
-                <FormLabel>{i18n.t('Documentation URL')}</FormLabel>
+                <FormLabel>{i18n.t('Icon')} *</FormLabel>
                 <FormControl>
-                  <Input type="url" placeholder="https://" {...field} />
+                  <div className="flex flex-wrap gap-2">
+                    {ICON_CODES.map(code => {
+                      const selected = field.value === code;
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => field.onChange(code)}
+                          className={cn(
+                            'flex h-12 w-12 items-center justify-center rounded-lg border transition-all',
+                            selected
+                              ? 'border-palette-indigo bg-palette-indigo/10 text-palette-indigo ring-1 ring-palette-indigo'
+                              : 'border-border bg-background text-foreground hover:ring-1 hover:ring-foreground/20',
+                          )}>
+                          <ProductIcon
+                            code={code}
+                            className={cn(
+                              'h-5 w-5',
+                              selected && 'text-palette-indigo',
+                            )}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={control}
-            name="supportIssuesUrl"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>{i18n.t('Issues URL')}</FormLabel>
-                <FormControl>
-                  <Input type="url" placeholder="https://" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="supportContactUrl"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>{i18n.t('Contact URL')}</FormLabel>
-                <FormControl>
-                  <Input type="url" placeholder="https://" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <FormField
+              control={control}
+              name="documentationUrl"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{i18n.t('Documentation URL')}</FormLabel>
+                  <FormControl>
+                    <Input type="url" placeholder="https://" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="supportIssuesUrl"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{i18n.t('Issues URL')}</FormLabel>
+                  <FormControl>
+                    <Input type="url" placeholder="https://" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="supportContactUrl"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{i18n.t('Contact URL')}</FormLabel>
+                  <FormControl>
+                    <Input type="url" placeholder="https://" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
-      </div>
-
       </div>
       {/* Footer */}
       <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">

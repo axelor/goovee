@@ -184,226 +184,228 @@ export function VersionForm({
   return (
     <Form {...form}>
       <div className="bg-muted/30 p-6" data-vaul-no-drag>
-      {/* Section header */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-semibold text-foreground">
-              {i18n.t('Versions')}
-            </h3>
-            {total > 1 && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        {/* Section header */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-semibold text-foreground">
+                {i18n.t('Versions')}
+              </h3>
+              {total > 1 && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={goPrev}
+                    disabled={creatingNew || versions.length <= 1}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span>{positionLabel}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={goNext}
+                    disabled={creatingNew || versions.length <= 1}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {creatingNew && versions.length > 0 && (
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon"
-                  onClick={goPrev}
-                  disabled={creatingNew || versions.length <= 1}>
-                  <ChevronLeft className="h-4 w-4" />
+                  size="sm"
+                  onClick={discardNew}
+                  className="text-destructive hover:text-destructive">
+                  <Trash2 className="mr-1 h-4 w-4" />
+                  {i18n.t('Discard')}
                 </Button>
-                <span>{positionLabel}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={goNext}
-                  disabled={creatingNew || versions.length <= 1}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {creatingNew && versions.length > 0 && (
+              )}
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={discardNew}
-                className="text-destructive hover:text-destructive">
-                <Trash2 className="mr-1 h-4 w-4" />
-                {i18n.t('Discard')}
+                onClick={addNew}
+                disabled={creatingNew}>
+                <Plus className="mr-1 h-4 w-4" />
+                {i18n.t('Add new version')}
               </Button>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addNew}
-              disabled={creatingNew}>
-              <Plus className="mr-1 h-4 w-4" />
-              {i18n.t('Add new version')}
-            </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="overflow-hidden">
-          <div
-            key={`${creatingNew ? 'new' : current?.id}-${index}`}
-            className={cn(
-              'rounded-xl border border-border bg-card p-6 shadow-sm space-y-8',
-              'animate-in fade-in duration-300',
-              slideDir === 'next'
-                ? 'slide-in-from-right-12'
-                : 'slide-in-from-left-12',
-            )}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto] md:items-end">
+          <div className="overflow-hidden">
+            <div
+              key={`${creatingNew ? 'new' : current?.id}-${index}`}
+              className={cn(
+                'rounded-xl border border-border bg-card p-6 shadow-sm space-y-8',
+                'animate-in fade-in duration-300',
+                slideDir === 'next'
+                  ? 'slide-in-from-right-12'
+                  : 'slide-in-from-left-12',
+              )}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto] md:items-end">
+                <FormField
+                  control={control}
+                  name="versionNumber"
+                  render={({field}) => (
+                    <FormItem>
+                      <FormLabel>{i18n.t('Version number')} *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="1.0.0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {current && (
+                  <Badge
+                    variant={
+                      current.statusSelect ===
+                      MARKETPLACE_VERSION_STATUS.PUBLISHED
+                        ? 'success'
+                        : 'secondary'
+                    }
+                    className="h-9 self-end capitalize">
+                    {current.statusSelect}
+                  </Badge>
+                )}
+              </div>
+
               <FormField
                 control={control}
-                name="versionNumber"
+                name="compatibilitySetIds"
                 render={({field}) => (
                   <FormItem>
-                    <FormLabel>{i18n.t('Version number')} *</FormLabel>
+                    <FormLabel>{i18n.t('Axelor compatibility')} *</FormLabel>
                     <FormControl>
-                      <Input placeholder="1.0.0" {...field} />
+                      <div className="flex flex-wrap gap-2">
+                        {compatibilityVersions.map(v => {
+                          const selected = field.value?.includes(v.id);
+                          return (
+                            <button
+                              key={v.id}
+                              type="button"
+                              onClick={() => {
+                                const next = selected
+                                  ? field.value.filter(id => id !== v.id)
+                                  : [...(field.value ?? []), v.id];
+                                field.onChange(next);
+                              }}
+                              className={cn(
+                                'rounded-full border px-3 py-1 text-sm font-medium transition-colors',
+                                selected
+                                  ? 'border-foreground bg-foreground text-background'
+                                  : 'border-border bg-background text-muted-foreground hover:border-foreground/50',
+                              )}>
+                              {v.title}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {current && (
-                <Badge
-                  variant={
-                    current.statusSelect ===
-                    MARKETPLACE_VERSION_STATUS.PUBLISHED
-                      ? 'success'
-                      : 'secondary'
-                  }
-                  className="h-9 self-end capitalize">
-                  {current.statusSelect}
-                </Badge>
-              )}
-            </div>
 
-            <FormField
-              control={control}
-              name="compatibilitySetIds"
-              render={({field}) => (
-                <FormItem>
-                  <FormLabel>{i18n.t('Axelor compatibility')} *</FormLabel>
-                  <FormControl>
-                    <div className="flex flex-wrap gap-2">
-                      {compatibilityVersions.map(v => {
-                        const selected = field.value?.includes(v.id);
-                        return (
-                          <button
-                            key={v.id}
-                            type="button"
-                            onClick={() => {
-                              const next = selected
-                                ? field.value.filter(id => id !== v.id)
-                                : [...(field.value ?? []), v.id];
-                              field.onChange(next);
-                            }}
-                            className={cn(
-                              'rounded-full border px-3 py-1 text-sm font-medium transition-colors',
-                              selected
-                                ? 'border-foreground bg-foreground text-background'
-                                : 'border-border bg-background text-muted-foreground hover:border-foreground/50',
-                            )}>
-                            {v.title}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="changelog"
-              render={({field}) => (
-                <FormItem>
-                  <FormLabel>{i18n.t('Changelog')}</FormLabel>
-                  <FormControl>
-                    <RichTextEditor
-                      content={field.value}
-                      onChange={field.onChange}
-                      classNames={{
-                        wrapperClassName: 'overflow-visible',
-                        toolbarClassName: 'mt-0',
-                        editorClassName: 'px-4',
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={control}
-              name="bundleFile"
-              render={() => (
-                <FormItem>
-                  <FormLabel>
-                    {i18n.t('Bundle file (.zip, up to 20 MB)')} *
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
-                      <FileArchive className="h-8 w-8 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0 flex-1">
-                        {watched.bundleFile ? (
-                          <>
-                            <p className="truncate text-sm text-foreground">
-                              {watched.bundleFile.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {(watched.bundleFile.size / 1024 / 1024).toFixed(
-                                2,
-                              )}{' '}
-                              MB
-                            </p>
-                          </>
-                        ) : current?.bundleFile?.fileName && downloadHref ? (
-                          <>
-                            <a
-                              href={downloadHref}
-                              download
-                              className="truncate text-sm font-medium text-primary hover:underline">
-                              {current.bundleFile.fileName}
-                            </a>
-                            {current.bundleFile.sizeText && (
-                              <p className="text-xs text-muted-foreground">
-                                {current.bundleFile.sizeText}
-                              </p>
-                            )}
-                          </>
-                        ) : (
-                          <p className="truncate text-sm text-muted-foreground">
-                            {i18n.t('No file selected')}
-                          </p>
-                        )}
-                      </div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".zip,application/zip,application/x-zip-compressed"
-                        className="hidden"
-                        onChange={handleFile}
+              <FormField
+                control={control}
+                name="changelog"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>{i18n.t('Changelog')}</FormLabel>
+                    <FormControl>
+                      <RichTextEditor
+                        content={field.value}
+                        onChange={field.onChange}
+                        classNames={{
+                          wrapperClassName: 'overflow-visible',
+                          toolbarClassName: 'mt-0',
+                          editorClassName: 'px-4',
+                        }}
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => fileInputRef.current?.click()}>
-                        <Upload className="mr-1 h-4 w-4" />
-                        {watched.bundleFile || watched.existingBundleFileId
-                          ? i18n.t('Replace')
-                          : i18n.t('Upload')}
-                      </Button>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={control}
+                name="bundleFile"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>
+                      {i18n.t('Bundle file (.zip, up to 20 MB)')} *
+                    </FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
+                        <FileArchive className="h-8 w-8 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          {watched.bundleFile ? (
+                            <>
+                              <p className="truncate text-sm text-foreground">
+                                {watched.bundleFile.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {(
+                                  watched.bundleFile.size /
+                                  1024 /
+                                  1024
+                                ).toFixed(2)}{' '}
+                                MB
+                              </p>
+                            </>
+                          ) : current?.bundleFile?.fileName && downloadHref ? (
+                            <>
+                              <a
+                                href={downloadHref}
+                                download
+                                className="truncate text-sm font-medium text-primary hover:underline">
+                                {current.bundleFile.fileName}
+                              </a>
+                              {current.bundleFile.sizeText && (
+                                <p className="text-xs text-muted-foreground">
+                                  {current.bundleFile.sizeText}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <p className="truncate text-sm text-muted-foreground">
+                              {i18n.t('No file selected')}
+                            </p>
+                          )}
+                        </div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".zip,application/zip,application/x-zip-compressed"
+                          className="hidden"
+                          onChange={handleFile}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}>
+                          <Upload className="mr-1 h-4 w-4" />
+                          {watched.bundleFile || watched.existingBundleFileId
+                            ? i18n.t('Replace')
+                            : i18n.t('Upload')}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       </div>
 
       {/* Footer */}

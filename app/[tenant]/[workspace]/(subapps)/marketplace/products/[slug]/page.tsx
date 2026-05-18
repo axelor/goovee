@@ -3,6 +3,7 @@ import {Suspense} from 'react';
 import {Download, FileText} from 'lucide-react';
 import {notFound} from 'next/navigation';
 import {SUBAPP_CODES} from '@/constants';
+import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../../common/constant/route-types';
 import {formatNumber} from '@/locale/server/formatters';
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
@@ -99,7 +100,8 @@ export default async function ProductPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
+                <Link
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
                   {await t('Skills Hub')}
                 </Link>
               </BreadcrumbLink>
@@ -110,7 +112,7 @@ export default async function ProductPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}?category=${product.productCategory?.id}`}>
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}?category=${product.productCategory?.id}`}>
                   {categoryName}
                 </Link>
               </BreadcrumbLink>
