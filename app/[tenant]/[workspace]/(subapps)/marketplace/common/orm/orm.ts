@@ -18,6 +18,7 @@ import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
 import {MARKETPLACE_TYPE} from '../constant/marketplace-types';
 import {
   withProductAccessFilter,
+  withPublishedProductFilter,
   withCategoryAccessFilter,
   withMyProductAccessFilter,
 } from './helpers';
@@ -158,7 +159,7 @@ export async function findProducts({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
-    where: withProductAccessFilter(workspace)({
+    where: withPublishedProductFilter(workspace)({
       ...where,
     }),
     select: {
@@ -195,7 +196,7 @@ export async function findProduct({
   workspace: PortalWorkspaceWithConfig;
 }) {
   const product = await client.aOSProduct.findOne({
-    where: withProductAccessFilter(workspace)({
+    where: withPublishedProductFilter(workspace)({
       slug,
     }),
     select: {
