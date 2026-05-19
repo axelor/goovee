@@ -51,6 +51,7 @@ export async function AppsTab({
       products={apps}
       title={await t('Apps')}
       requiresReview={workspace.config.requiresReview === true}
+      allowToPublish={workspace.config.allowToPublish === true}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

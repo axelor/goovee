@@ -48,6 +48,7 @@ type VersionFormProps = {
   versions: ExistingVersion[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
+  allowToPublish: boolean;
   onCancel: () => void;
   onDone: () => void;
 };
@@ -67,6 +68,7 @@ export function VersionForm({
   versions: initialVersions,
   compatibilityVersions,
   requiresReview,
+  allowToPublish,
   onCancel,
   onDone,
 }: VersionFormProps) {
@@ -230,15 +232,17 @@ export function VersionForm({
                   {i18n.t('Discard')}
                 </Button>
               )}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addNew}
-                disabled={creatingNew}>
-                <Plus className="mr-1 h-4 w-4" />
-                {i18n.t('Add new version')}
-              </Button>
+              {allowToPublish && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addNew}
+                  disabled={creatingNew}>
+                  <Plus className="mr-1 h-4 w-4" />
+                  {i18n.t('Add new version')}
+                </Button>
+              )}
             </div>
           </div>
 

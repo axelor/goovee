@@ -140,6 +140,7 @@ export default async function MyContributionsPage(props: {
               categories={clone(categories)}
               compatibilityVersions={clone(compatibilityVersions)}
               requiresReview={auth.workspace.config.requiresReview === true}
+              allowToPublish={auth.workspace.config.allowToPublish === true}
             />
           )}
         </div>

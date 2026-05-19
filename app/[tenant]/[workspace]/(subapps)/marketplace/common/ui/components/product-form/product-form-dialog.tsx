@@ -31,6 +31,7 @@ type ProductFormDialogProps = {
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
+  allowToPublish: boolean;
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
 };
@@ -44,6 +45,7 @@ export function ProductFormDialog({
   categories,
   compatibilityVersions,
   requiresReview,
+  allowToPublish,
   initial,
   defaultType,
 }: ProductFormDialogProps) {
@@ -128,6 +130,7 @@ export function ProductFormDialog({
               versions={initial?.versionList ?? []}
               compatibilityVersions={compatibilityVersions}
               requiresReview={requiresReview}
+              allowToPublish={allowToPublish}
               onCancel={close}
               onDone={onDone}
             />

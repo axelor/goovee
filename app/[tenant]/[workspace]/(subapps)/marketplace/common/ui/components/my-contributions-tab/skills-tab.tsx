@@ -51,6 +51,7 @@ export async function SkillsTab({
       products={skills}
       title={await t('Skills')}
       requiresReview={workspace.config.requiresReview === true}
+      allowToPublish={workspace.config.allowToPublish === true}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

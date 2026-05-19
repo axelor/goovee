@@ -15,6 +15,7 @@ type Props = {
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
+  allowToPublish: boolean;
   defaultType?: MARKETPLACE_TYPE;
 };
 
@@ -24,6 +25,7 @@ export function PublishNewLauncher({
   categories,
   compatibilityVersions,
   requiresReview,
+  allowToPublish,
   defaultType,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -45,6 +47,7 @@ export function PublishNewLauncher({
         categories={categories}
         compatibilityVersions={compatibilityVersions}
         requiresReview={requiresReview}
+        allowToPublish={allowToPublish}
         defaultType={defaultType}
       />
     </>

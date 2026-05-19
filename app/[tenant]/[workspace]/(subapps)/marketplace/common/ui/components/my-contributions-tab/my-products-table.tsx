@@ -47,6 +47,7 @@ type Props = {
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
+  allowToPublish: boolean;
 };
 
 export function MyProductsTable({
@@ -57,6 +58,7 @@ export function MyProductsTable({
   categories,
   compatibilityVersions,
   requiresReview,
+  allowToPublish,
 }: Props) {
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
@@ -201,6 +203,7 @@ export function MyProductsTable({
                       categories={categories}
                       compatibilityVersions={compatibilityVersions}
                       requiresReview={requiresReview}
+                      allowToPublish={allowToPublish}
                     />
                     <Link
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
