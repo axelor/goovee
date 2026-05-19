@@ -120,6 +120,7 @@ export async function VersionsTab({
             <PaginationItem>
               <PaginationPrevious asChild>
                 <Link
+                  scroll={false}
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions${versionPage > 1 ? `&versionPage=${versionPage - 1}` : ''}`}
                   className={cn({
                     ['pointer-events-none opacity-50']: versionPage <= 1,
@@ -144,6 +145,7 @@ export async function VersionsTab({
                 <PaginationItem key={value}>
                   <PaginationLink isActive={versionPage === value} asChild>
                     <Link
+                      scroll={false}
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions&versionPage=${value}`}>
                       {value}
                     </Link>
@@ -154,6 +156,7 @@ export async function VersionsTab({
             <PaginationItem>
               <PaginationNext asChild>
                 <Link
+                  scroll={false}
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions${versionPage < totalVersionPages ? `&versionPage=${versionPage + 1}` : ''}`}
                   className={cn({
                     ['pointer-events-none opacity-50']:

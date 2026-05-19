@@ -3,6 +3,7 @@ import {Suspense} from 'react';
 import {Download, FileText} from 'lucide-react';
 import {notFound} from 'next/navigation';
 import {SUBAPP_CODES} from '@/constants';
+import {getLoginURL} from '@/utils/url';
 import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constant/route-types';
 import {MARKETPLACE_TYPE} from '../../common/constant/marketplace-types';
 import {formatNumber} from '@/locale/server/formatters';
@@ -355,9 +356,16 @@ export default async function ProductPage(props: {
               <ReviewsTab
                 product={product}
                 workspaceURI={workspaceURI}
+                workspaceURL={workspaceURL}
                 tenantId={tenantId}
                 client={client}
                 reviewPage={reviewPage}
+                user={auth.user}
+                loginHref={getLoginURL({
+                  callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews`,
+                  workspaceURI,
+                  tenant: tenantId,
+                })}
               />
             )}
             {currentTab === ProductTab.Support && (

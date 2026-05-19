@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {Star, ChevronLeft, ChevronRight} from 'lucide-react';
 import {Rating} from '../rating';
 import {SUBAPP_CODES} from '@/constants';
+import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getSkip, getPaginationButtons} from '@/utils/pagination';
 import {
@@ -14,39 +15,62 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
-import {Avatar, AvatarImage} from '@/ui/components/avatar';
+import {ReviewerAvatar} from '../reviewer-avatar';
 import {
   findProductReviews,
+  findMyReview,
+  findProductVersions,
   type SingleProduct,
   type ListReview,
 } from '../../../orm/orm';
 import {ClientDate} from '../client-date';
+import {YourReviewCard} from '../your-review-card';
 import type {Client} from '@/goovee/.generated/client';
+import type {User} from '@/types';
 
 interface ReviewsTabProps {
   product: SingleProduct;
   workspaceURI: string;
+  workspaceURL: string;
   tenantId: string;
   client: Client;
   reviewPage: number;
+  user?: User;
+  loginHref: string;
 }
 
 export async function ReviewsTab({
   product,
   workspaceURI,
+  workspaceURL,
   tenantId,
   client,
   reviewPage,
+  user,
+  loginHref,
 }: ReviewsTabProps) {
   const REVIEWS_PAGE_SIZE = 4;
 
-  // Fetch paginated reviews
-  const reviewsResult = await findProductReviews({
-    productId: product.id,
-    client,
-    take: REVIEWS_PAGE_SIZE,
-    skip: getSkip(REVIEWS_PAGE_SIZE, reviewPage),
-  });
+  // Fetch paginated reviews (excluding the caller's own — that's rendered
+  // separately in the "Your review" card above the list), the caller's
+  // review, and published versions (for the version select).
+  const [visibleReviews, myReview, publishedVersions] = await Promise.all([
+    findProductReviews({
+      productId: product.id,
+      client,
+      take: REVIEWS_PAGE_SIZE,
+      skip: getSkip(REVIEWS_PAGE_SIZE, reviewPage),
+      where: user ? {author: {id: {ne: user.id}}} : undefined,
+    }),
+    user
+      ? findMyReview({productId: product.id, userId: user.id, client})
+      : null,
+    findProductVersions({
+      productId: product.id,
+      client,
+      take: 50,
+    }),
+  ]);
 
   const totalReviewCount = product.ratingCount || 0;
   const totalReviewPages = Math.ceil(totalReviewCount / REVIEWS_PAGE_SIZE);
@@ -84,32 +108,29 @@ export async function ReviewsTab({
       : 0;
   };
 
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return '?';
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const getAvatarColor = (initials: string) => {
-    const colors = [
-      'bg-yellow-100',
-      'bg-blue-100',
-      'bg-green-100',
-      'bg-pink-100',
-      'bg-purple-100',
-      'bg-orange-100',
-    ];
-    return colors[initials.charCodeAt(0) % colors.length];
-  };
+  const yourReviewCard = (
+    <YourReviewCard
+      productId={product.id}
+      workspaceURL={workspaceURL}
+      user={user}
+      loginHref={loginHref}
+      tenantId={tenantId}
+      initial={myReview ? clone(myReview) : null}
+      versions={publishedVersions.map(v => ({
+        id: v.id,
+        versionNumber: v.versionNumber,
+      }))}
+      defaultVersionId={product.currentVersion?.id ?? undefined}
+    />
+  );
 
   if (totalReviewCount === 0) {
     return (
-      <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">No reviews yet</p>
+      <div className="space-y-6">
+        {yourReviewCard}
+        <div className="text-center py-12 bg-card rounded-lg border border-border">
+          <p className="text-muted-foreground">No reviews yet</p>
+        </div>
       </div>
     );
   }
@@ -156,34 +177,17 @@ export async function ReviewsTab({
         </div>
       </div>
 
-      {/* Reviews List */}
+      {yourReviewCard}
+
+      {/* Reviews List (excludes the caller's own) */}
       <div className="space-y-4">
-        {reviewsResult.map((review: ListReview) => {
-          const initials = getInitials(review.author.simpleFullName);
-          const avatarBgColor = getAvatarColor(initials);
-          const hasImage = review.author.picture && review.author.picture.id;
+        {visibleReviews.map((review: ListReview) => {
           return (
             <div
               key={review.id}
               className="bg-card rounded-lg border border-border p-6 space-y-3">
               <div className="flex items-start gap-3">
-                {hasImage ? (
-                  <Avatar className="rounded-full h-10 w-10 flex-shrink-0">
-                    <AvatarImage
-                      src={`/api/tenant/${tenantId}/partner/image/${review.author.picture?.id}`}
-                      alt={review.author.simpleFullName || 'Reviewer'}
-                      size={40}
-                    />
-                  </Avatar>
-                ) : (
-                  <div
-                    className={cn(
-                      'rounded-full h-10 w-10 flex items-center justify-center font-semibold text-sm flex-shrink-0',
-                      avatarBgColor,
-                    )}>
-                    {initials}
-                  </div>
-                )}
+                <ReviewerAvatar partner={review.author} tenantId={tenantId} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-foreground text-sm">
@@ -224,6 +228,7 @@ export async function ReviewsTab({
             <PaginationItem>
               <PaginationPrevious asChild>
                 <Link
+                  scroll={false}
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage > 1 ? `&reviewPage=${reviewPage - 1}` : ''}`}
                   className={cn({
                     ['pointer-events-none opacity-50']: reviewPage <= 1,
@@ -248,6 +253,7 @@ export async function ReviewsTab({
                 <PaginationItem key={value}>
                   <PaginationLink isActive={reviewPage === value} asChild>
                     <Link
+                      scroll={false}
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews&reviewPage=${value}`}>
                       {value}
                     </Link>
@@ -258,6 +264,7 @@ export async function ReviewsTab({
             <PaginationItem>
               <PaginationNext asChild>
                 <Link
+                  scroll={false}
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage < totalReviewPages ? `&reviewPage=${reviewPage + 1}` : ''}`}
                   className={cn({
                     ['pointer-events-none opacity-50']:

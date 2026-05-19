@@ -345,6 +345,32 @@ export async function findProductReviews({
   return reviews;
 }
 
+export async function findMyReview({
+  productId,
+  userId,
+  client,
+}: {
+  productId: ID;
+  userId: ID;
+  client: Client;
+}) {
+  return client.aOSMarketplaceReview.findOne({
+    where: {product: {id: productId}, author: {id: userId}},
+    select: {
+      id: true,
+      version: true,
+      rating: true,
+      reviewComment: true,
+      createdOn: true,
+      updatedOn: true,
+      author: {id: true, simpleFullName: true, picture: {id: true}},
+      reviewedVersion: {id: true, versionNumber: true},
+    },
+  });
+}
+
+export type MyReview = NonNullable<Awaited<ReturnType<typeof findMyReview>>>;
+
 // ---- CREATE PRODUCT ---- //
 
 export async function createProduct(

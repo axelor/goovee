@@ -28,24 +28,41 @@ import type {Cloned} from '@/types/util';
 import {findMyProductWithVersions} from '../orm/orm';
 import type {MyProductWithVersions} from '../orm/orm';
 import type {Client} from '@/goovee/.generated/client';
+import {BigDecimal} from '@goovee/orm';
 import {
   productSchema,
   versionSchema,
   MAX_BUNDLE_SIZE,
 } from '../ui/components/product-form/schema';
 import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
+import {
+  saveReviewSchema,
+  deleteReviewSchema,
+  type SaveReviewInput,
+  type DeleteReviewInput,
+} from '../constant/review';
 
-export async function loadMyProductForEdit({
-  productId,
-  workspaceURL,
-}: {
-  productId: string;
-  workspaceURL: string;
-}): ActionResponse<Cloned<MyProductWithVersions>> {
+const loadMyProductForEditSchema = z.object({
+  productId: z.string().min(1),
+  workspaceURL: z.string().min(1),
+});
+type LoadMyProductForEditInput = z.infer<typeof loadMyProductForEditSchema>;
+
+export async function loadMyProductForEdit(
+  input: LoadMyProductForEditInput,
+): ActionResponse<Cloned<MyProductWithVersions>> {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }
+  const parsed = loadMyProductForEditSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      error: true,
+      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+    };
+  }
+  const {productId, workspaceURL} = parsed.data;
 
   const {error, auth} = await ensureAuth(workspaceURL, tenantId);
   if (error || !auth.user) {
@@ -334,6 +351,168 @@ function slugify(value: string) {
       .replace(/^-+|-+$/g, '')
       .slice(0, 80) || `product-${Date.now()}`
   );
+}
+
+// ---- SAVE / DELETE REVIEW ---- //
+
+async function recomputeProductRating(client: Client, productId: string) {
+  const agg = await client.aOSMarketplaceReview.aggregate({
+    count: {id: true},
+    avg: {rating: true},
+    where: {product: {id: productId}},
+  });
+  const count = Number(agg[0]?.count.id ?? 0);
+  const average = Number(agg[0]?.avg.rating ?? 0);
+  const current = await client.aOSProduct.findOne({
+    where: {id: productId},
+    select: {id: true, version: true},
+  });
+  if (!current) return;
+  await client.aOSProduct.update({
+    data: {
+      id: productId,
+      version: current.version,
+      averageRating: new BigDecimal(count > 0 ? average.toString() : '0'),
+      ratingCount: count,
+    },
+    select: {id: true},
+  });
+}
+
+export async function saveReview(
+  input: SaveReviewInput,
+): ActionResponse<{reviewId: string}> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+  const parsed = saveReviewSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      error: true,
+      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+    };
+  }
+  const payload = parsed.data;
+  const {error, auth} = await ensureAuth(payload.workspaceURL, tenantId);
+  if (error || !auth.user) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+  const {client} = auth.tenant;
+
+  // Ensure the product is visible to this user.
+  const product = await findProductAccess({
+    recordId: payload.productId,
+    client,
+    workspace: auth.workspace,
+    select: {id: true},
+  });
+  if (!product) {
+    return {error: true, message: await t('Product not found')};
+  }
+
+  // If a version is being attached, verify it belongs to this product —
+  // the UI restricts the dropdown, but a hand-crafted request shouldn't be
+  // able to link a review to an unrelated version.
+  if (payload.reviewedVersionId) {
+    const matchingVersion = await client.aOSMarketplaceProductVersion.findOne({
+      where: {
+        id: payload.reviewedVersionId,
+        product: {id: payload.productId},
+      },
+      select: {id: true},
+    });
+    if (!matchingVersion) {
+      return {error: true, message: await t('Invalid version')};
+    }
+  }
+
+  try {
+    const existing = await client.aOSMarketplaceReview.findOne({
+      where: {product: {id: payload.productId}, author: {id: auth.user.id}},
+      select: {id: true, version: true},
+    });
+
+    let reviewId: string;
+    const reviewedVersion = payload.reviewedVersionId
+      ? {select: {id: payload.reviewedVersionId}}
+      : undefined;
+
+    if (existing) {
+      await client.aOSMarketplaceReview.update({
+        data: {
+          id: existing.id,
+          version: existing.version,
+          rating: payload.rating,
+          reviewComment: payload.reviewComment ?? null,
+          ...(reviewedVersion && {reviewedVersion}),
+        },
+        select: {id: true},
+      });
+      reviewId = existing.id;
+    } else {
+      const created = await client.aOSMarketplaceReview.create({
+        data: {
+          product: {select: {id: payload.productId}},
+          author: {select: {id: auth.user.id}},
+          rating: payload.rating,
+          reviewComment: payload.reviewComment ?? null,
+          ...(reviewedVersion && {reviewedVersion}),
+        },
+        select: {id: true},
+      });
+      reviewId = created.id;
+    }
+
+    await recomputeProductRating(client, payload.productId);
+    return {success: true, data: {reviewId}};
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : await t('An error occurred');
+    return {error: true, message};
+  }
+}
+
+export async function deleteReview(
+  input: DeleteReviewInput,
+): ActionResponse<true> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+  const parsed = deleteReviewSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      error: true,
+      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+    };
+  }
+  const {productId, workspaceURL} = parsed.data;
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error || !auth.user) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+  const {client} = auth.tenant;
+
+  try {
+    const existing = await client.aOSMarketplaceReview.findOne({
+      where: {product: {id: productId}, author: {id: auth.user.id}},
+      select: {id: true, version: true},
+    });
+    if (!existing) {
+      return {error: true, message: await t('No review to delete')};
+    }
+    await client.aOSMarketplaceReview.delete({
+      id: existing.id,
+      version: existing.version,
+    });
+    await recomputeProductRating(client, productId);
+    return {success: true, data: true};
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : await t('An error occurred');
+    return {error: true, message};
+  }
 }
 
 // ---- VALIDATION SCHEMAS ---- //
