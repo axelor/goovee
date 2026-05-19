@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import {i18n} from '@/locale';
 import {Alert, AlertDescription, AlertTitle} from '@/ui/components/alert';
-import {Badge} from '@/ui/components/badge';
 import {Button} from '@/ui/components/button';
 import {Input} from '@/ui/components/input';
 import {RichTextEditor} from '@/ui/components';
@@ -248,7 +247,7 @@ export function VersionForm({
 
           <ReviewStatusAlert
             requiresReview={requiresReview}
-            isPublished={isPublished}
+            currentStatus={current?.statusSelect ?? null}
           />
 
           <div className="overflow-hidden">
@@ -275,18 +274,6 @@ export function VersionForm({
                     </FormItem>
                   )}
                 />
-                {current && (
-                  <Badge
-                    variant={
-                      current.statusSelect ===
-                      MARKETPLACE_VERSION_STATUS.PUBLISHED
-                        ? 'success'
-                        : 'secondary'
-                    }
-                    className="h-9 self-end capitalize">
-                    {i18n.tattr(current.statusSelect ?? '')}
-                  </Badge>
-                )}
               </div>
 
               <FormField
@@ -471,20 +458,66 @@ export function VersionForm({
 
 function ReviewStatusAlert({
   requiresReview,
-  isPublished,
+  currentStatus,
 }: {
   requiresReview: boolean;
-  isPublished: boolean;
+  /** null for an unsaved new version. */
+  currentStatus: string | null;
 }) {
-  if (isPublished) {
+  // Rejected or unpublished — saving brings the version back into circulation,
+  // either directly or via review depending on the workspace flag.
+  if (
+    currentStatus === MARKETPLACE_VERSION_STATUS.REJECTED ||
+    currentStatus === MARKETPLACE_VERSION_STATUS.UNPUBLISHED
+  ) {
+    const title =
+      currentStatus === MARKETPLACE_VERSION_STATUS.REJECTED
+        ? i18n.t('Rejected')
+        : i18n.t('Unpublished');
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{title}</AlertTitle>
+        <AlertDescription>
+          {requiresReview
+            ? i18n.t(
+                'Saving will resubmit this version for review. It becomes visible once approved.',
+              )
+            : i18n.t(
+                'Saving will publish this version. Changes are visible to the community immediately.',
+              )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // In review — independent of workspace flag, the version is already queued.
+  if (currentStatus === MARKETPLACE_VERSION_STATUS.IN_REVIEW) {
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{i18n.t('In review')}</AlertTitle>
+        <AlertDescription>
+          {i18n.t(
+            'This version is awaiting approval. Saving will requeue it for review.',
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Published — editing a live version.
+  if (currentStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED) {
     if (requiresReview) {
       return (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>{i18n.t('Editing will unlist this version')}</AlertTitle>
+          <AlertTitle>
+            {i18n.t('Published · editing sends back for review')}
+          </AlertTitle>
           <AlertDescription>
             {i18n.t(
-              'Saving will move this version to "in review" and remove it from public listings. If this is your only published version, the product will be hidden until a new version is approved.',
+              'Saving moves this version to "in review" and unlists it. If this is your only published version, the product itself will be hidden from listings until a new version is approved.',
             )}
           </AlertDescription>
         </Alert>
@@ -493,24 +526,53 @@ function ReviewStatusAlert({
     return (
       <Alert variant="primary">
         <Info className="h-4 w-4" />
-        <AlertTitle>{i18n.t('Ready to publish')}</AlertTitle>
+        <AlertTitle>{i18n.t('Published · live')}</AlertTitle>
         <AlertDescription>
           {i18n.t(
-            'Changes are published immediately and visible to the community.',
+            'Saving will update the published version. Changes are visible to the community immediately.',
           )}
         </AlertDescription>
       </Alert>
     );
   }
 
-  if (requiresReview) {
+  // Draft — editing an existing draft.
+  if (currentStatus === MARKETPLACE_VERSION_STATUS.DRAFT) {
+    if (requiresReview) {
+      return (
+        <Alert variant="primary">
+          <Info className="h-4 w-4" />
+          <AlertTitle>{i18n.t('Draft · review required')}</AlertTitle>
+          <AlertDescription>
+            {i18n.t(
+              'Keep saving as a draft, or submit for review to make this version live.',
+            )}
+          </AlertDescription>
+        </Alert>
+      );
+    }
     return (
-      <Alert variant="warning">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>{i18n.t('Review required before publishing')}</AlertTitle>
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{i18n.t('Draft')}</AlertTitle>
         <AlertDescription>
           {i18n.t(
-            'This version will be sent for review. It will become visible to the community once approved.',
+            'Keep saving as a draft, or publish to make this version live.',
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // New version (no saved state yet).
+  if (requiresReview) {
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{i18n.t('New version · review required')}</AlertTitle>
+        <AlertDescription>
+          {i18n.t(
+            'Save as a draft, or submit for review. The version becomes visible once approved.',
           )}
         </AlertDescription>
       </Alert>
@@ -519,10 +581,10 @@ function ReviewStatusAlert({
   return (
     <Alert variant="primary">
       <Info className="h-4 w-4" />
-      <AlertTitle>{i18n.t('Ready to publish')}</AlertTitle>
+      <AlertTitle>{i18n.t('New version')}</AlertTitle>
       <AlertDescription>
         {i18n.t(
-          'This version will be published immediately and visible to the community.',
+          'Save as a draft, or publish to make this version live immediately.',
         )}
       </AlertDescription>
     </Alert>
