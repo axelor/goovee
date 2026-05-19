@@ -210,6 +210,8 @@ export function VersionForm({
     !!current?.id &&
     (current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED ||
       current.statusSelect === MARKETPLACE_VERSION_STATUS.IN_REVIEW);
+  // Save-as-draft makes sense for anything that isn't already live or queued.
+  const canSaveAsDraft = !canUnpublish;
 
   // Other published versions the user could promote to currentVersion. Only
   // relevant when unpublishing the version that is currentVersion right now.
@@ -238,7 +240,9 @@ export function VersionForm({
         versionId: current.id,
         productId,
         workspaceURL,
-        newCurrentVersionId: needsReplacement ? replacementVersionId : undefined,
+        newCurrentVersionId: needsReplacement
+          ? replacementVersionId
+          : undefined,
       });
       if (!result.success) {
         toast({variant: 'destructive', title: result.message});
@@ -489,46 +493,38 @@ export function VersionForm({
           )}
         </div>
         <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onCancel}
-          disabled={pending}>
-          {i18n.t('Cancel')}
-        </Button>
-        {isPublished ? (
           <Button
             type="button"
-            disabled={pending || !formState.isDirty}
-            onClick={() => {
-              setValue('statusSelect', MARKETPLACE_VERSION_STATUS.PUBLISHED);
-              submit();
-            }}>
-            {requiresReview ? i18n.t('Submit for review') : i18n.t('Save')}
+            variant="ghost"
+            onClick={onCancel}
+            disabled={pending}>
+            {i18n.t('Cancel')}
           </Button>
-        ) : (
-          <>
+          {canSaveAsDraft && (
             <Button
               type="button"
               variant="outline"
-              disabled={pending}
+              disabled={pending || (!!current?.id && !formState.isDirty)}
               onClick={() => {
                 setValue('statusSelect', MARKETPLACE_VERSION_STATUS.DRAFT);
                 submit();
               }}>
               {i18n.t('Save as draft')}
             </Button>
-            <Button
-              type="button"
-              disabled={pending}
-              onClick={() => {
-                setValue('statusSelect', MARKETPLACE_VERSION_STATUS.PUBLISHED);
-                submit();
-              }}>
-              {requiresReview ? i18n.t('Submit for review') : i18n.t('Publish')}
-            </Button>
-          </>
-        )}
+          )}
+          <Button
+            type="button"
+            disabled={pending || (!!current?.id && !formState.isDirty)}
+            onClick={() => {
+              setValue('statusSelect', MARKETPLACE_VERSION_STATUS.PUBLISHED);
+              submit();
+            }}>
+            {isPublished && !requiresReview
+              ? i18n.t('Save')
+              : requiresReview
+                ? i18n.t('Submit for review')
+                : i18n.t('Publish')}
+          </Button>
         </div>
       </div>
       <AlertDialog open={confirmUnpublish} onOpenChange={setConfirmUnpublish}>
@@ -578,9 +574,7 @@ export function VersionForm({
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={runUnpublish}
-              disabled={
-                pending || (needsReplacement && !replacementVersionId)
-              }>
+              disabled={pending || (needsReplacement && !replacementVersionId)}>
               {i18n.t('Unpublish')}
             </AlertDialogAction>
           </AlertDialogFooter>

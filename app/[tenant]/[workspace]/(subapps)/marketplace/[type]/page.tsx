@@ -128,9 +128,8 @@ export default async function Page(props: {
               ))
         }
         background={
-          (auth.workspace.config.marketplaceHeroOverlayColorSelect as
-            | OverlayColor
-            | null) ?? null
+          (auth.workspace.config
+            .marketplaceHeroOverlayColorSelect as OverlayColor | null) ?? null
         }
         image={
           auth.workspace.config.marketplaceHeroBgImage?.id

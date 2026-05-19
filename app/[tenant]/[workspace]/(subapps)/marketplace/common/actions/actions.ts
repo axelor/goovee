@@ -261,11 +261,34 @@ export async function saveVersion(
         select: {
           id: true,
           version: true,
+          statusSelect: true,
           compatibilitySet: {select: {id: true}},
         },
       });
       if (!current) {
         return {error: true, message: await t('Version not found')};
+      }
+      // Demotion to draft is only allowed from states where the author is
+      // iterating: draft (stay), rejected (fix and resubmit), unpublished
+      // (rework and resubmit). Published and in-review must go through the
+      // explicit Unpublish flow first.
+      if (payload.statusSelect === MARKETPLACE_VERSION_STATUS.DRAFT) {
+        if (current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED) {
+          return {
+            error: true,
+            message: await t(
+              'A published version cannot be saved as a draft. Unpublish it first.',
+            ),
+          };
+        }
+        if (current.statusSelect === MARKETPLACE_VERSION_STATUS.IN_REVIEW) {
+          return {
+            error: true,
+            message: await t(
+              'An in-review version cannot be saved as a draft. Unpublish it first.',
+            ),
+          };
+        }
       }
       const existingCompat = (current.compatibilitySet ?? []).map(c => c.id);
       await client.aOSMarketplaceProductVersion.update({
@@ -298,6 +321,7 @@ export async function saveVersion(
           bundleFile: {select: {id: uploadedFileId}},
           compatibilitySet: {select: compatRefs},
           product: {select: {id: payload.productId}},
+          dateOfSubmission: new Date(),
           ...(effectiveStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED && {
             dateOfApproval: new Date(),
           }),
@@ -366,8 +390,7 @@ export async function unpublishVersion(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {versionId, productId, workspaceURL, newCurrentVersionId} =
-    parsed.data;
+  const {versionId, productId, workspaceURL, newCurrentVersionId} = parsed.data;
 
   const {error, auth} = await ensureAuth(workspaceURL, tenantId);
   if (error || !auth.user) {
@@ -399,7 +422,9 @@ export async function unpublishVersion(
   ) {
     return {
       error: true,
-      message: await t('Only published or in-review versions can be unpublished'),
+      message: await t(
+        'Only published or in-review versions can be unpublished',
+      ),
     };
   }
 
