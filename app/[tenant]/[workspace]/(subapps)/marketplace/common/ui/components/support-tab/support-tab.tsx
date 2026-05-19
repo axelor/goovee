@@ -1,22 +1,41 @@
 import Link from 'next/link';
 import {FileText, ExternalLink, User, AlertCircle} from 'lucide-react';
 import {Button} from '@/ui/components';
+import {t} from '@/locale/server';
 import type {SingleProduct} from '../../../orm/orm';
 
 interface SupportTabProps {
   product: SingleProduct;
 }
 
-export function SupportTab({product}: SupportTabProps) {
+export async function SupportTab({product}: SupportTabProps) {
   const hasAnyLink =
     product.documentationUrl ||
     product.supportIssuesUrl ||
     product.supportContactUrl;
 
+  const [
+    noSupportLabel,
+    needHelpLabel,
+    needHelpDescLabel,
+    readDocsLabel,
+    openIssuesLabel,
+    contactAuthorLabel,
+    reportProblemLabel,
+  ] = await Promise.all([
+    t('No support links available'),
+    t('Need help?'),
+    t('Get in touch with the maintainer or browse the documentation.'),
+    t('Read documentation'),
+    t('Open issues on Git'),
+    t('Contact author'),
+    t('Report a problem'),
+  ]);
+
   if (!hasAnyLink) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">No support links available</p>
+        <p className="text-muted-foreground">{noSupportLabel}</p>
       </div>
     );
   }
@@ -25,10 +44,10 @@ export function SupportTab({product}: SupportTabProps) {
     <div className="space-y-6">
       <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-6">
         <div className="space-y-3">
-          <h3 className="text-xl font-semibold text-foreground">Need help?</h3>
-          <p className="text-sm text-muted-foreground">
-            Get in touch with the maintainer or browse the documentation.
-          </p>
+          <h3 className="text-xl font-semibold text-foreground">
+            {needHelpLabel}
+          </h3>
+          <p className="text-sm text-muted-foreground">{needHelpDescLabel}</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -42,7 +61,7 @@ export function SupportTab({product}: SupportTabProps) {
                 target="_blank"
                 rel="noopener noreferrer">
                 <FileText size={16} />
-                Read documentation
+                {readDocsLabel}
               </Link>
             </Button>
           )}
@@ -57,7 +76,7 @@ export function SupportTab({product}: SupportTabProps) {
                 target="_blank"
                 rel="noopener noreferrer">
                 <ExternalLink size={16} />
-                Open issues on Git
+                {openIssuesLabel}
               </Link>
             </Button>
           )}
@@ -72,7 +91,7 @@ export function SupportTab({product}: SupportTabProps) {
                 target="_blank"
                 rel="noopener noreferrer">
                 <User size={16} />
-                Contact author
+                {contactAuthorLabel}
               </Link>
             </Button>
           )}
@@ -87,7 +106,7 @@ export function SupportTab({product}: SupportTabProps) {
                 target="_blank"
                 rel="noopener noreferrer">
                 <AlertCircle size={16} />
-                Report a problem
+                {reportProblemLabel}
               </Link>
             </Button>
           )}

@@ -270,7 +270,7 @@ export function VersionForm({
                         : 'secondary'
                     }
                     className="h-9 self-end capitalize">
-                    {current.statusSelect}
+                    {i18n.tattr(current.statusSelect ?? '')}
                   </Badge>
                 )}
               </div>

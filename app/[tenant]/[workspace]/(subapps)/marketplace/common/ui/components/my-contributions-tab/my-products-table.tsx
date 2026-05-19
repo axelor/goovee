@@ -98,7 +98,9 @@ export function MyProductsTable({
               ? 'bg-success/15 text-success-dark'
               : 'bg-muted text-muted-foreground',
           )}>
-          {product.currentVersion?.statusSelect || '—'}
+          {product.currentVersion?.statusSelect
+            ? i18n.tattr(product.currentVersion.statusSelect)
+            : '—'}
         </span>
       ),
     },
@@ -135,7 +137,7 @@ export function MyProductsTable({
     return (
       <div className="bg-card rounded-lg border border-border px-6 py-12 text-center">
         <div className="text-sm text-muted-foreground">
-          No {title.toLowerCase()} yet
+          {i18n.t('No {0} yet', title.toLowerCase())}
         </div>
       </div>
     );

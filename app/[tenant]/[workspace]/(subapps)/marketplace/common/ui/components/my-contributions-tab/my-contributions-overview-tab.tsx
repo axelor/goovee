@@ -1,5 +1,6 @@
 import {Skeleton} from '@/ui/components/skeleton';
 import {Swipe} from '../swipe/swipe';
+import {t} from '@/locale/server';
 
 const stats = [
   {
@@ -96,7 +97,19 @@ const recentActivity = [
   },
 ];
 
-export function OverviewTab() {
+export async function OverviewTab() {
+  const [
+    revenueHeadingLabel,
+    viewDetailsLabel,
+    pendingActionsLabel,
+    recentActivityLabel,
+  ] = await Promise.all([
+    t('Revenue · last 12 months'),
+    t('View details →'),
+    t('Pending actions'),
+    t('Recent activity'),
+  ]);
+
   return (
     <div className="space-y-6">
       {/* Stats Carousel */}
@@ -128,10 +141,10 @@ export function OverviewTab() {
         <div className="lg:col-span-2 bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-foreground">
-              Revenue · last 12 months
+              {revenueHeadingLabel}
             </h3>
             <button className="text-sm text-muted-foreground hover:text-foreground">
-              View details →
+              {viewDetailsLabel}
             </button>
           </div>
           <Skeleton className="w-full h-64 rounded-lg" />
@@ -140,7 +153,7 @@ export function OverviewTab() {
         {/* Pending Actions */}
         <div className="bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
           <h3 className="text-xl font-semibold text-foreground">
-            Pending actions
+            {pendingActionsLabel}
           </h3>
           <div className="space-y-3">
             {pendingActions.map(action => (
@@ -173,7 +186,7 @@ export function OverviewTab() {
       {/* Recent Activity */}
       <div className="bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
         <h3 className="text-xl font-semibold text-foreground">
-          Recent activity
+          {recentActivityLabel}
         </h3>
         <div className="space-y-4">
           {recentActivity.map(activity => (

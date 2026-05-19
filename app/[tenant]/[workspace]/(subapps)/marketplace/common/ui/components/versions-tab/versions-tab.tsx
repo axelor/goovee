@@ -19,6 +19,7 @@ import {
   type SingleProduct,
   type ListProductVersion,
 } from '../../../orm/orm';
+import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
 
 interface VersionsTabProps {
@@ -48,10 +49,28 @@ export async function VersionsTab({
   const totalVersionCount = getTotal(versionsResult);
   const totalVersionPages = Math.ceil(totalVersionCount / VERSIONS_PAGE_SIZE);
 
+  const [
+    noVersionsLabel,
+    latestLabel,
+    compatibleLabel,
+    noCompatibleLabel,
+    downloadLabel,
+    previousLabel,
+    nextLabel,
+  ] = await Promise.all([
+    t('No versions available'),
+    t('Latest'),
+    t('Compatible:'),
+    t('No compatible versions specified'),
+    t('Download'),
+    t('Previous'),
+    t('Next'),
+  ]);
+
   if (totalVersionCount === 0) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">No versions available</p>
+        <p className="text-muted-foreground">{noVersionsLabel}</p>
       </div>
     );
   }
@@ -74,14 +93,14 @@ export async function VersionsTab({
                   {version.versionNumber}
                 </h3>
                 {version.id === currentVersionId && (
-                  <Badge variant="success">Latest</Badge>
+                  <Badge variant="success">{latestLabel}</Badge>
                 )}
               </div>
               {version.compatibilitySet &&
               version.compatibilitySet.length > 0 ? (
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   <span className="text-xs text-muted-foreground">
-                    Compatible:
+                    {compatibleLabel}
                   </span>
                   {version.compatibilitySet.map(axelorVersion => (
                     <Badge
@@ -94,7 +113,7 @@ export async function VersionsTab({
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground mt-1">
-                  No compatible versions specified
+                  {noCompatibleLabel}
                 </p>
               )}
             </div>
@@ -107,7 +126,7 @@ export async function VersionsTab({
                 href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
                 download>
                 <Download size={16} />
-                Download
+                {downloadLabel}
               </a>
             </Button>
           </div>
@@ -126,7 +145,7 @@ export async function VersionsTab({
                     ['pointer-events-none opacity-50']: versionPage <= 1,
                   })}>
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">Previous</span>
+                  <span className="sr-only">{previousLabel}</span>
                 </Link>
               </PaginationPrevious>
             </PaginationItem>
@@ -162,7 +181,7 @@ export async function VersionsTab({
                     ['pointer-events-none opacity-50']:
                       versionPage >= totalVersionPages,
                   })}>
-                  <span className="sr-only">Next</span>
+                  <span className="sr-only">{nextLabel}</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </PaginationNext>

@@ -25,6 +25,7 @@ import {
 } from '../../../orm/orm';
 import {ClientDate} from '../client-date';
 import {YourReviewCard} from '../your-review-card';
+import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
 
@@ -74,6 +75,16 @@ export async function ReviewsTab({
 
   const totalReviewCount = product.ratingCount || 0;
   const totalReviewPages = Math.ceil(totalReviewCount / REVIEWS_PAGE_SIZE);
+
+  const [noReviewsLabel, reviewCountLabel, previousLabel, nextLabel] =
+    await Promise.all([
+      t('No reviews yet'),
+      totalReviewCount === 1
+        ? t('1 review')
+        : t('{0} reviews', String(totalReviewCount)),
+      t('Previous'),
+      t('Next'),
+    ]);
 
   // Calculate rating distribution using aggregate
   const ratingAggregates = await client.aOSMarketplaceReview.aggregate({
@@ -129,7 +140,7 @@ export async function ReviewsTab({
       <div className="space-y-6">
         {yourReviewCard}
         <div className="text-center py-12 bg-card rounded-lg border border-border">
-          <p className="text-muted-foreground">No reviews yet</p>
+          <p className="text-muted-foreground">{noReviewsLabel}</p>
         </div>
       </div>
     );
@@ -146,9 +157,7 @@ export async function ReviewsTab({
               {(Number(product.averageRating) || 0).toFixed(1)}
             </div>
             <Rating value={product.averageRating} showValue={false} size={16} />
-            <p className="text-sm text-muted-foreground">
-              {totalReviewCount} {totalReviewCount === 1 ? 'review' : 'reviews'}
-            </p>
+            <p className="text-sm text-muted-foreground">{reviewCountLabel}</p>
           </div>
 
           {/* Right: Rating Breakdown */}
@@ -234,7 +243,7 @@ export async function ReviewsTab({
                     ['pointer-events-none opacity-50']: reviewPage <= 1,
                   })}>
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">Previous</span>
+                  <span className="sr-only">{previousLabel}</span>
                 </Link>
               </PaginationPrevious>
             </PaginationItem>
@@ -270,7 +279,7 @@ export async function ReviewsTab({
                     ['pointer-events-none opacity-50']:
                       reviewPage >= totalReviewPages,
                   })}>
-                  <span className="sr-only">Next</span>
+                  <span className="sr-only">{nextLabel}</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </PaginationNext>

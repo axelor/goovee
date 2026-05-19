@@ -7,13 +7,15 @@ import {InnerHTML} from '@/ui/components/inner-html';
 import type {ListProduct} from '../../../orm/orm';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constant/gradients';
 import {ProductIcon} from '../product-icon';
+import {t} from '@/locale/server';
 
 export interface ProductCardProps {
   product: ListProduct;
   workspaceURI: string;
 }
 
-export function ProductCard({product, workspaceURI}: ProductCardProps) {
+export async function ProductCard({product, workspaceURI}: ProductCardProps) {
+  const freeLabel = await t('Free');
   const {
     slug,
     name,
@@ -36,7 +38,9 @@ export function ProductCard({product, workspaceURI}: ProductCardProps) {
           className={`h-[140px] bg-gradient-to-br ${bgGradient} flex items-center justify-center relative`}>
           <ProductIcon code={marketplaceIconCode} className="w-16 h-16" />
           <div className="absolute top-3 right-3 bg-success-light px-2.5 py-1 rounded-full">
-            <span className="text-xs font-medium text-success">Free</span>
+            <span className="text-xs font-medium text-success">
+              {freeLabel}
+            </span>
           </div>
         </div>
 

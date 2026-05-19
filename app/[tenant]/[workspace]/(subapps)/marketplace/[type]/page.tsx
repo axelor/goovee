@@ -1,5 +1,5 @@
 import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
-import {t} from '@/locale/server';
+import {t, tattr} from '@/locale/server';
 import {HeroSearch} from '@/ui/components';
 import {
   Pagination,
@@ -103,6 +103,10 @@ export default async function Page(props: {
   const totalCount = getTotal(products);
   const totalPages = getPages(products, limit);
 
+  const categoryNames = await Promise.all(
+    categories.map((cat: ListCategory) => tattr(cat.name ?? '')),
+  );
+
   return (
     <>
       <HeroSearch
@@ -141,7 +145,7 @@ export default async function Page(props: {
             </button>
           </Link>
 
-          {categories.map((cat: ListCategory) => (
+          {categories.map((cat: ListCategory, idx: number) => (
             <Link
               key={cat.id}
               href={{
@@ -157,7 +161,7 @@ export default async function Page(props: {
                     ? 'bg-foreground text-background'
                     : 'bg-background text-foreground border border-border hover:border-foreground',
                 )}>
-                {cat.name}
+                {categoryNames[idx]}
               </button>
             </Link>
           ))}
@@ -165,8 +169,9 @@ export default async function Page(props: {
 
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="text-sm text-muted-foreground">
-            {totalCount}{' '}
-            {totalCount === 1 ? await t('result') : await t('results')}
+            {totalCount === 1
+              ? await t('1 result')
+              : await t('{0} results', String(totalCount))}
           </div>
           <ProductSortSelect currentSort={sort || 'popular'} />
         </div>
@@ -203,7 +208,7 @@ export default async function Page(props: {
                       query: {...searchParams, page: +page - 1},
                     }}>
                     <ChevronLeft className="h-4 w-4" />
-                    <span className="sr-only">Previous</span>
+                    <span className="sr-only">{await t('Previous')}</span>
                   </Link>
                 </PaginationPrevious>
               </PaginationItem>
@@ -244,7 +249,7 @@ export default async function Page(props: {
                       pathname: listingHref,
                       query: {...searchParams, page: +page + 1},
                     }}>
-                    <span className="sr-only">Next</span>
+                    <span className="sr-only">{await t('Next')}</span>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </PaginationNext>

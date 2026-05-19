@@ -34,7 +34,7 @@ function Menu({icon, color}: {icon: string; color?: string}) {
     <>
       <button
         type="button"
-        aria-label="Open menu"
+        aria-label={i18n.t('Open menu')}
         onClick={openSidebar}
         className="cursor-pointer">
         <Icon

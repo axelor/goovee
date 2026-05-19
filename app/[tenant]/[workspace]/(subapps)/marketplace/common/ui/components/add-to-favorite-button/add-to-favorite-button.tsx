@@ -7,6 +7,7 @@ import {Button} from '@/ui/components';
 import {useToast} from '@/ui/hooks/use-toast';
 import {addProductToFavorites} from '../../../actions/actions';
 import {isRedirectError} from 'next/dist/client/components/redirect-error';
+import {i18n} from '@/locale';
 
 interface AddToFavoriteButtonProps {
   productId: string;
@@ -40,7 +41,7 @@ export function AddToFavoriteButton({
         setIsFavorite(!isFavorite);
       } else if (result.error) {
         toast({
-          title: 'Error',
+          title: i18n.t('Error'),
           description: result.message,
           variant: 'destructive',
         });
@@ -48,8 +49,8 @@ export function AddToFavoriteButton({
     } catch (error) {
       if (!isRedirectError(error)) {
         toast({
-          title: 'Error',
-          description: 'Failed to update favorite',
+          title: i18n.t('Error'),
+          description: i18n.t('Failed to update favorite'),
           variant: 'destructive',
         });
       }
@@ -69,7 +70,9 @@ export function AddToFavoriteButton({
         size={18}
         className={isFavorite ? 'fill-red-500 text-red-500' : ''}
       />
-      {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+      {isFavorite
+        ? i18n.t('Remove from favorites')
+        : i18n.t('Add to favorites')}
     </Button>
   );
 }

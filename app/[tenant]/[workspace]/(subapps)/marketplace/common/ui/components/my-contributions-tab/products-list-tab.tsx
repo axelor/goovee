@@ -19,6 +19,7 @@ import {
   PaginationEllipsis,
 } from '@/ui/components/pagination';
 import {getPaginationButtons} from '@/utils/pagination';
+import {t} from '@/locale/server';
 
 type ProductsListTabProps = {
   products: ListMyProduct[];
@@ -32,7 +33,7 @@ type ProductsListTabProps = {
   paramName?: string;
 };
 
-export function ProductsListTab({
+export async function ProductsListTab({
   products,
   title,
   workspaceURI,
@@ -43,6 +44,10 @@ export function ProductsListTab({
   totalPages = 1,
   paramName,
 }: ProductsListTabProps) {
+  const [previousLabel, nextLabel] = await Promise.all([
+    t('Previous'),
+    t('Next'),
+  ]);
   return (
     <div className="space-y-6">
       <MyProductsTable
@@ -74,7 +79,7 @@ export function ProductsListTab({
                         [paramName]: Math.max(1, page - 1),
                       },
                     }}>
-                    <span className="sr-only">Previous</span>
+                    <span className="sr-only">{previousLabel}</span>
                     <ChevronLeft className="h-4 w-4" />
                   </Link>
                 </PaginationPrevious>
@@ -124,7 +129,7 @@ export function ProductsListTab({
                         [paramName]: page + 1,
                       },
                     }}>
-                    <span className="sr-only">Next</span>
+                    <span className="sr-only">{nextLabel}</span>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </PaginationNext>

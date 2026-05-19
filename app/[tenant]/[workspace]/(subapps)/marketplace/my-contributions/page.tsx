@@ -19,6 +19,7 @@ import {PublishNewLauncher} from './client-launcher';
 import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
 import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-count-badge';
 import {MyContributionsTab} from '../common/constant/tabs';
+import {t} from '@/locale/server';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -75,6 +76,28 @@ export default async function MyContributionsPage(props: {
   const tabNavLink = (tab: string) =>
     `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions?tab=${tab}`;
 
+  const [
+    marketplaceLabel,
+    myContribLabel,
+    manageDescLabel,
+    overviewLabel,
+    skillsLabel,
+    appsLabel,
+    revenueLabel,
+    profileLabel,
+  ] = await Promise.all([
+    t('Marketplace'),
+    t('My contributions'),
+    t(
+      "Manage the plugins and apps you've published on the Axelor marketplace.",
+    ),
+    t('Overview'),
+    t('Skills'),
+    t('Apps'),
+    t('Revenue'),
+    t('Profile'),
+  ]);
+
   return (
     <div className="min-h-screen container pb-6">
       {/* Breadcrumb */}
@@ -87,14 +110,14 @@ export default async function MyContributionsPage(props: {
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
-                  Marketplace
+                  {marketplaceLabel}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="sm:truncate text-lg font-semibold">
-                My contributions
+                {myContribLabel}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -106,12 +129,9 @@ export default async function MyContributionsPage(props: {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              My contributions
+              {myContribLabel}
             </h1>
-            <p className="text-muted-foreground text-sm">
-              Manage the plugins and apps you've published on the Axelor
-              marketplace.
-            </p>
+            <p className="text-muted-foreground text-sm">{manageDescLabel}</p>
           </div>
           <PublishNewLauncher
             workspaceURI={workspaceURI}
@@ -132,7 +152,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            Overview
+            {overviewLabel}
           </Link>
           <Link
             href={tabNavLink(MyContributionsTab.Skills)}
@@ -141,7 +161,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            Skills (
+            {skillsLabel} (
             <Suspense fallback="...">
               <SkillsCountBadge
                 userId={auth.user.id}
@@ -158,7 +178,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            Apps (
+            {appsLabel} (
             <Suspense fallback="...">
               <AppsCountBadge
                 userId={auth.user.id}
@@ -175,7 +195,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            Revenue
+            {revenueLabel}
           </Link>
           <Link
             href={tabNavLink(MyContributionsTab.Profile)}
@@ -184,7 +204,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            Profile
+            {profileLabel}
           </Link>
         </div>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import {useRouter, useSearchParams} from 'next/navigation';
+import {i18n} from '@/locale';
 
 export interface ProductSortSelectProps {
   currentSort: string;
@@ -28,9 +29,9 @@ export function ProductSortSelect({currentSort}: ProductSortSelectProps) {
         backgroundSize: '1.2em 1.2em',
         paddingRight: '2.5rem',
       }}>
-      <option value="popular">Most popular</option>
-      <option value="newest">Newest</option>
-      <option value="rating">Highest rated</option>
+      <option value="popular">{i18n.t('Most popular')}</option>
+      <option value="newest">{i18n.t('Newest')}</option>
+      <option value="rating">{i18n.t('Highest rated')}</option>
     </select>
   );
 }

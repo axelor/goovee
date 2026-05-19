@@ -6,6 +6,7 @@ import {
 import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
 import {ProductsListTab} from './products-list-tab';
 import {getSkip, getTotal} from '@/utils/pagination';
+import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
 import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../../../utils/auth-helper';
@@ -48,7 +49,7 @@ export async function SkillsTab({
   return (
     <ProductsListTab
       products={skills}
-      title="Skills"
+      title={await t('Skills')}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

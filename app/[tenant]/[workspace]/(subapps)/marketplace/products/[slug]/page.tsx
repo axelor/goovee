@@ -97,6 +97,59 @@ export default async function ProductPage(props: {
   const tabNavLink = (tab: string) =>
     `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=${tab}`;
 
+  const installCountLabel = await t(
+    '{0} installs',
+    await formatNumber(product.installCount || 0),
+  );
+
+  const [
+    freeOpenSourceLabel,
+    byLabel,
+    updatedLabel,
+    downloadZipLabel,
+    documentationLabel,
+    overviewLabel,
+    versionsLabel,
+    reviewsLabel,
+    supportLabel,
+    detailsLabel,
+    versionLabel,
+    publishedLabel,
+    sizeLabel,
+    compatibilityLabel,
+    noCompatibleLabel,
+    categoryLabel,
+    licenseLabel,
+    aboutAuthorLabel,
+    authorLabel,
+    verifiedContributorLabel,
+    viewProfileLabel,
+    notAvailableLabel,
+  ] = await Promise.all([
+    t('Free · Open source'),
+    t('by'),
+    t('Updated'),
+    t('Download ZIP'),
+    t('Documentation'),
+    t('Overview'),
+    t('Versions'),
+    t('Reviews ({0})', String(ratingCount)),
+    t('Support'),
+    t('Details'),
+    t('Version'),
+    t('Published'),
+    t('Size'),
+    t('Compatibility'),
+    t('No compatible versions specified'),
+    t('Category'),
+    t('License'),
+    t('About the author'),
+    t('Author'),
+    t('Verified contributor'),
+    t('View profile'),
+    t('N/A'),
+  ]);
+
   return (
     <div className="min-h-screen">
       {/* Breadcrumb */}
@@ -160,7 +213,7 @@ export default async function ProductPage(props: {
                 {categoryName && (
                   <Badge variant="outline">{categoryName}</Badge>
                 )}
-                <Badge variant="success">Free · Open source</Badge>
+                <Badge variant="success">{freeOpenSourceLabel}</Badge>
                 {product.currentVersion?.versionNumber && (
                   <Badge variant="outline">
                     {product.currentVersion.versionNumber}
@@ -193,7 +246,7 @@ export default async function ProductPage(props: {
               {/* Creator, Rating, Stats */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm pt-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">by</span>
+                  <span className="text-muted-foreground">{byLabel}</span>
                   <span className="font-semibold text-foreground">
                     {product.defaultSupplierPartner?.simpleFullName ||
                       product.defaultSupplierPartner?.name ||
@@ -217,7 +270,7 @@ export default async function ProductPage(props: {
                 <div className="flex items-center gap-1">
                   <Download size={16} className="text-muted-foreground" />
                   <span className="text-muted-foreground">
-                    {formatNumber(product.installCount || 0)} installs
+                    {installCountLabel}
                   </span>
                 </div>
 
@@ -226,7 +279,7 @@ export default async function ProductPage(props: {
                   <ClientDate
                     date={product.currentVersion.dateOfApproval}
                     displayType="relative"
-                    prefix="Updated"
+                    prefix={updatedLabel}
                     lowercase
                   />
                 )}
@@ -248,7 +301,7 @@ export default async function ProductPage(props: {
                   }
                   download>
                   <Download size={18} />
-                  Download ZIP
+                  {downloadZipLabel}
                 </a>
               </Button>
 
@@ -276,7 +329,7 @@ export default async function ProductPage(props: {
                     target="_blank"
                     rel="noopener noreferrer">
                     <FileText size={18} />
-                    Documentation
+                    {documentationLabel}
                   </Link>
                 </Button>
               )}
@@ -296,7 +349,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            Overview
+            {overviewLabel}
           </Link>
           <Link
             href={tabNavLink(ProductTab.Versions)}
@@ -306,7 +359,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            Versions (
+            {versionsLabel} (
             <Suspense fallback="...">
               <VersionCountBadge slug={params.slug} client={client} />
             </Suspense>
@@ -320,7 +373,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            Reviews ({ratingCount})
+            {reviewsLabel}
           </Link>
           <Link
             href={tabNavLink(ProductTab.Support)}
@@ -330,7 +383,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            Support
+            {supportLabel}
           </Link>
         </div>
       </div>
@@ -377,16 +430,22 @@ export default async function ProductPage(props: {
           <div className="space-y-6">
             {/* Details Card */}
             <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-6">
-              <h3 className="text-lg font-bold text-foreground">Details</h3>
+              <h3 className="text-lg font-bold text-foreground">
+                {detailsLabel}
+              </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Version</span>
+                  <span className="text-sm text-muted-foreground">
+                    {versionLabel}
+                  </span>
                   <span className="font-semibold text-foreground">
-                    {product.currentVersion?.versionNumber || 'N/A'}
+                    {product.currentVersion?.versionNumber || notAvailableLabel}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Updated</span>
+                  <span className="text-sm text-muted-foreground">
+                    {updatedLabel}
+                  </span>
                   {product.currentVersion?.dateOfApproval ? (
                     <ClientDate
                       date={product.currentVersion.dateOfApproval}
@@ -395,12 +454,14 @@ export default async function ProductPage(props: {
                       className="font-semibold text-foreground"
                     />
                   ) : (
-                    <span className="font-semibold text-foreground">N/A</span>
+                    <span className="font-semibold text-foreground">
+                      {notAvailableLabel}
+                    </span>
                   )}
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    Published
+                    {publishedLabel}
                   </span>
                   {product.createdOn ? (
                     <ClientDate
@@ -410,12 +471,16 @@ export default async function ProductPage(props: {
                       className="font-semibold text-foreground"
                     />
                   ) : (
-                    <span className="font-semibold text-foreground">N/A</span>
+                    <span className="font-semibold text-foreground">
+                      {notAvailableLabel}
+                    </span>
                   )}
                 </div>
                 {product.currentVersion?.bundleFile?.sizeText && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Size</span>
+                    <span className="text-sm text-muted-foreground">
+                      {sizeLabel}
+                    </span>
                     <span className="font-semibold text-foreground">
                       {product.currentVersion.bundleFile.sizeText}
                     </span>
@@ -423,7 +488,7 @@ export default async function ProductPage(props: {
                 )}
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground block mb-2">
-                    Compatibility
+                    {compatibilityLabel}
                   </span>
                   {product.currentVersion?.compatibilitySet &&
                   product.currentVersion.compatibilitySet.length > 0 ? (
@@ -438,20 +503,22 @@ export default async function ProductPage(props: {
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      No compatible versions specified
+                      {noCompatibleLabel}
                     </p>
                   )}
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">
-                    Category
+                    {categoryLabel}
                   </span>
                   <p className="font-semibold text-foreground">
                     {categoryName ?? '—'}
                   </p>
                 </div>
                 <div className="border-t border-border pt-4">
-                  <span className="text-sm text-muted-foreground">License</span>
+                  <span className="text-sm text-muted-foreground">
+                    {licenseLabel}
+                  </span>
                   <p className="font-semibold text-foreground">MIT</p>
                 </div>
               </div>
@@ -461,7 +528,7 @@ export default async function ProductPage(props: {
             {product.defaultSupplierPartner && (
               <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
                 <h3 className="text-lg font-bold text-foreground">
-                  About the author
+                  {aboutAuthorLabel}
                 </h3>
                 <div className="flex items-start gap-4">
                   <Avatar className="rounded-full h-12 w-12 flex-shrink-0">
@@ -473,7 +540,7 @@ export default async function ProductPage(props: {
                       }
                       alt={
                         product.defaultSupplierPartner.simpleFullName ||
-                        'Author'
+                        authorLabel
                       }
                       size={48}
                     />
@@ -483,12 +550,12 @@ export default async function ProductPage(props: {
                       {product.defaultSupplierPartner.simpleFullName}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Verified contributor
+                      {verifiedContributorLabel}
                     </p>
                   </div>
                 </div>
                 <Button variant="outline" className="w-full rounded-full">
-                  View profile
+                  {viewProfileLabel}
                 </Button>
               </div>
             )}
