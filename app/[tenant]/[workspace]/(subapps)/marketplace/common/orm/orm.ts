@@ -13,7 +13,15 @@ import type {
   AOSMarketplaceProductVersion,
 } from '@/goovee/.generated/models';
 import type {ID} from '@/types';
+import fs from 'fs';
+import path from 'path';
+import {Readable} from 'stream';
+import type {ReadableStream as NodeReadableStream} from 'stream/web';
+import {pipeline} from 'stream/promises';
+import {clone} from '@/utils';
+import {getFileSizeText} from '@/utils/files';
 import {and, or} from '@/utils/orm';
+import {sql} from '@/utils/template-string';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {
@@ -615,4 +623,111 @@ export async function countMyProducts({
   });
 
   return Number(count);
+}
+
+// ---- BUNDLE UPLOAD ---- //
+
+/* Streams an uploaded `.zip` to the tenant's storage directory and creates
+ * the matching `aOSMetaFile` row. Returns the new file id. */
+export async function uploadBundle(
+  file: File,
+  storage: string,
+  client: Client,
+) {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const fileName = `${Date.now()}-${safeName}`;
+  await pipeline(
+    Readable.fromWeb(
+      file.stream() as unknown as NodeReadableStream<Uint8Array>,
+    ),
+    fs.createWriteStream(path.resolve(storage, fileName)),
+  );
+  const meta = await client.aOSMetaFile
+    .create({
+      data: {
+        fileName: file.name,
+        filePath: fileName,
+        fileType: file.type || 'application/zip',
+        fileSize: String(file.size),
+        sizeText: getFileSizeText(file.size),
+        description: '',
+      },
+      select: {id: true},
+    })
+    .then(clone);
+  return meta.id;
+}
+
+// ---- PRODUCT RATING (incremental maintenance) ---- //
+
+/* Each helper is a single raw-SQL UPDATE so the read and write of
+ * (ratingCount, averageRating) happen atomically at the row-lock level —
+ * no read-modify-write race — and the row's optimistic-lock `version`
+ * column is left alone so concurrent product edits aren't disrupted.
+ * Running-mean math accumulates rounding error over many edits; for star
+ * ratings clamped to 1-5, drift stays within a tenth of a star. An
+ * occasional full recompute job can correct it. */
+
+export async function addRating(
+  client: Client,
+  productId: string,
+  rating: number,
+) {
+  await client.$raw(
+    sql`
+      UPDATE base_product
+      SET
+        average_rating = (
+          COALESCE(average_rating, 0) * COALESCE(rating_count, 0) + $2
+        ) / (COALESCE(rating_count, 0) + 1),
+        rating_count = COALESCE(rating_count, 0) + 1
+      WHERE
+        id = $1
+    `,
+    productId,
+    rating,
+  );
+}
+
+export async function replaceRating(
+  client: Client,
+  productId: string,
+  oldRating: number,
+  newRating: number,
+) {
+  if (oldRating === newRating) return;
+  await client.$raw(
+    sql`
+      UPDATE base_product
+      SET
+        average_rating = average_rating + ($3 - $2)::numeric / NULLIF(rating_count, 0)
+      WHERE
+        id = $1
+    `,
+    productId,
+    oldRating,
+    newRating,
+  );
+}
+
+export async function removeRating(
+  client: Client,
+  productId: string,
+  oldRating: number,
+) {
+  await client.$raw(
+    sql`
+      UPDATE base_product
+      SET
+        average_rating = CASE
+          WHEN rating_count <= 1 THEN 0
+          ELSE (average_rating * rating_count - $2) / (rating_count - 1)
+        END,
+        rating_count = GREATEST(COALESCE(rating_count, 0) - 1, 0)
+      WHERE
+        id = $1
+    `,
+    productId,
+    oldRating,
+  );
 }

@@ -3,6 +3,7 @@
 import type {ActionResponse} from '@/types/action';
 import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
+import {after} from 'next/server';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
@@ -19,21 +20,20 @@ import {
 } from '../orm/orm';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 
-// ---- LOAD PRODUCT FOR EDITING ---- //
 import fs from 'fs';
-import path from 'path';
-import {Readable} from 'stream';
-import type {ReadableStream as NodeReadableStream} from 'stream/web';
-import {pipeline} from 'stream/promises';
 import {manager} from '@/tenant';
 import {clone} from '@/utils';
-import {getFileSizeText} from '@/utils/files';
 import {zodSafeParseFormData} from '@/utils/formdata';
 import type {Cloned} from '@/types/util';
-import {findMyProductWithVersions} from '../orm/orm';
+import {
+  findMyProductWithVersions,
+  uploadBundle,
+  addRating,
+  replaceRating,
+  removeRating,
+} from '../orm/orm';
 import type {MyProductWithVersions} from '../orm/orm';
-import type {Client} from '@/goovee/.generated/client';
-import {BigDecimal} from '@goovee/orm';
+import {slugify} from '../utils/slugify';
 import {
   productSchema,
   versionSchema,
@@ -501,67 +501,7 @@ export async function unpublishVersion(
   }
 }
 
-async function uploadBundle(file: File, storage: string, client: Client) {
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const fileName = `${Date.now()}-${safeName}`;
-  await pipeline(
-    Readable.fromWeb(
-      file.stream() as unknown as NodeReadableStream<Uint8Array>,
-    ),
-    fs.createWriteStream(path.resolve(storage, fileName)),
-  );
-  const meta = await client.aOSMetaFile
-    .create({
-      data: {
-        fileName: file.name,
-        filePath: fileName,
-        fileType: file.type || 'application/zip',
-        fileSize: String(file.size),
-        sizeText: getFileSizeText(file.size),
-        description: '',
-      },
-      select: {id: true},
-    })
-    .then(clone);
-  return meta.id;
-}
-
-function slugify(value: string) {
-  return (
-    value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 80) || `product-${Date.now()}`
-  );
-}
-
 // ---- SAVE / DELETE REVIEW ---- //
-
-async function recomputeProductRating(client: Client, productId: string) {
-  const agg = await client.aOSMarketplaceReview.aggregate({
-    count: {id: true},
-    avg: {rating: true},
-    where: {product: {id: productId}},
-  });
-  const count = Number(agg[0]?.count.id ?? 0);
-  const average = Number(agg[0]?.avg.rating ?? 0);
-  const current = await client.aOSProduct.findOne({
-    where: {id: productId},
-    select: {id: true, version: true},
-  });
-  if (!current) return;
-  await client.aOSProduct.update({
-    data: {
-      id: productId,
-      version: current.version,
-      averageRating: new BigDecimal(count > 0 ? average.toString() : '0'),
-      ratingCount: count,
-    },
-    select: {id: true},
-  });
-}
 
 export async function saveReview(
   input: SaveReviewInput,
@@ -603,6 +543,7 @@ export async function saveReview(
       where: {
         id: payload.reviewedVersionId,
         product: {id: payload.productId},
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       },
       select: {id: true},
     });
@@ -612,16 +553,17 @@ export async function saveReview(
   }
 
   try {
-    const existing = await client.aOSMarketplaceReview.findOne({
-      where: {product: {id: payload.productId}, author: {id: auth.user.id}},
-      select: {id: true, version: true},
-    });
-
-    let reviewId: string;
     const reviewedVersion = payload.reviewedVersionId
       ? {select: {id: payload.reviewedVersionId}}
       : undefined;
 
+    const existing = await client.aOSMarketplaceReview.findOne({
+      where: {product: {id: payload.productId}, author: {id: auth.user.id}},
+      select: {id: true, version: true, rating: true},
+    });
+
+    let reviewId: string;
+    let previousRating: number | null;
     if (existing) {
       await client.aOSMarketplaceReview.update({
         data: {
@@ -634,6 +576,7 @@ export async function saveReview(
         select: {id: true},
       });
       reviewId = existing.id;
+      previousRating = existing.rating;
     } else {
       const created = await client.aOSMarketplaceReview.create({
         data: {
@@ -646,9 +589,33 @@ export async function saveReview(
         select: {id: true},
       });
       reviewId = created.id;
+      previousRating = null;
     }
 
-    await recomputeProductRating(client, payload.productId);
+    // Rating aggregates are derived/telemetry; recompute them after the
+    // response is flushed so the save action returns immediately.
+    after(async () => {
+      try {
+        if (previousRating === null) {
+          await addRating(client, payload.productId, payload.rating);
+        } else {
+          await replaceRating(
+            client,
+            payload.productId,
+            previousRating,
+            payload.rating,
+          );
+        }
+      } catch (err) {
+        console.error('marketplace: failed to update product rating', {
+          productId: payload.productId,
+          reviewId,
+          userId: auth.user?.id ?? null,
+          error: err,
+        });
+      }
+    });
+
     return {success: true, data: {reviewId}};
   } catch (e) {
     const message =
@@ -681,7 +648,7 @@ export async function deleteReview(
   try {
     const existing = await client.aOSMarketplaceReview.findOne({
       where: {product: {id: productId}, author: {id: auth.user.id}},
-      select: {id: true, version: true},
+      select: {id: true, version: true, rating: true},
     });
     if (!existing) {
       return {error: true, message: await t('No review to delete')};
@@ -690,7 +657,22 @@ export async function deleteReview(
       id: existing.id,
       version: existing.version,
     });
-    await recomputeProductRating(client, productId);
+
+    // Rating aggregates are derived/telemetry; recompute after the response
+    // is flushed so the delete action returns immediately.
+    after(async () => {
+      try {
+        await removeRating(client, productId, existing.rating);
+      } catch (err) {
+        console.error('marketplace: failed to update product rating', {
+          productId,
+          reviewId: existing.id,
+          userId: auth.user?.id ?? null,
+          error: err,
+        });
+      }
+    });
+
     return {success: true, data: true};
   } catch (e) {
     const message =
