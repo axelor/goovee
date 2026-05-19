@@ -344,6 +344,133 @@ export async function saveVersion(
   }
 }
 
+// ---- UNPUBLISH VERSION ---- //
+const unpublishVersionSchema = z.object({
+  versionId: z.string().min(1),
+  productId: z.string().min(1),
+  workspaceURL: z.string().min(1),
+  /** Optional published version to promote into currentVersion. */
+  newCurrentVersionId: z.string().min(1).optional(),
+});
+
+type UnpublishVersionInput = z.infer<typeof unpublishVersionSchema>;
+
+export async function unpublishVersion(
+  input: UnpublishVersionInput,
+): ActionResponse<true> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+  const parsed = unpublishVersionSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true, message: z.prettifyError(parsed.error)};
+  }
+  const {versionId, productId, workspaceURL, newCurrentVersionId} =
+    parsed.data;
+
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error || !auth.user) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+  const {client} = auth.tenant;
+
+  // Owner check: caller must own the parent product.
+  const owned = await findMyProductWithVersions({
+    productId,
+    userId: auth.user.id,
+    client,
+    workspace: auth.workspace,
+  });
+  if (!owned) {
+    return {error: true, message: await t('Product not found')};
+  }
+
+  const current = await client.aOSMarketplaceProductVersion.findOne({
+    where: {id: versionId, product: {id: productId}},
+    select: {id: true, version: true, statusSelect: true},
+  });
+  if (!current) {
+    return {error: true, message: await t('Version not found')};
+  }
+  if (
+    current.statusSelect !== MARKETPLACE_VERSION_STATUS.PUBLISHED &&
+    current.statusSelect !== MARKETPLACE_VERSION_STATUS.IN_REVIEW
+  ) {
+    return {
+      error: true,
+      message: await t('Only published or in-review versions can be unpublished'),
+    };
+  }
+
+  // Decide whether to touch currentVersion. We only do so when the version
+  // being unpublished IS the current one. In that case, if any other
+  // published version exists, the caller must pick one to promote.
+  const isCurrent = owned.currentVersion?.id === versionId;
+  let promotedId: string | undefined;
+  if (isCurrent) {
+    const alternates = await client.aOSMarketplaceProductVersion.find({
+      where: {
+        product: {id: productId},
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+        id: {ne: versionId},
+      },
+      select: {id: true},
+    });
+    if (alternates.length > 0) {
+      if (!newCurrentVersionId) {
+        return {
+          error: true,
+          message: await t('Pick a version to promote as the current version'),
+        };
+      }
+      if (!alternates.some(v => v.id === newCurrentVersionId)) {
+        return {
+          error: true,
+          message: await t(
+            'Replacement must be another published version of this product',
+          ),
+        };
+      }
+      promotedId = newCurrentVersionId;
+    }
+  }
+
+  try {
+    await client.aOSMarketplaceProductVersion.update({
+      data: {
+        id: current.id,
+        version: current.version,
+        statusSelect: MARKETPLACE_VERSION_STATUS.UNPUBLISHED,
+      },
+      select: {id: true},
+    });
+
+    if (promotedId) {
+      const productNow = await client.aOSProduct.findOne({
+        where: {id: productId},
+        select: {id: true, version: true},
+      });
+      if (productNow) {
+        await client.aOSProduct.update({
+          data: {
+            id: productId,
+            version: productNow.version,
+            currentVersion: {select: {id: promotedId}},
+          },
+          select: {id: true},
+        });
+      }
+    }
+
+    return {success: true, data: true};
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : await t('An error occurred');
+    return {error: true, message};
+  }
+}
+
 async function uploadBundle(file: File, storage: string, client: Client) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
   const fileName = `${Date.now()}-${safeName}`;

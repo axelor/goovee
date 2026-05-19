@@ -13,8 +13,25 @@ import {
 } from 'lucide-react';
 import {i18n} from '@/locale';
 import {Alert, AlertDescription, AlertTitle} from '@/ui/components/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/components/alert-dialog';
 import {Button} from '@/ui/components/button';
 import {Input} from '@/ui/components/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/components/select';
 import {RichTextEditor} from '@/ui/components';
 import {
   Form,
@@ -29,7 +46,7 @@ import {cn} from '@/utils/css';
 import {packIntoFormData} from '@/utils/formdata';
 import type {Cloned} from '@/types/util';
 import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
-import {saveVersion} from '../../../actions/actions';
+import {saveVersion, unpublishVersion} from '../../../actions/actions';
 import {versionSchema, type VersionFormValues, MAX_BUNDLE_SIZE} from './schema';
 import type {
   CompatibilityVersion,
@@ -45,6 +62,7 @@ type VersionFormProps = {
   workspaceURL: string;
   productId: string;
   versions: ExistingVersion[];
+  productCurrentVersionId: string | null;
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
@@ -65,6 +83,7 @@ export function VersionForm({
   workspaceURL,
   productId,
   versions: initialVersions,
+  productCurrentVersionId,
   compatibilityVersions,
   requiresReview,
   allowToPublish,
@@ -82,6 +101,10 @@ export function VersionForm({
   /** Index in the `versions` array we are currently editing (when not creatingNew). */
   const [index, setIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<'next' | 'prev'>('next');
+  const [confirmUnpublish, setConfirmUnpublish] = useState(false);
+  const [replacementVersionId, setReplacementVersionId] = useState<
+    string | undefined
+  >(undefined);
 
   const current = creatingNew ? undefined : versions[index];
 
@@ -183,8 +206,50 @@ export function VersionForm({
   const isPublished =
     !!current?.id &&
     current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED;
+  const canUnpublish =
+    !!current?.id &&
+    (current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED ||
+      current.statusSelect === MARKETPLACE_VERSION_STATUS.IN_REVIEW);
+
+  // Other published versions the user could promote to currentVersion. Only
+  // relevant when unpublishing the version that is currentVersion right now.
+  const isUnpublishingCurrent =
+    !!current?.id && current.id === productCurrentVersionId;
+  const replacementCandidates = isUnpublishingCurrent
+    ? versions.filter(
+        v =>
+          v.id !== current?.id &&
+          v.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      )
+    : [];
+  const needsReplacement = replacementCandidates.length > 0;
+
+  const openUnpublish = () => {
+    // Default the replacement select to the newest other published version.
+    setReplacementVersionId(replacementCandidates[0]?.id);
+    setConfirmUnpublish(true);
+  };
+
+  const runUnpublish = () => {
+    if (!current?.id) return;
+    setConfirmUnpublish(false);
+    startTransition(async () => {
+      const result = await unpublishVersion({
+        versionId: current.id,
+        productId,
+        workspaceURL,
+        newCurrentVersionId: needsReplacement ? replacementVersionId : undefined,
+      });
+      if (!result.success) {
+        toast({variant: 'destructive', title: result.message});
+        return;
+      }
+      toast({variant: 'success', title: i18n.t('Version unpublished')});
+      onDone();
+    });
+  };
   const positionLabel = creatingNew
-    ? `${versions.length + 1} / ${total} (${i18n.t('new')})`
+    ? `1 / ${total} (${i18n.t('new')})`
     : `${index + 1} / ${total}`;
 
   return (
@@ -410,7 +475,20 @@ export function VersionForm({
       </div>
 
       {/* Footer */}
-      <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
+      <div className="sticky bottom-0 z-10 flex items-center justify-between gap-2 border-t border-border bg-background px-6 py-4">
+        <div>
+          {canUnpublish && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={openUnpublish}
+              className="text-destructive hover:text-destructive">
+              {i18n.t('Unpublish')}
+            </Button>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
         <Button
           type="button"
           variant="ghost"
@@ -451,7 +529,63 @@ export function VersionForm({
             </Button>
           </>
         )}
+        </div>
       </div>
+      <AlertDialog open={confirmUnpublish} onOpenChange={setConfirmUnpublish}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {i18n.t('Unpublish this version?')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {needsReplacement
+                ? i18n.t(
+                    'This version is currently the live version. Pick another published version to take its place.',
+                  )
+                : isUnpublishingCurrent
+                  ? i18n.t(
+                      'This is your only published version. Unpublishing will hide the product from listings until a new version is published.',
+                    )
+                  : i18n.t(
+                      'This version will be unlisted and no longer available to users.',
+                    )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {needsReplacement && (
+            <div className="space-y-2 py-2">
+              <label className="text-sm font-medium text-foreground">
+                {i18n.t('New live version')}
+              </label>
+              <Select
+                value={replacementVersionId}
+                onValueChange={setReplacementVersionId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {replacementCandidates.map(v => (
+                    <SelectItem key={v.id} value={v.id}>
+                      v{v.versionNumber}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pending}>
+              {i18n.t('Cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={runUnpublish}
+              disabled={
+                pending || (needsReplacement && !replacementVersionId)
+              }>
+              {i18n.t('Unpublish')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Form>
   );
 }

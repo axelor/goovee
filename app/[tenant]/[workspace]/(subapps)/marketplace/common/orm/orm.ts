@@ -563,12 +563,17 @@ export async function findMyProductWithVersions({
           versionNumber: true,
           changelog: true,
           statusSelect: true,
+          dateOfApproval: true,
           bundleFile: {id: true, fileName: true, sizeText: true},
           compatibilitySet: {
             select: {id: true, title: true, name: true},
           },
         },
-        orderBy: {versionNumber: 'DESC'},
+        orderBy: {
+          dateOfApproval: 'DESC',
+          dateOfSubmission: 'DESC',
+          createdOn: 'DESC',
+        },
       },
     },
   });

@@ -128,6 +128,7 @@ export function ProductFormDialog({
               workspaceURL={workspaceURL}
               productId={productId}
               versions={initial?.versionList ?? []}
+              productCurrentVersionId={initial?.currentVersion?.id ?? null}
               compatibilityVersions={compatibilityVersions}
               requiresReview={requiresReview}
               allowToPublish={allowToPublish}
