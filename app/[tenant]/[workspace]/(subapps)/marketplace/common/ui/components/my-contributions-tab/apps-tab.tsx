@@ -12,7 +12,7 @@ import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../../../utils/auth-helper';
 
 type AppsTabProps = {
-  userId: ID;
+  partnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   workspaceURI: string;
@@ -25,7 +25,7 @@ type AppsTabProps = {
 const PAGE_SIZE = 10;
 
 export async function AppsTab({
-  userId,
+  partnerId,
   client,
   workspace,
   workspaceURI,
@@ -35,7 +35,7 @@ export async function AppsTab({
   page,
 }: AppsTabProps) {
   const apps = await findMyProducts({
-    userId,
+    partnerId,
     client,
     workspace,
     type: MARKETPLACE_TYPE.APP,

@@ -67,10 +67,10 @@ export function withCategoryAccessFilter(workspace: PortalWorkspaceWithConfig) {
 
 export function getMyProductAccessFilter(
   workspace: PortalWorkspaceWithConfig,
-  userId: ID,
+  partnerId: ID,
 ) {
   const where = and<AOSProduct>([
-    {defaultSupplierPartner: {id: userId}},
+    {defaultSupplierPartner: {id: partnerId}},
     getProductAccessFilter(workspace),
   ]);
   return where;
@@ -78,12 +78,12 @@ export function getMyProductAccessFilter(
 
 export function withMyProductAccessFilter(
   workspace: PortalWorkspaceWithConfig,
-  userId: ID,
+  partnerId: ID,
 ) {
   return function (where?: WhereOptions<AOSProduct>) {
     return and<AOSProduct>([
       where,
-      getMyProductAccessFilter(workspace, userId),
+      getMyProductAccessFilter(workspace, partnerId),
     ]);
   };
 }
@@ -97,11 +97,11 @@ export function withMyProductAccessFilter(
  */
 export function withBundleAccessFilter({
   workspace,
-  userId,
+  partnerId,
   productId,
 }: {
   workspace: PortalWorkspaceWithConfig;
-  userId?: ID;
+  partnerId?: ID;
   productId: ID;
 }) {
   return function (where?: WhereOptions<AOSMarketplaceProductVersion>) {
@@ -113,7 +113,7 @@ export function withBundleAccessFilter({
           statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
           product: getProductAccessFilter(workspace),
         },
-        userId && {product: getMyProductAccessFilter(workspace, userId)},
+        partnerId && {product: getMyProductAccessFilter(workspace, partnerId)},
       ]),
     ]);
   };

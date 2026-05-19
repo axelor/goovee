@@ -76,7 +76,7 @@ export async function loadMyProductForEdit(
 
   const product = await findMyProductWithVersions({
     productId,
-    userId: auth.user.id,
+    partnerId: auth.user.mainPartnerId,
     client: auth.tenant.client,
     workspace: auth.workspace,
   });
@@ -123,7 +123,7 @@ export async function saveProduct(
   if (payload.id) {
     const existing = await findMyProductWithVersions({
       productId: payload.id,
-      userId: auth.user.id,
+      partnerId: auth.user.mainPartnerId,
       client,
       workspace: auth.workspace,
     });
@@ -156,7 +156,12 @@ export async function saveProduct(
         return {error: true, message: await t('Product not found')};
       }
       await client.aOSProduct.update({
-        data: {id: payload.id, version: current.version, ...productData},
+        data: {
+          id: payload.id,
+          version: current.version,
+          ...productData,
+          marketplaceUpdatedBy: {select: {id: auth.user.id}},
+        },
         select: {id: true},
       });
       productId = payload.id;
@@ -169,7 +174,7 @@ export async function saveProduct(
           code,
           slug,
           isMarketPlace: true,
-          defaultSupplierPartner: {select: {id: auth.user.id}},
+          defaultSupplierPartner: {select: {id: auth.user.mainPartnerId}},
           marketplaceCreatedBy: {select: {id: auth.user.id}},
         },
         select: {id: true},
@@ -221,7 +226,7 @@ export async function saveVersion(
 
   const existingProduct = await findMyProductWithVersions({
     productId: payload.productId,
-    userId: auth.user.id,
+    partnerId: auth.user.mainPartnerId,
     client,
     workspace: auth.workspace,
   });
@@ -401,7 +406,7 @@ export async function unpublishVersion(
   // Owner check: caller must own the parent product.
   const owned = await findMyProductWithVersions({
     productId,
-    userId: auth.user.id,
+    partnerId: auth.user.mainPartnerId,
     client,
     workspace: auth.workspace,
   });
@@ -746,7 +751,9 @@ export async function addProductToFavorites(
   }
 
   const client = auth.tenant.client;
-  const partnerId = auth.user.id;
+  // Favorites live on the caller's own AOSPartner row (per-user, not rolled
+  // up to the main partner) so a contact's favorites stay with the contact.
+  const userId = auth.user.id;
 
   try {
     const product = await findProductAccess({
@@ -764,7 +771,7 @@ export async function addProductToFavorites(
     }
 
     const partner = await client.aOSPartner.findOne({
-      where: {id: partnerId},
+      where: {id: userId},
       select: {
         id: true,
         favouriteProducts: {
@@ -788,7 +795,7 @@ export async function addProductToFavorites(
     // Update with new favorites list
     await client.aOSPartner.update({
       data: {
-        id: partnerId,
+        id: userId,
         version: partner.version,
         favouriteProducts: {
           ...(isFavorite && {remove: productId}),

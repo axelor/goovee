@@ -168,7 +168,7 @@ export default async function MyContributionsPage(props: {
             {skillsLabel} (
             <Suspense fallback="...">
               <SkillsCountBadge
-                userId={auth.user.id}
+                partnerId={auth.user.mainPartnerId}
                 client={auth.tenant.client}
                 workspace={auth.workspace}
               />
@@ -185,7 +185,7 @@ export default async function MyContributionsPage(props: {
             {appsLabel} (
             <Suspense fallback="...">
               <AppsCountBadge
-                userId={auth.user.id}
+                partnerId={auth.user.mainPartnerId}
                 client={auth.tenant.client}
                 workspace={auth.workspace}
               />
@@ -218,7 +218,7 @@ export default async function MyContributionsPage(props: {
         {currentTab === MyContributionsTab.Overview && <OverviewTab />}
         {currentTab === MyContributionsTab.Skills && (
           <SkillsTab
-            userId={auth.user.id}
+            partnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
             workspace={auth.workspace}
             workspaceURI={workspaceURI}
@@ -230,7 +230,7 @@ export default async function MyContributionsPage(props: {
         )}
         {currentTab === MyContributionsTab.Apps && (
           <AppsTab
-            userId={auth.user.id}
+            partnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
             workspace={auth.workspace}
             workspaceURI={workspaceURI}

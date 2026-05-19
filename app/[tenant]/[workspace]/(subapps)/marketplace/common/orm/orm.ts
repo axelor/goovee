@@ -478,7 +478,7 @@ export async function updateProduct(
 // ---- MY PRODUCTS (USER CONTRIBUTIONS) ---- //
 
 export async function findMyProducts({
-  userId,
+  partnerId,
   client,
   workspace,
   type,
@@ -487,7 +487,7 @@ export async function findMyProducts({
   skip,
   orderBy,
 }: {
-  userId: ID;
+  partnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   type?: MARKETPLACE_TYPE;
@@ -498,7 +498,7 @@ export async function findMyProducts({
     ...(orderBy ? {orderBy} : {}),
     where: withMyProductAccessFilter(
       workspace,
-      userId,
+      partnerId,
     )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
     select: {
       id: true,
@@ -529,17 +529,17 @@ export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
 
 export async function findMyProductWithVersions({
   productId,
-  userId,
+  partnerId,
   client,
   workspace,
 }: {
   productId: ID;
-  userId: ID;
+  partnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
 }) {
   const product = await client.aOSProduct.findOne({
-    where: withMyProductAccessFilter(workspace, userId)({id: productId}),
+    where: withMyProductAccessFilter(workspace, partnerId)({id: productId}),
     select: {
       id: true,
       version: true,
@@ -597,12 +597,12 @@ export type CompatibilityVersion = Awaited<
 >[number];
 
 export async function countMyProducts({
-  userId,
+  partnerId,
   client,
   workspace,
   type,
 }: {
-  userId: ID;
+  partnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   type?: MARKETPLACE_TYPE;
@@ -610,7 +610,7 @@ export async function countMyProducts({
   const count = await client.aOSProduct.count({
     where: withMyProductAccessFilter(
       workspace,
-      userId,
+      partnerId,
     )(type && {marketplaceTypeSelect: type}),
   });
 
