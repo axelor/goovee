@@ -14,8 +14,8 @@ import type {
 } from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and, or} from '@/utils/orm';
-import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
-import {MARKETPLACE_TYPE} from '../constant/marketplace-types';
+import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
+import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {
   withProductAccessFilter,
   withPublishedProductFilter,

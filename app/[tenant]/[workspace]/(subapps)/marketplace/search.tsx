@@ -19,7 +19,7 @@ import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 
 import {searchProducts} from './common/actions/actions';
-import {MARKETPLACE_TYPE} from './common/constant/marketplace-types';
+import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
 import {ProductIcon} from './common/ui/components/product-icon';
 import type {ProductSearchResult} from './common/orm/orm';
 

@@ -11,7 +11,7 @@ import {useResponsive} from '@/ui/hooks';
 import {Stepper} from '../stepper';
 import {RESPONSIVE_SIZES} from '@/constants';
 import type {Cloned} from '@/types/util';
-import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
+import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
 import {ProductForm} from './product-form';
 import {VersionForm} from './version-form';
 import type {
@@ -30,6 +30,7 @@ type ProductFormDialogProps = {
   workspaceURL: string;
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
+  requiresReview: boolean;
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
 };
@@ -42,6 +43,7 @@ export function ProductFormDialog({
   workspaceURL,
   categories,
   compatibilityVersions,
+  requiresReview,
   initial,
   defaultType,
 }: ProductFormDialogProps) {
@@ -125,6 +127,7 @@ export function ProductFormDialog({
               productId={productId}
               versions={initial?.versionList ?? []}
               compatibilityVersions={compatibilityVersions}
+              requiresReview={requiresReview}
               onCancel={close}
               onDone={onDone}
             />

@@ -17,7 +17,7 @@ import {
   findProductsBySearch,
   type ProductSearchResult,
 } from '../orm/orm';
-import {MARKETPLACE_TYPE} from '../constant/marketplace-types';
+import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 
 // ---- LOAD PRODUCT FOR EDITING ---- //
 import fs from 'fs';
@@ -39,13 +39,13 @@ import {
   versionSchema,
   MAX_BUNDLE_SIZE,
 } from '../ui/components/product-form/schema';
-import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
+import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {
   saveReviewSchema,
   deleteReviewSchema,
   type SaveReviewInput,
   type DeleteReviewInput,
-} from '../constant/review';
+} from '../constants/review';
 
 const loadMyProductForEditSchema = z.object({
   productId: z.string().min(1),
@@ -236,6 +236,16 @@ export async function saveVersion(
   }
   if (!fs.existsSync(storage)) fs.mkdirSync(storage, {recursive: true});
 
+  /* Drafts always stay drafts. Anything else (a "publish" intent today, or
+   * any future non-draft status the form might send) collapses to in_review
+   * when the workspace requires review, else to published. */
+  const effectiveStatus =
+    payload.statusSelect === MARKETPLACE_VERSION_STATUS.DRAFT
+      ? MARKETPLACE_VERSION_STATUS.DRAFT
+      : auth.workspace.config.requiresReview
+        ? MARKETPLACE_VERSION_STATUS.IN_REVIEW
+        : MARKETPLACE_VERSION_STATUS.PUBLISHED;
+
   try {
     let uploadedFileId: string | null = null;
     if (payload.bundleFile) {
@@ -264,7 +274,7 @@ export async function saveVersion(
           version: current.version,
           versionNumber: payload.versionNumber,
           changelog: payload.changelog || null,
-          statusSelect: payload.statusSelect,
+          statusSelect: effectiveStatus,
           ...(uploadedFileId && {
             bundleFile: {select: {id: uploadedFileId}},
           }),
@@ -284,11 +294,11 @@ export async function saveVersion(
         data: {
           versionNumber: payload.versionNumber,
           changelog: payload.changelog || null,
-          statusSelect: payload.statusSelect,
+          statusSelect: effectiveStatus,
           bundleFile: {select: {id: uploadedFileId}},
           compatibilitySet: {select: compatRefs},
           product: {select: {id: payload.productId}},
-          ...(payload.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED && {
+          ...(effectiveStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED && {
             dateOfApproval: new Date(),
           }),
         },
@@ -297,7 +307,10 @@ export async function saveVersion(
       versionId = created.id;
     }
 
-    // Promote currentVersion to the newest published version.
+    // Promote currentVersion to the newest published version. If no published
+    // version exists (e.g. the only published one just moved to in_review),
+    // leave the pointer as-is — the listing filter requires at least one
+    // published version on the product, so the product is unlisted regardless.
     const publishedNewest = await client.aOSMarketplaceProductVersion.findOne({
       where: {
         product: {id: payload.productId},

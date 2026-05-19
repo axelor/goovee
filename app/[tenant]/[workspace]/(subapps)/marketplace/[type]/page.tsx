@@ -27,11 +27,11 @@ import {
   type ListCategory,
 } from '../common/orm/orm';
 import {ensureAuth} from '../common/utils/auth-helper';
-import {MARKETPLACE_TYPE} from '../common/constant/marketplace-types';
+import {MARKETPLACE_TYPE} from '../common/constants/marketplace-types';
 import {
   MARKETPLACE_TYPE_BY_SEGMENT,
   MARKETPLACE_TYPE_SEGMENT,
-} from '../common/constant/route-types';
+} from '../common/constants/route-types';
 import {and} from '@/utils/orm';
 import type {AOSProduct} from '@/goovee/.generated/models';
 import {

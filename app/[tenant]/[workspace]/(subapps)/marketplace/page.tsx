@@ -2,7 +2,7 @@ import {redirect} from 'next/navigation';
 
 import {SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
-import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from './common/constant/route-types';
+import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from './common/constants/route-types';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;

@@ -3,7 +3,7 @@ import {
   type CompatibilityVersion,
   type ListCategory,
 } from '../../../orm/orm';
-import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
+import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
 import {ProductsListTab} from './products-list-tab';
 import {getSkip, getTotal} from '@/utils/pagination';
 import {t} from '@/locale/server';
@@ -50,6 +50,7 @@ export async function AppsTab({
     <ProductsListTab
       products={apps}
       title={await t('Apps')}
+      requiresReview={workspace.config.requiresReview === true}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

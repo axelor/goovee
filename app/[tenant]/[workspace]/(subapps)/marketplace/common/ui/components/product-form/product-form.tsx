@@ -23,8 +23,8 @@ import {
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import type {Cloned} from '@/types/util';
-import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
-import {GRADIENT_MAP} from '../../../constant/gradients';
+import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
+import {GRADIENT_MAP} from '../../../constants/gradients';
 import {ProductIcon} from '../product-icon';
 import {saveProduct} from '../../../actions/actions';
 import {productSchema, type ProductFormValues} from './schema';

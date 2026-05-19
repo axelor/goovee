@@ -14,7 +14,7 @@ import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import styles from './index.module.scss';
-import {MARKETPLACE_LINKS} from '../../../constant/marketplace-links';
+import {MARKETPLACE_LINKS} from '../../../constants/marketplace-links';
 
 function Menu({icon, color}: {icon: string; color?: string}) {
   const [open, setOpen] = useState(false);

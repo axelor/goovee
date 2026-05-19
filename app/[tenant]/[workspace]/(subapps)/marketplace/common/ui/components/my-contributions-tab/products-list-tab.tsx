@@ -28,6 +28,7 @@ type ProductsListTabProps = {
   workspaceURL: string;
   categories: ListCategory[];
   compatibilityVersions: CompatibilityVersion[];
+  requiresReview: boolean;
   page?: number;
   totalPages?: number;
   paramName?: string;
@@ -40,6 +41,7 @@ export async function ProductsListTab({
   workspaceURL,
   categories,
   compatibilityVersions,
+  requiresReview,
   page = 1,
   totalPages = 1,
   paramName,
@@ -57,6 +59,7 @@ export async function ProductsListTab({
         workspaceURL={workspaceURL}
         categories={clone(categories)}
         compatibilityVersions={clone(compatibilityVersions)}
+        requiresReview={requiresReview}
       />
 
       {/* Pagination */}

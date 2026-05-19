@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {Suspense} from 'react';
 import {SUBAPP_CODES} from '@/constants';
-import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constant/route-types';
+import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
 import {workspacePathname} from '@/utils/workspace';
 import {clone} from '@/utils';
 // clone is applied at server→client boundaries only.
@@ -18,7 +18,7 @@ import {
 import {PublishNewLauncher} from './client-launcher';
 import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
 import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-count-badge';
-import {MyContributionsTab} from '../common/constant/tabs';
+import {MyContributionsTab} from '../common/constants/tabs';
 import {t} from '@/locale/server';
 import {
   Breadcrumb,
@@ -139,6 +139,7 @@ export default async function MyContributionsPage(props: {
               workspaceURL={workspaceURL}
               categories={clone(categories)}
               compatibilityVersions={clone(compatibilityVersions)}
+              requiresReview={auth.workspace.config.requiresReview === true}
             />
           )}
         </div>

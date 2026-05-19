@@ -17,6 +17,7 @@ type Props = {
   productId: string;
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
+  requiresReview: boolean;
 };
 
 export function EditProductLauncher({
@@ -25,6 +26,7 @@ export function EditProductLauncher({
   productId,
   categories,
   compatibilityVersions,
+  requiresReview,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,6 +70,7 @@ export function EditProductLauncher({
           workspaceURL={workspaceURL}
           categories={categories}
           compatibilityVersions={compatibilityVersions}
+          requiresReview={requiresReview}
           initial={product}
         />
       )}

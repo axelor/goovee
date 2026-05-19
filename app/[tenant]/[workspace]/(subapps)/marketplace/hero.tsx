@@ -7,7 +7,7 @@ import {HeroSearch} from '@/ui/components';
 import {BannerVariants} from '@/ui/components/banner';
 
 import Search from './search';
-import {MARKETPLACE_TYPE} from './common/constant/marketplace-types';
+import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
 
 export const Hero = ({
   title,

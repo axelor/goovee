@@ -21,7 +21,7 @@ import {
 } from '@/ui/components/table';
 import {ProductIcon} from '../product-icon';
 import {EditProductLauncher} from './edit-product-launcher';
-import {MARKETPLACE_VERSION_STATUS} from '../../../constant/statuses';
+import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
 import type {
   CompatibilityVersion,
   ListCategory,
@@ -46,6 +46,7 @@ type Props = {
   workspaceURL: string;
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
+  requiresReview: boolean;
 };
 
 export function MyProductsTable({
@@ -55,6 +56,7 @@ export function MyProductsTable({
   workspaceURL,
   categories,
   compatibilityVersions,
+  requiresReview,
 }: Props) {
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
@@ -198,6 +200,7 @@ export function MyProductsTable({
                       workspaceURL={workspaceURL}
                       categories={categories}
                       compatibilityVersions={compatibilityVersions}
+                      requiresReview={requiresReview}
                     />
                     <Link
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}

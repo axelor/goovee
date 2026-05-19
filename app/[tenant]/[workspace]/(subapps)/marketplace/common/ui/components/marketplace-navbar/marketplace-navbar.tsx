@@ -13,7 +13,7 @@ import {cn} from '@/utils/css';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 import styles from './index.module.scss';
-import {MARKETPLACE_LINKS} from '../../../constant/marketplace-links';
+import {MARKETPLACE_LINKS} from '../../../constants/marketplace-links';
 
 function NavLinks() {
   const {workspaceURI} = useWorkspace();

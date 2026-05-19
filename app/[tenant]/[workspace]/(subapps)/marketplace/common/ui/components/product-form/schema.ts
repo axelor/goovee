@@ -1,6 +1,6 @@
 import {z} from 'zod';
-import {MARKETPLACE_TYPE} from '../../../constant/marketplace-types';
-import {MARKETPLACE_VERSION_STATUS} from '../../../constant/statuses';
+import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
+import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
 
 export const MAX_BUNDLE_SIZE = 20 * 1024 * 1024; // 20 MB
 

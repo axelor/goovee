@@ -5,7 +5,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
 import type {ListProduct} from '../../../orm/orm';
-import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constant/gradients';
+import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constants/gradients';
 import {ProductIcon} from '../product-icon';
 import {t} from '@/locale/server';
 

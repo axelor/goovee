@@ -6,7 +6,7 @@ import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
 import type {Cloned} from '@/types/util';
 import {ProductFormDialog} from '../common/ui/components/product-form';
-import {MARKETPLACE_TYPE} from '../common/constant/marketplace-types';
+import {MARKETPLACE_TYPE} from '../common/constants/marketplace-types';
 import type {CompatibilityVersion, ListCategory} from '../common/orm/orm';
 
 type Props = {
@@ -14,6 +14,7 @@ type Props = {
   workspaceURL: string;
   categories: Cloned<ListCategory>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
+  requiresReview: boolean;
   defaultType?: MARKETPLACE_TYPE;
 };
 
@@ -22,6 +23,7 @@ export function PublishNewLauncher({
   workspaceURL,
   categories,
   compatibilityVersions,
+  requiresReview,
   defaultType,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -42,6 +44,7 @@ export function PublishNewLauncher({
         workspaceURL={workspaceURL}
         categories={categories}
         compatibilityVersions={compatibilityVersions}
+        requiresReview={requiresReview}
         defaultType={defaultType}
       />
     </>

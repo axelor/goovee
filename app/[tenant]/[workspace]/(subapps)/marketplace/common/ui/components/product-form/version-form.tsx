@@ -2,14 +2,17 @@ import {useMemo, useRef, useState, useTransition} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
+  Info,
   Plus,
   Trash2,
   Upload,
   FileArchive,
 } from 'lucide-react';
 import {i18n} from '@/locale';
+import {Alert, AlertDescription, AlertTitle} from '@/ui/components/alert';
 import {Badge} from '@/ui/components/badge';
 import {Button} from '@/ui/components/button';
 import {Input} from '@/ui/components/input';
@@ -26,7 +29,7 @@ import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {packIntoFormData} from '@/utils/formdata';
 import type {Cloned} from '@/types/util';
-import {MARKETPLACE_VERSION_STATUS} from '../../../constant/statuses';
+import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
 import {saveVersion} from '../../../actions/actions';
 import {versionSchema, type VersionFormValues, MAX_BUNDLE_SIZE} from './schema';
 import type {
@@ -44,6 +47,7 @@ type VersionFormProps = {
   productId: string;
   versions: ExistingVersion[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
+  requiresReview: boolean;
   onCancel: () => void;
   onDone: () => void;
 };
@@ -62,6 +66,7 @@ export function VersionForm({
   productId,
   versions: initialVersions,
   compatibilityVersions,
+  requiresReview,
   onCancel,
   onDone,
 }: VersionFormProps) {
@@ -236,6 +241,11 @@ export function VersionForm({
               </Button>
             </div>
           </div>
+
+          <ReviewStatusAlert
+            requiresReview={requiresReview}
+            isPublished={isPublished}
+          />
 
           <div className="overflow-hidden">
             <div
@@ -425,7 +435,7 @@ export function VersionForm({
               setValue('statusSelect', MARKETPLACE_VERSION_STATUS.PUBLISHED);
               submit();
             }}>
-            {i18n.t('Save')}
+            {requiresReview ? i18n.t('Submit for review') : i18n.t('Save')}
           </Button>
         ) : (
           <>
@@ -446,11 +456,71 @@ export function VersionForm({
                 setValue('statusSelect', MARKETPLACE_VERSION_STATUS.PUBLISHED);
                 submit();
               }}>
-              {i18n.t('Publish')}
+              {requiresReview ? i18n.t('Submit for review') : i18n.t('Publish')}
             </Button>
           </>
         )}
       </div>
     </Form>
+  );
+}
+
+function ReviewStatusAlert({
+  requiresReview,
+  isPublished,
+}: {
+  requiresReview: boolean;
+  isPublished: boolean;
+}) {
+  if (isPublished) {
+    if (requiresReview) {
+      return (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>{i18n.t('Editing will unlist this version')}</AlertTitle>
+          <AlertDescription>
+            {i18n.t(
+              'Saving will move this version to "in review" and remove it from public listings. If this is your only published version, the product will be hidden until a new version is approved.',
+            )}
+          </AlertDescription>
+        </Alert>
+      );
+    }
+    return (
+      <Alert variant="primary">
+        <Info className="h-4 w-4" />
+        <AlertTitle>{i18n.t('Ready to publish')}</AlertTitle>
+        <AlertDescription>
+          {i18n.t(
+            'Changes are published immediately and visible to the community.',
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (requiresReview) {
+    return (
+      <Alert variant="warning">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>{i18n.t('Review required before publishing')}</AlertTitle>
+        <AlertDescription>
+          {i18n.t(
+            'This version will be sent for review. It will become visible to the community once approved.',
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  return (
+    <Alert variant="primary">
+      <Info className="h-4 w-4" />
+      <AlertTitle>{i18n.t('Ready to publish')}</AlertTitle>
+      <AlertDescription>
+        {i18n.t(
+          'This version will be published immediately and visible to the community.',
+        )}
+      </AlertDescription>
+    </Alert>
   );
 }

@@ -12,7 +12,7 @@ import type {Cloned} from '@/types/util';
 import {RatingInput} from './rating-input';
 import {VersionSelect} from './version-select';
 import {REVIEW_CARD_SHELL} from './shared';
-import {REVIEW_COMMENT_MAX_LENGTH} from '../../../constant/review';
+import {REVIEW_COMMENT_MAX_LENGTH} from '../../../constants/review';
 import type {MyReview} from '../../../orm/orm';
 
 export type ReviewFormValues = {

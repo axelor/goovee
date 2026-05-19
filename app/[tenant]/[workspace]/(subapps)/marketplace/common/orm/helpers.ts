@@ -7,7 +7,7 @@ import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
 import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {and, or} from '@/utils/orm';
-import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
+import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 
 export type QueryProps<T extends Entity> = {
   where?: WhereOptions<T> | null;
