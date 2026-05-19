@@ -133,12 +133,14 @@ export default async function MyContributionsPage(props: {
             </h1>
             <p className="text-muted-foreground text-sm">{manageDescLabel}</p>
           </div>
-          <PublishNewLauncher
-            workspaceURI={workspaceURI}
-            workspaceURL={workspaceURL}
-            categories={clone(categories)}
-            compatibilityVersions={clone(compatibilityVersions)}
-          />
+          {auth.workspace.config.allowToPublish && (
+            <PublishNewLauncher
+              workspaceURI={workspaceURI}
+              workspaceURL={workspaceURL}
+              categories={clone(categories)}
+              compatibilityVersions={clone(compatibilityVersions)}
+            />
+          )}
         </div>
       </div>
 

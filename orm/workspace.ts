@@ -148,6 +148,12 @@ export const portalAppConfigFields = {
   isFixedHeader: true,
   chatDisplayTypeSelect: true,
   termsOfUseAcceptanceText: true,
+  marketplaceHeroTitle: true,
+  marketplaceHeroDescription: true,
+  marketplaceHeroOverlayColorSelect: true,
+  marketplaceHeroBgImage: {id: true},
+  allowToPublish: true,
+  requiresReview: true,
 } as const satisfies SelectOptions<AOSPortalAppConfig>;
 
 export type PortalAppConfig = Payload<

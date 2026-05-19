@@ -108,6 +108,13 @@ export async function saveProduct(
   }
   const {client} = auth.tenant;
 
+  if (!payload.id && !auth.workspace.config.allowToPublish) {
+    return {
+      error: true,
+      message: await t('Publishing is not allowed in this workspace'),
+    };
+  }
+
   if (payload.id) {
     const existing = await findMyProductWithVersions({
       productId: payload.id,
@@ -200,6 +207,13 @@ export async function saveVersion(
     return {error: true, message: await t('Unauthorized')};
   }
   const {client} = auth.tenant;
+
+  if (!payload.id && !auth.workspace.config.allowToPublish) {
+    return {
+      error: true,
+      message: await t('Publishing is not allowed in this workspace'),
+    };
+  }
 
   if (payload.bundleFile && payload.bundleFile.size > MAX_BUNDLE_SIZE) {
     return {error: true, message: await t('Bundle exceeds 20 MB limit')};
