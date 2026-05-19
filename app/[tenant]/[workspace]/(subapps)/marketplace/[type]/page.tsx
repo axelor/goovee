@@ -42,10 +42,6 @@ import {
 
 const PAGE_SIZE = 12;
 
-export function generateStaticParams() {
-  return Object.values(MARKETPLACE_TYPE_SEGMENT).map(type => ({type}));
-}
-
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; type: string}>;
   searchParams: Promise<{[key: string]: string | undefined}>;
