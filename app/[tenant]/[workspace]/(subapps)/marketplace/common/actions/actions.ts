@@ -12,7 +12,12 @@ import {getLoginURL} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {ensureAuth} from '../utils/auth-helper';
-import {findProductAccess} from '../orm/orm';
+import {
+  findProductAccess,
+  findProductsBySearch,
+  type ProductSearchResult,
+} from '../orm/orm';
+import {MARKETPLACE_TYPE} from '../constant/marketplace-types';
 
 // ---- LOAD PRODUCT FOR EDITING ---- //
 import fs from 'fs';
@@ -23,7 +28,7 @@ import {pipeline} from 'stream/promises';
 import {manager} from '@/tenant';
 import {clone} from '@/utils';
 import {getFileSizeText} from '@/utils/files';
-import {zodParseFormData} from '@/utils/formdata';
+import {zodSafeParseFormData} from '@/utils/formdata';
 import type {Cloned} from '@/types/util';
 import {findMyProductWithVersions} from '../orm/orm';
 import type {MyProductWithVersions} from '../orm/orm';
@@ -59,7 +64,7 @@ export async function loadMyProductForEdit(
   if (!parsed.success) {
     return {
       error: true,
-      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+      message: z.prettifyError(parsed.error),
     };
   }
   const {productId, workspaceURL} = parsed.data;
@@ -97,7 +102,7 @@ export async function saveProduct(
   if (!parsed.success) {
     return {
       error: true,
-      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+      message: z.prettifyError(parsed.error),
     };
   }
   const payload = parsed.data;
@@ -188,19 +193,14 @@ export async function saveVersion(
     return {error: true, message: await t('TenantId is required')};
   }
 
-  let payload;
-  try {
-    payload = zodParseFormData(
-      formData,
-      versionSchema.safeExtend({workspaceURL: z.string().min(1)}),
-    );
-  } catch (e) {
-    const message =
-      e instanceof z.ZodError
-        ? (e.issues[0]?.message ?? (await t('Invalid input')))
-        : await t('Invalid input');
-    return {error: true, message};
+  const parsed = zodSafeParseFormData(
+    formData,
+    versionSchema.safeExtend({workspaceURL: z.string().min(1)}),
+  );
+  if (!parsed.success) {
+    return {error: true, message: z.prettifyError(parsed.error)};
   }
+  const payload = parsed.data;
 
   const {error, auth} = await ensureAuth(payload.workspaceURL, tenantId);
   if (error || !auth.user) {
@@ -404,7 +404,7 @@ export async function saveReview(
   if (!parsed.success) {
     return {
       error: true,
-      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+      message: z.prettifyError(parsed.error),
     };
   }
   const payload = parsed.data;
@@ -498,7 +498,7 @@ export async function deleteReview(
   if (!parsed.success) {
     return {
       error: true,
-      message: parsed.error.issues[0]?.message ?? (await t('Invalid input')),
+      message: z.prettifyError(parsed.error),
     };
   }
   const {productId, workspaceURL} = parsed.data;
@@ -557,7 +557,7 @@ export async function addProductToFavorites(
   if (!result.success) {
     return {
       error: true,
-      message: await t('Invalid input'),
+      message: z.prettifyError(result.error),
     };
   }
 
@@ -640,4 +640,45 @@ export async function addProductToFavorites(
     }
     throw e;
   }
+}
+
+// ---- SEARCH PRODUCTS ---- //
+const searchProductsSchema = z.object({
+  search: z.string().min(1).max(200),
+  workspaceURL: z.string().min(1),
+  type: z.enum(MARKETPLACE_TYPE).optional(),
+});
+
+type SearchProductsInput = z.infer<typeof searchProductsSchema>;
+
+export async function searchProducts(
+  input: SearchProductsInput,
+): ActionResponse<Cloned<ProductSearchResult>[]> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+  const parsed = searchProductsSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      error: true,
+      message: z.prettifyError(parsed.error),
+    };
+  }
+  const {search, workspaceURL, type} = parsed.data;
+
+  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
+    allowGuest: true,
+  });
+  if (error) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+
+  const products = await findProductsBySearch({
+    search,
+    type,
+    client: auth.tenant.client,
+    workspace: auth.workspace,
+  });
+  return {success: true, data: clone(products)};
 }

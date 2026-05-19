@@ -13,7 +13,7 @@ import type {
   AOSMarketplaceProductVersion,
 } from '@/goovee/.generated/models';
 import type {ID} from '@/types';
-import {and} from '@/utils/orm';
+import {and, or} from '@/utils/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constant/statuses';
 import {MARKETPLACE_TYPE} from '../constant/marketplace-types';
 import {
@@ -143,6 +143,48 @@ export async function findProductCategory({
 }
 
 // ---- PRODUCTS ---- //
+
+export async function findProductsBySearch({
+  search,
+  type,
+  client,
+  workspace,
+  take = 8,
+}: {
+  search: string;
+  type?: MARKETPLACE_TYPE;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  take?: number;
+}) {
+  const pattern = `%${search}%`;
+  const products = await client.aOSProduct.find({
+    take,
+    where: withPublishedProductFilter(workspace)(
+      and<AOSProduct>([
+        type ? {marketplaceTypeSelect: type} : undefined,
+        or<AOSProduct>([
+          {name: {like: pattern}},
+          {description: {like: pattern}},
+          {code: {like: pattern}},
+        ]),
+      ]),
+    ),
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      marketplaceIconCode: true,
+      marketplaceCoverStyle: true,
+      marketplaceTypeSelect: true,
+    },
+  });
+  return products;
+}
+
+export type ProductSearchResult = Awaited<
+  ReturnType<typeof findProductsBySearch>
+>[number];
 
 export async function findProducts({
   client,

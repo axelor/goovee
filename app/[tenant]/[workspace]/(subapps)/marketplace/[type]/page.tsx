@@ -1,6 +1,7 @@
-import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {t, tattr} from '@/locale/server';
-import {HeroSearch} from '@/ui/components';
+import type {OverlayColor} from '@/types';
+import {Hero} from '../hero';
 import {
   Pagination,
   PaginationContent,
@@ -109,22 +110,34 @@ export default async function Page(props: {
 
   return (
     <>
-      <HeroSearch
+      <Hero
         title={
-          marketplaceType === MARKETPLACE_TYPE.APP
+          auth.workspace.config.marketplaceHeroTitle ||
+          (marketplaceType === MARKETPLACE_TYPE.APP
             ? await t('Apps Studio')
-            : await t('Skills Hub')
+            : await t('Skills Hub'))
         }
         description={
-          marketplaceType === MARKETPLACE_TYPE.APP
+          auth.workspace.config.marketplaceHeroDescription ||
+          (marketplaceType === MARKETPLACE_TYPE.APP
             ? await t(
                 'Discover and install ready-made apps to extend your Axelor portal.',
               )
             : await t(
                 'Open-source plugins to extend Axelor — code generation, workflow automation, AI agents. Free forever.',
-              )
+              ))
         }
-        image={IMAGE_URL}
+        background={
+          (auth.workspace.config.marketplaceHeroOverlayColorSelect as
+            | OverlayColor
+            | null) ?? null
+        }
+        image={
+          auth.workspace.config.marketplaceHeroBgImage?.id
+            ? `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/hero/background`
+            : null
+        }
+        type={marketplaceType}
       />
 
       <div className="container py-8 space-y-6">
