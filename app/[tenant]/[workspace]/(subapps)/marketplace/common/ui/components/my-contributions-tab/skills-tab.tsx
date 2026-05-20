@@ -53,6 +53,7 @@ export async function SkillsTab({
       requiresReview={workspace.config.requiresReview === true}
       allowToPublish={workspace.config.allowToPublish === true}
       currencySymbol={workspace.config.marketplaceDefaultSaleCurrency?.symbol}
+      inAti={workspace.config.marketplaceInAti === true}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

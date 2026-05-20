@@ -31,6 +31,7 @@ type ProductsListTabProps = {
   requiresReview: boolean;
   allowToPublish: boolean;
   currencySymbol?: string | null;
+  inAti: boolean;
   page?: number;
   totalPages?: number;
   paramName?: string;
@@ -46,6 +47,7 @@ export async function ProductsListTab({
   requiresReview,
   allowToPublish,
   currencySymbol,
+  inAti,
   page = 1,
   totalPages = 1,
   paramName,
@@ -66,6 +68,7 @@ export async function ProductsListTab({
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}
         currencySymbol={currencySymbol}
+        inAti={inAti}
       />
 
       {/* Pagination */}

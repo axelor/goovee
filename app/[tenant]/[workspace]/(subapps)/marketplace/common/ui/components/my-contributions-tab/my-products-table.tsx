@@ -50,6 +50,7 @@ type Props = {
   requiresReview: boolean;
   allowToPublish: boolean;
   currencySymbol?: string | null;
+  inAti: boolean;
 };
 
 export function MyProductsTable({
@@ -62,6 +63,7 @@ export function MyProductsTable({
   requiresReview,
   allowToPublish,
   currencySymbol,
+  inAti,
 }: Props) {
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
@@ -217,6 +219,7 @@ export function MyProductsTable({
                       requiresReview={requiresReview}
                       allowToPublish={allowToPublish}
                       currencySymbol={currencySymbol}
+                      inAti={inAti}
                     />
                     <Link
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}

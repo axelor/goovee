@@ -17,6 +17,7 @@ type Props = {
   requiresReview: boolean;
   allowToPublish: boolean;
   currencySymbol?: string | null;
+  inAti: boolean;
   defaultType?: MARKETPLACE_TYPE;
 };
 
@@ -28,6 +29,7 @@ export function PublishNewLauncher({
   requiresReview,
   allowToPublish,
   currencySymbol,
+  inAti,
   defaultType,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -51,6 +53,7 @@ export function PublishNewLauncher({
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}
         currencySymbol={currencySymbol}
+        inAti={inAti}
         defaultType={defaultType}
       />
     </>

@@ -144,6 +144,7 @@ export default async function MyContributionsPage(props: {
               currencySymbol={
                 auth.workspace.config.marketplaceDefaultSaleCurrency?.symbol
               }
+              inAti={auth.workspace.config.marketplaceInAti === true}
             />
           )}
         </div>

@@ -20,6 +20,7 @@ type Props = {
   requiresReview: boolean;
   allowToPublish: boolean;
   currencySymbol?: string | null;
+  inAti: boolean;
 };
 
 export function EditProductLauncher({
@@ -31,6 +32,7 @@ export function EditProductLauncher({
   requiresReview,
   allowToPublish,
   currencySymbol,
+  inAti,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,6 +79,7 @@ export function EditProductLauncher({
           requiresReview={requiresReview}
           allowToPublish={allowToPublish}
           currencySymbol={currencySymbol}
+          inAti={inAti}
           initial={product}
         />
       )}

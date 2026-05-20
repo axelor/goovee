@@ -33,6 +33,7 @@ type ProductFormDialogProps = {
   requiresReview: boolean;
   allowToPublish: boolean;
   currencySymbol?: string | null;
+  inAti: boolean;
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
 };
@@ -48,6 +49,7 @@ export function ProductFormDialog({
   requiresReview,
   allowToPublish,
   currencySymbol,
+  inAti,
   initial,
   defaultType,
 }: ProductFormDialogProps) {
@@ -120,6 +122,7 @@ export function ProductFormDialog({
               initial={initial}
               defaultType={defaultType}
               currencySymbol={currencySymbol}
+              inAti={inAti}
               onSaved={id => setProductId(id)}
               onContinue={() => setStep('version')}
               onCancel={close}

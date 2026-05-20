@@ -1,4 +1,4 @@
-import {useMemo, useRef, useState, useTransition} from 'react';
+import {useMemo, useRef, useTransition} from 'react';
 import Image from 'next/image';
 import {useForm, useFormContext, useWatch} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -31,7 +31,6 @@ import {GRADIENT_MAP} from '../../../constants/gradients';
 import {ProductIcon} from '../product-icon';
 import {packIntoFormData} from '@/utils/formdata';
 import {saveProduct} from '../../../actions/actions';
-import {isPaid} from '../../../utils/price';
 import {
   productSchema,
   type ProductFormValues,
@@ -52,6 +51,10 @@ type ProductFormProps = {
   /** Currency symbol from workspace config (e.g. "$", "€"). Optional —
    *  if absent we render the input without an adornment. */
   currencySymbol?: string | null;
+  /** Workspace's `PortalAppConfig.marketplaceInAti`. Decides whether the
+   *  price the supplier enters is interpreted as gross (tax-inclusive)
+   *  or net (tax-exclusive). Drives the help-line wording. */
+  inAti: boolean;
   onSaved: (productId: string) => void;
   onContinue: () => void;
   onCancel: () => void;
@@ -64,19 +67,13 @@ export function ProductForm({
   initial,
   defaultType,
   currencySymbol,
+  inAti,
   onSaved,
   onContinue,
   onCancel,
 }: ProductFormProps) {
   const {toast} = useToast();
   const [pending, startTransition] = useTransition();
-  /* UI-only Free/Paid toggle. Not part of the form values — derived from
-   * salePrice when initializing, drives whether the price input is shown.
-   * Switching to "free" clears the salePrice so a hidden non-zero value
-   * can never sneak through. */
-  const [pricingMode, setPricingMode] = useState<'free' | 'paid'>(
-    isPaid(initial?.salePrice) ? 'paid' : 'free',
-  );
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -130,34 +127,85 @@ export function ProductForm({
             {i18n.t('Product details')}
           </h3>
 
-          <FormField
-            control={control}
-            name="marketplaceTypeSelect"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>{i18n.t('Type')} *</FormLabel>
-                <FormControl>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={mode === 'edit'}>
-                    <SelectTrigger className="w-full md:w-[260px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={MARKETPLACE_TYPE.SKILL}>
-                        {i18n.t('Skill')}
-                      </SelectItem>
-                      <SelectItem value={MARKETPLACE_TYPE.APP}>
-                        {i18n.t('App')}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Type + Price share one wrapping row. Setting price to 0 (or
+              leaving it blank) makes the product free; no separate
+              Free/Paid toggle. */}
+          <div className="flex flex-wrap gap-4">
+            <FormField
+              control={control}
+              name="marketplaceTypeSelect"
+              render={({field}) => (
+                <FormItem className="min-w-[200px] flex-1 sm:flex-none">
+                  <FormLabel>{i18n.t('Type')} *</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={mode === 'edit'}>
+                      <SelectTrigger className="w-full sm:w-[260px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={MARKETPLACE_TYPE.SKILL}>
+                          {i18n.t('Skill')}
+                        </SelectItem>
+                        <SelectItem value={MARKETPLACE_TYPE.APP}>
+                          {i18n.t('App')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="salePrice"
+              render={({field}) => (
+                <FormItem className="min-w-[200px] flex-1 sm:flex-none">
+                  <FormLabel>{i18n.t('Price')}</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      {currencySymbol && (
+                        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-muted-foreground">
+                          {currencySymbol}
+                        </span>
+                      )}
+                      <Input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        placeholder="0"
+                        className={cn(
+                          'sm:w-[200px]',
+                          currencySymbol && 'pl-8',
+                        )}
+                        value={field.value ?? ''}
+                        onChange={e =>
+                          field.onChange(
+                            e.target.value === ''
+                              ? undefined
+                              : Number(e.target.value),
+                          )
+                        }
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                    </div>
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    {inAti
+                      ? i18n.t('Price includes tax.')
+                      : i18n.t('Price excludes tax.')}
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
             <FormField
@@ -356,70 +404,6 @@ export function ProductForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_280px] md:items-end">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{i18n.t('Pricing')}</label>
-              <Select
-                value={pricingMode}
-                onValueChange={value => {
-                  const next = value as 'free' | 'paid';
-                  setPricingMode(next);
-                  if (next === 'free') {
-                    form.setValue('salePrice', undefined, {shouldDirty: true});
-                  }
-                }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="free">{i18n.t('Free')}</SelectItem>
-                  <SelectItem value="paid">{i18n.t('Paid')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {pricingMode === 'paid' && (
-              <FormField
-                control={control}
-                name="salePrice"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>{i18n.t('Price')}</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          placeholder="0"
-                          className={currencySymbol ? 'pr-12' : undefined}
-                          value={field.value ?? ''}
-                          onChange={e =>
-                            field.onChange(
-                              e.target.value === ''
-                                ? undefined
-                                : Number(e.target.value),
-                            )
-                          }
-                          onBlur={field.onBlur}
-                          name={field.name}
-                          ref={field.ref}
-                        />
-                        {currencySymbol && (
-                          <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-muted-foreground">
-                            {currencySymbol}
-                          </span>
-                        )}
-                      </div>
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      {i18n.t('Price excludes tax.')}
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-          </div>
         </div>
       </div>
       {/* Footer */}
