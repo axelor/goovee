@@ -90,10 +90,15 @@ export function withMyProductAccessFilter(
 
 /**
  * Restricts a version query to bundles the caller is allowed to download.
- * Anyone in the workspace can download published versions; the product
- * owner can additionally download their own drafts. Owner access is
- * delegated to {@link getMyProductAccessFilter} so any future rules on
- * my-product access apply here automatically.
+ * Branches the caller can satisfy:
+ *   - **Owner** of the product → any version, any status (delegated to
+ *     {@link getMyProductAccessFilter}).
+ *   - **Free + published** — `salePrice` ≤ 0 (or null) on the product.
+ *   - **Paid + owned + published** — a MarketplaceProductPurchase row
+ *     exists for the caller's partner on this product.
+ *
+ * Single query, no pre-fetch. Non-owner non-purchaser callers of paid
+ * products never match.
  */
 export function withBundleAccessFilter({
   workspace,
@@ -105,14 +110,30 @@ export function withBundleAccessFilter({
   productId: ID;
 }) {
   return function (where?: WhereOptions<AOSMarketplaceProductVersion>) {
+    const productAccess = getProductAccessFilter(workspace);
     return and<AOSMarketplaceProductVersion>([
       where,
       {product: {id: productId}},
       or<AOSMarketplaceProductVersion>([
+        // Free + published. `salePrice <= 0` excludes NULL in SQL, so
+        // the null branch is included explicitly for legacy / admin-
+        // edited products that never had a price set.
         {
           statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-          product: getProductAccessFilter(workspace),
+          product: and([
+            productAccess,
+            {OR: [{salePrice: {le: 0}}, {salePrice: null}]},
+          ]),
         },
+        // Paid + owned + published
+        partnerId && {
+          statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+          product: and([
+            productAccess,
+            {marketplaceProductPurchaseList: {partner: {id: partnerId}}},
+          ]),
+        },
+        // Owner — any status
         partnerId && {product: getMyProductAccessFilter(workspace, partnerId)},
       ]),
     ]);

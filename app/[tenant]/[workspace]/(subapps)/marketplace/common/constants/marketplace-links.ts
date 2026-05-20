@@ -16,4 +16,10 @@ export const MARKETPLACE_LINKS: MarketplaceLink[] = [
     segment: 'my-contributions',
     requiresAuth: true,
   },
+  {
+    id: 4,
+    title: 'My purchases',
+    segment: 'my-purchases',
+    requiresAuth: true,
+  },
 ];

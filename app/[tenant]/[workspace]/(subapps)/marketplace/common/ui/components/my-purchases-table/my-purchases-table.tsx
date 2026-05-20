@@ -2,13 +2,18 @@
 
 import Link from 'next/link';
 import {Fragment, useState, type ReactNode} from 'react';
-import {ExternalLink, ChevronDown, ChevronUp} from 'lucide-react';
+import {
+  Download as DownloadIcon,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
+
 import {i18n} from '@/locale';
-import {Rating} from '../rating';
-import {InnerHTML} from '@/ui/components/inner-html';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES, RESPONSIVE_SIZES} from '@/constants';
 import {useResponsive} from '@/ui/hooks';
+import {InnerHTML} from '@/ui/components/inner-html';
 import type {Cloned} from '@/types/util';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
 import {
@@ -19,61 +24,46 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/components/table';
+
 import {ProductIcon} from '../product-icon';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constants/gradients';
-import {EditProductLauncher} from './edit-product-launcher';
-import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
-import type {
-  CompatibilityVersion,
-  ListCategory,
-  ListMyProduct,
-} from '../../../orm/orm';
+import type {MarketplacePurchase} from '../../../orm/orm';
 
-type Product = Cloned<ListMyProduct>;
+type Purchase = Cloned<MarketplacePurchase>;
 
 type Column = {
   key: string;
   label: string;
   mobile?: boolean;
-  /** Extra Tailwind classes applied to the cell on desktop only. */
   desktopClassName?: string;
-  content: (p: Product) => ReactNode;
+  content: (p: Purchase, ctx: {dateFormat: Intl.DateTimeFormat}) => ReactNode;
 };
 
 type Props = {
-  products: Product[];
-  title: string;
+  purchases: Purchase[];
   workspaceURI: string;
-  workspaceURL: string;
-  categories: Cloned<ListCategory>[];
-  compatibilityVersions: Cloned<CompatibilityVersion>[];
-  requiresReview: boolean;
-  allowToPublish: boolean;
-  currencySymbol?: string | null;
 };
 
-export function MyProductsTable({
-  products,
-  title,
-  workspaceURI,
-  workspaceURL,
-  categories,
-  compatibilityVersions,
-  requiresReview,
-  allowToPublish,
-  currencySymbol,
-}: Props) {
+export function MyPurchasesTable({purchases, workspaceURI}: Props) {
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
   const [openId, setOpenId] = useState<string | null>(null);
 
+  const dateFormat = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+
   const columns: Column[] = [
     {
-      key: 'name',
-      label: i18n.t('Name'),
+      key: 'product',
+      label: i18n.t('Product'),
       mobile: true,
-      desktopClassName: 'w-[38%] min-w-[220px]',
-      content: product => {
+      desktopClassName: 'w-[45%] min-w-[220px]',
+      content: purchase => {
+        const product = purchase.product;
+        if (!product) return '—';
         const bgGradient =
           GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] ||
           DEFAULT_GRADIENT;
@@ -85,75 +75,76 @@ export function MyProductsTable({
                 bgGradient,
               )}>
               <ProductIcon
-                code={product.marketplaceIconCode}
+                code={product.marketplaceIconCode ?? undefined}
                 className="w-6 h-6"
               />
             </div>
             <div className="min-w-0">
-              <div className="font-medium text-foreground truncate">
-                {product.name}
-              </div>
-              <div className="text-xs text-muted-foreground line-clamp-2">
-                <InnerHTML content={product.description ?? undefined} />
-              </div>
+              {product.slug ? (
+                <Link
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
+                  className="font-medium text-foreground truncate hover:underline">
+                  {product.name}
+                </Link>
+              ) : (
+                <div className="font-medium text-foreground truncate">
+                  {product.name}
+                </div>
+              )}
+              {product.description && (
+                <div className="text-xs text-muted-foreground line-clamp-2">
+                  <InnerHTML content={product.description} />
+                </div>
+              )}
             </div>
           </div>
         );
       },
     },
     {
-      key: 'status',
-      label: i18n.t('Status'),
-      desktopClassName: 'w-[15%]',
-      content: product => (
-        <span
-          className={cn(
-            'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize whitespace-nowrap',
-            product.currentVersion?.statusSelect ===
-              MARKETPLACE_VERSION_STATUS.PUBLISHED
-              ? 'bg-success/15 text-success-dark'
-              : 'bg-muted text-muted-foreground',
-          )}>
-          {product.currentVersion?.statusSelect
-            ? i18n.tattr(product.currentVersion.statusSelect)
+      key: 'version',
+      label: i18n.t('Current version'),
+      desktopClassName: 'w-[18%]',
+      content: purchase => (
+        <span className="text-sm whitespace-nowrap">
+          {purchase.product?.currentVersion?.versionNumber
+            ? `v${purchase.product.currentVersion.versionNumber}`
             : '—'}
         </span>
       ),
     },
     {
-      key: 'version',
-      label: i18n.t('Current version'),
-      desktopClassName: 'w-[15%]',
-      content: product => (
-        <span className="text-sm whitespace-nowrap">
-          v{product.currentVersion?.versionNumber || '—'}
+      key: 'purchasedAt',
+      label: i18n.t('Purchased on'),
+      desktopClassName: 'w-[20%]',
+      content: (purchase, {dateFormat}) => (
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
+          {purchase.purchasedAt
+            ? dateFormat.format(new Date(purchase.purchasedAt))
+            : '—'}
         </span>
       ),
     },
     {
-      key: 'installs',
-      label: i18n.t('Installs'),
+      key: 'invoice',
+      label: i18n.t('Invoice'),
       desktopClassName: 'w-[15%]',
-      content: product => (
-        <span className="text-sm">{product.installCount ?? 0}</span>
+      content: purchase => (
+        <span className="text-sm text-muted-foreground">
+          {purchase.invoice?.invoiceId ?? '—'}
+        </span>
       ),
-    },
-    {
-      key: 'rating',
-      label: i18n.t('Rating'),
-      desktopClassName: 'w-[15%]',
-      content: product => <Rating value={product.averageRating} />,
     },
   ];
 
   const mainColumns = small ? columns.filter(c => c.mobile) : columns;
   const subColumns = small ? columns.filter(c => !c.mobile) : [];
 
-  if (products.length === 0) {
+  if (purchases.length === 0) {
     return (
       <div className="bg-card rounded-lg border border-border px-6 py-12 text-center">
         <div className="text-sm text-muted-foreground">
-          {i18n.t('No {0} yet', title.toLowerCase())}
+          {i18n.t("You haven't purchased anything yet.")}
         </div>
       </div>
     );
@@ -182,17 +173,20 @@ export function MyProductsTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {products.map(product => {
-          const open = openId === product.id;
+        {purchases.map(purchase => {
+          const open = openId === purchase.id;
           const Arrow = open ? ChevronUp : ChevronDown;
+          const product = purchase.product;
+          const version = product?.currentVersion;
+          const canDownload = product?.id && version?.id;
           return (
-            <Fragment key={product.id}>
+            <Fragment key={purchase.id}>
               <TableRow>
                 {mainColumns.map(c => (
                   <TableCell
                     key={c.key}
                     className={cn('p-3', !small && c.desktopClassName)}>
-                    {c.content(product)}
+                    {c.content(purchase, {dateFormat})}
                   </TableCell>
                 ))}
                 {small && subColumns.length > 0 && (
@@ -200,7 +194,7 @@ export function MyProductsTable({
                     <button
                       type="button"
                       aria-label={open ? 'Collapse' : 'Expand'}
-                      onClick={() => setOpenId(open ? null : product.id)}
+                      onClick={() => setOpenId(open ? null : purchase.id)}
                       className="p-1 rounded-full hover:bg-muted transition-colors">
                       <Arrow className="w-4 h-4 text-muted-foreground" />
                     </button>
@@ -208,21 +202,21 @@ export function MyProductsTable({
                 )}
                 <TableCell className="p-3">
                   <div className="flex justify-end gap-1">
-                    <EditProductLauncher
-                      productId={product.id}
-                      workspaceURI={workspaceURI}
-                      workspaceURL={workspaceURL}
-                      categories={categories}
-                      compatibilityVersions={compatibilityVersions}
-                      requiresReview={requiresReview}
-                      allowToPublish={allowToPublish}
-                      currencySymbol={currencySymbol}
-                    />
-                    <Link
-                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
-                      className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Link>
+                    {canDownload ? (
+                      <a
+                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                        aria-label={i18n.t('Download')}
+                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                        <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                      </a>
+                    ) : null}
+                    {product?.slug && (
+                      <Link
+                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
+                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                      </Link>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -238,7 +232,7 @@ export function MyProductsTable({
                                 {c.label}
                               </div>
                               <div className="flex justify-self-end items-center">
-                                {c.content(product)}
+                                {c.content(purchase, {dateFormat})}
                               </div>
                             </Fragment>
                           ))}

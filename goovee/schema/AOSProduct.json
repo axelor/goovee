@@ -92,6 +92,12 @@
       "mappedBy": "product"
     },
     {
+      "type": "OneToMany",
+      "name": "marketplaceProductPurchaseList",
+      "target": "AOSMarketplaceProductPurchase",
+      "mappedBy": "product"
+    },
+    {
       "type": "ManyToOne",
       "name": "productCategory",
       "target": "AOSProductCategory"

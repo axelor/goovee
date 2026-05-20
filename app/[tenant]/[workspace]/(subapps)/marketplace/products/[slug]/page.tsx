@@ -25,6 +25,7 @@ import {NO_IMAGE_URL} from '@/constants';
 
 import {findProduct, isProductFavorited} from '../../common/orm/orm';
 import {isPaid} from '../../common/utils/price';
+import {BuyButtons} from '../../common/ui/components/buy-buttons';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constants/gradients';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
@@ -107,6 +108,29 @@ export default async function ProductPage(props: {
   const priceScale = product.saleCurrency?.numberOfDecimals ?? 2;
   const {ati: priceAti} = product.price;
   const paid = isPaid(priceAti);
+
+  /* CTA gating. Free products keep the existing public Download button.
+   * For paid products:
+   *   - product owner (the supplier partner that created it) → Download
+   *   - buyer with a purchase row → Download
+   *   - logged-in non-owner non-buyer → Add to cart + Buy now
+   *   - guest → "Sign in to buy" link
+   * Owner can also pull drafts; the download gate honours both branches. */
+  const partnerId = auth.user?.mainPartnerId;
+  const isOwner =
+    !!partnerId && product.defaultSupplierPartner?.id === partnerId;
+  const owns = !!(
+    paid &&
+    partnerId &&
+    (await client.aOSMarketplaceProductPurchase.findOne({
+      where: {
+        partner: {id: partnerId},
+        product: {id: product.id},
+      },
+      select: {id: true},
+    }))
+  );
+  const canDownload = !paid || isOwner || owns;
   const priceBadgeLabel = paid
     ? await formatNumber(priceAti, {
         type: 'DECIMAL',
@@ -301,22 +325,54 @@ export default async function ProductPage(props: {
 
             {/* Right: Buttons and Links */}
             <div className="flex flex-col gap-3 justify-center">
-              <Button
-                size="lg"
-                className="gap-2 rounded-full"
-                asChild
-                disabled={!product.currentVersion?.id}>
-                <a
-                  href={
-                    product.currentVersion?.id
-                      ? `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`
-                      : '#'
+              {canDownload ? (
+                <Button
+                  size="lg"
+                  className="gap-2 rounded-full"
+                  asChild
+                  disabled={!product.currentVersion?.id}>
+                  <a
+                    href={
+                      product.currentVersion?.id
+                        ? `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${product.currentVersion.id}/download`
+                        : '#'
+                    }
+                    download>
+                    <Download size={18} />
+                    {downloadZipLabel}
+                  </a>
+                </Button>
+              ) : !auth.user ? (
+                <Button size="lg" className="gap-2 rounded-full" asChild>
+                  <Link
+                    href={getLoginURL({
+                      callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`,
+                      workspaceURI,
+                      tenant: tenantId,
+                    })}>
+                    {await t('Sign in to buy')}
+                  </Link>
+                </Button>
+              ) : (
+                <BuyButtons
+                  productId={product.id}
+                  productSlug={product.slug ?? ''}
+                  name={product.name ?? ''}
+                  priceAti={priceAti}
+                  currencySymbol={product.saleCurrency?.symbol ?? null}
+                  scale={priceScale}
+                  description={product.description ?? null}
+                  marketplaceIconCode={product.marketplaceIconCode ?? null}
+                  marketplaceCoverStyle={product.marketplaceCoverStyle ?? null}
+                  currentVersionNumber={
+                    product.currentVersion?.versionNumber ?? null
                   }
-                  download>
-                  <Download size={18} />
-                  {downloadZipLabel}
-                </a>
-              </Button>
+                  cartHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/cart`}
+                  addToCartLabel={await t('Add to cart')}
+                  buyNowLabel={await t('Buy now')}
+                  inCartLabel={await t('In cart — view cart')}
+                />
+              )}
 
               <Suspense
                 fallback={

@@ -146,6 +146,11 @@ export default async function Layout(props: {
   );
   const showCart = !hidePriceAndPurchase && shopSubapp?.isInstalled;
 
+  const marketplaceSubapp = subapps?.find(
+    (app: any) => app.code === SUBAPP_CODES.marketplace,
+  );
+  const showMarketplaceCart = marketplaceSubapp?.isInstalled;
+
   return (
     <Workspace
       id={$workspace.id}
@@ -169,6 +174,7 @@ export default async function Layout(props: {
               workspaces={workspaces}
               workspace={$workspace}
               showCart={showCart}
+              showMarketplaceCart={showMarketplaceCart}
             />
             <div className="flex flex-col flex-grow min-h-0">
               <div className="flex-grow">{children}</div>
@@ -180,6 +186,7 @@ export default async function Layout(props: {
             workspaces={workspaces}
             workspace={$workspace}
             showCart={showCart}
+            showMarketplaceCart={showMarketplaceCart}
           />
         </div>
       </CartContext>

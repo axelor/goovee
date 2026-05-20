@@ -23,6 +23,7 @@ import {PortalWorkspace} from '@/orm/workspace';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
+import MarketplaceCart from '@/app/[tenant]/[workspace]/marketplace-cart';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
@@ -67,12 +68,14 @@ export default function Header({
   workspaces,
   workspace,
   showCart,
+  showMarketplaceCart,
 }: {
   subapps: any;
   isTopNavigation?: boolean;
   workspaces: {id: string; name: string | null; url: string | null}[];
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   showCart?: boolean | null;
+  showMarketplaceCart?: boolean | null;
 }) {
   const router = useRouter();
   const {data: session} = authClient.useSession();
@@ -95,6 +98,7 @@ export default function Header({
 
   const shouldDisplayIcons = visible && !loading;
   const showCartIcon = showCart && shouldDisplayIcons;
+  const showMarketplaceCartIcon = showMarketplaceCart && shouldDisplayIcons;
   const isFixedHeader = workspace?.config?.isFixedHeader;
 
   return (
@@ -148,6 +152,7 @@ export default function Header({
                 })}
             {user && <Notification />}
             {showCartIcon && <Cart />}
+            {showMarketplaceCartIcon && <MarketplaceCart />}
             <Account baseURL={workspaceURI} tenant={tenant} />
           </div>
         )}

@@ -17,8 +17,17 @@ import {
   findProductAccess,
   findProductsBySearch,
   type ProductSearchResult,
+  recordPurchases,
+  attachInvoiceToPurchases,
 } from '../orm/orm';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
+import {getPaymentInfo} from '../utils/payment-info';
+import {validateCart} from './cart-validation';
+import {createMarketplaceOrder, findInvoiceBySaleOrderId} from '../service';
+import {markPaymentAsProcessed} from '@/payment/common/orm';
+import {PaymentOption} from '@/types';
+import {getPaymentModeId} from '@/utils/payment';
+import {WorkspaceURLSchema} from '@/utils/validators';
 
 import fs from 'fs';
 import {manager} from '@/tenant';
@@ -869,4 +878,158 @@ export async function searchProducts(
     workspace: auth.workspace,
   });
   return {success: true, data: clone(products)};
+}
+
+// ---- CHECKOUT ---- //
+
+const CheckoutSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  payment: z.object({
+    mode: z.enum(PaymentOption),
+    data: z.object({
+      id: z.string().optional(),
+      params: z.unknown().optional(),
+    }),
+  }),
+});
+
+/* Unified finalize action. Pulls the stashed cart from PaymentContext,
+ * re-validates it against fresh DB state, anti-tampers paidAmount vs
+ * server-recomputed total, grants access in a goovee tx, then post-
+ * commits the AOS order/invoice HTTP best-effort. See
+ * docs/marketplace-checkout-plan.md for the design. */
+export async function checkout(
+  props: z.input<typeof CheckoutSchema>,
+): ActionResponse<true> {
+  const parsed = CheckoutSchema.safeParse(props);
+  if (!parsed.success)
+    return {error: true, message: z.prettifyError(parsed.error)};
+
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId)
+    return {error: true, message: await t('Tenant ID is missing.')};
+
+  const {auth, error: authError} = await ensureAuth(
+    parsed.data.workspaceURL,
+    tenantId,
+    {allowGuest: false},
+  );
+  if (authError) {
+    return {error: true, message: await t('Sign in required.')};
+  }
+  const {client, config} = auth.tenant;
+  const partnerId = auth.user.mainPartnerId;
+
+  let paidAmount: number;
+  let paymentContextId: string;
+  let paymentContextVersion: number;
+  let stashedProductIds: string[];
+  try {
+    const info = await getPaymentInfo({
+      mode: parsed.data.payment.mode,
+      data: parsed.data.payment.data,
+      client,
+    });
+    paidAmount = info.amount;
+    paymentContextId = info.context.id;
+    paymentContextVersion = info.context.version;
+    stashedProductIds = info.context.data?.productIds ?? [];
+  } catch (e) {
+    return {
+      error: true,
+      message: await t((e as Error).message ?? 'Payment context not found.'),
+    };
+  }
+
+  const cartResult = await validateCart({
+    client,
+    workspace: auth.workspace,
+    partnerId,
+    productIds: stashedProductIds,
+  });
+  if (cartResult.error) return cartResult;
+  const cart = cartResult.data;
+
+  /* Anti-tamper: amount the provider captured must match what we'd compute
+   * now. Mirrors events register(). Cent-level rounding is consistent
+   * because both sides go through computePrice → round(scale). */
+  if (Math.abs(Number(paidAmount) - cart.total) > 0.005) {
+    return {
+      error: true,
+      message: await t(
+        'Paid amount {0} does not match expected amount {1}.',
+        String(paidAmount),
+        String(cart.total),
+      ),
+    };
+  }
+
+  const productIds = cart.items.map(item => item.productId);
+
+  try {
+    await client.$transaction(async txClient => {
+      await recordPurchases(txClient, partnerId, productIds);
+      await markPaymentAsProcessed({
+        contextId: paymentContextId,
+        version: paymentContextVersion,
+        client: txClient,
+      });
+    });
+  } catch (e) {
+    return {
+      error: true,
+      message:
+        e instanceof Error ? e.message : await t('Granting access failed.'),
+    };
+  }
+
+  const paymentModeId = getPaymentModeId(
+    auth.workspace.config.paymentOptionSet,
+    parsed.data.payment.mode,
+  );
+
+  /* Post-commit AOS HTTP. The buyer already has access; this only creates
+   * the upstream SO + Invoice + InvoicePayment for accounting. Errors are
+   * logged but never fail the action — see the rationale in
+   * docs/marketplace-checkout-plan.md. The Invoice id is back-attached to
+   * the purchase rows once we have it. */
+  after(async () => {
+    try {
+      const buyerPartner = await client.aOSPartner.findOne({
+        where: {id: partnerId},
+        select: {mainAddress: {id: true}},
+      });
+      const addressId = buyerPartner?.mainAddress?.id ?? null;
+
+      const {saleOrderId} = await createMarketplaceOrder({
+        cart,
+        workspace: auth.workspace,
+        partnerId,
+        contactId: auth.user.isContact ? auth.user.id : undefined,
+        invoicingAddressId: addressId,
+        deliveryAddressId: addressId,
+        paidAmount: cart.total,
+        paymentModeId,
+        config,
+      });
+
+      const invoice = await findInvoiceBySaleOrderId({client, saleOrderId});
+      if (invoice?.id) {
+        await attachInvoiceToPurchases(
+          client,
+          partnerId,
+          productIds,
+          invoice.id,
+        );
+      }
+    } catch (e) {
+      console.error('marketplace: AOS invoice creation failed', {
+        partnerId,
+        productIds,
+        error: e,
+      });
+    }
+  });
+
+  return {success: true, data: true};
 }
