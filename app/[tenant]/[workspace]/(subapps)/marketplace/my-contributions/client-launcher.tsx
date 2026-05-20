@@ -16,6 +16,7 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
+  currencySymbol?: string | null;
   defaultType?: MARKETPLACE_TYPE;
 };
 
@@ -26,6 +27,7 @@ export function PublishNewLauncher({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
+  currencySymbol,
   defaultType,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -48,6 +50,7 @@ export function PublishNewLauncher({
         compatibilityVersions={compatibilityVersions}
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}
+        currencySymbol={currencySymbol}
         defaultType={defaultType}
       />
     </>

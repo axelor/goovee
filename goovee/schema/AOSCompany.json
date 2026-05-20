@@ -22,6 +22,10 @@
       "type": "ManyToOne",
       "name": "partner",
       "target": "AOSPartner"
+    },
+    {
+      "type": "String",
+      "name": "timezone"
     }
   ]
 }

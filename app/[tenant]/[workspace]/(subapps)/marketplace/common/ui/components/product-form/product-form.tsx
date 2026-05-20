@@ -1,4 +1,4 @@
-import {useTransition} from 'react';
+import {useState, useTransition} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {i18n} from '@/locale';
@@ -27,6 +27,7 @@ import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
 import {GRADIENT_MAP} from '../../../constants/gradients';
 import {ProductIcon} from '../product-icon';
 import {saveProduct} from '../../../actions/actions';
+import {isPaid} from '../../../utils/price';
 import {productSchema, type ProductFormValues} from './schema';
 import type {ListCategory, MyProductWithVersions} from '../../../orm/orm';
 
@@ -39,6 +40,9 @@ type ProductFormProps = {
   categories: Cloned<ListCategory>[];
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
+  /** Currency symbol from workspace config (e.g. "$", "€"). Optional —
+   *  if absent we render the input without an adornment. */
+  currencySymbol?: string | null;
   onSaved: (productId: string) => void;
   onContinue: () => void;
   onCancel: () => void;
@@ -50,12 +54,20 @@ export function ProductForm({
   categories,
   initial,
   defaultType,
+  currencySymbol,
   onSaved,
   onContinue,
   onCancel,
 }: ProductFormProps) {
   const {toast} = useToast();
   const [pending, startTransition] = useTransition();
+  /* UI-only Free/Paid toggle. Not part of the form values — derived from
+   * salePrice when initializing, drives whether the price input is shown.
+   * Switching to "free" clears the salePrice so a hidden non-zero value
+   * can never sneak through. */
+  const [pricingMode, setPricingMode] = useState<'free' | 'paid'>(
+    isPaid(initial?.salePrice) ? 'paid' : 'free',
+  );
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -324,6 +336,71 @@ export function ProductForm({
               )}
             />
           </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[200px_280px] md:items-end">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{i18n.t('Pricing')}</label>
+              <Select
+                value={pricingMode}
+                onValueChange={value => {
+                  const next = value as 'free' | 'paid';
+                  setPricingMode(next);
+                  if (next === 'free') {
+                    form.setValue('salePrice', undefined, {shouldDirty: true});
+                  }
+                }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">{i18n.t('Free')}</SelectItem>
+                  <SelectItem value="paid">{i18n.t('Paid')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {pricingMode === 'paid' && (
+              <FormField
+                control={control}
+                name="salePrice"
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>{i18n.t('Price')}</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          placeholder="0"
+                          className={currencySymbol ? 'pr-12' : undefined}
+                          value={field.value ?? ''}
+                          onChange={e =>
+                            field.onChange(
+                              e.target.value === ''
+                                ? undefined
+                                : Number(e.target.value),
+                            )
+                          }
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
+                        />
+                        {currencySymbol && (
+                          <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-sm text-muted-foreground">
+                            {currencySymbol}
+                          </span>
+                        )}
+                      </div>
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {i18n.t('Price excludes tax.')}
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
         </div>
       </div>
       {/* Footer */}
@@ -361,6 +438,7 @@ function buildDefaults(
       documentationUrl: '',
       supportIssuesUrl: '',
       supportContactUrl: '',
+      salePrice: undefined,
     };
   }
   return {
@@ -377,5 +455,7 @@ function buildDefaults(
     documentationUrl: initial.documentationUrl ?? '',
     supportIssuesUrl: initial.supportIssuesUrl ?? '',
     supportContactUrl: initial.supportContactUrl ?? '',
+    salePrice:
+      initial.salePrice != null ? Number(initial.salePrice) : undefined,
   };
 }

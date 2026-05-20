@@ -11,6 +11,7 @@ export const portalAppConfigFields = {
   company: {
     id: true,
     name: true,
+    timezone: true,
     logo: {
       id: true,
     },
@@ -154,6 +155,16 @@ export const portalAppConfigFields = {
   marketplaceHeroBgImage: {id: true},
   allowToPublish: true,
   requiresReview: true,
+  marketplaceDefaultSaleCurrency: {
+    id: true,
+    code: true,
+    name: true,
+    symbol: true,
+    numberOfDecimals: true,
+  },
+  marketplaceDefaultUnit: {id: true, name: true},
+  marketplaceDefaultProductFamily: {id: true},
+  marketplaceInAti: true,
 } as const satisfies SelectOptions<AOSPortalAppConfig>;
 
 export type PortalAppConfig = Payload<

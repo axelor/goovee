@@ -52,6 +52,7 @@ export async function AppsTab({
       title={await t('Apps')}
       requiresReview={workspace.config.requiresReview === true}
       allowToPublish={workspace.config.allowToPublish === true}
+      currencySymbol={workspace.config.marketplaceDefaultSaleCurrency?.symbol}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

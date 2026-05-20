@@ -30,6 +30,7 @@ type ProductsListTabProps = {
   compatibilityVersions: CompatibilityVersion[];
   requiresReview: boolean;
   allowToPublish: boolean;
+  currencySymbol?: string | null;
   page?: number;
   totalPages?: number;
   paramName?: string;
@@ -44,6 +45,7 @@ export async function ProductsListTab({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
+  currencySymbol,
   page = 1,
   totalPages = 1,
   paramName,
@@ -63,6 +65,7 @@ export async function ProductsListTab({
         compatibilityVersions={clone(compatibilityVersions)}
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}
+        currencySymbol={currencySymbol}
       />
 
       {/* Pagination */}

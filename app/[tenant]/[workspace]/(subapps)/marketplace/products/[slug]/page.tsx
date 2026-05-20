@@ -24,6 +24,7 @@ import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {NO_IMAGE_URL} from '@/constants';
 
 import {findProduct, isProductFavorited} from '../../common/orm/orm';
+import {isPaid} from '../../common/utils/price';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constants/gradients';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
@@ -102,8 +103,19 @@ export default async function ProductPage(props: {
     await formatNumber(product.installCount || 0),
   );
 
+  // Server-computed ATI (and WT) come pre-baked on the product row.
+  const priceScale = product.saleCurrency?.numberOfDecimals ?? 2;
+  const {ati: priceAti} = product.price;
+  const paid = isPaid(priceAti);
+  const priceBadgeLabel = paid
+    ? await formatNumber(priceAti, {
+        type: 'DECIMAL',
+        scale: priceScale,
+        currency: product.saleCurrency?.symbol ?? undefined,
+      })
+    : await t('Free');
+
   const [
-    freeOpenSourceLabel,
     byLabel,
     updatedLabel,
     downloadZipLabel,
@@ -126,7 +138,6 @@ export default async function ProductPage(props: {
     viewProfileLabel,
     notAvailableLabel,
   ] = await Promise.all([
-    t('Free · Open source'),
     t('by'),
     t('Updated'),
     t('Download ZIP'),
@@ -213,7 +224,9 @@ export default async function ProductPage(props: {
                 {categoryName && (
                   <Badge variant="outline">{categoryName}</Badge>
                 )}
-                <Badge variant="success">{freeOpenSourceLabel}</Badge>
+                <Badge variant={paid ? 'outline' : 'success'}>
+                  {priceBadgeLabel}
+                </Badge>
                 {product.currentVersion?.versionNumber && (
                   <Badge variant="outline">
                     {product.currentVersion.versionNumber}

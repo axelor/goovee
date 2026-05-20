@@ -34,6 +34,7 @@ import {
 } from '../orm/orm';
 import type {MyProductWithVersions} from '../orm/orm';
 import {slugify} from '../utils/slugify';
+import {BigDecimal} from '@goovee/orm';
 import {
   productSchema,
   versionSchema,
@@ -132,6 +133,19 @@ export async function saveProduct(
     }
   }
 
+  /* Pricing defaults live on the workspace config. All three relations
+   * (currency / unit / productFamily) must be present for a paid product
+   * to flow through the standard AOS sale-order / invoice path. We gate
+   * creation on them so a supplier never ends up with a product that
+   * silently can't be sold. Updates skip the gate because we don't
+   * retroactively rewrite system fields. */
+  const priceDefaults = {
+    saleCurrency: auth.workspace.config.marketplaceDefaultSaleCurrency,
+    unit: auth.workspace.config.marketplaceDefaultUnit,
+    productFamily: auth.workspace.config.marketplaceDefaultProductFamily,
+    inAti: auth.workspace.config.marketplaceInAti === true,
+  };
+
   const productData = {
     name: payload.name,
     description: payload.description ?? null,
@@ -143,6 +157,7 @@ export async function saveProduct(
     supportIssuesUrl: payload.supportIssuesUrl || null,
     supportContactUrl: payload.supportContactUrl || null,
     productCategory: {select: {id: payload.productCategoryId}},
+    salePrice: new BigDecimal(String(payload.salePrice ?? 0)),
   };
 
   try {
@@ -166,6 +181,18 @@ export async function saveProduct(
       });
       productId = payload.id;
     } else {
+      if (
+        !priceDefaults.saleCurrency?.id ||
+        !priceDefaults.unit?.id ||
+        !priceDefaults.productFamily?.id
+      ) {
+        return {
+          error: true,
+          message: await t(
+            "Marketplace pricing isn't configured for this workspace. Contact your admin.",
+          ),
+        };
+      }
       const code = `mkt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const slug = slugify(payload.name);
       const created = await client.aOSProduct.create({
@@ -176,6 +203,13 @@ export async function saveProduct(
           isMarketPlace: true,
           defaultSupplierPartner: {select: {id: auth.user.mainPartnerId}},
           marketplaceCreatedBy: {select: {id: auth.user.id}},
+          saleCurrency: {select: {id: priceDefaults.saleCurrency.id}},
+          unit: {select: {id: priceDefaults.unit.id}},
+          productFamily: {select: {id: priceDefaults.productFamily.id}},
+          inAti: priceDefaults.inAti,
+          productTypeSelect: 'service',
+          sellable: true,
+          purchasable: false,
         },
         select: {id: true},
       });

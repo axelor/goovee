@@ -32,6 +32,7 @@ type ProductFormDialogProps = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
+  currencySymbol?: string | null;
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
 };
@@ -46,6 +47,7 @@ export function ProductFormDialog({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
+  currencySymbol,
   initial,
   defaultType,
 }: ProductFormDialogProps) {
@@ -117,6 +119,7 @@ export function ProductFormDialog({
               categories={categories}
               initial={initial}
               defaultType={defaultType}
+              currencySymbol={currencySymbol}
               onSaved={id => setProductId(id)}
               onContinue={() => setStep('version')}
               onCancel={close}

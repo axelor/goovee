@@ -8,8 +8,16 @@
       "name": "name"
     },
     {
-      "type": "Int",
+      "type": "Decimal",
       "name": "value"
+    },
+    {
+      "type": "Date",
+      "name": "startDate"
+    },
+    {
+      "type": "Date",
+      "name": "endDate"
     },
     {
       "type": "ManyToOne",

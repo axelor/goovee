@@ -5,6 +5,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
 import type {ListProduct} from '../../../orm/orm';
+import {isPaid} from '../../../utils/price';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constants/gradients';
 import {ProductIcon} from '../product-icon';
 import {t} from '@/locale/server';
@@ -25,7 +26,19 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
     installCount = 0,
     marketplaceIconCode,
     marketplaceCoverStyle,
+    saleCurrency,
   } = product;
+
+  // Server-computed ATI (and WT) come pre-baked on the product row.
+  const {ati: priceAti} = product.price;
+  const paid = isPaid(priceAti);
+  const priceLabel = paid
+    ? await formatNumber(priceAti, {
+        type: 'DECIMAL',
+        scale: saleCurrency?.numberOfDecimals ?? 2,
+        currency: saleCurrency?.symbol ?? undefined,
+      })
+    : freeLabel;
 
   const bgGradient =
     GRADIENT_MAP[marketplaceCoverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
@@ -37,9 +50,11 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
         <div
           className={`h-[140px] bg-gradient-to-br ${bgGradient} flex items-center justify-center relative`}>
           <ProductIcon code={marketplaceIconCode} className="w-16 h-16" />
-          <div className="absolute top-3 right-3 bg-success-light px-2.5 py-1 rounded-full">
-            <span className="text-xs font-medium text-success">
-              {freeLabel}
+          <div
+            className={`absolute top-3 right-3 px-2.5 py-1 rounded-full ${paid ? 'bg-primary/10' : 'bg-success-light'}`}>
+            <span
+              className={`text-xs font-medium ${paid ? 'text-primary' : 'text-success'}`}>
+              {priceLabel}
             </span>
           </div>
         </div>

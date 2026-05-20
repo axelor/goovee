@@ -23,6 +23,11 @@ export const productSchema = z.object({
   documentationUrl: optionalUrl,
   supportIssuesUrl: optionalUrl,
   supportContactUrl: optionalUrl,
+  salePrice: z
+    .number()
+    .min(0, 'Price cannot be negative')
+    .max(999_999_999, 'Price is unrealistically high')
+    .optional(),
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;

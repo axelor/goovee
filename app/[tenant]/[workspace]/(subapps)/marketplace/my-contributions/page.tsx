@@ -141,6 +141,9 @@ export default async function MyContributionsPage(props: {
               compatibilityVersions={clone(compatibilityVersions)}
               requiresReview={auth.workspace.config.requiresReview === true}
               allowToPublish={auth.workspace.config.allowToPublish === true}
+              currencySymbol={
+                auth.workspace.config.marketplaceDefaultSaleCurrency?.symbol
+              }
             />
           )}
         </div>

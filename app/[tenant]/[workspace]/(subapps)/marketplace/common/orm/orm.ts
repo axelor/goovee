@@ -22,6 +22,11 @@ import {clone} from '@/utils';
 import {getFileSizeText} from '@/utils/files';
 import {and, or} from '@/utils/orm';
 import {sql} from '@/utils/template-string';
+import {
+  computePrice,
+  type ComputedPrice,
+  type PriceComputeInput,
+} from '../utils/price';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {
@@ -44,6 +49,28 @@ export type ListProduct = Awaited<ReturnType<typeof findProducts>>[number];
 export type SingleProduct = NonNullable<
   Awaited<ReturnType<typeof findProduct>>
 >;
+
+/* Each query that returns a product enriches the row with `price`
+ * (wt / ati / taxRate) computed server-side via the same logic AOS Java
+ * uses when generating invoice lines. Consumers should read these
+ * numbers and never recompute on the client. */
+type PriceableProduct = PriceComputeInput & {
+  saleCurrency?: {numberOfDecimals?: number | null} | null;
+};
+
+function withPrice<T extends PriceableProduct>(
+  product: T,
+  workspace: PortalWorkspaceWithConfig,
+): T & {price: ComputedPrice} {
+  return {
+    ...product,
+    price: computePrice(product, {
+      companyId: workspace.config.company?.id,
+      companyTimezone: workspace.config.company?.timezone,
+      scale: product.saleCurrency?.numberOfDecimals ?? 2,
+    }),
+  };
+}
 export type ListCategory = Awaited<
   ReturnType<typeof findProductCategories>
 >[number];
@@ -226,6 +253,34 @@ export async function findProducts({
       averageRating: true,
       ratingCount: true,
       installCount: true,
+      salePrice: true,
+      saleCurrency: {symbol: true, numberOfDecimals: true},
+      inAti: true,
+      accountManagementList: {
+        select: {
+          id: true,
+          company: {id: true},
+          saleTaxSet: {
+            select: {
+              activeTaxLine: {value: true},
+              taxLineList: {
+                select: {value: true, startDate: true, endDate: true},
+              },
+            },
+          },
+        },
+      },
+      productFamily: {
+        accountManagementList: {
+          select: {
+            id: true,
+            company: {id: true},
+            saleTaxSet: {
+              select: {activeTaxLine: {value: true}},
+            },
+          },
+        },
+      },
       currentVersion: {
         id: true,
         versionNumber: true,
@@ -233,7 +288,7 @@ export async function findProducts({
     },
   });
 
-  return products;
+  return products.map(p => withPrice(p, workspace));
 }
 
 export async function findProduct({
@@ -302,10 +357,39 @@ export async function findProduct({
       portalImageList: {
         select: {picture: {id: true}},
       },
+      salePrice: true,
+      saleCurrency: {symbol: true, numberOfDecimals: true},
+      inAti: true,
+      accountManagementList: {
+        select: {
+          id: true,
+          company: {id: true},
+          saleTaxSet: {
+            select: {
+              activeTaxLine: {value: true},
+              taxLineList: {
+                select: {value: true, startDate: true, endDate: true},
+              },
+            },
+          },
+        },
+      },
+      productFamily: {
+        accountManagementList: {
+          select: {
+            id: true,
+            company: {id: true},
+            saleTaxSet: {
+              select: {activeTaxLine: {value: true}},
+            },
+          },
+        },
+      },
     },
   });
 
-  return product;
+  if (!product) return null;
+  return withPrice(product, workspace);
 }
 
 // ---- PRODUCT VERSIONS ---- //
@@ -522,6 +606,34 @@ export async function findMyProducts({
       averageRating: true,
       ratingCount: true,
       installCount: true,
+      salePrice: true,
+      saleCurrency: {symbol: true, numberOfDecimals: true},
+      inAti: true,
+      accountManagementList: {
+        select: {
+          id: true,
+          company: {id: true},
+          saleTaxSet: {
+            select: {
+              activeTaxLine: {value: true},
+              taxLineList: {
+                select: {value: true, startDate: true, endDate: true},
+              },
+            },
+          },
+        },
+      },
+      productFamily: {
+        accountManagementList: {
+          select: {
+            id: true,
+            company: {id: true},
+            saleTaxSet: {
+              select: {activeTaxLine: {value: true}},
+            },
+          },
+        },
+      },
       currentVersion: {
         id: true,
         versionNumber: true,
@@ -530,7 +642,7 @@ export async function findMyProducts({
     },
   });
 
-  return products;
+  return products.map(p => withPrice(p, workspace));
 }
 
 export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
@@ -564,6 +676,7 @@ export async function findMyProductWithVersions({
       supportContactUrl: true,
       productCategory: {id: true, name: true},
       currentVersion: {id: true},
+      salePrice: true,
       versionList: {
         select: {
           id: true,

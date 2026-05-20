@@ -52,6 +52,7 @@ export async function SkillsTab({
       title={await t('Skills')}
       requiresReview={workspace.config.requiresReview === true}
       allowToPublish={workspace.config.allowToPublish === true}
+      currencySymbol={workspace.config.marketplaceDefaultSaleCurrency?.symbol}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

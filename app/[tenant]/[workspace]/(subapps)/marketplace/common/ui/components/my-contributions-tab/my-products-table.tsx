@@ -48,6 +48,7 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
+  currencySymbol?: string | null;
 };
 
 export function MyProductsTable({
@@ -59,6 +60,7 @@ export function MyProductsTable({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
+  currencySymbol,
 }: Props) {
   const responsive = useResponsive();
   const small = RESPONSIVE_SIZES.some(size => responsive[size]);
@@ -204,6 +206,7 @@ export function MyProductsTable({
                       compatibilityVersions={compatibilityVersions}
                       requiresReview={requiresReview}
                       allowToPublish={allowToPublish}
+                      currencySymbol={currencySymbol}
                     />
                     <Link
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}

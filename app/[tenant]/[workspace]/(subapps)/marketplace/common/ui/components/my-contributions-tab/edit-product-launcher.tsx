@@ -19,6 +19,7 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
+  currencySymbol?: string | null;
 };
 
 export function EditProductLauncher({
@@ -29,6 +30,7 @@ export function EditProductLauncher({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
+  currencySymbol,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -74,6 +76,7 @@ export function EditProductLauncher({
           compatibilityVersions={compatibilityVersions}
           requiresReview={requiresReview}
           allowToPublish={allowToPublish}
+          currencySymbol={currencySymbol}
           initial={product}
         />
       )}
