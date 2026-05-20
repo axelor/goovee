@@ -41,6 +41,7 @@ export async function SkillsTab({
     type: MARKETPLACE_TYPE.SKILL,
     take: PAGE_SIZE,
     skip: getSkip(PAGE_SIZE, page),
+    orderBy: {createdOn: 'DESC'},
   });
 
   const totalCount = getTotal(skills);

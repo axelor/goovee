@@ -224,6 +224,11 @@ export async function saveProduct(
           // goovee writes bypass that hook so we set it explicitly.
           fullName: `[${code}] ${payload.name}`,
           isMarketPlace: true,
+          /* Scope the product to the current workspace. Without this,
+           * `getProductAccessFilter` (used by `withMyProductAccessFilter`)
+           * rejects the product on the very next lookup — saveVersion
+           * would then fail with "Product not found". */
+          portalWorkspace: {select: {id: auth.workspace.id}},
           defaultSupplierPartner: {select: {id: auth.user.mainPartnerId}},
           marketplaceCreatedBy: {select: {id: auth.user.id}},
           saleCurrency: {select: {id: priceDefaults.saleCurrency.id}},

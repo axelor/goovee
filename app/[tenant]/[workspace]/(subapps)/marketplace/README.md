@@ -90,7 +90,11 @@ into a single grouped cart is tracked in
 ### My contributions
 
 - Owner dashboard with Overview, Skills, Apps, Revenue, Profile tabs.
-- Tables of own products (collapsible columns on mobile, follows the ticketing pattern).
+- Tables of own products (collapsible columns on mobile, follows the ticketing pattern). Sorted newest-first by `createdOn`.
+- **Status column** reads `product.currentVersion?.statusSelect` — it's a "publication state" view, not a per-version status:
+  - Green **Published** badge when `currentVersion.statusSelect === 'published'`.
+  - Muted badge with the translated status for any other non-null state.
+  - **`—`** when `currentVersion` is null. Per the [`currentVersion` rule](#rules), the pointer is only set when a _published_ version exists — so draft-only / in-review-only / unpublished-only products all render `—`. The product still appears in the table (My contributions ignores publication state); only the listing/detail surfaces hide it.
 - "Publish new" launcher opens the create flow; row pencil opens the edit flow.
 
 ### Create / edit flow

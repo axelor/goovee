@@ -128,7 +128,9 @@ export function MyProductsTable({
       desktopClassName: 'w-[15%]',
       content: product => (
         <span className="text-sm whitespace-nowrap">
-          v{product.currentVersion?.versionNumber || '—'}
+          {product.currentVersion?.versionNumber
+            ? `v${product.currentVersion.versionNumber}`
+            : '—'}
         </span>
       ),
     },

@@ -41,6 +41,7 @@ export async function AppsTab({
     type: MARKETPLACE_TYPE.APP,
     take: PAGE_SIZE,
     skip: getSkip(PAGE_SIZE, page),
+    orderBy: {createdOn: 'DESC'},
   });
 
   const totalCount = getTotal(apps);
