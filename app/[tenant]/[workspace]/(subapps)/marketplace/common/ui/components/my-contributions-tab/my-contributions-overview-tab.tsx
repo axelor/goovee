@@ -1,6 +1,7 @@
 import {Skeleton} from '@/ui/components/skeleton';
 import {Swipe} from '../swipe/swipe';
 import {t} from '@/locale/server';
+import {ComingSoonBanner} from './coming-soon-banner';
 
 const stats = [
   {
@@ -112,6 +113,7 @@ export async function OverviewTab() {
 
   return (
     <div className="space-y-6">
+      <ComingSoonBanner />
       {/* Stats Carousel */}
       <Swipe
         className="!w-[284px] !h-[160px]"

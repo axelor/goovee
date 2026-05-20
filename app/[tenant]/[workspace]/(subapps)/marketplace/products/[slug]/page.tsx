@@ -586,8 +586,14 @@ export default async function ProductPage(props: {
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">
-                    {licenseLabel}
+                    {licenseLabel}{' '}
+                    <span className="text-xs text-palette-amber">
+                      (Hardcoded)
+                    </span>
                   </span>
+                  {/* TODO: license isn't modelled on the product yet — this
+                      value is a placeholder. Plug in a real source before
+                      shipping past demo. */}
                   <p className="font-semibold text-foreground">MIT</p>
                 </div>
               </div>

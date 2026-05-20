@@ -54,6 +54,7 @@ into a single grouped cart is tracked in
 - Tabs: Overview / Versions / Reviews / Support.
 - Type-aware breadcrumb — links back to the product's own hub (skills vs apps); category breadcrumb item is omitted when the product has no category.
 - Reviews summary shows filled stars + numeric average.
+- **Support tab** shows up to four buttons, each conditional on its source URL being set: **Read docs** (`documentationUrl`), **Open issues** (`supportIssuesUrl`), **Contact author** (`supportContactUrl`), **Report problem** (also `supportIssuesUrl`). The last button reuses the issues URL — only three distinct URLs are modelled on the product today. Either drop "Report problem" or back it with a dedicated field (e.g. `bugReportUrl`) — TODO in `support-tab.tsx`.
 - CTA state machine in the header card (resolved server-side):
 
   | Product state          | Buyer state                               | CTA shown                              |

@@ -11,6 +11,7 @@ import {getLoginURL} from '@/utils/url';
 import {OverviewTab} from '../common/ui/components/my-contributions-tab/my-contributions-overview-tab';
 import {SkillsTab} from '../common/ui/components/my-contributions-tab/skills-tab';
 import {AppsTab} from '../common/ui/components/my-contributions-tab/apps-tab';
+import {ComingSoonBanner} from '../common/ui/components/my-contributions-tab/coming-soon-banner';
 import {
   findProductCategories,
   findCompatibilityVersions,
@@ -243,6 +244,12 @@ export default async function MyContributionsPage(props: {
             compatibilityVersions={compatibilityVersions}
             page={appsPage}
           />
+        )}
+        {currentTab === MyContributionsTab.Revenue && (
+          <ComingSoonBanner area={await t('Revenue')} />
+        )}
+        {currentTab === MyContributionsTab.Profile && (
+          <ComingSoonBanner area={await t('Profile')} />
         )}
       </div>
     </div>

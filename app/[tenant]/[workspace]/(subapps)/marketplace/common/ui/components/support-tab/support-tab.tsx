@@ -96,6 +96,10 @@ export async function SupportTab({product}: SupportTabProps) {
             </Button>
           )}
 
+          {/* TODO: "Report problem" reuses `supportIssuesUrl` — the same
+              URL the "Open issues" button above already links to. Either
+              drop this button or back it by a dedicated product field
+              (e.g. `bugReportUrl` or a `mailto:`-style contact). */}
           {product.supportIssuesUrl && (
             <Button
               asChild
