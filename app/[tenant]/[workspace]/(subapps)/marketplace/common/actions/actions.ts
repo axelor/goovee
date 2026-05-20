@@ -32,11 +32,12 @@ import {WorkspaceURLSchema} from '@/utils/validators';
 import fs from 'fs';
 import {manager} from '@/tenant';
 import {clone} from '@/utils';
-import {zodSafeParseFormData} from '@/utils/formdata';
+import {unpackFromFormData, zodSafeParseFormData} from '@/utils/formdata';
 import type {Cloned} from '@/types/util';
 import {
   findMyProductWithVersions,
   uploadBundle,
+  syncProductImages,
   addRating,
   replaceRating,
   removeRating,
@@ -97,17 +98,23 @@ export async function loadMyProductForEdit(
 }
 
 // ---- SAVE PRODUCT (create or update) ---- //
-type SaveProductInput = z.infer<typeof productSchema> & {workspaceURL: string};
-
 export async function saveProduct(
-  input: SaveProductInput,
+  formData: FormData,
 ): ActionResponse<{productId: string}> {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {workspaceURL, ...rest} = input;
+  const raw = unpackFromFormData(formData) as Record<string, unknown> & {
+    workspaceURL?: string;
+  };
+  const workspaceURL = raw?.workspaceURL;
+  if (!workspaceURL) {
+    return {error: true, message: await t('Workspace is required')};
+  }
+  // Strip workspaceURL before validating against the product schema.
+  const {workspaceURL: _, ...rest} = raw;
   const parsed = productSchema.safeParse(rest);
   if (!parsed.success) {
     return {
@@ -231,6 +238,15 @@ export async function saveProduct(
       });
       productId = created.id;
     }
+
+    await syncProductImages({
+      client,
+      productId,
+      storage: auth.tenant.config.aos.storage,
+      keepImageIds: payload.existingImageIds,
+      newImages: payload.newImages,
+    });
+
     return {success: true, data: {productId}};
   } catch (e) {
     const message =

@@ -1,10 +1,13 @@
-import {useState, useTransition} from 'react';
-import {useForm} from 'react-hook-form';
+import {useMemo, useRef, useState, useTransition} from 'react';
+import Image from 'next/image';
+import {useForm, useFormContext, useWatch} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
+import {Plus, X} from 'lucide-react';
 import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
 import {Input} from '@/ui/components/input';
 import {RichTextEditor} from '@/ui/components';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {
   Form,
   FormControl,
@@ -26,9 +29,15 @@ import type {Cloned} from '@/types/util';
 import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
 import {GRADIENT_MAP} from '../../../constants/gradients';
 import {ProductIcon} from '../product-icon';
+import {packIntoFormData} from '@/utils/formdata';
 import {saveProduct} from '../../../actions/actions';
 import {isPaid} from '../../../utils/price';
-import {productSchema, type ProductFormValues} from './schema';
+import {
+  productSchema,
+  type ProductFormValues,
+  MAX_IMAGES,
+  MAX_IMAGE_SIZE,
+} from './schema';
 import type {ListCategory, MyProductWithVersions} from '../../../orm/orm';
 
 const ICON_CODES = Array.from({length: 12}, (_, i) => `icon-${i + 1}`);
@@ -80,13 +89,21 @@ export function ProductForm({
 
   const submit = handleSubmit(values => {
     startTransition(async () => {
-      const result = await saveProduct({...values, workspaceURL});
+      const formData = packIntoFormData({...values, workspaceURL});
+      const result = await saveProduct(formData);
       if (!result.success) {
         toast({variant: 'destructive', title: result.message});
         return;
       }
       toast({variant: 'success', title: i18n.t('Saved')});
-      form.reset(values);
+      /* Reset form to a state that reflects what's now persisted: any
+       * just-uploaded `newImages` are now persisted as `existingImageIds`
+       * (we won't know their ids until the next load, so just clear the
+       * new bucket so the dirty check works). */
+      form.reset({
+        ...values,
+        newImages: [],
+      });
       onSaved(result.data.productId);
       onContinue();
     });
@@ -295,6 +312,8 @@ export function ProductForm({
             )}
           />
 
+          <ScreenshotsField initial={initial} />
+
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <FormField
               control={control}
@@ -439,6 +458,8 @@ function buildDefaults(
       supportIssuesUrl: '',
       supportContactUrl: '',
       salePrice: undefined,
+      existingImageIds: [],
+      newImages: [],
     };
   }
   return {
@@ -457,5 +478,169 @@ function buildDefaults(
     supportContactUrl: initial.supportContactUrl ?? '',
     salePrice:
       initial.salePrice != null ? Number(initial.salePrice) : undefined,
+    existingImageIds: (initial.portalImageList ?? [])
+      .map(row => row?.id)
+      .filter((id): id is string => !!id),
+    newImages: [],
   };
+}
+
+type ScreenshotsFieldProps = {
+  initial?: Cloned<MyProductWithVersions>;
+};
+
+/* Multi-image upload for the product Overview tab screenshots.
+ *   - Renders thumbnails of already-persisted images (rows in form
+ *     `existingImageIds`). Removing one drops its row id from the array
+ *     — the server then deletes the orphaned AOSProductPicture on save.
+ *   - "Add images" appends to `newImages` (File[]).
+ *   - Client-side caps: 5 MB per file, 10 total (existing + new). The
+ *     same caps are enforced server-side by the Zod schema. */
+function ScreenshotsField({initial}: ScreenshotsFieldProps) {
+  const {tenant} = useWorkspace();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const {control, setValue, getValues} = useFormContext<ProductFormValues>();
+  const existingIds = useWatch({control, name: 'existingImageIds'}) ?? [];
+  const newImages = useWatch({control, name: 'newImages'}) ?? [];
+  const total = existingIds.length + newImages.length;
+  const remaining = MAX_IMAGES - total;
+
+  // Map existing AOSProductPicture rowId -> AOSMetaFile id (for URL).
+  const initialImageMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const row of initial?.portalImageList ?? []) {
+      if (row?.id && row?.picture?.id) {
+        map.set(row.id, row.picture.id);
+      }
+    }
+    return map;
+  }, [initial?.portalImageList]);
+
+  // TODO: per-file upload progress indicator.
+  // Server Actions don't expose upload progress; would need to either
+  // switch this to an XHR-backed route handler (universal — boring but
+  // proven) or to `fetch` + ReadableStream body (no Firefox support yet,
+  // HTTP/2 + HTTPS only, `duplex: 'half'`). For now we lean on the
+  // submit button's pending spinner; revisit if users complain.
+  const onPickFiles = (files: FileList | null) => {
+    if (!files) return;
+    const picked = Array.from(files);
+    const acceptable = picked
+      .filter(f => f.size <= MAX_IMAGE_SIZE)
+      .slice(0, Math.max(0, remaining));
+    setValue('newImages', [...newImages, ...acceptable], {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  return (
+    <FormField
+      control={control}
+      name="newImages"
+      render={({fieldState}) => (
+        <FormItem>
+          <FormLabel>
+            {i18n.t('Screenshots')}{' '}
+            <span className="text-xs text-muted-foreground">
+              {i18n.t(
+                '({0}/{1}, up to 5 MB each)',
+                String(total),
+                String(MAX_IMAGES),
+              )}
+            </span>
+          </FormLabel>
+          <FormControl>
+            <div className="flex flex-wrap gap-3">
+              {existingIds.map(rowId => {
+                const pictureId = initialImageMap.get(rowId);
+                if (!pictureId) return null;
+                return (
+                  <div
+                    key={rowId}
+                    className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
+                    <Image
+                      src={`/api/tenant/${tenant}/product/image/${pictureId}`}
+                      alt=""
+                      width={256}
+                      height={144}
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      aria-label={i18n.t('Remove image')}
+                      onClick={() =>
+                        setValue(
+                          'existingImageIds',
+                          getValues('existingImageIds').filter(
+                            id => id !== rowId,
+                          ),
+                          {shouldValidate: true, shouldDirty: true},
+                        )
+                      }
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
+              {newImages.map((file, i) => {
+                const url = URL.createObjectURL(file);
+                return (
+                  <div
+                    key={`${file.name}-${i}`}
+                    className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
+                    <img
+                      src={url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      onLoad={() => URL.revokeObjectURL(url)}
+                    />
+                    <button
+                      type="button"
+                      aria-label={i18n.t('Remove image')}
+                      onClick={() =>
+                        setValue(
+                          'newImages',
+                          newImages.filter((_, j) => j !== i),
+                          {shouldValidate: true, shouldDirty: true},
+                        )
+                      }
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
+              {remaining > 0 && (
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground">
+                  <Plus size={20} />
+                  <span className="text-xs">{i18n.t('Add images')}</span>
+                </button>
+              )}
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                multiple
+                hidden
+                onChange={e => onPickFiles(e.target.files)}
+              />
+            </div>
+          </FormControl>
+          {fieldState.error && <FormMessage />}
+          <p className="text-xs text-muted-foreground">
+            {i18n.t(
+              'PNG, JPG, GIF, WEBP or SVG. Max 5 MB per image, up to {0} per product.',
+              String(MAX_IMAGES),
+            )}
+          </p>
+        </FormItem>
+      )}
+    />
+  );
 }
