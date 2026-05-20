@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://goovee.axelor.com/marketplace/seed.schema.json",
+  "title": "Marketplace seed",
+  "description": "Demo data for the marketplace subapp. Source of truth is scripts/seed/seed.schema.ts (Zod). Keep this file in sync.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["products"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "IDE pointer to this schema file. Ignored at runtime."
+    },
+    "categories": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/Category"}
+    },
+    "compatibilityVersions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/CompatibilityVersion"}
+    },
+    "products": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/Product"}
+    }
+  },
+  "$defs": {
+    "Category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "name"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9-]+$",
+          "description": "Upsert key. AOSProductCategory.code; forced to forMarketPlace=true on seed."
+        },
+        "name": {"type": "string", "minLength": 1},
+        "iconCode": {"type": "string"},
+        "colorTheme": {"type": "string"}
+      }
+    },
+    "CompatibilityVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "title"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "Upsert key. AOSMarketplaceAxelorVersion.name (e.g. 'v9.0.9')."
+        },
+        "title": {"type": "string", "minLength": 1},
+        "releasedOn": {"type": "string", "format": "date-time"}
+      }
+    },
+    "Version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versionNumber", "status"],
+      "properties": {
+        "versionNumber": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "changelog": {"type": "string"},
+        "status": {"enum": ["draft", "published"]},
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO datetime. Required for `published`, absent for `draft`. Must be ≤ releasedAt."
+        },
+        "releasedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO datetime — the release / approval date. Required for `published`, absent for `draft`."
+        },
+        "compatibilityVersions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Names that must exist in compatibilityVersions[] or in the DB. Fail-fast otherwise."
+        }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authorEmail", "rating"],
+      "properties": {
+        "authorEmail": {"type": "string", "format": "email"},
+        "rating": {"type": "integer", "minimum": 1, "maximum": 5},
+        "comment": {
+          "type": "string",
+          "description": "Omit to seed a rating-only (no message) review."
+        },
+        "reviewedVersionNumber": {
+          "type": "string",
+          "description": "Defaults to the latest published version of the product."
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "slug",
+        "name",
+        "type",
+        "iconCode",
+        "coverStyle",
+        "categoryCode",
+        "price",
+        "versions"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^mkt-demo-[a-z0-9-]+$",
+          "description": "Upsert key. Prefix `mkt-demo-` is mandatory so reset can target seeded rows only."
+        },
+        "slug": {"type": "string", "pattern": "^[a-z0-9-]+$"},
+        "name": {"type": "string", "minLength": 1},
+        "supplierEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Override the CLI --supplier default."
+        },
+        "description": {"type": "string", "maxLength": 280},
+        "longDescription": {"type": "string"},
+        "type": {"enum": ["skill", "app"]},
+        "iconCode": {
+          "type": "string",
+          "pattern": "^icon-(1[0-2]|[1-9])$",
+          "description": "icon-1 .. icon-12 — must match the ProductIcon component options."
+        },
+        "coverStyle": {
+          "type": "string",
+          "pattern": "^gradient-(10|[1-9])$",
+          "description": "gradient-1 .. gradient-10 — must match GRADIENT_MAP."
+        },
+        "categoryCode": {
+          "type": "string",
+          "description": "AOSProductCategory.code; either seeded above or already present with forMarketPlace=true."
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "description": "In the workspace default sale currency. 0 = free product."
+        },
+        "installCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Demo-only fake install count to make listings look realistic. Runtime downloads still increment this normally."
+        },
+        "documentationUrl": {"type": "string", "format": "uri"},
+        "supportIssuesUrl": {"type": "string", "format": "uri"},
+        "supportContactUrl": {"type": "string", "format": "uri"},
+        "versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Version"}
+        },
+        "reviews": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/Review"}
+        }
+      }
+    }
+  }
+}
