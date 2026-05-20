@@ -609,7 +609,7 @@ function ScreenshotsField({initial}: ScreenshotsFieldProps) {
               <input
                 ref={inputRef}
                 type="file"
-                accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                accept="image/*"
                 multiple
                 hidden
                 onChange={e => onPickFiles(e.target.files)}
@@ -619,7 +619,7 @@ function ScreenshotsField({initial}: ScreenshotsFieldProps) {
           {fieldState.error && <FormMessage />}
           <p className="text-xs text-muted-foreground">
             {i18n.t(
-              'PNG, JPG, GIF, WEBP or SVG. Max 5 MB per image, up to {0} per product.',
+              'Any image format. Max 5 MB per image, up to {0} per product.',
               String(MAX_IMAGES),
             )}
           </p>

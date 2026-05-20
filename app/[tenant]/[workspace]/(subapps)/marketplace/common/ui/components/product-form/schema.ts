@@ -5,7 +5,7 @@ import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
 export const MAX_BUNDLE_SIZE = 20 * 1024 * 1024; // 20 MB
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB per image
 export const MAX_IMAGES = 9; // total per product (existing + new)
-export const ACCEPTED_IMAGE_TYPES = /^image\/(png|jpe?g|gif|webp|svg\+xml)$/;
+export const ACCEPTED_IMAGE_TYPES = /^image\//;
 
 const optionalUrl = z
   .union([z.url({protocol: /^https?$/}), z.literal('')])
@@ -46,7 +46,7 @@ export const productSchema = z
         message: 'Each image must be 5 MB or less',
       })
       .refine(arr => arr.every(f => ACCEPTED_IMAGE_TYPES.test(f.type)), {
-        message: 'Only PNG / JPEG / GIF / WEBP / SVG images are allowed',
+        message: 'Only image files are allowed',
       }),
   })
   .superRefine((v, ctx) => {
