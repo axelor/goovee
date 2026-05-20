@@ -8,6 +8,10 @@
       "name": "name"
     },
     {
+      "type": "String",
+      "name": "code"
+    },
+    {
       "type": "Boolean",
       "name": "isFeatured"
     },

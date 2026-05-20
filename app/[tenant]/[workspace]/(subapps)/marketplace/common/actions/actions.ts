@@ -207,8 +207,15 @@ export async function saveProduct(
       const created = await client.aOSProduct.create({
         data: {
           ...productData,
+          // TODO: revisit — base_product.dtype is NOT NULL and goovee
+          // doesn't default it from the schema entity name; hardcoded
+          // here so creates don't fail with a constraint violation.
+          dtype: 'Product',
           code,
           slug,
+          // AOS computes `[code] name` in ProductBaseRepository.save();
+          // goovee writes bypass that hook so we set it explicitly.
+          fullName: `[${code}] ${payload.name}`,
           isMarketPlace: true,
           defaultSupplierPartner: {select: {id: auth.user.mainPartnerId}},
           marketplaceCreatedBy: {select: {id: auth.user.id}},
