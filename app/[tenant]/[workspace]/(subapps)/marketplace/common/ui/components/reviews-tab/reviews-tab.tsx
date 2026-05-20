@@ -6,7 +6,7 @@ import {Rating} from '../rating';
 import {SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
-import {getSkip, getPaginationButtons} from '@/utils/pagination';
+import {getSkip, getPaginationButtons, getTotal} from '@/utils/pagination';
 import {
   Pagination,
   PaginationContent,
@@ -73,8 +73,9 @@ export async function ReviewsTab({
     }),
   ]);
 
-  const totalReviewCount = product.ratingCount || 0;
-  const totalReviewPages = Math.ceil(totalReviewCount / REVIEWS_PAGE_SIZE);
+  const visibleReviewTotal = getTotal(visibleReviews);
+  const totalReviewCount = visibleReviewTotal + (myReview ? 1 : 0);
+  const totalReviewPages = Math.ceil(visibleReviewTotal / REVIEWS_PAGE_SIZE);
 
   const [noReviewsLabel, reviewCountLabel, previousLabel, nextLabel] =
     await Promise.all([
