@@ -8,7 +8,7 @@ import {manager} from '@/tenant';
 
 import {SeedSchema} from './validators';
 import {validateCrossFieldRules} from './validate';
-import {findPartnerByEmail, findWorkspaceByUrl} from './lookups';
+import {findCustomerPartnerByEmail, findWorkspaceByUrl} from './lookups';
 import {
   recomputeRatings,
   refreshCurrentVersion,
@@ -34,7 +34,7 @@ const {values} = parseArgs({
   options: {
     tenant: {type: 'string'},
     workspace: {type: 'string'},
-    supplier: {type: 'string'},
+    suppliers: {type: 'string'},
     file: {type: 'string'},
     validate: {type: 'boolean'},
     help: {type: 'boolean'},
@@ -51,12 +51,13 @@ Usage:
   pnpm marketplace:seed [options]
 
 Options:
-  --tenant <id>      Tenant ID (defaults to 'd' if MULTI_TENANCY=false)
-  --workspace <url>  Workspace URL (required for seeding)
-  --supplier <email> Default supplier email (required for seeding)
-  --file <path>      Path to seed.json (defaults to local seed.json)
-  --validate         Run only validation (schema + cross-field rules)
-  --help             Show this help message
+  --tenant <id>         Tenant ID (defaults to 'd' if MULTI_TENANCY=false)
+  --workspace <url>     Workspace URL (required for seeding)
+  --suppliers <emails>  Comma-separated supplier emails (required for seeding)
+                        Apps and skills distributed equally among suppliers
+  --file <path>         Path to seed.json (defaults to local seed.json)
+  --validate            Run only validation (schema + cross-field rules)
+  --help                Show this help message
 `);
   process.exit(0);
 }
@@ -64,7 +65,7 @@ Options:
 const tenantId =
   values.tenant ?? (process.env.MULTI_TENANCY === 'true' ? undefined : 'd');
 const workspaceURL = values.workspace;
-const supplierEmail = values.supplier;
+const suppliersInput = values.suppliers;
 const seedFile = values.file ?? path.resolve(__dirname, 'seed.json');
 
 function fail(message: string): never {
@@ -75,7 +76,7 @@ function fail(message: string): never {
 if (!values.validate) {
   if (!tenantId) fail('--tenant is required (or set MULTI_TENANCY=false).');
   if (!workspaceURL) fail('--workspace=<url> is required.');
-  if (!supplierEmail) fail('--supplier=<email> is required.');
+  if (!suppliersInput) fail('--suppliers=<email1,email2,...> is required.');
 }
 
 async function main() {
@@ -109,7 +110,7 @@ async function main() {
   const publicRoot = path.resolve(process.cwd(), 'public');
 
   console.log(
-    `\x1b[36m→ Tenant=${tenantId} workspace=${workspaceURL} supplier=${supplierEmail}\x1b[0m`,
+    `\x1b[36m→ Tenant=${tenantId} workspace=${workspaceURL} suppliers=${suppliersInput}\x1b[0m`,
   );
   console.log(
     `\x1b[36m→ ${data.categories?.length ?? 0} categories, ${data.compatibilityVersions?.length ?? 0} compat versions, ${data.products.length} products\x1b[0m`,
@@ -117,10 +118,20 @@ async function main() {
 
   await client.$transaction(async txClient => {
     const workspace = await findWorkspaceByUrl(txClient, workspaceURL!);
-    const supplierPartner = await findPartnerByEmail(txClient, supplierEmail!);
+
+    /* Parse and validate all suppliers */
+    const supplierEmails = suppliersInput!.split(',').map(s => s.trim());
+    const suppliers = await Promise.all(
+      supplierEmails.map(email => findCustomerPartnerByEmail(txClient, email)),
+    );
+
+    console.log(
+      `\x1b[36m→ ${suppliers.length} suppliers: ${suppliers.map(s => s.name).join(', ')}\x1b[0m`,
+    );
+
     const ctx: WorkspaceContext = {
       workspaceId: workspace.id,
-      supplierPartnerId: supplierPartner.id,
+      supplierPartnerId: suppliers[0]!.id /* Default to first supplier */,
       defaults: {
         saleCurrencyId: workspace.config.marketplaceDefaultSaleCurrency!.id,
         unitId: workspace.config.marketplaceDefaultUnit!.id,
@@ -128,6 +139,30 @@ async function main() {
         inAti: workspace.config.marketplaceInAti === true,
       },
     };
+
+    /* Distribute products across suppliers: apps and skills evenly.
+     * Use deterministic hash of product code to avoid bias from data ordering. */
+    const appProducts = data.products.filter(p => p.type === 'app');
+    const skillProducts = data.products.filter(p => p.type === 'skill');
+
+    const hashCode = (str: string): number => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash = hash & hash;
+      }
+      return Math.abs(hash);
+    };
+
+    const productSupplierMap = new Map<string, string>();
+    appProducts.forEach(p => {
+      const hash = hashCode(p.code);
+      productSupplierMap.set(p.code, suppliers[hash % suppliers.length]!.id);
+    });
+    skillProducts.forEach(p => {
+      const hash = hashCode(p.code);
+      productSupplierMap.set(p.code, suppliers[hash % suppliers.length]!.id);
+    });
 
     for (const category of data.categories ?? []) {
       const row = await upsertCategory(txClient, category, ctx.workspaceId);
@@ -160,11 +195,13 @@ async function main() {
     const seededProductIds: string[] = [];
     for (let index = 0; index < data.products.length; index++) {
       const product = data.products[index];
+      const supplierIdForProduct =
+        productSupplierMap.get(product.code) || ctx.supplierPartnerId;
       const {id: productId} = await upsertProduct(
         txClient,
         ctx,
         product,
-        ctx.supplierPartnerId,
+        supplierIdForProduct,
       );
       seededProductIds.push(productId);
 
@@ -218,8 +255,11 @@ async function main() {
         });
       }
 
+      const supplierName = suppliers.find(
+        s => s.id === supplierIdForProduct,
+      )?.name;
       console.log(
-        `  \x1b[32m✓\x1b[0m product ${product.code} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''})`,
+        `  \x1b[32m✓\x1b[0m product ${product.code} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''}) → ${supplierName}`,
       );
     }
 

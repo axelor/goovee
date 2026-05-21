@@ -26,6 +26,7 @@ import {
   findCategoryByCode,
   findCompatibilityVersionByName,
   findPartnerByEmail,
+  findCustomerPartnerByEmail,
 } from './lookups';
 
 export type WorkspaceContext = {
@@ -251,7 +252,7 @@ export async function upsertProduct(
 ) {
   const category = await findCategoryByCode(client, product.categoryCode);
   const supplierPartnerId = product.supplierEmail
-    ? (await findPartnerByEmail(client, product.supplierEmail)).id
+    ? (await findCustomerPartnerByEmail(client, product.supplierEmail)).id
     : defaultSupplierPartnerId;
 
   const slug = product.slug;

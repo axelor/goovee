@@ -74,6 +74,28 @@ export async function findPartnerByEmail(client: Client, email: string) {
   return partner;
 }
 
+/* Suppliers must be customers. Review authors can be any partner. */
+export async function findCustomerPartnerByEmail(
+  client: Client,
+  email: string,
+) {
+  const partner = await client.aOSPartner.findOne({
+    where: {emailAddress: {address: email}},
+    select: {id: true, name: true, simpleFullName: true, isCustomer: true},
+  });
+  if (!partner) {
+    throw new SeedLookupError(
+      `Partner with email '${email}' not found. Create an AOSPartner with that email address first.`,
+    );
+  }
+  if (!partner.isCustomer) {
+    throw new SeedLookupError(
+      `Supplier partner with email '${email}' exists but is not a customer (isCustomer=false). Suppliers must be customers. Update the partner in AOS and try again.`,
+    );
+  }
+  return partner;
+}
+
 export async function findCategoryByCode(client: Client, code: string) {
   const category = await client.aOSProductCategory.findOne({
     where: {code, forMarketPlace: true},
