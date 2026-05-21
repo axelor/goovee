@@ -17,7 +17,33 @@
  *      company's IANA timezone). Sum the picked rates → totalTaxRate.
  *   4. If `inAti`, invert: WT = salePrice / (1 + rate/100), ATI =
  *      salePrice. Otherwise forward: WT = salePrice, ATI = WT + WT·rate/100.
- *   5. Round both to `options.scale` (currency.numberOfDecimals).
+ *   5. Attempt currency conversion in priority order (see below). WT and
+ *      ATI are both converted together; if any conversion step fails
+ *      (no matching CurrencyConversionLine) the next target is tried.
+ *   6. Round both to the resolved currency's `numberOfDecimals` (default 2).
+ *
+ * ──────────────────────────────────────────────────────────────────────
+ * Currency resolution order
+ * ──────────────────────────────────────────────────────────────────────
+ *   1. viewerCurrency  — the viewer's partner currency (from
+ *      `AOSPartner.currency`). Highest priority: show the price in the
+ *      buyer's own currency when a conversion line exists.
+ *   2. workspaceCurrency — `marketplaceDefaultSaleCurrency` on the
+ *      workspace config. Used when the viewer has no partner currency or
+ *      no conversion line for it.
+ *   3. productCurrency — the product's own `saleCurrency`. No conversion
+ *      needed; used as-is when neither of the above could be satisfied.
+ *
+ *   Conversion uses `appBase.currencyConversionLineList`, mirroring
+ *   AOS's `CurrencyServiceImpl.getCurrencyConversionRateAtDate`: try a
+ *   direct fromCode→toCode line first; if none, try the inverse and
+ *   invert the rate. Date-range filtering is applied to both.
+ *
+ *   Note: `saleCurrency` on the product is set at creation time to the
+ *   publisher's partner currency (falling back to the workspace default),
+ *   so `productCurrency` and `workspaceCurrency` often coincide. The
+ *   conversion step still runs to handle cross-currency catalogs and
+ *   buyer personalisation.
  *
  * ──────────────────────────────────────────────────────────────────────
  * How AOS does it at the time of this implementation
@@ -45,17 +71,20 @@
  * ──────────────────────────────────────────────────────────────────────
  *   - No fiscal position. Marketplace sells one regime per workspace;
  *     there is no per-buyer tax remapping to perform.
- *   - No currency conversion. Workspace pins a single sale currency
- *     (`marketplaceDefaultSaleCurrency`); product and company currency
- *     are the same by construction.
+ *   - Currency conversion is implemented but scoped to the three-tier
+ *     priority above (viewer → workspace → product). AOS's full
+ *     CurrencyService path (company currency, fiscal position overrides,
+ *     PriceList currency) is not replicated — unnecessary given the
+ *     single-company, single-catalog marketplace model.
  *   - No price-list / per-partner discount. Marketplace surfaces a
  *     uniform catalog price; per-buyer pricing isn't a marketplace
  *     feature.
  *   - No `productCompanyList` override. Marketplace products aren't
  *     multi-company configured, so the base `salePrice` is the truth.
- *   - Final rounding scale is `saleCurrency.numberOfDecimals` rather
- *     than `nbDecimalDigitForUnitPrice`; the two are typically equal,
- *     and the currency value is the one already on the displayed row.
+ *   - Final rounding scale is the resolved currency's `numberOfDecimals`
+ *     rather than `nbDecimalDigitForUnitPrice`; the two are typically
+ *     equal, and the currency value is the one already on the displayed
+ *     row.
  *   - Intermediate arithmetic is float64 rather than BigDecimal. For
  *     positive prices and tax rates `Math.round` matches HALF_UP, so
  *     the rounded result matches AOS at currency precision; cent-level
@@ -107,6 +136,25 @@ export type ComputedPrice = {
   ati: number;
   /** Total applied tax rate as a percentage. Sum across all matched tax lines. */
   taxRate: number;
+  /** Currency in which wt/ati are expressed. Resolved by priority:
+   *  viewer partner currency → workspace default currency → product currency. */
+  currency: {code: string; symbol: string};
+};
+
+/** Minimal currency shape needed for conversion. */
+export type CurrencyInput = {
+  code: string;
+  symbol: string;
+  numberOfDecimals?: number | null;
+};
+
+/** One row from `appBase.currencyConversionLineList`. */
+export type ConversionLine = {
+  startCurrency?: {code?: string | null} | null;
+  endCurrency?: {code?: string | null} | null;
+  exchangeRate?: unknown;
+  fromDate?: string | null;
+  toDate?: string | null;
 };
 
 export type ComputeOptions = {
@@ -122,6 +170,17 @@ export type ComputeOptions = {
   /** Decimal places for the rounded result. Defaults to 2; pass the
    *  currency's `numberOfDecimals` for currency-aware rounding. */
   scale?: number;
+  /** Currency of the product's `salePrice` field. Used as the conversion
+   *  source and as the final fallback when no conversion is possible. */
+  productCurrency?: CurrencyInput | null;
+  /** Viewer's preferred currency from their partner record. Highest-priority
+   *  conversion target. */
+  viewerCurrency?: CurrencyInput | null;
+  /** Workspace default sale currency. Second-priority conversion target. */
+  workspaceCurrency?: CurrencyInput | null;
+  /** All active CurrencyConversionLine rows from `appBase`. Used to look
+   *  up exchange rates, mirroring AOS's CurrencyService logic. */
+  conversionLines?: ConversionLine[] | null;
 };
 
 /** AOS-style resolution: try the product's own `accountManagementList`
@@ -219,39 +278,129 @@ function round(value: number, scale: number): number {
   return Math.round(value * factor) / factor;
 }
 
-/** Compute the without-tax price, all-tax-included price, and total
- *  applied tax rate for a product. */
+/** Mirrors AOS's CurrencyServiceImpl.getCurrencyConversionRateAtDate:
+ *  look for a direct fromCode→toCode line; if none, try the inverse and
+ *  invert the rate. Returns null if no line matches (caller falls back). */
+function getExchangeRate(
+  fromCode: string,
+  toCode: string,
+  today: string,
+  lines: ConversionLine[],
+): number | null {
+  if (fromCode === toCode) return 1;
+
+  const matchLine = (start: string, end: string) =>
+    lines.find(l => {
+      if (l.startCurrency?.code !== start || l.endCurrency?.code !== end)
+        return false;
+      if (l.fromDate && today < l.fromDate) return false;
+      if (l.toDate && today > l.toDate) return false;
+      return true;
+    });
+
+  const direct = matchLine(fromCode, toCode);
+  if (direct != null) {
+    const rate = Number(direct.exchangeRate);
+    return Number.isFinite(rate) && rate !== 0 ? rate : null;
+  }
+
+  const inverse = matchLine(toCode, fromCode);
+  if (inverse != null) {
+    const rate = Number(inverse.exchangeRate);
+    return Number.isFinite(rate) && rate !== 0 ? 1 / rate : null;
+  }
+
+  return null;
+}
+
+/** Attempt to convert `amount` from `fromCode` to `toCurrency` using the
+ *  provided conversion lines. Returns null if no usable rate is found. */
+function tryConvert(
+  amount: number,
+  fromCode: string,
+  toCurrency: CurrencyInput,
+  today: string,
+  lines: ConversionLine[],
+): {value: number; currency: CurrencyInput} | null {
+  const rate = getExchangeRate(fromCode, toCurrency.code, today, lines);
+  if (rate == null) return null;
+  return {value: amount * rate, currency: toCurrency};
+}
+
+/** Compute the without-tax price, all-tax-included price, total applied
+ *  tax rate, and display currency for a product.
+ *
+ *  Currency resolution order:
+ *    1. viewerCurrency  — if a conversion line exists for productCurrency→viewer
+ *    2. workspaceCurrency — if a conversion line exists for productCurrency→workspace
+ *    3. productCurrency — no conversion needed, used as-is
+ */
 export function computePrice(
   product: PriceComputeInput,
   options: ComputeOptions = {},
 ): ComputedPrice {
-  const {companyId, companyTimezone, scale = DEFAULT_PRICE_SCALE} = options;
+  const {
+    companyId,
+    companyTimezone,
+    scale = DEFAULT_PRICE_SCALE,
+    productCurrency,
+    viewerCurrency,
+    workspaceCurrency,
+    conversionLines,
+  } = options;
 
+  const today = todayInTimezone(companyTimezone);
   const salePrice = Number(product.salePrice ?? 0);
   const accountManagement = resolveAccountManagement(product, companyId);
   const taxRate = accountManagement
-    ? getTotalTaxRate(
-        accountManagement.saleTaxSet,
-        todayInTimezone(companyTimezone),
-      )
+    ? getTotalTaxRate(accountManagement.saleTaxSet, today)
     : DEFAULT_TAX_RATE;
 
   let wt: number;
   let ati: number;
   if (product.inAti) {
-    // Stored price already includes tax. Invert: WT = ATI / (1 + rate/100).
     ati = salePrice;
     wt = taxRate === 0 ? salePrice : salePrice / (1 + taxRate / 100);
   } else {
-    // Stored price excludes tax. Forward: ATI = WT + WT * rate/100.
     wt = salePrice;
     ati = wt + (wt * taxRate) / 100;
   }
 
+  // Attempt currency conversion in priority order.
+  const lines = conversionLines ?? [];
+  const fromCode = productCurrency?.code;
+  let resolvedCurrency: CurrencyInput | null = productCurrency ?? null;
+  let convertedWt = wt;
+  let convertedAti = ati;
+  let resolvedScale = scale;
+
+  if (fromCode) {
+    const targets = [viewerCurrency, workspaceCurrency].filter(
+      (c): c is CurrencyInput => c != null && c.code !== fromCode,
+    );
+    for (const target of targets) {
+      const wtResult = tryConvert(wt, fromCode, target, today, lines);
+      const atiResult = tryConvert(ati, fromCode, target, today, lines);
+      if (wtResult && atiResult) {
+        convertedWt = wtResult.value;
+        convertedAti = atiResult.value;
+        resolvedCurrency = target;
+        resolvedScale = target.numberOfDecimals ?? scale;
+        break;
+      }
+    }
+  }
+
+  const fallbackCurrency = resolvedCurrency ?? {code: '', symbol: ''};
+
   return {
-    wt: round(wt, scale),
-    ati: round(ati, scale),
+    wt: round(convertedWt, resolvedScale),
+    ati: round(convertedAti, resolvedScale),
     taxRate,
+    currency: {
+      code: fallbackCurrency.code,
+      symbol: fallbackCurrency.symbol,
+    },
   };
 }
 

@@ -16,6 +16,8 @@ import {ensureAuth} from '../utils/auth-helper';
 import {
   findProductAccess,
   findProductsBySearch,
+  findPartnerCurrency,
+  fetchPriceContext,
   type ProductSearchResult,
   recordPurchases,
   attachInvoiceToPurchases,
@@ -87,7 +89,7 @@ export async function loadMyProductForEdit(
 
   const product = await findMyProductWithVersions({
     productId,
-    partnerId: auth.user.mainPartnerId,
+    mainPartnerId: auth.user.mainPartnerId,
     client: auth.tenant.client,
     workspace: auth.workspace,
   });
@@ -140,7 +142,7 @@ export async function saveProduct(
   if (payload.id) {
     const existing = await findMyProductWithVersions({
       productId: payload.id,
-      partnerId: auth.user.mainPartnerId,
+      mainPartnerId: auth.user.mainPartnerId,
       client,
       workspace: auth.workspace,
     });
@@ -161,6 +163,11 @@ export async function saveProduct(
     productFamily: auth.workspace.config.marketplaceDefaultProductFamily,
     inAti: auth.workspace.config.marketplaceInAti === true,
   };
+  const partnerCurrency = await findPartnerCurrency({
+    client,
+    mainPartnerId: auth.user.mainPartnerId,
+  });
+  const saleCurrencyId = partnerCurrency?.id ?? priceDefaults.saleCurrency?.id;
 
   const productData = {
     name: payload.name,
@@ -174,6 +181,7 @@ export async function saveProduct(
     supportContactUrl: payload.supportContactUrl || null,
     productCategory: {select: {id: payload.productCategoryId}},
     salePrice: new BigDecimal(String(payload.salePrice ?? 0)),
+    ...(saleCurrencyId ? {saleCurrency: {select: {id: saleCurrencyId}}} : {}),
   };
 
   try {
@@ -198,7 +206,7 @@ export async function saveProduct(
       productId = payload.id;
     } else {
       if (
-        !priceDefaults.saleCurrency?.id ||
+        !saleCurrencyId ||
         !priceDefaults.unit?.id ||
         !priceDefaults.productFamily?.id
       ) {
@@ -231,7 +239,6 @@ export async function saveProduct(
           portalWorkspace: {select: {id: auth.workspace.id}},
           defaultSupplierPartner: {select: {id: auth.user.mainPartnerId}},
           marketplaceCreatedBy: {select: {id: auth.user.id}},
-          saleCurrency: {select: {id: priceDefaults.saleCurrency.id}},
           unit: {select: {id: priceDefaults.unit.id}},
           productFamily: {select: {id: priceDefaults.productFamily.id}},
           inAti: priceDefaults.inAti,
@@ -300,7 +307,7 @@ export async function saveVersion(
 
   const existingProduct = await findMyProductWithVersions({
     productId: payload.productId,
-    partnerId: auth.user.mainPartnerId,
+    mainPartnerId: auth.user.mainPartnerId,
     client,
     workspace: auth.workspace,
   });
@@ -480,7 +487,7 @@ export async function unpublishVersion(
   // Owner check: caller must own the parent product.
   const owned = await findMyProductWithVersions({
     productId,
-    partnerId: auth.user.mainPartnerId,
+    mainPartnerId: auth.user.mainPartnerId,
     client,
     workspace: auth.workspace,
   });
@@ -949,7 +956,7 @@ export async function checkout(
     return {error: true, message: await t('Sign in required.')};
   }
   const {client, config} = auth.tenant;
-  const partnerId = auth.user.mainPartnerId;
+  const mainPartnerId = auth.user.mainPartnerId;
 
   let paidAmount: number;
   let paymentContextId: string;
@@ -972,11 +979,14 @@ export async function checkout(
     };
   }
 
+  const priceContext = await fetchPriceContext({client, mainPartnerId});
   const cartResult = await validateCart({
     client,
     workspace: auth.workspace,
-    partnerId,
+    mainPartnerId,
     productIds: stashedProductIds,
+    conversionLines: priceContext.conversionLines,
+    viewerCurrency: priceContext.viewerCurrency,
   });
   if (cartResult.error) return cartResult;
   const cart = cartResult.data;
@@ -999,7 +1009,7 @@ export async function checkout(
 
   try {
     await client.$transaction(async txClient => {
-      await recordPurchases(txClient, partnerId, productIds);
+      await recordPurchases(txClient, mainPartnerId, productIds);
       await markPaymentAsProcessed({
         contextId: paymentContextId,
         version: paymentContextVersion,
@@ -1027,7 +1037,7 @@ export async function checkout(
   after(async () => {
     try {
       const buyerPartner = await client.aOSPartner.findOne({
-        where: {id: partnerId},
+        where: {id: mainPartnerId},
         select: {mainAddress: {id: true}},
       });
       const addressId = buyerPartner?.mainAddress?.id ?? null;
@@ -1035,7 +1045,7 @@ export async function checkout(
       const {saleOrderId} = await createMarketplaceOrder({
         cart,
         workspace: auth.workspace,
-        partnerId,
+        mainPartnerId,
         contactId: auth.user.isContact ? auth.user.id : undefined,
         invoicingAddressId: addressId,
         deliveryAddressId: addressId,
@@ -1048,14 +1058,14 @@ export async function checkout(
       if (invoice?.id) {
         await attachInvoiceToPurchases(
           client,
-          partnerId,
+          mainPartnerId,
           productIds,
           invoice.id,
         );
       }
     } catch (e) {
       console.error('marketplace: AOS invoice creation failed', {
-        partnerId,
+        mainPartnerId,
         productIds,
         error: e,
       });

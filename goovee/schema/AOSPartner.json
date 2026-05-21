@@ -224,6 +224,11 @@
       "type": "ManyToMany",
       "name": "favouriteProducts",
       "target": "AOSProduct"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency"
     }
   ]
 }

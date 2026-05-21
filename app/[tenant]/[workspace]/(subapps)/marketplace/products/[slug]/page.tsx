@@ -84,6 +84,7 @@ export default async function ProductPage(props: {
     slug: params.slug,
     client,
     workspace: auth.workspace,
+    mainPartnerId: auth.user?.mainPartnerId,
   });
 
   if (!product) notFound();
@@ -123,15 +124,15 @@ export default async function ProductPage(props: {
    *   - logged-in non-owner non-buyer → Add to cart + Buy now
    *   - guest → "Sign in to buy" link
    * Owner can also pull drafts; the download gate honours both branches. */
-  const partnerId = auth.user?.mainPartnerId;
+  const mainPartnerId = auth.user?.mainPartnerId;
   const isOwner =
-    !!partnerId && product.defaultSupplierPartner?.id === partnerId;
+    !!mainPartnerId && product.defaultSupplierPartner?.id === mainPartnerId;
   const owns = !!(
     paid &&
-    partnerId &&
+    mainPartnerId &&
     (await client.aOSMarketplaceProductPurchase.findOne({
       where: {
-        partner: {id: partnerId},
+        partner: {id: mainPartnerId},
         product: {id: product.id},
       },
       select: {id: true},

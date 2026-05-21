@@ -34,7 +34,7 @@ export async function GET(
   const version = await client.aOSMarketplaceProductVersion.findOne({
     where: withBundleAccessFilter({
       workspace: auth.workspace,
-      partnerId: auth.user?.mainPartnerId,
+      mainPartnerId: auth.user?.mainPartnerId,
       productId,
     })({id: versionId}),
     select: {

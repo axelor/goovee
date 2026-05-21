@@ -16,6 +16,7 @@ import {WorkspaceURLSchema} from '@/utils/validators';
 
 import {ensureAuth} from '../utils/auth-helper';
 import {validateCart, CartProductIdsSchema} from './cart-validation';
+import {fetchPriceContext} from '../orm/orm';
 
 const BaseSchema = z.object({
   productIds: CartProductIdsSchema,
@@ -43,11 +44,17 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
   if (authError) return err(await t('Sign in required.'));
   const {client, config} = auth.tenant;
 
+  const priceContext = await fetchPriceContext({
+    client,
+    mainPartnerId: auth.user.mainPartnerId,
+  });
   const cartResult = await validateCart({
     client,
     workspace: auth.workspace,
-    partnerId: auth.user.mainPartnerId,
+    mainPartnerId: auth.user.mainPartnerId,
     productIds,
+    conversionLines: priceContext.conversionLines,
+    viewerCurrency: priceContext.viewerCurrency,
   });
   if (cartResult.error) return cartResult;
   const cart = cartResult.data;

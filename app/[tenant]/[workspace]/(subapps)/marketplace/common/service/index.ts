@@ -12,7 +12,7 @@ import type {ValidatedCart} from '../actions/cart-validation';
 type CreateOrderArgs = {
   cart: ValidatedCart;
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
-  partnerId: string;
+  mainPartnerId: string;
   contactId?: string;
   invoicingAddressId: string | null;
   deliveryAddressId: string | null;
@@ -29,7 +29,7 @@ type CreateOrderArgs = {
 export async function createMarketplaceOrder({
   cart,
   workspace,
-  partnerId,
+  mainPartnerId,
   contactId,
   invoicingAddressId,
   deliveryAddressId,
@@ -41,11 +41,11 @@ export async function createMarketplaceOrder({
   const ws = `${aos.url}/ws/portal/orders/order`;
 
   const payload = {
-    partnerId,
+    partnerId: mainPartnerId,
     contactId,
     shipping: 0,
     total: cart.total,
-    inAti: true,
+    inAti: true, // paid price is always ATI, so we always send true
     items: cart.items.map(item => ({
       productId: item.productId,
       quantity: 1,

@@ -1,0 +1,34 @@
+{
+  "name": "AOSCurrencyConversionLine",
+  "table": "base_currency_conversion_line",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "startCurrency",
+      "target": "AOSCurrency"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "endCurrency",
+      "target": "AOSCurrency"
+    },
+    {
+      "type": "Decimal",
+      "name": "exchangeRate"
+    },
+    {
+      "type": "Date",
+      "name": "fromDate"
+    },
+    {
+      "type": "Date",
+      "name": "toDate"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "appBase",
+      "target": "AOSAppBase"
+    }
+  ]
+}

@@ -102,11 +102,11 @@ export function withMyProductAccessFilter(
  */
 export function withBundleAccessFilter({
   workspace,
-  partnerId,
+  mainPartnerId,
   productId,
 }: {
   workspace: PortalWorkspaceWithConfig;
-  partnerId?: ID;
+  mainPartnerId?: ID;
   productId: ID;
 }) {
   return function (where?: WhereOptions<AOSMarketplaceProductVersion>) {
@@ -126,15 +126,17 @@ export function withBundleAccessFilter({
           ]),
         },
         // Paid + owned + published
-        partnerId && {
+        mainPartnerId && {
           statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
           product: and([
             productAccess,
-            {marketplaceProductPurchaseList: {partner: {id: partnerId}}},
+            {marketplaceProductPurchaseList: {partner: {id: mainPartnerId}}},
           ]),
         },
         // Owner — any status
-        partnerId && {product: getMyProductAccessFilter(workspace, partnerId)},
+        mainPartnerId && {
+          product: getMyProductAccessFilter(workspace, mainPartnerId),
+        },
       ]),
     ]);
   };

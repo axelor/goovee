@@ -5,7 +5,11 @@ import type {Client} from '@/goovee/.generated/client';
 
 import {and} from '@/utils/orm';
 
-import {computePrice} from '../utils/price';
+import {
+  computePrice,
+  type ConversionLine,
+  type CurrencyInput,
+} from '../utils/price';
 import {getProductAccessFilter} from '../orm/helpers';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 
@@ -44,13 +48,17 @@ export type ValidatedCart = {
 export async function validateCart({
   client,
   workspace,
-  partnerId,
+  mainPartnerId,
   productIds,
+  conversionLines = [],
+  viewerCurrency = null,
 }: {
   client: Client;
   workspace: PortalWorkspaceWithConfig;
-  partnerId: string | null | undefined;
+  mainPartnerId: string | null | undefined;
   productIds: string[];
+  conversionLines?: ConversionLine[];
+  viewerCurrency?: CurrencyInput | null;
 }) {
   const dedupedIds = Array.from(new Set(productIds));
   if (dedupedIds.length === 0) {
@@ -83,9 +91,9 @@ export async function validateCart({
         numberOfDecimals: true,
       },
       currentVersion: {id: true, statusSelect: true},
-      marketplaceProductPurchaseList: partnerId
+      marketplaceProductPurchaseList: mainPartnerId
         ? {
-            where: {partner: {id: partnerId}},
+            where: {partner: {id: mainPartnerId}},
             select: {id: true},
           }
         : {select: {id: true}},
@@ -148,10 +156,29 @@ export async function validateCart({
         ),
       };
     }
+    const productCurrency: CurrencyInput | null = product.saleCurrency?.code
+      ? {
+          code: product.saleCurrency.code,
+          symbol: product.saleCurrency.symbol ?? '',
+          numberOfDecimals: product.saleCurrency.numberOfDecimals,
+        }
+      : null;
+    const workspaceCurrency = workspace.config.marketplaceDefaultSaleCurrency
+      ? {
+          code: workspace.config.marketplaceDefaultSaleCurrency.code ?? '',
+          symbol: workspace.config.marketplaceDefaultSaleCurrency.symbol ?? '',
+          numberOfDecimals:
+            workspace.config.marketplaceDefaultSaleCurrency.numberOfDecimals,
+        }
+      : null;
     const price = computePrice(product, {
       companyId: workspace.config.company?.id,
       companyTimezone: workspace.config.company?.timezone,
       scale: product.saleCurrency?.numberOfDecimals ?? 2,
+      productCurrency,
+      viewerCurrency,
+      workspaceCurrency,
+      conversionLines,
     });
     if (price.ati <= 0) {
       return {
@@ -162,15 +189,14 @@ export async function validateCart({
         ),
       };
     }
-    const code = product.saleCurrency?.code ?? null;
-    if (!code) {
+    if (!price.currency.code) {
       return {
         error: true as const,
         message: await t('Product is missing a currency configuration.'),
       };
     }
-    if (currencyCode == null) currencyCode = code;
-    else if (currencyCode !== code) {
+    if (currencyCode == null) currencyCode = price.currency.code;
+    else if (currencyCode !== price.currency.code) {
       return {
         error: true as const,
         message: await t(
@@ -184,8 +210,8 @@ export async function validateCart({
       name: product.name ?? '',
       priceAti: price.ati,
       scale: product.saleCurrency?.numberOfDecimals ?? 2,
-      currencyCode: code,
-      currencySymbol: product.saleCurrency?.symbol ?? null,
+      currencyCode: price.currency.code,
+      currencySymbol: price.currency.symbol || null,
     });
   }
 

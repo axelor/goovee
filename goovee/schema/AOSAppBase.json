@@ -18,6 +18,12 @@
     {
       "type": "Boolean",
       "name": "archived"
+    },
+    {
+      "type": "OneToMany",
+      "name": "currencyConversionLineList",
+      "target": "AOSCurrencyConversionLine",
+      "mappedBy": "appBase"
     }
   ]
 }

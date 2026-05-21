@@ -136,6 +136,7 @@ export default async function Page(props: {
   const products = await findProducts({
     client,
     workspace: auth.workspace,
+    mainPartnerId: auth.user?.mainPartnerId,
     take: limit,
     skip: getSkip(limit, page),
     where: and<AOSProduct>([

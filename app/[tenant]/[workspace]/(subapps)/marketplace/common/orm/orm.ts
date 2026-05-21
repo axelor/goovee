@@ -27,6 +27,8 @@ import {
   computePrice,
   type ComputedPrice,
   type PriceComputeInput,
+  type ConversionLine,
+  type CurrencyInput,
 } from '../utils/price';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
@@ -52,26 +54,149 @@ export type SingleProduct = NonNullable<
 >;
 
 /* Each query that returns a product enriches the row with `price`
- * (wt / ati / taxRate) computed server-side via the same logic AOS Java
- * uses when generating invoice lines. Consumers should read these
+ * (wt / ati / taxRate / currency) computed server-side via the same logic
+ * AOS Java uses when generating invoice lines. Consumers should read these
  * numbers and never recompute on the client. */
 type PriceableProduct = PriceComputeInput & {
-  saleCurrency?: {numberOfDecimals?: number | null} | null;
+  saleCurrency?: {
+    code?: string | null;
+    symbol?: string | null;
+    numberOfDecimals?: number | null;
+  } | null;
+};
+
+/** Fields every product query must select to enable price computation. */
+const priceSelectFields = {
+  salePrice: true,
+  saleCurrency: {code: true, symbol: true, numberOfDecimals: true},
+  inAti: true,
+  accountManagementList: {
+    select: {
+      id: true,
+      company: {id: true},
+      saleTaxSet: {
+        select: {
+          activeTaxLine: {value: true},
+          taxLineList: {
+            select: {value: true, startDate: true, endDate: true},
+          },
+        },
+      },
+    },
+  },
+  productFamily: {
+    accountManagementList: {
+      select: {
+        id: true,
+        company: {id: true},
+        saleTaxSet: {
+          select: {activeTaxLine: {value: true}},
+        },
+      },
+    },
+  },
+} as const satisfies SelectOptions<AOSProduct>;
+
+export type PriceContext = {
+  conversionLines: ConversionLine[];
+  viewerCurrency: CurrencyInput | null;
 };
 
 function withPrice<T extends PriceableProduct>(
   product: T,
   workspace: PortalWorkspaceWithConfig,
+  priceContext: PriceContext,
 ): T & {price: ComputedPrice} {
+  const productCurrency: CurrencyInput | null = product.saleCurrency?.code
+    ? {
+        code: product.saleCurrency.code,
+        symbol: product.saleCurrency.symbol ?? '',
+        numberOfDecimals: product.saleCurrency.numberOfDecimals,
+      }
+    : null;
+
+  const workspaceCurrency = workspace.config.marketplaceDefaultSaleCurrency
+    ? {
+        code: workspace.config.marketplaceDefaultSaleCurrency.code ?? '',
+        symbol: workspace.config.marketplaceDefaultSaleCurrency.symbol ?? '',
+        numberOfDecimals:
+          workspace.config.marketplaceDefaultSaleCurrency.numberOfDecimals,
+      }
+    : null;
+
   return {
     ...product,
     price: computePrice(product, {
       companyId: workspace.config.company?.id,
       companyTimezone: workspace.config.company?.timezone,
       scale: product.saleCurrency?.numberOfDecimals ?? 2,
+      productCurrency,
+      viewerCurrency: priceContext.viewerCurrency,
+      workspaceCurrency,
+      conversionLines: priceContext.conversionLines,
     }),
   };
 }
+
+/** Fetches the data needed for currency conversion in one query:
+ *  - all CurrencyConversionLine rows from appBase
+ *  - the viewer's partner currency (null for guests) */
+export async function fetchPriceContext({
+  client,
+  mainPartnerId,
+}: {
+  client: Client;
+  mainPartnerId: string | null | undefined;
+}): Promise<PriceContext> {
+  const [appBase, partner] = await Promise.all([
+    client.aOSAppBase.findOne({
+      where: {archived: {ne: true}},
+      select: {
+        currencyConversionLineList: {
+          select: {
+            startCurrency: {code: true},
+            endCurrency: {code: true},
+            exchangeRate: true,
+            fromDate: true,
+            toDate: true,
+          },
+        },
+      },
+    }),
+    findPartnerCurrency({client, mainPartnerId}),
+  ]);
+
+  const viewerCurrency = partner?.code
+    ? {
+        code: partner.code,
+        symbol: partner.symbol ?? '',
+        numberOfDecimals: partner.numberOfDecimals,
+      }
+    : null;
+
+  return {
+    conversionLines: appBase?.currencyConversionLineList ?? [],
+    viewerCurrency,
+  };
+}
+
+export async function findPartnerCurrency({
+  client,
+  mainPartnerId,
+}: {
+  client: Client;
+  mainPartnerId: string | null | undefined;
+}) {
+  if (!mainPartnerId) return null;
+  const partner = await client.aOSPartner.findOne({
+    where: {id: mainPartnerId},
+    select: {
+      currency: {id: true, code: true, symbol: true, numberOfDecimals: true},
+    },
+  });
+  return partner?.currency ?? null;
+}
+
 export type ListCategory = Awaited<
   ReturnType<typeof findProductCategories>
 >[number];
@@ -222,9 +347,28 @@ export type ProductSearchResult = Awaited<
   ReturnType<typeof findProductsBySearch>
 >[number];
 
+const findProductsSelect = {
+  id: true,
+  slug: true,
+  name: true,
+  description: true,
+  code: true,
+  picture: {id: true},
+  thumbnailImage: {id: true},
+  marketplaceTypeSelect: true,
+  marketplaceCoverStyle: true,
+  marketplaceIconCode: true,
+  averageRating: true,
+  ratingCount: true,
+  installCount: true,
+  ...priceSelectFields,
+  currentVersion: {id: true, versionNumber: true},
+} as const satisfies SelectOptions<AOSProduct>;
+
 export async function findProducts({
   client,
   workspace,
+  mainPartnerId,
   where,
   take,
   skip,
@@ -232,165 +376,86 @@ export async function findProducts({
 }: {
   client: Client;
   workspace: PortalWorkspaceWithConfig;
+  mainPartnerId?: string | null;
 } & QueryProps<AOSProduct>) {
-  const products = await client.aOSProduct.find({
-    ...(take ? {take} : {}),
-    ...(skip ? {skip} : {}),
-    ...(orderBy ? {orderBy} : {}),
-    where: withPublishedProductFilter(workspace)({
-      ...where,
+  const [products, priceContext] = await Promise.all([
+    client.aOSProduct.find({
+      ...(take ? {take} : {}),
+      ...(skip ? {skip} : {}),
+      ...(orderBy ? {orderBy} : {}),
+      where: withPublishedProductFilter(workspace)({...where}),
+      select: findProductsSelect,
     }),
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      description: true,
-      code: true,
-      picture: {id: true},
-      thumbnailImage: {id: true},
-      marketplaceTypeSelect: true,
-      marketplaceCoverStyle: true,
-      marketplaceIconCode: true,
-      averageRating: true,
-      ratingCount: true,
-      installCount: true,
-      salePrice: true,
-      saleCurrency: {symbol: true, numberOfDecimals: true},
-      inAti: true,
-      accountManagementList: {
-        select: {
-          id: true,
-          company: {id: true},
-          saleTaxSet: {
-            select: {
-              activeTaxLine: {value: true},
-              taxLineList: {
-                select: {value: true, startDate: true, endDate: true},
-              },
-            },
-          },
-        },
-      },
-      productFamily: {
-        accountManagementList: {
-          select: {
-            id: true,
-            company: {id: true},
-            saleTaxSet: {
-              select: {activeTaxLine: {value: true}},
-            },
-          },
-        },
-      },
-      currentVersion: {
-        id: true,
-        versionNumber: true,
-      },
-    },
-  });
+    fetchPriceContext({client, mainPartnerId}),
+  ]);
 
-  return products.map(p => withPrice(p, workspace));
+  return products.map(p => withPrice(p, workspace, priceContext));
 }
+
+const findProductSelect = {
+  id: true,
+  name: true,
+  description: true,
+  longDescription: true,
+  code: true,
+  slug: true,
+  createdOn: true,
+  picture: {id: true},
+  thumbnailImage: {id: true},
+  marketplaceTypeSelect: true,
+  marketplaceCoverStyle: true,
+  marketplaceIconCode: true,
+  documentationUrl: true,
+  supportIssuesUrl: true,
+  supportContactUrl: true,
+  averageRating: true,
+  ratingCount: true,
+  installCount: true,
+  ...priceSelectFields,
+  currentVersion: {
+    id: true,
+    versionNumber: true,
+    statusSelect: true,
+    changelog: true,
+    dateOfApproval: true,
+    bundleFile: {sizeText: true},
+    compatibilitySet: {
+      select: {title: true},
+      orderBy: {releasedOn: 'DESC' as const},
+    },
+  },
+  productCategory: {id: true, name: true},
+  defaultSupplierPartner: {
+    id: true,
+    simpleFullName: true,
+    name: true,
+    picture: {id: true},
+  },
+  portalCategorySet: {select: {id: true, name: true}},
+  portalImageList: {select: {picture: {id: true}}},
+} as const satisfies SelectOptions<AOSProduct>;
 
 export async function findProduct({
   slug,
   client,
   workspace,
+  mainPartnerId,
 }: {
   slug: string;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
+  mainPartnerId?: string | null;
 }) {
-  const product = await client.aOSProduct.findOne({
-    where: withPublishedProductFilter(workspace)({
-      slug,
+  const [product, priceContext] = await Promise.all([
+    client.aOSProduct.findOne({
+      where: withPublishedProductFilter(workspace)({slug}),
+      select: findProductSelect,
     }),
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      longDescription: true,
-      code: true,
-      slug: true,
-      createdOn: true,
-      picture: {id: true},
-      thumbnailImage: {id: true},
-      marketplaceTypeSelect: true,
-      marketplaceCoverStyle: true,
-      marketplaceIconCode: true,
-      documentationUrl: true,
-      supportIssuesUrl: true,
-      supportContactUrl: true,
-      averageRating: true,
-      ratingCount: true,
-      installCount: true,
-      currentVersion: {
-        id: true,
-        versionNumber: true,
-        statusSelect: true,
-        changelog: true,
-        dateOfApproval: true,
-        bundleFile: {
-          sizeText: true,
-        },
-        compatibilitySet: {
-          select: {
-            title: true,
-          },
-          orderBy: {
-            releasedOn: 'DESC',
-          },
-        },
-      },
-      productCategory: {
-        id: true,
-        name: true,
-      },
-      defaultSupplierPartner: {
-        id: true,
-        simpleFullName: true,
-        name: true,
-        picture: {id: true},
-      },
-      portalCategorySet: {
-        select: {id: true, name: true},
-      },
-      portalImageList: {
-        select: {picture: {id: true}},
-      },
-      salePrice: true,
-      saleCurrency: {symbol: true, numberOfDecimals: true},
-      inAti: true,
-      accountManagementList: {
-        select: {
-          id: true,
-          company: {id: true},
-          saleTaxSet: {
-            select: {
-              activeTaxLine: {value: true},
-              taxLineList: {
-                select: {value: true, startDate: true, endDate: true},
-              },
-            },
-          },
-        },
-      },
-      productFamily: {
-        accountManagementList: {
-          select: {
-            id: true,
-            company: {id: true},
-            saleTaxSet: {
-              select: {activeTaxLine: {value: true}},
-            },
-          },
-        },
-      },
-    },
-  });
+    fetchPriceContext({client, mainPartnerId}),
+  ]);
 
   if (!product) return null;
-  return withPrice(product, workspace);
+  return withPrice(product, workspace, priceContext);
 }
 
 // ---- PRODUCT VERSIONS ---- //
@@ -570,8 +635,26 @@ export async function updateProduct(
 
 // ---- MY PRODUCTS (USER CONTRIBUTIONS) ---- //
 
+const findMyProductsSelect = {
+  id: true,
+  slug: true,
+  name: true,
+  description: true,
+  code: true,
+  picture: {id: true},
+  thumbnailImage: {id: true},
+  marketplaceTypeSelect: true,
+  marketplaceCoverStyle: true,
+  marketplaceIconCode: true,
+  averageRating: true,
+  ratingCount: true,
+  installCount: true,
+  ...priceSelectFields,
+  currentVersion: {id: true, versionNumber: true, statusSelect: true},
+} as const satisfies SelectOptions<AOSProduct>;
+
 export async function findMyProducts({
-  partnerId,
+  mainPartnerId,
   client,
   workspace,
   type,
@@ -580,87 +663,43 @@ export async function findMyProducts({
   skip,
   orderBy,
 }: {
-  partnerId: ID;
+  mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   type?: MARKETPLACE_TYPE;
 } & QueryProps<AOSProduct>) {
-  const products = await client.aOSProduct.find({
-    ...(take ? {take} : {}),
-    ...(skip ? {skip} : {}),
-    ...(orderBy ? {orderBy} : {}),
-    where: withMyProductAccessFilter(
-      workspace,
-      partnerId,
-    )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      description: true,
-      code: true,
-      picture: {id: true},
-      thumbnailImage: {id: true},
-      marketplaceTypeSelect: true,
-      marketplaceCoverStyle: true,
-      marketplaceIconCode: true,
-      averageRating: true,
-      ratingCount: true,
-      installCount: true,
-      salePrice: true,
-      saleCurrency: {symbol: true, numberOfDecimals: true},
-      inAti: true,
-      accountManagementList: {
-        select: {
-          id: true,
-          company: {id: true},
-          saleTaxSet: {
-            select: {
-              activeTaxLine: {value: true},
-              taxLineList: {
-                select: {value: true, startDate: true, endDate: true},
-              },
-            },
-          },
-        },
-      },
-      productFamily: {
-        accountManagementList: {
-          select: {
-            id: true,
-            company: {id: true},
-            saleTaxSet: {
-              select: {activeTaxLine: {value: true}},
-            },
-          },
-        },
-      },
-      currentVersion: {
-        id: true,
-        versionNumber: true,
-        statusSelect: true,
-      },
-    },
-  });
+  const [products, priceContext] = await Promise.all([
+    client.aOSProduct.find({
+      ...(take ? {take} : {}),
+      ...(skip ? {skip} : {}),
+      ...(orderBy ? {orderBy} : {}),
+      where: withMyProductAccessFilter(
+        workspace,
+        mainPartnerId,
+      )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
+      select: findMyProductsSelect,
+    }),
+    fetchPriceContext({client, mainPartnerId}),
+  ]);
 
-  return products.map(p => withPrice(p, workspace));
+  return products.map(p => withPrice(p, workspace, priceContext));
 }
 
 export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
 
 export async function findMyProductWithVersions({
   productId,
-  partnerId,
+  mainPartnerId,
   client,
   workspace,
 }: {
   productId: ID;
-  partnerId: ID;
+  mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
 }) {
   const product = await client.aOSProduct.findOne({
-    where: withMyProductAccessFilter(workspace, partnerId)({id: productId}),
+    where: withMyProductAccessFilter(workspace, mainPartnerId)({id: productId}),
     select: {
       id: true,
       version: true,
@@ -722,12 +761,12 @@ export type CompatibilityVersion = Awaited<
 >[number];
 
 export async function countMyProducts({
-  partnerId,
+  mainPartnerId,
   client,
   workspace,
   type,
 }: {
-  partnerId: ID;
+  mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   type?: MARKETPLACE_TYPE;
@@ -735,7 +774,7 @@ export async function countMyProducts({
   const count = await client.aOSProduct.count({
     where: withMyProductAccessFilter(
       workspace,
-      partnerId,
+      mainPartnerId,
     )(type && {marketplaceTypeSelect: type}),
   });
 
@@ -931,18 +970,18 @@ export async function removeRating(
 
 export async function findPurchases({
   client,
-  partnerId,
+  mainPartnerId,
   take,
   skip,
 }: {
   client: Client;
-  partnerId: ID | null | undefined;
+  mainPartnerId: ID | null | undefined;
 } & Pick<QueryProps<AOSMarketplaceProductPurchase>, 'take' | 'skip'>) {
-  if (!partnerId) return [];
+  if (!mainPartnerId) return [];
   return client.aOSMarketplaceProductPurchase.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
-    where: {partner: {id: partnerId}},
+    where: {partner: {id: mainPartnerId}},
     orderBy: {purchasedAt: 'DESC'},
     select: {
       id: true,

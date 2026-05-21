@@ -90,7 +90,7 @@ export default async function MyPurchasesPage(props: {
 
   const purchases = await findPurchases({
     client: auth.tenant.client,
-    partnerId: auth.user.mainPartnerId,
+    mainPartnerId: auth.user.mainPartnerId,
     take: limit,
     skip: getSkip(limit, page),
   });

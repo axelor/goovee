@@ -12,9 +12,10 @@ import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../../../utils/auth-helper';
 
 type SkillsTabProps = {
-  partnerId: ID;
+  mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
+  currencySymbol?: string | null;
   workspaceURI: string;
   workspaceURL: string;
   categories: ListCategory[];
@@ -25,9 +26,10 @@ type SkillsTabProps = {
 const PAGE_SIZE = 10;
 
 export async function SkillsTab({
-  partnerId,
+  mainPartnerId,
   client,
   workspace,
+  currencySymbol,
   workspaceURI,
   workspaceURL,
   categories,
@@ -35,7 +37,7 @@ export async function SkillsTab({
   page,
 }: SkillsTabProps) {
   const skills = await findMyProducts({
-    partnerId,
+    mainPartnerId,
     client,
     workspace,
     type: MARKETPLACE_TYPE.SKILL,
@@ -53,7 +55,7 @@ export async function SkillsTab({
       title={await t('Skills')}
       requiresReview={workspace.config.requiresReview === true}
       allowToPublish={workspace.config.allowToPublish === true}
-      currencySymbol={workspace.config.marketplaceDefaultSaleCurrency?.symbol}
+      currencySymbol={currencySymbol}
       inAti={workspace.config.marketplaceInAti === true}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}

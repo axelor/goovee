@@ -15,6 +15,7 @@ import {ComingSoonBanner} from '../common/ui/components/my-contributions-tab/com
 import {
   findProductCategories,
   findCompatibilityVersions,
+  findPartnerCurrency,
 } from '../common/orm/orm';
 import {PublishNewLauncher} from './client-launcher';
 import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
@@ -73,14 +74,23 @@ export default async function MyContributionsPage(props: {
   }
   if (error) notFound();
 
-  const [categories, compatibilityVersions] = await Promise.all([
-    findProductCategories({
-      client: auth.tenant.client,
-      workspace: auth.workspace,
-      take: 100,
-    }),
-    findCompatibilityVersions(auth.tenant.client),
-  ]);
+  const [categories, compatibilityVersions, partnerCurrency] =
+    await Promise.all([
+      findProductCategories({
+        client: auth.tenant.client,
+        workspace: auth.workspace,
+        take: 100,
+      }),
+      findCompatibilityVersions(auth.tenant.client),
+      findPartnerCurrency({
+        client: auth.tenant.client,
+        mainPartnerId: auth.user.mainPartnerId,
+      }),
+    ]);
+
+  const currencySymbol =
+    partnerCurrency?.symbol ??
+    auth.workspace.config.marketplaceDefaultSaleCurrency?.symbol;
 
   const {tab, skillsPage, appsPage} = searchParams;
 
@@ -169,9 +179,7 @@ export default async function MyContributionsPage(props: {
               compatibilityVersions={clone(compatibilityVersions)}
               requiresReview={auth.workspace.config.requiresReview === true}
               allowToPublish={auth.workspace.config.allowToPublish === true}
-              currencySymbol={
-                auth.workspace.config.marketplaceDefaultSaleCurrency?.symbol
-              }
+              currencySymbol={currencySymbol}
               inAti={auth.workspace.config.marketplaceInAti === true}
             />
           )}
@@ -200,7 +208,7 @@ export default async function MyContributionsPage(props: {
             {skillsLabel} (
             <Suspense fallback="...">
               <SkillsCountBadge
-                partnerId={auth.user.mainPartnerId}
+                mainPartnerId={auth.user.mainPartnerId}
                 client={auth.tenant.client}
                 workspace={auth.workspace}
               />
@@ -217,7 +225,7 @@ export default async function MyContributionsPage(props: {
             {appsLabel} (
             <Suspense fallback="...">
               <AppsCountBadge
-                partnerId={auth.user.mainPartnerId}
+                mainPartnerId={auth.user.mainPartnerId}
                 client={auth.tenant.client}
                 workspace={auth.workspace}
               />
@@ -250,9 +258,10 @@ export default async function MyContributionsPage(props: {
         {tab === MyContributionsTab.Overview && <OverviewTab />}
         {tab === MyContributionsTab.Skills && (
           <SkillsTab
-            partnerId={auth.user.mainPartnerId}
+            mainPartnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
             workspace={auth.workspace}
+            currencySymbol={currencySymbol}
             workspaceURI={workspaceURI}
             workspaceURL={workspaceURL}
             categories={categories}
@@ -262,9 +271,10 @@ export default async function MyContributionsPage(props: {
         )}
         {tab === MyContributionsTab.Apps && (
           <AppsTab
-            partnerId={auth.user.mainPartnerId}
+            mainPartnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
             workspace={auth.workspace}
+            currencySymbol={currencySymbol}
             workspaceURI={workspaceURI}
             workspaceURL={workspaceURL}
             categories={categories}

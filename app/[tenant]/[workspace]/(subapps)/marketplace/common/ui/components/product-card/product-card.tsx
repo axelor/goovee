@@ -26,17 +26,16 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
     installCount = 0,
     marketplaceIconCode,
     marketplaceCoverStyle,
-    saleCurrency,
   } = product;
 
   // Server-computed ATI (and WT) come pre-baked on the product row.
-  const {ati: priceAti} = product.price;
+  const {ati: priceAti, currency} = product.price;
   const paid = isPaid(priceAti);
   const priceLabel = paid
     ? await formatNumber(priceAti, {
         type: 'DECIMAL',
-        scale: saleCurrency?.numberOfDecimals ?? 2,
-        currency: saleCurrency?.symbol ?? undefined,
+        scale: product.saleCurrency?.numberOfDecimals ?? 2,
+        currency: currency.symbol || undefined,
       })
     : freeLabel;
 

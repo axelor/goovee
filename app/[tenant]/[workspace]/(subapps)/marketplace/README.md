@@ -152,7 +152,7 @@ Demoting a live or queued version to draft must go through Unpublish first.
 - **Bundle files** are capped at 20 MB. Allowed types: `.zip`, `application/zip`, `application/x-zip-compressed`.
 - The **marketplace type** (`skill` / `app`) is fixed at creation — the select is disabled in edit mode.
 - **Categories** and **Axelor compatibility versions** are admin-controlled in AOS; the marketplace just reads them.
-- **Pricing** uses workspace-level defaults set on `PortalAppConfig`: `marketplaceDefaultSaleCurrency`, `marketplaceDefaultUnit`, `marketplaceDefaultProductFamily`, and `marketplaceInAti`. `saveProduct` writes these onto every new product at create time so it's ready for the AOS sale-order / invoice path. **Workspace defaults do not retroactively apply** — changing them later only affects products created after the change; existing products keep the currency / unit / family / `inAti` they were created with. A re-sync would be a separate admin action (not implemented).
+- **Pricing** uses workspace-level defaults set on `PortalAppConfig`: `marketplaceDefaultSaleCurrency`, `marketplaceDefaultUnit`, `marketplaceDefaultProductFamily`, and `marketplaceInAti`. `saveProduct` writes these onto every new product at create time so it's ready for the AOS sale-order / invoice path. The `saleCurrency` written at create time is resolved as: publisher's partner currency (`AOSPartner.currency`) → workspace default currency. This means the price the publisher enters is interpreted in their own currency. **These fields do not retroactively apply** — changing them later only affects products created after the change; existing products keep the currency / unit / family / `inAti` they were created with. A re-sync would be a separate admin action (not implemented).
 - A product is **free** when `salePrice === 0` and **paid** when `salePrice > 0`. Free and paid are not stored as a separate flag.
 - **Ownership is per-partner**, not per-user. Any contact under the same `mainPartner` can download products that partner bought. Matches B2B semantics (and mirrors how shop tracks orders).
 - **Free products skip checkout entirely** — no `MarketplaceProductPurchase` row is written, the bundle download endpoint serves them publicly. Only paid flows reach `checkout()`.
@@ -173,11 +173,14 @@ touching anything price-related.
 2. Resolve the AccountManagement row by walking `Product.accountManagementList → ProductFamily.accountManagementList`, filtered by the selling company's id. Skip a Product-level row whose `saleTaxSet` is empty (treated as accounting-only override).
 3. For each tax in `saleTaxSet`, pick a rate — prefer `activeTaxLine.value`; otherwise pick the entry from `taxLineList` whose `[startDate, endDate]` window contains today (computed in the company's IANA timezone). Sum the picked rates → `totalTaxRate`.
 4. If `inAti`, invert: `WT = salePrice / (1 + rate/100)`, `ATI = salePrice`. Otherwise forward: `WT = salePrice`, `ATI = WT + WT·rate/100`.
-5. Round both to `options.scale` (defaults to `saleCurrency.numberOfDecimals`).
+5. Attempt currency conversion in priority order: viewer partner currency → workspace default currency → product currency. Both WT and ATI are converted together using `appBase.currencyConversionLineList` (direct rate, then inverse fallback). If no conversion line exists for any target the product currency is used as-is.
+6. Round both to the resolved currency's `numberOfDecimals` (default 2).
 
 ### Server-computed everywhere
 
-`withPrice` in `common/orm/orm.ts` enriches **every product returned by an ORM query** with `price: { wt, ati, taxRate }` so the client never recomputes. Display sites (`ProductCard`, the product detail page, `CartItemCard`) read `product.price.ati` and format it for the locale. The bare `computePrice` is still exported for unit tests / future server-side reuse.
+`withPrice` in `common/orm/orm.ts` enriches **every product returned by an ORM query** with `price: { wt, ati, taxRate, currency: { code, symbol } }` so the client never recomputes. Display sites (`ProductCard`, the product detail page, `CartItemCard`) read `product.price.ati` and `product.price.currency` for formatting. The bare `computePrice` is still exported for unit tests / future server-side reuse.
+
+`fetchPriceContext` resolves two things in parallel for each request — the viewer's partner currency (from `AOSPartner.currency`) and all active `CurrencyConversionLine` rows from `appBase` — then passes both into `withPrice`. The context is fetched inside each find function (`findProducts`, `findProduct`, `findMyProducts`) alongside the product query, so no extra round-trip is added.
 
 Anti-tamper at checkout: `validateCart` re-fetches each product from the DB and re-runs `computePrice` to derive the authoritative cart total. The total is then compared against `paidAmount` returned from the payment provider via `getPaymentInfo`. A mismatch larger than `0.005` rejects the finalize action.
 
@@ -195,9 +198,13 @@ axelor-sale/.../ProductRestService.fetchProductPrice
 Intentional divergences (out of marketplace scope):
 
 - **No fiscal position.** Marketplace sells one tax regime per workspace; no per-buyer tax remapping.
-- **No currency conversion.** Workspace pins a single sale currency via `marketplaceDefaultSaleCurrency`; product and company currency are the same by construction.
+- **Currency conversion is scoped.** We convert using `appBase.currencyConversionLineList` with the three-tier priority (viewer partner → workspace default → product). AOS's full path (company currency, fiscal-position overrides, PriceList currency) is not replicated — unnecessary for a single-company, single-catalog model. When no conversion line exists, AOS throws a configuration error and blocks the operation; we silently fall back to displaying the price in the product's original currency. This means a misconfigured rate results in the buyer seeing a foreign-currency price with no warning rather than an error.
 - **No price-list / per-partner discount.** Catalog price is uniform.
 - **No `productCompanyList` override.** Marketplace products aren't multi-company configured.
+
+AOS order payload notes (`common/service/index.ts`):
+
+- **`inAti: true` is hardcoded and intentional.** Since the paid price is always ATI, we always send `true` so AOS interprets each item's `price` correctly.
 
 Precision differences (acceptable for display):
 
@@ -250,17 +257,17 @@ Stripe / Paybox: the buyer lands back on `/cart/checkout`, the provider button r
 
 `common/actions/actions.ts:checkout({payment, workspaceURL})`:
 
-1. Authenticate. Resolve `partnerId = auth.user.mainPartnerId`.
+1. Authenticate. Resolve `mainPartnerId = auth.user.mainPartnerId`.
 2. `getPaymentInfo({mode, data, client})` pulls the `PaymentContext` for this provider session and returns `{amount, context: {id, version, data: {productIds, ...}}}`. The buyer-supplied identifier is **the only client input** — everything else comes from server-side storage.
-3. `validateCart(productIds)` re-fetches the products from the DB and recomputes prices server-side. The stashed `cart.total` is **not trusted**.
+3. `fetchPriceContext` resolves the viewer's partner currency and conversion lines. `validateCart(productIds)` re-fetches the products from the DB and recomputes prices server-side including currency conversion. The stashed `cart.total` is **not trusted**.
 4. **Anti-tamper**: `Math.abs(paidAmount - cart.total) > 0.005` → reject.
 5. **goovee transaction**:
-   - `recordPurchases(txClient, partnerId, productIds)` — idempotent insert (unique `(partner, product)` constraint).
+   - `recordPurchases(txClient, mainPartnerId, productIds)` — idempotent insert (unique `(partner, product)` constraint).
    - `markPaymentAsProcessed({contextId, version, client: txClient})` — flips the context state so a replay of the same provider session would fail in step 2.
 6. **After commit** (via `next/server.after()`):
-   - POST `/ws/portal/orders/order` on AOS with `{partnerId, items, total, paidAmount, paymentModeId, invocingPartnerAddressId, deliveryPartnerAddressId}`. Addresses come from `partner.mainAddress`. The Java side creates SaleOrder + Invoice + InvoicePayment in one transaction.
+   - POST `/ws/portal/orders/order` on AOS with `{partnerId: mainPartnerId, items, total, paidAmount, paymentModeId, invocingPartnerAddressId, deliveryPartnerAddressId}`. Addresses come from `partner.mainAddress`. The Java side creates SaleOrder + Invoice + InvoicePayment in one transaction.
    - Look up the resulting Invoice via `aOSInvoice.findOne({where: {saleOrder: {id: returnedSoId}}})`.
-   - `attachInvoiceToPurchases(client, partnerId, productIds, invoice.id)` back-populates the `invoice` field on each purchase row.
+   - `attachInvoiceToPurchases(client, mainPartnerId, productIds, invoice.id)` back-populates the `invoice` field on each purchase row.
    - **All best-effort** — errors are logged but don't fail the finalize action. The buyer already has access; missing invoice is a back-office reconciliation, not a user-facing failure.
 7. Return `ActionResponse<true>`.
 
@@ -364,6 +371,7 @@ Defined in `goovee/schema/`. See `common/orm/orm.ts` for the query layer.
 - **`AOSMarketplaceAxelorVersion`** — the list of Axelor releases a version can declare compatibility with (e.g. `7.4`, `7.3`).
 - **`AOSMarketplaceReview`** — user review with rating + comment, linked to product + reviewed version.
 - **`AOSProductCategory`** — categories with `forMarketPlace: true`.
+- **`AOSCurrencyConversionLine`** — exchange-rate rows from `appBase.currencyConversionLineList`. Fields: `startCurrency`, `endCurrency`, `exchangeRate`, `fromDate`, `toDate`. Fetched once per request by `fetchPriceContext` and used by `computePrice` for the currency conversion step.
 - **`AOSMarketplaceDownload`** — telemetry; not used by the listing UI.
 - **`AOSMarketplaceProductPurchase`** — per-`(partner, product)` ownership row, written by `checkout()`. Fields: `partner`, `product`, `invoice` (nullable; back-attached after the post-commit AOS HTTP call), `purchasedAt`. Unique constraint on `(partner, product)` makes `recordPurchases` and `attachInvoiceToPurchases` idempotent. The AOS-side domain (`MarketplaceProductPurchase.xml` in `axelor-portal`) provides a back-office grid for inspection — see Marketplace → Purchases.
 
@@ -408,7 +416,7 @@ All three go through a shared `prepare()` (auth + workspace gating + cart valida
 
 ### Helpers
 
-- `common/actions/cart-validation.ts:validateCart({client, workspace, partnerId, productIds})` — single-query validator used by both the session creators and the finalize action. Enforces workspace access, paid-only, published version, not-already-owned (via the `marketplaceProductPurchaseList` back-relation), and single-currency rules. Returns `{success: true, data: {items, total, currencyCode}}` with server-recomputed prices.
+- `common/actions/cart-validation.ts:validateCart({client, workspace, mainPartnerId, productIds, conversionLines, viewerCurrency})` — single-query validator used by both the session creators and the finalize action. Enforces workspace access, paid-only, published version, not-already-owned (via the `marketplaceProductPurchaseList` back-relation), and single-currency rules. Recomputes each price server-side including currency conversion. Returns `{success: true, data: {items, total, currencyCode}}` with server-authoritative prices.
 - `common/service/index.ts:createMarketplaceOrder({...})` — POSTs to `/ws/portal/orders/order`. Mirrors the shop payload shape.
 - `common/service/index.ts:findInvoiceBySaleOrderId({client, saleOrderId})` — looks up the AOS-created Invoice via `aOSInvoice.saleOrder` (the endpoint only returns the SO id).
 - `common/utils/payment-info.ts:getPaymentInfo({mode, data, client})` — provider-dispatch helper, duplicated from events. Tracked as a candidate to lift to `lib/core/payment/common`.

@@ -5,16 +5,16 @@ import type {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../../../utils/auth-helper';
 
 async function AppsCountBadge({
-  partnerId,
+  mainPartnerId,
   client,
   workspace,
 }: {
-  partnerId: ID;
+  mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
 }) {
   const count = await countMyProducts({
-    partnerId,
+    mainPartnerId,
     client,
     workspace,
     type: MARKETPLACE_TYPE.APP,
