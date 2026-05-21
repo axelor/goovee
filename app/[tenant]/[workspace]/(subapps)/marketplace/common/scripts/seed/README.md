@@ -112,7 +112,11 @@ Point the editor at the JSON Schema for autocomplete:
         },
       ],
       "reviews": [
-        {"authorEmail": "alice@example.com", "rating": 5, "comment": "Saves me hours."},
+        {
+          "authorEmail": "alice@example.com",
+          "rating": 5,
+          "comment": "Saves me hours.",
+        },
         {"authorEmail": "bob@example.com", "rating": 4},
       ],
     },
