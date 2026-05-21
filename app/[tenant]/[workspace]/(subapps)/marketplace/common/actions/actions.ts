@@ -238,6 +238,9 @@ export async function saveProduct(
           productTypeSelect: 'service',
           sellable: true,
           purchasable: false,
+          averageRating: new BigDecimal('0'),
+          ratingCount: 0,
+          installCount: 0,
         },
         select: {id: true},
       });

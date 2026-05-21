@@ -28,12 +28,16 @@ import {
 } from '../common/orm/orm';
 import {ensureAuth} from '../common/utils/auth-helper';
 import {MARKETPLACE_TYPE} from '../common/constants/marketplace-types';
-import {
-  MARKETPLACE_TYPE_BY_SEGMENT,
-  MARKETPLACE_TYPE_SEGMENT,
-} from '../common/constants/route-types';
+import {MARKETPLACE_TYPE_BY_SEGMENT} from '../common/constants/route-types';
 import {and} from '@/utils/orm';
 import type {AOSProduct} from '@/goovee/.generated/models';
+import type {OrderByOptions} from '@goovee/orm';
+import {
+  searchParamsSchema,
+  pageParamsSchema,
+  PAGE_SIZE,
+  type SearchParams,
+} from '../common/utils/validators';
 import {
   getPaginationButtons,
   getSkip,
@@ -41,23 +45,30 @@ import {
   getTotal,
 } from '@/utils/pagination';
 
-const PAGE_SIZE = 12;
-
 export default async function Page(props: {
-  params: Promise<{tenant: string; workspace: string; type: string}>;
-  searchParams: Promise<{[key: string]: string | undefined}>;
+  params: Promise<Record<string, string>>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const [params, searchParams] = await Promise.all([
+  const [rawParams, rawSearchParams] = await Promise.all([
     props.params,
     props.searchParams,
   ]);
+
+  const paramsResult = pageParamsSchema.safeParse(rawParams);
+  if (!paramsResult.success) notFound();
+  const params = paramsResult.data;
+
+  const searchParamsResult = searchParamsSchema.safeParse(rawSearchParams);
+  if (!searchParamsResult.success) notFound();
+  const searchParams = searchParamsResult.data;
+
   const {
     workspaceURL,
     workspaceURI,
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const segment = params.type as MARKETPLACE_TYPE_SEGMENT;
+  const segment = params.type;
   const marketplaceType = MARKETPLACE_TYPE_BY_SEGMENT[segment];
   if (!marketplaceType) notFound();
 
@@ -77,8 +88,20 @@ export default async function Page(props: {
   }
   if (error) notFound();
 
-  const {limit = PAGE_SIZE, page = 1, category, sort} = searchParams;
+  const {limit, page, category, sort} = searchParams;
   const client = auth.tenant.client;
+
+  const buildQuery = (overrides: Partial<SearchParams> = {}) => {
+    const query: Record<string, string> = {};
+    if (limit !== PAGE_SIZE) query.limit = String(limit);
+    if (page !== 1) query.page = String(page);
+    if (category) query.category = category;
+    if (sort !== 'popular') query.sort = sort;
+    for (const [k, v] of Object.entries(overrides)) {
+      if (v !== undefined) query[k] = String(v);
+    }
+    return query;
+  };
 
   // Fetch categories
   const categories = await findProductCategories({
@@ -87,11 +110,24 @@ export default async function Page(props: {
     take: 100,
   });
 
+  const getOrderBy = (
+    sortValue: 'popular' | 'newest' | 'rating',
+  ): OrderByOptions<AOSProduct> => {
+    switch (sortValue) {
+      case 'newest':
+        return {createdOn: 'DESC'};
+      case 'rating':
+        return {averageRating: 'DESC'};
+      case 'popular':
+        return {installCount: 'DESC'};
+    }
+  };
+
   // Fetch products with pagination and filtering
   const products = await findProducts({
     client,
     workspace: auth.workspace,
-    take: +limit,
+    take: limit,
     skip: getSkip(limit, page),
     where: and<AOSProduct>([
       {marketplaceTypeSelect: marketplaceType},
@@ -99,6 +135,7 @@ export default async function Page(props: {
         ? {productCategory: {id: category, forMarketPlace: true}}
         : undefined,
     ]),
+    orderBy: getOrderBy(sort),
   });
 
   const totalCount = getTotal(products);
@@ -143,7 +180,10 @@ export default async function Page(props: {
         {/* Category Filters */}
         <div className="flex flex-wrap gap-3 items-start">
           <Link
-            href={{pathname: listingHref, query: {limit, sort}}}
+            href={{
+              pathname: listingHref,
+              query: buildQuery({category: undefined}),
+            }}
             scroll={false}
             replace>
             <button
@@ -162,7 +202,7 @@ export default async function Page(props: {
               key={cat.id}
               href={{
                 pathname: listingHref,
-                query: {limit, category: cat.id, sort},
+                query: buildQuery({category: cat.id}),
               }}
               scroll={false}
               replace>
@@ -213,11 +253,11 @@ export default async function Page(props: {
                 <PaginationPrevious asChild>
                   <Link
                     scroll={false}
-                    className={cn({['invisible']: +page <= 1})}
+                    className={cn({['invisible']: page <= 1})}
                     replace
                     href={{
                       pathname: listingHref,
-                      query: {...searchParams, page: +page - 1},
+                      query: buildQuery({page: page - 1}),
                     }}>
                     <ChevronLeft className="h-4 w-4" />
                     <span className="sr-only">{await t('Previous')}</span>
@@ -237,13 +277,13 @@ export default async function Page(props: {
                 }
                 return (
                   <PaginationItem key={value}>
-                    <PaginationLink isActive={+page === value} asChild>
+                    <PaginationLink isActive={page === value} asChild>
                       <Link
                         scroll={false}
                         replace
                         href={{
                           pathname: listingHref,
-                          query: {...searchParams, page: String(value)},
+                          query: buildQuery({page: value}),
                         }}>
                         {value}
                       </Link>
@@ -256,10 +296,10 @@ export default async function Page(props: {
                   <Link
                     scroll={false}
                     replace
-                    className={cn({['invisible']: +page >= totalPages})}
+                    className={cn({['invisible']: page >= totalPages})}
                     href={{
                       pathname: listingHref,
-                      query: {...searchParams, page: +page + 1},
+                      query: buildQuery({page: page + 1}),
                     }}>
                     <span className="sr-only">{await t('Next')}</span>
                     <ChevronRight className="h-4 w-4" />

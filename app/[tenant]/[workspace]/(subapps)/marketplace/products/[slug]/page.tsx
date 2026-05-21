@@ -25,6 +25,10 @@ import {NO_IMAGE_URL} from '@/constants';
 
 import {findProduct, isProductFavorited} from '../../common/orm/orm';
 import {isPaid} from '../../common/utils/price';
+import {
+  productPageParamsSchema,
+  productSearchParamsSchema,
+} from '../../common/utils/validators';
 import {BuyButtons} from '../../common/ui/components/buy-buttons';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constants/gradients';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
@@ -49,10 +53,20 @@ export default async function ProductPage(props: {
     versionPage?: string;
   }>;
 }) {
-  const [params, searchParams] = await Promise.all([
+  const [rawParams, rawSearchParams] = await Promise.all([
     props.params,
     props.searchParams,
   ]);
+
+  const paramsResult = productPageParamsSchema.safeParse(rawParams);
+  if (!paramsResult.success) notFound();
+  const params = paramsResult.data;
+
+  const searchParamsResult =
+    productSearchParamsSchema.safeParse(rawSearchParams);
+  if (!searchParamsResult.success) notFound();
+  const searchParams = searchParamsResult.data;
+
   const {
     workspaceURL,
     workspaceURI,
@@ -74,14 +88,7 @@ export default async function ProductPage(props: {
 
   if (!product) notFound();
 
-  const currentTab = (searchParams.tab || ProductTab.Overview) as ProductTab;
-
-  const reviewPage = searchParams.reviewPage
-    ? parseInt(searchParams.reviewPage)
-    : 1;
-  const versionPage = searchParams.versionPage
-    ? parseInt(searchParams.versionPage)
-    : 1;
+  const {tab, reviewPage, versionPage} = searchParams;
 
   const bgGradient =
     GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] ||
@@ -414,7 +421,7 @@ export default async function ProductPage(props: {
             href={tabNavLink(ProductTab.Overview)}
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
-              currentTab === ProductTab.Overview
+              tab === ProductTab.Overview
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
@@ -424,7 +431,7 @@ export default async function ProductPage(props: {
             href={tabNavLink(ProductTab.Versions)}
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
-              currentTab === ProductTab.Versions
+              tab === ProductTab.Versions
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
@@ -438,7 +445,7 @@ export default async function ProductPage(props: {
             href={tabNavLink(ProductTab.Reviews)}
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
-              currentTab === ProductTab.Reviews
+              tab === ProductTab.Reviews
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
@@ -448,7 +455,7 @@ export default async function ProductPage(props: {
             href={tabNavLink(ProductTab.Support)}
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
-              currentTab === ProductTab.Support
+              tab === ProductTab.Support
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
@@ -462,10 +469,10 @@ export default async function ProductPage(props: {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Changes with tabs */}
           <div className="lg:col-span-2">
-            {currentTab === ProductTab.Overview && (
+            {tab === ProductTab.Overview && (
               <OverviewTab product={product} tenantId={tenantId} />
             )}
-            {currentTab === ProductTab.Versions && (
+            {tab === ProductTab.Versions && (
               <VersionsTab
                 product={product}
                 workspaceURI={workspaceURI}
@@ -474,7 +481,7 @@ export default async function ProductPage(props: {
                 currentVersionId={product.currentVersion?.id}
               />
             )}
-            {currentTab === ProductTab.Reviews && (
+            {tab === ProductTab.Reviews && (
               <ReviewsTab
                 product={product}
                 workspaceURI={workspaceURI}
@@ -490,9 +497,7 @@ export default async function ProductPage(props: {
                 })}
               />
             )}
-            {currentTab === ProductTab.Support && (
-              <SupportTab product={product} />
-            )}
+            {tab === ProductTab.Support && <SupportTab product={product} />}
           </div>
 
           {/* Static Sidebar - Always Visible */}

@@ -22,6 +22,11 @@ import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-
 import {MyContributionsTab} from '../common/constants/tabs';
 import {t} from '@/locale/server';
 import {
+  myContributionsParamsSchema,
+  myContributionsSearchParamsSchema,
+  type MyContributionsSearchParams,
+} from '../common/utils/validators';
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -34,10 +39,20 @@ export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{tab?: string; skillsPage?: string; appsPage?: string}>;
 }) {
-  const [params, searchParams] = await Promise.all([
+  const [rawParams, rawSearchParams] = await Promise.all([
     props.params,
     props.searchParams,
   ]);
+
+  const paramsResult = myContributionsParamsSchema.safeParse(rawParams);
+  if (!paramsResult.success) notFound();
+  const params = paramsResult.data;
+
+  const searchParamsResult =
+    myContributionsSearchParamsSchema.safeParse(rawSearchParams);
+  if (!searchParamsResult.success) notFound();
+  const searchParams = searchParamsResult.data;
+
   const {
     workspaceURL,
     workspaceURI,
@@ -67,15 +82,27 @@ export default async function MyContributionsPage(props: {
     findCompatibilityVersions(auth.tenant.client),
   ]);
 
-  const currentTab = (searchParams.tab ||
-    MyContributionsTab.Overview) as MyContributionsTab;
-  const skillsPage = searchParams.skillsPage
-    ? parseInt(searchParams.skillsPage)
-    : 1;
-  const appsPage = searchParams.appsPage ? parseInt(searchParams.appsPage) : 1;
+  const {tab, skillsPage, appsPage} = searchParams;
 
-  const tabNavLink = (tab: string) =>
-    `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions?tab=${tab}`;
+  const buildQuery = (overrides: Partial<MyContributionsSearchParams> = {}) => {
+    const query: Record<string, string> = {};
+    if (tab !== 'overview') query.tab = tab;
+    if (skillsPage !== 1) query.skillsPage = String(skillsPage);
+    if (appsPage !== 1) query.appsPage = String(appsPage);
+    for (const [k, v] of Object.entries(overrides)) {
+      if (v !== undefined) query[k] = String(v);
+    }
+    return query;
+  };
+
+  const tabNavLink = (tabValue: MyContributionsTab) => {
+    const params = buildQuery({tab: tabValue});
+    const queryStr =
+      Object.keys(params).length > 0
+        ? `?${new URLSearchParams(params).toString()}`
+        : '';
+    return `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions${queryStr}`;
+  };
 
   const [
     marketplaceLabel,
@@ -157,7 +184,7 @@ export default async function MyContributionsPage(props: {
           <Link
             href={tabNavLink(MyContributionsTab.Overview)}
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              currentTab === MyContributionsTab.Overview
+              tab === MyContributionsTab.Overview
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
@@ -166,7 +193,7 @@ export default async function MyContributionsPage(props: {
           <Link
             href={tabNavLink(MyContributionsTab.Skills)}
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              currentTab === MyContributionsTab.Skills
+              tab === MyContributionsTab.Skills
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
@@ -183,7 +210,7 @@ export default async function MyContributionsPage(props: {
           <Link
             href={tabNavLink(MyContributionsTab.Apps)}
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              currentTab === MyContributionsTab.Apps
+              tab === MyContributionsTab.Apps
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
@@ -200,7 +227,7 @@ export default async function MyContributionsPage(props: {
           <Link
             href={tabNavLink(MyContributionsTab.Revenue)}
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              currentTab === MyContributionsTab.Revenue
+              tab === MyContributionsTab.Revenue
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
@@ -209,7 +236,7 @@ export default async function MyContributionsPage(props: {
           <Link
             href={tabNavLink(MyContributionsTab.Profile)}
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              currentTab === MyContributionsTab.Profile
+              tab === MyContributionsTab.Profile
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
@@ -220,8 +247,8 @@ export default async function MyContributionsPage(props: {
 
       {/* Content */}
       <div>
-        {currentTab === MyContributionsTab.Overview && <OverviewTab />}
-        {currentTab === MyContributionsTab.Skills && (
+        {tab === MyContributionsTab.Overview && <OverviewTab />}
+        {tab === MyContributionsTab.Skills && (
           <SkillsTab
             partnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
@@ -233,7 +260,7 @@ export default async function MyContributionsPage(props: {
             page={skillsPage}
           />
         )}
-        {currentTab === MyContributionsTab.Apps && (
+        {tab === MyContributionsTab.Apps && (
           <AppsTab
             partnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
@@ -245,10 +272,10 @@ export default async function MyContributionsPage(props: {
             page={appsPage}
           />
         )}
-        {currentTab === MyContributionsTab.Revenue && (
+        {tab === MyContributionsTab.Revenue && (
           <ComingSoonBanner area={await t('Revenue')} />
         )}
-        {currentTab === MyContributionsTab.Profile && (
+        {tab === MyContributionsTab.Profile && (
           <ComingSoonBanner area={await t('Profile')} />
         )}
       </div>

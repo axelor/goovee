@@ -284,6 +284,8 @@ export async function upsertProduct(
     supportIssuesUrl: product.supportIssuesUrl ?? null,
     supportContactUrl: product.supportContactUrl ?? null,
     installCount: product.installCount ?? 0,
+    averageRating: new BigDecimal('0'),
+    ratingCount: 0,
     productCategory: {select: {id: category.id}},
     salePrice: new BigDecimal(String(product.price)),
     saleCurrency: {select: {id: ctx.defaults.saleCurrencyId}},

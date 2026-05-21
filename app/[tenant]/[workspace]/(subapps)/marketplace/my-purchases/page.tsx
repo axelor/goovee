@@ -32,17 +32,30 @@ import {ensureAuth} from '../common/utils/auth-helper';
 import {findPurchases} from '../common/orm/orm';
 import {MyPurchasesTable} from '../common/ui/components/my-purchases-table';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
-
-const PAGE_SIZE = 10;
+import {
+  myPurchasesParamsSchema,
+  myPurchasesSearchParamsSchema,
+  type MyPurchasesSearchParams,
+} from '../common/utils/validators';
 
 export default async function MyPurchasesPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{page?: string; limit?: string}>;
 }) {
-  const [params, searchParams] = await Promise.all([
+  const [rawParams, rawSearchParams] = await Promise.all([
     props.params,
     props.searchParams,
   ]);
+
+  const paramsResult = myPurchasesParamsSchema.safeParse(rawParams);
+  if (!paramsResult.success) notFound();
+  const params = paramsResult.data;
+
+  const searchParamsResult =
+    myPurchasesSearchParamsSchema.safeParse(rawSearchParams);
+  if (!searchParamsResult.success) notFound();
+  const searchParams = searchParamsResult.data;
+
   const {
     workspaceURL,
     workspaceURI,
@@ -63,8 +76,17 @@ export default async function MyPurchasesPage(props: {
   }
   if (error) notFound();
 
-  const limit = Number(searchParams.limit) || PAGE_SIZE;
-  const page = Number(searchParams.page) || 1;
+  const {limit, page} = searchParams;
+
+  const buildQuery = (overrides: Partial<MyPurchasesSearchParams> = {}) => {
+    const query: Record<string, string> = {};
+    if (limit !== 10) query.limit = String(limit);
+    if (page !== 1) query.page = String(page);
+    for (const [k, v] of Object.entries(overrides)) {
+      if (v !== undefined) query[k] = String(v);
+    }
+    return query;
+  };
 
   const purchases = await findPurchases({
     client: auth.tenant.client,
@@ -131,7 +153,7 @@ export default async function MyPurchasesPage(props: {
                       className={cn({['invisible']: page <= 1})}
                       href={{
                         pathname: purchasesHref,
-                        query: {...searchParams, page: page - 1},
+                        query: buildQuery({page: page - 1}),
                       }}>
                       <ChevronLeft className="h-4 w-4" />
                       <span className="sr-only">{await t('Previous')}</span>
@@ -157,7 +179,7 @@ export default async function MyPurchasesPage(props: {
                           replace
                           href={{
                             pathname: purchasesHref,
-                            query: {...searchParams, page: String(value)},
+                            query: buildQuery({page: value}),
                           }}>
                           {value}
                         </Link>
@@ -173,7 +195,7 @@ export default async function MyPurchasesPage(props: {
                       className={cn({['invisible']: page >= totalPages})}
                       href={{
                         pathname: purchasesHref,
-                        query: {...searchParams, page: page + 1},
+                        query: buildQuery({page: page + 1}),
                       }}>
                       <span className="sr-only">{await t('Next')}</span>
                       <ChevronRight className="h-4 w-4" />
