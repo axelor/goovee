@@ -22,6 +22,7 @@ export const searchParamsSchema = z.object({
     .enum(['popular', 'newest', 'rating'])
     .catch('popular')
     .default('popular'),
+  priceType: z.enum(['free', 'paid', 'all']).catch('all').default('all'),
 });
 
 export const pageParamsSchema = z.object({

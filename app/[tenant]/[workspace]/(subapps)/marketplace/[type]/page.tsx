@@ -20,6 +20,7 @@ import {getLoginURL} from '@/utils/url';
 
 import {ProductCard} from '../common/ui/components/product-card';
 import {ProductSortSelect} from '../common/ui/components/product-sort-select';
+import {PriceTypeSelect} from '../common/ui/components/price-type-select/price-type-select';
 import {
   findProducts,
   findProductCategories,
@@ -88,7 +89,7 @@ export default async function Page(props: {
   }
   if (error) notFound();
 
-  const {limit, page, category, sort} = searchParams;
+  const {limit, page, category, sort, priceType} = searchParams;
   const client = auth.tenant.client;
 
   const buildQuery = (overrides: Partial<SearchParams> = {}) => {
@@ -97,6 +98,7 @@ export default async function Page(props: {
     if (page !== 1) query.page = String(page);
     if (category) query.category = category;
     if (sort !== 'popular') query.sort = sort;
+    if (priceType !== 'all') query.priceType = priceType;
     for (const [k, v] of Object.entries(overrides)) {
       if (v !== undefined) query[k] = String(v);
     }
@@ -124,6 +126,13 @@ export default async function Page(props: {
   };
 
   // Fetch products with pagination and filtering
+  const priceFilter =
+    priceType === 'free'
+      ? {salePrice: 0}
+      : priceType === 'paid'
+        ? {salePrice: {gt: 0}}
+        : undefined;
+
   const products = await findProducts({
     client,
     workspace: auth.workspace,
@@ -134,6 +143,7 @@ export default async function Page(props: {
       category
         ? {productCategory: {id: category, forMarketPlace: true}}
         : undefined,
+      priceFilter,
     ]),
     orderBy: getOrderBy(sort),
   });
@@ -227,7 +237,10 @@ export default async function Page(props: {
               ? await t('1 result')
               : await t('{0} results', String(totalCount))}
           </div>
-          <ProductSortSelect currentSort={sort || 'popular'} />
+          <div className="flex gap-3">
+            <PriceTypeSelect currentPriceType={priceType} />
+            <ProductSortSelect currentSort={sort || 'popular'} />
+          </div>
         </div>
 
         {products.length > 0 ? (

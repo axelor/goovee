@@ -32,7 +32,7 @@ export async function OverviewTab({product, tenantId}: OverviewTabProps) {
               image =>
                 image.picture?.id && (
                   <div
-                    key={image.picture.id}
+                    key={image.id}
                     className="aspect-video bg-muted rounded-lg border border-border overflow-hidden">
                     <Image
                       src={`/api/tenant/${tenantId}/product/image/${image.picture.id}`}
