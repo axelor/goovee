@@ -9,7 +9,7 @@ export type MarketplaceLink = {
 
 export const MARKETPLACE_LINKS: MarketplaceLink[] = [
   {id: 1, title: 'Skills', segment: MARKETPLACE_TYPE_SEGMENT.SKILLS},
-  {id: 2, title: 'Apps Studio', segment: MARKETPLACE_TYPE_SEGMENT.APPS},
+  {id: 2, title: 'Apps', segment: MARKETPLACE_TYPE_SEGMENT.APPS},
   {
     id: 3,
     title: 'My contributions',
