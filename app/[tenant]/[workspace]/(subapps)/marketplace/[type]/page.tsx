@@ -185,7 +185,8 @@ export default async function Page(props: {
               query: buildQuery({category: undefined}),
             }}
             scroll={false}
-            replace>
+            replace
+            prefetch={false}>
             <button
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
@@ -205,7 +206,8 @@ export default async function Page(props: {
                 query: buildQuery({category: cat.id}),
               }}
               scroll={false}
-              replace>
+              replace
+              prefetch={false}>
               <button
                 className={cn(
                   'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
@@ -255,6 +257,7 @@ export default async function Page(props: {
                     scroll={false}
                     className={cn({['invisible']: page <= 1})}
                     replace
+                    prefetch={false}
                     href={{
                       pathname: listingHref,
                       query: buildQuery({page: page - 1}),
@@ -281,6 +284,7 @@ export default async function Page(props: {
                       <Link
                         scroll={false}
                         replace
+                        prefetch={false}
                         href={{
                           pathname: listingHref,
                           query: buildQuery({page: value}),
@@ -296,6 +300,7 @@ export default async function Page(props: {
                   <Link
                     scroll={false}
                     replace
+                    prefetch={false}
                     className={cn({['invisible']: page >= totalPages})}
                     href={{
                       pathname: listingHref,
