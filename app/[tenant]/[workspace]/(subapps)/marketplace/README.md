@@ -169,17 +169,18 @@ touching anything price-related.
 
 ### How we compute WT / ATI
 
-1. Read `salePrice` and `inAti` off the product.
+1. Resolve the per-company override for `salePrice` / `inAti`: walk `Product.productCompanyList` and use the row matching the selling company; fall back to the base product fields otherwise.
 2. Resolve the AccountManagement row by walking `Product.accountManagementList → ProductFamily.accountManagementList`, filtered by the selling company's id. Skip a Product-level row whose `saleTaxSet` is empty (treated as accounting-only override).
-3. For each tax in `saleTaxSet`, pick a rate — prefer `activeTaxLine.value`; otherwise pick the entry from `taxLineList` whose `[startDate, endDate]` window contains today (computed in the company's IANA timezone). Sum the picked rates → `totalTaxRate`.
-4. If `inAti`, invert: `WT = salePrice / (1 + rate/100)`, `ATI = salePrice`. Otherwise forward: `WT = salePrice`, `ATI = WT + WT·rate/100`.
-5. Try to convert WT and ATI in this order (first hit wins): **viewer currency → default currency → product currency**. Conversion uses `CurrencyConversionLine` (direct rate, then inverse fallback). The display number and symbol always describe the same currency.
+3. If a buyer fiscal position is provided, remap each tax through `taxEquivList`: when the tax appears in any equiv's `fromTaxSet`, replace it with the equiv's `toTaxSet` (one tax can map to many).
+4. For each (possibly remapped) tax, pick a rate — prefer `activeTaxLine.value`; otherwise pick the entry from `taxLineList` whose `[startDate, endDate]` window contains today (computed in the company's IANA timezone). Sum the picked rates → `totalTaxRate`.
+5. If `inAti`, invert: `WT = salePrice / (1 + rate/100)`, `ATI = salePrice`. Otherwise forward: `WT = salePrice`, `ATI = WT + WT·rate/100`.
+6. Try to convert WT and ATI in this order (first hit wins): **viewer currency → default currency → product currency**. Conversion uses `CurrencyConversionLine` (direct rate, then inverse fallback). The display number and symbol always describe the same currency.
 
    - _Viewer currency_ — `AOSPartner.currency` resolved via `auth.user.mainPartnerId`; contacts share the parent partner's currency. Guests, and partners with no `currency` set, have no viewer currency and skip straight to the default.
    - _Default currency_ — the app-wide `DEFAULT_CURRENCY_CODE` from `@/constants`, looked up in `AOSCurrency`. Stops a mixed-currency catalog from rendering each product in its own currency when the viewer's currency has no configured rate (or the viewer is a guest).
    - _Product currency_ — last-resort fallback when neither target has a usable rate. The buyer sees the price in the product's own currency.
 
-6. Round both to the resolved currency's `numberOfDecimals` (defaults to `DEFAULT_CURRENCY_SCALE`).
+7. Round both to the resolved currency's `numberOfDecimals` (defaults to `DEFAULT_CURRENCY_SCALE`).
 
 ### Server-computed everywhere
 
@@ -197,15 +198,19 @@ The compute mirrors the AOS Java pricing chain:
 axelor-sale/.../ProductRestService.fetchProductPrice
   → axelor-base/.../ProductPriceServiceImpl.getSaleUnitPrice
   → axelor-base/.../AccountManagementServiceImpl.getTaxLineSet
+  → axelor-base/.../FiscalPositionService.getTaxSet
   → axelor-base/.../TaxService.convertUnitPrice + getTotalTaxRate
+  → axelor-base/.../CurrencyServiceImpl.getAmountCurrencyConvertedAtDate
+  → axelor-base/.../ProductCompanyService.get
 ```
 
-Intentional divergences (out of marketplace scope):
+Parity is verified by `pnpm marketplace:test-price`, which loads every marketplace product, picks one buyer per distinct fiscal position (plus the no-partner case), iterates every active company, and compares `computePrice` against AOS's authoritative `/ws/aos/product/price` endpoint. Pass `--verbose` for a per-row table; mismatches are always reported.
 
-- **No fiscal position.** Marketplace sells one tax regime per workspace; no per-buyer tax remapping.
-- **Currency conversion has a three-step fallback** (viewer → default → product). We convert using `appBase.currencyConversionLineList` (direct rate, then inverse fallback). AOS's full path (company currency, fiscal-position overrides, PriceList currency) is not replicated — unnecessary for a single-company, single-catalog model. When no conversion line exists for any target, AOS throws a configuration error and blocks the operation; we silently fall back to displaying the price in the product's original currency. A misconfigured rate therefore results in the buyer seeing the product's own currency with no warning rather than an error.
-- **No price-list / per-partner discount.** Catalog price is uniform.
-- **No `productCompanyList` override.** Marketplace products aren't multi-company configured.
+Remaining differences vs AOS:
+
+- **No PriceList / PriceListLine adjustment.** AOS applies the buyer partner's `salePartnerPriceList` to override unit prices (discount, markup, replacement). Marketplace surfaces the catalog price; a buyer with a sale price list will silently diverge — guard at `validateCart` or mirror the logic if this becomes relevant.
+- **No unit conversion.** AOS's `/aos/product/price` accepts `unitId` and converts via `Unit.conversion`. Marketplace always sells at qty=1 in the product's natural unit, so this never fires.
+- **Currency-conversion fallback.** When no conversion line exists for any target, AOS throws a configuration error and blocks the operation; we silently fall back to displaying the price in the product's original currency. A misconfigured rate results in the buyer seeing the source currency with no warning rather than an error.
 
 AOS order payload notes (`common/service/index.ts`):
 

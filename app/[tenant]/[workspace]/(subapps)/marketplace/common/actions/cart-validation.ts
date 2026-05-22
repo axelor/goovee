@@ -7,7 +7,7 @@ import {DEFAULT_CURRENCY_SCALE} from '@/constants';
 
 import {computePrice, type CurrencyInput} from '../utils/price';
 import {withProductAccessFilter} from '../orm/helpers';
-import {buildPriceContext} from '../orm/orm';
+import {buildPriceContext, priceSelectFields} from '../orm/orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 
 /* Per-product availability check shared by validateCart and
@@ -95,46 +95,11 @@ export async function validateCart({
       id: true,
       slug: true,
       name: true,
-      salePrice: true,
-      inAti: true,
-      saleCurrency: {
-        id: true,
-        code: true,
-        symbol: true,
-        numberOfDecimals: true,
-      },
+      ...priceSelectFields,
       currentVersion: {id: true, statusSelect: true},
       marketplaceProductPurchaseList: {
         where: {partner: {id: mainPartnerId}},
         select: {id: true},
-      },
-      accountManagementList: {
-        select: {
-          company: {id: true},
-          saleTaxSet: {
-            select: {
-              activeTaxLine: {value: true},
-              taxLineList: {
-                select: {value: true, startDate: true, endDate: true},
-              },
-            },
-          },
-        },
-      },
-      productFamily: {
-        accountManagementList: {
-          select: {
-            company: {id: true},
-            saleTaxSet: {
-              select: {
-                activeTaxLine: {value: true},
-                taxLineList: {
-                  select: {value: true, startDate: true, endDate: true},
-                },
-              },
-            },
-          },
-        },
       },
     },
   });

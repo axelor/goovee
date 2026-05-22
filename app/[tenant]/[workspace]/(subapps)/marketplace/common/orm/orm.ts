@@ -30,6 +30,7 @@ import {
   type PriceComputeInput,
   type ConversionLine,
   type CurrencyInput,
+  type FiscalPositionInput,
 } from '../utils/price';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
@@ -66,17 +67,27 @@ type PriceableProduct = PriceComputeInput & {
   } | null;
 };
 
-/** Fields every product query must select to enable price computation. */
-const priceSelectFields = {
+/** Fields every product query must select to enable price computation.
+ *  Exported so cart-validation and other call sites can spread it into
+ *  their selects and stay in lockstep with whatever `computePrice` reads. */
+export const priceSelectFields = {
   salePrice: true,
   saleCurrency: {code: true, symbol: true, numberOfDecimals: true},
   inAti: true,
+  productCompanyList: {
+    select: {
+      company: {id: true},
+      salePrice: true,
+      inAti: true,
+    },
+  },
   accountManagementList: {
     select: {
       id: true,
       company: {id: true},
       saleTaxSet: {
         select: {
+          id: true,
           activeTaxLine: {value: true},
           taxLineList: {
             select: {value: true, startDate: true, endDate: true},
@@ -91,7 +102,13 @@ const priceSelectFields = {
         id: true,
         company: {id: true},
         saleTaxSet: {
-          select: {activeTaxLine: {value: true}},
+          select: {
+            id: true,
+            activeTaxLine: {value: true},
+            taxLineList: {
+              select: {value: true, startDate: true, endDate: true},
+            },
+          },
         },
       },
     },
@@ -102,6 +119,7 @@ export type PriceContext = {
   conversionLines: ConversionLine[];
   viewerCurrency: CurrencyInput | null;
   defaultCurrency: CurrencyInput | null;
+  fiscalPosition: FiscalPositionInput | null;
 };
 
 function toCurrencyInput(
@@ -138,6 +156,7 @@ function withPrice<T extends PriceableProduct>(
       viewerCurrency: priceContext.viewerCurrency,
       defaultCurrency: priceContext.defaultCurrency,
       conversionLines: priceContext.conversionLines,
+      fiscalPosition: priceContext.fiscalPosition,
     }),
   };
 }
@@ -165,15 +184,14 @@ export async function fetchConversionLines({
   const froms = Array.from(
     new Set(
       fromCodes.filter(
-        (c): c is string =>
-          typeof c === 'string' && c.length > 0 && !tos.includes(c),
+        (c): c is string => typeof c === 'string' && c.length > 0,
       ),
     ),
   );
   if (froms.length === 0) return [];
 
   const appBase = await client.aOSAppBase.findOne({
-    where: {archived: {ne: true}},
+    where: {OR: [{archived: false}, {archived: null}]},
     select: {
       currencyConversionLineList: {
         where: {
@@ -215,9 +233,10 @@ export async function buildPriceContext({
   mainPartnerId: string | null | undefined;
   productCurrencyCodes: Array<string | null | undefined>;
 }): Promise<PriceContext> {
-  const [partner, fallback] = await Promise.all([
+  const [partner, fallback, fiscalPosition] = await Promise.all([
     findPartnerCurrency({client, mainPartnerId}),
     findDefaultCurrency(client),
+    findPartnerFiscalPosition({client, mainPartnerId}),
   ]);
   const viewerCurrency = toCurrencyInput(partner);
   const defaultCurrency = toCurrencyInput(fallback);
@@ -226,7 +245,41 @@ export async function buildPriceContext({
     fromCodes: productCurrencyCodes,
     toCodes: [viewerCurrency?.code, defaultCurrency?.code],
   });
-  return {conversionLines, viewerCurrency, defaultCurrency};
+  return {conversionLines, viewerCurrency, defaultCurrency, fiscalPosition};
+}
+
+/** Resolves the buyer partner's fiscal position with its taxEquivList,
+ *  ready to be passed to `computePrice` for per-buyer tax remapping. */
+export async function findPartnerFiscalPosition({
+  client,
+  mainPartnerId,
+}: {
+  client: Client;
+  mainPartnerId: string | null | undefined;
+}): Promise<FiscalPositionInput | null> {
+  if (!mainPartnerId) return null;
+  const partner = await client.aOSPartner.findOne({
+    where: {id: mainPartnerId},
+    select: {
+      fiscalPosition: {
+        taxEquivList: {
+          select: {
+            fromTaxSet: {select: {id: true}},
+            toTaxSet: {
+              select: {
+                id: true,
+                activeTaxLine: {value: true},
+                taxLineList: {
+                  select: {value: true, startDate: true, endDate: true},
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  return partner?.fiscalPosition ?? null;
 }
 
 /** Looks up the app-wide fallback currency (`DEFAULT_CURRENCY_CODE`) in

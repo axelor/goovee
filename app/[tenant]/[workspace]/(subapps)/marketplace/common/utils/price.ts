@@ -1,27 +1,37 @@
 /* Marketplace price compute — single source of truth for every price-
- * related calculation in the marketplace subapp. All WT/ATI math, the
+ * related calculation in the marketplace subapp. All WT/ATI math and the
  * Paid/Free predicate so that display values stay in lockstep with what
  * AOS will invoice.
+ *
+ * Parity is verified by `scripts/test-price/run.ts`, which sweeps every
+ * marketplace product × company × distinct-fiscal-position partner and
+ * compares the output of `computePrice` against AOS's authoritative
+ * `/ws/aos/product/price` endpoint.
  *
  * ──────────────────────────────────────────────────────────────────────
  * Our algorithm
  * ──────────────────────────────────────────────────────────────────────
- *   1. Read `salePrice` and `inAti` off the product.
+ *   1. Resolve the per-company override for `salePrice` / `inAti`:
+ *      walk `Product.productCompanyList` and use the row matching the
+ *      selling company; fall back to the base product fields otherwise.
  *   2. Resolve the AccountManagement row by walking
  *      Product.accountManagementList → ProductFamily.accountManagementList,
  *      filtered by the selling company's id. Skip a Product-level row
  *      whose `saleTaxSet` is empty (treated as accounting-only override).
- *   3. For each tax in `saleTaxSet`, pick a rate: prefer
+ *   3. If a buyer fiscal position is provided, remap each tax through
+ *      `taxEquivList`: when the tax appears in any equiv's `fromTaxSet`,
+ *      replace it with the equiv's `toTaxSet` (one tax can map to many).
+ *   4. For each (possibly remapped) tax, pick a rate: prefer
  *      `activeTaxLine.value`; otherwise pick the entry from `taxLineList`
  *      whose [startDate, endDate] window contains today (computed in the
  *      company's IANA timezone). Sum the picked rates → totalTaxRate.
- *   4. If `inAti`, invert: WT = salePrice / (1 + rate/100), ATI =
+ *   5. If `inAti`, invert: WT = salePrice / (1 + rate/100), ATI =
  *      salePrice. Otherwise forward: WT = salePrice, ATI = WT + WT·rate/100.
- *   5. Try to convert WT and ATI in this order (first hit wins):
+ *   6. Try to convert WT and ATI in this order (first hit wins):
  *      viewerCurrency → defaultCurrency → productCurrency. Conversion
  *      uses CurrencyConversionLine (direct rate, then inverse fallback).
  *      If no target has a usable line, the price stays in productCurrency.
- *   6. Round both to the resolved currency's `numberOfDecimals`
+ *   7. Round both to the resolved currency's `numberOfDecimals`
  *      (defaults to DEFAULT_CURRENCY_SCALE).
  *
  * ──────────────────────────────────────────────────────────────────────
@@ -44,45 +54,31 @@
  *   invert the rate. Date-range filtering is applied to both.
  *
  * ──────────────────────────────────────────────────────────────────────
- * How AOS does it at the time of this implementation
+ * AOS Java path mirrored
  * ──────────────────────────────────────────────────────────────────────
- * Java path:
  *   axelor-sale/.../ProductRestService.fetchProductPrice
  *     → axelor-base/.../ProductPriceServiceImpl.getSaleUnitPrice
  *     → axelor-base/.../AccountManagementServiceImpl.getTaxLineSet
+ *     → axelor-base/.../FiscalPositionService.getTaxSet
  *     → axelor-base/.../TaxService.convertUnitPrice + getTotalTaxRate
- *
- * AOS additionally:
- *   - Applies the buyer partner's FiscalPosition to remap taxes before
- *     summing (`FiscalPositionService.getTaxSet`).
- *   - Converts the price via `CurrencyService` when the product currency
- *     differs from the selling company's currency.
- *   - Applies PriceList / PriceListLine adjustments for the buyer.
- *   - Honours `productCompanyList` per-company overrides of `salePrice`
- *     and related fields.
- *   - Runs all arithmetic in BigDecimal with COMPUTATION_SCALING (20
- *     digits) and HALF_UP rounding, then truncates to the app config's
- *     `nbDecimalDigitForUnitPrice`.
+ *     → axelor-base/.../CurrencyServiceImpl.getAmountCurrencyConvertedAtDate
+ *     → axelor-base/.../ProductCompanyService.get
  *
  * ──────────────────────────────────────────────────────────────────────
- * Differences and rationale
+ * Remaining differences vs AOS
  * ──────────────────────────────────────────────────────────────────────
- *   - No fiscal position. Marketplace sells one regime per workspace;
- *     there is no per-buyer tax remapping to perform.
- *   - Currency conversion has a three-step fallback (viewer → default
- *     → product). AOS's full CurrencyService path (company currency,
- *     fiscal position overrides, PriceList currency) is not replicated
- *     — unnecessary given the single-company, single-catalog marketplace
- *     model.
- *   - No price-list / per-partner discount. Marketplace surfaces a
- *     uniform catalog price; per-buyer pricing isn't a marketplace
- *     feature.
- *   - No `productCompanyList` override. Marketplace products aren't
- *     multi-company configured, so the base `salePrice` is the truth.
- *   - Final rounding scale is the resolved currency's `numberOfDecimals`
- *     rather than `nbDecimalDigitForUnitPrice`; the two are typically
- *     equal, and the currency value is the one already on the displayed
- *     row.
+ *   - No PriceList / PriceListLine adjustment. AOS applies the buyer's
+ *     `salePartnerPriceList` to override unit prices (discount, markup,
+ *     replacement). Marketplace surfaces the catalog price; partners
+ *     with a sale price list will diverge silently. Either mirror this
+ *     or guard at validateCart against `buyer.salePartnerPriceList`.
+ *   - No unit conversion. AOS's `/aos/product/price` accepts `unitId`
+ *     and converts via `Unit.conversion`. Marketplace always sells at
+ *     qty=1 in the product's natural unit, so this never fires.
+ *   - Rounding scale is the resolved currency's `numberOfDecimals` (typically
+ *     2) rather than `appConfig.nbDecimalDigitForUnitPrice` (often 4).
+ *     With qty=1 the totals converge at the cent; multi-line inversions
+ *     could theoretically drift by sub-cent.
  *   - Intermediate arithmetic is float64 rather than BigDecimal. For
  *     positive prices and tax rates `Math.round` matches HALF_UP, so
  *     the rounded result matches AOS at currency precision; cent-level
@@ -105,6 +101,7 @@ type TaxLineRow = {
 };
 
 type TaxRow = {
+  id?: string | null;
   activeTaxLine?: TaxLineRow | null;
   taxLineList?: TaxLineRow[] | null;
 };
@@ -112,6 +109,16 @@ type TaxRow = {
 type AccountManagementRow = {
   company?: {id?: string | null} | null;
   saleTaxSet?: TaxRow[] | null;
+};
+
+/** Per-company override row from `Product.productCompanyList`. Mirrors
+ *  AOS's `ProductCompanyService.getProductCompany(product, field, company)`:
+ *  when a row matches the selling company, its `salePrice` / `inAti`
+ *  override the base product fields. */
+type ProductCompanyRow = {
+  company?: {id?: string | null} | null;
+  salePrice?: unknown;
+  inAti?: boolean | null;
 };
 
 /** Shape of the fields a product needs to expose for price compute.
@@ -126,6 +133,20 @@ export type PriceComputeInput = {
   productFamily?: {
     accountManagementList?: AccountManagementRow[] | null;
   } | null;
+  /** Per-company overrides of `salePrice` / `inAti`. AOS reads these
+   *  via `ProductCompanyService` before falling back to the base product. */
+  productCompanyList?: ProductCompanyRow[] | null;
+};
+
+/** One row from `FiscalPosition.taxEquivList`. */
+export type TaxEquivRow = {
+  fromTaxSet?: Array<{id?: string | null} | null> | null;
+  toTaxSet?: TaxRow[] | null;
+};
+
+/** Buyer's fiscal position — drives per-buyer tax remapping. */
+export type FiscalPositionInput = {
+  taxEquivList?: TaxEquivRow[] | null;
 };
 
 export type ComputedPrice = {
@@ -183,6 +204,11 @@ export type ComputeOptions = {
    *  to the (productCurrency ↔ viewerCurrency) pair. Used to look
    *  up exchange rates, mirroring AOS's CurrencyService logic. */
   conversionLines?: ConversionLine[] | null;
+  /** Buyer partner's fiscal position. When set, each tax in the product's
+   *  saleTaxSet is remapped through `taxEquivList` (matching by tax id in
+   *  `fromTaxSet`) before its value is read — mirroring AOS's
+   *  `FiscalPositionService.getTaxSet`. */
+  fiscalPosition?: FiscalPositionInput | null;
 };
 
 /** AOS-style resolution: try the product's own `accountManagementList`
@@ -236,15 +262,37 @@ function resolveTaxLineValue(tax: TaxRow, today: string): number | null {
   return null;
 }
 
+/** Mirrors AOS's `FiscalPositionService.getTaxSet`: if any equivalence row
+ *  lists this tax in its `fromTaxSet`, swap it for the equivalence's
+ *  `toTaxSet` (one tax can map to many). Returns `[tax]` when no fiscal
+ *  position is provided or no row matches. */
+function remapTax(
+  tax: TaxRow,
+  fiscalPosition: FiscalPositionInput | null | undefined,
+): TaxRow[] {
+  const equivs = fiscalPosition?.taxEquivList;
+  if (!equivs || equivs.length === 0 || tax.id == null) return [tax];
+  for (const equiv of equivs) {
+    if (!equiv?.fromTaxSet || !equiv.toTaxSet) continue;
+    if (equiv.fromTaxSet.some(t => t?.id != null && t.id === tax.id)) {
+      return equiv.toTaxSet;
+    }
+  }
+  return [tax];
+}
+
 function getTotalTaxRate(
   saleTaxSet: TaxRow[] | null | undefined,
   today: string,
+  fiscalPosition: FiscalPositionInput | null | undefined,
 ): number {
   if (!saleTaxSet || saleTaxSet.length === 0) return DEFAULT_TAX_RATE;
   let total = 0;
   for (const tax of saleTaxSet) {
-    const rate = resolveTaxLineValue(tax, today);
-    if (rate != null) total += rate;
+    for (const effective of remapTax(tax, fiscalPosition)) {
+      const rate = resolveTaxLineValue(effective, today);
+      if (rate != null) total += rate;
+    }
   }
   return total;
 }
@@ -349,18 +397,27 @@ export function computePrice(
     viewerCurrency,
     defaultCurrency,
     conversionLines,
+    fiscalPosition,
   } = options;
 
   const today = todayInTimezone(companyTimezone);
-  const salePrice = Number(product.salePrice ?? 0);
+  const override =
+    companyId == null
+      ? null
+      : (product.productCompanyList?.find(
+          row => row?.company?.id === companyId,
+        ) ?? null);
+  const basePrice = override?.salePrice ?? product.salePrice;
+  const baseInAti = override?.inAti ?? product.inAti;
+  const salePrice = Number(basePrice ?? 0);
   const accountManagement = resolveAccountManagement(product, companyId);
   const taxRate = accountManagement
-    ? getTotalTaxRate(accountManagement.saleTaxSet, today)
+    ? getTotalTaxRate(accountManagement.saleTaxSet, today, fiscalPosition)
     : DEFAULT_TAX_RATE;
 
   let wt: number;
   let ati: number;
-  if (product.inAti) {
+  if (baseInAti) {
     ati = salePrice;
     wt = taxRate === 0 ? salePrice : salePrice / (1 + taxRate / 100);
   } else {
