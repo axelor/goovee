@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {Suspense} from 'react';
-import {SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES, DEFAULT_CURRENCY_SYMBOL} from '@/constants';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
 import {workspacePathname} from '@/utils/workspace';
 import {clone} from '@/utils';
@@ -88,9 +88,7 @@ export default async function MyContributionsPage(props: {
       }),
     ]);
 
-  const currencySymbol =
-    partnerCurrency?.symbol ??
-    auth.workspace.config.marketplaceDefaultSaleCurrency?.symbol;
+  const currencySymbol = partnerCurrency?.symbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   const {tab, skillsPage, appsPage} = searchParams;
 

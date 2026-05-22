@@ -16,7 +16,6 @@ import {WorkspaceURLSchema} from '@/utils/validators';
 
 import {ensureAuth} from '../utils/auth-helper';
 import {validateCart, CartProductIdsSchema} from './cart-validation';
-import {fetchPriceContext} from '../orm/orm';
 
 const BaseSchema = z.object({
   productIds: CartProductIdsSchema,
@@ -44,17 +43,11 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
   if (authError) return err(await t('Sign in required.'));
   const {client, config} = auth.tenant;
 
-  const priceContext = await fetchPriceContext({
-    client,
-    mainPartnerId: auth.user.mainPartnerId,
-  });
   const cartResult = await validateCart({
     client,
     workspace: auth.workspace,
     mainPartnerId: auth.user.mainPartnerId,
     productIds,
-    conversionLines: priceContext.conversionLines,
-    viewerCurrency: priceContext.viewerCurrency,
   });
   if (cartResult.error) return cartResult;
   const cart = cartResult.data;
@@ -68,12 +61,11 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
     return err(await t('Payment options are not configured.'));
   }
 
-  /* PaymentContext holds the cart as a verbatim snapshot so the finalize
-   * step can re-check it without trusting the client. */
+  /* PaymentContext holds the validated cart verbatim. On the return leg
+   * `checkout()` trusts these server-stamped prices and only re-checks
+   * the time-sensitive invariants (ownership, published version, access). */
   const context = {
-    productIds: cart.items.map(item => item.productId),
-    total: cart.total,
-    currencyCode: cart.currencyCode,
+    cart,
     workspaceURL,
   };
 

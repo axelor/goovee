@@ -3,15 +3,35 @@ import {z} from 'zod';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
 
-import {and} from '@/utils/orm';
+import {DEFAULT_CURRENCY_SCALE} from '@/constants';
 
-import {
-  computePrice,
-  type ConversionLine,
-  type CurrencyInput,
-} from '../utils/price';
-import {getProductAccessFilter} from '../orm/helpers';
+import {computePrice, type CurrencyInput} from '../utils/price';
+import {withProductAccessFilter} from '../orm/helpers';
+import {buildPriceContext} from '../orm/orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+
+/* Per-product availability check shared by validateCart and
+ * recheckCartAvailability. Returns a translated error message if the
+ * product can't be granted to the partner right now, null otherwise. */
+type AvailabilityRow = {
+  id: string;
+  name: string | null;
+  slug: string | null;
+  currentVersion: {id: string} | null;
+  marketplaceProductPurchaseList: Array<{id: string}> | null;
+};
+async function checkAvailability(
+  product: AvailabilityRow,
+): Promise<string | null> {
+  const label = product.name ?? product.slug ?? product.id;
+  if (!product.currentVersion) {
+    return t('{0} has no published version.', label);
+  }
+  if ((product.marketplaceProductPurchaseList?.length ?? 0) > 0) {
+    return t('{0} is already in your purchases.', label);
+  }
+  return null;
+}
 
 export const CartProductIdsSchema = z
   .array(z.string().min(1))
@@ -50,15 +70,11 @@ export async function validateCart({
   workspace,
   mainPartnerId,
   productIds,
-  conversionLines = [],
-  viewerCurrency = null,
 }: {
   client: Client;
   workspace: PortalWorkspaceWithConfig;
-  mainPartnerId: string | null | undefined;
+  mainPartnerId: string;
   productIds: string[];
-  conversionLines?: ConversionLine[];
-  viewerCurrency?: CurrencyInput | null;
 }) {
   const dedupedIds = Array.from(new Set(productIds));
   if (dedupedIds.length === 0) {
@@ -74,10 +90,7 @@ export async function validateCart({
    *     means the partner already owns this product;
    *   - tax chain for `computePrice`. */
   const products = await client.aOSProduct.find({
-    where: and([
-      getProductAccessFilter(workspace),
-      {id: {in: dedupedIds}, isMarketPlace: true},
-    ]),
+    where: withProductAccessFilter(workspace)({id: {in: dedupedIds}}),
     select: {
       id: true,
       slug: true,
@@ -91,12 +104,10 @@ export async function validateCart({
         numberOfDecimals: true,
       },
       currentVersion: {id: true, statusSelect: true},
-      marketplaceProductPurchaseList: mainPartnerId
-        ? {
-            where: {partner: {id: mainPartnerId}},
-            select: {id: true},
-          }
-        : {select: {id: true}},
+      marketplaceProductPurchaseList: {
+        where: {partner: {id: mainPartnerId}},
+        select: {id: true},
+      },
       accountManagementList: {
         select: {
           company: {id: true},
@@ -135,27 +146,18 @@ export async function validateCart({
     };
   }
 
+  const {conversionLines, viewerCurrency, defaultCurrency} =
+    await buildPriceContext({
+      client,
+      mainPartnerId,
+      productCurrencyCodes: products.map(p => p.saleCurrency?.code),
+    });
+
   const items: ValidatedCartItem[] = [];
   let currencyCode: string | null = null;
   for (const product of products) {
-    if (!product.currentVersion?.id) {
-      return {
-        error: true as const,
-        message: await t(
-          '{0} has no published version.',
-          product.name ?? product.slug ?? product.id,
-        ),
-      };
-    }
-    if ((product.marketplaceProductPurchaseList?.length ?? 0) > 0) {
-      return {
-        error: true as const,
-        message: await t(
-          '{0} is already in your purchases.',
-          product.name ?? product.slug ?? product.id,
-        ),
-      };
-    }
+    const unavailable = await checkAvailability(product);
+    if (unavailable) return {error: true as const, message: unavailable};
     const productCurrency: CurrencyInput | null = product.saleCurrency?.code
       ? {
           code: product.saleCurrency.code,
@@ -163,21 +165,13 @@ export async function validateCart({
           numberOfDecimals: product.saleCurrency.numberOfDecimals,
         }
       : null;
-    const workspaceCurrency = workspace.config.marketplaceDefaultSaleCurrency
-      ? {
-          code: workspace.config.marketplaceDefaultSaleCurrency.code ?? '',
-          symbol: workspace.config.marketplaceDefaultSaleCurrency.symbol ?? '',
-          numberOfDecimals:
-            workspace.config.marketplaceDefaultSaleCurrency.numberOfDecimals,
-        }
-      : null;
     const price = computePrice(product, {
       companyId: workspace.config.company?.id,
       companyTimezone: workspace.config.company?.timezone,
-      scale: product.saleCurrency?.numberOfDecimals ?? 2,
+      scale: product.saleCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE,
       productCurrency,
       viewerCurrency,
-      workspaceCurrency,
+      defaultCurrency,
       conversionLines,
     });
     if (price.ati <= 0) {
@@ -192,7 +186,10 @@ export async function validateCart({
     if (!price.currency.code) {
       return {
         error: true as const,
-        message: await t('Product is missing a currency configuration.'),
+        message: await t(
+          '{0} could not be priced in a supported currency.',
+          product.name ?? product.slug ?? product.id,
+        ),
       };
     }
     if (currencyCode == null) currencyCode = price.currency.code;
@@ -209,7 +206,7 @@ export async function validateCart({
       productSlug: product.slug ?? '',
       name: product.name ?? '',
       priceAti: price.ati,
-      scale: product.saleCurrency?.numberOfDecimals ?? 2,
+      scale: price.currency.numberOfDecimals,
       currencyCode: price.currency.code,
       currencySymbol: price.currency.symbol || null,
     });
@@ -225,4 +222,55 @@ export async function validateCart({
       currencyCode: currencyCode!,
     } satisfies ValidatedCart,
   };
+}
+
+/* Time-sensitive re-check used on the payment-return leg. The validated
+ * cart (with server-stamped prices) is already in PaymentContext from
+ * the prepare step, so we don't recompute prices here — that would risk
+ * rejecting a payment we already captured if a tax/currency line moved
+ * between prepare and return. We only re-assert the invariants that can
+ * actually change in that window:
+ *   - workspace still allows the buyer to see the product;
+ *   - product still has a published currentVersion;
+ *   - partner doesn't already own it (another tab/session may have
+ *     completed a parallel purchase). */
+export async function recheckCartAvailability({
+  client,
+  workspace,
+  mainPartnerId,
+  productIds,
+}: {
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  mainPartnerId: string;
+  productIds: string[];
+}) {
+  const dedupedIds = Array.from(new Set(productIds));
+  if (dedupedIds.length === 0) {
+    return {error: true as const, message: await t('Your cart is empty.')};
+  }
+  const products = await client.aOSProduct.find({
+    where: withProductAccessFilter(workspace)({id: {in: dedupedIds}}),
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      currentVersion: {id: true},
+      marketplaceProductPurchaseList: {
+        where: {partner: {id: mainPartnerId}},
+        select: {id: true},
+      },
+    },
+  });
+  if (products.length !== dedupedIds.length) {
+    return {
+      error: true as const,
+      message: await t('Some items in your cart are no longer available.'),
+    };
+  }
+  for (const product of products) {
+    const unavailable = await checkAvailability(product);
+    if (unavailable) return {error: true as const, message: unavailable};
+  }
+  return {success: true as const};
 }

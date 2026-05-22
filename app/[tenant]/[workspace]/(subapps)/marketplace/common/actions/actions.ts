@@ -13,18 +13,19 @@ import {getLoginURL} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {ensureAuth} from '../utils/auth-helper';
+import {DEFAULT_CURRENCY_CODE, DEFAULT_CURRENCY_SCALE} from '@/constants';
 import {
   findProductAccess,
   findProductsBySearch,
   findPartnerCurrency,
-  fetchPriceContext,
+  findDefaultCurrency,
   type ProductSearchResult,
   recordPurchases,
   attachInvoiceToPurchases,
 } from '../orm/orm';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {getPaymentInfo} from '../utils/payment-info';
-import {validateCart} from './cart-validation';
+import {recheckCartAvailability, type ValidatedCart} from './cart-validation';
 import {createMarketplaceOrder, findInvoiceBySaleOrderId} from '../service';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
 import {PaymentOption} from '@/types';
@@ -151,23 +152,17 @@ export async function saveProduct(
     }
   }
 
-  /* Pricing defaults live on the workspace config. All three relations
-   * (currency / unit / productFamily) must be present for a paid product
-   * to flow through the standard AOS sale-order / invoice path. We gate
-   * creation on them so a supplier never ends up with a product that
-   * silently can't be sold. Updates skip the gate because we don't
-   * retroactively rewrite system fields. */
+  /* Pricing defaults live on the workspace config. Unit and productFamily
+   * must be present for a paid product to flow through the standard AOS
+   * sale-order / invoice path; we gate creation on them. `saleCurrency`
+   * is resolved separately (publisher's partner currency, falling back
+   * to DEFAULT_CURRENCY_CODE) and stamped only on create — updates leave
+   * the existing product currency alone. */
   const priceDefaults = {
-    saleCurrency: auth.workspace.config.marketplaceDefaultSaleCurrency,
     unit: auth.workspace.config.marketplaceDefaultUnit,
     productFamily: auth.workspace.config.marketplaceDefaultProductFamily,
     inAti: auth.workspace.config.marketplaceInAti === true,
   };
-  const partnerCurrency = await findPartnerCurrency({
-    client,
-    mainPartnerId: auth.user.mainPartnerId,
-  });
-  const saleCurrencyId = partnerCurrency?.id ?? priceDefaults.saleCurrency?.id;
 
   const productData = {
     name: payload.name,
@@ -181,7 +176,6 @@ export async function saveProduct(
     supportContactUrl: payload.supportContactUrl || null,
     productCategory: {select: {id: payload.productCategoryId}},
     salePrice: new BigDecimal(String(payload.salePrice ?? 0)),
-    ...(saleCurrencyId ? {saleCurrency: {select: {id: saleCurrencyId}}} : {}),
   };
 
   try {
@@ -205,15 +199,35 @@ export async function saveProduct(
       });
       productId = payload.id;
     } else {
-      if (
-        !saleCurrencyId ||
-        !priceDefaults.unit?.id ||
-        !priceDefaults.productFamily?.id
-      ) {
+      if (!priceDefaults.unit?.id || !priceDefaults.productFamily?.id) {
         return {
           error: true,
           message: await t(
             "Marketplace pricing isn't configured for this workspace. Contact your admin.",
+          ),
+        };
+      }
+      /* saleCurrency is stamped at creation only and never rewritten on
+       * later updates — historical products must keep showing the price
+       * in the currency they were created with, even if the publisher's
+       * partner currency later changes. Resolution order:
+       *   1. publisher's partner currency
+       *   2. AOS currency matching DEFAULT_CURRENCY_CODE */
+      const partnerCurrency = await findPartnerCurrency({
+        client,
+        mainPartnerId: auth.user.mainPartnerId,
+      });
+      let saleCurrencyId = partnerCurrency?.id ?? null;
+      if (!saleCurrencyId) {
+        const defaultCurrency = await findDefaultCurrency(client);
+        saleCurrencyId = defaultCurrency?.id ?? null;
+      }
+      if (!saleCurrencyId) {
+        return {
+          error: true,
+          message: await t(
+            "No currency is configured for this publisher and the fallback currency '{0}' is missing in AOS.",
+            DEFAULT_CURRENCY_CODE,
           ),
         };
       }
@@ -239,6 +253,7 @@ export async function saveProduct(
           portalWorkspace: {select: {id: auth.workspace.id}},
           defaultSupplierPartner: {select: {id: auth.user.mainPartnerId}},
           marketplaceCreatedBy: {select: {id: auth.user.id}},
+          saleCurrency: {select: {id: saleCurrencyId}},
           unit: {select: {id: priceDefaults.unit.id}},
           productFamily: {select: {id: priceDefaults.productFamily.id}},
           inAti: priceDefaults.inAti,
@@ -961,7 +976,7 @@ export async function checkout(
   let paidAmount: number;
   let paymentContextId: string;
   let paymentContextVersion: number;
-  let stashedProductIds: string[];
+  let cart: ValidatedCart;
   try {
     const info = await getPaymentInfo({
       mode: parsed.data.payment.mode,
@@ -971,7 +986,11 @@ export async function checkout(
     paidAmount = info.amount;
     paymentContextId = info.context.id;
     paymentContextVersion = info.context.version;
-    stashedProductIds = info.context.data?.productIds ?? [];
+    const stashedCart = info.context.data?.cart as ValidatedCart | undefined;
+    if (!stashedCart?.items?.length) {
+      return {error: true, message: await t('Payment context is empty.')};
+    }
+    cart = stashedCart;
   } catch (e) {
     return {
       error: true,
@@ -979,22 +998,19 @@ export async function checkout(
     };
   }
 
-  const priceContext = await fetchPriceContext({client, mainPartnerId});
-  const cartResult = await validateCart({
-    client,
-    workspace: auth.workspace,
-    mainPartnerId,
-    productIds: stashedProductIds,
-    conversionLines: priceContext.conversionLines,
-    viewerCurrency: priceContext.viewerCurrency,
-  });
-  if (cartResult.error) return cartResult;
-  const cart = cartResult.data;
-
-  /* Anti-tamper: amount the provider captured must match what we'd compute
-   * now. Mirrors events register(). Cent-level rounding is consistent
-   * because both sides go through computePrice → round(scale). */
-  if (Math.abs(Number(paidAmount) - cart.total) > 0.005) {
+  /* Anti-tamper: the amount the provider captured must match the cart
+   * the provider was handed at prepare time (stashed in PaymentContext).
+   * We don't recompute prices here — pricing inputs (taxes, FX rates)
+   * could have moved since prepare, and rejecting an already-captured
+   * payment over server-state drift is worse than honouring the price
+   * the buyer actually saw.
+   *
+   * Tolerance is half of the cart currency's smallest representable
+   * unit: any genuine mismatch is ≥ 1 minor unit, anything below is
+   * IEEE 754 / provider-side conversion drift. */
+  const tolerance =
+    0.5 * 10 ** -(cart.items[0]?.scale ?? DEFAULT_CURRENCY_SCALE);
+  if (Math.abs(Number(paidAmount) - cart.total) > tolerance) {
     return {
       error: true,
       message: await t(
@@ -1006,6 +1022,18 @@ export async function checkout(
   }
 
   const productIds = cart.items.map(item => item.productId);
+
+  /* Time-sensitive re-check: between prepare and now (could be minutes
+   * via 3-D Secure / external redirects) the buyer may have purchased
+   * the same product in another tab, or the publisher may have pulled a
+   * version. Block the grant if so. Prices are NOT re-checked here. */
+  const recheck = await recheckCartAvailability({
+    client,
+    workspace: auth.workspace,
+    mainPartnerId,
+    productIds,
+  });
+  if (recheck.error) return recheck;
 
   try {
     await client.$transaction(async txClient => {

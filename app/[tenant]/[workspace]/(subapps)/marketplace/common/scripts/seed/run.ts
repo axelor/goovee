@@ -8,7 +8,13 @@ import {manager} from '@/tenant';
 
 import {SeedSchema} from './validators';
 import {validateCrossFieldRules} from './validate';
-import {findCustomerPartnerByEmail, findWorkspaceByUrl} from './lookups';
+import {DEFAULT_CURRENCY_CODE} from '@/constants';
+import {
+  findCurrencyByCode,
+  findCustomerPartnerByEmail,
+  findPartnerCurrencies,
+  findWorkspaceByUrl,
+} from './lookups';
 import {
   recomputeRatings,
   refreshCurrentVersion,
@@ -133,12 +139,26 @@ async function main() {
       workspaceId: workspace.id,
       supplierPartnerId: suppliers[0]!.id /* Default to first supplier */,
       defaults: {
-        saleCurrencyId: workspace.config.marketplaceDefaultSaleCurrency!.id,
         unitId: workspace.config.marketplaceDefaultUnit!.id,
         productFamilyId: workspace.config.marketplaceDefaultProductFamily!.id,
         inAti: workspace.config.marketplaceInAti === true,
       },
     };
+
+    /* Per-supplier currency resolution: each product's saleCurrency
+     * follows its supplier's partner currency, falling back to the
+     * app-wide DEFAULT_CURRENCY_CODE when the supplier has none. Mirrors
+     * the runtime behaviour in saveProduct. */
+    const supplierCurrencyMap = await findPartnerCurrencies(
+      txClient,
+      suppliers.map(s => s.id),
+    );
+    const fallbackCurrency = await findCurrencyByCode(
+      txClient,
+      DEFAULT_CURRENCY_CODE,
+    );
+    const resolveSaleCurrencyId = (supplierId: string) =>
+      supplierCurrencyMap.get(supplierId) ?? fallbackCurrency.id;
 
     /* Distribute products across suppliers: apps and skills evenly.
      * Use deterministic hash of product code to avoid bias from data ordering. */
@@ -202,6 +222,7 @@ async function main() {
         ctx,
         product,
         supplierIdForProduct,
+        resolveSaleCurrencyId(supplierIdForProduct),
       );
       seededProductIds.push(productId);
 

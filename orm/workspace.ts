@@ -155,13 +155,6 @@ export const portalAppConfigFields = {
   marketplaceHeroBgImage: {id: true},
   allowToPublish: true,
   requiresReview: true,
-  marketplaceDefaultSaleCurrency: {
-    id: true,
-    code: true,
-    name: true,
-    symbol: true,
-    numberOfDecimals: true,
-  },
   marketplaceDefaultUnit: {id: true, name: true},
   marketplaceDefaultProductFamily: {id: true},
   marketplaceInAti: true,

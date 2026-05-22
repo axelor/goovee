@@ -17,33 +17,31 @@
  *      company's IANA timezone). Sum the picked rates → totalTaxRate.
  *   4. If `inAti`, invert: WT = salePrice / (1 + rate/100), ATI =
  *      salePrice. Otherwise forward: WT = salePrice, ATI = WT + WT·rate/100.
- *   5. Attempt currency conversion in priority order (see below). WT and
- *      ATI are both converted together; if any conversion step fails
- *      (no matching CurrencyConversionLine) the next target is tried.
- *   6. Round both to the resolved currency's `numberOfDecimals` (default 2).
+ *   5. Try to convert WT and ATI in this order (first hit wins):
+ *      viewerCurrency → defaultCurrency → productCurrency. Conversion
+ *      uses CurrencyConversionLine (direct rate, then inverse fallback).
+ *      If no target has a usable line, the price stays in productCurrency.
+ *   6. Round both to the resolved currency's `numberOfDecimals`
+ *      (defaults to DEFAULT_CURRENCY_SCALE).
  *
  * ──────────────────────────────────────────────────────────────────────
- * Currency resolution order
+ * Currency resolution
  * ──────────────────────────────────────────────────────────────────────
- *   1. viewerCurrency  — the viewer's partner currency (from
- *      `AOSPartner.currency`). Highest priority: show the price in the
- *      buyer's own currency when a conversion line exists.
- *   2. workspaceCurrency — `marketplaceDefaultSaleCurrency` on the
- *      workspace config. Used when the viewer has no partner currency or
- *      no conversion line for it.
- *   3. productCurrency — the product's own `saleCurrency`. No conversion
- *      needed; used as-is when neither of the above could be satisfied.
+ *   - productCurrency — the product's own `saleCurrency`, stamped at
+ *     creation from the publisher's partner currency (falling back to
+ *     DEFAULT_CURRENCY_CODE) and never overwritten on later edits. This
+ *     is the source currency and the last-resort display fallback.
+ *   - viewerCurrency — `AOSPartner.currency` on `auth.user.mainPartnerId`
+ *     (contacts share the parent partner's currency). First conversion
+ *     target when present.
+ *   - defaultCurrency — the app-wide `DEFAULT_CURRENCY_CODE` looked up
+ *     in `AOSCurrency`. Second conversion target — used when the viewer
+ *     conversion has no matching line, or when there is no viewer.
  *
  *   Conversion uses `appBase.currencyConversionLineList`, mirroring
  *   AOS's `CurrencyServiceImpl.getCurrencyConversionRateAtDate`: try a
  *   direct fromCode→toCode line first; if none, try the inverse and
  *   invert the rate. Date-range filtering is applied to both.
- *
- *   Note: `saleCurrency` on the product is set at creation time to the
- *   publisher's partner currency (falling back to the workspace default),
- *   so `productCurrency` and `workspaceCurrency` often coincide. The
- *   conversion step still runs to handle cross-currency catalogs and
- *   buyer personalisation.
  *
  * ──────────────────────────────────────────────────────────────────────
  * How AOS does it at the time of this implementation
@@ -71,11 +69,11 @@
  * ──────────────────────────────────────────────────────────────────────
  *   - No fiscal position. Marketplace sells one regime per workspace;
  *     there is no per-buyer tax remapping to perform.
- *   - Currency conversion is implemented but scoped to the three-tier
- *     priority above (viewer → workspace → product). AOS's full
- *     CurrencyService path (company currency, fiscal position overrides,
- *     PriceList currency) is not replicated — unnecessary given the
- *     single-company, single-catalog marketplace model.
+ *   - Currency conversion has a three-step fallback (viewer → default
+ *     → product). AOS's full CurrencyService path (company currency,
+ *     fiscal position overrides, PriceList currency) is not replicated
+ *     — unnecessary given the single-company, single-catalog marketplace
+ *     model.
  *   - No price-list / per-partner discount. Marketplace surfaces a
  *     uniform catalog price; per-buyer pricing isn't a marketplace
  *     feature.
@@ -91,8 +89,9 @@
  *     drift is only theoretically possible at extreme magnitudes.
  */
 
+import {DEFAULT_CURRENCY_SCALE} from '@/constants';
+
 const DEFAULT_TAX_RATE = 0;
-const DEFAULT_PRICE_SCALE = 2;
 
 /** A row from `accountManagementList` — minimum fields needed for tax
  *  resolution. Lives at the leaf so it can be referenced both on the
@@ -136,9 +135,9 @@ export type ComputedPrice = {
   ati: number;
   /** Total applied tax rate as a percentage. Sum across all matched tax lines. */
   taxRate: number;
-  /** Currency in which wt/ati are expressed. Resolved by priority:
-   *  viewer partner currency → workspace default currency → product currency. */
-  currency: {code: string; symbol: string};
+  /** Currency in which wt/ati are expressed: viewer's partner currency
+   *  if conversion succeeded, otherwise the product's own currency. */
+  currency: {code: string; symbol: string; numberOfDecimals: number};
 };
 
 /** Minimal currency shape needed for conversion. */
@@ -173,12 +172,15 @@ export type ComputeOptions = {
   /** Currency of the product's `salePrice` field. Used as the conversion
    *  source and as the final fallback when no conversion is possible. */
   productCurrency?: CurrencyInput | null;
-  /** Viewer's preferred currency from their partner record. Highest-priority
+  /** Viewer's preferred currency from their partner record. First
    *  conversion target. */
   viewerCurrency?: CurrencyInput | null;
-  /** Workspace default sale currency. Second-priority conversion target. */
-  workspaceCurrency?: CurrencyInput | null;
-  /** All active CurrencyConversionLine rows from `appBase`. Used to look
+  /** App-wide fallback currency (`DEFAULT_CURRENCY_CODE`). Second
+   *  conversion target — tried when the viewer currency conversion has
+   *  no matching line, or when there is no viewer currency. */
+  defaultCurrency?: CurrencyInput | null;
+  /** Active CurrencyConversionLine rows from `appBase`, ideally filtered
+   *  to the (productCurrency ↔ viewerCurrency) pair. Used to look
    *  up exchange rates, mirroring AOS's CurrencyService logic. */
   conversionLines?: ConversionLine[] | null;
 };
@@ -293,6 +295,7 @@ function getExchangeRate(
     lines.find(l => {
       if (l.startCurrency?.code !== start || l.endCurrency?.code !== end)
         return false;
+      // fromDate/toDate are PG `date` columns (YYYY-MM-DD); lex compare = chronological.
       if (l.fromDate && today < l.fromDate) return false;
       if (l.toDate && today > l.toDate) return false;
       return true;
@@ -330,11 +333,10 @@ function tryConvert(
 /** Compute the without-tax price, all-tax-included price, total applied
  *  tax rate, and display currency for a product.
  *
- *  Currency resolution order:
- *    1. viewerCurrency  — if a conversion line exists for productCurrency→viewer
- *    2. workspaceCurrency — if a conversion line exists for productCurrency→workspace
- *    3. productCurrency — no conversion needed, used as-is
- */
+ *  Currency resolution (in order, first hit wins):
+ *    1. viewerCurrency — if a productCurrency→viewer conversion line exists
+ *    2. defaultCurrency — if a productCurrency→default conversion line exists
+ *    3. productCurrency — last-resort, displayed as-is */
 export function computePrice(
   product: PriceComputeInput,
   options: ComputeOptions = {},
@@ -342,10 +344,10 @@ export function computePrice(
   const {
     companyId,
     companyTimezone,
-    scale = DEFAULT_PRICE_SCALE,
+    scale = DEFAULT_CURRENCY_SCALE,
     productCurrency,
     viewerCurrency,
-    workspaceCurrency,
+    defaultCurrency,
     conversionLines,
   } = options;
 
@@ -366,17 +368,21 @@ export function computePrice(
     ati = wt + (wt * taxRate) / 100;
   }
 
-  // Attempt currency conversion in priority order.
   const lines = conversionLines ?? [];
   const fromCode = productCurrency?.code;
   let resolvedCurrency: CurrencyInput | null = productCurrency ?? null;
   let convertedWt = wt;
   let convertedAti = ati;
-  let resolvedScale = scale;
+  let resolvedScale = productCurrency?.numberOfDecimals ?? scale;
 
   if (fromCode) {
-    const targets = [viewerCurrency, workspaceCurrency].filter(
-      (c): c is CurrencyInput => c != null && c.code !== fromCode,
+    const seen = new Set<string>();
+    const targets = [viewerCurrency, defaultCurrency].filter(
+      (c): c is CurrencyInput => {
+        if (!c?.code || c.code === fromCode || seen.has(c.code)) return false;
+        seen.add(c.code);
+        return true;
+      },
     );
     for (const target of targets) {
       const wtResult = tryConvert(wt, fromCode, target, today, lines);
@@ -391,15 +397,14 @@ export function computePrice(
     }
   }
 
-  const fallbackCurrency = resolvedCurrency ?? {code: '', symbol: ''};
-
   return {
     wt: round(convertedWt, resolvedScale),
     ati: round(convertedAti, resolvedScale),
     taxRate,
     currency: {
-      code: fallbackCurrency.code,
-      symbol: fallbackCurrency.symbol,
+      code: resolvedCurrency?.code ?? '',
+      symbol: resolvedCurrency?.symbol ?? '',
+      numberOfDecimals: resolvedScale,
     },
   };
 }

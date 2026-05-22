@@ -13,8 +13,10 @@ class SeedLookupError extends Error {
 
 /* Resolves the workspace AND its marketplace pricing defaults by walking
  * AOSPortalWorkspace → defaultPartnerWorkspace → portalAppConfig. The
- * defaults are read once here and then stamped onto every seeded product,
- * mirroring `saveProduct` in the app. */
+ * defaults (unit, productFamily) are read once here and then stamped onto
+ * every seeded product, mirroring `saveProduct` in the app. The product
+ * currency is resolved per-supplier in run.ts (partner currency, falling
+ * back to DEFAULT_CURRENCY_CODE) — there is no workspace-level default. */
 export async function findWorkspaceByUrl(client: Client, url: string) {
   const workspace = await client.aOSPortalWorkspace.findOne({
     where: {url},
@@ -26,12 +28,6 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
         id: true,
         portalAppConfig: {
           id: true,
-          marketplaceDefaultSaleCurrency: {
-            id: true,
-            code: true,
-            numberOfDecimals: true,
-            symbol: true,
-          },
           marketplaceDefaultUnit: {id: true, name: true},
           marketplaceDefaultProductFamily: {id: true, code: true},
           marketplaceInAti: true,
@@ -50,15 +46,44 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
   }
   const config = workspace.defaultPartnerWorkspace?.portalAppConfig;
   if (
-    !config?.marketplaceDefaultSaleCurrency?.id ||
     !config?.marketplaceDefaultUnit?.id ||
     !config?.marketplaceDefaultProductFamily?.id
   ) {
     throw new SeedLookupError(
-      `Workspace '${url}' is missing marketplace pricing defaults. Set marketplaceDefaultSaleCurrency, marketplaceDefaultUnit and marketplaceDefaultProductFamily on its PortalAppConfig.`,
+      `Workspace '${url}' is missing marketplace pricing defaults. Set marketplaceDefaultUnit and marketplaceDefaultProductFamily on its PortalAppConfig.`,
     );
   }
   return {...workspace, config};
+}
+
+/* Resolves an AOSCurrency by its ISO code. Used for the fallback when a
+ * supplier partner has no `currency` set. */
+export async function findCurrencyByCode(client: Client, code: string) {
+  const currency = await client.aOSCurrency.findOne({
+    where: {code},
+    select: {id: true, code: true, symbol: true, numberOfDecimals: true},
+  });
+  if (!currency) {
+    throw new SeedLookupError(
+      `AOSCurrency with code '${code}' not found. Create it in AOS or change the fallback in @/constants.`,
+    );
+  }
+  return currency;
+}
+
+/* Resolves the partner currencies for a batch of supplier ids. Returns
+ * a Map<partnerId, currencyId | null>; partners without a currency get
+ * null and will fall back to DEFAULT_CURRENCY_CODE at the call site. */
+export async function findPartnerCurrencies(
+  client: Client,
+  partnerIds: string[],
+) {
+  if (!partnerIds.length) return new Map<string, string | null>();
+  const partners = await client.aOSPartner.find({
+    where: {id: {in: partnerIds}},
+    select: {id: true, currency: {id: true}},
+  });
+  return new Map(partners.map(p => [p.id, p.currency?.id ?? null]));
 }
 
 export async function findPartnerByEmail(client: Client, email: string) {

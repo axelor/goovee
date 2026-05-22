@@ -34,7 +34,7 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
   const priceLabel = paid
     ? await formatNumber(priceAti, {
         type: 'DECIMAL',
-        scale: product.saleCurrency?.numberOfDecimals ?? 2,
+        scale: currency.numberOfDecimals,
         currency: currency.symbol || undefined,
       })
     : freeLabel;

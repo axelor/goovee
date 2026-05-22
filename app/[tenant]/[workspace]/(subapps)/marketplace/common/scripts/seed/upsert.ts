@@ -33,7 +33,6 @@ export type WorkspaceContext = {
   workspaceId: string;
   supplierPartnerId: string;
   defaults: {
-    saleCurrencyId: string;
     unitId: string;
     productFamilyId: string;
     inAti: boolean;
@@ -249,6 +248,7 @@ export async function upsertProduct(
   ctx: WorkspaceContext,
   product: ProductSeed,
   defaultSupplierPartnerId: string,
+  saleCurrencyId: string,
 ) {
   const category = await findCategoryByCode(client, product.categoryCode);
   const supplierPartnerId = product.supplierEmail
@@ -289,7 +289,7 @@ export async function upsertProduct(
     ratingCount: 0,
     productCategory: {select: {id: category.id}},
     salePrice: new BigDecimal(String(product.price)),
-    saleCurrency: {select: {id: ctx.defaults.saleCurrencyId}},
+    saleCurrency: {select: {id: saleCurrencyId}},
     unit: {select: {id: ctx.defaults.unitId}},
     productFamily: {select: {id: ctx.defaults.productFamilyId}},
     inAti: ctx.defaults.inAti,

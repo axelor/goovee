@@ -22,6 +22,7 @@ import {pipeline} from 'stream/promises';
 import {clone} from '@/utils';
 import {getFileSizeText} from '@/utils/files';
 import {and, or} from '@/utils/orm';
+import {DEFAULT_CURRENCY_CODE, DEFAULT_CURRENCY_SCALE} from '@/constants';
 import {sql} from '@/utils/template-string';
 import {
   computePrice,
@@ -100,84 +101,144 @@ const priceSelectFields = {
 export type PriceContext = {
   conversionLines: ConversionLine[];
   viewerCurrency: CurrencyInput | null;
+  defaultCurrency: CurrencyInput | null;
 };
+
+function toCurrencyInput(
+  c:
+    | {
+        code?: string | null;
+        symbol?: string | null;
+        numberOfDecimals?: number | null;
+      }
+    | null
+    | undefined,
+): CurrencyInput | null {
+  if (!c?.code) return null;
+  return {
+    code: c.code,
+    symbol: c.symbol ?? '',
+    numberOfDecimals: c.numberOfDecimals,
+  };
+}
 
 function withPrice<T extends PriceableProduct>(
   product: T,
   workspace: PortalWorkspaceWithConfig,
   priceContext: PriceContext,
 ): T & {price: ComputedPrice} {
-  const productCurrency: CurrencyInput | null = product.saleCurrency?.code
-    ? {
-        code: product.saleCurrency.code,
-        symbol: product.saleCurrency.symbol ?? '',
-        numberOfDecimals: product.saleCurrency.numberOfDecimals,
-      }
-    : null;
-
-  const workspaceCurrency = workspace.config.marketplaceDefaultSaleCurrency
-    ? {
-        code: workspace.config.marketplaceDefaultSaleCurrency.code ?? '',
-        symbol: workspace.config.marketplaceDefaultSaleCurrency.symbol ?? '',
-        numberOfDecimals:
-          workspace.config.marketplaceDefaultSaleCurrency.numberOfDecimals,
-      }
-    : null;
-
+  const productCurrency = toCurrencyInput(product.saleCurrency);
   return {
     ...product,
     price: computePrice(product, {
       companyId: workspace.config.company?.id,
       companyTimezone: workspace.config.company?.timezone,
-      scale: product.saleCurrency?.numberOfDecimals ?? 2,
+      scale: product.saleCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE,
       productCurrency,
       viewerCurrency: priceContext.viewerCurrency,
-      workspaceCurrency,
+      defaultCurrency: priceContext.defaultCurrency,
       conversionLines: priceContext.conversionLines,
     }),
   };
 }
 
-/** Fetches the data needed for currency conversion in one query:
- *  - all CurrencyConversionLine rows from appBase
- *  - the viewer's partner currency (null for guests) */
-export async function fetchPriceContext({
+/** Fetches the conversion lines needed to convert between the given
+ *  product currencies and any of the conversion targets (viewer +
+ *  default). Filters the query to just the relevant (from, to) pairs
+ *  (in both directions) so we don't pull the entire table. Returns
+ *  empty when there's nothing to convert. */
+export async function fetchConversionLines({
+  client,
+  fromCodes,
+  toCodes,
+}: {
+  client: Client;
+  fromCodes: Array<string | null | undefined>;
+  toCodes: Array<string | null | undefined>;
+}): Promise<ConversionLine[]> {
+  const tos = Array.from(
+    new Set(
+      toCodes.filter((c): c is string => typeof c === 'string' && c.length > 0),
+    ),
+  );
+  if (tos.length === 0) return [];
+  const froms = Array.from(
+    new Set(
+      fromCodes.filter(
+        (c): c is string =>
+          typeof c === 'string' && c.length > 0 && !tos.includes(c),
+      ),
+    ),
+  );
+  if (froms.length === 0) return [];
+
+  const appBase = await client.aOSAppBase.findOne({
+    where: {archived: {ne: true}},
+    select: {
+      currencyConversionLineList: {
+        where: {
+          OR: [
+            {
+              startCurrency: {code: {in: froms}},
+              endCurrency: {code: {in: tos}},
+            },
+            {
+              startCurrency: {code: {in: tos}},
+              endCurrency: {code: {in: froms}},
+            },
+          ],
+        },
+        select: {
+          startCurrency: {code: true},
+          endCurrency: {code: true},
+          exchangeRate: true,
+          fromDate: true,
+          toDate: true,
+        },
+      },
+    },
+  });
+  return appBase?.currencyConversionLineList ?? [];
+}
+
+/** Builds the PriceContext for a batch of products: resolves the viewer
+ *  and default currencies, then fetches only the conversion lines
+ *  between the product currencies present in the batch and either
+ *  target. `computePrice` applies the three-step fallback (viewer →
+ *  default → product). */
+export async function buildPriceContext({
   client,
   mainPartnerId,
+  productCurrencyCodes,
 }: {
   client: Client;
   mainPartnerId: string | null | undefined;
+  productCurrencyCodes: Array<string | null | undefined>;
 }): Promise<PriceContext> {
-  const [appBase, partner] = await Promise.all([
-    client.aOSAppBase.findOne({
-      where: {archived: {ne: true}},
-      select: {
-        currencyConversionLineList: {
-          select: {
-            startCurrency: {code: true},
-            endCurrency: {code: true},
-            exchangeRate: true,
-            fromDate: true,
-            toDate: true,
-          },
-        },
-      },
-    }),
+  const [partner, fallback] = await Promise.all([
     findPartnerCurrency({client, mainPartnerId}),
+    findDefaultCurrency(client),
   ]);
+  const viewerCurrency = toCurrencyInput(partner);
+  const defaultCurrency = toCurrencyInput(fallback);
+  const conversionLines = await fetchConversionLines({
+    client,
+    fromCodes: productCurrencyCodes,
+    toCodes: [viewerCurrency?.code, defaultCurrency?.code],
+  });
+  return {conversionLines, viewerCurrency, defaultCurrency};
+}
 
-  const viewerCurrency = partner?.code
-    ? {
-        code: partner.code,
-        symbol: partner.symbol ?? '',
-        numberOfDecimals: partner.numberOfDecimals,
-      }
-    : null;
-
-  return {
-    conversionLines: appBase?.currencyConversionLineList ?? [],
-    viewerCurrency,
-  };
+/** Looks up the app-wide fallback currency (`DEFAULT_CURRENCY_CODE`) in
+ *  `AOSCurrency`. Used at product create time (`saveProduct`) and at
+ *  display time (`buildPriceContext`). Returns null if the row is missing
+ *  — callers decide whether that's a hard failure (create) or a soft
+ *  fallback (display). */
+export async function findDefaultCurrency(client: Client) {
+  return client.aOSCurrency.findOne({
+    where: {code: DEFAULT_CURRENCY_CODE},
+    select: {id: true, code: true, symbol: true, numberOfDecimals: true},
+  });
 }
 
 export async function findPartnerCurrency({
@@ -378,16 +439,18 @@ export async function findProducts({
   workspace: PortalWorkspaceWithConfig;
   mainPartnerId?: string | null;
 } & QueryProps<AOSProduct>) {
-  const [products, priceContext] = await Promise.all([
-    client.aOSProduct.find({
-      ...(take ? {take} : {}),
-      ...(skip ? {skip} : {}),
-      ...(orderBy ? {orderBy} : {}),
-      where: withPublishedProductFilter(workspace)({...where}),
-      select: findProductsSelect,
-    }),
-    fetchPriceContext({client, mainPartnerId}),
-  ]);
+  const products = await client.aOSProduct.find({
+    ...(take ? {take} : {}),
+    ...(skip ? {skip} : {}),
+    ...(orderBy ? {orderBy} : {}),
+    where: withPublishedProductFilter(workspace)({...where}),
+    select: findProductsSelect,
+  });
+  const priceContext = await buildPriceContext({
+    client,
+    mainPartnerId,
+    productCurrencyCodes: products.map(p => p.saleCurrency?.code),
+  });
 
   return products.map(p => withPrice(p, workspace, priceContext));
 }
@@ -446,15 +509,16 @@ export async function findProduct({
   workspace: PortalWorkspaceWithConfig;
   mainPartnerId?: string | null;
 }) {
-  const [product, priceContext] = await Promise.all([
-    client.aOSProduct.findOne({
-      where: withPublishedProductFilter(workspace)({slug}),
-      select: findProductSelect,
-    }),
-    fetchPriceContext({client, mainPartnerId}),
-  ]);
-
+  const product = await client.aOSProduct.findOne({
+    where: withPublishedProductFilter(workspace)({slug}),
+    select: findProductSelect,
+  });
   if (!product) return null;
+  const priceContext = await buildPriceContext({
+    client,
+    mainPartnerId,
+    productCurrencyCodes: [product.saleCurrency?.code],
+  });
   return withPrice(product, workspace, priceContext);
 }
 
@@ -668,19 +732,21 @@ export async function findMyProducts({
   workspace: PortalWorkspaceWithConfig;
   type?: MARKETPLACE_TYPE;
 } & QueryProps<AOSProduct>) {
-  const [products, priceContext] = await Promise.all([
-    client.aOSProduct.find({
-      ...(take ? {take} : {}),
-      ...(skip ? {skip} : {}),
-      ...(orderBy ? {orderBy} : {}),
-      where: withMyProductAccessFilter(
-        workspace,
-        mainPartnerId,
-      )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
-      select: findMyProductsSelect,
-    }),
-    fetchPriceContext({client, mainPartnerId}),
-  ]);
+  const products = await client.aOSProduct.find({
+    ...(take ? {take} : {}),
+    ...(skip ? {skip} : {}),
+    ...(orderBy ? {orderBy} : {}),
+    where: withMyProductAccessFilter(
+      workspace,
+      mainPartnerId,
+    )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
+    select: findMyProductsSelect,
+  });
+  const priceContext = await buildPriceContext({
+    client,
+    mainPartnerId,
+    productCurrencyCodes: products.map(p => p.saleCurrency?.code),
+  });
 
   return products.map(p => withPrice(p, workspace, priceContext));
 }

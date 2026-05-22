@@ -446,11 +446,6 @@
     },
     {
       "type": "ManyToOne",
-      "name": "marketplaceDefaultSaleCurrency",
-      "target": "AOSCurrency"
-    },
-    {
-      "type": "ManyToOne",
       "name": "marketplaceDefaultUnit",
       "target": "AOSUnit"
     },

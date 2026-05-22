@@ -220,7 +220,9 @@ export function MyProductsTable({
                       compatibilityVersions={compatibilityVersions}
                       requiresReview={requiresReview}
                       allowToPublish={allowToPublish}
-                      currencySymbol={currencySymbol}
+                      currencySymbol={
+                        product.saleCurrency?.symbol || currencySymbol
+                      }
                       inAti={inAti}
                     />
                     <Link
