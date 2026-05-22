@@ -74,7 +74,10 @@ export async function createMarketplaceOrder({
   if (!saleOrderId) {
     const message = res?.data?.message ?? 'No error message provided';
     throw new Error(
-      await t('Order creation returned no sale order ID. Message: {0}', message),
+      await t(
+        'Order creation returned no sale order ID. Message: {0}',
+        message,
+      ),
     );
   }
 
@@ -88,6 +91,17 @@ export async function findInvoiceBySaleOrderId({
   client: Client;
   saleOrderId: string;
 }) {
+  const invoiceLines = await client.aOSInvoiceLine.find({
+    where: {
+      saleOrderLine: {saleOrder: {id: saleOrderId}},
+    },
+    select: {invoice: {id: true, invoiceId: true, statusSelect: true}},
+  });
+
+  if (invoiceLines.length > 0 && invoiceLines[0]?.invoice) {
+    return invoiceLines[0].invoice;
+  }
+
   return client.aOSInvoice.findOne({
     where: {saleOrder: {id: saleOrderId}},
     select: {id: true, invoiceId: true, statusSelect: true},
