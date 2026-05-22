@@ -26,6 +26,7 @@
     "marketplace:common:dir": "app/[tenant]/[workspace]/(subapps)/marketplace/common/",
     "marketplace:seed": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/seed/run.ts",
     "marketplace:reset": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/seed/reset.ts",
+    "marketplace:test-price": "node -r @swc-node/register $npm_package_scripts_marketplace_common_dir/scripts/test-price/run.ts",
     "changelogs:validate": "node ./changelogs/validate",
     "changelogs:generate": "node ./changelogs/generate",
     "prepare:bump": "node ./scripts/prepare-bump.js",
