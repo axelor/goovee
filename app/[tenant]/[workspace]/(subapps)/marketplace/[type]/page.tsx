@@ -1,6 +1,7 @@
 import {SUBAPP_CODES} from '@/constants';
 import {t, tattr} from '@/locale/server';
 import type {OverlayColor} from '@/types';
+import type {NullableValues} from '@/types/util';
 import {Hero} from '../hero';
 import {
   Pagination,
@@ -92,7 +93,9 @@ export default async function Page(props: {
   const {limit, page, category, sort, priceType} = searchParams;
   const client = auth.tenant.client;
 
-  const buildQuery = (overrides: Partial<SearchParams> = {}) => {
+  const buildQuery = (
+    overrides: Partial<NullableValues<SearchParams>> = {},
+  ) => {
     const query: Record<string, string> = {};
     if (limit !== PAGE_SIZE) query.limit = String(limit);
     if (page !== 1) query.page = String(page);
@@ -100,7 +103,11 @@ export default async function Page(props: {
     if (sort !== 'popular') query.sort = sort;
     if (priceType !== 'all') query.priceType = priceType;
     for (const [k, v] of Object.entries(overrides)) {
-      if (v !== undefined) query[k] = String(v);
+      if (v === null) {
+        delete query[k];
+      } else if (v !== undefined) {
+        query[k] = String(v);
+      }
     }
     return query;
   };
@@ -193,7 +200,7 @@ export default async function Page(props: {
           <Link
             href={{
               pathname: listingHref,
-              query: buildQuery({category: undefined}),
+              query: buildQuery({category: null}),
             }}
             scroll={false}
             replace

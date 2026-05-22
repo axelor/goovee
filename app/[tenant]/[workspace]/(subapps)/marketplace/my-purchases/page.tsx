@@ -27,6 +27,7 @@ import {
   PaginationPrevious,
 } from '@/ui/components/pagination';
 import {getPaginationButtons, getSkip, getPages} from '@/utils/pagination';
+import type {NullableValues} from '@/types/util';
 
 import {ensureAuth} from '../common/utils/auth-helper';
 import {findPurchases} from '../common/orm/orm';
@@ -78,12 +79,18 @@ export default async function MyPurchasesPage(props: {
 
   const {limit, page} = searchParams;
 
-  const buildQuery = (overrides: Partial<MyPurchasesSearchParams> = {}) => {
+  const buildQuery = (
+    overrides: Partial<NullableValues<MyPurchasesSearchParams>> = {},
+  ) => {
     const query: Record<string, string> = {};
     if (limit !== 10) query.limit = String(limit);
     if (page !== 1) query.page = String(page);
     for (const [k, v] of Object.entries(overrides)) {
-      if (v !== undefined) query[k] = String(v);
+      if (v === null) {
+        delete query[k];
+      } else if (v !== undefined) {
+        query[k] = String(v);
+      }
     }
     return query;
   };

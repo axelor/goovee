@@ -35,6 +35,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
+import type {NullableValues} from '@/types/util';
 
 export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -92,13 +93,19 @@ export default async function MyContributionsPage(props: {
 
   const {tab, skillsPage, appsPage} = searchParams;
 
-  const buildQuery = (overrides: Partial<MyContributionsSearchParams> = {}) => {
+  const buildQuery = (
+    overrides: Partial<NullableValues<MyContributionsSearchParams>> = {},
+  ) => {
     const query: Record<string, string> = {};
     if (tab !== 'overview') query.tab = tab;
     if (skillsPage !== 1) query.skillsPage = String(skillsPage);
     if (appsPage !== 1) query.appsPage = String(appsPage);
     for (const [k, v] of Object.entries(overrides)) {
-      if (v !== undefined) query[k] = String(v);
+      if (v === null) {
+        delete query[k];
+      } else if (v !== undefined) {
+        query[k] = String(v);
+      }
     }
     return query;
   };
