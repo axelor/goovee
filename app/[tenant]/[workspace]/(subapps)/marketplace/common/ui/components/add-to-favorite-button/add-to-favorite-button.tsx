@@ -5,6 +5,7 @@ import {usePathname} from 'next/navigation';
 import {Heart} from 'lucide-react';
 import {Button} from '@/ui/components';
 import {useToast} from '@/ui/hooks/use-toast';
+import {cn} from '@/utils/css';
 import {addProductToFavorites} from '../../../actions/actions';
 import {isRedirectError} from 'next/dist/client/components/redirect-error';
 import {i18n} from '@/locale';
@@ -68,7 +69,9 @@ export function AddToFavoriteButton({
       className="gap-2 rounded-full">
       <Heart
         size={18}
-        className={isFavorite ? 'fill-red-500 text-red-500' : ''}
+        className={cn('shrink-0', {
+          'fill-red-500 text-red-500': isFavorite,
+        })}
       />
       {isFavorite
         ? i18n.t('Remove from favorites')
