@@ -11,7 +11,7 @@ import {createPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder} from '@/payment/stripe/actions';
 import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
-import {isPaymentOptionAvailable} from '@/utils/payment';
+import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {WorkspaceURLSchema} from '@/utils/validators';
 
 import {ensureAuth} from '../utils/auth-helper';
@@ -89,6 +89,9 @@ export async function createStripeCheckoutSession(props: {
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.stripe)) {
     return err(await t('Stripe is not available.'));
   }
+  if (!getPaymentModeId(paymentOptionSet, PaymentOption.stripe)) {
+    return err(await t('Payment mode is not configured for {0}.', 'Stripe'));
+  }
 
   const payer = await findGooveeUserByEmail(
     auth.user.email,
@@ -138,6 +141,9 @@ export async function paypalCreateOrder(props: {
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.paypal)) {
     return err(await t('PayPal is not available.'));
   }
+  if (!getPaymentModeId(paymentOptionSet, PaymentOption.paypal)) {
+    return err(await t('Payment mode is not configured for {0}.', 'PayPal'));
+  }
 
   const payer = await findGooveeUserByEmail(
     auth.user.email,
@@ -178,6 +184,9 @@ export async function payboxCreateOrder(props: {
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.paybox)) {
     return err(await t('Paybox is not available.'));
   }
+  if (!getPaymentModeId(paymentOptionSet, PaymentOption.paybox)) {
+    return err(await t('Payment mode is not configured for {0}.', 'Paybox'));
+  }
 
   const payer = await findGooveeUserByEmail(
     auth.user.email,
@@ -194,8 +203,8 @@ export async function payboxCreateOrder(props: {
       context,
       client: auth.tenant.client,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}/${parsed.data.uri}?paybox_response=true`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${parsed.data.uri}?paybox_error=true`,
+        success: `${process.env.GOOVEE_PUBLIC_HOST}${parsed.data.uri}?paybox_response=true`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${parsed.data.uri}?paybox_error=true`,
       },
     });
     return {success: true, order: response};

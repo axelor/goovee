@@ -9,6 +9,11 @@ import {Payments} from '@/ui/components/payment';
 import {PaymentOption} from '@/types';
 import type {PortalWorkspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
+import type {SuccessResponse} from '@/types/action';
+import {SUBAPP_CODES} from '@/constants';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+
+import {useToast} from '@/ui/hooks';
 
 import {useMarketplaceCart} from '../../../hooks/use-marketplace-cart';
 import {
@@ -21,8 +26,6 @@ import {CartItemCard} from '../cart-item-card';
 
 type Props = {
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
-  workspaceURL: string;
-  marketplaceBase: string;
 };
 
 function formatPrice(value: number, scale = 2, currencySymbol?: string | null) {
@@ -38,21 +41,19 @@ function formatPrice(value: number, scale = 2, currencySymbol?: string | null) {
  * provider session actions. Server-side guards (auth, drift, paid-only,
  * not-owned) run inside each action so the buyer can't tamper with the
  * cart between this page and the provider redirect. */
-export function CheckoutClient({
-  workspace,
-  workspaceURL,
-  marketplaceBase,
-}: Props) {
+export function CheckoutClient({workspace}: Props) {
   const router = useRouter();
+  const {workspaceURI, workspaceURL} = useWorkspace();
+  const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
   const {cart, loaded, clearCart} = useMarketplaceCart(workspaceURL);
+  const {toast} = useToast();
   const productIds = cart.items.map(item => item.productId);
 
-  /* Path used by Paybox to build success/failure return URLs. The host
-   * is added by the server-side action. */
-  const payboxReturnPath = `${marketplaceBase.replace(/^\//, '')}/cart/checkout`;
-
-  const onApprove = async () => {
+  const onApprove = async (result: SuccessResponse<true>) => {
     await clearCart();
+    if (result.message) {
+      toast({variant: 'destructive', title: result.message});
+    }
     router.push(`${marketplaceBase}/cart/checkout/success`);
   };
 
@@ -129,7 +130,7 @@ export function CheckoutClient({
           payboxCreateOrder({
             productIds,
             workspaceURL,
-            uri: uri ?? payboxReturnPath,
+            uri,
           })
         }
         onPayboxValidatePayment={async ({params}) =>

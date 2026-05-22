@@ -74,11 +74,7 @@ export default async function CheckoutPage(props: {
         {await t('Checkout')}
       </h1>
 
-      <CheckoutClient
-        workspace={clone(auth.workspace)}
-        workspaceURL={workspaceURL}
-        marketplaceBase={marketplaceBase}
-      />
+      <CheckoutClient workspace={clone(auth.workspace)} />
     </div>
   );
 }

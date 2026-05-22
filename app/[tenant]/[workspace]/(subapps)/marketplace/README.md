@@ -209,7 +209,8 @@ Intentional divergences (out of marketplace scope):
 
 AOS order payload notes (`common/service/index.ts`):
 
-- **`inAti: true` is hardcoded and intentional.** Since the paid price is always ATI, we always send `true` so AOS interprets each item's `price` correctly.
+- **Prices are computed server-side by AOS**, not sent from goovee. The payload carries only `productId` per item; AOS calls `ProductPriceService.getSaleUnitPrice` in the chosen currency to build each sale order line.
+- **`inAti: true` is set on the order**, not per-item, because `ProductPriceService` returns ATI prices directly.
 
 Precision differences (acceptable for display):
 
@@ -269,11 +270,10 @@ Stripe / Paybox: the buyer lands back on `/cart/checkout`, the provider button r
 5. **goovee transaction**:
    - `recordPurchases(txClient, mainPartnerId, productIds)` — idempotent insert (unique `(partner, product)` constraint).
    - `markPaymentAsProcessed({contextId, version, client: txClient})` — flips the context state so a replay of the same provider session would fail in step 2.
-6. **After commit** (via `next/server.after()`):
-   - POST `/ws/portal/orders/order` on AOS with `{partnerId: mainPartnerId, items, total, paidAmount, paymentModeId, invocingPartnerAddressId, deliveryPartnerAddressId}`. Addresses come from `partner.mainAddress`. The Java side creates SaleOrder + Invoice + InvoicePayment in one transaction.
-   - Look up the resulting Invoice via `aOSInvoice.findOne({where: {saleOrder: {id: returnedSoId}}})`.
-   - `attachInvoiceToPurchases(client, mainPartnerId, productIds, invoice.id)` back-populates the `invoice` field on each purchase row.
-   - **All best-effort** — errors are logged but don't fail the finalize action. The buyer already has access; missing invoice is a back-office reconciliation, not a user-facing failure.
+6. **After commit**:
+   - POST `/ws/portal/marketplace/order` on AOS with `{partnerId, contactId, workspaceId, currencyCode, invocingPartnerAddressId, items: [{productId}], paidAmount, paymentModeId}`. AOS computes prices server-side, creates SaleOrder + Invoice + InvoicePayment, and returns all three ids.
+   - `attachInvoiceToPurchases(client, mainPartnerId, productIds, invoiceId)` back-populates the `invoice` field on each purchase row.
+   - **Invoice creation is best-effort** — if it fails, the action still returns success with a warning message. The buyer already has access; a missing invoice is a back-office reconciliation, not a user-facing failure. Price mismatch rejections from AOS are treated the same way (gap is accepted).
 7. Return `ActionResponse<true>`.
 
 The `<Payments>` `onApprove` callback then clears the cart and `router.push('/cart/checkout/success')`. The success page re-queries `findPurchases` and renders the buyer's recent purchases with Download buttons.
@@ -417,14 +417,13 @@ through everything built on top of it.
 
 All three go through a shared `prepare()` (auth + workspace gating + cart validation) before delegating to `@/payment/<provider>/actions`.
 
-`common/actions/actions.ts:checkout({payment: {mode, data}, workspaceURL})` — unified finalize. Pulls cart from `PaymentContext` via `getPaymentInfo`, re-validates, asserts `paidAmount === total`, writes `MarketplaceProductPurchase` rows in one goovee tx (with `markPaymentAsProcessed`), then runs `createMarketplaceOrder` + `attachInvoiceToPurchases` best-effort after commit. Returns `ActionResponse<true>`. See the "Buying flow" section above for the full sequence.
+`common/actions/actions.ts:checkout({payment: {mode, data}, workspaceURL})` — unified finalize. Pulls cart from `PaymentContext` via `getPaymentInfo`, re-validates, asserts `paidAmount === total`, writes `MarketplaceProductPurchase` rows in one goovee tx (with `markPaymentAsProcessed`), then runs `createMarketplaceOrder` + `attachInvoiceToPurchases` after commit. Invoice failure returns success with a warning message rather than failing the action. Returns `ActionResponse<true>`. See the "Buying flow" section above for the full sequence.
 
 ### Helpers
 
 - `common/actions/cart-validation.ts:validateCart({client, workspace, mainPartnerId, productIds})` — full pricing + eligibility validator, called at **prepare time** only. Enforces workspace access, paid-only, published version, not-already-owned (via the `marketplaceProductPurchaseList` back-relation), and single-currency rules. Recomputes each price server-side including the three-step currency conversion (uses `buildPriceContext` internally for the viewer + default currencies and filtered conversion lines). Returns `{success: true, data: {items, total, currencyCode}}` with server-authoritative prices.
 - `common/actions/cart-validation.ts:recheckCartAvailability({client, workspace, mainPartnerId, productIds})` — narrower revalidator called by `checkout()` on the **payment-return leg**. Only re-checks the invariants that can change during the provider redirect (access, published version, ownership). No pricing, no tax chain, no conversion lines. Shares the per-product check predicate with `validateCart` via the internal `checkAvailability` helper so the error messages stay identical.
-- `common/service/index.ts:createMarketplaceOrder({...})` — POSTs to `/ws/portal/orders/order`. Mirrors the shop payload shape.
-- `common/service/index.ts:findInvoiceBySaleOrderId({client, saleOrderId})` — looks up the AOS-created Invoice via `aOSInvoice.saleOrder` (the endpoint only returns the SO id).
+- `common/service/index.ts:createMarketplaceOrder({...})` — POSTs to `/ws/portal/marketplace/order`. Returns `{saleOrderId, invoiceId, invoicePaymentId}`; AOS computes all prices server-side.
 - `common/utils/payment-info.ts:getPaymentInfo({mode, data, client})` — provider-dispatch helper, duplicated from events. Tracked as a candidate to lift to `lib/core/payment/common`.
 - `common/utils/price.ts` — single source of truth for price math. See the file header for the algorithm and AOS divergences.
 - `common/hooks/use-marketplace-cart.ts` — localStorage-backed cart hook.

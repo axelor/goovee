@@ -26,7 +26,7 @@ import {
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {getPaymentInfo} from '../utils/payment-info';
 import {recheckCartAvailability, type ValidatedCart} from './cart-validation';
-import {createMarketplaceOrder, findInvoiceBySaleOrderId} from '../service';
+import {createMarketplaceOrder} from '../service';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
 import {PaymentOption} from '@/types';
 import {getPaymentModeId} from '@/utils/payment';
@@ -1057,19 +1057,12 @@ export async function checkout(
     parsed.data.payment.mode,
   );
 
-  /* Post-commit AOS HTTP. The buyer already has access; this only creates
-   * the upstream SO + Invoice + InvoicePayment for accounting. Errors are
-   * logged but never fail the action — see the rationale in
-   * docs/marketplace-checkout-plan.md. The Invoice id is back-attached to
-   * the purchase rows once we have it. */
   try {
     const buyerPartner = await client.aOSPartner.findOne({
       where: {id: mainPartnerId},
       select: {
         partnerAddressList: {
-          where: {
-            isInvoicingAddr: true,
-          },
+          where: {isInvoicingAddr: true},
           select: {id: true, isDefaultAddr: true},
         },
       },
@@ -1079,47 +1072,47 @@ export async function checkout(
       buyerPartner?.partnerAddressList?.find(addr => addr.isDefaultAddr)?.id ??
       buyerPartner?.partnerAddressList?.[0]?.id;
     if (!addressId) {
-      return {error: true, message: await t('No invoicing address found.')};
+      return {
+        success: true,
+        data: true,
+        message: await t(
+          'Invoice creation failed: no invoicing address found.',
+        ),
+      };
     }
-    const {saleOrderId} = await createMarketplaceOrder({
+
+    const {invoiceId} = await createMarketplaceOrder({
       cart,
       workspace: auth.workspace,
       mainPartnerId,
       contactId: auth.user.isContact ? auth.user.id : undefined,
       invoicingAddressId: addressId,
-      deliveryAddressId: addressId,
       paidAmount: cart.total,
       paymentModeId,
       config,
     });
 
-    const invoice = await findInvoiceBySaleOrderId({client, saleOrderId});
-    if (invoice?.id) {
-      await attachInvoiceToPurchases(
-        client,
-        mainPartnerId,
-        productIds,
-        invoice.id,
-      );
-    } else {
-      console.error(
-        'marketplace: AOS invoice creation failed: No invoice found',
-        {
-          saleOrderId,
-          mainPartnerId,
-          addressId,
-          productIds,
-          paymentContextId,
-        },
-      );
-    }
+    await attachInvoiceToPurchases(
+      client,
+      mainPartnerId,
+      productIds,
+      invoiceId,
+    );
   } catch (e) {
-    console.error('marketplace: AOS invoice creation failed', {
+    const reason = e instanceof Error ? e.message : '';
+    console.error('marketplace: invoice creation failed', {
       mainPartnerId,
       productIds,
       paymentContextId,
       error: e,
     });
+    return {
+      success: true,
+      data: true,
+      message: reason
+        ? await t('Invoice creation failed: {0}', reason)
+        : await t('Invoice creation failed.'),
+    };
   }
 
   return {success: true, data: true};
