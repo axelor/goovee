@@ -70,7 +70,15 @@ export async function createMarketplaceOrder({
     );
   }
 
-  return {saleOrderId: String(res?.data?.data)};
+  const saleOrderId = res?.data?.data;
+  if (!saleOrderId) {
+    const message = res?.data?.message ?? 'No error message provided';
+    throw new Error(
+      await t('Order creation returned no sale order ID. Message: {0}', message),
+    );
+  }
+
+  return {saleOrderId: String(saleOrderId)};
 }
 
 export async function findInvoiceBySaleOrderId({
