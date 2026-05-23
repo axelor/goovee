@@ -30,7 +30,7 @@ type ProductsListTabProps = {
   compatibilityVersions: CompatibilityVersion[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  currencySymbol?: string | null;
+  currencySymbol: string | null;
   inAti: boolean;
   page?: number;
   totalPages?: number;

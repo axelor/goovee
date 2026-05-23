@@ -10,7 +10,7 @@ import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 
 type CreateOrderArgs = {
   cart: ValidatedCart;
-  workspace: PortalWorkspaceWithConfig | Cloned<PortalWorkspaceWithConfig>;
+  workspace: PortalWorkspaceWithConfig;
   mainPartnerId: string;
   contactId?: string;
   invoicingAddressId: string;

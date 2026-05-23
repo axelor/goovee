@@ -52,7 +52,7 @@ export function PublishNewLauncher({
         compatibilityVersions={compatibilityVersions}
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}
-        currencySymbol={currencySymbol}
+        currencySymbol={currencySymbol ?? null}
         inAti={inAti}
         defaultType={defaultType}
       />

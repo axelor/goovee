@@ -9,17 +9,17 @@ export type MarketplaceCartItem = {
   productSlug: string;
   name: string;
   priceAti: number;
-  currencySymbol?: string | null;
+  currencySymbol: string | null;
   /** Decimal places to render priceAti at. From the product's saleCurrency. */
   scale?: number;
   /* Display-only snapshot used by the cart row so it can render a richer
    * product card without a server roundtrip. These may go stale between
    * "add to cart" and checkout, which is fine — the server re-fetches
    * fresh values for price and ownership at checkout time. */
-  description?: string | null;
-  marketplaceIconCode?: string | null;
-  marketplaceCoverStyle?: string | null;
-  currentVersionNumber?: string | null;
+  description: string | null;
+  marketplaceIconCode: string | null;
+  marketplaceCoverStyle: string | null;
+  currentVersionNumber: string | null;
 };
 
 export type MarketplaceCart = {

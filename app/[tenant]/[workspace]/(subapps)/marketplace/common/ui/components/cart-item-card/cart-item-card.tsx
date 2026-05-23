@@ -40,7 +40,7 @@ export function CartItemCard({
         href={productHref}
         className={`shrink-0 w-24 sm:w-32 min-h-[96px] bg-gradient-to-br ${bgGradient} flex items-center justify-center self-stretch`}>
         <ProductIcon
-          code={item.marketplaceIconCode ?? undefined}
+          code={item.marketplaceIconCode}
           className="w-10 h-10 sm:w-12 sm:h-12"
         />
       </Link>

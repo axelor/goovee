@@ -24,7 +24,11 @@ type Props = {
 
 /* Decimal-aware formatter using whatever scale the item was added with.
  * Each cart row may have its own currency symbol; we show it inline. */
-function formatPrice(value: number, scale = 2, currencySymbol?: string | null) {
+function formatPrice(
+  value: number,
+  scale = 2,
+  currencySymbol: string | null = null,
+) {
   const amount = value.toLocaleString(undefined, {
     minimumFractionDigits: scale,
     maximumFractionDigits: scale,

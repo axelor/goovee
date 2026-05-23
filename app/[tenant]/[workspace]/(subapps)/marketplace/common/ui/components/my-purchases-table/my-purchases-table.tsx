@@ -75,7 +75,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                 bgGradient,
               )}>
               <ProductIcon
-                code={product.marketplaceIconCode ?? undefined}
+                code={product.marketplaceIconCode}
                 className="w-6 h-6"
               />
             </div>

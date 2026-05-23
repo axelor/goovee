@@ -30,7 +30,7 @@ const ICON_COMPONENTS: Record<
 };
 
 export interface ProductIconProps {
-  code?: string | null;
+  code: string | null;
   className?: string;
 }
 

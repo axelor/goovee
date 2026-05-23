@@ -50,7 +50,7 @@ type ProductFormProps = {
   defaultType?: MARKETPLACE_TYPE;
   /** Currency symbol from workspace config (e.g. "$", "€"). Optional —
    *  if absent we render the input without an adornment. */
-  currencySymbol?: string | null;
+  currencySymbol: string | null;
   /** Workspace's `PortalAppConfig.marketplaceInAti`. Decides whether the
    *  price the supplier enters is interpreted as gross (tax-inclusive)
    *  or net (tax-exclusive). Drives the help-line wording. */

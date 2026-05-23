@@ -19,7 +19,7 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  currencySymbol?: string | null;
+  currencySymbol: string | null;
   inAti: boolean;
 };
 

@@ -25,10 +25,14 @@ import {checkout} from '../../../actions/actions';
 import {CartItemCard} from '../cart-item-card';
 
 type Props = {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Cloned<PortalWorkspace>;
 };
 
-function formatPrice(value: number, scale = 2, currencySymbol?: string | null) {
+function formatPrice(
+  value: number,
+  scale = 2,
+  currencySymbol: string | null = null,
+) {
   const amount = value.toLocaleString(undefined, {
     minimumFractionDigits: scale,
     maximumFractionDigits: scale,

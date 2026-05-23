@@ -14,12 +14,12 @@ type Props = {
   productSlug: string;
   name: string;
   priceAti: number;
-  currencySymbol?: string | null;
+  currencySymbol: string | null;
   scale?: number;
-  description?: string | null;
-  marketplaceIconCode?: string | null;
-  marketplaceCoverStyle?: string | null;
-  currentVersionNumber?: string | null;
+  description: string | null;
+  marketplaceIconCode: string | null;
+  marketplaceCoverStyle: string | null;
+  currentVersionNumber: string | null;
   cartHref: string;
   addToCartLabel: string;
   buyNowLabel: string;

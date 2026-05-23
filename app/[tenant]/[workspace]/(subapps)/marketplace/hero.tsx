@@ -16,10 +16,10 @@ export const Hero = ({
   background,
   type,
 }: {
-  title?: string | null;
-  description?: string | null;
-  image?: string | null;
-  background?: VariantProps<BannerVariants>['background'] | null;
+  title: string | null;
+  description: string | null;
+  image: string | null;
+  background: VariantProps<BannerVariants>['background'] | null;
   type?: MARKETPLACE_TYPE;
 }) => {
   const renderSearch = () => <Search type={type} />;

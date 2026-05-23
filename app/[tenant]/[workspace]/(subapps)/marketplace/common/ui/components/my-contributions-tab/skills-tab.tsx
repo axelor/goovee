@@ -15,7 +15,7 @@ type SkillsTabProps = {
   mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
-  currencySymbol?: string | null;
+  currencySymbol: string | null;
   workspaceURI: string;
   workspaceURL: string;
   categories: ListCategory[];
