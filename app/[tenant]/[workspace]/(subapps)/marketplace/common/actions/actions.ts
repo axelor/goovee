@@ -22,7 +22,18 @@ import {
   type ProductSearchResult,
   recordPurchases,
   attachInvoiceToPurchases,
+  findMatchingPublishedVersion,
+  findNewestPublishedVersion,
+  findPublishedAlternateVersions,
+  findExistingReview,
+  findPartnerWithFavorite,
+  findPartnerInvoicingAddresses,
 } from '../orm/orm';
+import {
+  updateProductCurrentVersion,
+  updateVersionStatus,
+  setPartnerFavorite,
+} from '../orm/mutations';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {getPaymentInfo} from '../utils/payment-info';
 import {recheckCartAvailability, type ValidatedCart} from './cart-validation';
@@ -234,6 +245,7 @@ export async function saveProduct(
       const code = `mkt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const slug = slugify(payload.name);
       const created = await client.aOSProduct.create({
+        select: {id: true},
         data: {
           ...productData,
           // TODO: revisit — base_product.dtype is NOT NULL and goovee
@@ -264,7 +276,6 @@ export async function saveProduct(
           ratingCount: 0,
           installCount: 0,
         },
-        select: {id: true},
       });
       productId = created.id;
     }
@@ -393,6 +404,7 @@ export async function saveVersion(
       }
       const existingCompat = (current.compatibilitySet ?? []).map(c => c.id);
       await client.aOSMarketplaceProductVersion.update({
+        select: {id: true},
         data: {
           id: payload.id,
           version: current.version,
@@ -407,7 +419,6 @@ export async function saveVersion(
             ...(compatRefs.length && {select: compatRefs}),
           },
         },
-        select: {id: true},
       });
       versionId = payload.id;
     } else {
@@ -415,6 +426,7 @@ export async function saveVersion(
         return {error: true, message: await t('Bundle file is required')};
       }
       const created = await client.aOSMarketplaceProductVersion.create({
+        select: {id: true},
         data: {
           versionNumber: payload.versionNumber,
           changelog: payload.changelog || null,
@@ -427,7 +439,6 @@ export async function saveVersion(
             dateOfApproval: new Date(),
           }),
         },
-        select: {id: true},
       });
       versionId = created.id;
     }
@@ -436,13 +447,9 @@ export async function saveVersion(
     // version exists (e.g. the only published one just moved to in_review),
     // leave the pointer as-is — the listing filter requires at least one
     // published version on the product, so the product is unlisted regardless.
-    const publishedNewest = await client.aOSMarketplaceProductVersion.findOne({
-      where: {
-        product: {id: payload.productId},
-        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-      },
-      orderBy: {versionNumber: 'DESC'},
-      select: {id: true},
+    const publishedNewest = await findNewestPublishedVersion({
+      client,
+      productId: payload.productId,
     });
     if (publishedNewest) {
       const productNow = await client.aOSProduct.findOne({
@@ -450,13 +457,11 @@ export async function saveVersion(
         select: {id: true, version: true},
       });
       if (productNow) {
-        await client.aOSProduct.update({
-          data: {
-            id: payload.productId,
-            version: productNow.version,
-            currentVersion: {select: {id: publishedNewest.id}},
-          },
-          select: {id: true},
+        await updateProductCurrentVersion({
+          client,
+          productId: payload.productId,
+          version: productNow.version,
+          currentVersionId: publishedNewest.id,
         });
       }
     }
@@ -535,13 +540,10 @@ export async function unpublishVersion(
   const isCurrent = owned.currentVersion?.id === versionId;
   let promotedId: string | undefined;
   if (isCurrent) {
-    const alternates = await client.aOSMarketplaceProductVersion.find({
-      where: {
-        product: {id: productId},
-        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-        id: {ne: versionId},
-      },
-      select: {id: true},
+    const alternates = await findPublishedAlternateVersions({
+      client,
+      productId,
+      excludeVersionId: versionId,
     });
     if (alternates.length > 0) {
       if (!newCurrentVersionId) {
@@ -563,13 +565,11 @@ export async function unpublishVersion(
   }
 
   try {
-    await client.aOSMarketplaceProductVersion.update({
-      data: {
-        id: current.id,
-        version: current.version,
-        statusSelect: MARKETPLACE_VERSION_STATUS.UNPUBLISHED,
-      },
-      select: {id: true},
+    await updateVersionStatus({
+      client,
+      versionId: current.id,
+      version: current.version,
+      statusSelect: MARKETPLACE_VERSION_STATUS.UNPUBLISHED,
     });
 
     if (promotedId) {
@@ -578,13 +578,11 @@ export async function unpublishVersion(
         select: {id: true, version: true},
       });
       if (productNow) {
-        await client.aOSProduct.update({
-          data: {
-            id: productId,
-            version: productNow.version,
-            currentVersion: {select: {id: promotedId}},
-          },
-          select: {id: true},
+        await updateProductCurrentVersion({
+          client,
+          productId,
+          version: productNow.version,
+          currentVersionId: promotedId,
         });
       }
     }
@@ -635,13 +633,10 @@ export async function saveReview(
   // the UI restricts the dropdown, but a hand-crafted request shouldn't be
   // able to link a review to an unrelated version.
   if (payload.reviewedVersionId) {
-    const matchingVersion = await client.aOSMarketplaceProductVersion.findOne({
-      where: {
-        id: payload.reviewedVersionId,
-        product: {id: payload.productId},
-        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-      },
-      select: {id: true},
+    const matchingVersion = await findMatchingPublishedVersion({
+      client,
+      versionId: payload.reviewedVersionId,
+      productId: payload.productId,
     });
     if (!matchingVersion) {
       return {error: true, message: await t('Invalid version')};
@@ -653,15 +648,17 @@ export async function saveReview(
       ? {select: {id: payload.reviewedVersionId}}
       : undefined;
 
-    const existing = await client.aOSMarketplaceReview.findOne({
-      where: {product: {id: payload.productId}, author: {id: auth.user.id}},
-      select: {id: true, version: true, rating: true},
+    const existing = await findExistingReview({
+      client,
+      productId: payload.productId,
+      userId: auth.user.id,
     });
 
     let reviewId: string;
     let previousRating: number | null;
     if (existing) {
       await client.aOSMarketplaceReview.update({
+        select: {id: true},
         data: {
           id: existing.id,
           version: existing.version,
@@ -669,12 +666,12 @@ export async function saveReview(
           reviewComment: payload.reviewComment ?? null,
           ...(reviewedVersion && {reviewedVersion}),
         },
-        select: {id: true},
       });
       reviewId = existing.id;
       previousRating = existing.rating;
     } else {
       const created = await client.aOSMarketplaceReview.create({
+        select: {id: true},
         data: {
           product: {select: {id: payload.productId}},
           author: {select: {id: auth.user.id}},
@@ -682,7 +679,6 @@ export async function saveReview(
           reviewComment: payload.reviewComment ?? null,
           ...(reviewedVersion && {reviewedVersion}),
         },
-        select: {id: true},
       });
       reviewId = created.id;
       previousRating = null;
@@ -742,9 +738,10 @@ export async function deleteReview(
   const {client} = auth.tenant;
 
   try {
-    const existing = await client.aOSMarketplaceReview.findOne({
-      where: {product: {id: productId}, author: {id: auth.user.id}},
-      select: {id: true, version: true, rating: true},
+    const existing = await findExistingReview({
+      client,
+      productId,
+      userId: auth.user.id,
     });
     if (!existing) {
       return {error: true, message: await t('No review to delete')};
@@ -783,6 +780,7 @@ const AddToFavoritesSchema = z.object({
   workspaceURL: z.string().min(1),
   workspaceURI: z.string().min(1),
   returnUrl: z.string().min(1),
+  isFavorite: z.boolean(),
 });
 
 type AddToFavoritesInput = z.infer<typeof AddToFavoritesSchema>;
@@ -809,7 +807,8 @@ export async function addProductToFavorites(
     };
   }
 
-  const {productId, workspaceURL, workspaceURI, returnUrl} = result.data;
+  const {productId, workspaceURL, workspaceURI, returnUrl, isFavorite} =
+    result.data;
 
   const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId);
   if (forceLogin) {
@@ -848,15 +847,10 @@ export async function addProductToFavorites(
       };
     }
 
-    const partner = await client.aOSPartner.findOne({
-      where: {id: userId},
-      select: {
-        id: true,
-        favouriteProducts: {
-          where: {id: productId},
-          select: {id: true},
-        },
-      },
+    const partner = await findPartnerWithFavorite({
+      client,
+      userId,
+      productId,
     });
 
     if (!partner) {
@@ -866,21 +860,21 @@ export async function addProductToFavorites(
       };
     }
 
-    const isFavorite = partner.favouriteProducts?.some(
+    const currentlyFavorite = !!partner.favouriteProducts?.some(
       product => product.id === productId,
     );
 
-    // Update with new favorites list
-    await client.aOSPartner.update({
-      data: {
-        id: userId,
-        version: partner.version,
-        favouriteProducts: {
-          ...(isFavorite && {remove: productId}),
-          ...(!isFavorite && {select: {id: productId}}),
-        },
-      },
-      select: {id: true},
+    // No-op if desired state already matches.
+    if (currentlyFavorite === isFavorite) {
+      return {success: true, data: true};
+    }
+
+    await setPartnerFavorite({
+      client,
+      userId,
+      version: partner.version,
+      productId,
+      isFavorite,
     });
 
     return {success: true, data: true};
@@ -1058,14 +1052,9 @@ export async function checkout(
   );
 
   try {
-    const buyerPartner = await client.aOSPartner.findOne({
-      where: {id: mainPartnerId},
-      select: {
-        partnerAddressList: {
-          where: {isInvoicingAddr: true},
-          select: {id: true, isDefaultAddr: true},
-        },
-      },
+    const buyerPartner = await findPartnerInvoicingAddresses({
+      client,
+      mainPartnerId,
     });
 
     const addressId =

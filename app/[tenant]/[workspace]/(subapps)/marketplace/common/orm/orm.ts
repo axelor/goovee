@@ -39,6 +39,7 @@ import {
   withPublishedProductFilter,
   withCategoryAccessFilter,
   withMyProductAccessFilter,
+  withBundleAccessFilter,
 } from './helpers';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 
@@ -50,10 +51,8 @@ export type QueryProps<T extends Entity> = {
   skip?: number;
 };
 
-export type ListProduct = Awaited<ReturnType<typeof findProducts>>[number];
-export type SingleProduct = NonNullable<
-  Awaited<ReturnType<typeof findProduct>>
->;
+/** Default goovee-orm result shape for lookups that select only id+version. */
+export type ORMRecord = {id: string; version: number};
 
 /* Each query that returns a product enriches the row with `price`
  * (wt / ati / taxRate / currency) computed server-side via the same logic
@@ -311,11 +310,6 @@ export async function findPartnerCurrency({
   return partner?.currency ?? null;
 }
 
-export type ListCategory = Awaited<
-  ReturnType<typeof findProductCategories>
->[number];
-export type ListReview = Awaited<ReturnType<typeof findProductReviews>>[number];
-
 // ---- ACCESS CONTROL ---- //
 export async function findProductAccess<T extends SelectOptions<AOSProduct>>({
   recordId: productId,
@@ -364,6 +358,10 @@ export async function isProductFavorited({
 
 // ---- PRODUCT CATEGORIES ---- //
 
+export type ListCategory = Awaited<
+  ReturnType<typeof findProductCategories>
+>[number];
+
 export async function findProductCategories({
   client,
   workspace,
@@ -393,31 +391,11 @@ export async function findProductCategories({
   return categories;
 }
 
-export async function findProductCategory({
-  categoryId,
-  client,
-  workspace,
-}: {
-  categoryId: ID;
-  client: Client;
-  workspace: PortalWorkspaceWithConfig;
-}) {
-  const category = await client.aOSProductCategory.findOne({
-    where: withCategoryAccessFilter(workspace)({
-      id: categoryId,
-    }),
-    select: {
-      id: true,
-      name: true,
-      colorTheme: true,
-      iconCode: true,
-    },
-  });
-
-  return category;
-}
-
 // ---- PRODUCTS ---- //
+
+export type ProductSearchResult = Awaited<
+  ReturnType<typeof findProductsBySearch>
+>[number];
 
 export async function findProductsBySearch({
   search,
@@ -457,10 +435,6 @@ export async function findProductsBySearch({
   return products;
 }
 
-export type ProductSearchResult = Awaited<
-  ReturnType<typeof findProductsBySearch>
->[number];
-
 const findProductsSelect = {
   id: true,
   slug: true,
@@ -478,6 +452,8 @@ const findProductsSelect = {
   ...priceSelectFields,
   currentVersion: {id: true, versionNumber: true},
 } as const satisfies SelectOptions<AOSProduct>;
+
+export type ListProduct = Awaited<ReturnType<typeof findProducts>>[number];
 
 export async function findProducts({
   client,
@@ -551,6 +527,10 @@ const findProductSelect = {
   portalImageList: {select: {picture: {id: true}}},
 } as const satisfies SelectOptions<AOSProduct>;
 
+export type SingleProduct = NonNullable<
+  Awaited<ReturnType<typeof findProduct>>
+>;
+
 export async function findProduct({
   slug,
   client,
@@ -576,6 +556,10 @@ export async function findProduct({
 }
 
 // ---- PRODUCT VERSIONS ---- //
+
+export type ListProductVersion = Awaited<
+  ReturnType<typeof findProductVersions>
+>[number];
 
 export async function findProductVersions({
   productId,
@@ -619,11 +603,9 @@ export async function findProductVersions({
   return versions;
 }
 
-export type ListProductVersion = Awaited<
-  ReturnType<typeof findProductVersions>
->[number];
-
 // ---- PRODUCT REVIEWS ---- //
+
+export type ListReview = Awaited<ReturnType<typeof findProductReviews>>[number];
 
 export async function findProductReviews({
   productId,
@@ -662,6 +644,8 @@ export async function findProductReviews({
   return reviews;
 }
 
+export type MyReview = NonNullable<Awaited<ReturnType<typeof findMyReview>>>;
+
 export async function findMyReview({
   productId,
   userId,
@@ -686,70 +670,6 @@ export async function findMyReview({
   });
 }
 
-export type MyReview = NonNullable<Awaited<ReturnType<typeof findMyReview>>>;
-
-// ---- CREATE PRODUCT ---- //
-
-export async function createProduct(
-  client: Client,
-  data: {
-    name: string;
-    code: string;
-    description?: string | null;
-    marketplaceTypeSelect?: string | null;
-    marketplaceCoverStyle?: string | null;
-    marketplaceIconCode?: string | null;
-    documentationUrl?: string | null;
-    supportIssuesUrl?: string | null;
-    supportContactUrl?: string | null;
-  },
-) {
-  const product = await client.aOSProduct.create({
-    data: {
-      ...data,
-      isMarketPlace: true,
-    },
-    select: {
-      id: true,
-      name: true,
-      code: true,
-    },
-  });
-
-  return product;
-}
-
-// ---- UPDATE PRODUCT ---- //
-
-export async function updateProduct(
-  client: Client,
-  data: {
-    id: ID;
-    version: number;
-    name?: string;
-    code?: string;
-    description?: string | null;
-    marketplaceTypeSelect?: string | null;
-    marketplaceCoverStyle?: string | null;
-    marketplaceIconCode?: string | null;
-    documentationUrl?: string | null;
-    supportIssuesUrl?: string | null;
-    supportContactUrl?: string | null;
-  },
-) {
-  const product = await client.aOSProduct.update({
-    data,
-    select: {
-      id: true,
-      name: true,
-      code: true,
-      version: true,
-    },
-  });
-
-  return product;
-}
-
 // ---- MY PRODUCTS (USER CONTRIBUTIONS) ---- //
 
 const findMyProductsSelect = {
@@ -769,6 +689,8 @@ const findMyProductsSelect = {
   ...priceSelectFields,
   currentVersion: {id: true, versionNumber: true, statusSelect: true},
 } as const satisfies SelectOptions<AOSProduct>;
+
+export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
 
 export async function findMyProducts({
   mainPartnerId,
@@ -804,7 +726,9 @@ export async function findMyProducts({
   return products.map(p => withPrice(p, workspace, priceContext));
 }
 
-export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
+export type MyProductWithVersions = NonNullable<
+  Awaited<ReturnType<typeof findMyProductWithVersions>>
+>;
 
 export async function findMyProductWithVersions({
   productId,
@@ -864,9 +788,9 @@ export async function findMyProductWithVersions({
   return product;
 }
 
-export type MyProductWithVersions = NonNullable<
-  Awaited<ReturnType<typeof findMyProductWithVersions>>
->;
+export type CompatibilityVersion = Awaited<
+  ReturnType<typeof findCompatibilityVersions>
+>[number];
 
 export async function findCompatibilityVersions(client: Client) {
   return client.aOSMarketplaceAxelorVersion.find({
@@ -874,10 +798,6 @@ export async function findCompatibilityVersions(client: Client) {
     orderBy: {releasedOn: 'DESC'},
   });
 }
-
-export type CompatibilityVersion = Awaited<
-  ReturnType<typeof findCompatibilityVersions>
->[number];
 
 export async function countMyProducts({
   mainPartnerId,
@@ -1087,6 +1007,10 @@ export async function removeRating(
  * invoice id once the SO/Invoice/InvoicePayment have been created. See
  * docs/marketplace-checkout-plan.md for the full rationale. */
 
+export type MarketplacePurchase = Awaited<
+  ReturnType<typeof findPurchases>
+>[number];
+
 export async function findPurchases({
   client,
   mainPartnerId,
@@ -1119,10 +1043,6 @@ export async function findPurchases({
     },
   });
 }
-
-export type MarketplacePurchase = Awaited<
-  ReturnType<typeof findPurchases>
->[number];
 
 export async function recordPurchases(
   client: Client,
@@ -1159,6 +1079,202 @@ export async function recordPurchases(
        * Already-owned is exactly the state we want, so swallow. */
     }
   }
+}
+
+// ---- VERSION LOOKUPS ---- //
+
+export async function findMatchingPublishedVersion({
+  client,
+  versionId,
+  productId,
+}: {
+  client: Client;
+  versionId: ID;
+  productId: ID;
+}) {
+  return client.aOSMarketplaceProductVersion.findOne({
+    where: {
+      id: versionId,
+      product: {id: productId},
+      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+    },
+    select: {id: true},
+  });
+}
+
+export async function findNewestPublishedVersion({
+  client,
+  productId,
+}: {
+  client: Client;
+  productId: ID;
+}) {
+  return client.aOSMarketplaceProductVersion.findOne({
+    where: {
+      product: {id: productId},
+      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+    },
+    orderBy: {versionNumber: 'DESC'},
+    select: {id: true},
+  });
+}
+
+export async function findPublishedAlternateVersions({
+  client,
+  productId,
+  excludeVersionId,
+}: {
+  client: Client;
+  productId: ID;
+  excludeVersionId: ID;
+}) {
+  return client.aOSMarketplaceProductVersion.find({
+    where: {
+      product: {id: productId},
+      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      id: {ne: excludeVersionId},
+    },
+    select: {id: true},
+  });
+}
+
+export async function findVersionForDownload({
+  client,
+  workspace,
+  mainPartnerId,
+  productId,
+  versionId,
+}: {
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  mainPartnerId: string | null | undefined;
+  productId: ID;
+  versionId: ID;
+}) {
+  return client.aOSMarketplaceProductVersion.findOne({
+    where: withBundleAccessFilter({
+      workspace,
+      mainPartnerId: mainPartnerId ?? undefined,
+      productId: String(productId),
+    })({id: versionId}),
+    select: {
+      id: true,
+      bundleFile: {id: true},
+    },
+  });
+}
+
+// ---- REVIEW LOOKUPS / AGGREGATES ---- //
+
+export async function findExistingReview({
+  client,
+  productId,
+  userId,
+}: {
+  client: Client;
+  productId: ID;
+  userId: ID;
+}) {
+  return client.aOSMarketplaceReview.findOne({
+    where: {product: {id: productId}, author: {id: userId}},
+    select: {id: true, version: true, rating: true},
+  });
+}
+
+// ---- PARTNER LOOKUPS ---- //
+
+export async function findPartnerWithFavorite({
+  client,
+  userId,
+  productId,
+}: {
+  client: Client;
+  userId: ID;
+  productId: ID;
+}) {
+  return client.aOSPartner.findOne({
+    where: {id: userId},
+    select: {
+      id: true,
+      favouriteProducts: {
+        where: {id: productId},
+        select: {id: true},
+      },
+    },
+  });
+}
+
+export async function findPartnerInvoicingAddresses({
+  client,
+  mainPartnerId,
+}: {
+  client: Client;
+  mainPartnerId: ID;
+}) {
+  return client.aOSPartner.findOne({
+    where: {id: mainPartnerId},
+    select: {
+      partnerAddressList: {
+        where: {isInvoicingAddr: true},
+        select: {id: true, isDefaultAddr: true},
+      },
+    },
+  });
+}
+
+// ---- CART (CHECKOUT) ---- //
+
+export async function findCartProducts({
+  client,
+  workspace,
+  mainPartnerId,
+  productIds,
+}: {
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  mainPartnerId: string;
+  productIds: string[];
+}) {
+  return client.aOSProduct.find({
+    where: withProductAccessFilter(workspace)({id: {in: productIds}}),
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      ...priceSelectFields,
+      currentVersion: {id: true, statusSelect: true},
+      marketplaceProductPurchaseList: {
+        where: {partner: {id: mainPartnerId}},
+        select: {id: true},
+      },
+    },
+  });
+}
+
+export async function findCartProductsAvailability({
+  client,
+  workspace,
+  mainPartnerId,
+  productIds,
+}: {
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  mainPartnerId: string;
+  productIds: string[];
+}) {
+  return client.aOSProduct.find({
+    where: withProductAccessFilter(workspace)({id: {in: productIds}}),
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      currentVersion: {id: true},
+      marketplaceProductPurchaseList: {
+        where: {partner: {id: mainPartnerId}},
+        select: {id: true},
+      },
+    },
+  });
 }
 
 export async function attachInvoiceToPurchases(

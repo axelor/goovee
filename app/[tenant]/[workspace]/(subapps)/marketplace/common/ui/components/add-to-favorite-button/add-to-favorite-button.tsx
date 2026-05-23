@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, useTransition} from 'react';
 import {usePathname} from 'next/navigation';
 import {Heart} from 'lucide-react';
 import {Button} from '@/ui/components';
@@ -26,44 +26,45 @@ export function AddToFavoriteButton({
   const pathname = usePathname();
   const {toast} = useToast();
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const handleAddToFavorite = async () => {
-    setIsLoading(true);
-    try {
-      const result = await addProductToFavorites({
-        productId,
-        workspaceURL,
-        workspaceURI,
-        returnUrl: pathname,
-      });
-
-      if (result.success) {
-        setIsFavorite(!isFavorite);
-      } else if (result.error) {
-        toast({
-          title: i18n.t('Error'),
-          description: result.message,
-          variant: 'destructive',
+  const handleClick = () => {
+    const next = !isFavorite;
+    setIsFavorite(next); // optimistic
+    startTransition(async () => {
+      try {
+        const result = await addProductToFavorites({
+          productId,
+          workspaceURL,
+          workspaceURI,
+          returnUrl: pathname,
+          isFavorite: next,
         });
+        if (result.error) {
+          setIsFavorite(!next); // revert
+          toast({
+            title: i18n.t('Error'),
+            description: result.message,
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        if (!isRedirectError(error)) {
+          setIsFavorite(!next); // revert
+          toast({
+            title: i18n.t('Error'),
+            description: i18n.t('Failed to update favorite'),
+            variant: 'destructive',
+          });
+        }
       }
-    } catch (error) {
-      if (!isRedirectError(error)) {
-        toast({
-          title: i18n.t('Error'),
-          description: i18n.t('Failed to update favorite'),
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   return (
     <Button
-      onClick={handleAddToFavorite}
-      disabled={isLoading}
+      onClick={handleClick}
+      disabled={isPending}
       variant="outline"
       size="lg"
       className="gap-2 rounded-full">

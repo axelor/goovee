@@ -2,9 +2,12 @@ import {NextRequest, NextResponse, after} from 'next/server';
 
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
-import {sql} from '@/utils/template-string';
 
-import {withBundleAccessFilter} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/orm/helpers';
+import {findVersionForDownload} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/orm/orm';
+import {
+  createDownloadRecord,
+  incrementInstallCount,
+} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/orm/mutations';
 import {ensureAuth} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/utils/auth-helper';
 
 export async function GET(
@@ -31,16 +34,12 @@ export async function GET(
 
   const {client} = auth.tenant;
 
-  const version = await client.aOSMarketplaceProductVersion.findOne({
-    where: withBundleAccessFilter({
-      workspace: auth.workspace,
-      mainPartnerId: auth.user?.mainPartnerId,
-      productId,
-    })({id: versionId}),
-    select: {
-      id: true,
-      bundleFile: {id: true},
-    },
+  const version = await findVersionForDownload({
+    client,
+    workspace: auth.workspace,
+    mainPartnerId: auth.user?.mainPartnerId,
+    productId,
+    versionId,
   });
   if (!version || !version.bundleFile?.id) {
     return new NextResponse('File not found', {status: 404});
@@ -67,25 +66,14 @@ export async function GET(
    * since this is best-effort. */
   after(async () => {
     try {
-      await client.$transaction(async tx => {
-        await tx.aOSMarketplaceDownload.create({
-          data: {
-            product: {select: {id: productId}},
-            productVersion: {select: {id: versionId}},
-            ...(auth.user?.id && {partner: {select: {id: auth.user.id}}}),
-          },
-          select: {id: true},
-        });
-        await tx.$raw(
-          sql`
-            UPDATE base_product
-            SET
-              install_count = COALESCE(install_count, 0) + 1
-            WHERE
-              id = $1
-          `,
+      await client.$transaction(async txClient => {
+        await createDownloadRecord({
+          client: txClient,
           productId,
-        );
+          versionId,
+          partnerId: auth.user?.id,
+        });
+        await incrementInstallCount({client: txClient, productId});
       });
     } catch (e) {
       console.error('marketplace: failed to record install', {

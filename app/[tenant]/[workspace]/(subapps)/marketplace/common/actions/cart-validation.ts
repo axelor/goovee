@@ -6,8 +6,11 @@ import type {Client} from '@/goovee/.generated/client';
 import {DEFAULT_CURRENCY_SCALE} from '@/constants';
 
 import {computePrice, type CurrencyInput} from '../utils/price';
-import {withProductAccessFilter} from '../orm/helpers';
-import {buildPriceContext, priceSelectFields} from '../orm/orm';
+import {
+  buildPriceContext,
+  findCartProducts,
+  findCartProductsAvailability,
+} from '../orm/orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 
 /* Per-product availability check shared by validateCart and
@@ -89,19 +92,11 @@ export async function validateCart({
    *     `marketplaceProductPurchaseList` back-relation — non-empty
    *     means the partner already owns this product;
    *   - tax chain for `computePrice`. */
-  const products = await client.aOSProduct.find({
-    where: withProductAccessFilter(workspace)({id: {in: dedupedIds}}),
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      ...priceSelectFields,
-      currentVersion: {id: true, statusSelect: true},
-      marketplaceProductPurchaseList: {
-        where: {partner: {id: mainPartnerId}},
-        select: {id: true},
-      },
-    },
+  const products = await findCartProducts({
+    client,
+    workspace,
+    mainPartnerId,
+    productIds: dedupedIds,
   });
 
   if (products.length !== dedupedIds.length) {
@@ -214,18 +209,11 @@ export async function recheckCartAvailability({
   if (dedupedIds.length === 0) {
     return {error: true as const, message: await t('Your cart is empty.')};
   }
-  const products = await client.aOSProduct.find({
-    where: withProductAccessFilter(workspace)({id: {in: dedupedIds}}),
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      currentVersion: {id: true},
-      marketplaceProductPurchaseList: {
-        where: {partner: {id: mainPartnerId}},
-        select: {id: true},
-      },
-    },
+  const products = await findCartProductsAvailability({
+    client,
+    workspace,
+    mainPartnerId,
+    productIds: dedupedIds,
   });
   if (products.length !== dedupedIds.length) {
     return {
