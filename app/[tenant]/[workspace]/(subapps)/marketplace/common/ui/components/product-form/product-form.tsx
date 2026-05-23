@@ -36,7 +36,7 @@ import {
   type ProductFormValues,
   MAX_IMAGES,
   MAX_IMAGE_SIZE,
-} from './schema';
+} from './validator';
 import type {ListCategory, MyProductWithVersions} from '../../../orm/orm';
 
 const ICON_CODES = Array.from({length: 12}, (_, i) => `icon-${i + 1}`);
@@ -59,6 +59,50 @@ type ProductFormProps = {
   onContinue: () => void;
   onCancel: () => void;
 };
+
+function buildDefaults(
+  initial: Cloned<MyProductWithVersions> | undefined,
+  defaultType: MARKETPLACE_TYPE | undefined,
+): ProductFormValues {
+  if (!initial) {
+    return {
+      marketplaceTypeSelect: defaultType ?? MARKETPLACE_TYPE.SKILL,
+      name: '',
+      description: '',
+      longDescription: '',
+      productCategoryId: '',
+      marketplaceCoverStyle: 'gradient-1',
+      marketplaceIconCode: 'icon-1',
+      documentationUrl: '',
+      supportIssuesUrl: '',
+      supportContactUrl: '',
+      salePrice: undefined,
+      existingImageIds: [],
+      newImages: [],
+    };
+  }
+  return {
+    id: initial.id,
+    marketplaceTypeSelect:
+      (initial.marketplaceTypeSelect as MARKETPLACE_TYPE) ??
+      MARKETPLACE_TYPE.SKILL,
+    name: initial.name ?? '',
+    description: initial.description ?? '',
+    longDescription: initial.longDescription ?? '',
+    productCategoryId: initial.productCategory?.id ?? '',
+    marketplaceCoverStyle: initial.marketplaceCoverStyle ?? 'gradient-1',
+    marketplaceIconCode: initial.marketplaceIconCode ?? 'icon-1',
+    documentationUrl: initial.documentationUrl ?? '',
+    supportIssuesUrl: initial.supportIssuesUrl ?? '',
+    supportContactUrl: initial.supportContactUrl ?? '',
+    salePrice:
+      initial.salePrice != null ? Number(initial.salePrice) : undefined,
+    existingImageIds: (initial.portalImageList ?? [])
+      .map(row => row?.id)
+      .filter((id): id is string => !!id),
+    newImages: [],
+  };
+}
 
 export function ProductForm({
   mode,
@@ -174,6 +218,7 @@ export function ProductForm({
                         </span>
                       )}
                       <Input
+                        {...field}
                         type="number"
                         min={0}
                         step="0.01"
@@ -187,9 +232,6 @@ export function ProductForm({
                               : Number(e.target.value),
                           )
                         }
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
                       />
                     </div>
                   </FormControl>
@@ -272,7 +314,7 @@ export function ProductForm({
                 <FormLabel>{i18n.t('Long description')}</FormLabel>
                 <FormControl>
                   <RichTextEditor
-                    content={field.value}
+                    content={initial?.longDescription ?? ''}
                     onChange={field.onChange}
                     classNames={{
                       wrapperClassName: 'overflow-visible',
@@ -357,7 +399,7 @@ export function ProductForm({
             )}
           />
 
-          <ScreenshotsField initial={initial} />
+          <ScreenshotsFormField initial={initial} />
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <FormField
@@ -421,69 +463,148 @@ export function ProductForm({
   );
 }
 
-function buildDefaults(
-  initial: Cloned<MyProductWithVersions> | undefined,
-  defaultType: MARKETPLACE_TYPE | undefined,
-): ProductFormValues {
-  if (!initial) {
-    return {
-      marketplaceTypeSelect: defaultType ?? MARKETPLACE_TYPE.SKILL,
-      name: '',
-      description: '',
-      longDescription: '',
-      productCategoryId: '',
-      marketplaceCoverStyle: 'gradient-1',
-      marketplaceIconCode: 'icon-1',
-      documentationUrl: '',
-      supportIssuesUrl: '',
-      supportContactUrl: '',
-      salePrice: undefined,
-      existingImageIds: [],
-      newImages: [],
-    };
-  }
-  return {
-    id: initial.id,
-    marketplaceTypeSelect:
-      (initial.marketplaceTypeSelect as MARKETPLACE_TYPE) ??
-      MARKETPLACE_TYPE.SKILL,
-    name: initial.name ?? '',
-    description: initial.description ?? '',
-    longDescription: initial.longDescription ?? '',
-    productCategoryId: initial.productCategory?.id ?? '',
-    marketplaceCoverStyle: initial.marketplaceCoverStyle ?? 'gradient-1',
-    marketplaceIconCode: initial.marketplaceIconCode ?? 'icon-1',
-    documentationUrl: initial.documentationUrl ?? '',
-    supportIssuesUrl: initial.supportIssuesUrl ?? '',
-    supportContactUrl: initial.supportContactUrl ?? '',
-    salePrice:
-      initial.salePrice != null ? Number(initial.salePrice) : undefined,
-    existingImageIds: (initial.portalImageList ?? [])
-      .map(row => row?.id)
-      .filter((id): id is string => !!id),
-    newImages: [],
-  };
-}
-
-type ScreenshotsFieldProps = {
-  initial?: Cloned<MyProductWithVersions>;
+type ExistingImage = {
+  /** AOSProductPicture row id (the form field value). */
+  rowId: string;
+  /** AOSMetaFile id used to fetch the image. */
+  pictureId: string;
 };
 
-/* Multi-image upload for the product Overview tab screenshots.
- *   - Renders thumbnails of already-persisted images (rows in form
- *     `existingImageIds`). Removing one drops its row id from the array
- *     — the server then deletes the orphaned AOSProductPicture on save.
+type ScreenshotsFieldProps = {
+  existingImages: ExistingImage[];
+  newImages: File[];
+  onExistingImagesChange: (next: ExistingImage[]) => void;
+  onNewImagesChange: (next: File[]) => void;
+  /** Tenant slug used to build image URLs. */
+  tenant: string;
+  /** Max number of files (existing + new) the user can keep. */
+  maxImages: number;
+  /** Per-file size cap; oversize files are silently dropped on pick. */
+  maxImageSize: number;
+};
+
+/* Controlled multi-image uploader. Knows nothing about react-hook-form;
+ * caller drives state via the two value/onChange pairs.
+ *   - Renders thumbnails of already-persisted images (`existingImages`).
+ *     Removing one filters the array — the server then deletes the
+ *     orphaned AOSProductPicture on save.
  *   - "Add images" appends to `newImages` (File[]).
- *   - Client-side caps: 5 MB per file, 10 total (existing + new). The
- *     same caps are enforced server-side by the Zod schema. */
-function ScreenshotsField({initial}: ScreenshotsFieldProps) {
-  const {tenant} = useWorkspace();
+ *   - Caps applied client-side: oversize files dropped, total slice'd
+ *     at maxImages. */
+function ScreenshotsField({
+  existingImages,
+  newImages,
+  onExistingImagesChange,
+  onNewImagesChange,
+  tenant,
+  maxImages,
+  maxImageSize,
+}: ScreenshotsFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const {control, setValue, getValues} = useFormContext<ProductFormValues>();
-  const existingIds = useWatch({control, name: 'existingImageIds'}) ?? [];
-  const newImages = useWatch({control, name: 'newImages'}) ?? [];
-  const total = existingIds.length + newImages.length;
-  const remaining = MAX_IMAGES - total;
+  const total = existingImages.length + newImages.length;
+  const remaining = maxImages - total;
+
+  // TODO: per-file upload progress indicator.
+  // Server Actions don't expose upload progress; would need to either
+  // switch this to an XHR-backed route handler (universal — boring but
+  // proven) or to `fetch` + ReadableStream body (no Firefox support yet,
+  // HTTP/2 + HTTPS only, `duplex: 'half'`). For now we lean on the
+  // submit button's pending spinner; revisit if users complain.
+  const onPickFiles = (files: FileList | null) => {
+    if (!files) return;
+    const acceptable = Array.from(files)
+      .filter(f => f.size <= maxImageSize)
+      .slice(0, Math.max(0, remaining));
+    onNewImagesChange([...newImages, ...acceptable]);
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      {existingImages.map(({rowId, pictureId}, index) => (
+        <div
+          key={rowId}
+          className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
+          <Image
+            src={`/api/tenant/${tenant}/product/image/${pictureId}`}
+            alt={i18n.t('Product screenshot {0}', String(index + 1))}
+            width={256}
+            height={144}
+            className="h-full w-full object-cover"
+          />
+          <button
+            type="button"
+            aria-label={i18n.t('Remove image')}
+            onClick={() =>
+              onExistingImagesChange(
+                existingImages.filter(img => img.rowId !== rowId),
+              )
+            }
+            className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+            <X size={12} />
+          </button>
+        </div>
+      ))}
+      {newImages.map((file, i) => {
+        const url = URL.createObjectURL(file);
+        return (
+          <div
+            key={`${file.name}-${i}`}
+            className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
+            <Image
+              src={url}
+              alt={file.name}
+              width={256}
+              height={144}
+              unoptimized
+              className="h-full w-full object-cover"
+              onLoad={() => URL.revokeObjectURL(url)}
+            />
+            <button
+              type="button"
+              aria-label={i18n.t('Remove image')}
+              onClick={() =>
+                onNewImagesChange(newImages.filter((_, j) => j !== i))
+              }
+              className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+              <X size={12} />
+            </button>
+          </div>
+        );
+      })}
+      {remaining > 0 && (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground">
+          <Plus size={20} />
+          <span className="text-xs">{i18n.t('Add images')}</span>
+        </button>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={e => onPickFiles(e.target.files)}
+      />
+    </div>
+  );
+}
+
+/* Binds ScreenshotsField to RHF (existingImageIds + newImages fields)
+ * and wraps it in FormField scaffolding. Kept as a subcomponent so the
+ * useWatch subscriptions don't re-render the whole ProductForm. */
+function ScreenshotsFormField({
+  initial,
+}: {
+  initial?: Cloned<MyProductWithVersions>;
+}) {
+  const {tenant} = useWorkspace();
+  const {control, setValue} = useFormContext<ProductFormValues>();
+  const existingIds = useWatch({control, name: 'existingImageIds'});
+  const newImages = useWatch({control, name: 'newImages'});
 
   // Map existing AOSProductPicture rowId -> AOSMetaFile id (for URL).
   const initialImageMap = useMemo(() => {
@@ -496,24 +617,18 @@ function ScreenshotsField({initial}: ScreenshotsFieldProps) {
     return map;
   }, [initial?.portalImageList]);
 
-  // TODO: per-file upload progress indicator.
-  // Server Actions don't expose upload progress; would need to either
-  // switch this to an XHR-backed route handler (universal — boring but
-  // proven) or to `fetch` + ReadableStream body (no Firefox support yet,
-  // HTTP/2 + HTTPS only, `duplex: 'half'`). For now we lean on the
-  // submit button's pending spinner; revisit if users complain.
-  const onPickFiles = (files: FileList | null) => {
-    if (!files) return;
-    const picked = Array.from(files);
-    const acceptable = picked
-      .filter(f => f.size <= MAX_IMAGE_SIZE)
-      .slice(0, Math.max(0, remaining));
-    setValue('newImages', [...newImages, ...acceptable], {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-    if (inputRef.current) inputRef.current.value = '';
-  };
+  const existingImages = useMemo<ExistingImage[]>(
+    () =>
+      existingIds
+        .map(rowId => {
+          const pictureId = initialImageMap.get(rowId);
+          return pictureId ? {rowId, pictureId} : null;
+        })
+        .filter((x): x is ExistingImage => x !== null),
+    [existingIds, initialImageMap],
+  );
+
+  const total = existingIds.length + newImages.length;
 
   return (
     <FormField
@@ -532,85 +647,26 @@ function ScreenshotsField({initial}: ScreenshotsFieldProps) {
             </span>
           </FormLabel>
           <FormControl>
-            <div className="flex flex-wrap gap-3">
-              {existingIds.map(rowId => {
-                const pictureId = initialImageMap.get(rowId);
-                if (!pictureId) return null;
-                return (
-                  <div
-                    key={rowId}
-                    className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
-                    <Image
-                      src={`/api/tenant/${tenant}/product/image/${pictureId}`}
-                      alt=""
-                      width={256}
-                      height={144}
-                      className="h-full w-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      aria-label={i18n.t('Remove image')}
-                      onClick={() =>
-                        setValue(
-                          'existingImageIds',
-                          getValues('existingImageIds').filter(
-                            id => id !== rowId,
-                          ),
-                          {shouldValidate: true, shouldDirty: true},
-                        )
-                      }
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
-                      <X size={12} />
-                    </button>
-                  </div>
-                );
-              })}
-              {newImages.map((file, i) => {
-                const url = URL.createObjectURL(file);
-                return (
-                  <div
-                    key={`${file.name}-${i}`}
-                    className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
-                    <img
-                      src={url}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      onLoad={() => URL.revokeObjectURL(url)}
-                    />
-                    <button
-                      type="button"
-                      aria-label={i18n.t('Remove image')}
-                      onClick={() =>
-                        setValue(
-                          'newImages',
-                          newImages.filter((_, j) => j !== i),
-                          {shouldValidate: true, shouldDirty: true},
-                        )
-                      }
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
-                      <X size={12} />
-                    </button>
-                  </div>
-                );
-              })}
-              {remaining > 0 && (
-                <button
-                  type="button"
-                  onClick={() => inputRef.current?.click()}
-                  className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground">
-                  <Plus size={20} />
-                  <span className="text-xs">{i18n.t('Add images')}</span>
-                </button>
-              )}
-              <input
-                ref={inputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                hidden
-                onChange={e => onPickFiles(e.target.files)}
-              />
-            </div>
+            <ScreenshotsField
+              existingImages={existingImages}
+              newImages={newImages}
+              onExistingImagesChange={next =>
+                setValue(
+                  'existingImageIds',
+                  next.map(img => img.rowId),
+                  {shouldValidate: true, shouldDirty: true},
+                )
+              }
+              onNewImagesChange={next =>
+                setValue('newImages', next, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                })
+              }
+              tenant={tenant}
+              maxImages={MAX_IMAGES}
+              maxImageSize={MAX_IMAGE_SIZE}
+            />
           </FormControl>
           {fieldState.error && <FormMessage />}
           <p className="text-xs text-muted-foreground">

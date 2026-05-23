@@ -1,5 +1,5 @@
 import {useMemo, useRef, useState, useTransition} from 'react';
-import {useForm} from 'react-hook-form';
+import {useForm, useWatch} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
   AlertTriangle,
@@ -47,7 +47,11 @@ import {packIntoFormData} from '@/utils/formdata';
 import type {Cloned} from '@/types/util';
 import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
 import {saveVersion, unpublishVersion} from '../../../actions/actions';
-import {versionSchema, type VersionFormValues, MAX_BUNDLE_SIZE} from './schema';
+import {
+  versionSchema,
+  type VersionFormValues,
+  MAX_BUNDLE_SIZE,
+} from './validator';
 import type {
   CompatibilityVersion,
   MyProductWithVersions,
@@ -82,7 +86,7 @@ export function VersionForm({
   workspaceURI,
   workspaceURL,
   productId,
-  versions: initialVersions,
+  versions,
   productCurrentVersionId,
   compatibilityVersions,
   requiresReview,
@@ -92,12 +96,8 @@ export function VersionForm({
 }: VersionFormProps) {
   const {toast} = useToast();
   const [pending, startTransition] = useTransition();
-  /** List of existing (saved) versions, kept up-to-date as we save. */
-  const [versions, setVersions] = useState<ExistingVersion[]>(initialVersions);
   /** When true, we are editing/creating a brand-new version (not yet saved). */
-  const [creatingNew, setCreatingNew] = useState(
-    () => initialVersions.length === 0,
-  );
+  const [creatingNew, setCreatingNew] = useState(() => versions.length === 0);
   /** Index in the `versions` array we are currently editing (when not creatingNew). */
   const [index, setIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<'next' | 'prev'>('next');
@@ -131,8 +131,11 @@ export function VersionForm({
     mode: 'onSubmit',
   });
 
-  const {control, handleSubmit, watch, setValue, formState} = form;
-  const watched = watch();
+  const {control, handleSubmit, setValue, formState} = form;
+  const existingBundleFileId = useWatch({
+    control,
+    name: 'existingBundleFileId',
+  });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const downloadHref = current
@@ -390,7 +393,7 @@ export function VersionForm({
                     <FormLabel>{i18n.t('Changelog')}</FormLabel>
                     <FormControl>
                       <RichTextEditor
-                        content={field.value}
+                        content={current?.changelog ?? ''}
                         onChange={field.onChange}
                         classNames={{
                           wrapperClassName: 'overflow-visible',
@@ -407,7 +410,7 @@ export function VersionForm({
               <FormField
                 control={control}
                 name="bundleFile"
-                render={() => (
+                render={({field}) => (
                   <FormItem>
                     <FormLabel>
                       {i18n.t('Bundle file (.zip, up to 20 MB)')} *
@@ -416,18 +419,13 @@ export function VersionForm({
                       <div className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
                         <FileArchive className="h-8 w-8 shrink-0 text-muted-foreground" />
                         <div className="min-w-0 flex-1">
-                          {watched.bundleFile ? (
+                          {field.value ? (
                             <>
                               <p className="truncate text-sm text-foreground">
-                                {watched.bundleFile.name}
+                                {field.value.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {(
-                                  watched.bundleFile.size /
-                                  1024 /
-                                  1024
-                                ).toFixed(2)}{' '}
-                                MB
+                                {(field.value.size / 1024 / 1024).toFixed(2)} MB
                               </p>
                             </>
                           ) : current?.bundleFile?.fileName && downloadHref ? (
@@ -463,7 +461,7 @@ export function VersionForm({
                           size="sm"
                           onClick={() => fileInputRef.current?.click()}>
                           <Upload className="mr-1 h-4 w-4" />
-                          {watched.bundleFile || watched.existingBundleFileId
+                          {field.value || existingBundleFileId
                             ? i18n.t('Replace')
                             : i18n.t('Upload')}
                         </Button>

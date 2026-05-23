@@ -1,5 +1,3 @@
-'use client';
-
 import {useState} from 'react';
 
 import {i18n} from '@/locale';

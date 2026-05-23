@@ -52,7 +52,7 @@ import {
   productSchema,
   versionSchema,
   MAX_BUNDLE_SIZE,
-} from '../ui/components/product-form/schema';
+} from '../ui/components/product-form/validator';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {
   saveReviewSchema,

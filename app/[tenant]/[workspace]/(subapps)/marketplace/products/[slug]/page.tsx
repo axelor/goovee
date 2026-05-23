@@ -6,6 +6,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
 import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
 import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
+import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
 import {formatNumber} from '@/locale/server/formatters';
 import {t} from '@/locale/server';
 import {workspacePathname} from '@/utils/workspace';
@@ -31,7 +32,6 @@ import {
 } from '../../common/utils/validators';
 import {BuyButtons} from '../../common/ui/components/buy-buttons';
 import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constants/gradients';
-import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
 import {ProductIcon} from '../../common/ui/components/product-icon';
 import {Rating} from '../../common/ui/components/rating';
