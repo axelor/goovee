@@ -1,7 +1,5 @@
-import {notFound} from 'next/navigation';
-
+import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {workspacePathname} from '@/utils/workspace';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,12 +8,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
+import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
-import {SUBAPP_CODES} from '@/constants';
-
-import {ensureAuth} from '../common/utils/auth-helper';
-import {CartContent} from '../common/ui/components/cart-content';
+import {notFound} from 'next/navigation';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
+import {CartContent} from '../common/ui/components/cart-content';
+import {ensureAuth} from '../common/utils/auth-helper';
 
 export default async function CartPage(props: {
   params: Promise<{tenant: string; workspace: string}>;

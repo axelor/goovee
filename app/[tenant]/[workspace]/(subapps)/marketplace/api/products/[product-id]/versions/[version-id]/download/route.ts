@@ -1,14 +1,12 @@
-import {NextRequest, NextResponse, after} from 'next/server';
-
-import {findFile, streamFile} from '@/utils/download';
-import {workspacePathname} from '@/utils/workspace';
-
-import {findVersionForDownload} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/orm/orm';
 import {
   createDownloadRecord,
+  findVersionForDownload,
   incrementInstallCount,
-} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/orm/mutations';
-import {ensureAuth} from '@/app/[tenant]/[workspace]/(subapps)/marketplace/common/utils/auth-helper';
+} from '@/subapps/marketplace/common/orm';
+import {ensureAuth} from '@/subapps/marketplace/common/utils/auth-helper';
+import {findFile, streamFile} from '@/utils/download';
+import {workspacePathname} from '@/utils/workspace';
+import {NextRequest, NextResponse, after} from 'next/server';
 
 export async function GET(
   _request: NextRequest,

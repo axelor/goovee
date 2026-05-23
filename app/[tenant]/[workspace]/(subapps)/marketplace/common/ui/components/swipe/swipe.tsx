@@ -1,8 +1,8 @@
 'use client';
-import {Swiper, SwiperSlide} from 'swiper/react';
-import {FreeMode, Pagination} from 'swiper/modules';
-import {ReactNode} from 'react';
 import {cn} from '@/utils/css';
+import {ReactNode} from 'react';
+import {FreeMode, Pagination} from 'swiper/modules';
+import {Swiper, SwiperSlide} from 'swiper/react';
 
 type SwipeProps = {
   items: ReactNode[];

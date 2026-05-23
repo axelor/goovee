@@ -1,10 +1,7 @@
-import axios from 'axios';
-
-import {getAOSAuthHeaders} from '@/tenant/auth';
 import {t} from '@/locale/server';
 import type {Tenant} from '@/tenant';
-import type {Cloned} from '@/types/util';
-
+import {getAOSAuthHeaders} from '@/tenant/auth';
+import axios from 'axios';
 import type {ValidatedCart} from '../actions/cart-validation';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 

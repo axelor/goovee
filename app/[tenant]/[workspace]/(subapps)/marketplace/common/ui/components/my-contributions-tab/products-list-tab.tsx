@@ -1,25 +1,25 @@
-import Link from 'next/link';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {clone} from '@/utils';
-import {
-  ListMyProduct,
-  type CompatibilityVersion,
-  type ListCategory,
-} from '../../../orm/orm';
-import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
-import {MyProductsTable} from './my-products-table';
+import {t} from '@/locale/server';
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  PaginationEllipsis,
 } from '@/ui/components/pagination';
+import {clone} from '@/utils';
+import {cn} from '@/utils/css';
 import {getPaginationButtons} from '@/utils/pagination';
-import {t} from '@/locale/server';
+import {ChevronLeft, ChevronRight} from 'lucide-react';
+import Link from 'next/link';
+import {
+  ListMyProduct,
+  type CompatibilityVersion,
+  type ListCategory,
+} from '../../../orm';
+import {MyProductsTable} from './my-products-table';
 
 type ProductsListTabProps = {
   products: ListMyProduct[];

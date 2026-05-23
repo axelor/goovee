@@ -1,14 +1,14 @@
 'use client';
 
-import {useState, useTransition} from 'react';
-import {usePathname} from 'next/navigation';
-import {Heart} from 'lucide-react';
+import {i18n} from '@/locale';
 import {Button} from '@/ui/components';
 import {useToast} from '@/ui/hooks/use-toast';
 import {cn} from '@/utils/css';
-import {addProductToFavorites} from '../../../actions/actions';
+import {Heart} from 'lucide-react';
 import {isRedirectError} from 'next/dist/client/components/redirect-error';
-import {i18n} from '@/locale';
+import {usePathname} from 'next/navigation';
+import {useState, useTransition} from 'react';
+import {addProductToFavorites} from '../../../actions/actions';
 
 interface AddToFavoriteButtonProps {
   productId: string;

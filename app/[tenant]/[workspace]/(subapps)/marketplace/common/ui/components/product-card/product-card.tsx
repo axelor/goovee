@@ -1,14 +1,14 @@
-import Link from 'next/link';
-import {Download} from 'lucide-react';
-import {Rating} from '../rating';
 import {SUBAPP_CODES} from '@/constants';
+import {t} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
-import type {ListProduct} from '../../../orm/orm';
+import {Download} from 'lucide-react';
+import Link from 'next/link';
+import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../constants/gradients';
+import type {ListProduct} from '../../../orm';
 import {isPaid} from '../../../utils/price';
-import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constants/gradients';
 import {ProductIcon} from '../product-icon';
-import {t} from '@/locale/server';
+import {Rating} from '../rating';
 
 export interface ProductCardProps {
   product: ListProduct;

@@ -1,21 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import {Fragment, useState, type ReactNode} from 'react';
-import {
-  Download as DownloadIcon,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
-
+import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import {cn} from '@/utils/css';
-import {SUBAPP_CODES, RESPONSIVE_SIZES} from '@/constants';
-import {useResponsive} from '@/ui/hooks';
-import {InnerHTML} from '@/ui/components/inner-html';
 import type {Cloned} from '@/types/util';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
+import {InnerHTML} from '@/ui/components/inner-html';
 import {
   Table,
   TableBody,
@@ -24,10 +13,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/components/table';
-
+import {useResponsive} from '@/ui/hooks';
+import {cn} from '@/utils/css';
+import {
+  ChevronDown,
+  ChevronUp,
+  Download as DownloadIcon,
+  ExternalLink,
+} from 'lucide-react';
+import Link from 'next/link';
+import {Fragment, useState, type ReactNode} from 'react';
+import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../constants/gradients';
+import type {MarketplacePurchase} from '../../../orm';
 import {ProductIcon} from '../product-icon';
-import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constants/gradients';
-import type {MarketplacePurchase} from '../../../orm/orm';
 
 type Purchase = Cloned<MarketplacePurchase>;
 

@@ -1,7 +1,6 @@
-import {redirect} from 'next/navigation';
-
 import {SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
+import {redirect} from 'next/navigation';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from './common/constants/route-types';
 
 export default async function Page(props: {

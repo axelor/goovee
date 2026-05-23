@@ -1,10 +1,3 @@
-import fs from 'node:fs';
-import fsp from 'node:fs/promises';
-import path from 'node:path';
-import {Readable} from 'node:stream';
-import {pipeline} from 'node:stream/promises';
-import {BigDecimal, type CreateArgs} from '@goovee/orm';
-
 import type {Client} from '@/goovee/.generated/client';
 import type {
   AOSMarketplaceProductVersion,
@@ -12,22 +5,26 @@ import type {
 } from '@/goovee/.generated/models';
 import {getFileSizeText} from '@/utils/files';
 import {sql} from '@/utils/template-string';
-
-import {slugify} from '../../utils/slugify';
-
+import {BigDecimal, type CreateArgs} from '@goovee/orm';
+import fs from 'node:fs';
+import fsp from 'node:fs/promises';
+import path from 'node:path';
+import {Readable} from 'node:stream';
+import {pipeline} from 'node:stream/promises';
 import {MARKETPLACE_VERSION_STATUS} from '../../constants/statuses';
+import {slugify} from '../../utils/slugify';
+import {
+  findCategoryByCode,
+  findCompatibilityVersionByName,
+  findCustomerPartnerByEmail,
+  findPartnerByEmail,
+} from './lookups';
 import type {
   CategorySeed,
   CompatibilityVersionSeed,
   ProductSeed,
   VersionSeed,
 } from './validators';
-import {
-  findCategoryByCode,
-  findCompatibilityVersionByName,
-  findPartnerByEmail,
-  findCustomerPartnerByEmail,
-} from './lookups';
 
 export type WorkspaceContext = {
   workspaceId: string;

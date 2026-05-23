@@ -1,6 +1,6 @@
+import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
 import {Swipe} from '../swipe/swipe';
-import {t} from '@/locale/server';
 import {ComingSoonBanner} from './coming-soon-banner';
 
 const stats = [

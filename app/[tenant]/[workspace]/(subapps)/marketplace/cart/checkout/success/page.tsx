@@ -1,15 +1,13 @@
-import Link from 'next/link';
-import {Download, CheckCircle2} from 'lucide-react';
-import {notFound, redirect} from 'next/navigation';
-
 import {SUBAPP_CODES} from '@/constants';
-import {getLoginURL} from '@/utils/url';
 import {t} from '@/locale/server';
-import {workspacePathname} from '@/utils/workspace';
 import {Button} from '@/ui/components';
-
+import {getLoginURL} from '@/utils/url';
+import {workspacePathname} from '@/utils/workspace';
+import {CheckCircle2, Download} from 'lucide-react';
+import Link from 'next/link';
+import {notFound, redirect} from 'next/navigation';
+import {findPurchases} from '../../../common/orm';
 import {ensureAuth} from '../../../common/utils/auth-helper';
-import {findPurchases} from '../../../common/orm/orm';
 
 /* Success destination after `onApprove` fires in the Payments component.
  * We don't trust query state — just list the buyer's purchases freshly

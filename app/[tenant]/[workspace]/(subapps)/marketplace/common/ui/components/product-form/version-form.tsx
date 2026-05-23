@@ -1,17 +1,6 @@
-import {useMemo, useRef, useState, useTransition} from 'react';
-import {useForm, useWatch} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
-  Info,
-  Plus,
-  Trash2,
-  Upload,
-  FileArchive,
-} from 'lucide-react';
 import {i18n} from '@/locale';
+import type {Cloned} from '@/types/util';
+import {RichTextEditor} from '@/ui/components';
 import {Alert, AlertDescription, AlertTitle} from '@/ui/components/alert';
 import {
   AlertDialog,
@@ -24,15 +13,6 @@ import {
   AlertDialogTitle,
 } from '@/ui/components/alert-dialog';
 import {Button} from '@/ui/components/button';
-import {Input} from '@/ui/components/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/components/select';
-import {RichTextEditor} from '@/ui/components';
 import {
   Form,
   FormControl,
@@ -41,21 +21,38 @@ import {
   FormLabel,
   FormMessage,
 } from '@/ui/components/form';
+import {Input} from '@/ui/components/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/components/select';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {packIntoFormData} from '@/utils/formdata';
-import type {Cloned} from '@/types/util';
-import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
-import {saveVersion, unpublishVersion} from '../../../actions/actions';
+import {zodResolver} from '@hookform/resolvers/zod';
 import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  FileArchive,
+  Info,
+  Plus,
+  Trash2,
+  Upload,
+} from 'lucide-react';
+import {useMemo, useRef, useState, useTransition} from 'react';
+import {useForm, useWatch} from 'react-hook-form';
+import {saveVersion, unpublishVersion} from '../../../actions/actions';
+import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
+import type {CompatibilityVersion, MyProductWithVersions} from '../../../orm';
+import {
+  MAX_BUNDLE_SIZE,
   versionSchema,
   type VersionFormValues,
-  MAX_BUNDLE_SIZE,
 } from './validator';
-import type {
-  CompatibilityVersion,
-  MyProductWithVersions,
-} from '../../../orm/orm';
 
 type ExistingVersion = NonNullable<
   Cloned<MyProductWithVersions>['versionList']

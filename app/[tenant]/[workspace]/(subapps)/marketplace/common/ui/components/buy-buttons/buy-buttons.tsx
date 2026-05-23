@@ -1,12 +1,10 @@
 'use client';
 
-import {useRouter} from 'next/navigation';
-import Link from 'next/link';
-import {ShoppingCart, ArrowRight} from 'lucide-react';
-
-import {Button} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-
+import {Button} from '@/ui/components';
+import {ArrowRight, ShoppingCart} from 'lucide-react';
+import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 import {useMarketplaceCart} from '../../../hooks/use-marketplace-cart';
 
 type Props = {

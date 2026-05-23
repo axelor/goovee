@@ -1,11 +1,5 @@
-import Link from 'next/link';
-import {notFound, redirect} from 'next/navigation';
-
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {workspacePathname} from '@/utils/workspace';
-import {getLoginURL} from '@/utils/url';
-import {clone} from '@/utils';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,10 +8,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
-
-import {ensureAuth} from '../../common/utils/auth-helper';
-import {CheckoutClient} from '../../common/ui/components/checkout-client';
+import {clone} from '@/utils';
+import {getLoginURL} from '@/utils/url';
+import {workspacePathname} from '@/utils/workspace';
+import Link from 'next/link';
+import {notFound, redirect} from 'next/navigation';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
+import {CheckoutClient} from '../../common/ui/components/checkout-client';
+import {ensureAuth} from '../../common/utils/auth-helper';
 
 export default async function CheckoutPage(props: {
   params: Promise<{tenant: string; workspace: string}>;

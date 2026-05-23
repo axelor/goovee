@@ -1,5 +1,5 @@
-import {Construction} from 'lucide-react';
 import {t} from '@/locale/server';
+import {Construction} from 'lucide-react';
 
 type Props = {
   /** Optional tab name shown in the body line ("Revenue", "Profile", …). */

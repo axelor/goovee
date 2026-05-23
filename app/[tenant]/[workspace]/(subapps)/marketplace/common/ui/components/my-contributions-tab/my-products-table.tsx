@@ -1,16 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import {Fragment, useState, type ReactNode} from 'react';
-import {ExternalLink, ChevronDown, ChevronUp} from 'lucide-react';
+import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import {Rating} from '../rating';
-import {InnerHTML} from '@/ui/components/inner-html';
-import {cn} from '@/utils/css';
-import {SUBAPP_CODES, RESPONSIVE_SIZES} from '@/constants';
-import {useResponsive} from '@/ui/hooks';
 import type {Cloned} from '@/types/util';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
+import {InnerHTML} from '@/ui/components/inner-html';
 import {
   Table,
   TableBody,
@@ -19,15 +13,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/components/table';
-import {ProductIcon} from '../product-icon';
-import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constants/gradients';
-import {EditProductLauncher} from './edit-product-launcher';
+import {useResponsive} from '@/ui/hooks';
+import {cn} from '@/utils/css';
+import {ChevronDown, ChevronUp, ExternalLink} from 'lucide-react';
+import Link from 'next/link';
+import {Fragment, useState, type ReactNode} from 'react';
+import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../constants/gradients';
 import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
 import type {
   CompatibilityVersion,
   ListCategory,
   ListMyProduct,
-} from '../../../orm/orm';
+} from '../../../orm';
+import {ProductIcon} from '../product-icon';
+import {Rating} from '../rating';
+import {EditProductLauncher} from './edit-product-launcher';
 
 type Product = Cloned<ListMyProduct>;
 

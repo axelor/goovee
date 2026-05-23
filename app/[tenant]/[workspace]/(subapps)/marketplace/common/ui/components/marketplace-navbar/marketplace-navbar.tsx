@@ -1,19 +1,17 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
-import Link from 'next/link';
-import {usePathname} from 'next/navigation';
-
-import {Portal} from '@/ui/components';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
-import {i18n} from '@/locale';
 import {authClient} from '@/lib/auth-client';
+import {i18n} from '@/locale';
+import {Portal} from '@/ui/components';
 import {useResponsive} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-
-import styles from './index.module.scss';
+import Link from 'next/link';
+import {usePathname} from 'next/navigation';
+import {useEffect, useMemo, useState} from 'react';
 import {MARKETPLACE_LINKS} from '../../../constants/marketplace-links';
+import styles from './index.module.scss';
 
 function NavLinks() {
   const {workspaceURI} = useWorkspace();

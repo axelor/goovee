@@ -1,10 +1,9 @@
-import Link from 'next/link';
-import {XCircle} from 'lucide-react';
-
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {workspacePathname} from '@/utils/workspace';
 import {Button} from '@/ui/components';
+import {workspacePathname} from '@/utils/workspace';
+import {XCircle} from 'lucide-react';
+import Link from 'next/link';
 
 export default async function CheckoutCancelPage(props: {
   params: Promise<{tenant: string; workspace: string}>;

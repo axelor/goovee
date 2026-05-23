@@ -1,6 +1,6 @@
-import {Fragment} from 'react';
-import {Check} from 'lucide-react';
 import {cn} from '@/utils/css';
+import {Check} from 'lucide-react';
+import {Fragment} from 'react';
 
 export type StepperStep = {
   id: string;

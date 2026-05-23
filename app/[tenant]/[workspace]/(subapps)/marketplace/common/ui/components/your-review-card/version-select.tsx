@@ -1,8 +1,7 @@
 'use client';
 
-import {useRef, useState} from 'react';
-import {ChevronsUpDown} from 'lucide-react';
-
+import {RESPONSIVE_SIZES} from '@/constants';
+import {i18n} from '@/locale';
 import {
   Button,
   Command,
@@ -16,10 +15,10 @@ import {
   PopoverTrigger,
 } from '@/ui/components';
 import {Drawer, DrawerContent, DrawerTrigger} from '@/ui/components/drawer';
-import {i18n} from '@/locale';
 import {useResponsive} from '@/ui/hooks';
-import {RESPONSIVE_SIZES} from '@/constants';
 import {cn} from '@/utils/css';
+import {ChevronsUpDown} from 'lucide-react';
+import {useRef, useState} from 'react';
 
 type VersionOption = {id: string; versionNumber: string};
 

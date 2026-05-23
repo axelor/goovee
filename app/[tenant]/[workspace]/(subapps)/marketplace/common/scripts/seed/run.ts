@@ -1,14 +1,10 @@
 import '@/load-swc-env';
 
+import {DEFAULT_CURRENCY_CODE} from '@/constants';
+import {manager} from '@/tenant';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
-
-import {manager} from '@/tenant';
-
-import {SeedSchema} from './validators';
-import {validateCrossFieldRules} from './validate';
-import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {
   findCurrencyByCode,
   findCustomerPartnerByEmail,
@@ -21,13 +17,15 @@ import {
   upsertCategory,
   upsertCompatibilityVersion,
   upsertProduct,
+  upsertReview,
   upsertScreenshots,
   upsertSharedBundleMetaFile,
   upsertSharedScreenshotMetaFiles,
-  upsertReview,
   upsertVersion,
   type WorkspaceContext,
 } from './upsert';
+import {validateCrossFieldRules} from './validate';
+import {SeedSchema} from './validators';
 
 /* `pnpm <script> -- --flag` forwards a bare `--` as its own argv token,
  * which `parseArgs` then treats as the positional separator. Strip it

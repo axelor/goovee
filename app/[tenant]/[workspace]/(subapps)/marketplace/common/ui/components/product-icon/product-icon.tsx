@@ -1,4 +1,7 @@
 import Icon1 from './icon-1.svg';
+import Icon10 from './icon-10.svg';
+import Icon11 from './icon-11.svg';
+import Icon12 from './icon-12.svg';
 import Icon2 from './icon-2.svg';
 import Icon3 from './icon-3.svg';
 import Icon4 from './icon-4.svg';
@@ -7,9 +10,6 @@ import Icon6 from './icon-6.svg';
 import Icon7 from './icon-7.svg';
 import Icon8 from './icon-8.svg';
 import Icon9 from './icon-9.svg';
-import Icon10 from './icon-10.svg';
-import Icon11 from './icon-11.svg';
-import Icon12 from './icon-12.svg';
 
 const ICON_COMPONENTS: Record<
   string,

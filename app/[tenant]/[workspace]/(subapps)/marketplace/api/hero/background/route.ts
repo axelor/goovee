@@ -1,9 +1,7 @@
-import {NextRequest, NextResponse} from 'next/server';
-
 import {TENANT_HEADER} from '@/proxy';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
-
+import {NextRequest, NextResponse} from 'next/server';
 import {ensureAuth} from '../../../common/utils/auth-helper';
 
 export async function GET(

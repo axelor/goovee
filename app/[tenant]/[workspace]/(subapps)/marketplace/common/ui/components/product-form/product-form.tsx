@@ -1,13 +1,8 @@
-import {useMemo, useRef, useTransition} from 'react';
-import Image from 'next/image';
-import {useForm, useFormContext, useWatch} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {Plus, X} from 'lucide-react';
-import {i18n} from '@/locale';
-import {Button} from '@/ui/components/button';
-import {Input} from '@/ui/components/input';
-import {RichTextEditor} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {i18n} from '@/locale';
+import type {Cloned} from '@/types/util';
+import {RichTextEditor} from '@/ui/components';
+import {Button} from '@/ui/components/button';
 import {
   Form,
   FormControl,
@@ -16,6 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/ui/components/form';
+import {Input} from '@/ui/components/input';
 import {
   Select,
   SelectContent,
@@ -25,19 +21,23 @@ import {
 } from '@/ui/components/select';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import type {Cloned} from '@/types/util';
-import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
-import {GRADIENT_MAP} from '../../../constants/gradients';
-import {ProductIcon} from '../product-icon';
 import {packIntoFormData} from '@/utils/formdata';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {Plus, X} from 'lucide-react';
+import Image from 'next/image';
+import {useMemo, useRef, useTransition} from 'react';
+import {useForm, useFormContext, useWatch} from 'react-hook-form';
 import {saveProduct} from '../../../actions/actions';
+import {GRADIENT_MAP} from '../../../constants/gradients';
+import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
+import type {ListCategory, MyProductWithVersions} from '../../../orm';
+import {ProductIcon} from '../product-icon';
 import {
-  productSchema,
-  type ProductFormValues,
   MAX_IMAGES,
   MAX_IMAGE_SIZE,
+  productSchema,
+  type ProductFormValues,
 } from './validator';
-import type {ListCategory, MyProductWithVersions} from '../../../orm/orm';
 
 const ICON_CODES = Array.from({length: 12}, (_, i) => `icon-${i + 1}`);
 const COVER_CODES = Object.keys(GRADIENT_MAP);

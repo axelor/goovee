@@ -1,13 +1,19 @@
 import type {
+  AOSMarketplaceProductVersion,
   AOSProduct,
   AOSProductCategory,
-  AOSMarketplaceProductVersion,
 } from '@/goovee/.generated/models';
-import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
 import type {ID} from '@/types';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {and, or} from '@/utils/orm';
+import type {
+  Entity,
+  OrderByArg,
+  SelectOptions,
+  WhereOptions,
+} from '@goovee/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
+import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import {type PriceComputeInput} from '../utils/price';
 
 export type QueryProps<T extends Entity> = {
   where?: WhereOptions<T> | null;
@@ -141,3 +147,66 @@ export function withBundleAccessFilter({
     ]);
   };
 }
+
+/** Default goovee-orm result shape for lookups that select only id+version. */
+export type ORMRecord = {id: string; version: number};
+
+/* Each query that returns a product enriches the row with `price`
+ * (wt / ati / taxRate / currency) computed server-side via the same logic
+ * AOS Java uses when generating invoice lines. Consumers should read these
+ * numbers and never recompute on the client. */
+export type PriceableProduct = PriceComputeInput & {
+  saleCurrency?: {
+    code?: string | null;
+    symbol?: string | null;
+    numberOfDecimals?: number | null;
+  } | null;
+};
+
+/** Fields every product query must select to enable price computation.
+ *  Exported so cart-validation and other call sites can spread it into
+ *  their selects and stay in lockstep with whatever `computePrice` reads. */
+export const priceSelectFields = {
+  salePrice: true,
+  saleCurrency: {code: true, symbol: true, numberOfDecimals: true},
+  inAti: true,
+  productCompanyList: {
+    select: {
+      company: {id: true},
+      salePrice: true,
+      inAti: true,
+    },
+  },
+  accountManagementList: {
+    select: {
+      id: true,
+      company: {id: true},
+      saleTaxSet: {
+        select: {
+          id: true,
+          activeTaxLine: {value: true},
+          taxLineList: {
+            select: {value: true, startDate: true, endDate: true},
+          },
+        },
+      },
+    },
+  },
+  productFamily: {
+    accountManagementList: {
+      select: {
+        id: true,
+        company: {id: true},
+        saleTaxSet: {
+          select: {
+            id: true,
+            activeTaxLine: {value: true},
+            taxLineList: {
+              select: {value: true, startDate: true, endDate: true},
+            },
+          },
+        },
+      },
+    },
+  },
+} as const satisfies SelectOptions<AOSProduct>;

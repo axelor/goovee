@@ -1,8 +1,9 @@
-import type {CreateArgs} from '@goovee/orm';
 import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceDownload} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {sql} from '@/utils/template-string';
+import type {CreateArgs} from '@goovee/orm';
+import type {ORMRecord} from './helpers';
 
 // ---- PRODUCT MUTATIONS ---- //
 
@@ -18,7 +19,7 @@ export async function updateProductCurrentVersion({
   productId: ID;
   version: number;
   currentVersionId: ID;
-}) {
+}): Promise<ORMRecord> {
   return client.aOSProduct.update({
     data: {
       id: productId,
@@ -43,7 +44,7 @@ export async function updateVersionStatus({
   versionId: ID;
   version: number;
   statusSelect: string;
-}) {
+}): Promise<ORMRecord> {
   return client.aOSMarketplaceProductVersion.update({
     data: {
       id: versionId,
@@ -72,7 +73,7 @@ export async function setPartnerFavorite({
   version: number;
   productId: ID;
   isFavorite: boolean;
-}) {
+}): Promise<ORMRecord> {
   return client.aOSPartner.update({
     data: {
       id: userId,
@@ -97,7 +98,7 @@ export async function createDownloadRecord({
   productId: ID;
   versionId: ID;
   partnerId?: ID | null;
-}) {
+}): Promise<ORMRecord> {
   const data: CreateArgs<AOSMarketplaceDownload> = {
     product: {select: {id: String(productId)}},
     productVersion: {select: {id: String(versionId)}},

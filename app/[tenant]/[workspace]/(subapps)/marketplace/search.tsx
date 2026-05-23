@@ -1,7 +1,4 @@
 'use client';
-import {debounce} from 'lodash-es';
-import {useRouter} from 'next/navigation';
-import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
@@ -17,11 +14,13 @@ import {
 } from '@/ui/components/command';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-
+import {debounce} from 'lodash-es';
+import {useRouter} from 'next/navigation';
+import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 import {searchProducts} from './common/actions/actions';
 import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
+import type {ProductSearchResult} from './common/orm';
 import {ProductIcon} from './common/ui/components/product-icon';
-import type {ProductSearchResult} from './common/orm/orm';
 
 export function Search({
   type,

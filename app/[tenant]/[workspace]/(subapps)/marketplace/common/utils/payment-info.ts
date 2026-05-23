@@ -1,9 +1,9 @@
+import type {Client} from '@/goovee/.generated/client';
+import type {PaymentOrder} from '@/lib/core/payment/common/type';
 import {findPayboxOrder} from '@/payment/paybox/actions';
 import {findPaypalOrder} from '@/payment/paypal/actions';
 import {findStripeOrder} from '@/payment/stripe/actions';
 import {PaymentOption} from '@/types';
-import type {PaymentOrder} from '@/lib/core/payment/common/type';
-import type {Client} from '@/goovee/.generated/client';
 
 /* Marketplace-local copy of events/common/utils/validate.ts:getPaymentInfo.
  * Pulls the validated cart back from PaymentContext keyed by the

@@ -1,13 +1,12 @@
 'use client';
-import type {VariantProps} from 'class-variance-authority';
 
 import {IMAGE_URL} from '@/constants';
 import {i18n} from '@/lib/core/locale';
 import {HeroSearch} from '@/ui/components';
 import {BannerVariants} from '@/ui/components/banner';
-
-import Search from './search';
+import type {VariantProps} from 'class-variance-authority';
 import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
+import Search from './search';
 
 export const Hero = ({
   title,

@@ -1,20 +1,17 @@
 'use client';
 
-import {useCallback, useEffect, useMemo, useState} from 'react';
-import Link from 'next/link';
-import {usePathname} from 'next/navigation';
-// ---- CORE IMPORTS ---- //
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {SUBAPP_CODES} from '@/constants';
+import {authClient} from '@/lib/auth-client';
+import {i18n} from '@/locale';
 import {Icon, Portal} from '@/ui/components';
 import {Sheet, SheetContent, SheetTitle} from '@/ui/components/sheet';
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {i18n} from '@/locale';
-import {authClient} from '@/lib/auth-client';
-import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
-
-// ---- LOCAL IMPORTS ---- //
-import styles from './index.module.scss';
+import Link from 'next/link';
+import {usePathname} from 'next/navigation';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {MARKETPLACE_LINKS} from '../../../constants/marketplace-links';
+import styles from './index.module.scss';
 
 function Menu({icon, color}: {icon: string; color?: string}) {
   const [open, setOpen] = useState(false);

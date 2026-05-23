@@ -1,12 +1,10 @@
-import Link from 'next/link';
-import {Trash2} from 'lucide-react';
-
 import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
-
-import {ProductIcon} from '../product-icon';
-import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../../constants/gradients';
+import {Trash2} from 'lucide-react';
+import Link from 'next/link';
+import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../constants/gradients';
 import type {MarketplaceCartItem} from '../../../hooks/use-marketplace-cart';
+import {ProductIcon} from '../product-icon';
 
 type Props = {
   item: MarketplaceCartItem;

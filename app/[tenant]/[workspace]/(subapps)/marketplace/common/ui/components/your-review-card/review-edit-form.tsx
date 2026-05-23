@@ -1,17 +1,15 @@
-import {useState} from 'react';
-
 import {i18n} from '@/locale';
+import type {Cloned} from '@/types/util';
 import {Button} from '@/ui/components/button';
 import {Textarea} from '@/ui/components/textarea';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import type {Cloned} from '@/types/util';
-
-import {RatingInput} from './rating-input';
-import {VersionSelect} from './version-select';
-import {REVIEW_CARD_SHELL} from './shared';
+import {useState} from 'react';
 import {REVIEW_COMMENT_MAX_LENGTH} from '../../../constants/review';
-import type {MyReview} from '../../../orm/orm';
+import type {MyReview} from '../../../orm';
+import {RatingInput} from './rating-input';
+import {REVIEW_CARD_SHELL} from './shared';
+import {VersionSelect} from './version-select';
 
 export type ReviewFormValues = {
   rating: number;

@@ -1,11 +1,9 @@
 'use server';
 
-import Link from 'next/link';
-import {ChevronLeft, ChevronRight, Download} from 'lucide-react';
 import {SUBAPP_CODES} from '@/constants';
-import {cn} from '@/utils/css';
+import type {Client} from '@/goovee/.generated/client';
+import {t} from '@/locale/server';
 import {Badge, Button} from '@/ui/components';
-import {getSkip, getPaginationButtons, getTotal} from '@/utils/pagination';
 import {
   Pagination,
   PaginationContent,
@@ -14,13 +12,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
+import {cn} from '@/utils/css';
+import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';
+import {ChevronLeft, ChevronRight, Download} from 'lucide-react';
+import Link from 'next/link';
 import {
   findProductVersions,
-  type SingleProduct,
   type ListProductVersion,
-} from '../../../orm/orm';
-import {t} from '@/locale/server';
-import type {Client} from '@/goovee/.generated/client';
+  type SingleProduct,
+} from '../../../orm';
 
 interface VersionsTabProps {
   product: SingleProduct;

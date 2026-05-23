@@ -1,14 +1,12 @@
-import type {ReactNode} from 'react';
-import {notFound} from 'next/navigation';
-
-import {SUBAPP_CODES} from '@/constants';
 import {getSession} from '@/auth';
-import {manager} from '@/tenant';
+import {SUBAPP_CODES} from '@/constants';
 import {findSubappAccess} from '@/orm/workspace';
+import {manager} from '@/tenant';
 import {workspacePathname} from '@/utils/workspace';
-
-import {MarketplaceNavbar} from './common/ui/components/marketplace-navbar';
+import {notFound} from 'next/navigation';
+import type {ReactNode} from 'react';
 import {MarketplaceMobileMenu} from './common/ui/components/marketplace-mobile-menu';
+import {MarketplaceNavbar} from './common/ui/components/marketplace-navbar';
 
 export default async function Layout({
   children,

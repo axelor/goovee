@@ -1,10 +1,8 @@
 import '@/load-swc-env';
-
+import {manager} from '@/tenant';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
-
-import {manager} from '@/tenant';
 
 /* Reset / teardown for the marketplace seed.
  *

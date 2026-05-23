@@ -1,8 +1,8 @@
 import {SUBAPP_CODES} from '@/constants';
+import type {AOSProduct} from '@/goovee/.generated/models';
 import {t, tattr} from '@/locale/server';
 import type {OverlayColor} from '@/types';
 import type {NullableValues} from '@/types/util';
-import {Hero} from '../hero';
 import {
   Pagination,
   PaginationContent,
@@ -13,39 +13,38 @@ import {
   PaginationPrevious,
 } from '@/ui/components/pagination';
 import {cn} from '@/utils/css';
+import {and} from '@/utils/orm';
+import {
+  getPages,
+  getPaginationButtons,
+  getSkip,
+  getTotal,
+} from '@/utils/pagination';
+import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
+import type {OrderByOptions} from '@goovee/orm';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
-import {getLoginURL} from '@/utils/url';
-
-import {ProductCard} from '../common/ui/components/product-card';
-import {ProductSortSelect} from '../common/ui/components/product-sort-select';
-import {PriceTypeSelect} from '../common/ui/components/price-type-select/price-type-select';
-import {
-  findProducts,
-  findProductCategories,
-  type ListProduct,
-  type ListCategory,
-} from '../common/orm/orm';
-import {ensureAuth} from '../common/utils/auth-helper';
 import {MARKETPLACE_TYPE} from '../common/constants/marketplace-types';
 import {MARKETPLACE_TYPE_BY_SEGMENT} from '../common/constants/route-types';
-import {and} from '@/utils/orm';
-import type {AOSProduct} from '@/goovee/.generated/models';
-import type {OrderByOptions} from '@goovee/orm';
 import {
-  searchParamsSchema,
-  pageParamsSchema,
+  findProductCategories,
+  findProducts,
+  type ListCategory,
+  type ListProduct,
+} from '../common/orm';
+import {PriceTypeSelect} from '../common/ui/components/price-type-select/price-type-select';
+import {ProductCard} from '../common/ui/components/product-card';
+import {ProductSortSelect} from '../common/ui/components/product-sort-select';
+import {ensureAuth} from '../common/utils/auth-helper';
+import {
   PAGE_SIZE,
+  pageParamsSchema,
+  searchParamsSchema,
   type SearchParams,
 } from '../common/utils/validators';
-import {
-  getPaginationButtons,
-  getSkip,
-  getPages,
-  getTotal,
-} from '@/utils/pagination';
+import {Hero} from '../hero';
 
 export default async function Page(props: {
   params: Promise<Record<string, string>>;

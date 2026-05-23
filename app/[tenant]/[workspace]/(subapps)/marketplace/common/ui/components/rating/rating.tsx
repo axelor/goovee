@@ -1,7 +1,7 @@
-import {Star} from 'lucide-react';
-import type {BigDecimal} from '@goovee/orm';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
+import type {BigDecimal} from '@goovee/orm';
+import {Star} from 'lucide-react';
 
 type RatingProps = {
   /** 0–5 value. Accepts number, string, or ORM BigDecimal. */

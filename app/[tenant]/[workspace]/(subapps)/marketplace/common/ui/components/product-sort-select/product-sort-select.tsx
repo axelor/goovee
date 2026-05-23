@@ -1,7 +1,7 @@
 'use client';
 
-import {useRouter, useSearchParams} from 'next/navigation';
 import {i18n} from '@/locale';
+import {useRouter, useSearchParams} from 'next/navigation';
 
 export interface ProductSortSelectProps {
   currentSort: string;

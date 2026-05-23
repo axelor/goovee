@@ -1,12 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import {useRouter} from 'next/navigation';
-import {useOptimistic, useState, useTransition} from 'react';
-import {Pencil, Trash2} from 'lucide-react';
-
 import {i18n} from '@/locale';
-import {Button} from '@/ui/components/button';
+import type {User} from '@/types';
+import type {Cloned} from '@/types/util';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,13 +13,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/ui/components/alert-dialog';
+import {Button} from '@/ui/components/button';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import type {Cloned} from '@/types/util';
-import type {User} from '@/types';
-
-import {Rating} from '../rating';
+import {Pencil, Trash2} from 'lucide-react';
+import Link from 'next/link';
+import {useRouter} from 'next/navigation';
+import {useOptimistic, useState, useTransition} from 'react';
+import {deleteReview, saveReview} from '../../../actions/actions';
+import type {MyReview} from '../../../orm';
 import {ClientDate} from '../client-date';
+import {Rating} from '../rating';
 import {ReviewerAvatar} from '../reviewer-avatar';
 import {PromptCard} from './prompt-card';
 import {ReviewEditForm, type ReviewFormValues} from './review-edit-form';
@@ -32,8 +32,6 @@ import {
   deriveDisplayReview,
   type OptimisticAction,
 } from './shared';
-import {saveReview, deleteReview} from '../../../actions/actions';
-import type {MyReview} from '../../../orm/orm';
 
 type VersionOption = {id: string; versionNumber: string};
 

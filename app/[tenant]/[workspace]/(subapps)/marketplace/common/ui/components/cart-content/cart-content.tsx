@@ -1,10 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-
-import {Button} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-
+import {Button} from '@/ui/components';
+import Link from 'next/link';
 import {useMarketplaceCart} from '../../../hooks/use-marketplace-cart';
 import {CartItemCard} from '../cart-item-card';
 

@@ -1,15 +1,15 @@
-import {useState} from 'react';
-import {Pencil, Loader2} from 'lucide-react';
 import {i18n} from '@/locale';
-import {useToast} from '@/ui/hooks';
 import type {Cloned} from '@/types/util';
-import {ProductFormDialog} from '../product-form';
+import {useToast} from '@/ui/hooks';
+import {Loader2, Pencil} from 'lucide-react';
+import {useState} from 'react';
 import {loadMyProductForEdit} from '../../../actions/actions';
 import type {
   CompatibilityVersion,
   ListCategory,
   MyProductWithVersions,
-} from '../../../orm/orm';
+} from '../../../orm';
+import {ProductFormDialog} from '../product-form';
 
 type Props = {
   workspaceURI: string;

@@ -1,6 +1,6 @@
-import {useRouter} from 'next/navigation';
-import {useCallback, useState} from 'react';
+import {RESPONSIVE_SIZES} from '@/constants';
 import {i18n} from '@/locale';
+import type {Cloned} from '@/types/util';
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -8,17 +8,17 @@ import {
   ResponsiveDialogTitle,
 } from '@/ui/components/responsive-dialog';
 import {useResponsive} from '@/ui/hooks';
-import {Stepper} from '../stepper';
-import {RESPONSIVE_SIZES} from '@/constants';
-import type {Cloned} from '@/types/util';
+import {useRouter} from 'next/navigation';
+import {useCallback, useState} from 'react';
 import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
-import {ProductForm} from './product-form';
-import {VersionForm} from './version-form';
 import type {
   CompatibilityVersion,
   ListCategory,
   MyProductWithVersions,
-} from '../../../orm/orm';
+} from '../../../orm';
+import {Stepper} from '../stepper';
+import {ProductForm} from './product-form';
+import {VersionForm} from './version-form';
 
 type Step = 'product' | 'version';
 

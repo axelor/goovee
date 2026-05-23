@@ -7,7 +7,7 @@ import {Button} from '@/ui/components/button';
 import type {Cloned} from '@/types/util';
 import {ProductFormDialog} from '../common/ui/components/product-form';
 import {MARKETPLACE_TYPE} from '../common/constants/marketplace-types';
-import type {CompatibilityVersion, ListCategory} from '../common/orm/orm';
+import type {CompatibilityVersion, ListCategory} from '../common/orm';
 
 type Props = {
   workspaceURI: string;

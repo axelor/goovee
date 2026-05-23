@@ -1,15 +1,13 @@
 import '@/load-swc-env';
 
-import axios from 'axios';
-import {parseArgs} from 'node:util';
-
-import {manager} from '@/tenant';
-import {getAOSAuthHeaders} from '@/tenant/auth';
 import {DEFAULT_CURRENCY_SCALE, DEFAULT_TENANT} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-
+import {manager} from '@/tenant';
+import {getAOSAuthHeaders} from '@/tenant/auth';
+import axios from 'axios';
+import {parseArgs} from 'node:util';
+import {buildPriceContext, priceSelectFields} from '../../orm';
 import {computePrice} from '../../utils/price';
-import {buildPriceContext, priceSelectFields} from '../../orm/orm';
 
 type AosPriceEntry = {
   productId: number;

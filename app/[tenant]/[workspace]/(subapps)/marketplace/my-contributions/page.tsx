@@ -1,32 +1,6 @@
-import Link from 'next/link';
-import {Suspense} from 'react';
-import {SUBAPP_CODES, DEFAULT_CURRENCY_SYMBOL} from '@/constants';
-import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
-import {workspacePathname} from '@/utils/workspace';
-import {clone} from '@/utils';
-// clone is applied at server→client boundaries only.
-import {ensureAuth} from '../common/utils/auth-helper';
-import {notFound, redirect} from 'next/navigation';
-import {getLoginURL} from '@/utils/url';
-import {OverviewTab} from '../common/ui/components/my-contributions-tab/my-contributions-overview-tab';
-import {SkillsTab} from '../common/ui/components/my-contributions-tab/skills-tab';
-import {AppsTab} from '../common/ui/components/my-contributions-tab/apps-tab';
-import {ComingSoonBanner} from '../common/ui/components/my-contributions-tab/coming-soon-banner';
-import {
-  findProductCategories,
-  findCompatibilityVersions,
-  findPartnerCurrency,
-} from '../common/orm/orm';
-import {PublishNewLauncher} from './client-launcher';
-import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
-import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-count-badge';
-import {MyContributionsTab} from '../common/constants/tabs';
+import {DEFAULT_CURRENCY_SYMBOL, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {
-  myContributionsParamsSchema,
-  myContributionsSearchParamsSchema,
-  type MyContributionsSearchParams,
-} from '../common/utils/validators';
+import type {NullableValues} from '@/types/util';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,7 +9,32 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
-import type {NullableValues} from '@/types/util';
+import {clone} from '@/utils';
+import {getLoginURL} from '@/utils/url';
+import {workspacePathname} from '@/utils/workspace';
+import Link from 'next/link';
+import {notFound, redirect} from 'next/navigation';
+import {Suspense} from 'react';
+import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
+import {MyContributionsTab} from '../common/constants/tabs';
+import {
+  findCompatibilityVersions,
+  findPartnerCurrency,
+  findProductCategories,
+} from '../common/orm';
+import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-count-badge';
+import {AppsTab} from '../common/ui/components/my-contributions-tab/apps-tab';
+import {ComingSoonBanner} from '../common/ui/components/my-contributions-tab/coming-soon-banner';
+import {OverviewTab} from '../common/ui/components/my-contributions-tab/my-contributions-overview-tab';
+import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
+import {SkillsTab} from '../common/ui/components/my-contributions-tab/skills-tab';
+import {ensureAuth} from '../common/utils/auth-helper';
+import {
+  myContributionsParamsSchema,
+  myContributionsSearchParamsSchema,
+  type MyContributionsSearchParams,
+} from '../common/utils/validators';
+import {PublishNewLauncher} from './client-launcher';
 
 export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;

@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import {FileText, ExternalLink, User, AlertCircle} from 'lucide-react';
-import {Button} from '@/ui/components';
 import {t} from '@/locale/server';
-import type {SingleProduct} from '../../../orm/orm';
+import {Button} from '@/ui/components';
+import {AlertCircle, ExternalLink, FileText, User} from 'lucide-react';
+import Link from 'next/link';
+import type {SingleProduct} from '../../../orm';
 
 interface SupportTabProps {
   product: SingleProduct;

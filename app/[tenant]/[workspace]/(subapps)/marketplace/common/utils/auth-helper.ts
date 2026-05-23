@@ -1,10 +1,10 @@
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
+import type {PortalWorkspace, Subapp} from '@/orm/workspace';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {manager, type Tenant} from '@/tenant';
 import type {User} from '@/types';
-import type {PortalWorkspace, Subapp} from '@/orm/workspace';
 import {Maybe} from '@/types/util';
 import {getPartnerId} from '@/utils';
 

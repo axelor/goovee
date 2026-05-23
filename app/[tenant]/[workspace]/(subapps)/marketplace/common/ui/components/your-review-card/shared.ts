@@ -1,7 +1,6 @@
-import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
-
-import type {MyReview} from '../../../orm/orm';
+import type {Cloned} from '@/types/util';
+import type {MyReview} from '../../../orm';
 
 export const REVIEW_CARD_SHELL =
   'rounded-lg border border-primary/40 bg-card p-6';

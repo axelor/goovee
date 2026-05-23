@@ -1,7 +1,7 @@
-import Image from 'next/image';
-import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
 import {t} from '@/locale/server';
-import type {SingleProduct} from '../../../orm/orm';
+import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
+import Image from 'next/image';
+import type {SingleProduct} from '../../../orm';
 
 interface OverviewTabProps {
   product: SingleProduct;

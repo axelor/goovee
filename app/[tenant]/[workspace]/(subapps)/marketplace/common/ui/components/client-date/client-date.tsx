@@ -1,9 +1,9 @@
 'use client';
 
 import {
-  formatRelativeTime,
-  formatDateTime,
   formatDate,
+  formatDateTime,
+  formatRelativeTime,
 } from '@/locale/formatters';
 import {
   Tooltip,

@@ -1,6 +1,5 @@
-import type {ReactNode} from 'react';
-
 import {cn} from '@/utils/css';
+import type {ReactNode} from 'react';
 import {REVIEW_CARD_SHELL} from './shared';
 
 type PromptCardProps = {

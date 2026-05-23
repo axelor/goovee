@@ -184,7 +184,7 @@ touching anything price-related.
 
 ### Server-computed everywhere
 
-`withPrice` in `common/orm/orm.ts` enriches **every product returned by an ORM query** with `price: { wt, ati, taxRate, currency: { code, symbol, numberOfDecimals } }` so the client never recomputes. Display sites (`ProductCard`, the product detail page, `CartItemCard`) read `product.price.ati` and `product.price.currency` for formatting (including the scale — so JPY/BHD render correctly when conversion changes the currency). The bare `computePrice` is still exported for unit tests / future server-side reuse.
+`withPrice` in `common/orm.ts` enriches **every product returned by an ORM query** with `price: { wt, ati, taxRate, currency: { code, symbol, numberOfDecimals } }` so the client never recomputes. Display sites (`ProductCard`, the product detail page, `CartItemCard`) read `product.price.ati` and `product.price.currency` for formatting (including the scale — so JPY/BHD render correctly when conversion changes the currency). The bare `computePrice` is still exported for unit tests / future server-side reuse.
 
 `buildPriceContext` is called per find function (`findProducts`, `findProduct`, `findMyProducts`, `validateCart`) **after** the product query and resolves three things in parallel: the viewer's partner currency, the app-wide default currency (`AOSCurrency` by `DEFAULT_CURRENCY_CODE`), and only the `CurrencyConversionLine` rows that connect one of the product currencies in the result to **either** target (filtered via an `OR` in both directions so the inverse-rate fallback still works). We never pull the full conversion table.
 
@@ -356,7 +356,7 @@ Net effect: a contact who creates a product attaches the product to their main p
 
 ## Models (ORM)
 
-Defined in `goovee/schema/`. See `common/orm/orm.ts` for the query layer.
+Defined in `goovee/schema/`. See `common/orm.ts` for the query layer.
 
 - **`AOSProduct`** — the product itself. Marketplace-relevant fields:
   - `isMarketPlace: true`, `marketplaceTypeSelect: 'skill' | 'app'`
@@ -400,95 +400,3 @@ through everything built on top of it.
 | Caller owns the product (their `defaultSupplierPartner`)                                                                           | `getMyProductAccessFilter` / `withMyProductAccessFilter`   |
 | Category belongs to the workspace's marketplace                                                                                    | `getCategoryAccessFilter` / `withCategoryAccessFilter`     |
 | Bundle is downloadable: published + (free **or** caller's partner has a purchase row), **or** caller owns the product (any status) | `withBundleAccessFilter`                                   |
-
-## Server actions
-
-`common/actions/actions.ts`. All require auth (`ensureAuth` with default
-`allowGuest: false`), return `ActionResponse<T>`.
-
-- `loadMyProductForEdit({productId, workspaceURL})` — fetch a product (with all its versions) for the owner-edit dialog.
-- `saveProduct(input)` — create or update a product (no version data). Returns the productId. Create path (no `input.id`) is gated by `workspace.config.allowToPublish`; updates are always allowed for the owner.
-- `saveVersion(formData)` — create or update a single version. Accepts `FormData` because of the bundle file. Resolves `effectiveStatus` from the form intent and `workspace.config.requiresReview`: a "publish" intent becomes `in_review` when the flag is on, otherwise stays `published`. `dateOfApproval` is set only when the effective status is actually `published`. After save, promotes `product.currentVersion` to the newest published version. Body-size limit is raised to 25 MB in `next.config.mjs` to accommodate the 20 MB bundle cap. Same `allowToPublish` gate as `saveProduct` for the create path.
-- `unpublishVersion({versionId, productId, workspaceURL, newCurrentVersionId?})` — owner-only. Flips a `published` or `in_review` version to `unpublished`. When the target is the product's `currentVersion` and other published versions exist, `newCurrentVersionId` is required and must be one of those alternates; the server validates and promotes it. Otherwise the pointer is left alone.
-- `addProductToFavorites({productId, workspaceURL, workspaceURI, returnUrl})` — toggle favorite for the current user.
-
-### Buying actions
-
-`common/actions/payments.ts`:
-
-- `createStripeCheckoutSession({productIds, workspaceURL})` — validates cart, creates Stripe session with cart payload stashed in PaymentContext, returns `{url, client_secret}`.
-- `paypalCreateOrder({productIds, workspaceURL})` — same shape for PayPal.
-- `payboxCreateOrder({productIds, workspaceURL, uri})` — same shape for Paybox. `uri` is the path the provider returns the buyer to (success/failure query params).
-
-All three go through a shared `prepare()` (auth + workspace gating + cart validation) before delegating to `@/payment/<provider>/actions`.
-
-`common/actions/actions.ts:checkout({payment: {mode, data}, workspaceURL})` — unified finalize. Pulls cart from `PaymentContext` via `getPaymentInfo`, re-validates, asserts `paidAmount === total`, writes `MarketplaceProductPurchase` rows in one goovee tx (with `markPaymentAsProcessed`), then runs `createMarketplaceOrder` + `attachInvoiceToPurchases` after commit. Invoice failure returns success with a warning message rather than failing the action. Returns `ActionResponse<true>`. See the "Buying flow" section above for the full sequence.
-
-### Helpers
-
-- `common/actions/cart-validation.ts:validateCart({client, workspace, mainPartnerId, productIds})` — full pricing + eligibility validator, called at **prepare time** only. Enforces workspace access, paid-only, published version, not-already-owned (via the `marketplaceProductPurchaseList` back-relation), and single-currency rules. Recomputes each price server-side including the three-step currency conversion (uses `buildPriceContext` internally for the viewer + default currencies and filtered conversion lines). Returns `{success: true, data: {items, total, currencyCode}}` with server-authoritative prices.
-- `common/actions/cart-validation.ts:recheckCartAvailability({client, workspace, mainPartnerId, productIds})` — narrower revalidator called by `checkout()` on the **payment-return leg**. Only re-checks the invariants that can change during the provider redirect (access, published version, ownership). No pricing, no tax chain, no conversion lines. Shares the per-product check predicate with `validateCart` via the internal `checkAvailability` helper so the error messages stay identical.
-- `common/service/index.ts:createMarketplaceOrder({...})` — POSTs to `/ws/portal/marketplace/order`. Returns `{saleOrderId, invoiceId, invoicePaymentId}`; AOS computes all prices server-side.
-- `common/utils/payment-info.ts:getPaymentInfo({mode, data, client})` — provider-dispatch helper, duplicated from events. Tracked as a candidate to lift to `lib/core/payment/common`.
-- `common/utils/price.ts` — single source of truth for price math. See the file header for the algorithm and AOS divergences.
-- `common/hooks/use-marketplace-cart.ts` — localStorage-backed cart hook.
-
-## Constants
-
-- `common/constants/marketplace-types.ts` — `MARKETPLACE_TYPE` enum (DB values).
-- `common/constants/route-types.ts` — `MARKETPLACE_TYPE_SEGMENT` enum (URL segments) and `MARKETPLACE_TYPE_BY_SEGMENT` map. `[type]/page.tsx` uses `generateStaticParams` to limit segments to these.
-- `common/constants/marketplace-links.ts` — navbar links with `requiresAuth` flags.
-- `common/constants/statuses.ts` — `MARKETPLACE_VERSION_STATUS` enum.
-- `common/constants/tabs.ts` — `MyContributionsTab` enum.
-- `common/constants/gradients.ts` — cover-style gradient classes (10 options).
-
-## File layout
-
-```
-marketplace/
-  page.tsx                          # redirect to /marketplace/skills
-  layout.tsx                        # mounts navbar + mobile menu
-  README.md                         # this file
-  [type]/page.tsx                   # listing (skills/apps)
-  products/[slug]/page.tsx          # product detail
-  my-contributions/
-    page.tsx                        # owner dashboard
-    client-launcher.tsx             # "Publish new" button
-  my-purchases/page.tsx             # buyer's purchase history
-  cart/
-    page.tsx                        # cart listing
-    checkout/
-      page.tsx                      # review + payments
-      success/page.tsx              # post-payment confirmation
-      cancel/page.tsx               # stripe cancel return
-  api/products/[product-id]/versions/[version-id]/download/route.ts
-  common/
-    actions/
-      actions.ts                    # save*, favorite, loadMyProduct, checkout
-      payments.ts                   # per-provider session creators
-      cart-validation.ts            # shared cart validator
-    constants/                      # see Constants section
-    hooks/use-marketplace-cart.ts   # localStorage cart
-    orm/orm.ts, orm/helpers.ts      # query layer and access filters
-    service/index.ts                # AOS HTTP wrappers
-    ui/components/                  # product-form, marketplace-navbar, marketplace-mobile-menu, stepper, rating, buy-buttons, cart-content, cart-item-card, checkout-client, my-purchases-table, etc.
-    utils/
-      auth-helper.ts                # ensureAuth wrapper
-      payment-info.ts               # provider dispatch (duplicate of events')
-      price.ts                      # WT/ATI compute (single source of truth)
-```
-
-Workspace-level files outside the subapp:
-
-```
-app/[tenant]/[workspace]/marketplace-cart.tsx   # header / mobile-menu cart icon
-```
-
-Design docs (outside the goovee repo):
-
-```
-docs/marketplace-checkout-plan.md                # buying flow design
-docs/marketplace-pricing-impl-assumptions.md     # pricing parity audit
-docs/shop-checkout-flow.md                       # shop reference flow
-docs/shop-pricing.md                             # (don't mirror — broken)
-```

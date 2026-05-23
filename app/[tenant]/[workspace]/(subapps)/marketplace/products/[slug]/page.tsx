@@ -1,18 +1,10 @@
-import Link from 'next/link';
-import {Suspense} from 'react';
-import {Download, FileText} from 'lucide-react';
-import {notFound} from 'next/navigation';
-import {SUBAPP_CODES} from '@/constants';
-import {getLoginURL} from '@/utils/url';
-import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
-import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
-import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
-import {formatNumber} from '@/locale/server/formatters';
+import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import type {Client} from '@/goovee/.generated/client';
 import {t} from '@/locale/server';
-import {workspacePathname} from '@/utils/workspace';
-import {cn} from '@/utils/css';
+import {formatNumber} from '@/locale/server/formatters';
+import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
-import {InnerHTML} from '@/ui/components/inner-html';
+import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,29 +13,35 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
-import {Avatar, AvatarImage} from '@/ui/components/avatar';
-import {NO_IMAGE_URL} from '@/constants';
-
-import {findProduct, isProductFavorited} from '../../common/orm/orm';
+import {InnerHTML} from '@/ui/components/inner-html';
+import {cn} from '@/utils/css';
+import {getLoginURL} from '@/utils/url';
+import {workspacePathname} from '@/utils/workspace';
+import {Download, FileText} from 'lucide-react';
+import Link from 'next/link';
+import {notFound} from 'next/navigation';
+import {Suspense} from 'react';
+import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../common/constants/gradients';
+import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
+import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
+import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
+import {ProductTab} from '../../common/constants/tabs';
+import {findProduct, isProductFavorited} from '../../common/orm';
+import {AddToFavoriteButton} from '../../common/ui/components/add-to-favorite-button';
+import {BuyButtons} from '../../common/ui/components/buy-buttons';
+import {ClientDate} from '../../common/ui/components/client-date';
+import {OverviewTab} from '../../common/ui/components/overview-tab';
+import {ProductIcon} from '../../common/ui/components/product-icon';
+import {Rating} from '../../common/ui/components/rating';
+import {ReviewsTab} from '../../common/ui/components/reviews-tab';
+import {SupportTab} from '../../common/ui/components/support-tab';
+import {VersionsTab} from '../../common/ui/components/versions-tab';
+import {ensureAuth} from '../../common/utils/auth-helper';
 import {isPaid} from '../../common/utils/price';
 import {
   productPageParamsSchema,
   productSearchParamsSchema,
 } from '../../common/utils/validators';
-import {BuyButtons} from '../../common/ui/components/buy-buttons';
-import {GRADIENT_MAP, DEFAULT_GRADIENT} from '../../common/constants/gradients';
-import {ProductTab} from '../../common/constants/tabs';
-import {ProductIcon} from '../../common/ui/components/product-icon';
-import {Rating} from '../../common/ui/components/rating';
-import {ensureAuth} from '../../common/utils/auth-helper';
-import {OverviewTab} from '../../common/ui/components/overview-tab';
-import {VersionsTab} from '../../common/ui/components/versions-tab';
-import {ReviewsTab} from '../../common/ui/components/reviews-tab';
-import {SupportTab} from '../../common/ui/components/support-tab';
-import {AddToFavoriteButton} from '../../common/ui/components/add-to-favorite-button';
-import {ClientDate} from '../../common/ui/components/client-date';
-import type {Client} from '@/goovee/.generated/client';
-import type {ID} from '@/types';
 
 export default async function ProductPage(props: {
   params: Promise<{tenant: string; workspace: string; slug: string}>;
