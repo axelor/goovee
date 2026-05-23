@@ -3,7 +3,7 @@ import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
 import {Loader2, Pencil} from 'lucide-react';
 import {useState} from 'react';
-import {loadMyProductForEdit} from '../../../actions/actions';
+import {loadMyProductForEdit} from '../../../actions';
 import type {
   CompatibilityVersion,
   ListCategory,

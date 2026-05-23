@@ -3,17 +3,31 @@
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
+import {markPaymentAsProcessed} from '@/payment/common/orm';
 import {createPayboxOrder} from '@/payment/paybox/actions';
 import {createPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder} from '@/payment/stripe/actions';
 import {TENANT_HEADER} from '@/proxy';
 import {PaymentOption} from '@/types';
+import type {ActionResponse} from '@/types/action';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {WorkspaceURLSchema} from '@/utils/validators';
 import {headers} from 'next/headers';
 import {z} from 'zod';
+import {
+  attachInvoiceToPurchases,
+  findPartnerInvoicingAddresses,
+  recordPurchases,
+} from '../orm';
+import {createMarketplaceOrder} from '../service';
 import {ensureAuth} from '../utils/auth-helper';
-import {CartProductIdsSchema, validateCart} from './cart-validation';
+import {
+  CartProductIdsSchema,
+  recheckCartAvailability,
+  validateCart,
+  type ValidatedCart,
+} from '../utils/cart';
+import {getPaymentInfo} from '../utils/payment-info';
 
 const BaseSchema = z.object({
   productIds: CartProductIdsSchema,
@@ -22,13 +36,24 @@ const BaseSchema = z.object({
 
 const PayboxSchema = BaseSchema.extend({uri: z.string().min(1)});
 
+const CheckoutSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  payment: z.object({
+    mode: z.enum(PaymentOption),
+    data: z.object({
+      id: z.string().optional(),
+      params: z.unknown().optional(),
+    }),
+  }),
+});
+
 type Err = {error: true; message: string};
 const err = (message: string): Err => ({error: true, message});
 
 /* Per-provider session creators. Each one validates the cart server-side,
  * stashes the validated cart in PaymentContext (via the shared
  * `createXOrder` helpers), and returns the provider's session shape.
- * The unified `checkout()` action (in actions.ts) pulls the cart back
+ * The unified `checkout()` action pulls the cart back
  * from PaymentContext on the return leg. */
 
 async function prepare(input: {productIds: string[]; workspaceURL: string}) {
@@ -209,4 +234,167 @@ export async function payboxCreateOrder(props: {
   } catch (e) {
     return err(await t((e as any)?.message ?? 'Paybox order failed.'));
   }
+}
+
+export async function checkout(
+  props: z.input<typeof CheckoutSchema>,
+): ActionResponse<true> {
+  const parsed = CheckoutSchema.safeParse(props);
+  if (!parsed.success)
+    return {error: true, message: z.prettifyError(parsed.error)};
+
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId)
+    return {error: true, message: await t('Tenant ID is missing.')};
+
+  const {auth, error: authError} = await ensureAuth(
+    parsed.data.workspaceURL,
+    tenantId,
+    {allowGuest: false},
+  );
+  if (authError) {
+    return {error: true, message: await t('Sign in required.')};
+  }
+  const {client, config} = auth.tenant;
+  const mainPartnerId = auth.user.mainPartnerId;
+
+  let paidAmount: number;
+  let paymentContextId: string;
+  let paymentContextVersion: number;
+  let cart: ValidatedCart;
+  try {
+    const info = await getPaymentInfo({
+      mode: parsed.data.payment.mode,
+      data: parsed.data.payment.data,
+      client,
+    });
+    paidAmount = info.amount;
+    paymentContextId = info.context.id;
+    paymentContextVersion = info.context.version;
+    const stashedCart = info.context.data?.cart as ValidatedCart | undefined;
+    if (!stashedCart?.items?.length) {
+      return {error: true, message: await t('Payment context is empty.')};
+    }
+    cart = stashedCart;
+  } catch (e) {
+    return {
+      error: true,
+      message: await t((e as Error).message ?? 'Payment context not found.'),
+    };
+  }
+
+  /* Anti-tamper: the amount the provider captured must match the cart
+   * the provider was handed at prepare time (stashed in PaymentContext).
+   * We don't recompute prices here — pricing inputs (taxes, FX rates)
+   * could have moved since prepare, and rejecting an already-captured
+   * payment over server-state drift is worse than honouring the price
+   * the buyer actually saw.
+   *
+   * Tolerance is half of the cart currency's smallest representable
+   * unit: any genuine mismatch is ≥ 1 minor unit, anything below is
+   * IEEE 754 / provider-side conversion drift. */
+  const DEFAULT_CURRENCY_SCALE = 2;
+  const tolerance =
+    0.5 * 10 ** -(cart.items[0]?.scale ?? DEFAULT_CURRENCY_SCALE);
+  if (Math.abs(Number(paidAmount) - cart.total) > tolerance) {
+    return {
+      error: true,
+      message: await t(
+        'Paid amount {0} does not match expected amount {1}.',
+        String(paidAmount),
+        String(cart.total),
+      ),
+    };
+  }
+
+  const productIds = cart.items.map(item => item.productId);
+
+  /* Time-sensitive re-check: between prepare and now (could be minutes
+   * via 3-D Secure / external redirects) the buyer may have purchased
+   * the same product in another tab, or the publisher may have pulled a
+   * version. Block the grant if so. Prices are NOT re-checked here. */
+  const recheck = await recheckCartAvailability({
+    client,
+    workspace: auth.workspace,
+    mainPartnerId,
+    productIds,
+  });
+  if (recheck.error) return recheck;
+
+  try {
+    await client.$transaction(async txClient => {
+      await recordPurchases(txClient, mainPartnerId, productIds);
+      await markPaymentAsProcessed({
+        contextId: paymentContextId,
+        version: paymentContextVersion,
+        client: txClient,
+      });
+    });
+  } catch (e) {
+    return {
+      error: true,
+      message:
+        e instanceof Error ? e.message : await t('Granting access failed.'),
+    };
+  }
+
+  const paymentModeId = getPaymentModeId(
+    auth.workspace.config.paymentOptionSet,
+    parsed.data.payment.mode,
+  );
+
+  try {
+    const buyerPartner = await findPartnerInvoicingAddresses({
+      client,
+      mainPartnerId,
+    });
+
+    const addressId =
+      buyerPartner?.partnerAddressList?.find(addr => addr.isDefaultAddr)?.id ??
+      buyerPartner?.partnerAddressList?.[0]?.id;
+    if (!addressId) {
+      return {
+        success: true,
+        data: true,
+        message: await t(
+          'Invoice creation failed: no invoicing address found.',
+        ),
+      };
+    }
+
+    const {invoiceId} = await createMarketplaceOrder({
+      cart,
+      workspace: auth.workspace,
+      mainPartnerId,
+      contactId: auth.user.isContact ? auth.user.id : undefined,
+      invoicingAddressId: addressId,
+      paidAmount: cart.total,
+      paymentModeId,
+      config,
+    });
+
+    await attachInvoiceToPurchases(
+      client,
+      mainPartnerId,
+      productIds,
+      invoiceId,
+    );
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : '';
+    console.error('marketplace: invoice creation failed', {
+      mainPartnerId,
+      productIds,
+      paymentContextId,
+      error: e,
+    });
+    return {
+      success: true,
+      data: true,
+      message: reason
+        ? await t('Invoice creation failed: {0}', reason)
+        : await t('Invoice creation failed.'),
+    };
+  }
+
+  return {success: true, data: true};
 }

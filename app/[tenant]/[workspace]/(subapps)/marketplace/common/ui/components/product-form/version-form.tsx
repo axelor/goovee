@@ -45,7 +45,7 @@ import {
 } from 'lucide-react';
 import {useMemo, useRef, useState, useTransition} from 'react';
 import {useForm, useWatch} from 'react-hook-form';
-import {saveVersion, unpublishVersion} from '../../../actions/actions';
+import {saveVersion, unpublishVersion} from '../../../actions';
 import {MARKETPLACE_VERSION_STATUS} from '../../../constants/statuses';
 import type {CompatibilityVersion, MyProductWithVersions} from '../../../orm';
 import {

@@ -12,12 +12,12 @@ import {Payments} from '@/ui/components/payment';
 import {useToast} from '@/ui/hooks';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import {checkout} from '../../../actions/actions';
 import {
+  checkout,
   createStripeCheckoutSession,
   payboxCreateOrder,
   paypalCreateOrder,
-} from '../../../actions/payments';
+} from '../../../actions';
 import {useMarketplaceCart} from '../../../hooks/use-marketplace-cart';
 import {CartItemCard} from '../cart-item-card';
 

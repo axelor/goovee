@@ -27,7 +27,7 @@ import {Plus, X} from 'lucide-react';
 import Image from 'next/image';
 import {useMemo, useRef, useTransition} from 'react';
 import {useForm, useFormContext, useWatch} from 'react-hook-form';
-import {saveProduct} from '../../../actions/actions';
+import {saveProduct} from '../../../actions';
 import {GRADIENT_MAP} from '../../../constants/gradients';
 import {MARKETPLACE_TYPE} from '../../../constants/marketplace-types';
 import type {ListCategory, MyProductWithVersions} from '../../../orm';

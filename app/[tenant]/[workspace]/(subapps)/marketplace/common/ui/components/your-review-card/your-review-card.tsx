@@ -20,7 +20,7 @@ import {Pencil, Trash2} from 'lucide-react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useOptimistic, useState, useTransition} from 'react';
-import {deleteReview, saveReview} from '../../../actions/actions';
+import {deleteReview, saveReview} from '../../../actions';
 import type {MyReview} from '../../../orm';
 import {ClientDate} from '../client-date';
 import {Rating} from '../rating';

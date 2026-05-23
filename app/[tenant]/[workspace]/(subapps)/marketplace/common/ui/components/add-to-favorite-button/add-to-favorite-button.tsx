@@ -8,7 +8,7 @@ import {Heart} from 'lucide-react';
 import {isRedirectError} from 'next/dist/client/components/redirect-error';
 import {usePathname} from 'next/navigation';
 import {useState, useTransition} from 'react';
-import {addProductToFavorites} from '../../../actions/actions';
+import {addProductToFavorites} from '../../../actions';
 
 interface AddToFavoriteButtonProps {
   productId: string;
