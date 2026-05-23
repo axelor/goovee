@@ -12,7 +12,7 @@ import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
-import {CartContent} from '../common/ui/components/cart-content';
+import {CartContent} from '../common/ui/components/contents/cart-content';
 import {ensureAuth} from '../common/utils/auth-helper';
 
 export default async function CartPage(props: {

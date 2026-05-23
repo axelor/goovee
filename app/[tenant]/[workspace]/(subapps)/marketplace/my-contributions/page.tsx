@@ -15,26 +15,27 @@ import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
+import {MARKETPLACE_TYPE} from '../common/constants/marketplace-types';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
 import {MyContributionsTab} from '../common/constants/tabs';
 import {
+  countMyProducts,
   findCompatibilityVersions,
   findPartnerCurrency,
   findProductCategories,
 } from '../common/orm';
-import {AppsCountBadge} from '../common/ui/components/my-contributions-tab/apps-count-badge';
-import {AppsTab} from '../common/ui/components/my-contributions-tab/apps-tab';
-import {ComingSoonBanner} from '../common/ui/components/my-contributions-tab/coming-soon-banner';
-import {OverviewTab} from '../common/ui/components/my-contributions-tab/my-contributions-overview-tab';
-import {SkillsCountBadge} from '../common/ui/components/my-contributions-tab/skills-count-badge';
-import {SkillsTab} from '../common/ui/components/my-contributions-tab/skills-tab';
+import {PublishNewButton} from '../common/ui/components/buttons/publish-new-button';
+import {Await} from '../common/ui/components/primitives/await';
+import {ComingSoonBanner} from '../common/ui/components/primitives/coming-soon-banner';
+import {AppsTab} from '../common/ui/components/tabs/apps-tab';
+import {OverviewTab} from '../common/ui/components/tabs/my-contributions-overview-tab';
+import {SkillsTab} from '../common/ui/components/tabs/skills-tab';
 import {ensureAuth} from '../common/utils/auth-helper';
 import {
   myContributionsParamsSchema,
   myContributionsSearchParamsSchema,
   type MyContributionsSearchParams,
 } from '../common/utils/validators';
-import {PublishNewLauncher} from './client-launcher';
 
 export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -176,7 +177,7 @@ export default async function MyContributionsPage(props: {
             <p className="text-muted-foreground text-sm">{manageDescLabel}</p>
           </div>
           {auth.workspace.config.allowToPublish && (
-            <PublishNewLauncher
+            <PublishNewButton
               workspaceURI={workspaceURI}
               workspaceURL={workspaceURL}
               categories={clone(categories)}
@@ -211,10 +212,13 @@ export default async function MyContributionsPage(props: {
             }`}>
             {skillsLabel} (
             <Suspense fallback="...">
-              <SkillsCountBadge
-                mainPartnerId={auth.user.mainPartnerId}
-                client={auth.tenant.client}
-                workspace={auth.workspace}
+              <Await
+                promise={countMyProducts({
+                  mainPartnerId: auth.user.mainPartnerId,
+                  client: auth.tenant.client,
+                  workspace: auth.workspace,
+                  type: MARKETPLACE_TYPE.SKILL,
+                })}
               />
             </Suspense>
             )
@@ -228,10 +232,13 @@ export default async function MyContributionsPage(props: {
             }`}>
             {appsLabel} (
             <Suspense fallback="...">
-              <AppsCountBadge
-                mainPartnerId={auth.user.mainPartnerId}
-                client={auth.tenant.client}
-                workspace={auth.workspace}
+              <Await
+                promise={countMyProducts({
+                  mainPartnerId: auth.user.mainPartnerId,
+                  client: auth.tenant.client,
+                  workspace: auth.workspace,
+                  type: MARKETPLACE_TYPE.APP,
+                })}
               />
             </Suspense>
             )
@@ -286,12 +293,8 @@ export default async function MyContributionsPage(props: {
             page={appsPage}
           />
         )}
-        {tab === MyContributionsTab.Revenue && (
-          <ComingSoonBanner area={await t('Revenue')} />
-        )}
-        {tab === MyContributionsTab.Profile && (
-          <ComingSoonBanner area={await t('Profile')} />
-        )}
+        {tab === MyContributionsTab.Revenue && <ComingSoonBanner />}
+        {tab === MyContributionsTab.Profile && <ComingSoonBanner />}
       </div>
     </div>
   );

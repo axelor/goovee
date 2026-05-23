@@ -20,7 +20,7 @@ import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 import {searchProducts} from './common/actions';
 import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
 import type {ProductSearchResult} from './common/orm';
-import {ProductIcon} from './common/ui/components/product-icon';
+import {ProductIcon} from './common/ui/components/primitives/product-icon';
 
 export function Search({
   type,

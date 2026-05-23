@@ -29,7 +29,7 @@ import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
 import {findPurchases} from '../common/orm';
-import {MyPurchasesTable} from '../common/ui/components/my-purchases-table';
+import {MyPurchasesTable} from '../common/ui/components/tables/my-purchases-table';
 import {ensureAuth} from '../common/utils/auth-helper';
 import {
   myPurchasesParamsSchema,

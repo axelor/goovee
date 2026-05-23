@@ -27,15 +27,15 @@ import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
 import {findProduct, isProductFavorited} from '../../common/orm';
-import {AddToFavoriteButton} from '../../common/ui/components/add-to-favorite-button';
-import {BuyButtons} from '../../common/ui/components/buy-buttons';
-import {ClientDate} from '../../common/ui/components/client-date';
-import {OverviewTab} from '../../common/ui/components/overview-tab';
-import {ProductIcon} from '../../common/ui/components/product-icon';
-import {Rating} from '../../common/ui/components/rating';
-import {ReviewsTab} from '../../common/ui/components/reviews-tab';
-import {SupportTab} from '../../common/ui/components/support-tab';
-import {VersionsTab} from '../../common/ui/components/versions-tab';
+import {AddToFavoriteButton} from '../../common/ui/components/buttons/add-to-favorite-button';
+import {BuyButtons} from '../../common/ui/components/buttons/buy-buttons';
+import {ProductIcon} from '../../common/ui/components/primitives/product-icon';
+import {Rating} from '../../common/ui/components/primitives/rating';
+import {TooltipDate} from '../../common/ui/components/primitives/tooltip-date';
+import {OverviewTab} from '../../common/ui/components/tabs/overview-tab';
+import {ReviewsTab} from '../../common/ui/components/tabs/reviews-tab';
+import {SupportTab} from '../../common/ui/components/tabs/support-tab';
+import {VersionsTab} from '../../common/ui/components/tabs/versions-tab';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {isPaid} from '../../common/utils/price';
 import {
@@ -319,7 +319,7 @@ export default async function ProductPage(props: {
 
                 {/* Updated */}
                 {product.currentVersion?.dateOfApproval && (
-                  <ClientDate
+                  <TooltipDate
                     date={product.currentVersion.dateOfApproval}
                     displayType="relative"
                     prefix={updatedLabel}
@@ -520,7 +520,7 @@ export default async function ProductPage(props: {
                     {updatedLabel}
                   </span>
                   {product.currentVersion?.dateOfApproval ? (
-                    <ClientDate
+                    <TooltipDate
                       date={product.currentVersion.dateOfApproval}
                       displayType="relative"
                       showTooltip={true}
@@ -537,7 +537,7 @@ export default async function ProductPage(props: {
                     {publishedLabel}
                   </span>
                   {product.createdOn ? (
-                    <ClientDate
+                    <TooltipDate
                       date={product.createdOn}
                       displayType="simple"
                       format="MMM YYYY"

@@ -5,8 +5,8 @@ import {manager} from '@/tenant';
 import {workspacePathname} from '@/utils/workspace';
 import {notFound} from 'next/navigation';
 import type {ReactNode} from 'react';
-import {MarketplaceMobileMenu} from './common/ui/components/marketplace-mobile-menu';
-import {MarketplaceNavbar} from './common/ui/components/marketplace-navbar';
+import {MobileMenu} from './common/ui/components/nav/mobile-menu';
+import {Navbar} from './common/ui/components/nav/navbar';
 
 export default async function Layout({
   children,
@@ -32,9 +32,9 @@ export default async function Layout({
 
   return (
     <div className="mb-[72px] lg:mb-0">
-      <MarketplaceNavbar />
+      <Navbar />
       {children}
-      <MarketplaceMobileMenu
+      <MobileMenu
         icon={subapp?.icon ?? 'marketplace'}
         color={subapp?.color ?? undefined}
       />

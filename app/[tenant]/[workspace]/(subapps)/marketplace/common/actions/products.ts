@@ -28,11 +28,11 @@ import {
   updateVersionStatus,
   uploadBundle,
 } from '../orm';
+import {productSchema} from '../ui/components/forms/product-form/validator';
 import {
   MAX_BUNDLE_SIZE,
-  productSchema,
   versionSchema,
-} from '../ui/components/product-form/validator';
+} from '../ui/components/forms/version-form/validator';
 import {ensureAuth} from '../utils/auth-helper';
 import {slugify} from '../utils/slugify';
 

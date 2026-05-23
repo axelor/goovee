@@ -14,7 +14,7 @@ import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
-import {CheckoutClient} from '../../common/ui/components/checkout-client';
+import {CheckoutContent} from '../../common/ui/components/contents/checkout-content';
 import {ensureAuth} from '../../common/utils/auth-helper';
 
 export default async function CheckoutPage(props: {
@@ -72,7 +72,7 @@ export default async function CheckoutPage(props: {
         {await t('Checkout')}
       </h1>
 
-      <CheckoutClient workspace={clone(auth.workspace)} />
+      <CheckoutContent workspace={clone(auth.workspace)} />
     </div>
   );
 }

@@ -34,9 +34,9 @@ import {
   type ListCategory,
   type ListProduct,
 } from '../common/orm';
-import {PriceTypeSelect} from '../common/ui/components/price-type-select/price-type-select';
-import {ProductCard} from '../common/ui/components/product-card';
-import {ProductSortSelect} from '../common/ui/components/product-sort-select';
+import {ProductCard} from '../common/ui/components/cards/product-card';
+import {PriceTypeSelect} from '../common/ui/components/inputs/price-type-select';
+import {ProductSortSelect} from '../common/ui/components/inputs/product-sort-select';
 import {ensureAuth} from '../common/utils/auth-helper';
 import {
   PAGE_SIZE,
