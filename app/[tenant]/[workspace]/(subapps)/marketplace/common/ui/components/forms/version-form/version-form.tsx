@@ -522,7 +522,13 @@ export function VersionForm({
           )}
           <Button
             type="button"
-            disabled={pending || (!!current?.id && !formState.isDirty)}
+            disabled={
+              pending ||
+              (!!current?.id &&
+                !formState.isDirty &&
+                isPublished &&
+                !requiresReview)
+            }
             onClick={() => {
               setValue('statusSelect', MARKETPLACE_VERSION_STATUS.PUBLISHED);
               submit();
@@ -617,10 +623,10 @@ function ReviewStatusAlert({
         <AlertDescription>
           {requiresReview
             ? i18n.t(
-                'Saving will resubmit this version for review. It becomes visible once approved.',
+                'You may submit this version for review again. It becomes visible once approved.',
               )
             : i18n.t(
-                'Saving will publish this version. Changes are visible to the community immediately.',
+                'You may publish this version again. Changes are visible to the community immediately.',
               )}
         </AlertDescription>
       </Alert>
