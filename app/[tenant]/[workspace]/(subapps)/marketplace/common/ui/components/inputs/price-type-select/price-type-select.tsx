@@ -14,7 +14,7 @@ export function PriceTypeSelect({currentPriceType}: PriceTypeSelectProps) {
   const handlePriceType = (priceTypeValue: string) => {
     const params = new URLSearchParams(searchParams);
     params.set('priceType', priceTypeValue);
-    params.set('page', '1');
+    params.delete('page');
     router.push(`?${params.toString()}`);
   };
 

@@ -199,7 +199,7 @@ export default async function Page(props: {
           <Link
             href={{
               pathname: listingHref,
-              query: buildQuery({category: null}),
+              query: buildQuery({category: null, page: null}),
             }}
             scroll={false}
             replace
@@ -220,7 +220,7 @@ export default async function Page(props: {
               key={cat.id}
               href={{
                 pathname: listingHref,
-                query: buildQuery({category: cat.id}),
+                query: buildQuery({category: cat.id, page: null}),
               }}
               scroll={false}
               replace
