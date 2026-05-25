@@ -192,6 +192,16 @@ export function VersionForm({
     setIndex(0);
   };
 
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(2)} KB`;
+    }
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  };
+
   const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -425,7 +435,7 @@ export function VersionForm({
                                 {field.value.name}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {(field.value.size / 1024 / 1024).toFixed(2)} MB
+                                {formatFileSize(field.value.size)}
                               </p>
                             </>
                           ) : current?.bundleFile?.fileName && downloadHref ? (
