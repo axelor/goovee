@@ -143,6 +143,8 @@ export async function buildPriceContext({
   return {conversionLines, viewerCurrency, defaultCurrency, fiscalPosition};
 }
 
+/** Resolves the buyer partner's fiscal position with its taxEquivList,
+ *  ready to be passed to `computePrice` for per-buyer tax remapping. */
 export async function findPartnerFiscalPosition({
   client,
   mainPartnerId,

@@ -1,6 +1,6 @@
 'use server';
 
-import {SUBAPP_CODES} from '@/constants';
+import {DEFAULT_CURRENCY_SCALE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
@@ -293,7 +293,6 @@ export async function checkout(
    * Tolerance is half of the cart currency's smallest representable
    * unit: any genuine mismatch is ≥ 1 minor unit, anything below is
    * IEEE 754 / provider-side conversion drift. */
-  const DEFAULT_CURRENCY_SCALE = 2;
   const tolerance =
     0.5 * 10 ** -(cart.items[0]?.scale ?? DEFAULT_CURRENCY_SCALE);
   if (Math.abs(Number(paidAmount) - cart.total) > tolerance) {

@@ -174,6 +174,12 @@ export async function saveProduct(
           ),
         };
       }
+      /* saleCurrency is stamped at creation only and never rewritten on
+       * later updates — historical products must keep showing the price
+       * in the currency they were created with, even if the publisher's
+       * partner currency later changes. Resolution order:
+       *   1. publisher's partner currency
+       *   2. AOS currency matching DEFAULT_CURRENCY_CODE */
       const partnerCurrency = await findPartnerCurrency({
         client,
         mainPartnerId: auth.user.mainPartnerId,
@@ -198,6 +204,9 @@ export async function saveProduct(
         select: {id: true},
         data: {
           ...productData,
+          // TODO: revisit — base_product.dtype is NOT NULL and goovee
+          // doesn't default it from the schema entity name; hardcoded
+          // here so creates don't fail with a constraint violation.
           dtype: 'Product',
           code,
           slug,
@@ -379,6 +388,8 @@ export async function saveVersion(
       versionId = created.id;
     }
 
+    //BUG: this whole process is broken. We need to let the user choose which
+    //version to promote as the current version.
     const publishedNewest = await findNewestPublishedVersion({
       client,
       productId: payload.productId,

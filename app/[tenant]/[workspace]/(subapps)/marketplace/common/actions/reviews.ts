@@ -105,6 +105,8 @@ export async function saveReview(
       previousRating = null;
     }
 
+    // Rating aggregates are derived/telemetry; recompute them after the
+    // response is flushed so the save action returns immediately.
     after(async () => {
       try {
         if (previousRating === null) {
@@ -170,6 +172,8 @@ export async function deleteReview(
       version: existing.version,
     });
 
+    // Rating aggregates are derived/telemetry; recompute them after the
+    // response is flushed so the save action returns immediately.
     after(async () => {
       try {
         await removeRating(client, productId, existing.rating);
