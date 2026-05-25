@@ -336,6 +336,9 @@ export async function saveVersion(
         }
       }
       const existingCompat = (current.compatibilitySet ?? []).map(c => c.id);
+      const toRemove = existingCompat.filter(
+        id => !compatRefs.find(({id: newId}) => newId === id),
+      );
       await client.aOSMarketplaceProductVersion.update({
         select: {id: true},
         data: {
@@ -348,7 +351,7 @@ export async function saveVersion(
             bundleFile: {select: {id: uploadedFileId}},
           }),
           compatibilitySet: {
-            ...(existingCompat.length && {remove: existingCompat}),
+            ...(existingCompat.length && {remove: toRemove}),
             ...(compatRefs.length && {select: compatRefs}),
           },
         },
