@@ -27,6 +27,7 @@ import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
 import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
 import {findProduct, isProductFavorited} from '../../common/orm';
+import {formatVersionNumber} from '../../common/utils/version-number';
 import {AddToFavoriteButton} from '../../common/ui/components/buttons/add-to-favorite-button';
 import {BuyButtons} from '../../common/ui/components/buttons/buy-buttons';
 import {ProductIcon} from '../../common/ui/components/primitives/product-icon';
@@ -257,9 +258,9 @@ export default async function ProductPage(props: {
                 <Badge variant={paid ? 'outline' : 'success'}>
                   {priceBadgeLabel}
                 </Badge>
-                {product.currentVersion?.versionNumber && (
+                {product.currentVersion && (
                   <Badge variant="outline">
-                    {product.currentVersion.versionNumber}
+                    {formatVersionNumber(product.currentVersion)}
                   </Badge>
                 )}
                 {product.currentVersion?.compatibilitySet &&
@@ -318,9 +319,9 @@ export default async function ProductPage(props: {
                 </div>
 
                 {/* Updated */}
-                {product.currentVersion?.dateOfApproval && (
+                {product.currentVersion?.dateOfPublish && (
                   <TooltipDate
-                    date={product.currentVersion.dateOfApproval}
+                    date={product.currentVersion.dateOfPublish}
                     displayType="relative"
                     prefix={updatedLabel}
                     lowercase
@@ -371,7 +372,9 @@ export default async function ProductPage(props: {
                   marketplaceIconCode={product.marketplaceIconCode ?? null}
                   marketplaceCoverStyle={product.marketplaceCoverStyle ?? null}
                   currentVersionNumber={
-                    product.currentVersion?.versionNumber ?? null
+                    product.currentVersion
+                      ? formatVersionNumber(product.currentVersion)
+                      : null
                   }
                   cartHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/cart`}
                   addToCartLabel={await t('Add to cart')}
@@ -512,16 +515,18 @@ export default async function ProductPage(props: {
                     {versionLabel}
                   </span>
                   <span className="font-semibold text-foreground">
-                    {product.currentVersion?.versionNumber || notAvailableLabel}
+                    {product.currentVersion
+                      ? formatVersionNumber(product.currentVersion)
+                      : notAvailableLabel}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
                     {updatedLabel}
                   </span>
-                  {product.currentVersion?.dateOfApproval ? (
+                  {product.currentVersion?.dateOfPublish ? (
                     <TooltipDate
-                      date={product.currentVersion.dateOfApproval}
+                      date={product.currentVersion.dateOfPublish}
                       displayType="relative"
                       showTooltip={true}
                       className="font-semibold text-foreground"

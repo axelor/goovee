@@ -1,6 +1,7 @@
 import type {User} from '@/types';
 import type {Cloned} from '@/types/util';
 import type {MyReview} from '../../../../orm';
+import {formatVersionNumber} from '../../../../utils/version-number';
 
 export const REVIEW_CARD_SHELL =
   'rounded-lg border border-primary/40 bg-card p-6';
@@ -59,5 +60,14 @@ export function deriveDisplayReview(
         : null,
     };
   }
-  return initial;
+  if (!initial) return null;
+  return {
+    rating: initial.rating,
+    reviewComment: initial.reviewComment,
+    updatedOn: initial.updatedOn,
+    author: initial.author,
+    reviewedVersion: initial.reviewedVersion
+      ? {versionNumber: formatVersionNumber(initial.reviewedVersion)}
+      : null,
+  };
 }

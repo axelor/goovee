@@ -15,11 +15,11 @@ import {
 import {
   addRating,
   findExistingReview,
-  findMatchingPublishedVersion,
   findProductAccess,
   removeRating,
   replaceRating,
 } from '../orm';
+import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {ensureAuth} from '../utils/auth-helper';
 
 export async function saveReview(
@@ -54,10 +54,13 @@ export async function saveReview(
   }
 
   if (payload.reviewedVersionId) {
-    const matchingVersion = await findMatchingPublishedVersion({
-      client,
-      versionId: payload.reviewedVersionId,
-      productId: payload.productId,
+    const matchingVersion = await client.aOSMarketplaceProductVersion.findOne({
+      where: {
+        id: payload.reviewedVersionId,
+        product: {id: payload.productId},
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
+      select: {id: true},
     });
     if (!matchingVersion) {
       return {error: true, message: await t('Invalid version')};

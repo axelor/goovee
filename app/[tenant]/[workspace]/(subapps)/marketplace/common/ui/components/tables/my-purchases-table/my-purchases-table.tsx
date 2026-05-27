@@ -25,6 +25,7 @@ import Link from 'next/link';
 import {Fragment, useState, type ReactNode} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import type {MarketplacePurchase} from '../../../../orm';
+import {formatVersionNumber} from '../../../../utils/version-number';
 import {ProductIcon} from '../../primitives/product-icon';
 
 type Purchase = Cloned<MarketplacePurchase>;
@@ -105,8 +106,8 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       desktopClassName: 'w-[18%]',
       content: purchase => (
         <span className="text-sm whitespace-nowrap">
-          {purchase.product?.currentVersion?.versionNumber
-            ? `v${purchase.product.currentVersion.versionNumber}`
+          {purchase.product?.currentVersion
+            ? `v${formatVersionNumber(purchase.product.currentVersion)}`
             : '—'}
         </span>
       ),

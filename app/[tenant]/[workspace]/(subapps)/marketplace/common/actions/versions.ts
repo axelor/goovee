@@ -11,9 +11,7 @@ import {z} from 'zod';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {
   findMyProductWithVersions,
-  findNewestPublishedVersion,
-  findPublishedAlternateVersions,
-  updateProductCurrentVersion,
+  syncProductVersionPointers,
   updateVersionStatus,
   uploadBundle,
 } from '../orm';
@@ -22,6 +20,7 @@ import {
   versionSchema,
 } from '../ui/components/forms/version-form/validator';
 import {ensureAuth} from '../utils/auth-helper';
+import {parseVersionNumber} from '../utils/version-number';
 
 export async function saveVersion(
   formData: FormData,
@@ -57,6 +56,11 @@ export async function saveVersion(
     return {error: true, message: await t('Bundle exceeds 20 MB limit')};
   }
 
+  const parts = parseVersionNumber(payload.versionNumber);
+  if (!parts) {
+    return {error: true, message: await t('Invalid version number')};
+  }
+
   const existingProduct = await findMyProductWithVersions({
     productId: payload.productId,
     mainPartnerId: auth.user.mainPartnerId,
@@ -65,6 +69,27 @@ export async function saveVersion(
   });
   if (!existingProduct) {
     return {error: true, message: await t('Product not found')};
+  }
+
+  /* App-level uniqueness: no other version of this product can hold the
+   * same (vMajor, vMinor, vPatch, vPreRelease) tuple. */
+  const duplicate = await client.aOSMarketplaceProductVersion.findOne({
+    where: {
+      product: {id: payload.productId},
+      vMajor: parts.vMajor,
+      vMinor: parts.vMinor,
+      vPatch: parts.vPatch,
+      vPreRelease:
+        parts.vPreRelease === null ? {eq: null} : {eq: parts.vPreRelease},
+      ...(payload.id ? {id: {ne: payload.id}} : {}),
+    },
+    select: {id: true},
+  });
+  if (duplicate) {
+    return {
+      error: true,
+      message: await t('A version with this number already exists'),
+    };
   }
 
   const tenant = await manager.getTenant(tenantId);
@@ -97,6 +122,7 @@ export async function saveVersion(
           id: true,
           version: true,
           statusSelect: true,
+          dateOfPublish: true,
           compatibilitySet: {select: {id: true}},
         },
       });
@@ -125,14 +151,25 @@ export async function saveVersion(
       const toRemove = existingCompat.filter(
         id => !compatRefs.find(({id: newId}) => newId === id),
       );
+      /* Stamp `dateOfPublish` the first time a version enters PUBLISHED; keep
+       * the original stamp on subsequent re-publishes (e.g. unpublish→publish
+       * cycles preserve the original release date). */
+      const transitioningToPublished =
+        effectiveStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED &&
+        current.statusSelect !== MARKETPLACE_VERSION_STATUS.PUBLISHED &&
+        !current.dateOfPublish;
       await client.aOSMarketplaceProductVersion.update({
         select: {id: true},
         data: {
           id: payload.id,
           version: current.version,
-          versionNumber: payload.versionNumber,
+          vMajor: parts.vMajor,
+          vMinor: parts.vMinor,
+          vPatch: parts.vPatch,
+          vPreRelease: parts.vPreRelease,
           changelog: payload.changelog || null,
           statusSelect: effectiveStatus,
+          ...(transitioningToPublished && {dateOfPublish: new Date()}),
           ...(uploadedFileId && {
             bundleFile: {select: {id: uploadedFileId}},
           }),
@@ -150,7 +187,10 @@ export async function saveVersion(
       const created = await client.aOSMarketplaceProductVersion.create({
         select: {id: true},
         data: {
-          versionNumber: payload.versionNumber,
+          vMajor: parts.vMajor,
+          vMinor: parts.vMinor,
+          vPatch: parts.vPatch,
+          vPreRelease: parts.vPreRelease,
           changelog: payload.changelog || null,
           statusSelect: effectiveStatus,
           bundleFile: {select: {id: uploadedFileId}},
@@ -158,33 +198,17 @@ export async function saveVersion(
           product: {select: {id: payload.productId}},
           dateOfSubmission: new Date(),
           ...(effectiveStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED && {
-            dateOfApproval: new Date(),
+            dateOfPublish: new Date(),
           }),
         },
       });
       versionId = created.id;
     }
 
-    //BUG: this whole process is broken. We need to let the user choose which
-    //version to promote as the current version.
-    const publishedNewest = await findNewestPublishedVersion({
+    await syncProductVersionPointers({
       client,
       productId: payload.productId,
     });
-    if (publishedNewest) {
-      const productNow = await client.aOSProduct.findOne({
-        where: {id: payload.productId},
-        select: {id: true, version: true},
-      });
-      if (productNow) {
-        await updateProductCurrentVersion({
-          client,
-          productId: payload.productId,
-          version: productNow.version,
-          currentVersionId: publishedNewest.id,
-        });
-      }
-    }
 
     return {success: true, data: {versionId}};
   } catch (e) {
@@ -198,7 +222,6 @@ const unpublishVersionSchema = z.object({
   versionId: z.string().min(1),
   productId: z.string().min(1),
   workspaceURL: z.string().min(1),
-  newCurrentVersionId: z.string().min(1).optional(),
 });
 
 type UnpublishVersionInput = z.infer<typeof unpublishVersionSchema>;
@@ -214,7 +237,7 @@ export async function unpublishVersion(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {versionId, productId, workspaceURL, newCurrentVersionId} = parsed.data;
+  const {versionId, productId, workspaceURL} = parsed.data;
 
   const {error, auth} = await ensureAuth(workspaceURL, tenantId);
   if (error || !auth.user) {
@@ -251,33 +274,6 @@ export async function unpublishVersion(
     };
   }
 
-  const isCurrent = owned.currentVersion?.id === versionId;
-  let promotedId: string | undefined;
-  if (isCurrent) {
-    const alternates = await findPublishedAlternateVersions({
-      client,
-      productId,
-      excludeVersionId: versionId,
-    });
-    if (alternates.length > 0) {
-      if (!newCurrentVersionId) {
-        return {
-          error: true,
-          message: await t('Pick a version to promote as the current version'),
-        };
-      }
-      if (!alternates.some(v => v.id === newCurrentVersionId)) {
-        return {
-          error: true,
-          message: await t(
-            'Replacement must be another published version of this product',
-          ),
-        };
-      }
-      promotedId = newCurrentVersionId;
-    }
-  }
-
   try {
     await updateVersionStatus({
       client,
@@ -285,22 +281,7 @@ export async function unpublishVersion(
       version: current.version,
       statusSelect: MARKETPLACE_VERSION_STATUS.UNPUBLISHED,
     });
-
-    if (promotedId) {
-      const productNow = await client.aOSProduct.findOne({
-        where: {id: productId},
-        select: {id: true, version: true},
-      });
-      if (productNow) {
-        await updateProductCurrentVersion({
-          client,
-          productId,
-          version: productNow.version,
-          currentVersionId: promotedId,
-        });
-      }
-    }
-
+    await syncProductVersionPointers({client, productId});
     return {success: true, data: true};
   } catch (e) {
     const message =

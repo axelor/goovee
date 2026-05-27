@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
+import {VERSION_NUMBER_PATTERN} from '../../../../utils/version-number';
 
 export const MAX_BUNDLE_SIZE = 20 * 1024 * 1024; // 20 MB
 
@@ -11,8 +12,9 @@ export const versionSchema = z
       .string()
       .min(1, 'Version number is required')
       .max(40)
-      .regex(/^[0-9]+(\.[0-9]+){0,2}([\-+][0-9A-Za-z.\-]+)?$/, {
-        message: 'Use a version like 1.0.0',
+      .regex(VERSION_NUMBER_PATTERN, {
+        message:
+          'Use 1–3 numeric segments, optionally followed by -tag (e.g. 1.2.3-rc1)',
       }),
     changelog: z.string().max(5000).optional(),
     statusSelect: z.enum([

@@ -9,17 +9,36 @@
       "target": "AOSProduct"
     },
     {
-      "type": "String",
-      "name": "versionNumber",
-      "required": true
-    },
-    {
       "type": "DateTime",
       "name": "dateOfSubmission"
     },
     {
       "type": "DateTime",
       "name": "dateOfApproval"
+    },
+    {
+      "type": "DateTime",
+      "name": "dateOfPublish"
+    },
+    {
+      "type": "Int",
+      "name": "vMajor",
+      "required": true,
+      "default": 0
+    },
+    {
+      "type": "Int",
+      "name": "vMinor",
+      "default": 0
+    },
+    {
+      "type": "Int",
+      "name": "vPatch",
+      "default": 0
+    },
+    {
+      "type": "String",
+      "name": "vPreRelease"
     },
     {
       "type": "ManyToOne",

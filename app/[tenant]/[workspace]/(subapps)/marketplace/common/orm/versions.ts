@@ -4,10 +4,12 @@ import type {ID} from '@/types';
 import {and} from '@/utils/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import type {QueryProps} from './helpers';
-import {withBundleAccessFilter, type ORMRecord} from './helpers';
-
-// ---- PRODUCT VERSIONS ---- //
+import {
+  versionNumberFields,
+  versionSortOrder,
+  withBundleAccessFilter,
+  type QueryProps,
+} from './helpers';
 
 export type ListProductVersion = Awaited<
   ReturnType<typeof findProductVersions>
@@ -19,15 +21,13 @@ export async function findProductVersions({
   where,
   take,
   skip,
-  orderBy,
 }: {
   productId: ID;
   client: Client;
 } & QueryProps<AOSMarketplaceProductVersion>) {
-  const versions = await client.aOSMarketplaceProductVersion.find({
+  return client.aOSMarketplaceProductVersion.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
-    ...(orderBy ? {orderBy} : {}),
     where: and<AOSMarketplaceProductVersion>([
       {product: {id: productId}},
       {statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED},
@@ -35,78 +35,59 @@ export async function findProductVersions({
     ]),
     select: {
       id: true,
-      versionNumber: true,
-      dateOfApproval: true,
+      ...versionNumberFields,
+      dateOfPublish: true,
       changelog: true,
       statusSelect: true,
       bundleFile: {id: true},
       compatibilitySet: {
-        select: {
-          title: true,
-        },
-        orderBy: {
-          releasedOn: 'DESC',
-        },
+        select: {title: true},
+        orderBy: {releasedOn: 'DESC'},
       },
     },
-    orderBy: {dateOfApproval: 'DESC'},
-  });
-
-  return versions;
-}
-
-// ---- VERSION LOOKUPS ---- //
-
-export async function findMatchingPublishedVersion({
-  client,
-  versionId,
-  productId,
-}: {
-  client: Client;
-  versionId: ID;
-  productId: ID;
-}): Promise<ORMRecord | null> {
-  return client.aOSMarketplaceProductVersion.findOne({
-    where: {
-      id: versionId,
-      product: {id: productId},
-      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-    },
-    select: {id: true},
+    orderBy: versionSortOrder,
   });
 }
 
-export async function findNewestPublishedVersion({
+/* Single source of truth for `product.currentVersion` and
+ * `product.latestVersion`. Call after any create/status-change/delete.
+ *
+ *   latestVersion  = highest sortkey across ALL versions of the product
+ *   currentVersion = highest sortkey among PUBLISHED versions, or null */
+export async function syncProductVersionPointers({
   client,
   productId,
 }: {
   client: Client;
   productId: ID;
-}): Promise<ORMRecord | null> {
-  return client.aOSMarketplaceProductVersion.findOne({
-    where: {
-      product: {id: productId},
-      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-    },
-    orderBy: {versionNumber: 'DESC'},
-    select: {id: true},
-  });
-}
+}): Promise<void> {
+  const [latest, currentPublished, product] = await Promise.all([
+    client.aOSMarketplaceProductVersion.findOne({
+      where: {product: {id: productId}},
+      orderBy: versionSortOrder,
+      select: {id: true},
+    }),
+    client.aOSMarketplaceProductVersion.findOne({
+      where: {
+        product: {id: productId},
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
+      orderBy: versionSortOrder,
+      select: {id: true},
+    }),
+    client.aOSProduct.findOne({
+      where: {id: productId},
+      select: {id: true, version: true},
+    }),
+  ]);
+  if (!product) return;
 
-export async function findPublishedAlternateVersions({
-  client,
-  productId,
-  excludeVersionId,
-}: {
-  client: Client;
-  productId: ID;
-  excludeVersionId: ID;
-}): Promise<ORMRecord[]> {
-  return client.aOSMarketplaceProductVersion.find({
-    where: {
-      product: {id: productId},
-      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-      id: {ne: excludeVersionId},
+  await client.aOSProduct.update({
+    data: {
+      id: product.id,
+      version: product.version,
+      latestVersion: {select: {id: latest?.id ?? null}},
+      currentVersion: {select: {id: currentPublished?.id ?? null}},
     },
     select: {id: true},
   });

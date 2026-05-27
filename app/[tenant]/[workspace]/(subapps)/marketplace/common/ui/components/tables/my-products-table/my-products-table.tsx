@@ -19,12 +19,29 @@ import {ChevronDown, ChevronUp, ExternalLink} from 'lucide-react';
 import Link from 'next/link';
 import {Fragment, useState, type ReactNode} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
-import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
+import {
+  MARKETPLACE_VERSION_STATUS,
+  MARKETPLACE_VERSION_STATUS_LABELS,
+} from '../../../../constants/statuses';
+
+function statusBadgeClass(status: string | null): string {
+  switch (status) {
+    case MARKETPLACE_VERSION_STATUS.PUBLISHED:
+      return 'bg-success/15 text-success-dark';
+    case MARKETPLACE_VERSION_STATUS.IN_REVIEW:
+      return 'bg-palette-orange/40 text-palette-orange-dark';
+    case MARKETPLACE_VERSION_STATUS.REJECTED:
+      return 'bg-destructive/15 text-destructive';
+    default:
+      return 'bg-muted text-muted-foreground';
+  }
+}
 import type {
   CompatibilityVersion,
   ListCategory,
   ListMyProduct,
 } from '../../../../orm';
+import {formatVersionNumber} from '../../../../utils/version-number';
 import {EditProductButton} from '../../buttons/edit-product-button';
 import {ProductIcon} from '../../primitives/product-icon';
 import {Rating} from '../../primitives/rating';
@@ -107,32 +124,40 @@ export function MyProductsTable({
       key: 'status',
       label: i18n.t('Status'),
       desktopClassName: 'w-[15%]',
-      content: product => (
-        <span
-          className={cn(
-            'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize whitespace-nowrap',
-            product.currentVersion?.statusSelect ===
-              MARKETPLACE_VERSION_STATUS.PUBLISHED
-              ? 'bg-success/15 text-success-dark'
-              : 'bg-muted text-muted-foreground',
-          )}>
-          {product.currentVersion?.statusSelect
-            ? i18n.tattr(product.currentVersion.statusSelect)
-            : '—'}
-        </span>
-      ),
+      content: product => {
+        const status = product.latestVersion?.statusSelect ?? null;
+        return (
+          <span
+            className={cn(
+              'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize whitespace-nowrap',
+              statusBadgeClass(status),
+            )}>
+            {status && MARKETPLACE_VERSION_STATUS_LABELS[status]
+              ? i18n.t(MARKETPLACE_VERSION_STATUS_LABELS[status])
+              : '—'}
+          </span>
+        );
+      },
     },
     {
       key: 'version',
-      label: i18n.t('Current version'),
+      label: i18n.t('Latest version'),
       desktopClassName: 'w-[15%]',
-      content: product => (
-        <span className="text-sm whitespace-nowrap">
-          {product.currentVersion?.versionNumber
-            ? `v${product.currentVersion.versionNumber}`
-            : '—'}
-        </span>
-      ),
+      content: product => {
+        const latest = product.latestVersion;
+        const current = product.currentVersion;
+        const showLiveHint = !!latest && !!current && latest.id !== current.id;
+        return (
+          <div className="text-sm whitespace-nowrap">
+            <div>{latest ? `v${formatVersionNumber(latest)}` : '—'}</div>
+            {showLiveHint && current && (
+              <div className="text-xs text-muted-foreground">
+                {i18n.t('live: v{0}', formatVersionNumber(current))}
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'installs',

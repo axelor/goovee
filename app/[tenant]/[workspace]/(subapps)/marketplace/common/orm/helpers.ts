@@ -148,6 +148,24 @@ export function withBundleAccessFilter({
   };
 }
 
+/* Canonical ordering for version listings: highest sort tuple first.
+ * vPreRelease NULLs sort ABOVE tags on DESC so `1.2.3` > `1.2.3-rc2`. */
+export const versionSortOrder = {
+  vMajor: 'DESC',
+  vMinor: 'DESC',
+  vPatch: 'DESC',
+  vPreRelease: 'DESC',
+} as const satisfies OrderByArg<AOSMarketplaceProductVersion>;
+
+/* Shared fragment for selecting the four parsed-version columns. Callers
+ * pair this with `formatVersionNumber` to render the display string. */
+export const versionNumberFields = {
+  vMajor: true,
+  vMinor: true,
+  vPatch: true,
+  vPreRelease: true,
+} as const satisfies SelectOptions<AOSMarketplaceProductVersion>;
+
 /** Default goovee-orm result shape for lookups that select only id+version. */
 export type ORMRecord = {id: string; version: number};
 

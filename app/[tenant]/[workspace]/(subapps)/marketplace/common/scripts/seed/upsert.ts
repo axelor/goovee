@@ -11,8 +11,9 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
-import {MARKETPLACE_VERSION_STATUS} from '../../constants/statuses';
+import {syncProductVersionPointers} from '../../orm/versions';
 import {slugify} from '../../utils/slugify';
+import {parseVersionNumber} from '../../utils/version-number';
 import {
   findCategoryByCode,
   findCompatibilityVersionByName,
@@ -338,22 +339,37 @@ export async function upsertVersion({
   const dateOfSubmission = version.submittedAt
     ? new Date(version.submittedAt)
     : null;
-  const dateOfApproval = version.releasedAt
+  const dateOfPublish = version.releasedAt
     ? new Date(version.releasedAt)
     : null;
 
+  const parts = parseVersionNumber(version.versionNumber);
+  if (!parts) {
+    throw new Error(`Invalid version number: ${version.versionNumber}`);
+  }
+
   const existing = await client.aOSMarketplaceProductVersion.findOne({
-    where: {product: {id: productId}, versionNumber: version.versionNumber},
+    where: {
+      product: {id: productId},
+      vMajor: parts.vMajor,
+      vMinor: parts.vMinor,
+      vPatch: parts.vPatch,
+      vPreRelease:
+        parts.vPreRelease === null ? {eq: null} : {eq: parts.vPreRelease},
+    },
     select: {id: true, version: true},
   });
 
   const data = {
     product: {select: {id: productId}},
-    versionNumber: version.versionNumber,
+    vMajor: parts.vMajor,
+    vMinor: parts.vMinor,
+    vPatch: parts.vPatch,
+    vPreRelease: parts.vPreRelease,
     changelog: version.changelog ?? null,
     statusSelect: version.status,
     dateOfSubmission,
-    dateOfApproval,
+    dateOfPublish,
     bundleFile: {select: {id: bundleMetaId}},
     compatibilitySet: {select: compatIds},
   } satisfies CreateArgs<AOSMarketplaceProductVersion>;
@@ -361,40 +377,19 @@ export async function upsertVersion({
   if (existing) {
     return client.aOSMarketplaceProductVersion.update({
       data: {...data, id: existing.id, version: existing.version},
-      select: {id: true, statusSelect: true, dateOfApproval: true},
+      select: {id: true, statusSelect: true, dateOfPublish: true},
     });
   }
   return client.aOSMarketplaceProductVersion.create({
     data,
-    select: {id: true, statusSelect: true, dateOfApproval: true},
+    select: {id: true, statusSelect: true, dateOfPublish: true},
   });
 }
 
-/* Promotes the product's `currentVersion` pointer to the newest published
- * version (matches what `saveVersion` does in the live app). */
+/* Promotes the product's `currentVersion` and `latestVersion` pointers
+ * (matches what `saveVersion` does in the live app). */
 export async function refreshCurrentVersion(client: Client, productId: string) {
-  const latest = await client.aOSMarketplaceProductVersion.findOne({
-    where: {
-      product: {id: productId},
-      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-    },
-    orderBy: {dateOfApproval: 'DESC'},
-    select: {id: true},
-  });
-  if (!latest) return;
-  const product = await client.aOSProduct.findOne({
-    where: {id: productId},
-    select: {id: true, version: true},
-  });
-  if (!product) return;
-  await client.aOSProduct.update({
-    data: {
-      id: product.id,
-      version: product.version,
-      currentVersion: {select: {id: latest.id}},
-    },
-    select: {id: true},
-  });
+  await syncProductVersionPointers({client, productId});
 }
 
 export async function upsertReview({

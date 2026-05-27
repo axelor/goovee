@@ -196,6 +196,11 @@
       "target": "AOSMarketplaceProductVersion"
     },
     {
+      "type": "ManyToOne",
+      "name": "latestVersion",
+      "target": "AOSMarketplaceProductVersion"
+    },
+    {
       "type": "String",
       "name": "marketplaceCoverStyle"
     },

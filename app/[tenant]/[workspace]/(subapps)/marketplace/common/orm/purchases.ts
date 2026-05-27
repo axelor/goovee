@@ -1,7 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceProductPurchase} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
-import type {QueryProps} from './helpers';
+import {versionNumberFields, type QueryProps} from './helpers';
 
 // ---- PURCHASES / OWNERSHIP ---- //
 
@@ -44,7 +44,7 @@ export async function findPurchases({
         marketplaceTypeSelect: true,
         marketplaceIconCode: true,
         marketplaceCoverStyle: true,
-        currentVersion: {id: true, versionNumber: true},
+        currentVersion: {id: true, ...versionNumberFields},
       },
       invoice: {id: true, invoiceId: true},
     },

@@ -21,6 +21,7 @@ import {
   type ListProductVersion,
   type SingleProduct,
 } from '../../../../orm';
+import {formatVersionNumber} from '../../../../utils/version-number';
 
 interface VersionsTabProps {
   product: SingleProduct;
@@ -90,7 +91,7 @@ export async function VersionsTab({
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h3 className="font-semibold text-foreground">
-                  {version.versionNumber}
+                  v{formatVersionNumber(version)}
                 </h3>
                 {version.id === currentVersionId && (
                   <Badge variant="success">{latestLabel}</Badge>

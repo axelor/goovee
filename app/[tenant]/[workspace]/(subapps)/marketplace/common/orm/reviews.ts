@@ -2,7 +2,7 @@ import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceReview} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
-import type {QueryProps} from './helpers';
+import {versionNumberFields, type QueryProps} from './helpers';
 
 // ---- PRODUCT REVIEWS ---- //
 
@@ -34,10 +34,7 @@ export async function findProductReviews({
         simpleFullName: true,
         picture: {id: true},
       },
-      reviewedVersion: {
-        id: true,
-        versionNumber: true,
-      },
+      reviewedVersion: {id: true, ...versionNumberFields},
     },
     orderBy: {createdOn: 'DESC'},
   });
@@ -66,7 +63,7 @@ export async function findMyReview({
       createdOn: true,
       updatedOn: true,
       author: {id: true, simpleFullName: true, picture: {id: true}},
-      reviewedVersion: {id: true, versionNumber: true},
+      reviewedVersion: {id: true, ...versionNumberFields},
     },
   });
 }

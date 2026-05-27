@@ -22,13 +22,6 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/components/select';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {packIntoFormData} from '@/utils/formdata';
@@ -51,6 +44,7 @@ import type {
   CompatibilityVersion,
   MyProductWithVersions,
 } from '../../../../orm';
+import {formatVersionNumber} from '../../../../utils/version-number';
 import {
   MAX_BUNDLE_SIZE,
   versionSchema,
@@ -102,9 +96,6 @@ export function VersionForm({
   const [index, setIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<'next' | 'prev'>('next');
   const [confirmUnpublish, setConfirmUnpublish] = useState(false);
-  const [replacementVersionId, setReplacementVersionId] = useState<
-    string | undefined
-  >(undefined);
 
   const current = creatingNew ? undefined : versions[index];
 
@@ -113,7 +104,7 @@ export function VersionForm({
     return {
       id: current.id,
       productId,
-      versionNumber: current.versionNumber ?? '',
+      versionNumber: formatVersionNumber(current),
       changelog: current.changelog ?? '',
       statusSelect:
         current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED
@@ -226,24 +217,21 @@ export function VersionForm({
   // Save-as-draft makes sense for anything that isn't already live or queued.
   const canSaveAsDraft = !canUnpublish;
 
-  // Other published versions the user could promote to currentVersion. Only
-  // relevant when unpublishing the version that is currentVersion right now.
+  /* When the version being unpublished is the live (currentVersion) one,
+   * `syncProductVersionPointers` will auto-promote the next-highest published
+   * version. If none exist, the product gets unlisted until a new version
+   * is published — the dialog wording reflects which case applies. */
   const isUnpublishingCurrent =
     !!current?.id && current.id === productCurrentVersionId;
-  const replacementCandidates = isUnpublishingCurrent
-    ? versions.filter(
-        v =>
-          v.id !== current?.id &&
-          v.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED,
-      )
-    : [];
-  const needsReplacement = replacementCandidates.length > 0;
+  const hasOtherPublished =
+    isUnpublishingCurrent &&
+    versions.some(
+      v =>
+        v.id !== current?.id &&
+        v.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED,
+    );
 
-  const openUnpublish = () => {
-    // Default the replacement select to the newest other published version.
-    setReplacementVersionId(replacementCandidates[0]?.id);
-    setConfirmUnpublish(true);
-  };
+  const openUnpublish = () => setConfirmUnpublish(true);
 
   const runUnpublish = () => {
     if (!current?.id) return;
@@ -253,9 +241,6 @@ export function VersionForm({
         versionId: current.id,
         productId,
         workspaceURL,
-        newCurrentVersionId: needsReplacement
-          ? replacementVersionId
-          : undefined,
       });
       if (!result.success) {
         toast({variant: 'destructive', title: result.message});
@@ -548,9 +533,9 @@ export function VersionForm({
               {i18n.t('Unpublish this version?')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {needsReplacement
+              {hasOtherPublished
                 ? i18n.t(
-                    'This version is currently the live version. Pick another published version to take its place.',
+                    'This version will be unlisted. The next-highest published version will become live.',
                   )
                 : isUnpublishingCurrent
                   ? i18n.t(
@@ -561,34 +546,11 @@ export function VersionForm({
                     )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {needsReplacement && (
-            <div className="space-y-2 py-2">
-              <label className="text-sm font-medium text-foreground">
-                {i18n.t('New live version')}
-              </label>
-              <Select
-                value={replacementVersionId}
-                onValueChange={setReplacementVersionId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {replacementCandidates.map(v => (
-                    <SelectItem key={v.id} value={v.id}>
-                      v{v.versionNumber}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={pending}>
               {i18n.t('Cancel')}
             </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={runUnpublish}
-              disabled={pending || (needsReplacement && !replacementVersionId)}>
+            <AlertDialogAction onClick={runUnpublish} disabled={pending}>
               {i18n.t('Unpublish')}
             </AlertDialogAction>
           </AlertDialogFooter>

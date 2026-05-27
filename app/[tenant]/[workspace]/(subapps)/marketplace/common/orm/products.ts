@@ -7,6 +7,7 @@ import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {
   priceSelectFields,
+  versionNumberFields,
   withProductAccessFilter,
   withPublishedProductFilter,
   type QueryProps,
@@ -78,24 +79,6 @@ export async function findProductsBySearch({
   return products;
 }
 
-const findProductsSelect = {
-  id: true,
-  slug: true,
-  name: true,
-  description: true,
-  code: true,
-  picture: {id: true},
-  thumbnailImage: {id: true},
-  marketplaceTypeSelect: true,
-  marketplaceCoverStyle: true,
-  marketplaceIconCode: true,
-  averageRating: true,
-  ratingCount: true,
-  installCount: true,
-  ...priceSelectFields,
-  currentVersion: {id: true, versionNumber: true},
-} as const satisfies SelectOptions<AOSProduct>;
-
 export type ListProduct = Awaited<ReturnType<typeof findProducts>>[number];
 
 export async function findProducts({
@@ -116,7 +99,23 @@ export async function findProducts({
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
     where: withPublishedProductFilter(workspace)({...where}),
-    select: findProductsSelect,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      code: true,
+      picture: {id: true},
+      thumbnailImage: {id: true},
+      marketplaceTypeSelect: true,
+      marketplaceCoverStyle: true,
+      marketplaceIconCode: true,
+      averageRating: true,
+      ratingCount: true,
+      installCount: true,
+      ...priceSelectFields,
+      currentVersion: {id: true, ...versionNumberFields},
+    },
   });
   const priceContext = await buildPriceContext({
     client,
@@ -126,49 +125,6 @@ export async function findProducts({
 
   return products.map(p => withPrice(p, workspace, priceContext));
 }
-
-const findProductSelect = {
-  id: true,
-  name: true,
-  description: true,
-  longDescription: true,
-  code: true,
-  slug: true,
-  createdOn: true,
-  picture: {id: true},
-  thumbnailImage: {id: true},
-  marketplaceTypeSelect: true,
-  marketplaceCoverStyle: true,
-  marketplaceIconCode: true,
-  documentationUrl: true,
-  supportIssuesUrl: true,
-  supportContactUrl: true,
-  averageRating: true,
-  ratingCount: true,
-  installCount: true,
-  ...priceSelectFields,
-  currentVersion: {
-    id: true,
-    versionNumber: true,
-    statusSelect: true,
-    changelog: true,
-    dateOfApproval: true,
-    bundleFile: {sizeText: true},
-    compatibilitySet: {
-      select: {title: true},
-      orderBy: {releasedOn: 'DESC' as const},
-    },
-  },
-  productCategory: {id: true, name: true},
-  defaultSupplierPartner: {
-    id: true,
-    simpleFullName: true,
-    name: true,
-    picture: {id: true},
-  },
-  portalCategorySet: {select: {id: true, name: true}},
-  portalImageList: {select: {picture: {id: true}}},
-} as const satisfies SelectOptions<AOSProduct>;
 
 export type SingleProduct = NonNullable<
   Awaited<ReturnType<typeof findProduct>>
@@ -187,7 +143,48 @@ export async function findProduct({
 }) {
   const product = await client.aOSProduct.findOne({
     where: withPublishedProductFilter(workspace)({slug}),
-    select: findProductSelect,
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      longDescription: true,
+      code: true,
+      slug: true,
+      createdOn: true,
+      picture: {id: true},
+      thumbnailImage: {id: true},
+      marketplaceTypeSelect: true,
+      marketplaceCoverStyle: true,
+      marketplaceIconCode: true,
+      documentationUrl: true,
+      supportIssuesUrl: true,
+      supportContactUrl: true,
+      averageRating: true,
+      ratingCount: true,
+      installCount: true,
+      ...priceSelectFields,
+      currentVersion: {
+        id: true,
+        ...versionNumberFields,
+        statusSelect: true,
+        changelog: true,
+        dateOfPublish: true,
+        bundleFile: {sizeText: true},
+        compatibilitySet: {
+          select: {title: true},
+          orderBy: {releasedOn: 'DESC'},
+        },
+      },
+      productCategory: {id: true, name: true},
+      defaultSupplierPartner: {
+        id: true,
+        simpleFullName: true,
+        name: true,
+        picture: {id: true},
+      },
+      portalCategorySet: {select: {id: true, name: true}},
+      portalImageList: {select: {picture: {id: true}}},
+    },
   });
   if (!product) return null;
   const priceContext = await buildPriceContext({

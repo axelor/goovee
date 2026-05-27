@@ -7,6 +7,7 @@ import Link from 'next/link';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import type {ListProduct} from '../../../../orm';
 import {isPaid} from '../../../../utils/price';
+import {formatVersionNumber} from '../../../../utils/version-number';
 import {ProductIcon} from '../../primitives/product-icon';
 import {Rating} from '../../primitives/rating';
 
@@ -66,9 +67,9 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
               <h3 className="text-sm font-semibold text-foreground line-clamp-1">
                 {name}
               </h3>
-              {currentVersion?.versionNumber && (
+              {currentVersion && (
                 <span className="text-xs text-muted-foreground flex-shrink-0">
-                  {currentVersion.versionNumber}
+                  {formatVersionNumber(currentVersion)}
                 </span>
               )}
             </div>

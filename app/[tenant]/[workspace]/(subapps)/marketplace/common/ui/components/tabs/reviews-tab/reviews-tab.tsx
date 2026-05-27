@@ -24,6 +24,7 @@ import {
   type ListReview,
   type SingleProduct,
 } from '../../../../orm';
+import {formatVersionNumber} from '../../../../utils/version-number';
 import {YourReviewCard} from '../../cards/your-review-card';
 import {Rating} from '../../primitives/rating';
 import {ReviewerAvatar} from '../../primitives/reviewer-avatar';
@@ -130,7 +131,7 @@ export async function ReviewsTab({
       initial={myReview ? clone(myReview) : null}
       versions={publishedVersions.map(v => ({
         id: v.id,
-        versionNumber: v.versionNumber,
+        versionNumber: formatVersionNumber(v),
       }))}
       defaultVersionId={product.currentVersion?.id ?? undefined}
     />

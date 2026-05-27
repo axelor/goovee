@@ -2,35 +2,16 @@ import type {Client} from '@/goovee/.generated/client';
 import type {AOSProduct} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
-import type {SelectOptions} from '@goovee/orm';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {
   priceSelectFields,
+  versionNumberFields,
+  versionSortOrder,
   withMyProductAccessFilter,
   type QueryProps,
 } from './helpers';
 import {buildPriceContext, withPrice} from './price';
-
-// ---- MY PRODUCTS (USER CONTRIBUTIONS) ---- //
-
-const findMyProductsSelect = {
-  id: true,
-  slug: true,
-  name: true,
-  description: true,
-  code: true,
-  picture: {id: true},
-  thumbnailImage: {id: true},
-  marketplaceTypeSelect: true,
-  marketplaceCoverStyle: true,
-  marketplaceIconCode: true,
-  averageRating: true,
-  ratingCount: true,
-  installCount: true,
-  ...priceSelectFields,
-  currentVersion: {id: true, versionNumber: true, statusSelect: true},
-} as const satisfies SelectOptions<AOSProduct>;
 
 export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
 
@@ -57,7 +38,24 @@ export async function findMyProducts({
       workspace,
       mainPartnerId,
     )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
-    select: findMyProductsSelect,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      code: true,
+      picture: {id: true},
+      thumbnailImage: {id: true},
+      marketplaceTypeSelect: true,
+      marketplaceCoverStyle: true,
+      marketplaceIconCode: true,
+      averageRating: true,
+      ratingCount: true,
+      installCount: true,
+      ...priceSelectFields,
+      currentVersion: {id: true, ...versionNumberFields, statusSelect: true},
+      latestVersion: {id: true, ...versionNumberFields, statusSelect: true},
+    },
   });
   const priceContext = await buildPriceContext({
     client,
@@ -109,20 +107,16 @@ export async function findMyProductWithVersions({
         select: {
           id: true,
           version: true,
-          versionNumber: true,
+          ...versionNumberFields,
           changelog: true,
           statusSelect: true,
-          dateOfApproval: true,
+          dateOfPublish: true,
           bundleFile: {id: true, fileName: true, sizeText: true},
           compatibilitySet: {
             select: {id: true, title: true, name: true},
           },
         },
-        orderBy: {
-          dateOfApproval: 'DESC',
-          dateOfSubmission: 'DESC',
-          createdOn: 'DESC',
-        },
+        orderBy: versionSortOrder,
       },
     },
   });

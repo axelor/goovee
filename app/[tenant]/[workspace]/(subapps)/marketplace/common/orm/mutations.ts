@@ -5,31 +5,6 @@ import {sql} from '@/utils/template-string';
 import type {CreateArgs} from '@goovee/orm';
 import type {ORMRecord} from './helpers';
 
-// ---- PRODUCT MUTATIONS ---- //
-
-/** Promotes a different version into `currentVersion`. Optimistic-lock
- *  protected via the caller-supplied `version`. */
-export async function updateProductCurrentVersion({
-  client,
-  productId,
-  version,
-  currentVersionId,
-}: {
-  client: Client;
-  productId: ID;
-  version: number;
-  currentVersionId: ID;
-}): Promise<ORMRecord> {
-  return client.aOSProduct.update({
-    data: {
-      id: productId,
-      version,
-      currentVersion: {select: {id: String(currentVersionId)}},
-    },
-    select: {id: true},
-  });
-}
-
 // ---- VERSION MUTATIONS ---- //
 
 /** Sets the status of an existing version (used by the unpublish flow).
