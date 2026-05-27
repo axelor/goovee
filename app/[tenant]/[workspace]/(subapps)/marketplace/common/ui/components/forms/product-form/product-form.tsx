@@ -25,7 +25,7 @@ import {packIntoFormData} from '@/utils/formdata';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {Plus, X} from 'lucide-react';
 import Image from 'next/image';
-import {useMemo, useRef, useTransition} from 'react';
+import {useEffect, useMemo, useRef, useState, useTransition} from 'react';
 import {useForm, useFormContext, useWatch} from 'react-hook-form';
 import {saveProduct} from '../../../../actions';
 import {GRADIENT_MAP} from '../../../../constants/gradients';
@@ -34,6 +34,7 @@ import type {ListCategory, MyProductWithVersions} from '../../../../orm';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {ProductIcon} from '../../primitives/product-icon';
 import {
+  ACCEPTED_IMAGE_TYPES,
   MAX_IMAGES,
   MAX_IMAGE_SIZE,
   productSchema,
@@ -506,8 +507,22 @@ function ScreenshotsField({
   maxImageSize,
 }: ScreenshotsFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  /* Depth counter so the highlight doesn't flicker as the cursor crosses
+   * child thumbnails (dragenter/dragleave fire per element boundary). */
+  const dragDepth = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
   const total = existingImages.length + newImages.length;
   const remaining = maxImages - total;
+
+  /* Object URLs for the not-yet-uploaded files. Created in an effect (never
+   * during render) and revoked on cleanup so they don't leak across re-renders
+   * or unmount. `previews` mirrors `newImages` order, so indices line up. */
+  const [previews, setPreviews] = useState<string[]>([]);
+  useEffect(() => {
+    const urls = newImages.map(file => URL.createObjectURL(file));
+    setPreviews(urls);
+    return () => urls.forEach(url => URL.revokeObjectURL(url));
+  }, [newImages]);
 
   // TODO: per-file upload progress indicator.
   // Server Actions don't expose upload progress; would need to either
@@ -518,14 +533,48 @@ function ScreenshotsField({
   const onPickFiles = (files: FileList | null) => {
     if (!files) return;
     const acceptable = Array.from(files)
-      .filter(f => f.size <= maxImageSize)
+      .filter(
+        f =>
+          (ACCEPTED_IMAGE_TYPES as readonly string[]).includes(f.type) &&
+          f.size <= maxImageSize,
+      )
       .slice(0, Math.max(0, remaining));
     onNewImagesChange([...newImages, ...acceptable]);
     if (inputRef.current) inputRef.current.value = '';
   };
 
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    dragDepth.current = 0;
+    setIsDragging(false);
+    if (remaining <= 0) return;
+    onPickFiles(event.dataTransfer.files);
+  };
+
   return (
-    <div className="flex flex-wrap gap-3">
+    <div
+      onDragEnter={e => {
+        e.preventDefault();
+        dragDepth.current += 1;
+        if (remaining > 0) setIsDragging(true);
+      }}
+      onDragOver={e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = remaining > 0 ? 'copy' : 'none';
+      }}
+      onDragLeave={e => {
+        e.preventDefault();
+        dragDepth.current -= 1;
+        if (dragDepth.current <= 0) {
+          dragDepth.current = 0;
+          setIsDragging(false);
+        }
+      }}
+      onDrop={handleDrop}
+      className={cn(
+        'flex flex-wrap gap-3 rounded-lg border-2 border-dashed p-3 transition-colors',
+        isDragging ? 'border-primary bg-primary/5' : 'border-transparent',
+      )}>
       {existingImages.map(({rowId, pictureId}, index) => (
         <div
           key={rowId}
@@ -551,7 +600,8 @@ function ScreenshotsField({
         </div>
       ))}
       {newImages.map((file, i) => {
-        const url = URL.createObjectURL(file);
+        const url = previews[i];
+        if (!url) return null;
         return (
           <div
             key={`${file.name}-${i}`}
@@ -563,7 +613,6 @@ function ScreenshotsField({
               height={144}
               unoptimized
               className="h-full w-full object-cover"
-              onLoad={() => URL.revokeObjectURL(url)}
             />
             <button
               type="button"
@@ -583,13 +632,13 @@ function ScreenshotsField({
           onClick={() => inputRef.current?.click()}
           className="flex aspect-video w-32 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground">
           <Plus size={20} />
-          <span className="text-xs">{i18n.t('Add images')}</span>
+          <span className="text-xs">{i18n.t('Add or drop images')}</span>
         </button>
       )}
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={ACCEPTED_IMAGE_TYPES.join(',')}
         multiple
         hidden
         onChange={e => onPickFiles(e.target.files)}

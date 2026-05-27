@@ -4,7 +4,18 @@ import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 export const MAX_BUNDLE_SIZE = 20 * 1024 * 1024; // 20 MB
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB per image
 export const MAX_IMAGES = 9; // total per product (existing + new)
-export const ACCEPTED_IMAGE_TYPES = /^image\//;
+/* Common raster formats only. SVG is intentionally excluded: it can carry
+ * embedded scripts/external refs, so serving user-supplied SVG is an XSS
+ * vector. Used for both the schema refine and the <input accept> attribute. */
+export const ACCEPTED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+] as const;
+export const ACCEPTED_IMAGE_MESSAGE =
+  'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed';
 
 const optionalUrl = z
   .union([z.url({protocol: /^https?$/}), z.literal('')])
@@ -44,9 +55,13 @@ export const productSchema = z
       .refine(arr => arr.every(f => f.size <= MAX_IMAGE_SIZE), {
         message: 'Each image must be 5 MB or less',
       })
-      .refine(arr => arr.every(f => ACCEPTED_IMAGE_TYPES.test(f.type)), {
-        message: 'Only image files are allowed',
-      }),
+      .refine(
+        arr =>
+          arr.every(f =>
+            (ACCEPTED_IMAGE_TYPES as readonly string[]).includes(f.type),
+          ),
+        {message: ACCEPTED_IMAGE_MESSAGE},
+      ),
   })
   .superRefine((v, ctx) => {
     const total = v.existingImageIds.length + v.newImages.length;

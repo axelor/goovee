@@ -30,11 +30,9 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  FileArchive,
   Info,
   Plus,
   Trash2,
-  Upload,
 } from 'lucide-react';
 import {useMemo, useRef, useState, useTransition} from 'react';
 import {useForm, useWatch} from 'react-hook-form';
@@ -46,6 +44,7 @@ import type {
 } from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
+import {BundleDropzone} from '../../inputs/bundle-dropzone';
 import {
   MAX_BUNDLE_SIZE,
   versionSchema,
@@ -128,7 +127,6 @@ export function VersionForm({
     control,
     name: 'existingBundleFileId',
   });
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   const downloadHref = current
@@ -186,29 +184,6 @@ export function VersionForm({
   const discardNew = () => {
     setCreatingNew(false);
     setIndex(0);
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) {
-      return `${bytes} B`;
-    }
-    if (bytes < 1024 * 1024) {
-      return `${(bytes / 1024).toFixed(2)} KB`;
-    }
-    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-  };
-
-  const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (file.size > MAX_BUNDLE_SIZE) {
-      toast({
-        variant: 'destructive',
-        title: i18n.t('Bundle must be 20 MB or less'),
-      });
-      return;
-    }
-    setValue('bundleFile', file, {shouldValidate: true, shouldDirty: true});
   };
 
   const total = versions.length + (creatingNew ? 1 : 0);
@@ -416,56 +391,26 @@ export function VersionForm({
                       {i18n.t('Bundle file (.zip, up to 20 MB)')} *
                     </FormLabel>
                     <FormControl>
-                      <div className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
-                        <FileArchive className="h-8 w-8 shrink-0 text-muted-foreground" />
-                        <div className="min-w-0 flex-1">
-                          {field.value ? (
-                            <>
-                              <p className="truncate text-sm text-foreground">
-                                {field.value.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatFileSize(field.value.size)}
-                              </p>
-                            </>
-                          ) : current?.bundleFile?.fileName && downloadHref ? (
-                            <>
-                              <a
-                                href={downloadHref}
-                                download
-                                className="truncate text-sm font-medium text-primary hover:underline">
-                                {current.bundleFile.fileName}
-                              </a>
-                              {current.bundleFile.sizeText && (
-                                <p className="text-xs text-muted-foreground">
-                                  {current.bundleFile.sizeText}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            <p className="truncate text-sm text-muted-foreground">
-                              {i18n.t('No file selected')}
-                            </p>
-                          )}
-                        </div>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept=".zip,application/zip,application/x-zip-compressed"
-                          className="hidden"
-                          onChange={handleFile}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => fileInputRef.current?.click()}>
-                          <Upload className="mr-1 h-4 w-4" />
-                          {field.value || existingBundleFileId
-                            ? i18n.t('Replace')
-                            : i18n.t('Upload')}
-                        </Button>
-                      </div>
+                      <BundleDropzone
+                        file={field.value}
+                        existingFileName={
+                          existingBundleFileId
+                            ? current?.bundleFile?.fileName
+                            : null
+                        }
+                        existingFileSizeText={current?.bundleFile?.sizeText}
+                        downloadHref={downloadHref}
+                        maxSize={MAX_BUNDLE_SIZE}
+                        onFile={file =>
+                          setValue('bundleFile', file, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          })
+                        }
+                        onError={message =>
+                          toast({variant: 'destructive', title: message})
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
