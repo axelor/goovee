@@ -45,6 +45,7 @@ import type {
   MyProductWithVersions,
 } from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
+import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {
   MAX_BUNDLE_SIZE,
   versionSchema,
@@ -128,23 +129,27 @@ export function VersionForm({
     name: 'existingBundleFileId',
   });
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const downloadHref = current
     ? `${workspaceURI}/marketplace/api/products/${productId}/versions/${current.id}/download`
     : undefined;
 
-  const submit = handleSubmit(values => {
-    startTransition(async () => {
-      const formData = packIntoFormData({...values, workspaceURL});
-      const result = await saveVersion(formData);
-      if (!result.success) {
-        toast({variant: 'destructive', title: result.message});
-        return;
-      }
-      toast({variant: 'success', title: i18n.t('Version saved')});
-      onDone();
-    });
-  });
+  const submit = handleSubmit(
+    values => {
+      startTransition(async () => {
+        const formData = packIntoFormData({...values, workspaceURL});
+        const result = await saveVersion(formData);
+        if (!result.success) {
+          toast({variant: 'destructive', title: result.message});
+          return;
+        }
+        toast({variant: 'success', title: i18n.t('Version saved')});
+        onDone();
+      });
+    },
+    () => scrollToFirstError(bodyRef.current),
+  );
 
   const guardedNavigate = (move: () => void, dir: 'next' | 'prev') => {
     if (formState.isDirty) {
@@ -256,7 +261,7 @@ export function VersionForm({
 
   return (
     <Form {...form}>
-      <div className="bg-muted/30 p-6" data-vaul-no-drag>
+      <div ref={bodyRef} className="bg-muted/30 p-6" data-vaul-no-drag>
         {/* Section header */}
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-2">

@@ -31,6 +31,7 @@ import {saveProduct} from '../../../../actions';
 import {GRADIENT_MAP} from '../../../../constants/gradients';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import type {ListCategory, MyProductWithVersions} from '../../../../orm';
+import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {ProductIcon} from '../../primitives/product-icon';
 import {
   MAX_IMAGES,
@@ -127,28 +128,32 @@ export function ProductForm({
 
   const {control, handleSubmit, formState} = form;
   const productId = initial?.id;
+  const bodyRef = useRef<HTMLDivElement>(null);
 
-  const submit = handleSubmit(values => {
-    startTransition(async () => {
-      const formData = packIntoFormData({...values, workspaceURL});
-      const result = await saveProduct(formData);
-      if (!result.success) {
-        toast({variant: 'destructive', title: result.message});
-        return;
-      }
-      toast({variant: 'success', title: i18n.t('Saved')});
-      /* Reset form to a state that reflects what's now persisted: any
-       * just-uploaded `newImages` are now persisted as `existingImageIds`
-       * (we won't know their ids until the next load, so just clear the
-       * new bucket so the dirty check works). */
-      form.reset({
-        ...values,
-        newImages: [],
+  const submit = handleSubmit(
+    values => {
+      startTransition(async () => {
+        const formData = packIntoFormData({...values, workspaceURL});
+        const result = await saveProduct(formData);
+        if (!result.success) {
+          toast({variant: 'destructive', title: result.message});
+          return;
+        }
+        toast({variant: 'success', title: i18n.t('Saved')});
+        /* Reset form to a state that reflects what's now persisted: any
+         * just-uploaded `newImages` are now persisted as `existingImageIds`
+         * (we won't know their ids until the next load, so just clear the
+         * new bucket so the dirty check works). */
+        form.reset({
+          ...values,
+          newImages: [],
+        });
+        onSaved(result.data.productId);
+        onContinue();
       });
-      onSaved(result.data.productId);
-      onContinue();
-    });
-  });
+    },
+    () => scrollToFirstError(bodyRef.current),
+  );
 
   const handleContinue = () => {
     if (!productId && !formState.isDirty) {
@@ -165,7 +170,7 @@ export function ProductForm({
 
   return (
     <Form {...form}>
-      <div className="bg-muted/30 p-6" data-vaul-no-drag>
+      <div ref={bodyRef} className="bg-muted/30 p-6" data-vaul-no-drag>
         <div className="space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="text-lg font-semibold text-foreground">
             {i18n.t('Product details')}
