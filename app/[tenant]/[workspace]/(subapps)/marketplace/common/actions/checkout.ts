@@ -238,7 +238,7 @@ export async function payboxCreateOrder(props: {
 
 export async function checkout(
   props: z.input<typeof CheckoutSchema>,
-): ActionResponse<true> {
+): ActionResponse<{purchaseIds: string[]}> {
   const parsed = CheckoutSchema.safeParse(props);
   if (!parsed.success)
     return {error: true, message: z.prettifyError(parsed.error)};
@@ -320,9 +320,10 @@ export async function checkout(
   });
   if (recheck.error) return recheck;
 
+  let purchaseIds: string[] = [];
   try {
     await client.$transaction(async txClient => {
-      await recordPurchases(txClient, mainPartnerId, productIds);
+      purchaseIds = await recordPurchases(txClient, mainPartnerId, productIds);
       await markPaymentAsProcessed({
         contextId: paymentContextId,
         version: paymentContextVersion,
@@ -354,7 +355,7 @@ export async function checkout(
     if (!addressId) {
       return {
         success: true,
-        data: true,
+        data: {purchaseIds},
         message: await t(
           'Invoice creation failed: no invoicing address found.',
         ),
@@ -388,12 +389,12 @@ export async function checkout(
     });
     return {
       success: true,
-      data: true,
+      data: {purchaseIds},
       message: reason
         ? await t('Invoice creation failed: {0}', reason)
         : await t('Invoice creation failed.'),
     };
   }
 
-  return {success: true, data: true};
+  return {success: true, data: {purchaseIds}};
 }

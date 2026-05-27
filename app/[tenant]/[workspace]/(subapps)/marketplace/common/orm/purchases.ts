@@ -23,15 +23,21 @@ export async function findPurchases({
   mainPartnerId,
   take,
   skip,
+  purchaseIds,
 }: {
   client: Client;
-  mainPartnerId: ID | null | undefined;
+  mainPartnerId: ID;
+  /** When provided, restricts the result to these purchase rows (still
+   *  partner-scoped, so it's safe against tampered ids). */
+  purchaseIds?: string[];
 } & Pick<QueryProps<AOSMarketplaceProductPurchase>, 'take' | 'skip'>) {
-  if (!mainPartnerId) return [];
   return client.aOSMarketplaceProductPurchase.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
-    where: {partner: {id: mainPartnerId}},
+    where: {
+      partner: {id: mainPartnerId},
+      ...(purchaseIds?.length ? {id: {in: purchaseIds}} : {}),
+    },
     orderBy: {purchasedAt: 'DESC'},
     select: {
       id: true,
@@ -51,13 +57,16 @@ export async function findPurchases({
   });
 }
 
+/* Returns the purchase-row ids for every product in `productIds` owned by
+ * the partner (newly created here plus any already-owned). Callers use these
+ * to scope the success page to exactly this checkout. */
 export async function recordPurchases(
   client: Client,
   partnerId: ID,
   productIds: string[],
   invoiceId: ID | null = null,
-) {
-  if (!productIds.length) return;
+): Promise<string[]> {
+  if (!productIds.length) return [];
   const existing = await client.aOSMarketplaceProductPurchase.find({
     where: {
       partner: {id: partnerId},
@@ -86,6 +95,16 @@ export async function recordPurchases(
        * Already-owned is exactly the state we want, so swallow. */
     }
   }
+  /* Re-read so the returned set is complete regardless of which rows were
+   * created here vs. already present (or inserted by a concurrent tab). */
+  const rows = await client.aOSMarketplaceProductPurchase.find({
+    where: {
+      partner: {id: partnerId},
+      product: {id: {in: productIds}},
+    },
+    select: {id: true},
+  });
+  return rows.map(row => row.id);
 }
 
 export async function attachInvoiceToPurchases(

@@ -50,12 +50,18 @@ export function CheckoutContent({workspace}: Props) {
   const {toast} = useToast();
   const productIds = cart.items.map(item => item.productId);
 
-  const onApprove = async (result: SuccessResponse<true>) => {
+  const onApprove = async (
+    result: SuccessResponse<{purchaseIds: string[]}>,
+  ) => {
     await clearCart();
     if (result.message) {
       toast({variant: 'destructive', title: result.message});
     }
-    router.push(`${marketplaceBase}/cart/checkout/success`);
+    const ids = result.data?.purchaseIds ?? [];
+    const search = new URLSearchParams();
+    ids.forEach(id => search.append('id', id));
+    const query = ids.length ? `?${search.toString()}` : '';
+    router.push(`${marketplaceBase}/cart/checkout/success${query}`);
   };
 
   if (!loaded) {

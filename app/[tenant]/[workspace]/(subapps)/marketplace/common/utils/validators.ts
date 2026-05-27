@@ -108,3 +108,18 @@ export type MyPurchasesParams = z.infer<typeof myPurchasesParamsSchema>;
 export type MyPurchasesSearchParams = z.infer<
   typeof myPurchasesSearchParamsSchema
 >;
+
+/* Checkout success page. `id` carries the purchase-row ids from this
+ * checkout — repeated query keys (?id=1&id=2) arrive as an array, a single
+ * one as a string; normalize both to a clean string[]. */
+export const checkoutSuccessSearchParamsSchema = z.object({
+  id: z
+    .union([z.string(), z.array(z.string())])
+    .transform(val => (Array.isArray(val) ? val : [val]).filter(Boolean))
+    .catch([])
+    .default([]),
+});
+
+export type CheckoutSuccessSearchParams = z.infer<
+  typeof checkoutSuccessSearchParamsSchema
+>;
