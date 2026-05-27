@@ -6,7 +6,7 @@ import {versionNumberFields, type QueryProps} from './helpers';
 // ---- PURCHASES / OWNERSHIP ---- //
 
 /* Marketplace ownership records. The unique (partner, product) constraint
- * on the AOS side makes `recordPurchases` and `attachInvoiceToPurchases`
+ * on the AOS side makes `recordPurchases` and `attachOrderToPurchases`
  * idempotent — safe to retry from the success page or a backfill job.
  *
  * The `invoice` field is nullable: the goovee tx writes the access row
@@ -53,6 +53,7 @@ export async function findPurchases({
         currentVersion: {id: true, ...versionNumberFields},
       },
       invoice: {id: true, invoiceId: true},
+      saleOrder: {id: true, saleOrderSeq: true},
     },
   });
 }
@@ -107,11 +108,11 @@ export async function recordPurchases(
   return rows.map(row => row.id);
 }
 
-export async function attachInvoiceToPurchases(
+export async function attachOrderToPurchases(
   client: Client,
   partnerId: ID,
   productIds: string[],
-  invoiceId: ID,
+  {invoiceId, saleOrderId}: {invoiceId: ID; saleOrderId: ID},
 ) {
   if (!productIds.length) return;
   const rows = await client.aOSMarketplaceProductPurchase.find({
@@ -128,6 +129,7 @@ export async function attachInvoiceToPurchases(
         id: row.id,
         version: row.version,
         invoice: {select: {id: String(invoiceId)}},
+        saleOrder: {select: {id: String(saleOrderId)}},
       },
       select: {id: true},
     });

@@ -1,6 +1,6 @@
 'use client';
 
-import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
+import {RESPONSIVE_SIZES, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
@@ -125,14 +125,34 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       ),
     },
     {
+      key: 'order',
+      label: i18n.t('Order'),
+      desktopClassName: 'w-[15%]',
+      content: purchase =>
+        purchase.saleOrder?.id ? (
+          <Link
+            href={`${workspaceURI}/${SUBAPP_CODES.orders}${SUBAPP_PAGE.orders}/${purchase.saleOrder.id}`}
+            className="text-sm text-primary hover:underline">
+            {purchase.saleOrder.saleOrderSeq ?? i18n.t('View')}
+          </Link>
+        ) : (
+          <span className="text-sm text-muted-foreground">—</span>
+        ),
+    },
+    {
       key: 'invoice',
       label: i18n.t('Invoice'),
       desktopClassName: 'w-[15%]',
-      content: purchase => (
-        <span className="text-sm text-muted-foreground">
-          {purchase.invoice?.invoiceId ?? '—'}
-        </span>
-      ),
+      content: purchase =>
+        purchase.invoice?.id ? (
+          <Link
+            href={`${workspaceURI}/${SUBAPP_CODES.invoices}/${purchase.invoice.id}`}
+            className="text-sm text-primary hover:underline">
+            {purchase.invoice.invoiceId ?? i18n.t('View')}
+          </Link>
+        ) : (
+          <span className="text-sm text-muted-foreground">—</span>
+        ),
     },
   ];
 

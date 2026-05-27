@@ -15,7 +15,7 @@ import {WorkspaceURLSchema} from '@/utils/validators';
 import {headers} from 'next/headers';
 import {z} from 'zod';
 import {
-  attachInvoiceToPurchases,
+  attachOrderToPurchases,
   findPartnerInvoicingAddresses,
   recordPurchases,
 } from '../orm';
@@ -362,7 +362,7 @@ export async function checkout(
       };
     }
 
-    const {invoiceId} = await createMarketplaceOrder({
+    const {invoiceId, saleOrderId} = await createMarketplaceOrder({
       cart,
       workspace: auth.workspace,
       mainPartnerId,
@@ -373,12 +373,10 @@ export async function checkout(
       config,
     });
 
-    await attachInvoiceToPurchases(
-      client,
-      mainPartnerId,
-      productIds,
+    await attachOrderToPurchases(client, mainPartnerId, productIds, {
       invoiceId,
-    );
+      saleOrderId,
+    });
   } catch (e) {
     const reason = e instanceof Error ? e.message : '';
     console.error('marketplace: invoice creation failed', {

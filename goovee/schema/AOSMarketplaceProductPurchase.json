@@ -21,6 +21,11 @@
       "target": "AOSInvoice"
     },
     {
+      "type": "ManyToOne",
+      "name": "saleOrder",
+      "target": "AOSOrder"
+    },
+    {
       "type": "DateTime",
       "name": "purchasedAt",
       "required": true
