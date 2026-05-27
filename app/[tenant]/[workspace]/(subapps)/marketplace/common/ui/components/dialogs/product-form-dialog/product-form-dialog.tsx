@@ -9,7 +9,7 @@ import {
 } from '@/ui/components/responsive-dialog';
 import {useResponsive} from '@/ui/hooks';
 import {useRouter} from 'next/navigation';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import type {
   CompatibilityVersion,
@@ -60,6 +60,14 @@ export function ProductFormDialog({
   const [step, setStep] = useState<Step>('product');
   const [productId, setProductId] = useState<string | undefined>(initial?.id);
 
+  // Each step is taller than the viewport; without this the scroll position
+  // carries over when switching steps (e.g. land at the bottom of the version
+  // form after scrolling down the product form). Reset to the top on change.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({top: 0});
+  }, [step]);
+
   const productName =
     initial?.name ?? (defaultType === MARKETPLACE_TYPE.APP ? '' : '');
   const title =
@@ -86,7 +94,9 @@ export function ProductFormDialog({
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange} isSmall={isSmall}>
       <ResponsiveDialogContent className="max-w-6xl gap-0 p-0">
-        <div className="max-h-[90vh] overflow-y-auto overscroll-contain">
+        <div
+          ref={scrollRef}
+          className="max-h-[90vh] overflow-y-auto overscroll-contain">
           {/* Sticky top: Header + Stepper */}
           <div className="sticky top-0 z-10 bg-background">
             <div className="border-b border-border px-6 py-5">
