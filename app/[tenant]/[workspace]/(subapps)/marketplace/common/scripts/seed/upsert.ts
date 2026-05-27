@@ -6,6 +6,7 @@ import type {
 import {getFileSizeText} from '@/utils/files';
 import {sql} from '@/utils/template-string';
 import {BigDecimal, type CreateArgs} from '@goovee/orm';
+import {MARKETPLACE_ICONS} from '../../constants/icons';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -48,6 +49,17 @@ const MIME_BY_EXT: Record<string, string> = {
   '.pdf': 'application/pdf',
   '.txt': 'text/plain',
 };
+
+function getRandomIconCode(productCode: string): string {
+  /* Deterministically select an icon based on product code hash
+   * so the same icon is always chosen for the same product across runs. */
+  let hash = 0;
+  for (let i = 0; i < productCode.length; i++) {
+    hash = (hash << 5) - hash + productCode.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return MARKETPLACE_ICONS[Math.abs(hash) % MARKETPLACE_ICONS.length]!.code;
+}
 
 export async function upsertCategory(
   client: Client,
@@ -278,7 +290,7 @@ export async function upsertProduct(
     longDescription: product.longDescription ?? null,
     marketplaceTypeSelect: product.type,
     marketplaceCoverStyle: product.coverStyle,
-    marketplaceIconCode: product.iconCode,
+    marketplaceIconCode: getRandomIconCode(product.code),
     documentationUrl: product.documentationUrl ?? null,
     supportIssuesUrl: product.supportIssuesUrl ?? null,
     supportContactUrl: product.supportContactUrl ?? null,

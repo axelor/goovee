@@ -29,6 +29,10 @@ import {useEffect, useMemo, useRef, useState, useTransition} from 'react';
 import {useForm, useFormContext, useWatch} from 'react-hook-form';
 import {saveProduct} from '../../../../actions';
 import {GRADIENT_MAP} from '../../../../constants/gradients';
+import {
+  DEFAULT_ICON_CODE,
+  MARKETPLACE_ICONS,
+} from '../../../../constants/icons';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import type {ListCategory, MyProductWithVersions} from '../../../../orm';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
@@ -41,7 +45,6 @@ import {
   type ProductFormValues,
 } from './validator';
 
-const ICON_CODES = Array.from({length: 12}, (_, i) => `icon-${i + 1}`);
 const COVER_CODES = Object.keys(GRADIENT_MAP);
 
 type ProductFormProps = {
@@ -74,7 +77,7 @@ function buildDefaults(
       longDescription: '',
       productCategoryId: '',
       marketplaceCoverStyle: 'gradient-1',
-      marketplaceIconCode: 'icon-1',
+      marketplaceIconCode: DEFAULT_ICON_CODE,
       documentationUrl: '',
       supportIssuesUrl: '',
       supportContactUrl: '',
@@ -93,7 +96,7 @@ function buildDefaults(
     longDescription: initial.longDescription ?? '',
     productCategoryId: initial.productCategory?.id ?? '',
     marketplaceCoverStyle: initial.marketplaceCoverStyle ?? 'gradient-1',
-    marketplaceIconCode: initial.marketplaceIconCode ?? 'icon-1',
+    marketplaceIconCode: initial.marketplaceIconCode ?? DEFAULT_ICON_CODE,
     documentationUrl: initial.documentationUrl ?? '',
     supportIssuesUrl: initial.supportIssuesUrl ?? '',
     supportContactUrl: initial.supportContactUrl ?? '',
@@ -375,13 +378,16 @@ export function ProductForm({
                 <FormLabel>{i18n.t('Icon')} *</FormLabel>
                 <FormControl>
                   <div className="flex flex-wrap gap-2">
-                    {ICON_CODES.map(code => {
+                    {MARKETPLACE_ICONS.map(({code, label}) => {
                       const selected = field.value === code;
                       return (
                         <button
                           key={code}
                           type="button"
                           onClick={() => field.onChange(code)}
+                          title={i18n.t(label)}
+                          aria-label={i18n.t(label)}
+                          aria-pressed={selected}
                           className={cn(
                             'flex h-12 w-12 items-center justify-center rounded-lg border transition-all',
                             selected

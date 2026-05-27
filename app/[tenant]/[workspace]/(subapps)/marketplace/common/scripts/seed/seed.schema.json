@@ -107,7 +107,6 @@
         "slug",
         "name",
         "type",
-        "iconCode",
         "coverStyle",
         "categoryCode",
         "price",
@@ -129,11 +128,6 @@
         "description": {"type": "string", "maxLength": 280},
         "longDescription": {"type": "string"},
         "type": {"enum": ["skill", "app"]},
-        "iconCode": {
-          "type": "string",
-          "pattern": "^icon-(1[0-2]|[1-9])$",
-          "description": "icon-1 .. icon-12 — must match the ProductIcon component options."
-        },
         "coverStyle": {
           "type": "string",
           "pattern": "^gradient-(10|[1-9])$",

@@ -84,7 +84,6 @@ export const ProductSchema = z
     description: z.string().max(280).optional(),
     longDescription: z.string().optional(),
     type: z.enum(['skill', 'app']),
-    iconCode: z.string().regex(/^icon-(1[0-2]|[1-9])$/),
     coverStyle: z.string().regex(/^gradient-(10|[1-9])$/),
     categoryCode: z.string(),
     price: z
