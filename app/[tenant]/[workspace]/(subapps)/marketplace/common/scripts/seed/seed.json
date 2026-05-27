@@ -111,7 +111,7 @@
       "code": "mkt-demo-bpm-workflow-generator",
       "slug": "bpm-workflow-generator",
       "name": "BPM Workflow Generator",
-      "description": "Generate BPMN workflows from a YAML spec \u2014 no clicking around in the editor.",
+      "description": "Generate BPMN workflows from a YAML spec — no clicking around in the editor.",
       "longDescription": "<p>A code-first complement to the BPM Studio. Define your process in a YAML file, run a single command, and the toolkit emits the BPMN XML and registers it against your workflow engine.</p><h3>What it does</h3><ul><li>Compiles YAML process definitions into valid BPMN 2.0 XML.</li><li>Validates against the schema before installing.</li><li>Supports timer events, sub-processes, and inclusive gateways.</li></ul>",
       "type": "skill",
       "iconCode": "icon-7",
@@ -165,7 +165,9 @@
           "comment": "Saves me hours every sprint."
         }
       ],
-      "installCount": 97
+      "installCount": 97,
+      "supportIssuesUrl": "https://issues.example.com/bpm-workflow-generator",
+      "supportContactUrl": "https://support.example.com/bpm-workflow-generator"
     },
     {
       "code": "mkt-demo-ai-sentiment-analyzer",
@@ -494,7 +496,10 @@
           "rating": 5
         }
       ],
-      "installCount": 371
+      "installCount": 371,
+      "documentationUrl": "https://docs.example.com/smart-invoice-parser",
+      "supportIssuesUrl": "https://issues.example.com/smart-invoice-parser",
+      "supportContactUrl": "https://support.example.com/smart-invoice-parser"
     },
     {
       "code": "mkt-demo-inventory-optimizer",
@@ -585,7 +590,10 @@
           "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
         }
       ],
-      "installCount": 645
+      "installCount": 645,
+      "documentationUrl": "https://docs.example.com/crm-gamification",
+      "supportIssuesUrl": "https://issues.example.com/crm-gamification",
+      "supportContactUrl": "https://support.example.com/crm-gamification"
     },
     {
       "code": "mkt-demo-hr-onboarding-toolkit",
@@ -679,7 +687,10 @@
           "rating": 5,
           "comment": "Our non-technical analysts can now pull reports without bothering developers. Training took 30 minutes and they were productive immediately. This has been a game-changer."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/sql-query-builder",
+      "supportIssuesUrl": "https://issues.example.com/sql-query-builder",
+      "supportContactUrl": "https://support.example.com/sql-query-builder"
     },
     {
       "code": "mkt-demo-analytics-dashboard-pro",
@@ -767,7 +778,10 @@
           "rating": 5,
           "comment": "Warehouse operations are completely different now. We can visualize inventory locations, optimize picking routes, and train new staff using the interactive maps effectively."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/warehouse-mapping",
+      "supportIssuesUrl": "https://issues.example.com/warehouse-mapping",
+      "supportContactUrl": "https://support.example.com/warehouse-mapping"
     },
     {
       "code": "mkt-demo-automatic-translations",
@@ -888,7 +902,10 @@
           "rating": 4,
           "comment": "Good solution. Easy to configure and works well with existing systems."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/custom-report-engine",
+      "supportIssuesUrl": "https://issues.example.com/custom-report-engine",
+      "supportContactUrl": "https://support.example.com/custom-report-engine"
     },
     {
       "code": "mkt-demo-chatbot-support",
@@ -1032,7 +1049,10 @@
           "rating": 5,
           "comment": "The customer portal is slick and handles billing inquiries without involving our finance team. Support tickets dropped dramatically after implementation."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/recurring-billing",
+      "supportIssuesUrl": "https://issues.example.com/recurring-billing",
+      "supportContactUrl": "https://support.example.com/recurring-billing"
     },
     {
       "code": "mkt-demo-slack-integration",
@@ -1134,7 +1154,10 @@
           "rating": 4,
           "comment": "Good solution. Easy to configure and works well with existing systems."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/audit-log-viewer",
+      "supportIssuesUrl": "https://issues.example.com/audit-log-viewer",
+      "supportContactUrl": "https://support.example.com/audit-log-viewer"
     },
     {
       "code": "mkt-demo-leads-enrichment",
@@ -1224,7 +1247,10 @@
           "rating": 4,
           "comment": "Good solution. Easy to configure and works well with existing systems."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/iot-connector",
+      "supportIssuesUrl": "https://issues.example.com/iot-connector",
+      "supportContactUrl": "https://support.example.com/iot-connector"
     },
     {
       "code": "mkt-demo-expense-scanner",
@@ -1321,7 +1347,10 @@
           "rating": 5,
           "comment": "Timesheet submission rates improved from 60% to 98% after deploying this tool. Smart reminders escalate through channels rather than just nagging constantly."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/timesheet-reminder",
+      "supportIssuesUrl": "https://issues.example.com/timesheet-reminder",
+      "supportContactUrl": "https://support.example.com/timesheet-reminder"
     },
     {
       "code": "mkt-demo-data-anonymizer",
@@ -1399,7 +1428,10 @@
           "rating": 4,
           "comment": "Good solution. Easy to configure and works well with existing systems."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/draft-product",
+      "supportIssuesUrl": "https://issues.example.com/draft-product",
+      "supportContactUrl": "https://support.example.com/draft-product"
     },
     {
       "code": "mkt-demo-multi-status-product",
@@ -1515,7 +1547,10 @@
           "rating": 5,
           "comment": "Drill-down by segment, product, and rep shows exactly where risks and opportunities exist clearly."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/sales-forecast",
+      "supportIssuesUrl": "https://issues.example.com/sales-forecast",
+      "supportContactUrl": "https://support.example.com/sales-forecast"
     },
     {
       "code": "mkt-demo-email-marketing",
@@ -1617,7 +1652,10 @@
           "rating": 5,
           "comment": "Users love not having to remember exact names anymore. Search suggestions are smart and contextual always."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/quick-search",
+      "supportIssuesUrl": "https://issues.example.com/quick-search",
+      "supportContactUrl": "https://support.example.com/quick-search"
     },
     {
       "code": "mkt-demo-password-policy-manager",
@@ -1731,7 +1769,10 @@
           "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
         }
       ],
-      "installCount": 809
+      "installCount": 809,
+      "documentationUrl": "https://docs.example.com/pdf-watermarker",
+      "supportIssuesUrl": "https://issues.example.com/pdf-watermarker",
+      "supportContactUrl": "https://support.example.com/pdf-watermarker"
     },
     {
       "code": "mkt-demo-currency-rate-sync",
@@ -1830,7 +1871,10 @@
           "comment": "Works well for 80% of leads."
         }
       ],
-      "installCount": 133
+      "installCount": 133,
+      "documentationUrl": "https://docs.example.com/linkedin-auto-connector",
+      "supportIssuesUrl": "https://issues.example.com/linkedin-auto-connector",
+      "supportContactUrl": "https://support.example.com/linkedin-auto-connector"
     },
     {
       "code": "mkt-demo-barcode-generator",
@@ -1936,7 +1980,10 @@
           "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
         }
       ],
-      "installCount": 407
+      "installCount": 407,
+      "documentationUrl": "https://docs.example.com/holiday-calendar-importer",
+      "supportIssuesUrl": "https://issues.example.com/holiday-calendar-importer",
+      "supportContactUrl": "https://support.example.com/holiday-calendar-importer"
     },
     {
       "code": "mkt-demo-db-vacuum-scheduler",
@@ -2054,7 +2101,10 @@
           "comment": "Perfect for bridging the gap between business and dev."
         }
       ],
-      "installCount": 681
+      "installCount": 681,
+      "documentationUrl": "https://docs.example.com/jira-bridge",
+      "supportIssuesUrl": "https://issues.example.com/jira-bridge",
+      "supportContactUrl": "https://support.example.com/jira-bridge"
     },
     {
       "code": "mkt-demo-customer-map-viewer",
@@ -2163,7 +2213,10 @@
           "comment": "UI could be a bit cleaner on older devices."
         }
       ],
-      "installCount": 955
+      "installCount": 955,
+      "documentationUrl": "https://docs.example.com/stock-taking-helper",
+      "supportIssuesUrl": "https://issues.example.com/stock-taking-helper",
+      "supportContactUrl": "https://support.example.com/stock-taking-helper"
     },
     {
       "code": "mkt-demo-performance-review-template",
@@ -2260,7 +2313,10 @@
           "comment": "Saved us from several manual calculation errors."
         }
       ],
-      "installCount": 279
+      "installCount": 279,
+      "documentationUrl": "https://docs.example.com/sales-tax-auto-calc",
+      "supportIssuesUrl": "https://issues.example.com/sales-tax-auto-calc",
+      "supportContactUrl": "https://support.example.com/sales-tax-auto-calc"
     },
     {
       "code": "mkt-demo-json-data-exporter",
@@ -2364,7 +2420,10 @@
           "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
         }
       ],
-      "installCount": 553
+      "installCount": 553,
+      "documentationUrl": "https://docs.example.com/image-optimizer",
+      "supportIssuesUrl": "https://issues.example.com/image-optimizer",
+      "supportContactUrl": "https://support.example.com/image-optimizer"
     },
     {
       "code": "mkt-demo-sentiment-tagger",
@@ -2477,7 +2536,10 @@
           "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
         }
       ],
-      "installCount": 827
+      "installCount": 827,
+      "documentationUrl": "https://docs.example.com/predictive-maintenance",
+      "supportIssuesUrl": "https://issues.example.com/predictive-maintenance",
+      "supportContactUrl": "https://support.example.com/predictive-maintenance"
     },
     {
       "code": "mkt-demo-smart-asset-tracker",
@@ -2577,7 +2639,10 @@
           "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
         }
       ],
-      "installCount": 151
+      "installCount": 151,
+      "documentationUrl": "https://docs.example.com/automated-payroll-pro",
+      "supportIssuesUrl": "https://issues.example.com/automated-payroll-pro",
+      "supportContactUrl": "https://support.example.com/automated-payroll-pro"
     },
     {
       "code": "mkt-demo-financial-consolidator",
@@ -2677,7 +2742,10 @@
           "comment": "Excellent tool with reliable and intuitive interface. Integration was smooth and support was responsive throughout the entire process."
         }
       ],
-      "installCount": 425
+      "installCount": 425,
+      "documentationUrl": "https://docs.example.com/omnichannel-support-desk",
+      "supportIssuesUrl": "https://issues.example.com/omnichannel-support-desk",
+      "supportContactUrl": "https://support.example.com/omnichannel-support-desk"
     },
     {
       "code": "mkt-demo-bi-report-designer",
@@ -2791,7 +2859,10 @@
           "rating": 4
         }
       ],
-      "installCount": 699
+      "installCount": 699,
+      "documentationUrl": "https://docs.example.com/fleet-management-system",
+      "supportIssuesUrl": "https://issues.example.com/fleet-management-system",
+      "supportContactUrl": "https://support.example.com/fleet-management-system"
     },
     {
       "code": "mkt-demo-talent-acquisition-portal",
@@ -2900,7 +2971,10 @@
           "rating": 4,
           "comment": "Good solution. Easy to configure and works well with existing systems."
         }
-      ]
+      ],
+      "documentationUrl": "https://docs.example.com/real-estate-manager",
+      "supportIssuesUrl": "https://issues.example.com/real-estate-manager",
+      "supportContactUrl": "https://support.example.com/real-estate-manager"
     },
     {
       "code": "mkt-demo-api-gateway-studio",
@@ -2997,7 +3071,10 @@
           "comment": "Our sales team is actually logging notes now!"
         }
       ],
-      "installCount": 297
+      "installCount": 297,
+      "documentationUrl": "https://docs.example.com/voice-to-crm-notes",
+      "supportIssuesUrl": "https://issues.example.com/voice-to-crm-notes",
+      "supportContactUrl": "https://support.example.com/voice-to-crm-notes"
     },
     {
       "code": "mkt-demo-project-portfolio-optimizer",
