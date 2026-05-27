@@ -263,16 +263,6 @@ export default async function ProductPage(props: {
                     {formatVersionNumber(product.currentVersion)}
                   </Badge>
                 )}
-                {product.currentVersion?.compatibilitySet &&
-                  product.currentVersion.compatibilitySet.length > 0 && (
-                    <>
-                      {product.currentVersion.compatibilitySet.map(version => (
-                        <Badge key={version.id} variant="outline">
-                          {version.title}
-                        </Badge>
-                      ))}
-                    </>
-                  )}
               </div>
 
               {/* Title */}
