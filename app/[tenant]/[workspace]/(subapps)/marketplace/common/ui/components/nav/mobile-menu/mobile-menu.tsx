@@ -49,8 +49,13 @@ function Menu({icon, color}: {icon: string; color?: string}) {
           </SheetTitle>
           <nav className="flex flex-col">
             {links.map(item => {
-              const href = `${marketplaceBase}/${item.segment}`;
-              const active = pathname.startsWith(href);
+              const href = item.segment
+                ? `${marketplaceBase}/${item.segment}`
+                : marketplaceBase;
+              const active = item.segment
+                ? pathname.startsWith(href)
+                : pathname === marketplaceBase ||
+                  pathname.startsWith(`${marketplaceBase}/products`);
               return (
                 <Link
                   key={item.id}

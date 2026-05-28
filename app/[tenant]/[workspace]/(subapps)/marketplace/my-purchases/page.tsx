@@ -27,7 +27,6 @@ import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
-import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
 import {findPurchases} from '../common/orm';
 import {MyPurchasesTable} from '../common/ui/components/tables/my-purchases-table';
 import {ensureAuth} from '../common/utils/auth-helper';
@@ -111,10 +110,7 @@ export default async function MyPurchasesPage(props: {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link
-                href={`${marketplaceBase}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
-                {await t('Marketplace')}
-              </Link>
+              <Link href={marketplaceBase}>{await t('Marketplace')}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -134,10 +130,7 @@ export default async function MyPurchasesPage(props: {
             {await t("You haven't purchased anything yet.")}
           </p>
           <Button asChild>
-            <Link
-              href={`${marketplaceBase}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
-              {await t('Browse marketplace')}
-            </Link>
+            <Link href={marketplaceBase}>{await t('Browse marketplace')}</Link>
           </Button>
         </div>
       ) : (

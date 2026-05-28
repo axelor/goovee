@@ -2,6 +2,7 @@ import '@/load-swc-env';
 
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {manager} from '@/tenant';
+import {hash} from '../../utils/string';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
@@ -164,23 +165,14 @@ async function main() {
     const appProducts = data.products.filter(p => p.type === 'app');
     const skillProducts = data.products.filter(p => p.type === 'skill');
 
-    const hashCode = (str: string): number => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = (hash << 5) - hash + str.charCodeAt(i);
-        hash = hash & hash;
-      }
-      return Math.abs(hash);
-    };
-
     const productSupplierMap = new Map<string, string>();
     appProducts.forEach(p => {
-      const hash = hashCode(p.code);
-      productSupplierMap.set(p.code, suppliers[hash % suppliers.length]!.id);
+      const h = hash(p.code);
+      productSupplierMap.set(p.code, suppliers[h % suppliers.length]!.id);
     });
     skillProducts.forEach(p => {
-      const hash = hashCode(p.code);
-      productSupplierMap.set(p.code, suppliers[hash % suppliers.length]!.id);
+      const h = hash(p.code);
+      productSupplierMap.set(p.code, suppliers[h % suppliers.length]!.id);
     });
 
     for (const category of data.categories ?? []) {

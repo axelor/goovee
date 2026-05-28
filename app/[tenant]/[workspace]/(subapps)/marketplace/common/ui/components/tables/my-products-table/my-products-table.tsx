@@ -45,6 +45,7 @@ import type {
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {EditProductButton} from '../../buttons/edit-product-button';
 import {ProductIcon} from '../../primitives/product-icon';
+import {ProductTypeBadge} from '../../primitives/product-type-badge';
 import {Rating} from '../../primitives/rating';
 
 type Product = Cloned<ListMyProduct>;
@@ -112,8 +113,17 @@ export function MyProductsTable({
               />
             </div>
             <div className="min-w-0">
-              <div className="font-medium text-foreground truncate">
-                {product.name}
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="font-medium text-foreground truncate">
+                  {product.name}
+                </div>
+                {product.marketplaceTypeSelect && (
+                  <ProductTypeBadge
+                    type={product.marketplaceTypeSelect}
+                    label={i18n.tattr(product.marketplaceTypeSelect)}
+                    className="flex-shrink-0"
+                  />
+                )}
               </div>
               <div className="text-xs text-muted-foreground line-clamp-2">
                 <InnerHTML content={product.description ?? undefined} />

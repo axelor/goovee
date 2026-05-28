@@ -18,16 +18,14 @@ import {debounce} from 'lodash-es';
 import {useRouter} from 'next/navigation';
 import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 import {searchProducts} from './common/actions';
-import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
 import type {ProductSearchResult} from './common/orm';
 import {ProductIcon} from './common/ui/components/primitives/product-icon';
+import {ProductTypeBadge} from './common/ui/components/primitives/product-type-badge';
 
 export function Search({
-  type,
   className,
   inputClassName,
 }: {
-  type?: MARKETPLACE_TYPE;
   inputClassName?: string;
   className?: string;
 }) {
@@ -51,7 +49,6 @@ export function Search({
           const {error, message, data} = await searchProducts({
             search: query,
             workspaceURL,
-            type,
           });
           if (searchRef.current !== query) return;
           if (error) {
@@ -71,7 +68,7 @@ export function Search({
           }
         }
       }, 500),
-    [toast, workspaceURL, type],
+    [toast, workspaceURL],
   );
 
   const handleSearch = useCallback(
@@ -129,6 +126,13 @@ export function Search({
                     <span className="text-sm font-medium truncate">
                       {product.name}
                     </span>
+                    {product.marketplaceTypeSelect && (
+                      <ProductTypeBadge
+                        type={product.marketplaceTypeSelect}
+                        label={i18n.tattr(product.marketplaceTypeSelect)}
+                        className="ml-auto flex-shrink-0"
+                      />
+                    )}
                   </CommandItem>
                 ))
               : null}

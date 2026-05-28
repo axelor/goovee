@@ -5,7 +5,6 @@ import {i18n} from '@/lib/core/locale';
 import {HeroSearch} from '@/ui/components';
 import {BannerVariants} from '@/ui/components/banner';
 import type {VariantProps} from 'class-variance-authority';
-import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
 import Search from './search';
 
 export const Hero = ({
@@ -13,15 +12,13 @@ export const Hero = ({
   description,
   image,
   background,
-  type,
 }: {
   title: string | null;
   description: string | null;
   image: string | null;
   background: VariantProps<BannerVariants>['background'] | null;
-  type?: MARKETPLACE_TYPE;
 }) => {
-  const renderSearch = () => <Search type={type} />;
+  const renderSearch = () => <Search />;
   return (
     <HeroSearch
       title={title || i18n.t('Marketplace')}

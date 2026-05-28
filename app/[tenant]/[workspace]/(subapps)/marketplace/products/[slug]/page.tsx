@@ -19,8 +19,6 @@ import {Eye} from 'lucide-react';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
-import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
-import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
 import {MARKETPLACE_VERSION_STATUS_LABELS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
 import {findProduct, findVersionCount} from '../../common/orm';
@@ -87,11 +85,8 @@ export default async function ProductPage(props: {
 
   if (!product) notFound();
 
-  const isApp = product.marketplaceTypeSelect === MARKETPLACE_TYPE.APP;
-  const hubSegment = isApp
-    ? MARKETPLACE_TYPE_SEGMENT.APPS
-    : MARKETPLACE_TYPE_SEGMENT.SKILLS;
-  const hubLabel = isApp ? await t('Apps Studio') : await t('Skills Hub');
+  const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
+  const hubLabel = await t('Marketplace');
   const categoryName = product.productCategory?.name ?? null;
 
   const buildQuery = (
@@ -194,10 +189,7 @@ export default async function ProductPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${hubSegment}`}>
-                  {hubLabel}
-                </Link>
+                <Link href={marketplaceHref}>{hubLabel}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             {categoryName && product.productCategory?.id && (
@@ -208,7 +200,7 @@ export default async function ProductPage(props: {
                     asChild
                     className="text-foreground-muted cursor-pointer truncate text-md">
                     <Link
-                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${hubSegment}?category=${product.productCategory.id}`}>
+                      href={`${marketplaceHref}?category=${product.productCategory.id}`}>
                       {categoryName}
                     </Link>
                   </BreadcrumbLink>

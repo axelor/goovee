@@ -96,7 +96,6 @@ export const SUBAPP_WITH_ROLES = [
  * SUBAPP PAGE
  */
 export const SUBAPP_PAGE = {
-  marketplace: '/skills',
   completed: 'completed',
   archived: '/archived',
   checkout: `${SUBAPP_CODES.shop}/cart/checkout`,

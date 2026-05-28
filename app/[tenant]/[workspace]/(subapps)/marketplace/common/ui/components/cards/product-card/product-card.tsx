@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import {t} from '@/locale/server';
+import {t, tattr} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {Download} from 'lucide-react';
@@ -9,6 +9,7 @@ import type {ListProduct} from '../../../../orm';
 import {isPaid} from '../../../../utils/price';
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {ProductIcon} from '../../primitives/product-icon';
+import {ProductTypeBadge} from '../../primitives/product-type-badge';
 import {Rating} from '../../primitives/rating';
 
 export interface ProductCardProps {
@@ -27,6 +28,7 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
     installCount = 0,
     marketplaceIconCode,
     marketplaceCoverStyle,
+    marketplaceTypeSelect,
   } = product;
 
   // Server-computed ATI (and WT) come pre-baked on the product row.
@@ -50,6 +52,15 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
         <div
           className={`h-[140px] bg-gradient-to-br ${bgGradient} flex items-center justify-center relative`}>
           <ProductIcon code={marketplaceIconCode} className="w-16 h-16" />
+          {marketplaceTypeSelect && (
+            <div className="absolute top-3 left-3">
+              <ProductTypeBadge
+                type={marketplaceTypeSelect}
+                label={await tattr(marketplaceTypeSelect)}
+                className="h-8"
+              />
+            </div>
+          )}
           <div
             className={`absolute top-3 right-3 px-2.5 py-1 rounded-full ${paid ? 'bg-primary/10' : 'bg-success-light'}`}>
             <span

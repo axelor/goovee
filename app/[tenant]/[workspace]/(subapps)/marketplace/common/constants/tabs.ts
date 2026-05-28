@@ -7,8 +7,7 @@ export enum ProductTab {
 
 export enum MyContributionsTab {
   Overview = 'overview',
-  Skills = 'skills',
-  Apps = 'apps',
+  Products = 'products',
   Revenue = 'revenue',
   Profile = 'profile',
 }

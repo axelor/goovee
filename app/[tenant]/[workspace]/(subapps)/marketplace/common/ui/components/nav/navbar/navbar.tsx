@@ -27,8 +27,15 @@ function NavLinks() {
   return (
     <nav className="flex">
       {links.map(item => {
-        const href = `${marketplaceBase}/${item.segment}`;
-        const active = pathname.startsWith(href);
+        const href = item.segment
+          ? `${marketplaceBase}/${item.segment}`
+          : marketplaceBase;
+        // For the root Products link, only highlight on the listing or
+        // product detail pages — not on sibling segments like my-contributions.
+        const active = item.segment
+          ? pathname.startsWith(href)
+          : pathname === marketplaceBase ||
+            pathname.startsWith(`${marketplaceBase}/products`);
         return (
           <Link
             key={item.id}

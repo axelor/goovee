@@ -11,7 +11,6 @@ import {
 import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
 import {CartContent} from '../common/ui/components/contents/cart-content';
 import {ensureAuth} from '../common/utils/auth-helper';
 
@@ -54,10 +53,7 @@ export default async function CartPage(props: {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link
-                href={`${marketplaceBase}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
-                {await t('Marketplace')}
-              </Link>
+              <Link href={marketplaceBase}>{await t('Marketplace')}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -78,7 +74,7 @@ export default async function CartPage(props: {
         subtotalLabel={subtotalLabel}
         proceedLabel={proceedLabel}
         removeLabel={removeLabel}
-        browseHref={`${marketplaceBase}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}
+        browseHref={marketplaceBase}
         checkoutHref={`${marketplaceBase}/cart/checkout`}
       />
     </div>

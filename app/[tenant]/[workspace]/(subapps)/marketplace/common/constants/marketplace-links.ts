@@ -1,23 +1,21 @@
-import {MARKETPLACE_TYPE_SEGMENT} from './route-types';
-
 export type MarketplaceLink = {
   id: number;
   title: string;
+  /** Sub-segment after `…/marketplace/`. Empty string targets the root. */
   segment: string;
   requiresAuth?: boolean;
 };
 
 export const MARKETPLACE_LINKS: MarketplaceLink[] = [
-  {id: 1, title: 'Skills', segment: MARKETPLACE_TYPE_SEGMENT.SKILLS},
-  {id: 2, title: 'Apps', segment: MARKETPLACE_TYPE_SEGMENT.APPS},
+  {id: 1, title: 'Products', segment: ''},
   {
-    id: 3,
+    id: 2,
     title: 'My contributions',
     segment: 'my-contributions',
     requiresAuth: true,
   },
   {
-    id: 4,
+    id: 3,
     title: 'My purchases',
     segment: 'my-purchases',
     requiresAuth: true,

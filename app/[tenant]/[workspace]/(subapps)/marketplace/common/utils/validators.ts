@@ -1,5 +1,4 @@
 import {z} from 'zod';
-import {MARKETPLACE_TYPE_SEGMENT} from '../constants/route-types';
 import {MyContributionsTab, ProductTab} from '../constants/tabs';
 
 export const PAGE_SIZE = 12;
@@ -23,12 +22,15 @@ export const searchParamsSchema = z.object({
     .catch('popular')
     .default('popular'),
   priceType: z.enum(['free', 'paid', 'all']).catch('all').default('all'),
+  /* Accepts any selection code; the listing page narrows it against the
+   * known type list and falls back to 'all' if unknown. Keeps the schema
+   * forward-compatible with new marketplace types. */
+  type: z.string().catch('all').default('all'),
 });
 
 export const pageParamsSchema = z.object({
   tenant: z.string(),
   workspace: z.string(),
-  type: z.enum(MARKETPLACE_TYPE_SEGMENT),
 });
 
 export type SearchParams = z.infer<typeof searchParamsSchema>;
@@ -69,12 +71,7 @@ export const myContributionsParamsSchema = z.object({
 
 export const myContributionsSearchParamsSchema = z.object({
   tab: z.enum(MyContributionsTab).catch(MyContributionsTab.Overview),
-  skillsPage: z
-    .string()
-    .transform(val => parseInt(val, 10))
-    .pipe(z.number().positive())
-    .catch(1),
-  appsPage: z
+  productsPage: z
     .string()
     .transform(val => parseInt(val, 10))
     .pipe(z.number().positive())

@@ -2,7 +2,6 @@ import type {Client} from '@/goovee/.generated/client';
 import {t} from '@/locale/server';
 import type {ID} from '@/types';
 import {getSkip, getTotal} from '@/utils/pagination';
-import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import {
   findMyProducts,
   type CompatibilityVersion,
@@ -12,7 +11,7 @@ import {
 import type {PortalWorkspaceWithConfig} from '../../../../utils/auth-helper';
 import {ProductsListTab} from '../products-list-tab';
 
-type AppsTabProps = {
+type ProductsTabProps = {
   mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
@@ -27,7 +26,7 @@ type AppsTabProps = {
 
 const PAGE_SIZE = 10;
 
-export async function AppsTab({
+export async function ProductsTab({
   mainPartnerId,
   client,
   workspace,
@@ -38,24 +37,23 @@ export async function AppsTab({
   licenses,
   compatibilityVersions,
   page,
-}: AppsTabProps) {
-  const apps = await findMyProducts({
+}: ProductsTabProps) {
+  const products = await findMyProducts({
     mainPartnerId,
     client,
     workspace,
-    type: MARKETPLACE_TYPE.APP,
     take: PAGE_SIZE,
     skip: getSkip(PAGE_SIZE, page),
     orderBy: {createdOn: 'DESC'},
   });
 
-  const totalCount = getTotal(apps);
+  const totalCount = getTotal(products);
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <ProductsListTab
-      products={apps}
-      title={await t('Apps')}
+      products={products}
+      title={await t('Products')}
       requiresReview={workspace.config.requiresReview === true}
       allowToPublish={workspace.config.allowToPublish === true}
       currencySymbol={currencySymbol}
@@ -67,7 +65,7 @@ export async function AppsTab({
       compatibilityVersions={compatibilityVersions}
       page={page}
       totalPages={totalPages}
-      paramName="appsPage"
+      paramName="productsPage"
     />
   );
 }

@@ -1,6 +1,6 @@
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import {t} from '@/locale/server';
+import {t, tattr} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
@@ -16,6 +16,7 @@ import {formatVersionNumber} from '../../../../utils/version-number';
 import {AddToFavoriteButton} from '../../buttons/add-to-favorite-button';
 import {BuyButtons} from '../../buttons/buy-buttons';
 import {ProductIcon} from '../../primitives/product-icon';
+import {ProductTypeBadge} from '../../primitives/product-type-badge';
 import {Rating} from '../../primitives/rating';
 import {TooltipDate} from '../../primitives/tooltip-date';
 
@@ -65,6 +66,10 @@ export async function ProductHeaderCard({
     t('Free'),
   ]);
 
+  const typeLabel = product.marketplaceTypeSelect
+    ? await tattr(product.marketplaceTypeSelect)
+    : undefined;
+
   const priceBadgeLabel = paid
     ? await formatNumber(priceAti, {
         type: 'DECIMAL',
@@ -96,6 +101,12 @@ export async function ProductHeaderCard({
         <div className="space-y-4">
           {/* Category and Status */}
           <div className="flex items-center gap-2 flex-wrap">
+            {product.marketplaceTypeSelect && typeLabel && (
+              <ProductTypeBadge
+                type={product.marketplaceTypeSelect}
+                label={typeLabel}
+              />
+            )}
             {categoryName && <Badge variant="outline">{categoryName}</Badge>}
             <Badge variant={paid ? 'outline' : 'success'}>
               {priceBadgeLabel}

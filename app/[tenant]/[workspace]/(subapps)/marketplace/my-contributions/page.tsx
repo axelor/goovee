@@ -15,8 +15,6 @@ import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
-import {MARKETPLACE_TYPE} from '../common/constants/marketplace-types';
-import {DEFAULT_MARKETPLACE_TYPE_SEGMENT} from '../common/constants/route-types';
 import {MyContributionsTab} from '../common/constants/tabs';
 import {
   countMyProducts,
@@ -29,9 +27,8 @@ import {PublishNewButton} from '../common/ui/components/buttons/publish-new-butt
 import {Await} from '../common/ui/components/primitives/await';
 import {Construction} from 'lucide-react';
 import {NoticeBanner} from '../common/ui/components/primitives/notice-banner';
-import {AppsTab} from '../common/ui/components/tabs/apps-tab';
 import {OverviewTab} from '../common/ui/components/tabs/my-contributions-overview-tab';
-import {SkillsTab} from '../common/ui/components/tabs/skills-tab';
+import {ProductsTab} from '../common/ui/components/tabs/products-tab';
 import {ensureAuth} from '../common/utils/auth-helper';
 import {
   myContributionsParamsSchema,
@@ -41,7 +38,7 @@ import {
 
 export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
-  searchParams: Promise<{tab?: string; skillsPage?: string; appsPage?: string}>;
+  searchParams: Promise<{tab?: string; productsPage?: string}>;
 }) {
   const [rawParams, rawSearchParams] = await Promise.all([
     props.params,
@@ -94,15 +91,14 @@ export default async function MyContributionsPage(props: {
 
   const currencySymbol = partnerCurrency?.symbol ?? DEFAULT_CURRENCY_SYMBOL;
 
-  const {tab, skillsPage, appsPage} = searchParams;
+  const {tab, productsPage} = searchParams;
 
   const buildQuery = (
     overrides: Partial<NullableValues<MyContributionsSearchParams>> = {},
   ) => {
     const query: Record<string, string> = {};
     if (tab !== 'overview') query.tab = tab;
-    if (skillsPage !== 1) query.skillsPage = String(skillsPage);
-    if (appsPage !== 1) query.appsPage = String(appsPage);
+    if (productsPage !== 1) query.productsPage = String(productsPage);
     for (const [k, v] of Object.entries(overrides)) {
       if (v === null) {
         delete query[k];
@@ -127,8 +123,7 @@ export default async function MyContributionsPage(props: {
     myContribLabel,
     manageDescLabel,
     overviewLabel,
-    skillsLabel,
-    appsLabel,
+    productsLabel,
     revenueLabel,
     profileLabel,
     comingSoonTitle,
@@ -140,8 +135,7 @@ export default async function MyContributionsPage(props: {
       "Manage the plugins and apps you've published on the Axelor marketplace.",
     ),
     t('Overview'),
-    t('Skills'),
-    t('Apps'),
+    t('Products'),
     t('Revenue'),
     t('Profile'),
     t('Coming soon'),
@@ -168,8 +162,7 @@ export default async function MyContributionsPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/${DEFAULT_MARKETPLACE_TYPE_SEGMENT}`}>
+                <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
                   {marketplaceLabel}
                 </Link>
               </BreadcrumbLink>
@@ -222,40 +215,19 @@ export default async function MyContributionsPage(props: {
             {overviewLabel}
           </Link>
           <Link
-            href={tabNavLink(MyContributionsTab.Skills)}
+            href={tabNavLink(MyContributionsTab.Products)}
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              tab === MyContributionsTab.Skills
+              tab === MyContributionsTab.Products
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            {skillsLabel} (
+            {productsLabel} (
             <Suspense fallback="...">
               <Await
                 promise={countMyProducts({
                   mainPartnerId: auth.user.mainPartnerId,
                   client: auth.tenant.client,
                   workspace: auth.workspace,
-                  type: MARKETPLACE_TYPE.SKILL,
-                })}
-              />
-            </Suspense>
-            )
-          </Link>
-          <Link
-            href={tabNavLink(MyContributionsTab.Apps)}
-            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              tab === MyContributionsTab.Apps
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
-            }`}>
-            {appsLabel} (
-            <Suspense fallback="...">
-              <Await
-                promise={countMyProducts({
-                  mainPartnerId: auth.user.mainPartnerId,
-                  client: auth.tenant.client,
-                  workspace: auth.workspace,
-                  type: MARKETPLACE_TYPE.APP,
                 })}
               />
             </Suspense>
@@ -285,8 +257,8 @@ export default async function MyContributionsPage(props: {
       {/* Content */}
       <div>
         {tab === MyContributionsTab.Overview && <OverviewTab />}
-        {tab === MyContributionsTab.Skills && (
-          <SkillsTab
+        {tab === MyContributionsTab.Products && (
+          <ProductsTab
             mainPartnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
             workspace={auth.workspace}
@@ -296,21 +268,7 @@ export default async function MyContributionsPage(props: {
             categories={categories}
             licenses={licenses}
             compatibilityVersions={compatibilityVersions}
-            page={skillsPage}
-          />
-        )}
-        {tab === MyContributionsTab.Apps && (
-          <AppsTab
-            mainPartnerId={auth.user.mainPartnerId}
-            client={auth.tenant.client}
-            workspace={auth.workspace}
-            currencySymbol={currencySymbol}
-            workspaceURI={workspaceURI}
-            workspaceURL={workspaceURL}
-            categories={categories}
-            licenses={licenses}
-            compatibilityVersions={compatibilityVersions}
-            page={appsPage}
+            page={productsPage}
           />
         )}
         {tab === MyContributionsTab.Revenue && comingSoonBanner}
