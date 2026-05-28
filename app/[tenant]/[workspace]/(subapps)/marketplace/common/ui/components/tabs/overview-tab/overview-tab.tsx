@@ -1,7 +1,7 @@
 import {t} from '@/locale/server';
 import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
-import Image from 'next/image';
 import type {SingleProduct} from '../../../../orm';
+import {ScreenshotGallery} from '../../primitives/screenshot-gallery';
 
 interface OverviewTabProps {
   product: SingleProduct;
@@ -27,24 +27,15 @@ export async function OverviewTab({product, tenantId}: OverviewTabProps) {
           <h2 className="text-xl font-bold text-foreground">
             {screenshotsLabel}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {images.map(
-              image =>
-                image.picture?.id && (
-                  <div
-                    key={image.id}
-                    className="aspect-video bg-muted rounded-lg border border-border overflow-hidden">
-                    <Image
-                      src={`/api/tenant/${tenantId}/product/image/${image.picture.id}`}
-                      alt={screenshotAlt}
-                      width={600}
-                      height={400}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ),
-            )}
-          </div>
+          <ScreenshotGallery
+            images={images
+              .filter(img => img.picture?.id)
+              .map(img => ({
+                id: img.id,
+                src: `/api/tenant/${tenantId}/product/image/${img.picture!.id}`,
+              }))}
+            alt={screenshotAlt}
+          />
         </div>
       )}
 
