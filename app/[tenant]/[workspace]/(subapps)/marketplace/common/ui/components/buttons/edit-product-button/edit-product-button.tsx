@@ -7,6 +7,7 @@ import {loadMyProductForEdit} from '../../../../actions';
 import type {
   CompatibilityVersion,
   ListCategory,
+  ListLicense,
   MyProductWithVersions,
 } from '../../../../orm';
 import {ProductFormDialog} from '../../dialogs/product-form-dialog';
@@ -16,6 +17,7 @@ type Props = {
   workspaceURL: string;
   productId: string;
   categories: Cloned<ListCategory>[];
+  licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
@@ -28,6 +30,7 @@ export function EditProductButton({
   workspaceURL,
   productId,
   categories,
+  licenses,
   compatibilityVersions,
   requiresReview,
   allowToPublish,
@@ -75,6 +78,7 @@ export function EditProductButton({
           workspaceURI={workspaceURI}
           workspaceURL={workspaceURL}
           categories={categories}
+          licenses={licenses}
           compatibilityVersions={compatibilityVersions}
           requiresReview={requiresReview}
           allowToPublish={allowToPublish}

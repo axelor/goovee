@@ -36,6 +36,23 @@ export type CompatibilityVersionSeed = z.infer<
   typeof CompatibilityVersionSchema
 >;
 
+export const LicenseSchema = z
+  .object({
+    code: z
+      .string()
+      .regex(
+        /^[A-Za-z][A-Za-z0-9._-]*$/,
+        'Letters, digits, dot, dash, underscore; must start with a letter. Use the SPDX identifier when available.',
+      ),
+    name: z.string().min(1),
+    url: z.httpUrl().optional(),
+    description: z.string().optional(),
+    isPaid: z.boolean().optional(),
+    sequence: z.number().int().min(0).optional(),
+  })
+  .strict();
+export type LicenseSeed = z.infer<typeof LicenseSchema>;
+
 export const VersionSchema = z
   .object({
     versionNumber: z
@@ -77,7 +94,6 @@ export const ProductSchema = z
     slug: z.string().regex(/^[a-z0-9-]+$/),
     name: z.string().min(1),
     supplierEmail: z
-      .string()
       .email()
       .optional()
       .describe('Override the CLI --supplier default for this product.'),
@@ -98,9 +114,9 @@ export const ProductSchema = z
       .describe(
         'Demo-only fake install count to make the listing look realistic. Runtime downloads still increment this normally.',
       ),
-    documentationUrl: z.url().optional(),
-    supportIssuesUrl: z.url().optional(),
-    supportContactUrl: z.url().optional(),
+    documentationUrl: z.httpUrl().optional(),
+    supportIssuesUrl: z.httpUrl().optional(),
+    supportContactUrl: z.httpUrl().optional(),
     versions: z.array(VersionSchema).min(1),
     reviews: z.array(ReviewSchema).optional(),
   })
@@ -114,6 +130,7 @@ export const SeedSchema = z
     $schema: z.string().optional(),
     categories: z.array(CategorySchema).optional(),
     compatibilityVersions: z.array(CompatibilityVersionSchema).optional(),
+    licenses: z.array(LicenseSchema).optional(),
     products: z.array(ProductSchema),
   })
   .strict();

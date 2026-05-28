@@ -39,6 +39,7 @@ function statusBadgeClass(status: string | null): string {
 import type {
   CompatibilityVersion,
   ListCategory,
+  ListLicense,
   ListMyProduct,
 } from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
@@ -63,6 +64,7 @@ type Props = {
   workspaceURI: string;
   workspaceURL: string;
   categories: Cloned<ListCategory>[];
+  licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
@@ -76,6 +78,7 @@ export function MyProductsTable({
   workspaceURI,
   workspaceURL,
   categories,
+  licenses,
   compatibilityVersions,
   requiresReview,
   allowToPublish,
@@ -242,6 +245,7 @@ export function MyProductsTable({
                       workspaceURI={workspaceURI}
                       workspaceURL={workspaceURL}
                       categories={categories}
+                      licenses={licenses}
                       compatibilityVersions={compatibilityVersions}
                       requiresReview={requiresReview}
                       allowToPublish={allowToPublish}

@@ -1,6 +1,7 @@
 export * from './cart';
 export * from './categories';
 export * from './helpers';
+export * from './licenses';
 export * from './mutations';
 export * from './my-products';
 export * from './partners';

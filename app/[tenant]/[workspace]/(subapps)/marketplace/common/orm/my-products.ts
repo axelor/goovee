@@ -98,6 +98,7 @@ export async function findMyProductWithVersions({
       supportIssuesUrl: true,
       supportContactUrl: true,
       productCategory: {id: true, name: true},
+      marketplaceLicense: {id: true},
       currentVersion: {id: true},
       salePrice: true,
       portalImageList: {

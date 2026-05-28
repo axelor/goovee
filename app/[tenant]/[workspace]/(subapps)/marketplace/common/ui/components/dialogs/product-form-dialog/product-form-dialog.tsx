@@ -14,6 +14,7 @@ import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import type {
   CompatibilityVersion,
   ListCategory,
+  ListLicense,
   MyProductWithVersions,
 } from '../../../../orm';
 import {ProductForm} from '../../forms/product-form';
@@ -29,6 +30,7 @@ type ProductFormDialogProps = {
   workspaceURI: string;
   workspaceURL: string;
   categories: Cloned<ListCategory>[];
+  licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
@@ -45,6 +47,7 @@ export function ProductFormDialog({
   workspaceURI,
   workspaceURL,
   categories,
+  licenses,
   compatibilityVersions,
   requiresReview,
   allowToPublish,
@@ -129,6 +132,7 @@ export function ProductFormDialog({
               mode={mode}
               workspaceURL={workspaceURL}
               categories={categories}
+              licenses={licenses}
               initial={initial}
               defaultType={defaultType}
               currencySymbol={currencySymbol}

@@ -6,13 +6,18 @@ import {Button} from '@/ui/components/button';
 import {Plus} from 'lucide-react';
 import {useState} from 'react';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
-import type {CompatibilityVersion, ListCategory} from '../../../../orm';
+import type {
+  CompatibilityVersion,
+  ListCategory,
+  ListLicense,
+} from '../../../../orm';
 import {ProductFormDialog} from '../../dialogs/product-form-dialog';
 
 type Props = {
   workspaceURI: string;
   workspaceURL: string;
   categories: Cloned<ListCategory>[];
+  licenses: Cloned<ListLicense>[];
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
@@ -25,6 +30,7 @@ export function PublishNewButton({
   workspaceURI,
   workspaceURL,
   categories,
+  licenses,
   compatibilityVersions,
   requiresReview,
   allowToPublish,
@@ -49,6 +55,7 @@ export function PublishNewButton({
         workspaceURI={workspaceURI}
         workspaceURL={workspaceURL}
         categories={categories}
+        licenses={licenses}
         compatibilityVersions={compatibilityVersions}
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}

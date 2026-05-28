@@ -201,6 +201,11 @@
       "target": "AOSMarketplaceProductVersion"
     },
     {
+      "type": "ManyToOne",
+      "name": "marketplaceLicense",
+      "target": "AOSMarketplaceLicense"
+    },
+    {
       "type": "String",
       "name": "marketplaceCoverStyle"
     },

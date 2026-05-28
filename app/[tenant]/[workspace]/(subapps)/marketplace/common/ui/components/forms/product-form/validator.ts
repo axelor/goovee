@@ -17,9 +17,7 @@ export const ACCEPTED_IMAGE_TYPES = [
 export const ACCEPTED_IMAGE_MESSAGE =
   'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed';
 
-const optionalUrl = z
-  .union([z.url({protocol: /^https?$/}), z.literal('')])
-  .optional();
+const optionalUrl = z.union([z.httpUrl(), z.literal('')]).optional();
 
 export const productSchema = z
   .object({
@@ -35,6 +33,7 @@ export const productSchema = z
       .max(280, 'Keep it under 280 characters'),
     longDescription: z.string().max(20000).optional(),
     productCategoryId: z.string().min(1, 'Category is required'),
+    marketplaceLicenseId: z.string().min(1, 'License is required'),
     marketplaceCoverStyle: z.string().min(1, 'Cover is required'),
     marketplaceIconCode: z.string().min(1, 'Icon is required'),
     documentationUrl: optionalUrl,

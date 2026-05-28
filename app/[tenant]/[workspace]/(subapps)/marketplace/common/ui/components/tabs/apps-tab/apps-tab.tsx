@@ -7,6 +7,7 @@ import {
   findMyProducts,
   type CompatibilityVersion,
   type ListCategory,
+  type ListLicense,
 } from '../../../../orm';
 import type {PortalWorkspaceWithConfig} from '../../../../utils/auth-helper';
 import {ProductsListTab} from '../products-list-tab';
@@ -19,6 +20,7 @@ type AppsTabProps = {
   workspaceURI: string;
   workspaceURL: string;
   categories: ListCategory[];
+  licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];
   page: number;
 };
@@ -33,6 +35,7 @@ export async function AppsTab({
   workspaceURI,
   workspaceURL,
   categories,
+  licenses,
   compatibilityVersions,
   page,
 }: AppsTabProps) {
@@ -60,6 +63,7 @@ export async function AppsTab({
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}
+      licenses={licenses}
       compatibilityVersions={compatibilityVersions}
       page={page}
       totalPages={totalPages}

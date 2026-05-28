@@ -192,6 +192,12 @@ export async function findProduct({
       // pointer yet, so we render from its latest (draft/in-review) version.
       latestVersion: versionDetailSelect,
       productCategory: {id: true, name: true},
+      marketplaceLicense: {
+        id: true,
+        code: true,
+        name: true,
+        url: true,
+      },
       defaultSupplierPartner: {
         id: true,
         simpleFullName: true,

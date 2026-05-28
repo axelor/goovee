@@ -34,7 +34,11 @@ import {
   MARKETPLACE_ICONS,
 } from '../../../../constants/icons';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
-import type {ListCategory, MyProductWithVersions} from '../../../../orm';
+import type {
+  ListCategory,
+  ListLicense,
+  MyProductWithVersions,
+} from '../../../../orm';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {ProductIcon} from '../../primitives/product-icon';
 import {
@@ -51,6 +55,7 @@ type ProductFormProps = {
   mode: 'create' | 'edit';
   workspaceURL: string;
   categories: Cloned<ListCategory>[];
+  licenses: Cloned<ListLicense>[];
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
   /** Currency symbol from workspace config (e.g. "$", "€"). Optional —
@@ -76,6 +81,7 @@ function buildDefaults(
       description: '',
       longDescription: '',
       productCategoryId: '',
+      marketplaceLicenseId: '',
       marketplaceCoverStyle: 'gradient-1',
       marketplaceIconCode: DEFAULT_ICON_CODE,
       documentationUrl: '',
@@ -95,6 +101,7 @@ function buildDefaults(
     description: initial.description ?? '',
     longDescription: initial.longDescription ?? '',
     productCategoryId: initial.productCategory?.id ?? '',
+    marketplaceLicenseId: initial.marketplaceLicense?.id ?? '',
     marketplaceCoverStyle: initial.marketplaceCoverStyle ?? 'gradient-1',
     marketplaceIconCode: initial.marketplaceIconCode ?? DEFAULT_ICON_CODE,
     documentationUrl: initial.documentationUrl ?? '',
@@ -113,6 +120,7 @@ export function ProductForm({
   mode,
   workspaceURL,
   categories,
+  licenses,
   initial,
   defaultType,
   currencySymbol,
@@ -255,7 +263,7 @@ export function ProductForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px_240px]">
             <FormField
               control={control}
               name="name"
@@ -287,6 +295,33 @@ export function ProductForm({
                         {categories.map(c => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="marketplaceLicenseId"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>{i18n.t('License')} *</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={i18n.t('Select')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {licenses.map(l => (
+                          <SelectItem key={l.id} value={l.id}>
+                            {l.name}
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              {l.code}
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>

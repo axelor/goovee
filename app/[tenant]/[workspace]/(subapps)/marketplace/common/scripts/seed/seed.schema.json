@@ -19,6 +19,10 @@
       "type": "array",
       "items": {"$ref": "#/$defs/CompatibilityVersion"}
     },
+    "licenses": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/License"}
+    },
     "products": {
       "type": "array",
       "items": {"$ref": "#/$defs/Product"}
@@ -52,6 +56,23 @@
         },
         "title": {"type": "string", "minLength": 1},
         "releasedOn": {"type": "string", "format": "date-time"}
+      }
+    },
+    "License": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "name"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._-]*$",
+          "description": "Upsert key. AOSMarketplaceLicense.code — use the SPDX identifier when available (e.g. 'MIT', 'Apache-2.0', 'GPL-3.0-only')."
+        },
+        "name": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "format": "uri"},
+        "description": {"type": "string"},
+        "isPaid": {"type": "boolean"},
+        "sequence": {"type": "integer", "minimum": 0}
       }
     },
     "Version": {

@@ -155,6 +155,10 @@ async function main() {
       where: {id: {in: productIds}},
     });
 
+    /* Licenses are a shared lookup dictionary (like compatibility
+     * versions) — intentionally NOT deleted on reset so referencing
+     * data outside the seed isn't broken. */
+
     /* 4. Orphan MetaFile rows whose filePath we stamped (`mkt-demo-…`).
      *    Covers bundles + screenshots in one shot. */
     await txClient.aOSMetaFile.deleteAll({

@@ -106,6 +106,102 @@
       "releasedOn": "2025-01-12T13:20:00Z"
     }
   ],
+  "licenses": [
+    {
+      "code": "MIT",
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT",
+      "description": "Permissive license — do anything, just keep the copyright notice.",
+      "isPaid": false,
+      "sequence": 10
+    },
+    {
+      "code": "Apache-2.0",
+      "name": "Apache License 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0",
+      "description": "Permissive license with an explicit patent grant.",
+      "isPaid": false,
+      "sequence": 20
+    },
+    {
+      "code": "BSD-3-Clause",
+      "name": "BSD 3-Clause License",
+      "url": "https://opensource.org/licenses/BSD-3-Clause",
+      "description": "Permissive license with a no-endorsement clause.",
+      "isPaid": false,
+      "sequence": 30
+    },
+    {
+      "code": "ISC",
+      "name": "ISC License",
+      "url": "https://opensource.org/licenses/ISC",
+      "description": "MIT-equivalent permissive license with shorter wording.",
+      "isPaid": false,
+      "sequence": 40
+    },
+    {
+      "code": "MPL-2.0",
+      "name": "Mozilla Public License 2.0",
+      "url": "https://www.mozilla.org/MPL/2.0/",
+      "description": "File-level copyleft — middle ground between permissive and GPL.",
+      "isPaid": false,
+      "sequence": 50
+    },
+    {
+      "code": "LGPL-3.0-only",
+      "name": "GNU Lesser General Public License v3.0",
+      "url": "https://www.gnu.org/licenses/lgpl-3.0.html",
+      "description": "Weak copyleft — friendlier for libraries linked from closed-source code.",
+      "isPaid": false,
+      "sequence": 60
+    },
+    {
+      "code": "GPL-3.0-only",
+      "name": "GNU General Public License v3.0",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.html",
+      "description": "Strong copyleft — derivative works must also be GPL.",
+      "isPaid": false,
+      "sequence": 70
+    },
+    {
+      "code": "AGPL-3.0-only",
+      "name": "GNU Affero General Public License v3.0",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.html",
+      "description": "Strong copyleft extended to network/SaaS use.",
+      "isPaid": false,
+      "sequence": 80
+    },
+    {
+      "code": "BUSL-1.1",
+      "name": "Business Source License 1.1",
+      "url": "https://mariadb.com/bsl11/",
+      "description": "Source-available — paid for production use until it converts to OSS after N years.",
+      "isPaid": true,
+      "sequence": 90
+    },
+    {
+      "code": "Elastic-2.0",
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license",
+      "description": "Source-available — restricts hosted-service resale and license-key circumvention.",
+      "isPaid": true,
+      "sequence": 100
+    },
+    {
+      "code": "LicenseRef-Proprietary",
+      "name": "Proprietary (EULA)",
+      "description": "Custom end-user license agreement specific to the vendor.",
+      "isPaid": true,
+      "sequence": 110
+    },
+    {
+      "code": "LicenseRef-Commercial",
+      "name": "Commercial subscription",
+      "description": "Paid commercial subscription / SaaS terms of service.",
+      "isPaid": true,
+      "sequence": 120
+    }
+  ],
   "products": [
     {
       "code": "mkt-demo-bpm-workflow-generator",

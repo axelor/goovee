@@ -18,6 +18,7 @@ import {
   ListMyProduct,
   type CompatibilityVersion,
   type ListCategory,
+  type ListLicense,
 } from '../../../../orm';
 import {MyProductsTable} from '../../tables/my-products-table';
 
@@ -27,6 +28,7 @@ type ProductsListTabProps = {
   workspaceURI: string;
   workspaceURL: string;
   categories: ListCategory[];
+  licenses: ListLicense[];
   compatibilityVersions: CompatibilityVersion[];
   requiresReview: boolean;
   allowToPublish: boolean;
@@ -43,6 +45,7 @@ export async function ProductsListTab({
   workspaceURI,
   workspaceURL,
   categories,
+  licenses,
   compatibilityVersions,
   requiresReview,
   allowToPublish,
@@ -64,6 +67,7 @@ export async function ProductsListTab({
         workspaceURI={workspaceURI}
         workspaceURL={workspaceURL}
         categories={clone(categories)}
+        licenses={clone(licenses)}
         compatibilityVersions={clone(compatibilityVersions)}
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}

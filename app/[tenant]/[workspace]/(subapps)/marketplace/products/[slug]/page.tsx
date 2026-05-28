@@ -424,15 +424,32 @@ export default async function ProductPage(props: {
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">
-                    {licenseLabel}{' '}
-                    <span className="text-xs text-palette-amber">
-                      (Hardcoded)
-                    </span>
+                    {licenseLabel}
                   </span>
-                  {/* TODO: license isn't modelled on the product yet — this
-                      value is a placeholder. Plug in a real source before
-                      shipping past demo. */}
-                  <p className="font-semibold text-foreground">MIT</p>
+                  {product.marketplaceLicense ? (
+                    product.marketplaceLicense.url ? (
+                      <Link
+                        href={product.marketplaceLicense.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        prefetch={false}
+                        className="font-semibold text-foreground hover:underline block">
+                        {product.marketplaceLicense.name}
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                          {product.marketplaceLicense.code}
+                        </span>
+                      </Link>
+                    ) : (
+                      <p className="font-semibold text-foreground">
+                        {product.marketplaceLicense.name}
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                          {product.marketplaceLicense.code}
+                        </span>
+                      </p>
+                    )
+                  ) : (
+                    <p className="font-semibold text-foreground">—</p>
+                  )}
                 </div>
               </div>
             </div>

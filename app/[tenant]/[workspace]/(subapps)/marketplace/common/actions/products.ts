@@ -130,6 +130,7 @@ export async function saveProduct(
     supportIssuesUrl: payload.supportIssuesUrl || null,
     supportContactUrl: payload.supportContactUrl || null,
     productCategory: {select: {id: payload.productCategoryId}},
+    marketplaceLicense: {select: {id: payload.marketplaceLicenseId}},
     salePrice: new BigDecimal(String(payload.salePrice ?? 0)),
   };
 

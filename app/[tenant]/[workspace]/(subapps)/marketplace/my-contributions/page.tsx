@@ -22,6 +22,7 @@ import {
   countMyProducts,
   findCompatibilityVersions,
   findPartnerCurrency,
+  findLicenses,
   findProductCategories,
 } from '../common/orm';
 import {PublishNewButton} from '../common/ui/components/buttons/publish-new-button';
@@ -76,13 +77,14 @@ export default async function MyContributionsPage(props: {
   }
   if (error) notFound();
 
-  const [categories, compatibilityVersions, partnerCurrency] =
+  const [categories, licenses, compatibilityVersions, partnerCurrency] =
     await Promise.all([
       findProductCategories({
         client: auth.tenant.client,
         workspace: auth.workspace,
         take: 100,
       }),
+      findLicenses({client: auth.tenant.client}),
       findCompatibilityVersions(auth.tenant.client),
       findPartnerCurrency({
         client: auth.tenant.client,
@@ -196,6 +198,7 @@ export default async function MyContributionsPage(props: {
               workspaceURI={workspaceURI}
               workspaceURL={workspaceURL}
               categories={clone(categories)}
+              licenses={clone(licenses)}
               compatibilityVersions={clone(compatibilityVersions)}
               requiresReview={auth.workspace.config.requiresReview === true}
               allowToPublish={auth.workspace.config.allowToPublish === true}
@@ -291,6 +294,7 @@ export default async function MyContributionsPage(props: {
             workspaceURI={workspaceURI}
             workspaceURL={workspaceURL}
             categories={categories}
+            licenses={licenses}
             compatibilityVersions={compatibilityVersions}
             page={skillsPage}
           />
@@ -304,6 +308,7 @@ export default async function MyContributionsPage(props: {
             workspaceURI={workspaceURI}
             workspaceURL={workspaceURL}
             categories={categories}
+            licenses={licenses}
             compatibilityVersions={compatibilityVersions}
             page={appsPage}
           />

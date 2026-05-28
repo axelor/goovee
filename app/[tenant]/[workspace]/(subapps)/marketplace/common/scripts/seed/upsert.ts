@@ -24,6 +24,7 @@ import {
 import type {
   CategorySeed,
   CompatibilityVersionSeed,
+  LicenseSeed,
   ProductSeed,
   VersionSeed,
 } from './validators';
@@ -61,6 +62,21 @@ function getRandomIconCode(productCode: string): string {
   return MARKETPLACE_ICONS[Math.abs(hash) % MARKETPLACE_ICONS.length]!.code;
 }
 
+function getRandomLicenseCode(
+  productCode: string,
+  licenseCodes: string[],
+): string | null {
+  /* Deterministically select a license code based on product code hash
+   * so the same license is always chosen for the same product across runs. */
+  if (!licenseCodes.length) return null;
+  let hash = 0;
+  for (let i = 0; i < productCode.length; i++) {
+    hash = (hash << 5) - hash + productCode.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return licenseCodes[Math.abs(hash) % licenseCodes.length]!;
+}
+
 export async function upsertCategory(
   client: Client,
   data: CategorySeed,
@@ -92,6 +108,31 @@ export async function upsertCategory(
     });
   }
   return client.aOSProductCategory.create({
+    data: payload,
+    select: {id: true, code: true},
+  });
+}
+
+export async function upsertLicense(client: Client, data: LicenseSeed) {
+  const existing = await client.aOSMarketplaceLicense.findOne({
+    where: {code: data.code},
+    select: {id: true, version: true},
+  });
+  const payload = {
+    code: data.code,
+    name: data.name,
+    url: data.url ?? null,
+    description: data.description ?? null,
+    isPaid: data.isPaid ?? false,
+    sequence: data.sequence ?? 0,
+  };
+  if (existing) {
+    return client.aOSMarketplaceLicense.update({
+      data: {...payload, id: existing.id, version: existing.version},
+      select: {id: true, code: true},
+    });
+  }
+  return client.aOSMarketplaceLicense.create({
     data: payload,
     select: {id: true, code: true},
   });
@@ -259,6 +300,7 @@ export async function upsertProduct(
   product: ProductSeed,
   defaultSupplierPartnerId: string,
   saleCurrencyId: string,
+  licenseCodes: string[] = [],
 ) {
   const category = await findCategoryByCode(client, product.categoryCode);
   const supplierPartnerId = product.supplierEmail
@@ -272,7 +314,10 @@ export async function upsertProduct(
     select: {id: true, version: true},
   });
 
-  const data = {
+  /* Randomly select a license code */
+  const selectedLicenseCode = getRandomLicenseCode(product.code, licenseCodes);
+
+  const data: CreateArgs<AOSProduct> = {
     // TODO: revisit how dtype should be populated.
     // base_product.dtype is the single-table inheritance discriminator
     // and is NOT NULL at the DB level. AOS uses 'Product' for plain
@@ -298,6 +343,7 @@ export async function upsertProduct(
     averageRating: new BigDecimal('0'),
     ratingCount: 0,
     productCategory: {select: {id: category.id}},
+    marketplaceLicense: {select: {code: selectedLicenseCode}},
     salePrice: new BigDecimal(String(product.price)),
     saleCurrency: {select: {id: saleCurrencyId}},
     unit: {select: {id: ctx.defaults.unitId}},
@@ -309,7 +355,7 @@ export async function upsertProduct(
     isMarketPlace: true,
     portalWorkspace: {select: {id: ctx.workspaceId}},
     defaultSupplierPartner: {select: {id: supplierPartnerId}},
-  } satisfies CreateArgs<AOSProduct>;
+  };
 
   if (existing) {
     await client.aOSProduct.update({
@@ -372,7 +418,7 @@ export async function upsertVersion({
     select: {id: true, version: true},
   });
 
-  const data = {
+  const data: CreateArgs<AOSMarketplaceProductVersion> = {
     product: {select: {id: productId}},
     vMajor: parts.vMajor,
     vMinor: parts.vMinor,
@@ -384,7 +430,7 @@ export async function upsertVersion({
     dateOfPublish,
     bundleFile: {select: {id: bundleMetaId}},
     compatibilitySet: {select: compatIds},
-  } satisfies CreateArgs<AOSMarketplaceProductVersion>;
+  };
 
   if (existing) {
     return client.aOSMarketplaceProductVersion.update({

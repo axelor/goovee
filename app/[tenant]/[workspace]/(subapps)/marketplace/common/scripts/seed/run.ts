@@ -16,6 +16,7 @@ import {
   refreshCurrentVersion,
   upsertCategory,
   upsertCompatibilityVersion,
+  upsertLicense,
   upsertProduct,
   upsertReview,
   upsertScreenshots,
@@ -192,6 +193,11 @@ async function main() {
       console.log(`  \x1b[32m✓\x1b[0m compatibility ${row.name}`);
     }
 
+    for (const license of data.licenses ?? []) {
+      const row = await upsertLicense(txClient, license);
+      console.log(`  \x1b[32m✓\x1b[0m license ${row.code}`);
+    }
+
     /* The seed shares two screenshot files (desktop + mobile PWA shots)
      * across every product. Upload once, link a varying number (0..9)
      * cycling through them per product. The count cycles deterministically
@@ -210,6 +216,14 @@ async function main() {
       storage,
     });
 
+    /* Organize license codes by isPaid for random selection during product seeding */
+    const paidLicenseCodes = (data.licenses ?? [])
+      .filter(l => l.isPaid)
+      .map(l => l.code);
+    const freeLicenseCodes = (data.licenses ?? [])
+      .filter(l => !l.isPaid)
+      .map(l => l.code);
+
     const seededProductIds: string[] = [];
     for (let index = 0; index < data.products.length; index++) {
       const product = data.products[index];
@@ -221,6 +235,7 @@ async function main() {
         product,
         supplierIdForProduct,
         resolveSaleCurrencyId(supplierIdForProduct),
+        product.price > 0 ? paidLicenseCodes : freeLicenseCodes,
       );
       seededProductIds.push(productId);
 
