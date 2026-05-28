@@ -12,7 +12,6 @@ import {Variant} from '@/ui/components/tag';
 
 // ---- LOCAL IMPORTS ---- //
 import {ORDER_TYPE} from '@/subapps/orders/common/constants/orders';
-import type {OrderType} from '@/subapps/orders/common/types/orders';
 
 export const Informations = ({
   createdOn,
@@ -21,7 +20,6 @@ export const Informations = ({
   variant,
   orderId,
   orderReport,
-  orderType,
 }: {
   createdOn: Date | string;
   shipmentMode?: {name?: string | null} | null;
@@ -29,7 +27,6 @@ export const Informations = ({
   variant: Variant;
   orderId: string;
   orderReport?: {id: string} | null;
-  orderType: OrderType;
 }) => {
   const {workspaceURI} = useWorkspace();
   const showShippingLink = [ORDER_TYPE.SHIPPED, ORDER_TYPE.DELIVERED].includes(
@@ -75,7 +72,7 @@ export const Informations = ({
                 variant="outline"
                 className="flex items-center gap-2 bg-white hover:bg-white text-success hover:text-success border-success !font-medium basis-full md:basis-0">
                 <a
-                  href={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderType}/${orderId}/attachment`}>
+                  href={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderId}/attachment`}>
                   <MdOutlineFileDownload className="text-2xl" />{' '}
                   {i18n.t('Download order')}
                 </a>

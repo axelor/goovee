@@ -5,7 +5,7 @@ import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {Payments} from '@/ui/components/payment';
-import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
@@ -41,9 +41,7 @@ export function ShopPayments({workspace, orderSubapp}: ShopPaymentsProps) {
   const redirectOrder = useCallback(
     async (order: SuccessResponse<string>) => {
       if (orderSubapp) {
-        router.replace(
-          `${workspaceURI}/${SUBAPP_CODES.orders}/${SUBAPP_PAGE.orders}/${order.data}`,
-        );
+        router.replace(`${workspaceURI}/${SUBAPP_CODES.orders}/${order.data}`);
       } else {
         router.replace(`${workspaceURI}/shop?${ORDER_SUCCESS_PARAM}=true`);
       }

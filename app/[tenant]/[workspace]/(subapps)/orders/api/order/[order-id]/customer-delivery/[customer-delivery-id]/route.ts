@@ -12,7 +12,6 @@ import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {findOrder} from '@/subapps/orders/common/orm/orders';
-import {ORDER} from '@/subapps/orders/common/constants/orders';
 
 export async function GET(
   request: NextRequest,
@@ -20,20 +19,15 @@ export async function GET(
     params: Promise<{
       tenant: string;
       workspace: string;
-      'order-type': string;
       'order-id': string;
-      'invoice-id': string;
+      'customer-delivery-id': string;
     }>;
   },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
-  const {
-    'order-type': orderType,
-    'order-id': orderId,
-    'invoice-id': invoiceId,
-  } = params;
-  const isCompleted = orderType === ORDER.COMPLETED;
+  const {'order-id': orderId, 'customer-delivery-id': customerDeliveryId} =
+    params;
 
   const session = await getSession();
   if (!session?.user) {
@@ -79,28 +73,27 @@ export async function GET(
     client,
     workspaceURL,
     params: {where: orderWhereClause},
-    isCompleted,
   });
 
   if (!order) {
     return new NextResponse('Order not found', {status: 404});
   }
 
-  const invoice = order.invoices?.find(
-    invoice => String(invoice.id) === String(invoiceId),
+  const customerDelivery = order.customerDeliveries?.find(
+    delivery => String(delivery.id) === String(customerDeliveryId),
   );
 
-  if (!invoice) {
-    return new NextResponse('Invoice not found', {status: 404});
+  if (!customerDelivery) {
+    return new NextResponse('Customer delivery not found', {status: 404});
   }
 
   const file = await findLatestDMSFileByName({
     client: tenant.client,
     storage: tenant.config.aos.storage,
     user,
-    relatedId: invoice.id,
-    relatedModel: RELATED_MODELS.INVOICE,
-    name: invoice.invoiceId || '',
+    relatedId: customerDelivery.id,
+    relatedModel: RELATED_MODELS.STOCK_MOVE,
+    name: customerDelivery.stockMoveSeq || '',
   });
 
   if (!file) {

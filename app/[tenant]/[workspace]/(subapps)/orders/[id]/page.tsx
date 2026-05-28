@@ -14,16 +14,14 @@ import {manager} from '@/tenant';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {findOrder} from '@/subapps/orders/common/orm/orders';
-import {ORDER} from '@/subapps/orders/common/constants/orders';
 import {OrderSkeleton} from '@/subapps/orders/common/ui/components';
-import {OrderType} from '@/subapps/orders/common/types/orders';
 
 async function Order({
   params,
 }: {
-  params: {tenant: string; workspace: string; type: OrderType; id: string};
+  params: {tenant: string; workspace: string; id: string};
 }) {
-  const {type, id, tenant: tenantId} = params;
+  const {id, tenant: tenantId} = params;
 
   const session = await getSession();
   const user = session?.user as User;
@@ -36,6 +34,7 @@ async function Order({
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
+
   const {client} = tenant;
 
   const workspace = await findWorkspace({
@@ -66,37 +65,32 @@ async function Order({
     partnerKey: PartnerKey.CLIENT_PARTNER,
   });
 
-  const invoicesWhereClasuse = getWhereClauseForEntity({
+  const invoicesWhereClause = getWhereClauseForEntity({
     user,
     role,
     isContactAdmin,
     partnerKey: PartnerKey.PARTNER,
   });
-  const isCompleted = type === ORDER.COMPLETED ? true : false;
 
   const order = await findOrder({
     id,
     client,
-    params: {
-      where,
-    },
+    params: {where},
     workspaceURL,
-    isCompleted,
-    invoicesParams: {where: invoicesWhereClasuse},
+    invoicesParams: {where: invoicesWhereClause},
   });
 
   if (!order) {
     return notFound();
   }
 
-  return <Content order={clone(order)} orderType={type} />;
+  return <Content order={clone(order)} />;
 }
 
 export default async function Page(props: {
   params: Promise<{
     tenant: string;
     workspace: string;
-    type: OrderType;
     id: string;
   }>;
 }) {

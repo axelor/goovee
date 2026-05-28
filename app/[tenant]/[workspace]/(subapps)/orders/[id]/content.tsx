@@ -29,16 +29,9 @@ import type {
   CustomerDelivery,
   DetailOrder,
   Invoice,
-  OrderType,
 } from '@/subapps/orders/common/types/orders';
 
-const Content = ({
-  order,
-  orderType,
-}: {
-  order: DetailOrder;
-  orderType: OrderType;
-}) => {
+const Content = ({order}: {order: DetailOrder}) => {
   const {
     saleOrderSeq,
     exTaxTotal,
@@ -56,6 +49,7 @@ const Content = ({
     customerDeliveries = [],
     orderReport,
   } = order;
+
   const {status, variant} = getStatus(statusSelect, deliveryState);
 
   const {workspaceURI, tenant} = useWorkspace();
@@ -73,7 +67,6 @@ const Content = ({
         variant={variant}
         orderId={id}
         orderReport={orderReport}
-        orderType={orderType}
       />
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-4">
         <div className="col-span-12 xl:col-span-9 flex flex-col gap-6">
@@ -111,7 +104,7 @@ const Content = ({
                       </div>
                       <div className="flex justify-end">
                         <DownloadButton
-                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderType}/${id}/invoice/${record.id}`}
+                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`}
                           title={i18n.t(DOWNLOAD_PDF)}
                           className="border-none p-0"
                         />
@@ -140,7 +133,7 @@ const Content = ({
                       <div className="flex justify-end">
                         <DownloadButton
                           title={i18n.t(DOWNLOAD_PDF)}
-                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderType}/${id}/customer-delivery/${record.id}`}
+                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`}
                           className="border-none p-0"
                         />
                       </div>

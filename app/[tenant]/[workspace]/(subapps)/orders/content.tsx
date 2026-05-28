@@ -29,13 +29,11 @@ const Content = ({orders, pageInfo, orderType}: ContentProps) => {
     useSortBy(orders);
 
   const handleTabChange = (e: {href: string}) => {
-    router.push(`${workspaceURI}/${SUBAPP_CODES.orders}/${e.href}`);
+    router.push(`${workspaceURI}/${SUBAPP_CODES.orders}?type=${e.href}`);
   };
 
   const handleClick = (order: Order) =>
-    router.push(
-      `${workspaceURI}/${SUBAPP_CODES.orders}/${orderType}/${order.id}`,
-    );
+    router.push(`${workspaceURI}/${SUBAPP_CODES.orders}/${order.id}`);
 
   return (
     <Container title={i18n.t('Orders')}>

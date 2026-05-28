@@ -140,14 +140,12 @@ export async function findOrder({
   client,
   workspaceURL,
   params = {},
-  isCompleted = false,
   invoicesParams = {},
 }: {
   id: ID;
   client: Client;
   workspaceURL: PortalWorkspace['url'];
   params?: {where?: WhereOptions<AOSOrder>};
-  isCompleted?: boolean;
   invoicesParams?: {where?: WhereOptions<AOSInvoice>};
 }) {
   if (!client && !workspaceURL) return null;
@@ -158,11 +156,9 @@ export async function findOrder({
       id,
       portalWorkspace: {url: workspaceURL},
       template: false,
+      OR: [{archived: false}, {archived: null}],
+      statusSelect: {in: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CLOSED]},
     },
-    {OR: [{archived: false}, {archived: null}]},
-    isCompleted
-      ? {statusSelect: {eq: ORDER_STATUS.CLOSED}}
-      : {statusSelect: ORDER_STATUS.CONFIRMED},
   ]);
 
   const order = await client.aOSOrder.findOne({

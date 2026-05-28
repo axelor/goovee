@@ -1,0 +1,6 @@
+{
+  "title": "Flatten orders routing to use search params and remove type path segment",
+  "type": "change",
+  "description": "Orders list and detail pages now use the same flat URL structure as invoices. Tab state is handled via search param instead of a path segment.",
+  "scope": ["orders"]
+}

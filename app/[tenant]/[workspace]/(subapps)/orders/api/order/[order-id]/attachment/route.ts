@@ -12,7 +12,6 @@ import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {findOrder} from '@/subapps/orders/common/orm/orders';
-import {ORDER} from '@/subapps/orders/common/constants/orders';
 
 export async function GET(
   request: NextRequest,
@@ -20,15 +19,13 @@ export async function GET(
     params: Promise<{
       tenant: string;
       workspace: string;
-      'order-type': string;
       'order-id': string;
     }>;
   },
 ) {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
-  const {'order-type': orderType, 'order-id': orderId} = params;
-  const isCompleted = orderType === ORDER.COMPLETED;
+  const {'order-id': orderId} = params;
 
   const session = await getSession();
   if (!session?.user) {
@@ -69,7 +66,6 @@ export async function GET(
     client,
     workspaceURL,
     params: {where: orderWhereClause},
-    isCompleted,
   });
 
   if (!order) {
