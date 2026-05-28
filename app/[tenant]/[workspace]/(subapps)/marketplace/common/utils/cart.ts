@@ -8,7 +8,13 @@ import {
   findCartProductsAvailability,
 } from '../orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import {computePrice, type CurrencyInput} from '../utils/price';
+import {
+  ComputedPrice,
+  computePrice,
+  round,
+  type CurrencyInput,
+} from '../utils/price';
+import {ActionResponse} from '@/types/action';
 
 /* Per-product availability check shared by validateCart and
  * recheckCartAvailability. Returns a translated error message if the
@@ -75,7 +81,7 @@ export async function validateCart({
   workspace: PortalWorkspaceWithConfig;
   mainPartnerId: string;
   productIds: string[];
-}) {
+}): ActionResponse<ValidatedCart> {
   const dedupedIds = Array.from(new Set(productIds));
   if (dedupedIds.length === 0) {
     return {error: true as const, message: await t('Your cart is empty.')};
@@ -98,7 +104,7 @@ export async function validateCart({
 
   if (products.length !== dedupedIds.length) {
     return {
-      error: true as const,
+      error: true,
       message: await t('Some items in your cart are no longer available.'),
     };
   }
@@ -111,7 +117,7 @@ export async function validateCart({
     });
 
   const items: ValidatedCartItem[] = [];
-  let currencyCode: string | null = null;
+  let currency: ComputedPrice['currency'] | null = null;
   for (const product of products) {
     const unavailable = await checkAvailability(product);
     if (unavailable) return {error: true as const, message: unavailable};
@@ -133,7 +139,7 @@ export async function validateCart({
     });
     if (price.ati <= 0) {
       return {
-        error: true as const,
+        error: true,
         message: await t(
           '{0} is not a paid product.',
           product.name ?? product.slug ?? product.id,
@@ -142,17 +148,17 @@ export async function validateCart({
     }
     if (!price.currency.code) {
       return {
-        error: true as const,
+        error: true,
         message: await t(
           '{0} could not be priced in a supported currency.',
           product.name ?? product.slug ?? product.id,
         ),
       };
     }
-    if (currencyCode == null) currencyCode = price.currency.code;
-    else if (currencyCode !== price.currency.code) {
+    if (!currency) currency = price.currency;
+    else if (currency.code !== price.currency.code) {
       return {
-        error: true as const,
+        error: true,
         message: await t(
           'Your cart contains items in different currencies, which is not supported.',
         ),
@@ -169,15 +175,17 @@ export async function validateCart({
     });
   }
 
+  if (!currency) throw new Error('No currency found');
+
   const total = items.reduce((sum, item) => sum + item.priceAti, 0);
 
   return {
-    success: true as const,
+    success: true,
     data: {
       items,
-      total,
-      currencyCode: currencyCode!,
-    } satisfies ValidatedCart,
+      total: round(total, currency.numberOfDecimals),
+      currencyCode: currency.code,
+    },
   };
 }
 

@@ -323,7 +323,7 @@ function todayInTimezone(timezone: string | null | undefined): string {
   }
 }
 
-function round(value: number, scale: number): number {
+export function round(value: number, scale: number): number {
   const factor = 10 ** scale;
   return Math.round(value * factor) / factor;
 }
