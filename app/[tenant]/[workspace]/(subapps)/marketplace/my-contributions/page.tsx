@@ -155,7 +155,7 @@ export default async function MyContributionsPage(props: {
   return (
     <div className="min-h-screen container pb-6">
       {/* Breadcrumb */}
-      <div className="my-6">
+      <div className="mt-6 mb-4">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -178,7 +178,7 @@ export default async function MyContributionsPage(props: {
       </div>
 
       {/* Header */}
-      <div className="py-6">
+      <div className="pb-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">

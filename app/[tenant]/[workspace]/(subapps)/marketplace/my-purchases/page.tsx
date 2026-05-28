@@ -104,25 +104,47 @@ export default async function MyPurchasesPage(props: {
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
   const purchasesHref = `${marketplaceBase}/my-purchases`;
 
-  return (
-    <div className="container mx-auto px-4 py-6">
-      <Breadcrumb className="mb-4">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href={marketplaceBase}>{await t('Marketplace')}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{await t('My purchases')}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+  const [marketplaceLabel, myPurchasesLabel, myPurchasesDescLabel] =
+    await Promise.all([
+      t('Marketplace'),
+      t('My purchases'),
+      t("Review and manage the apps you've purchased from the marketplace."),
+    ]);
 
-      <h1 className="text-2xl font-semibold text-foreground mb-6">
-        {await t('My purchases')}
-      </h1>
+  return (
+    <div className="min-h-screen container pb-6">
+      {/* Breadcrumb */}
+      <div className="mt-6 mb-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                asChild
+                className="text-foreground-muted cursor-pointer truncate text-md">
+                <Link href={marketplaceBase}>{marketplaceLabel}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="sm:truncate text-lg font-semibold">
+                {myPurchasesLabel}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      {/* Header */}
+      <div className="pb-6">
+        <div className="space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            {myPurchasesLabel}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {myPurchasesDescLabel}
+          </p>
+        </div>
+      </div>
 
       {purchases.length === 0 ? (
         <div className="rounded-lg border border-border bg-card p-8 text-center">
