@@ -5,6 +5,7 @@ import {formatNumber} from '@/locale/server/formatters';
 import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
+import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {Download, FileText, Heart} from 'lucide-react';
 import Link from 'next/link';
@@ -84,7 +85,35 @@ export async function ProductHeaderCard({
   );
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 sm:p-8">
+    <div className="bg-card rounded-2xl border border-border p-4 sm:p-8 relative">
+      {/* Favorite — pinned top-right */}
+      <div className="absolute top-4 right-4 z-10">
+        {preview ? (
+          <Button
+            variant="outline"
+            size="icon"
+            disabled
+            title={await t('Inactive in preview')}
+            aria-label={await t('Add to favorites')}
+            className="rounded-full bg-card/90 backdrop-blur-sm shadow-sm">
+            <Heart size={18} className="shrink-0" />
+          </Button>
+        ) : (
+          <Suspense
+            fallback={
+              <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+            }>
+            <FavoriteButton
+              productId={product.id}
+              workspaceURL={workspaceURL}
+              workspaceURI={workspaceURI}
+              userId={user?.id}
+              client={client}
+            />
+          </Suspense>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-[120px_1fr_240px] gap-6 md:gap-8">
         {/* Left: Icon */}
         <div className="flex items-center justify-center">
@@ -108,9 +137,6 @@ export async function ProductHeaderCard({
               />
             )}
             {categoryName && <Badge variant="outline">{categoryName}</Badge>}
-            <Badge variant={paid ? 'outline' : 'success'}>
-              {priceBadgeLabel}
-            </Badge>
             {product.currentVersion && (
               <Badge variant="outline">
                 {formatVersionNumber(product.currentVersion)}
@@ -171,8 +197,16 @@ export async function ProductHeaderCard({
           </div>
         </div>
 
-        {/* Right: Buttons and Links */}
+        {/* Right: Price + Buttons */}
         <div className="flex flex-col gap-3 justify-center">
+          <div
+            className={cn(
+              'text-4xl font-bold text-right lg:pr-12',
+              paid ? 'text-foreground' : 'text-success',
+            )}>
+            {priceBadgeLabel}
+          </div>
+
           <CTAButton
             product={product}
             user={user}
@@ -185,31 +219,6 @@ export async function ProductHeaderCard({
             downloadZipLabel={downloadZipLabel}
             preview={preview}
           />
-
-          {preview ? (
-            <Button
-              variant="outline"
-              size="lg"
-              className="gap-2 rounded-full"
-              disabled
-              title={await t('Inactive in preview')}>
-              <Heart size={18} className="shrink-0" />
-              {await t('Add to favorites')}
-            </Button>
-          ) : (
-            <Suspense
-              fallback={
-                <div className="h-11 rounded-full bg-muted animate-pulse" />
-              }>
-              <FavoriteButton
-                productId={product.id}
-                workspaceURL={workspaceURL}
-                workspaceURI={workspaceURI}
-                userId={user?.id}
-                client={client}
-              />
-            </Suspense>
-          )}
 
           {product.documentationUrl && (
             <DocumentationButton

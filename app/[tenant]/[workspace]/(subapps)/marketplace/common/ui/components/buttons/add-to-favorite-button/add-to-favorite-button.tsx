@@ -61,22 +61,25 @@ export function AddToFavoriteButton({
     });
   };
 
+  const label = isFavorite
+    ? i18n.t('Remove from favorites')
+    : i18n.t('Add to favorites');
+
   return (
     <Button
       onClick={handleClick}
       disabled={isPending}
       variant="outline"
-      size="lg"
-      className="gap-2 rounded-full">
+      size="icon"
+      title={label}
+      aria-label={label}
+      className="rounded-full bg-card/90 backdrop-blur-sm shadow-sm hover:bg-card">
       <Heart
         size={18}
         className={cn('shrink-0', {
           'fill-red-500 text-red-500': isFavorite,
         })}
       />
-      {isFavorite
-        ? i18n.t('Remove from favorites')
-        : i18n.t('Add to favorites')}
     </Button>
   );
 }
