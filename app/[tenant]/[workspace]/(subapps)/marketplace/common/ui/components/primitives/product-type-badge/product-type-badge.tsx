@@ -17,15 +17,12 @@ export interface ProductTypeBadgeProps {
  * both white cards and the gradient product header. */
 const TYPE_PALETTE = [
   'bg-palette-blue-dark/15 text-palette-blue-dark',
-  'bg-palette-purple-dark/15 text-palette-purple-dark',
   'bg-palette-teal-dark/15 text-palette-teal-dark',
-  'bg-palette-pink-dark/15 text-palette-pink-dark',
-  'bg-palette-indigo-dark/15 text-palette-indigo-dark',
-  'bg-palette-orange-dark/15 text-palette-orange-dark',
+  'bg-palette-lime-dark/15 text-palette-lime-dark',
+  'bg-palette-red-dark/15 text-palette-red-dark',
   'bg-palette-green-dark/15 text-palette-green-dark',
-  'bg-palette-cyan-dark/15 text-palette-cyan-dark',
   'bg-palette-deeporange-dark/15 text-palette-deeporange-dark',
-  'bg-palette-bluegrey-dark/15 text-palette-bluegrey-dark',
+  'bg-palette-brown-dark/15 text-palette-brown-dark',
 ] as const;
 
 export function ProductTypeBadge({
