@@ -53,6 +53,9 @@ export const productSearchParamsSchema = z.object({
     .transform(val => parseInt(val, 10))
     .pipe(z.number().positive())
     .catch(1),
+  /* Owner-only preview of an unpublished product. Access is enforced
+   * server-side (owner filter), so the flag alone exposes nothing. */
+  preview: z.enum(['1', 'true']).optional().transform(Boolean).catch(false),
 });
 
 export type ProductPageParams = z.infer<typeof productPageParamsSchema>;

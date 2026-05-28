@@ -26,7 +26,8 @@ import {
 } from '../common/orm';
 import {PublishNewButton} from '../common/ui/components/buttons/publish-new-button';
 import {Await} from '../common/ui/components/primitives/await';
-import {ComingSoonBanner} from '../common/ui/components/primitives/coming-soon-banner';
+import {Construction} from 'lucide-react';
+import {NoticeBanner} from '../common/ui/components/primitives/notice-banner';
 import {AppsTab} from '../common/ui/components/tabs/apps-tab';
 import {OverviewTab} from '../common/ui/components/tabs/my-contributions-overview-tab';
 import {SkillsTab} from '../common/ui/components/tabs/skills-tab';
@@ -128,6 +129,8 @@ export default async function MyContributionsPage(props: {
     appsLabel,
     revenueLabel,
     profileLabel,
+    comingSoonTitle,
+    comingSoonDescription,
   ] = await Promise.all([
     t('Marketplace'),
     t('My contributions'),
@@ -139,7 +142,19 @@ export default async function MyContributionsPage(props: {
     t('Apps'),
     t('Revenue'),
     t('Profile'),
+    t('Coming soon'),
+    t(
+      'This section is still being built; what you see below is a preview of the layout.',
+    ),
   ]);
+
+  const comingSoonBanner = (
+    <NoticeBanner
+      icon={Construction}
+      title={comingSoonTitle}
+      description={comingSoonDescription}
+    />
+  );
 
   return (
     <div className="min-h-screen container pb-6">
@@ -293,8 +308,8 @@ export default async function MyContributionsPage(props: {
             page={appsPage}
           />
         )}
-        {tab === MyContributionsTab.Revenue && <ComingSoonBanner />}
-        {tab === MyContributionsTab.Profile && <ComingSoonBanner />}
+        {tab === MyContributionsTab.Revenue && comingSoonBanner}
+        {tab === MyContributionsTab.Profile && comingSoonBanner}
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import type {ID} from '@/types';
 import {Badge, Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {getLoginURL} from '@/utils/url';
-import {Download, FileText} from 'lucide-react';
+import {Download, FileText, Heart} from 'lucide-react';
 import Link from 'next/link';
 import {Suspense} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
@@ -26,6 +26,8 @@ export interface ProductHeaderCardProps {
   workspaceURL: string;
   workspaceURI: string;
   tenantId: string;
+  /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
+  preview?: boolean;
 }
 
 export async function ProductHeaderCard({
@@ -35,6 +37,7 @@ export async function ProductHeaderCard({
   workspaceURL,
   workspaceURI,
   tenantId,
+  preview = false,
 }: ProductHeaderCardProps) {
   const bgGradient =
     GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] ||
@@ -169,20 +172,33 @@ export async function ProductHeaderCard({
             priceAti={priceAti}
             priceScale={priceScale}
             downloadZipLabel={downloadZipLabel}
+            preview={preview}
           />
 
-          <Suspense
-            fallback={
-              <div className="h-11 rounded-full bg-muted animate-pulse" />
-            }>
-            <FavoriteButton
-              productId={product.id}
-              workspaceURL={workspaceURL}
-              workspaceURI={workspaceURI}
-              userId={user?.id}
-              client={client}
-            />
-          </Suspense>
+          {preview ? (
+            <Button
+              variant="outline"
+              size="lg"
+              className="gap-2 rounded-full"
+              disabled
+              title={await t('Inactive in preview')}>
+              <Heart size={18} className="shrink-0" />
+              {await t('Add to favorites')}
+            </Button>
+          ) : (
+            <Suspense
+              fallback={
+                <div className="h-11 rounded-full bg-muted animate-pulse" />
+              }>
+              <FavoriteButton
+                productId={product.id}
+                workspaceURL={workspaceURL}
+                workspaceURI={workspaceURI}
+                userId={user?.id}
+                client={client}
+              />
+            </Suspense>
+          )}
 
           {product.documentationUrl && (
             <DocumentationButton
@@ -206,6 +222,7 @@ async function CTAButton({
   priceAti,
   priceScale,
   downloadZipLabel,
+  preview,
 }: {
   product: SingleProduct;
   user?: {id: ID; mainPartnerId?: ID};
@@ -216,7 +233,41 @@ async function CTAButton({
   priceAti: number;
   priceScale: number;
   downloadZipLabel: string;
+  preview: boolean;
 }) {
+  // Preview: show the buyer's CTA exactly as a shopper would see it, but
+  // inert — no cart writes, no checkout, no draft-bundle download.
+  if (preview) {
+    return paid ? (
+      <div className="flex flex-col gap-2">
+        <Button
+          size="lg"
+          className="gap-2 rounded-full"
+          disabled
+          title={await t('Inactive in preview')}>
+          {await t('Buy now')}
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          className="gap-2 rounded-full"
+          disabled
+          title={await t('Inactive in preview')}>
+          {await t('Add to cart')}
+        </Button>
+      </div>
+    ) : (
+      <Button
+        size="lg"
+        className="gap-2 rounded-full"
+        disabled
+        title={await t('Inactive in preview')}>
+        <Download size={18} />
+        {downloadZipLabel}
+      </Button>
+    );
+  }
+
   const mainPartnerId = user?.mainPartnerId;
   const isOwner =
     !!mainPartnerId && product.defaultSupplierPartner?.id === mainPartnerId;

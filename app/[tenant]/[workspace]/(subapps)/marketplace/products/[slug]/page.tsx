@@ -1,7 +1,8 @@
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
+import type {NullableValues} from '@/types/util';
 import {t} from '@/locale/server';
-import {Button} from '@/ui/components';
+import {Badge, Button} from '@/ui/components';
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {
   Breadcrumb,
@@ -14,15 +15,17 @@ import {
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
+import {Eye} from 'lucide-react';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
 import {MARKETPLACE_TYPE_SEGMENT} from '../../common/constants/route-types';
-import {MARKETPLACE_VERSION_STATUS} from '../../common/constants/statuses';
+import {MARKETPLACE_VERSION_STATUS_LABELS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
-import {findProduct} from '../../common/orm';
+import {findProduct, findVersionCount} from '../../common/orm';
 import {ProductHeaderCard} from '../../common/ui/components/cards/product-header-card';
+import {NoticeBanner} from '../../common/ui/components/primitives/notice-banner';
 import {TooltipDate} from '../../common/ui/components/primitives/tooltip-date';
 import {OverviewTab} from '../../common/ui/components/tabs/overview-tab';
 import {ReviewsTab} from '../../common/ui/components/tabs/reviews-tab';
@@ -32,6 +35,7 @@ import {ensureAuth} from '../../common/utils/auth-helper';
 import {
   productPageParamsSchema,
   productSearchParamsSchema,
+  type ProductSearchParams,
 } from '../../common/utils/validators';
 import {formatVersionNumber} from '../../common/utils/version-number';
 
@@ -41,6 +45,7 @@ export default async function ProductPage(props: {
     tab?: string;
     reviewPage?: string;
     versionPage?: string;
+    preview?: string;
   }>;
 }) {
   const [rawParams, rawSearchParams] = await Promise.all([
@@ -70,16 +75,17 @@ export default async function ProductPage(props: {
 
   const client = auth.tenant.client;
 
+  const {tab, reviewPage, versionPage, preview} = searchParams;
+
   const product = await findProduct({
     slug: params.slug,
     client,
     workspace: auth.workspace,
     mainPartnerId: auth.user?.mainPartnerId,
+    preview,
   });
 
   if (!product) notFound();
-
-  const {tab, reviewPage, versionPage} = searchParams;
 
   const isApp = product.marketplaceTypeSelect === MARKETPLACE_TYPE.APP;
   const hubSegment = isApp
@@ -88,8 +94,36 @@ export default async function ProductPage(props: {
   const hubLabel = isApp ? await t('Apps Studio') : await t('Skills Hub');
   const categoryName = product.productCategory?.name ?? null;
 
-  const tabNavLink = (tab: string) =>
-    `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=${tab}`;
+  const buildQuery = (
+    overrides: Partial<NullableValues<ProductSearchParams>> = {},
+  ) => {
+    const query: Record<string, string> = {};
+    if (tab !== ProductTab.Overview) query.tab = tab;
+    if (reviewPage !== 1) query.reviewPage = String(reviewPage);
+    if (versionPage !== 1) query.versionPage = String(versionPage);
+    if (preview) query.preview = '1';
+    for (const [k, v] of Object.entries(overrides)) {
+      if (v === null) {
+        delete query[k];
+      } else if (v !== undefined) {
+        query[k] = String(v);
+      }
+    }
+    return query;
+  };
+
+  const productUrl = (
+    overrides?: Partial<NullableValues<ProductSearchParams>>,
+  ) => {
+    const params = buildQuery(overrides);
+    const queryStr =
+      Object.keys(params).length > 0
+        ? `?${new URLSearchParams(params).toString()}`
+        : '';
+    return `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}${queryStr}`;
+  };
+
+  const tabNavLink = (tabValue: ProductTab) => productUrl({tab: tabValue});
 
   const ratingCount = Number(product.ratingCount || 0);
 
@@ -133,8 +167,25 @@ export default async function ProductPage(props: {
     t('N/A'),
   ]);
 
+  const previewStatus = product.currentVersion?.statusSelect ?? null;
+  const previewStatusLabel =
+    previewStatus && MARKETPLACE_VERSION_STATUS_LABELS[previewStatus]
+      ? await t(MARKETPLACE_VERSION_STATUS_LABELS[previewStatus])
+      : null;
+
   return (
     <div className="min-h-screen">
+      {preview && (
+        <NoticeBanner
+          variant="bar"
+          icon={Eye}
+          title={await t('Preview — not yet visible to buyers.')}
+          description={await t('Buttons and actions are inactive in preview.')}>
+          {previewStatusLabel && (
+            <Badge variant="outline">{previewStatusLabel}</Badge>
+          )}
+        </NoticeBanner>
+      )}
       {/* Breadcrumb */}
       <div className="container my-6">
         <Breadcrumb>
@@ -183,6 +234,7 @@ export default async function ProductPage(props: {
           workspaceURL={workspaceURL}
           workspaceURI={workspaceURI}
           tenantId={tenantId}
+          preview={preview}
         />
       </div>
 
@@ -209,7 +261,11 @@ export default async function ProductPage(props: {
             )}>
             {versionsLabel} (
             <Suspense fallback="...">
-              <VersionCountBadge slug={params.slug} client={client} />
+              <VersionCountBadge
+                productId={product.id}
+                client={client}
+                preview={preview}
+              />
             </Suspense>
             )
           </Link>
@@ -251,6 +307,8 @@ export default async function ProductPage(props: {
                 client={client}
                 versionPage={versionPage}
                 currentVersionId={product.currentVersion?.id}
+                preview={preview}
+                buildPageHref={page => productUrl({versionPage: page})}
               />
             )}
             {tab === ProductTab.Reviews && (
@@ -262,8 +320,9 @@ export default async function ProductPage(props: {
                 client={client}
                 reviewPage={reviewPage}
                 user={auth.user}
+                preview={preview}
                 loginHref={getLoginURL({
-                  callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews`,
+                  callbackurl: productUrl({tab: ProductTab.Reviews}),
                   workspaceURI,
                   tenant: tenantId,
                 })}
@@ -421,17 +480,18 @@ export default async function ProductPage(props: {
 }
 
 async function VersionCountBadge({
-  slug,
+  productId,
   client,
+  preview,
 }: {
-  slug: string;
+  productId: string;
   client: Client;
+  preview: boolean;
 }) {
-  const versionCount = await client.aOSMarketplaceProductVersion.count({
-    where: {
-      product: {slug},
-      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-    },
+  const versionCount = await findVersionCount({
+    client,
+    productId,
+    includeUnpublished: preview,
   });
 
   return <>{versionCount}</>;

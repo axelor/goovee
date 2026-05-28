@@ -29,6 +29,10 @@ interface VersionsTabProps {
   client: Client;
   versionPage: number;
   currentVersionId?: string;
+  /** Owner preview: download links rendered inert. */
+  preview?: boolean;
+  /** Returns the URL for a given page number (preserves other search params). */
+  buildPageHref: (page: number) => string;
 }
 
 export async function VersionsTab({
@@ -37,6 +41,8 @@ export async function VersionsTab({
   client,
   versionPage,
   currentVersionId,
+  preview = false,
+  buildPageHref,
 }: VersionsTabProps) {
   const VERSIONS_PAGE_SIZE = 8;
 
@@ -45,6 +51,7 @@ export async function VersionsTab({
     client,
     take: VERSIONS_PAGE_SIZE,
     skip: getSkip(VERSIONS_PAGE_SIZE, versionPage),
+    includeUnpublished: preview,
   });
 
   const totalVersionCount = getTotal(versionsResult);
@@ -58,6 +65,7 @@ export async function VersionsTab({
     downloadLabel,
     previousLabel,
     nextLabel,
+    inactiveLabel,
   ] = await Promise.all([
     t('No versions available'),
     t('Latest'),
@@ -66,6 +74,7 @@ export async function VersionsTab({
     t('Download'),
     t('Previous'),
     t('Next'),
+    t('Inactive in preview'),
   ]);
 
   if (totalVersionCount === 0) {
@@ -118,18 +127,30 @@ export async function VersionsTab({
                 </p>
               )}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 flex-shrink-0 rounded-full"
-              asChild>
-              <a
-                href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
-                download>
+            {preview ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 flex-shrink-0 rounded-full"
+                disabled
+                title={inactiveLabel}>
                 <Download size={16} />
                 {downloadLabel}
-              </a>
-            </Button>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 flex-shrink-0 rounded-full"
+                asChild>
+                <a
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                  download>
+                  <Download size={16} />
+                  {downloadLabel}
+                </a>
+              </Button>
+            )}
           </div>
         ))}
       </div>
@@ -141,7 +162,7 @@ export async function VersionsTab({
               <PaginationPrevious asChild>
                 <Link
                   scroll={false}
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions${versionPage > 1 ? `&versionPage=${versionPage - 1}` : ''}`}
+                  href={buildPageHref(Math.max(1, versionPage - 1))}
                   className={cn({
                     ['pointer-events-none opacity-50']: versionPage <= 1,
                   })}>
@@ -164,9 +185,7 @@ export async function VersionsTab({
               return (
                 <PaginationItem key={value}>
                   <PaginationLink isActive={versionPage === value} asChild>
-                    <Link
-                      scroll={false}
-                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions&versionPage=${value}`}>
+                    <Link scroll={false} href={buildPageHref(value)}>
                       {value}
                     </Link>
                   </PaginationLink>
@@ -177,7 +196,9 @@ export async function VersionsTab({
               <PaginationNext asChild>
                 <Link
                   scroll={false}
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=versions${versionPage < totalVersionPages ? `&versionPage=${versionPage + 1}` : ''}`}
+                  href={buildPageHref(
+                    Math.min(totalVersionPages, versionPage + 1),
+                  )}
                   className={cn({
                     ['pointer-events-none opacity-50']:
                       versionPage >= totalVersionPages,

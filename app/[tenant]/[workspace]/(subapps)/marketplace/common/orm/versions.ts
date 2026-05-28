@@ -15,22 +15,47 @@ export type ListProductVersion = Awaited<
   ReturnType<typeof findProductVersions>
 >[number];
 
+export async function findVersionCount({
+  client,
+  productId,
+  includeUnpublished = false,
+}: {
+  client: Client;
+  productId: ID;
+  /** Owner preview: count drafts/in-review/rejected too. */
+  includeUnpublished?: boolean;
+}) {
+  return client.aOSMarketplaceProductVersion.count({
+    where: and<AOSMarketplaceProductVersion>([
+      {product: {id: productId}},
+      !includeUnpublished && {
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
+    ]),
+  });
+}
+
 export async function findProductVersions({
   productId,
   client,
   where,
   take,
   skip,
+  /** Owner preview: include drafts/in-review/rejected too. */
+  includeUnpublished = false,
 }: {
   productId: ID;
   client: Client;
+  includeUnpublished?: boolean;
 } & QueryProps<AOSMarketplaceProductVersion>) {
   return client.aOSMarketplaceProductVersion.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     where: and<AOSMarketplaceProductVersion>([
       {product: {id: productId}},
-      {statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED},
+      !includeUnpublished && {
+        statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      },
       where,
     ]),
     select: {

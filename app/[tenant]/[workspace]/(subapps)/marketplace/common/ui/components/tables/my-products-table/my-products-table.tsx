@@ -15,7 +15,7 @@ import {
 } from '@/ui/components/table';
 import {useResponsive} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {ChevronDown, ChevronUp, ExternalLink} from 'lucide-react';
+import {ChevronDown, ChevronUp, ExternalLink, Eye} from 'lucide-react';
 import Link from 'next/link';
 import {Fragment, useState, type ReactNode} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
@@ -250,11 +250,21 @@ export function MyProductsTable({
                       }
                       inAti={inAti}
                     />
-                    <Link
-                      href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
-                      className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                    </Link>
+                    {product.currentVersion ? (
+                      <Link
+                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
+                        title={i18n.t('View live')}
+                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?preview=1`}
+                        title={i18n.t('Preview')}
+                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                        <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+                      </Link>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

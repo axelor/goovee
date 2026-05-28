@@ -39,6 +39,8 @@ interface ReviewsTabProps {
   reviewPage: number;
   user?: User;
   loginHref: string;
+  /** Owner preview: hide the write-a-review card (no interaction). */
+  preview?: boolean;
 }
 
 export async function ReviewsTab({
@@ -50,6 +52,7 @@ export async function ReviewsTab({
   reviewPage,
   user,
   loginHref,
+  preview = false,
 }: ReviewsTabProps) {
   const REVIEWS_PAGE_SIZE = 4;
 
@@ -121,7 +124,7 @@ export async function ReviewsTab({
       : 0;
   };
 
-  const yourReviewCard = (
+  const yourReviewCard = preview ? null : (
     <YourReviewCard
       productId={product.id}
       workspaceURL={workspaceURL}

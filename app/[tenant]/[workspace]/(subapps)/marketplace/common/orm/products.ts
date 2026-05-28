@@ -8,6 +8,7 @@ import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {
   priceSelectFields,
   versionNumberFields,
+  withMyProductAccessFilter,
   withProductAccessFilter,
   withPublishedProductFilter,
   type QueryProps,
@@ -135,14 +136,37 @@ export async function findProduct({
   client,
   workspace,
   mainPartnerId,
+  preview = false,
 }: {
   slug: string;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   mainPartnerId?: string | null;
+  /* Owner-only preview of an unpublished product: drop the published filter
+   * and scope strictly to the caller's own products instead. */
+  preview?: boolean;
 }) {
+  // Nothing to preview without a known partner to scope ownership to.
+  if (preview && !mainPartnerId) return null;
+
+  const versionDetailSelect = {
+    id: true,
+    ...versionNumberFields,
+    statusSelect: true,
+    changelog: true,
+    dateOfPublish: true,
+    bundleFile: {sizeText: true},
+    compatibilitySet: {
+      select: {title: true},
+      orderBy: {releasedOn: 'DESC'},
+    },
+  } as const;
+
   const product = await client.aOSProduct.findOne({
-    where: withPublishedProductFilter(workspace)({slug}),
+    where:
+      preview && mainPartnerId
+        ? withMyProductAccessFilter(workspace, mainPartnerId)({slug})
+        : withPublishedProductFilter(workspace)({slug}),
     select: {
       id: true,
       name: true,
@@ -163,18 +187,10 @@ export async function findProduct({
       ratingCount: true,
       installCount: true,
       ...priceSelectFields,
-      currentVersion: {
-        id: true,
-        ...versionNumberFields,
-        statusSelect: true,
-        changelog: true,
-        dateOfPublish: true,
-        bundleFile: {sizeText: true},
-        compatibilitySet: {
-          select: {title: true},
-          orderBy: {releasedOn: 'DESC'},
-        },
-      },
+      currentVersion: versionDetailSelect,
+      // Fallback for preview: an unpublished product has no currentVersion
+      // pointer yet, so we render from its latest (draft/in-review) version.
+      latestVersion: versionDetailSelect,
       productCategory: {id: true, name: true},
       defaultSupplierPartner: {
         id: true,
@@ -187,10 +203,16 @@ export async function findProduct({
     },
   });
   if (!product) return null;
+  // In preview, surface the latest version through `currentVersion` so the
+  // page's version-specific sections render without special-casing.
+  const resolved =
+    preview && !product.currentVersion
+      ? {...product, currentVersion: product.latestVersion}
+      : product;
   const priceContext = await buildPriceContext({
     client,
     mainPartnerId,
-    productCurrencyCodes: [product.saleCurrency?.code],
+    productCurrencyCodes: [resolved.saleCurrency?.code],
   });
-  return withPrice(product, workspace, priceContext);
+  return withPrice(resolved, workspace, priceContext);
 }

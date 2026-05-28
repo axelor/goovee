@@ -1,6 +1,7 @@
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
-import {ComingSoonBanner} from '../../primitives/coming-soon-banner';
+import {Construction} from 'lucide-react';
+import {NoticeBanner} from '../../primitives/notice-banner';
 import {Swipe} from '../../primitives/swipe';
 
 const stats = [
@@ -104,16 +105,26 @@ export async function OverviewTab() {
     viewDetailsLabel,
     pendingActionsLabel,
     recentActivityLabel,
+    comingSoonTitle,
+    comingSoonDescription,
   ] = await Promise.all([
     t('Revenue · last 12 months'),
     t('View details →'),
     t('Pending actions'),
     t('Recent activity'),
+    t('Coming soon'),
+    t(
+      'This section is still being built; what you see below is a preview of the layout.',
+    ),
   ]);
 
   return (
     <div className="space-y-6">
-      <ComingSoonBanner />
+      <NoticeBanner
+        icon={Construction}
+        title={comingSoonTitle}
+        description={comingSoonDescription}
+      />
       {/* Stats Carousel */}
       <Swipe
         className="!w-[284px] !h-[160px]"
