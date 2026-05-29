@@ -152,7 +152,7 @@ Demoting a live or queued version to draft must go through Unpublish first.
 - **Bundle files** are capped at 20 MB. Allowed types: `.zip`, `application/zip`, `application/x-zip-compressed`.
 - The **marketplace type** (`skill` / `app`) is fixed at creation — the select is disabled in edit mode.
 - **Categories** and **Axelor compatibility versions** are admin-controlled in AOS; the marketplace just reads them.
-- **Pricing** uses workspace-level defaults set on `PortalAppConfig`: `marketplaceDefaultUnit`, `marketplaceDefaultProductFamily`, and `marketplaceInAti`. `saveProduct` writes these onto every new product at create time so it's ready for the AOS sale-order / invoice path. The `saleCurrency` written at create time is resolved as: publisher's partner currency (`AOSPartner.currency`) → the app-wide `DEFAULT_CURRENCY_CODE` from `@/constants` (looked up in `AOSCurrency` by code). There is no workspace-level default currency. **`saleCurrency` is stamped only on create** — once a product exists, edits never rewrite its currency, even if the publisher's partner currency later changes. Historical products keep the currency they were priced in. The other defaults (unit / family / `inAti`) follow the same create-time-only rule.
+- **Pricing** uses workspace-level defaults set on `PortalAppConfig`: `marketplaceDefaultUnit`, `defaultProductForMarketplaceFamily`, and `marketplaceInAti`. `saveProduct` writes these onto every new product at create time so it's ready for the AOS sale-order / invoice path. The `saleCurrency` written at create time is resolved as: publisher's partner currency (`AOSPartner.currency`) → the app-wide `DEFAULT_CURRENCY_CODE` from `@/constants` (looked up in `AOSCurrency` by code). There is no workspace-level default currency. **`saleCurrency` is stamped only on create** — once a product exists, edits never rewrite its currency, even if the publisher's partner currency later changes. Historical products keep the currency they were priced in. The other defaults (unit / family / `inAti`) follow the same create-time-only rule.
 - A product is **free** when `salePrice === 0` and **paid** when `salePrice > 0`. Free and paid are not stored as a separate flag.
 - **Ownership is per-partner**, not per-user. Any contact under the same `mainPartner` can download products that partner bought. Matches B2B semantics (and mirrors how shop tracks orders).
 - **Free products skip checkout entirely** — no `MarketplaceProductPurchase` row is written, the bundle download endpoint serves them publicly. Only paid flows reach `checkout()`.
@@ -203,8 +203,6 @@ axelor-sale/.../ProductRestService.fetchProductPrice
   → axelor-base/.../CurrencyServiceImpl.getAmountCurrencyConvertedAtDate
   → axelor-base/.../ProductCompanyService.get
 ```
-
-Parity is verified by `pnpm marketplace:test-price`, which loads every marketplace product, picks one buyer per distinct fiscal position (plus the no-partner case), iterates every active company, and compares `computePrice` against AOS's authoritative `/ws/aos/product/price` endpoint. Pass `--verbose` for a per-row table; mismatches are always reported.
 
 Remaining differences vs AOS:
 

@@ -95,7 +95,7 @@ export async function ReviewsTab({
   const ratingAggregates = await client.aOSMarketplaceReview.aggregate({
     count: {id: true},
     groupBy: {rating: true},
-    where: {product: {id: product.id}},
+    where: {marketplaceProduct: {id: product.id}},
   });
 
   const ratingDistribution = {
@@ -107,10 +107,10 @@ export async function ReviewsTab({
   };
 
   ratingAggregates.forEach(item => {
-    if (item.groupBy.rating) {
-      ratingDistribution[
-        item.groupBy.rating as keyof typeof ratingDistribution
-      ] = item.count.id;
+    const r = item.groupBy?.rating;
+    if (r != null) {
+      ratingDistribution[r as keyof typeof ratingDistribution] =
+        item.count?.id ?? 0;
     }
   });
 

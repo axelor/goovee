@@ -19,11 +19,14 @@ export async function findProductReviews({
   productId: ID;
   client: Client;
 } & QueryProps<AOSMarketplaceReview>) {
-  const reviews = await client.aOSMarketplaceReview.find({
+  return client.aOSMarketplaceReview.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
-    where: and<AOSMarketplaceReview>([{product: {id: productId}}, where]),
+    where: and<AOSMarketplaceReview>([
+      {marketplaceProduct: {id: productId}},
+      where,
+    ]),
     select: {
       id: true,
       rating: true,
@@ -38,8 +41,6 @@ export async function findProductReviews({
     },
     orderBy: {createdOn: 'DESC'},
   });
-
-  return reviews;
 }
 
 export type MyReview = NonNullable<Awaited<ReturnType<typeof findMyReview>>>;
@@ -54,7 +55,7 @@ export async function findMyReview({
   client: Client;
 }) {
   return client.aOSMarketplaceReview.findOne({
-    where: {product: {id: productId}, author: {id: userId}},
+    where: {marketplaceProduct: {id: productId}, author: {id: userId}},
     select: {
       id: true,
       version: true,
@@ -67,8 +68,6 @@ export async function findMyReview({
     },
   });
 }
-
-// ---- REVIEW LOOKUPS / AGGREGATES ---- //
 
 export type ExistingReview = NonNullable<
   Awaited<ReturnType<typeof findExistingReview>>
@@ -84,7 +83,7 @@ export async function findExistingReview({
   userId: ID;
 }) {
   return client.aOSMarketplaceReview.findOne({
-    where: {product: {id: productId}, author: {id: userId}},
+    where: {marketplaceProduct: {id: productId}, author: {id: userId}},
     select: {id: true, version: true, rating: true},
   });
 }

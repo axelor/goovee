@@ -3,17 +3,14 @@
  * Paid/Free predicate so that display values stay in lockstep with what
  * AOS will invoice.
  *
- * Parity is verified by `scripts/test-price/run.ts`, which sweeps every
- * marketplace product × company × distinct-fiscal-position partner and
- * compares the output of `computePrice` against AOS's authoritative
- * `/ws/aos/product/price` endpoint.
- *
  * ──────────────────────────────────────────────────────────────────────
  * Our algorithm
  * ──────────────────────────────────────────────────────────────────────
- *   1. Resolve the per-company override for `salePrice` / `inAti`:
- *      walk `Product.productCompanyList` and use the row matching the
- *      selling company; fall back to the base product fields otherwise.
+ *   1. Resolve the price-defining fields (`salePrice`, `inAti`,
+ *      `saleCurrency`). If `priceOverride` is provided, use it as-is —
+ *      the override layer is sealed and never falls through. Otherwise
+ *      walk `Product.productCompanyList` for a row matching the selling
+ *      company; fall back to the base product fields if none.
  *   2. Resolve the AccountManagement row by walking
  *      Product.accountManagementList → ProductFamily.accountManagementList,
  *      filtered by the selling company's id. Skip a Product-level row
@@ -93,9 +90,8 @@ import type {
   FiscalPositionInput,
   PriceableProduct,
   PriceContext,
+  Currency,
 } from '../orm';
-import {PortalAppConfig} from '@/orm/workspace';
-
 const DEFAULT_TAX_RATE = 0;
 
 export type ComputedPrice = {
@@ -108,15 +104,6 @@ export type ComputedPrice = {
   /** Currency in which wt/ati are expressed: viewer's partner currency
    *  if conversion succeeded, otherwise the product's own currency. */
   currency: {code: string; symbol: string; numberOfDecimals: number};
-};
-
-/** Minimal currency shape needed for conversion. */
-export type CurrencyInput = {
-  id: string;
-  version: number;
-  code: string;
-  symbol: string | null;
-  numberOfDecimals: number | null;
 };
 
 /** AOS-style resolution: try the product's own `accountManagementList`
@@ -277,10 +264,10 @@ function getExchangeRate(
 function tryConvert(
   amount: number,
   fromCode: string,
-  toCurrency: CurrencyInput,
+  toCurrency: Currency,
   today: string,
   lines: ConversionLine[],
-): {value: number; currency: CurrencyInput} | null {
+): {value: number; currency: Currency} | null {
   const rate = getExchangeRate(fromCode, toCurrency.code, today, lines);
   if (rate == null) return null;
   return {value: amount * rate, currency: toCurrency};
@@ -289,7 +276,12 @@ function tryConvert(
 /** Compute the without-tax price, all-tax-included price, total applied
  *  tax rate, and display currency for a product.
  *
- *  Currency resolution (in order, first hit wins):
+ *  Layering of price-defining fields (top wins):
+ *    1. `priceOverride`        — marketplace listing layer, optional
+ *    2. `productCompanyList`   — per-company override on the Product
+ *    3. base Product fields
+ *
+ *  Currency display resolution (in order, first hit wins):
  *    1. viewerCurrency — if a productCurrency→viewer conversion line exists
  *    2. defaultCurrency — if a productCurrency→default conversion line exists
  *    3. productCurrency — last-resort, displayed as-is */
@@ -297,26 +289,44 @@ export function computePrice({
   product,
   priceContext,
   company,
+  priceOverride,
 }: {
   product: PriceableProduct;
   priceContext: PriceContext;
   company: {id: string; timezone: string | null} | null;
+  /** Override layer — fully sealed when provided. All three fields
+   *  must be present; none fall back through `productCompanyList` or
+   *  the base product. The fallback path runs only when there's no
+   *  `priceOverride`. Tax / accountManagement always come from the
+   *  product itself; this layer overrides only price, inAti, and
+   *  currency. */
+  priceOverride?: {
+    salePrice: NonNullable<PriceableProduct['salePrice']>;
+    saleCurrency: NonNullable<PriceableProduct['saleCurrency']>;
+    inAti: NonNullable<PriceableProduct['inAti']>;
+  };
 }): ComputedPrice {
   const {viewerCurrency, defaultCurrency, conversionLines, fiscalPosition} =
     priceContext;
   const {id: companyId, timezone: companyTimezone} = company || {};
 
   const today = todayInTimezone(companyTimezone);
-  const override =
+  const companyOverride =
     companyId == null
       ? null
       : (product.productCompanyList?.find(
           row => row?.company?.id === companyId,
         ) ?? null);
-  const basePrice = override?.salePrice ?? product.salePrice;
-  const baseInAti = override?.inAti ?? product.inAti;
-  const baseCurrency = override?.saleCurrency ?? product.saleCurrency;
-  const salePrice = Number(basePrice ?? 0);
+
+  const base = priceOverride ?? {
+    salePrice: companyOverride?.salePrice ?? product.salePrice,
+    inAti: companyOverride?.inAti ?? product.inAti,
+    saleCurrency: companyOverride?.saleCurrency ?? product.saleCurrency,
+  };
+
+  const {salePrice: _salePrice, inAti, saleCurrency} = base;
+  const salePrice = Number(_salePrice ?? 0);
+
   const accountManagement = resolveAccountManagement(product, companyId);
   const taxRate = accountManagement
     ? getTotalTaxRate(accountManagement.saleTaxSet, today, fiscalPosition)
@@ -324,7 +334,7 @@ export function computePrice({
 
   let wt: number;
   let ati: number;
-  if (baseInAti) {
+  if (inAti) {
     ati = salePrice;
     wt = taxRate === 0 ? salePrice : salePrice / (1 + taxRate / 100);
   } else {
@@ -333,16 +343,16 @@ export function computePrice({
   }
 
   const lines = conversionLines ?? [];
-  const fromCode = baseCurrency?.code;
-  let resolvedCurrency = baseCurrency;
+  const fromCode = saleCurrency?.code;
+  let resolvedCurrency = saleCurrency;
   let convertedWt = wt;
   let convertedAti = ati;
-  let resolvedScale = baseCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
+  let resolvedScale = saleCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
 
   if (fromCode) {
     const seen = new Set<string>();
     const targets = [viewerCurrency, defaultCurrency].filter(
-      (c): c is CurrencyInput => {
+      (c): c is Currency => {
         if (!c?.code || c.code === fromCode || seen.has(c.code)) return false;
         seen.add(c.code);
         return true;

@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {AOSProduct} from '@/goovee/.generated/models';
+import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import {ID} from '@/types';
 import {and, or} from '@/utils/orm';
 import type {Payload, SelectOptions} from '@goovee/orm';
@@ -17,7 +17,9 @@ import {buildPriceContext, withPrice} from './price';
 
 // ---- PRODUCTS ---- //
 
-export async function findProductAccess<T extends SelectOptions<AOSProduct>>({
+export async function findProductAccess<
+  T extends SelectOptions<AOSMarketplaceProduct>,
+>({
   recordId: productId,
   client,
   workspace,
@@ -27,15 +29,11 @@ export async function findProductAccess<T extends SelectOptions<AOSProduct>>({
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   select?: T;
-}): Promise<Payload<AOSProduct, {select: T}> | null> {
-  const product = await client.aOSProduct.findOne({
-    where: withProductAccessFilter(workspace)({
-      id: productId,
-    }),
+}): Promise<Payload<AOSMarketplaceProduct, {select: T}> | null> {
+  return client.aOSMarketplaceProduct.findOne({
+    where: withProductAccessFilter(workspace)({id: productId}),
     select: select as T,
   });
-
-  return product;
 }
 
 export type ProductSearchResult = Awaited<
@@ -56,15 +54,14 @@ export async function findProductsBySearch({
   take?: number;
 }) {
   const pattern = `%${search}%`;
-  const products = await client.aOSProduct.find({
+  return client.aOSMarketplaceProduct.find({
     take,
     where: withPublishedProductFilter(workspace)(
-      and<AOSProduct>([
+      and<AOSMarketplaceProduct>([
         type ? {marketplaceTypeSelect: type} : undefined,
-        or<AOSProduct>([
+        or<AOSMarketplaceProduct>([
           {name: {like: pattern}},
           {description: {like: pattern}},
-          {code: {like: pattern}},
         ]),
       ]),
     ),
@@ -72,12 +69,11 @@ export async function findProductsBySearch({
       id: true,
       slug: true,
       name: true,
-      marketplaceIconCode: true,
-      marketplaceCoverStyle: true,
+      iconCode: true,
+      coverStyle: true,
       marketplaceTypeSelect: true,
     },
   });
-  return products;
 }
 
 export type ListProduct = Awaited<ReturnType<typeof findProducts>>[number];
@@ -94,8 +90,8 @@ export async function findProducts({
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   mainPartnerId?: string | null;
-} & QueryProps<AOSProduct>) {
-  const products = await client.aOSProduct.find({
+} & QueryProps<AOSMarketplaceProduct>) {
+  const products = await client.aOSMarketplaceProduct.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
@@ -105,12 +101,9 @@ export async function findProducts({
       slug: true,
       name: true,
       description: true,
-      code: true,
-      picture: {id: true},
-      thumbnailImage: {id: true},
       marketplaceTypeSelect: true,
-      marketplaceCoverStyle: true,
-      marketplaceIconCode: true,
+      coverStyle: true,
+      iconCode: true,
       averageRating: true,
       ratingCount: true,
       installCount: true,
@@ -121,7 +114,9 @@ export async function findProducts({
   const priceContext = await buildPriceContext({
     client,
     mainPartnerId,
-    productCurrencyCodes: products.map(p => p.saleCurrency?.code),
+    productCurrencyCodes: products.map(
+      p => p.saleCurrency?.code ?? p.product?.saleCurrency?.code,
+    ),
   });
 
   return products.map(p => withPrice(p, workspace, priceContext));
@@ -142,8 +137,8 @@ export async function findProduct({
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   mainPartnerId?: string | null;
-  /* Owner-only preview of an unpublished product: drop the published filter
-   * and scope strictly to the caller's own products instead. */
+  /* Owner-only preview of an unpublished product: drop the published
+   * filter and scope strictly to the caller's own products instead. */
   preview?: boolean;
 }) {
   // Nothing to preview without a known partner to scope ownership to.
@@ -162,7 +157,7 @@ export async function findProduct({
     },
   } as const;
 
-  const product = await client.aOSProduct.findOne({
+  const product = await client.aOSMarketplaceProduct.findOne({
     where:
       preview && mainPartnerId
         ? withMyProductAccessFilter(workspace, mainPartnerId)({slug})
@@ -172,14 +167,11 @@ export async function findProduct({
       name: true,
       description: true,
       longDescription: true,
-      code: true,
       slug: true,
       createdOn: true,
-      picture: {id: true},
-      thumbnailImage: {id: true},
       marketplaceTypeSelect: true,
-      marketplaceCoverStyle: true,
-      marketplaceIconCode: true,
+      coverStyle: true,
+      iconCode: true,
       documentationUrl: true,
       supportIssuesUrl: true,
       supportContactUrl: true,
@@ -188,24 +180,21 @@ export async function findProduct({
       installCount: true,
       ...priceSelectFields,
       currentVersion: versionDetailSelect,
-      // Fallback for preview: an unpublished product has no currentVersion
-      // pointer yet, so we render from its latest (draft/in-review) version.
       latestVersion: versionDetailSelect,
-      productCategory: {id: true, name: true},
-      marketplaceLicense: {
+      categorySet: {select: {id: true, name: true}},
+      license: {
         id: true,
         code: true,
         name: true,
         url: true,
       },
-      defaultSupplierPartner: {
+      publisher: {
         id: true,
         simpleFullName: true,
         name: true,
         picture: {id: true},
       },
-      portalCategorySet: {select: {id: true, name: true}},
-      portalImageList: {select: {picture: {id: true}}},
+      pictureList: {select: {picture: {id: true}}},
     },
   });
   if (!product) return null;
@@ -218,7 +207,9 @@ export async function findProduct({
   const priceContext = await buildPriceContext({
     client,
     mainPartnerId,
-    productCurrencyCodes: [resolved.saleCurrency?.code],
+    productCurrencyCodes: [
+      resolved.saleCurrency?.code ?? resolved.product?.saleCurrency?.code,
+    ],
   });
   return withPrice(resolved, workspace, priceContext);
 }

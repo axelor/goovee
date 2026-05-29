@@ -9,9 +9,7 @@ interface OverviewTabProps {
 }
 
 export async function OverviewTab({product, tenantId}: OverviewTabProps) {
-  const images = (product.portalImageList || []).filter(
-    img => !!img.picture?.id,
-  );
+  const images = (product.pictureList || []).filter(img => !!img.picture?.id);
 
   const [screenshotsLabel, screenshotAlt, aboutLabel] = await Promise.all([
     t('Screenshots'),

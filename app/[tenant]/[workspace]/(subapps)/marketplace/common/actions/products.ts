@@ -1,6 +1,5 @@
 'use server';
 
-import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
@@ -13,10 +12,9 @@ import {z} from 'zod';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import type {MyProductWithVersions} from '../orm';
 import {
-  findDefaultCurrency,
   findMyProductWithVersions,
-  findPartnerCurrency,
   findProductsBySearch,
+  resolveNewListingCurrency,
   type ProductSearchResult,
   syncProductImages,
 } from '../orm';
@@ -113,104 +111,110 @@ export async function saveProduct(
     }
   }
 
-  const priceDefaults = {
-    unit: auth.workspace.config.marketplaceDefaultUnit,
-    productFamily: auth.workspace.config.marketplaceDefaultProductFamily,
-    inAti: auth.workspace.config.marketplaceInAti === true,
-  };
-
+  /* The form supplies marketplace identity + price overrides only. The
+   * backing real Product is fixed per workspace via
+   * `PortalAppConfig.defaultProductForMarketplace` (a service product with
+   * the right accounting/tax setup). Tax, currency, unit etc. are read
+   * from that backing Product at checkout time. */
   const productData = {
     name: payload.name,
     description: payload.description ?? null,
     longDescription: payload.longDescription || null,
     marketplaceTypeSelect: payload.marketplaceTypeSelect,
-    marketplaceCoverStyle: payload.marketplaceCoverStyle,
-    marketplaceIconCode: payload.marketplaceIconCode,
+    coverStyle: payload.coverStyle,
+    iconCode: payload.iconCode,
     documentationUrl: payload.documentationUrl || null,
     supportIssuesUrl: payload.supportIssuesUrl || null,
     supportContactUrl: payload.supportContactUrl || null,
-    productCategory: {select: {id: payload.productCategoryId}},
-    marketplaceLicense: {select: {id: payload.marketplaceLicenseId}},
+    license: {select: {id: payload.licenseId}},
     salePrice: new BigDecimal(String(payload.salePrice ?? 0)),
   };
 
   try {
     let productId: string;
     if (payload.id) {
-      const current = await client.aOSProduct.findOne({
+      const current = await client.aOSMarketplaceProduct.findOne({
         where: {id: payload.id},
-        select: {id: true, version: true},
+        select: {id: true, version: true, categorySet: {select: {id: true}}},
       });
       if (!current) {
         return {error: true, message: await t('Product not found')};
       }
-      await client.aOSProduct.update({
+      /* m2m: compute add/remove diff so the update applies exactly the
+       * requested set without dropping rows that are still selected. */
+      const desired = new Set(payload.categoryIds);
+      const previous = new Set(
+        (current.categorySet ?? [])
+          .map(c => c?.id)
+          .filter((id): id is string => !!id),
+      );
+      const toAdd = [...desired].filter(id => !previous.has(id));
+      const toRemove = [...previous].filter(id => !desired.has(id));
+      await client.aOSMarketplaceProduct.update({
         data: {
           id: payload.id,
           version: current.version,
           ...productData,
-          marketplaceUpdatedBy: {select: {id: auth.user.id}},
+          updatedByPartner: {select: {id: auth.user.mainPartnerId}},
+          ...(toAdd.length || toRemove.length
+            ? {
+                categorySet: {
+                  ...(toAdd.length ? {select: toAdd.map(id => ({id}))} : {}),
+                  ...(toRemove.length ? {remove: toRemove} : {}),
+                },
+              }
+            : {}),
         },
         select: {id: true},
       });
       productId = payload.id;
     } else {
-      if (!priceDefaults.unit?.id || !priceDefaults.productFamily?.id) {
+      const backingProductId =
+        auth.workspace.config.defaultProductForMarketplace?.id;
+      if (!backingProductId) {
         return {
           error: true,
           message: await t(
-            "Marketplace pricing isn't configured for this workspace. Contact your admin.",
+            "Marketplace isn't configured for this workspace: missing default backing product. Contact your admin.",
           ),
         };
       }
-      /* saleCurrency is stamped at creation only and never rewritten on
-       * later updates — historical products must keep showing the price
-       * in the currency they were created with, even if the publisher's
-       * partner currency later changes. Resolution order:
-       *   1. publisher's partner currency
-       *   2. AOS currency matching DEFAULT_CURRENCY_CODE */
-      const partnerCurrency = await findPartnerCurrency({
+      /* Stamp saleCurrency once at create. Same resolver the form uses
+       * for its display symbol, so the price the supplier just typed is
+       * interpreted in the currency that gets persisted. Never rewritten
+       * on edit. */
+      const defaultSaleCurrency = await resolveNewListingCurrency({
         client,
         mainPartnerId: auth.user.mainPartnerId,
       });
-      let saleCurrencyId = partnerCurrency?.id ?? null;
-      if (!saleCurrencyId) {
-        const defaultCurrency = await findDefaultCurrency(client);
-        saleCurrencyId = defaultCurrency?.id ?? null;
-      }
-      if (!saleCurrencyId) {
+      if (!defaultSaleCurrency) {
         return {
           error: true,
           message: await t(
-            "No currency is configured for this publisher and the fallback currency '{0}' is missing in AOS.",
-            DEFAULT_CURRENCY_CODE,
+            "Marketplace isn't configured: no currency resolvable for new listings. Contact your admin.",
           ),
         };
       }
-      const code = `mkt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const slug = slugify(payload.name);
-      const created = await client.aOSProduct.create({
+      const created = await client.aOSMarketplaceProduct.create({
         select: {id: true},
         data: {
           ...productData,
-          // TODO: revisit — base_product.dtype is NOT NULL and goovee
-          // doesn't default it from the schema entity name; hardcoded
-          // here so creates don't fail with a constraint violation.
-          dtype: 'Product',
-          code,
           slug,
-          fullName: `[${code}] ${payload.name}`,
-          isMarketPlace: true,
+          /* Seed inAti from the workspace's backing product so the
+           * salePrice the user just typed is interpreted in the same
+           * basis as the configured backing product. Admin can flip it
+           * later per-MP if needed. */
+          inAti:
+            auth.workspace.config.defaultProductForMarketplace?.inAti ?? false,
+          saleCurrency: {select: {id: defaultSaleCurrency.id}},
+          publisher: {select: {id: auth.user.mainPartnerId}},
+          createdByPartner: {select: {id: auth.user.mainPartnerId}},
+          product: {select: {id: backingProductId}},
           portalWorkspace: {select: {id: auth.workspace.id}},
-          defaultSupplierPartner: {select: {id: auth.user.mainPartnerId}},
-          marketplaceCreatedBy: {select: {id: auth.user.id}},
-          saleCurrency: {select: {id: saleCurrencyId}},
-          unit: {select: {id: priceDefaults.unit.id}},
-          productFamily: {select: {id: priceDefaults.productFamily.id}},
-          inAti: priceDefaults.inAti,
-          productTypeSelect: 'service',
-          sellable: true,
-          purchasable: false,
+          categorySet: {
+            select: payload.categoryIds.map(id => ({id})),
+          },
           averageRating: new BigDecimal('0'),
           ratingCount: 0,
           installCount: 0,

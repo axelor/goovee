@@ -8,10 +8,6 @@
       "name": "name"
     },
     {
-      "type": "String",
-      "name": "code"
-    },
-    {
       "type": "Boolean",
       "name": "isFeatured"
     },
@@ -58,18 +54,6 @@
     {
       "name": "slug",
       "type": "String"
-    },
-    {
-      "type": "String",
-      "name": "colorTheme"
-    },
-    {
-      "type": "String",
-      "name": "iconCode"
-    },
-    {
-      "type": "Boolean",
-      "name": "forMarketPlace"
     }
   ]
 }

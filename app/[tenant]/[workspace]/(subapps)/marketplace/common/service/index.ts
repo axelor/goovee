@@ -43,7 +43,7 @@ export async function createMarketplaceOrder({
     currencyCode: cart.currencyCode,
     invocingPartnerAddressId: invoicingAddressId,
     items: cart.items.map(item => ({
-      productId: item.productId,
+      marketplaceProductId: item.productId,
       priceAti: item.priceAti,
     })),
     paidAmount: String(paidAmount),

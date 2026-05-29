@@ -1,5 +1,5 @@
 import {SUBAPP_CODES} from '@/constants';
-import type {AOSProduct} from '@/goovee/.generated/models';
+import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import {t, tattr} from '@/locale/server';
 import type {OverlayColor} from '@/types';
 import type {NullableValues} from '@/types/util';
@@ -126,7 +126,7 @@ export default async function Page(props: {
 
   const getOrderBy = (
     sortValue: 'popular' | 'newest' | 'rating',
-  ): OrderByOptions<AOSProduct> => {
+  ): OrderByOptions<AOSMarketplaceProduct> => {
     switch (sortValue) {
       case 'newest':
         return {createdOn: 'DESC'};
@@ -150,9 +150,9 @@ export default async function Page(props: {
     mainPartnerId: auth.user?.mainPartnerId,
     take: limit,
     skip: getSkip(limit, page),
-    where: and<AOSProduct>([
+    where: and<AOSMarketplaceProduct>([
       type !== 'all' && {marketplaceTypeSelect: type as MARKETPLACE_TYPE},
-      category && {productCategory: {id: category, forMarketPlace: true}},
+      category && {categorySet: {id: category}},
       priceFilter,
     ]),
     orderBy: getOrderBy(sort),

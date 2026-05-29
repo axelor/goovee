@@ -10,6 +10,7 @@ import type {
   CompatibilityVersion,
   ListCategory,
   ListLicense,
+  Currency,
 } from '../../../../orm';
 import {ProductFormDialog} from '../../dialogs/product-form-dialog';
 
@@ -21,7 +22,7 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  currencySymbol?: string | null;
+  newListingCurrency: Cloned<Currency> | null;
   inAti: boolean;
   defaultType?: MARKETPLACE_TYPE;
 };
@@ -34,7 +35,7 @@ export function PublishNewButton({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
-  currencySymbol,
+  newListingCurrency,
   inAti,
   defaultType,
 }: Props) {
@@ -59,7 +60,7 @@ export function PublishNewButton({
         compatibilityVersions={compatibilityVersions}
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}
-        currencySymbol={currencySymbol ?? null}
+        listingCurrency={newListingCurrency}
         inAti={inAti}
         defaultType={defaultType}
       />

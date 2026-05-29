@@ -57,7 +57,7 @@ export async function saveReview(
     const matchingVersion = await client.aOSMarketplaceProductVersion.findOne({
       where: {
         id: payload.reviewedVersionId,
-        product: {id: payload.productId},
+        marketplaceProduct: {id: payload.productId},
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       },
       select: {id: true},
@@ -97,7 +97,7 @@ export async function saveReview(
       const created = await client.aOSMarketplaceReview.create({
         select: {id: true},
         data: {
-          product: {select: {id: payload.productId}},
+          marketplaceProduct: {select: {id: payload.productId}},
           author: {select: {id: auth.user.id}},
           rating: payload.rating,
           reviewComment: payload.reviewComment ?? null,

@@ -15,7 +15,7 @@ export async function findCartProducts({
   mainPartnerId: string;
   productIds: string[];
 }) {
-  return client.aOSProduct.find({
+  const products = await client.aOSMarketplaceProduct.find({
     where: withProductAccessFilter(workspace)({id: {in: productIds}}),
     select: {
       id: true,
@@ -23,12 +23,22 @@ export async function findCartProducts({
       name: true,
       ...priceSelectFields,
       currentVersion: {id: true, statusSelect: true},
-      marketplaceProductPurchaseList: {
-        where: {partner: {id: mainPartnerId}},
-        select: {id: true},
-      },
     },
   });
+  const owned = await client.aOSMarketplaceProductPurchase.find({
+    where: {
+      partner: {id: mainPartnerId},
+      marketplaceProduct: {id: {in: productIds}},
+    },
+    select: {marketplaceProduct: {id: true}},
+  });
+  const ownedIds = new Set(
+    owned.map(o => o.marketplaceProduct?.id).filter(Boolean) as string[],
+  );
+  return products.map(p => ({
+    ...p,
+    marketplaceProductPurchaseList: ownedIds.has(p.id) ? [{id: p.id}] : [],
+  }));
 }
 
 export type CartProductAvailability = Awaited<
@@ -46,17 +56,27 @@ export async function findCartProductsAvailability({
   mainPartnerId: string;
   productIds: string[];
 }) {
-  return client.aOSProduct.find({
+  const products = await client.aOSMarketplaceProduct.find({
     where: withProductAccessFilter(workspace)({id: {in: productIds}}),
     select: {
       id: true,
       slug: true,
       name: true,
       currentVersion: {id: true},
-      marketplaceProductPurchaseList: {
-        where: {partner: {id: mainPartnerId}},
-        select: {id: true},
-      },
     },
   });
+  const owned = await client.aOSMarketplaceProductPurchase.find({
+    where: {
+      partner: {id: mainPartnerId},
+      marketplaceProduct: {id: {in: productIds}},
+    },
+    select: {marketplaceProduct: {id: true}},
+  });
+  const ownedIds = new Set(
+    owned.map(o => o.marketplaceProduct?.id).filter(Boolean) as string[],
+  );
+  return products.map(p => ({
+    ...p,
+    marketplaceProductPurchaseList: ownedIds.has(p.id) ? [{id: p.id}] : [],
+  }));
 }

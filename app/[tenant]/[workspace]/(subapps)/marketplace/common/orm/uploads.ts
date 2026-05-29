@@ -6,6 +6,7 @@ import path from 'path';
 import {Readable} from 'stream';
 import {pipeline} from 'stream/promises';
 import type {ReadableStream as NodeReadableStream} from 'stream/web';
+
 // ---- BUNDLE UPLOAD ---- //
 
 /* Streams an uploaded file to the tenant's storage directory and creates
@@ -35,12 +36,14 @@ async function uploadFile(file: File, storage: string, client: Client) {
   return meta.id;
 }
 
-/* Reconciles a product's screenshot list against the form submission:
- *   - Deletes any AOSProductPicture rows whose ids aren't in `keepImageIds`.
+/* Reconciles a marketplace product's screenshot list against the form
+ * submission:
+ *   - Deletes any AOSMarketplaceProductPicture rows whose ids aren't in
+ *     `keepImageIds`.
  *   - Uploads each file in `newImages` as a MetaFile + creates a fresh
- *     AOSProductPicture linked to the product.
- * Called from saveProduct after the product row exists. The form-level
- * cap (10 images / 5 MB each) has already been enforced by Zod. */
+ *     AOSMarketplaceProductPicture linked to the marketplace product.
+ * Called from saveProduct after the MP row exists. The form-level cap
+ * (10 images / 5 MB each) has already been enforced by Zod. */
 export async function syncProductImages({
   client,
   productId,
@@ -54,22 +57,22 @@ export async function syncProductImages({
   keepImageIds: string[];
   newImages: File[];
 }) {
-  const existing = await client.aOSProductPicture.find({
-    where: {product: {id: productId}},
+  const existing = await client.aOSMarketplaceProductPicture.find({
+    where: {marketplaceProduct: {id: productId}},
     select: {id: true, picture: {id: true}},
   });
   const keep = new Set(keepImageIds);
   const toDelete = existing.filter(row => !keep.has(row.id));
   if (toDelete.length) {
-    await client.aOSProductPicture.deleteAll({
+    await client.aOSMarketplaceProductPicture.deleteAll({
       where: {id: {in: toDelete.map(row => row.id)}},
     });
   }
   for (const file of newImages) {
     const metaId = await uploadFile(file, storage, client);
-    await client.aOSProductPicture.create({
+    await client.aOSMarketplaceProductPicture.create({
       data: {
-        product: {select: {id: productId}},
+        marketplaceProduct: {select: {id: productId}},
         picture: {select: {id: metaId}},
       },
       select: {id: true},
@@ -77,8 +80,8 @@ export async function syncProductImages({
   }
 }
 
-/* Streams an uploaded `.zip` to the tenant's storage directory and creates
- * the matching `aOSMetaFile` row. Returns the new file id. */
+/* Streams an uploaded `.zip` to the tenant's storage directory and
+ * creates the matching `aOSMetaFile` row. Returns the new file id. */
 export async function uploadBundle(
   file: File,
   storage: string,

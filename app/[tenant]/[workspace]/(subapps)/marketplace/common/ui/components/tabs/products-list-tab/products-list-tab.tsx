@@ -19,6 +19,7 @@ import {
   type CompatibilityVersion,
   type ListCategory,
   type ListLicense,
+  type Currency,
 } from '../../../../orm';
 import {MyProductsTable} from '../../tables/my-products-table';
 
@@ -32,7 +33,7 @@ type ProductsListTabProps = {
   compatibilityVersions: CompatibilityVersion[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  currencySymbol: string | null;
+  newListingCurrency: Currency | null;
   inAti: boolean;
   page?: number;
   totalPages?: number;
@@ -49,7 +50,7 @@ export async function ProductsListTab({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
-  currencySymbol,
+  newListingCurrency,
   inAti,
   page = 1,
   totalPages = 1,
@@ -71,7 +72,7 @@ export async function ProductsListTab({
         compatibilityVersions={clone(compatibilityVersions)}
         requiresReview={requiresReview}
         allowToPublish={allowToPublish}
-        currencySymbol={currencySymbol}
+        newListingCurrency={clone(newListingCurrency)}
         inAti={inAti}
       />
 

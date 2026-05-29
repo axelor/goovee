@@ -446,17 +446,8 @@
     },
     {
       "type": "ManyToOne",
-      "name": "marketplaceDefaultUnit",
-      "target": "AOSUnit"
-    },
-    {
-      "type": "ManyToOne",
-      "name": "marketplaceDefaultProductFamily",
-      "target": "AOSProductFamily"
-    },
-    {
-      "type": "Boolean",
-      "name": "marketplaceInAti"
+      "name": "defaultProductForMarketplace",
+      "target": "AOSProduct"
     }
   ]
 }

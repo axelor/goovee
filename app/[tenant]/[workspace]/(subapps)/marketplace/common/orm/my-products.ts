@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {AOSProduct} from '@/goovee/.generated/models';
+import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
@@ -29,26 +29,29 @@ export async function findMyProducts({
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   type?: MARKETPLACE_TYPE;
-} & QueryProps<AOSProduct>) {
-  const products = await client.aOSProduct.find({
+} & QueryProps<AOSMarketplaceProduct>) {
+  // "My" === published by this partner; scoped by withMyProductAccessFilter.
+  const products = await client.aOSMarketplaceProduct.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
     where: withMyProductAccessFilter(
       workspace,
       mainPartnerId,
-    )(and<AOSProduct>([type && {marketplaceTypeSelect: type}, where])),
+    )(
+      and<AOSMarketplaceProduct>([
+        type && {marketplaceTypeSelect: type},
+        where,
+      ]),
+    ),
     select: {
       id: true,
       slug: true,
       name: true,
       description: true,
-      code: true,
-      picture: {id: true},
-      thumbnailImage: {id: true},
       marketplaceTypeSelect: true,
-      marketplaceCoverStyle: true,
-      marketplaceIconCode: true,
+      coverStyle: true,
+      iconCode: true,
       averageRating: true,
       ratingCount: true,
       installCount: true,
@@ -60,7 +63,9 @@ export async function findMyProducts({
   const priceContext = await buildPriceContext({
     client,
     mainPartnerId,
-    productCurrencyCodes: products.map(p => p.saleCurrency?.code),
+    productCurrencyCodes: products.map(
+      p => p.saleCurrency?.code ?? p.product?.saleCurrency?.code,
+    ),
   });
 
   return products.map(p => withPrice(p, workspace, priceContext));
@@ -81,27 +86,26 @@ export async function findMyProductWithVersions({
   client: Client;
   workspace: PortalWorkspaceWithConfig;
 }) {
-  const product = await client.aOSProduct.findOne({
+  return client.aOSMarketplaceProduct.findOne({
     where: withMyProductAccessFilter(workspace, mainPartnerId)({id: productId}),
     select: {
       id: true,
       version: true,
       name: true,
-      code: true,
       slug: true,
       description: true,
       longDescription: true,
       marketplaceTypeSelect: true,
-      marketplaceCoverStyle: true,
-      marketplaceIconCode: true,
+      coverStyle: true,
+      iconCode: true,
       documentationUrl: true,
       supportIssuesUrl: true,
       supportContactUrl: true,
-      productCategory: {id: true, name: true},
-      marketplaceLicense: {id: true},
+      categorySet: {select: {id: true, name: true}},
+      license: {id: true},
       currentVersion: {id: true},
       salePrice: true,
-      portalImageList: {
+      pictureList: {
         select: {id: true, picture: {id: true}},
       },
       versionList: {
@@ -121,8 +125,6 @@ export async function findMyProductWithVersions({
       },
     },
   });
-
-  return product;
 }
 
 export type CompatibilityVersion = Awaited<
@@ -147,7 +149,7 @@ export async function countMyProducts({
   workspace: PortalWorkspaceWithConfig;
   type?: MARKETPLACE_TYPE;
 }): Promise<number> {
-  const count = await client.aOSProduct.count({
+  const count = await client.aOSMarketplaceProduct.count({
     where: withMyProductAccessFilter(
       workspace,
       mainPartnerId,
@@ -169,13 +171,9 @@ export async function isProductFavorited({
   const favorite = await client.aOSPartner.findOne({
     where: {
       id: userId,
-      favouriteProducts: {
-        id: productId,
-      },
+      favouriteMarketplaceProducts: {id: productId},
     },
-    select: {
-      id: true,
-    },
+    select: {id: true},
   });
 
   return !!favorite;

@@ -1,7 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {
+  AOSMarketplaceProduct,
   AOSMarketplaceProductVersion,
-  AOSProduct,
 } from '@/goovee/.generated/models';
 import {getFileSizeText} from '@/utils/files';
 import {sql} from '@/utils/template-string';
@@ -13,7 +13,6 @@ import path from 'node:path';
 import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {syncProductVersionPointers} from '../../orm/versions';
-import {slugify} from '../../utils/slugify';
 import {parseVersionNumber} from '../../utils/version-number';
 import {
   findCategoryByCode,
@@ -32,10 +31,13 @@ import type {
 export type WorkspaceContext = {
   workspaceId: string;
   supplierPartnerId: string;
+  /** The workspace's backing real Product (PortalAppConfig.defaultProductForMarketplace).
+   *  Every seeded MarketplaceProduct points at this; tax/currency/unit
+   *  live there and the marketplace product only overrides salePrice/inAti. */
+  backingProductId: string;
   defaults: {
-    unitId: string;
-    productFamilyId: string;
     inAti: boolean;
+    saleCurrencyId: string;
   };
 };
 
@@ -80,34 +82,23 @@ function getRandomLicenseCode(
 export async function upsertCategory(
   client: Client,
   data: CategorySeed,
-  workspaceId: string,
+  _workspaceId: string,
 ) {
-  const existing = await client.aOSProductCategory.findOne({
+  const existing = await client.aOSMarketplaceCategory.findOne({
     where: {code: data.code},
     select: {id: true, version: true},
   });
   const payload = {
     code: data.code,
     name: data.name,
-    /* `slug` is derived from the name (lower-kebab) so the URL surface
-     * for category pages stays readable. AOS doesn't enforce a unique
-     * constraint, but two categories with the same slug would collide
-     * downstream so the seed-validator would catch that case. */
-    slug: slugify(data.name),
-    forMarketPlace: true,
-    iconCode: data.iconCode ?? null,
-    colorTheme: data.colorTheme ?? null,
-    /* Scope the category to the workspace passed via --workspace. The
-     * marketplace's category-access filter already keys off this. */
-    portalWorkspace: {select: {id: workspaceId}},
   };
   if (existing) {
-    return client.aOSProductCategory.update({
+    return client.aOSMarketplaceCategory.update({
       data: {...payload, id: existing.id, version: existing.version},
       select: {id: true, code: true},
     });
   }
-  return client.aOSProductCategory.create({
+  return client.aOSMarketplaceCategory.create({
     data: payload,
     select: {id: true, code: true},
   });
@@ -210,8 +201,8 @@ export async function upsertSharedBundleMetaFile({
  * instead of accepting per-product paths in the JSON. Uploads each file
  * to storage exactly once (deterministic filePath under the
  * SCREENSHOT_PREFIX) and returns the two MetaFile ids; subsequent
- * AOSProductPicture rows just link to these shared ids so a fleet of
- * demo products doesn't bloat the metafile table. */
+ * AOSMarketplaceProductPicture rows just link to these shared ids so a
+ * fleet of demo products doesn't bloat the metafile table. */
 const SHARED_SCREENSHOT_ASSETS = [
   'pwa/screenshots/desktop-screenshot.png',
   'pwa/screenshots/mobile-screenshot.png',
@@ -262,11 +253,12 @@ export async function upsertSharedScreenshotMetaFiles({
   return ids;
 }
 
-/* Replaces all seeded screenshot links for a product with a fresh set
- * of length `desiredMetaIds.length`. Allowed to repeat the same metafile
- * across rows — the demo intentionally cycles through the same two
- * shared images to vary the per-product screenshot count. Idempotent
- * via blanket-delete-then-create scoped to our SCREENSHOT_PREFIX. */
+/* Replaces all seeded screenshot links for a marketplace product with a
+ * fresh set of length `desiredMetaIds.length`. Allowed to repeat the
+ * same metafile across rows — the demo intentionally cycles through the
+ * same two shared images to vary the per-product screenshot count.
+ * Idempotent via blanket-delete-then-create scoped to our
+ * SCREENSHOT_PREFIX. */
 export async function upsertScreenshots({
   client,
   productId,
@@ -277,16 +269,16 @@ export async function upsertScreenshots({
   /** Ordered list of AOSMetaFile ids to link; duplicates allowed. */
   desiredMetaIds: string[];
 }) {
-  await client.aOSProductPicture.deleteAll({
+  await client.aOSMarketplaceProductPicture.deleteAll({
     where: {
-      product: {id: productId},
+      marketplaceProduct: {id: productId},
       picture: {filePath: {like: `${SCREENSHOT_PREFIX}-%`}},
     },
   });
   for (const metaId of desiredMetaIds) {
-    await client.aOSProductPicture.create({
+    await client.aOSMarketplaceProductPicture.create({
       data: {
-        product: {select: {id: productId}},
+        marketplaceProduct: {select: {id: productId}},
         picture: {select: {id: metaId}},
       },
       select: {id: true},
@@ -298,77 +290,65 @@ export async function upsertProduct(
   client: Client,
   ctx: WorkspaceContext,
   product: ProductSeed,
-  defaultSupplierPartnerId: string,
-  saleCurrencyId: string,
+  defaultPublisherPartnerId: string,
   licenseCodes: string[] = [],
 ) {
   const category = await findCategoryByCode(client, product.categoryCode);
-  const supplierPartnerId = product.supplierEmail
+  const publisherPartnerId = product.supplierEmail
     ? (await findCustomerPartnerByEmail(client, product.supplierEmail)).id
-    : defaultSupplierPartnerId;
+    : defaultPublisherPartnerId;
 
   const slug = product.slug;
-
-  const existing = await client.aOSProduct.findOne({
-    where: {code: product.code},
+  /* Marketplace products are identified across re-runs by slug
+   * (`mkt-demo-…`). The schema has no `code` field — slug is the stable
+   * idempotency key here, mirroring what reset.ts uses for cleanup. */
+  const existing = await client.aOSMarketplaceProduct.findOne({
+    where: {slug},
     select: {id: true, version: true},
   });
 
   /* Randomly select a license code */
   const selectedLicenseCode = getRandomLicenseCode(product.code, licenseCodes);
 
-  const data: CreateArgs<AOSProduct> = {
-    // TODO: revisit how dtype should be populated.
-    // base_product.dtype is the single-table inheritance discriminator
-    // and is NOT NULL at the DB level. AOS uses 'Product' for plain
-    // products and 'ProductCompany' for per-company overlays; we
-    // hardcode 'Product' here, but ideally goovee ORM would default it
-    // from the schema entity name.
-    dtype: 'Product',
-    code: product.code,
+  const data: CreateArgs<AOSMarketplaceProduct> = {
     slug,
     name: product.name,
-    /* AOS computes `fullName` as `[code] name` in ProductBaseRepository.save();
-     * goovee writes bypass that hook, so we have to set it explicitly. */
-    fullName: `[${product.code}] ${product.name}`,
     description: product.description ?? null,
     longDescription: product.longDescription ?? null,
     marketplaceTypeSelect: product.type,
-    marketplaceCoverStyle: product.coverStyle,
-    marketplaceIconCode: getRandomIconCode(product.code),
+    coverStyle: product.coverStyle,
+    iconCode: getRandomIconCode(product.code),
     documentationUrl: product.documentationUrl ?? null,
     supportIssuesUrl: product.supportIssuesUrl ?? null,
     supportContactUrl: product.supportContactUrl ?? null,
     installCount: product.installCount ?? 0,
     averageRating: new BigDecimal('0'),
     ratingCount: 0,
-    productCategory: {select: {id: category.id}},
-    marketplaceLicense: {select: {code: selectedLicenseCode}},
+    categorySet: {select: [{id: category.id}]},
+    ...(selectedLicenseCode && {
+      license: {select: {code: selectedLicenseCode}},
+    }),
     salePrice: new BigDecimal(String(product.price)),
-    saleCurrency: {select: {id: saleCurrencyId}},
-    unit: {select: {id: ctx.defaults.unitId}},
-    productFamily: {select: {id: ctx.defaults.productFamilyId}},
     inAti: ctx.defaults.inAti,
-    productTypeSelect: 'service',
-    sellable: true,
-    purchasable: false,
-    isMarketPlace: true,
+    saleCurrency: {select: {id: ctx.defaults.saleCurrencyId}},
+    product: {select: {id: ctx.backingProductId}},
     portalWorkspace: {select: {id: ctx.workspaceId}},
-    defaultSupplierPartner: {select: {id: supplierPartnerId}},
+    publisher: {select: {id: publisherPartnerId}},
+    createdByPartner: {select: {id: publisherPartnerId}},
   };
 
   if (existing) {
-    await client.aOSProduct.update({
+    await client.aOSMarketplaceProduct.update({
       data: {...data, id: existing.id, version: existing.version},
       select: {id: true},
     });
-    return {id: existing.id, supplierPartnerId};
+    return {id: existing.id, supplierPartnerId: publisherPartnerId};
   }
-  const created = await client.aOSProduct.create({
+  const created = await client.aOSMarketplaceProduct.create({
     data,
     select: {id: true},
   });
-  return {id: created.id, supplierPartnerId};
+  return {id: created.id, supplierPartnerId: publisherPartnerId};
 }
 
 export async function upsertVersion({
@@ -408,7 +388,7 @@ export async function upsertVersion({
 
   const existing = await client.aOSMarketplaceProductVersion.findOne({
     where: {
-      product: {id: productId},
+      marketplaceProduct: {id: productId},
       vMajor: parts.vMajor,
       vMinor: parts.vMinor,
       vPatch: parts.vPatch,
@@ -419,7 +399,7 @@ export async function upsertVersion({
   });
 
   const data: CreateArgs<AOSMarketplaceProductVersion> = {
-    product: {select: {id: productId}},
+    marketplaceProduct: {select: {id: productId}},
     vMajor: parts.vMajor,
     vMinor: parts.vMinor,
     vPatch: parts.vPatch,
@@ -444,8 +424,8 @@ export async function upsertVersion({
   });
 }
 
-/* Promotes the product's `currentVersion` and `latestVersion` pointers
- * (matches what `saveVersion` does in the live app). */
+/* Promotes the marketplace product's `currentVersion` and `latestVersion`
+ * pointers (matches what `saveVersion` does in the live app). */
 export async function refreshCurrentVersion(client: Client, productId: string) {
   await syncProductVersionPointers({client, productId});
 }
@@ -467,7 +447,7 @@ export async function upsertReview({
 }) {
   const author = await findPartnerByEmail(client, authorEmail);
   const existing = await client.aOSMarketplaceReview.findOne({
-    where: {product: {id: productId}, author: {id: author.id}},
+    where: {marketplaceProduct: {id: productId}, author: {id: author.id}},
     select: {id: true, version: true},
   });
   const payload = {
@@ -486,7 +466,7 @@ export async function upsertReview({
   return client.aOSMarketplaceReview.create({
     data: {
       ...payload,
-      product: {select: {id: productId}},
+      marketplaceProduct: {select: {id: productId}},
       author: {select: {id: author.id}},
     },
     select: {id: true},
@@ -494,29 +474,29 @@ export async function upsertReview({
 }
 
 /* Rebuilds (averageRating, ratingCount) from review rows for a set of
- * products in one raw UPDATE — avoids the read-modify-write race that
- * per-row helpers like `addRating`/`replaceRating` would cause across
- * idempotent re-runs. */
+ * marketplace products in one raw UPDATE — avoids the read-modify-write
+ * race that per-row helpers like `addRating`/`replaceRating` would cause
+ * across idempotent re-runs. */
 export async function recomputeRatings(client: Client, productIds: string[]) {
   if (productIds.length === 0) return;
   await client.$raw(
     sql`
-      UPDATE base_product p
+      UPDATE portal_marketplace_product p
       SET
         average_rating = COALESCE(s.avg, 0),
         rating_count = COALESCE(s.cnt, 0)
       FROM
         (
           SELECT
-            product AS pid,
+            marketplace_product AS pid,
             AVG(rating)::numeric(5, 2) AS avg,
             COUNT(*) AS cnt
           FROM
             portal_marketplace_review
           WHERE
-            product = ANY ($1::BIGINT[])
+            marketplace_product = ANY ($1::BIGINT[])
           GROUP BY
-            product
+            marketplace_product
         ) s
       WHERE
         p.id = ANY ($1::BIGINT[])

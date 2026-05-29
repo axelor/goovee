@@ -75,7 +75,7 @@ export async function saveVersion(
    * same (vMajor, vMinor, vPatch, vPreRelease) tuple. */
   const duplicate = await client.aOSMarketplaceProductVersion.findOne({
     where: {
-      product: {id: payload.productId},
+      marketplaceProduct: {id: payload.productId},
       vMajor: parts.vMajor,
       vMinor: parts.vMinor,
       vPatch: parts.vPatch,
@@ -195,7 +195,7 @@ export async function saveVersion(
           statusSelect: effectiveStatus,
           bundleFile: {select: {id: uploadedFileId}},
           compatibilitySet: {select: compatRefs},
-          product: {select: {id: payload.productId}},
+          marketplaceProduct: {select: {id: payload.productId}},
           dateOfSubmission: new Date(),
           ...(effectiveStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED && {
             dateOfPublish: new Date(),
@@ -256,7 +256,7 @@ export async function unpublishVersion(
   }
 
   const current = await client.aOSMarketplaceProductVersion.findOne({
-    where: {id: versionId, product: {id: productId}},
+    where: {id: versionId, marketplaceProduct: {id: productId}},
     select: {id: true, version: true, statusSelect: true},
   });
   if (!current) {

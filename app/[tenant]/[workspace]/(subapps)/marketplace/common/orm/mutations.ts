@@ -32,10 +32,10 @@ export async function updateVersionStatus({
 
 // ---- PARTNER FAVORITES ---- //
 
-/** Sets a product's presence on the partner's favouriteProducts list to
- *  the requested state. Pass `isFavorite: true` to add, `false` to remove.
- *  Caller is expected to skip the call when the desired state already
- *  matches current state. */
+/** Sets a marketplace product's presence on the partner's
+ *  favouriteMarketplaceProducts list to the requested state. Pass
+ *  `isFavorite: true` to add, `false` to remove. Caller is expected to
+ *  skip the call when the desired state already matches current state. */
 export async function setPartnerFavorite({
   client,
   userId,
@@ -53,7 +53,7 @@ export async function setPartnerFavorite({
     data: {
       id: userId,
       version,
-      favouriteProducts: isFavorite
+      favouriteMarketplaceProducts: isFavorite
         ? {select: {id: productId}}
         : {remove: productId},
     },
@@ -75,7 +75,7 @@ export async function createDownloadRecord({
   partnerId?: ID | null;
 }): Promise<ORMRecord> {
   const data: CreateArgs<AOSMarketplaceDownload> = {
-    product: {select: {id: String(productId)}},
+    marketplaceProduct: {select: {id: String(productId)}},
     productVersion: {select: {id: String(versionId)}},
     ...(partnerId && {partner: {select: {id: String(partnerId)}}}),
   };
@@ -97,7 +97,7 @@ export async function incrementInstallCount({
 }) {
   await client.$raw(
     sql`
-      UPDATE base_product
+      UPDATE portal_marketplace_product
       SET
         install_count = COALESCE(install_count, 0) + 1
       WHERE

@@ -16,6 +16,7 @@ import type {
   ListCategory,
   ListLicense,
   MyProductWithVersions,
+  Currency,
 } from '../../../../orm';
 import {ProductForm} from '../../forms/product-form';
 import {VersionForm} from '../../forms/version-form';
@@ -34,7 +35,7 @@ type ProductFormDialogProps = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  currencySymbol: string | null;
+  listingCurrency: Cloned<Currency> | null;
   inAti: boolean;
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
@@ -51,7 +52,7 @@ export function ProductFormDialog({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
-  currencySymbol,
+  listingCurrency,
   inAti,
   initial,
   defaultType,
@@ -135,7 +136,7 @@ export function ProductFormDialog({
               licenses={licenses}
               initial={initial}
               defaultType={defaultType}
-              currencySymbol={currencySymbol}
+              listingCurrency={listingCurrency}
               inAti={inAti}
               onSaved={id => setProductId(id)}
               onContinue={() => setStep('version')}

@@ -106,25 +106,32 @@ export async function validateCart({
   const priceContext = await buildPriceContext({
     client,
     mainPartnerId,
-    productCurrencyCodes: products.map(p => p.saleCurrency?.code),
+    productCurrencyCodes: products.map(
+      mp => mp.saleCurrency?.code ?? mp.product?.saleCurrency?.code,
+    ),
   });
 
   const items: ValidatedCartItem[] = [];
   let currency: ComputedPrice['currency'] | null = null;
-  for (const product of products) {
-    const unavailable = await checkAvailability(product);
+  for (const mp of products) {
+    const unavailable = await checkAvailability(mp);
     if (unavailable) return {error: true as const, message: unavailable};
     const price = computePrice({
-      product,
-      priceContext: priceContext,
+      product: mp.product,
+      priceContext,
       company: workspace.config.company,
+      priceOverride: {
+        salePrice: mp.salePrice,
+        saleCurrency: mp.saleCurrency,
+        inAti: mp.inAti,
+      },
     });
     if (price.ati <= 0) {
       return {
         error: true,
         message: await t(
           '{0} is not a paid product.',
-          product.name ?? product.slug ?? product.id,
+          mp.name ?? mp.slug ?? mp.id,
         ),
       };
     }
@@ -133,7 +140,7 @@ export async function validateCart({
         error: true,
         message: await t(
           '{0} could not be priced in a supported currency.',
-          product.name ?? product.slug ?? product.id,
+          mp.name ?? mp.slug ?? mp.id,
         ),
       };
     }
@@ -147,9 +154,9 @@ export async function validateCart({
       };
     }
     items.push({
-      productId: product.id,
-      productSlug: product.slug ?? '',
-      name: product.name ?? '',
+      productId: mp.id,
+      productSlug: mp.slug ?? '',
+      name: mp.name ?? '',
       priceAti: price.ati,
       scale: price.currency.numberOfDecimals,
       currencyCode: price.currency.code,

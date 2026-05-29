@@ -222,8 +222,8 @@
     },
     {
       "type": "ManyToMany",
-      "name": "favouriteProducts",
-      "target": "AOSProduct"
+      "name": "favouriteMarketplaceProducts",
+      "target": "AOSMarketplaceProduct"
     },
     {
       "type": "ManyToOne",

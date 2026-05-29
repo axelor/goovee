@@ -5,14 +5,14 @@ import {versionNumberFields, type QueryProps} from './helpers';
 
 // ---- PURCHASES / OWNERSHIP ---- //
 
-/* Marketplace ownership records. The unique (partner, product) constraint
- * on the AOS side makes `recordPurchases` and `attachOrderToPurchases`
- * idempotent — safe to retry from the success page or a backfill job.
+/* Marketplace ownership records. The unique (partner, marketplaceProduct)
+ * constraint on the AOS side makes `recordPurchases` and
+ * `attachOrderToPurchases` idempotent — safe to retry from the success
+ * page or a backfill job.
  *
  * The `invoice` field is nullable: the goovee tx writes the access row
  * immediately, and the post-commit AOS HTTP call back-attaches the
- * invoice id once the SO/Invoice/InvoicePayment have been created. See
- * docs/marketplace-checkout-plan.md for the full rationale. */
+ * invoice id once the SO/Invoice/InvoicePayment have been created. */
 
 export type MarketplacePurchase = Awaited<
   ReturnType<typeof findPurchases>
@@ -42,14 +42,14 @@ export async function findPurchases({
     select: {
       id: true,
       purchasedAt: true,
-      product: {
+      marketplaceProduct: {
         id: true,
         slug: true,
         name: true,
         description: true,
         marketplaceTypeSelect: true,
-        marketplaceIconCode: true,
-        marketplaceCoverStyle: true,
+        iconCode: true,
+        coverStyle: true,
         currentVersion: {id: true, ...versionNumberFields},
       },
       invoice: {id: true, invoiceId: true},
@@ -58,9 +58,10 @@ export async function findPurchases({
   });
 }
 
-/* Returns the purchase-row ids for every product in `productIds` owned by
- * the partner (newly created here plus any already-owned). Callers use these
- * to scope the success page to exactly this checkout. */
+/* Returns the purchase-row ids for every marketplace product in
+ * `productIds` owned by the partner (newly created here plus any
+ * already-owned). Callers use these to scope the success page to
+ * exactly this checkout. */
 export async function recordPurchases(
   client: Client,
   partnerId: ID,
@@ -71,12 +72,12 @@ export async function recordPurchases(
   const existing = await client.aOSMarketplaceProductPurchase.find({
     where: {
       partner: {id: partnerId},
-      product: {id: {in: productIds}},
+      marketplaceProduct: {id: {in: productIds}},
     },
-    select: {product: {id: true}},
+    select: {marketplaceProduct: {id: true}},
   });
   const existingIds = new Set(
-    existing.map(row => row.product?.id).filter(Boolean) as string[],
+    existing.map(row => row.marketplaceProduct?.id).filter(Boolean) as string[],
   );
   const missing = productIds.filter(id => !existingIds.has(id));
   const now = new Date();
@@ -85,15 +86,15 @@ export async function recordPurchases(
       await client.aOSMarketplaceProductPurchase.create({
         data: {
           partner: {select: {id: partnerId}},
-          product: {select: {id: productId}},
+          marketplaceProduct: {select: {id: productId}},
           ...(invoiceId ? {invoice: {select: {id: String(invoiceId)}}} : {}),
           purchasedAt: now,
         },
         select: {id: true},
       });
     } catch {
-      /* Unique (partner, product) violation from a concurrent insert.
-       * Already-owned is exactly the state we want, so swallow. */
+      /* Unique (partner, marketplaceProduct) violation from a concurrent
+       * insert. Already-owned is exactly the state we want, so swallow. */
     }
   }
   /* Re-read so the returned set is complete regardless of which rows were
@@ -101,7 +102,7 @@ export async function recordPurchases(
   const rows = await client.aOSMarketplaceProductPurchase.find({
     where: {
       partner: {id: partnerId},
-      product: {id: {in: productIds}},
+      marketplaceProduct: {id: {in: productIds}},
     },
     select: {id: true},
   });
@@ -118,7 +119,7 @@ export async function attachOrderToPurchases(
   const rows = await client.aOSMarketplaceProductPurchase.find({
     where: {
       partner: {id: partnerId},
-      product: {id: {in: productIds}},
+      marketplaceProduct: {id: {in: productIds}},
       invoice: {id: null},
     },
     select: {id: true, version: true},

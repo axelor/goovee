@@ -7,6 +7,7 @@ import {
   type CompatibilityVersion,
   type ListCategory,
   type ListLicense,
+  type Currency,
 } from '../../../../orm';
 import type {PortalWorkspaceWithConfig} from '../../../../utils/auth-helper';
 import {ProductsListTab} from '../products-list-tab';
@@ -15,7 +16,7 @@ type ProductsTabProps = {
   mainPartnerId: ID;
   client: Client;
   workspace: PortalWorkspaceWithConfig;
-  currencySymbol: string | null;
+  newListingCurrency: Currency | null;
   workspaceURI: string;
   workspaceURL: string;
   categories: ListCategory[];
@@ -30,7 +31,7 @@ export async function ProductsTab({
   mainPartnerId,
   client,
   workspace,
-  currencySymbol,
+  newListingCurrency,
   workspaceURI,
   workspaceURL,
   categories,
@@ -56,8 +57,8 @@ export async function ProductsTab({
       title={await t('Products')}
       requiresReview={workspace.config.requiresReview === true}
       allowToPublish={workspace.config.allowToPublish === true}
-      currencySymbol={currencySymbol}
-      inAti={workspace.config.marketplaceInAti === true}
+      newListingCurrency={newListingCurrency}
+      inAti={workspace.config.defaultProductForMarketplace?.inAti === true}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

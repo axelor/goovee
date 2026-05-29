@@ -9,6 +9,7 @@ import type {
   ListCategory,
   ListLicense,
   MyProductWithVersions,
+  Currency,
 } from '../../../../orm';
 import {ProductFormDialog} from '../../dialogs/product-form-dialog';
 
@@ -21,7 +22,7 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  currencySymbol: string | null;
+  listingCurrency: Cloned<Currency> | null;
   inAti: boolean;
 };
 
@@ -34,7 +35,7 @@ export function EditProductButton({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
-  currencySymbol,
+  listingCurrency,
   inAti,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -82,7 +83,7 @@ export function EditProductButton({
           compatibilityVersions={compatibilityVersions}
           requiresReview={requiresReview}
           allowToPublish={allowToPublish}
-          currencySymbol={currencySymbol}
+          listingCurrency={listingCurrency}
           inAti={inAti}
           initial={product}
         />

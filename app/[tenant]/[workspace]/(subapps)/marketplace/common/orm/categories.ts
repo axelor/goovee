@@ -1,5 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
-import type {AOSProductCategory} from '@/goovee/.generated/models';
+import type {AOSMarketplaceCategory} from '@/goovee/.generated/models';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import type {QueryProps} from './helpers';
 import {withCategoryAccessFilter} from './helpers';
@@ -18,21 +18,15 @@ export async function findProductCategories({
 }: {
   client: Client;
   workspace: PortalWorkspaceWithConfig;
-} & QueryProps<AOSProductCategory>) {
-  const categories = await client.aOSProductCategory.find({
+} & QueryProps<AOSMarketplaceCategory>) {
+  return client.aOSMarketplaceCategory.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
-    where: withCategoryAccessFilter(workspace)({
-      ...where,
-    }),
+    where: withCategoryAccessFilter(workspace)({...where}),
     select: {
       id: true,
       name: true,
-      colorTheme: true,
-      iconCode: true,
     },
   });
-
-  return categories;
 }

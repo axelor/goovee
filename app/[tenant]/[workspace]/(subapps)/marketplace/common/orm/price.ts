@@ -2,21 +2,30 @@ import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {computePrice, type ComputedPrice} from '../utils/price';
-import type {PriceableProduct} from './helpers';
+import {currencySelect, type PriceableMarketplaceProduct} from './helpers';
 import {Payload, SelectOptions} from '@goovee/orm';
 import {AOSTax} from '@/goovee/.generated/models';
 
-export function withPrice<T extends PriceableProduct>(
-  product: T,
+/* Marketplace listings fold their `salePrice` / `inAti` / `saleCurrency`
+ * into the price-compute via `priceOverride`. The backing AOSProduct
+ * (via `mp.product`) is still the source of tax / account-management /
+ * fallback currency — same path AOS takes on the SO line.  */
+export function withPrice<T extends PriceableMarketplaceProduct>(
+  mp: T,
   workspace: PortalWorkspaceWithConfig,
   priceContext: PriceContext,
 ): T & {price: ComputedPrice} {
   return {
-    ...product,
+    ...mp,
     price: computePrice({
-      product,
+      product: mp.product,
       priceContext,
       company: workspace.config.company,
+      priceOverride: {
+        salePrice: mp.salePrice,
+        saleCurrency: mp.saleCurrency,
+        inAti: mp.inAti,
+      },
     }),
   };
 }
@@ -165,7 +174,7 @@ export async function findPartnerFiscalPosition({
 export async function findDefaultCurrency(client: Client) {
   return client.aOSCurrency.findOne({
     where: {code: DEFAULT_CURRENCY_CODE},
-    select: {id: true, code: true, symbol: true, numberOfDecimals: true},
+    select: currencySelect,
   });
 }
 
@@ -180,8 +189,28 @@ export async function findPartnerCurrency({
   const partner = await client.aOSPartner.findOne({
     where: {id: mainPartnerId},
     select: {
-      currency: {id: true, code: true, symbol: true, numberOfDecimals: true},
+      currency: currencySelect,
     },
   });
   return partner?.currency ?? null;
+}
+
+/** Resolves the currency to use for a brand-new marketplace listing:
+ *  publisher's partner currency → app-wide default (`DEFAULT_CURRENCY_CODE`).
+ *  Single source of truth shared between the create form (display symbol)
+ *  and `saveProduct` (FK stamped on insert), so the price the supplier
+ *  types is interpreted in the same currency that gets persisted.
+ *  Existing listings keep their own `saleCurrency` — this helper is not
+ *  consulted on edit. */
+
+export async function resolveNewListingCurrency({
+  client,
+  mainPartnerId,
+}: {
+  client: Client;
+  mainPartnerId: string | null | undefined;
+}) {
+  const partnerCurrency = await findPartnerCurrency({client, mainPartnerId});
+  if (partnerCurrency) return partnerCurrency;
+  return findDefaultCurrency(client);
 }

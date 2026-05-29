@@ -8,13 +8,16 @@ import {parseArgs} from 'node:util';
  *
  * Scope: everything created by `run.ts` and nothing else. The seeded
  * rows are identified by stable prefixes:
- *   - AOSProduct.code        LIKE 'mkt-demo-%'
- *   - AOSMetaFile.filePath   LIKE 'mkt-demo-%'  (bundles + screenshots)
+ *   - AOSMarketplaceProduct.slug LIKE 'mkt-demo-%'
+ *   - AOSMetaFile.filePath       LIKE 'mkt-demo-%'  (bundles + screenshots)
  *
  * Intentionally NOT touched:
- *   - AOSProductCategory rows — may be referenced by non-seeded
- *     products, the cleanup is conservative.
- *   - AOSMarketplaceAxelorVersion rows — shared dictionary.
+ *   - AOSMarketplaceCategory rows — may be referenced by non-seeded
+ *     marketplace products; cleanup stays conservative.
+ *   - AOSMarketplaceAxelorVersion / AOSMarketplaceLicense rows — shared
+ *     dictionaries.
+ *   - The backing real AOSProduct (e.g. `defaultProductForMarketplace`)
+ *     — shared, owned by the workspace config.
  *
  * Storage files (mkt-demo-bundle-*, mkt-demo-screenshot-*) are removed
  * from disk best-effort after the DB transaction commits. */
@@ -60,7 +63,7 @@ async function confirm(): Promise<boolean> {
   if (values.yes) return true;
   return new Promise(resolve => {
     process.stdout.write(
-      `\x1b[33m? This will delete every marketplace row with code LIKE 'mkt-demo-%' on tenant '${tenantId}'. Continue? [y/N] \x1b[0m`,
+      `\x1b[33m? This will delete every marketplace row with slug LIKE 'mkt-demo-%' on tenant '${tenantId}'. Continue? [y/N] \x1b[0m`,
     );
     const onData = (chunk: Buffer) => {
       process.stdin.removeListener('data', onData);
@@ -85,33 +88,38 @@ async function main() {
   const storage = config.aos.storage;
 
   await client.$transaction(async txClient => {
-    /* Pull the seeded products with the bits we need for the cleanup
-     * dance: id+version for optimistic-lock updates, currentVersion to
-     * detach the M2O before deleting the version row it points at. */
-    const products = await txClient.aOSProduct.find({
-      where: {code: {like: 'mkt-demo-%'}},
+    /* Pull the seeded MP rows with the bits we need for the cleanup
+     * dance: id+version for optimistic-lock updates, currentVersion +
+     * latestVersion to detach the m2o pointers before deleting the
+     * version rows they reference. */
+    const products = await txClient.aOSMarketplaceProduct.find({
+      where: {slug: {like: 'mkt-demo-%'}},
       select: {
         id: true,
         version: true,
         currentVersion: {id: true},
+        latestVersion: {id: true},
       },
     });
     if (products.length === 0) return;
     const productIds = products.map(p => p.id);
-    const productFilter = {product: {id: {in: productIds}}} as const;
+    const productFilter = {marketplaceProduct: {id: {in: productIds}}} as const;
 
-    /* 1. Child rows scoped to the seeded products. */
+    /* 1. Child rows scoped to the seeded marketplace products. */
     await txClient.aOSMarketplaceReview.deleteAll({where: productFilter});
     await txClient.aOSMarketplaceDownload.deleteAll({where: productFilter});
     await txClient.aOSMarketplaceProductPurchase.deleteAll({
       where: productFilter,
     });
-    await txClient.aOSProductPicture.deleteAll({where: productFilter});
+    await txClient.aOSMarketplaceProductPicture.deleteAll({
+      where: productFilter,
+    });
 
     /* 2. Versions — the compatibilitySet M2M must be `remove`d before
      *    the parent rows can be deleted, otherwise the join rows orphan
-     *    against a missing version. Same for the product.currentVersion
-     *    M2O pointer: detach before the version it references is gone. */
+     *    against a missing version. Same for currentVersion/latestVersion
+     *    m2o pointers on MP: detach before the referenced version is
+     *    gone. */
     const versions = await txClient.aOSMarketplaceProductVersion.find({
       where: productFilter,
       select: {
@@ -124,7 +132,7 @@ async function main() {
       const compatIds =
         v.compatibilitySet
           ?.map(row => row.id)
-          .filter((id): id is string => !!id) ?? [];
+          .filter((id: unknown): id is string => typeof id === 'string') ?? [];
       if (compatIds.length === 0) continue;
       await txClient.aOSMarketplaceProductVersion.update({
         data: {
@@ -136,12 +144,13 @@ async function main() {
       });
     }
     for (const p of products) {
-      if (!p.currentVersion?.id) continue;
-      await txClient.aOSProduct.update({
+      if (!p.currentVersion?.id && !p.latestVersion?.id) continue;
+      await txClient.aOSMarketplaceProduct.update({
         data: {
           id: p.id,
           version: p.version,
           currentVersion: {select: {id: null}},
+          latestVersion: {select: {id: null}},
         },
         select: {id: true},
       });
@@ -150,14 +159,16 @@ async function main() {
       where: productFilter,
     });
 
-    /* 3. Products themselves. */
-    await txClient.aOSProduct.deleteAll({
+    /* 3. The marketplace products themselves. */
+    await txClient.aOSMarketplaceProduct.deleteAll({
       where: {id: {in: productIds}},
     });
 
-    /* Licenses are a shared lookup dictionary (like compatibility
-     * versions) — intentionally NOT deleted on reset so referencing
-     * data outside the seed isn't broken. */
+    /* Licenses / compatibility versions / categories are shared lookup
+     * dictionaries — intentionally NOT deleted on reset so referencing
+     * data outside the seed isn't broken. The backing real AOSProduct
+     * is also preserved: it's the workspace's defaultProductForMarketplace
+     * and not owned by the seed. */
 
     /* 4. Orphan MetaFile rows whose filePath we stamped (`mkt-demo-…`).
      *    Covers bundles + screenshots in one shot. */
@@ -184,7 +195,7 @@ async function main() {
 
   console.log(
     `\x1b[32m🔥 Reset done — tenant=${tenantId}\x1b[0m\n` +
-      `  All rows with code/file_path LIKE 'mkt-demo-%' deleted.\n` +
+      `  All rows with slug/file_path LIKE 'mkt-demo-%' deleted.\n` +
       `  ${removedFiles} on-disk storage files removed.`,
   );
 }

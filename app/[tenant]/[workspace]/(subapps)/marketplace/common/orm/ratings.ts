@@ -1,7 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import {sql} from '@/utils/template-string';
 
-// ---- PRODUCT RATING (incremental maintenance) ---- //
+// ---- MARKETPLACE PRODUCT RATING (incremental maintenance) ---- //
 
 /* Each helper is a single raw-SQL UPDATE so the read and write of
  * (ratingCount, averageRating) happen atomically at the row-lock level —
@@ -18,7 +18,7 @@ export async function addRating(
 ) {
   await client.$raw(
     sql`
-      UPDATE base_product
+      UPDATE portal_marketplace_product
       SET
         average_rating = (
           COALESCE(average_rating, 0) * COALESCE(rating_count, 0) + $2
@@ -41,7 +41,7 @@ export async function replaceRating(
   if (oldRating === newRating) return;
   await client.$raw(
     sql`
-      UPDATE base_product
+      UPDATE portal_marketplace_product
       SET
         average_rating = average_rating + ($3 - $2)::numeric / NULLIF(rating_count, 0)
       WHERE
@@ -60,7 +60,7 @@ export async function removeRating(
 ) {
   await client.$raw(
     sql`
-      UPDATE base_product
+      UPDATE portal_marketplace_product
       SET
         average_rating = CASE
           WHEN rating_count <= 1 THEN 0

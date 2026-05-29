@@ -42,14 +42,14 @@ export async function ProductHeaderCard({
   preview = false,
 }: ProductHeaderCardProps) {
   const bgGradient =
-    GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] ||
-    DEFAULT_GRADIENT;
+    GRADIENT_MAP[product.coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
 
   const rating = Number(product.averageRating || 0);
   const ratingCount = Number(product.ratingCount || 0);
-  const categoryName = product.productCategory?.name ?? null;
+  const categories = (product.categorySet ?? []).filter(c => !!c?.id);
+  const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 
-  const priceScale = product.saleCurrency?.numberOfDecimals ?? 2;
+  const priceScale = product.product?.saleCurrency?.numberOfDecimals ?? 2;
   const {ati: priceAti} = product.price;
   const paid = priceAti > 0;
 
@@ -75,7 +75,7 @@ export async function ProductHeaderCard({
     ? await formatNumber(priceAti, {
         type: 'DECIMAL',
         scale: priceScale,
-        currency: product.saleCurrency?.symbol ?? undefined,
+        currency: product.product?.saleCurrency?.symbol ?? undefined,
       })
     : priceFreeLabel;
 
@@ -119,10 +119,7 @@ export async function ProductHeaderCard({
         <div className="flex items-center justify-center">
           <div
             className={`w-32 h-32 rounded-2xl bg-gradient-to-br ${bgGradient} flex items-center justify-center`}>
-            <ProductIcon
-              code={product.marketplaceIconCode}
-              className="w-16 h-16"
-            />
+            <ProductIcon code={product.iconCode} className="w-16 h-16" />
           </div>
         </div>
 
@@ -136,7 +133,17 @@ export async function ProductHeaderCard({
                 label={typeLabel}
               />
             )}
-            {categoryName && <Badge variant="outline">{categoryName}</Badge>}
+            {/* Each category badge acts like a breadcrumb-style filter
+                link back to the marketplace listing. */}
+            {categories.map(c => (
+              <Link key={c.id} href={`${marketplaceHref}?category=${c.id}`}>
+                <Badge
+                  variant="outline"
+                  className="hover:bg-muted cursor-pointer">
+                  {c.name}
+                </Badge>
+              </Link>
+            ))}
             {product.currentVersion && (
               <Badge variant="outline">
                 {formatVersionNumber(product.currentVersion)}
@@ -161,8 +168,8 @@ export async function ProductHeaderCard({
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">{byLabel}</span>
               <span className="font-semibold text-foreground">
-                {product.defaultSupplierPartner?.simpleFullName ||
-                  product.defaultSupplierPartner?.name ||
+                {product.publisher?.simpleFullName ||
+                  product.publisher?.name ||
                   ''}
               </span>
             </div>
@@ -289,15 +296,14 @@ async function CTAButton({
   }
 
   const mainPartnerId = user?.mainPartnerId;
-  const isOwner =
-    !!mainPartnerId && product.defaultSupplierPartner?.id === mainPartnerId;
+  const isOwner = !!mainPartnerId && product.publisher?.id === mainPartnerId;
   const owns = !!(
     paid &&
     mainPartnerId &&
     (await client.aOSMarketplaceProductPurchase.findOne({
       where: {
         partner: {id: mainPartnerId},
-        product: {id: product.id},
+        marketplaceProduct: {id: product.id},
       },
       select: {id: true},
     }))
@@ -346,11 +352,11 @@ async function CTAButton({
       productSlug={product.slug ?? ''}
       name={product.name ?? ''}
       priceAti={priceAti}
-      currencySymbol={product.saleCurrency?.symbol ?? null}
+      currencySymbol={product.product?.saleCurrency?.symbol ?? null}
       scale={priceScale}
       description={product.description ?? null}
-      marketplaceIconCode={product.marketplaceIconCode ?? null}
-      marketplaceCoverStyle={product.marketplaceCoverStyle ?? null}
+      iconCode={product.iconCode ?? null}
+      coverStyle={product.coverStyle ?? null}
       currentVersionNumber={
         product.currentVersion
           ? formatVersionNumber(product.currentVersion)

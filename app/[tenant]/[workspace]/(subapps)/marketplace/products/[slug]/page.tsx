@@ -87,7 +87,9 @@ export default async function ProductPage(props: {
 
   const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
   const hubLabel = await t('Marketplace');
-  const categoryName = product.productCategory?.name ?? null;
+  // Category surfacing moved into the header card as multi-badges. The
+  // breadcrumb no longer carries category because a product can belong
+  // to multiple categories and there's no canonical "primary" one.
 
   const buildQuery = (
     overrides: Partial<NullableValues<ProductSearchParams>> = {},
@@ -192,21 +194,6 @@ export default async function ProductPage(props: {
                 <Link href={marketplaceHref}>{hubLabel}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            {categoryName && product.productCategory?.id && (
-              <>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink
-                    asChild
-                    className="text-foreground-muted cursor-pointer truncate text-md">
-                    <Link
-                      href={`${marketplaceHref}?category=${product.productCategory.id}`}>
-                      {categoryName}
-                    </Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-              </>
-            )}
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="sm:truncate text-lg font-semibold">
@@ -411,31 +398,36 @@ export default async function ProductPage(props: {
                     {categoryLabel}
                   </span>
                   <p className="font-semibold text-foreground">
-                    {categoryName ?? '—'}
+                    {product.categorySet?.length
+                      ? product.categorySet
+                          .map(c => c?.name)
+                          .filter(Boolean)
+                          .join(', ')
+                      : '—'}
                   </p>
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">
                     {licenseLabel}
                   </span>
-                  {product.marketplaceLicense ? (
-                    product.marketplaceLicense.url ? (
+                  {product.license ? (
+                    product.license.url ? (
                       <Link
-                        href={product.marketplaceLicense.url}
+                        href={product.license.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         prefetch={false}
                         className="font-semibold text-foreground hover:underline block">
-                        {product.marketplaceLicense.name}
+                        {product.license.name}
                         <span className="ml-2 text-xs font-normal text-muted-foreground">
-                          {product.marketplaceLicense.code}
+                          {product.license.code}
                         </span>
                       </Link>
                     ) : (
                       <p className="font-semibold text-foreground">
-                        {product.marketplaceLicense.name}
+                        {product.license.name}
                         <span className="ml-2 text-xs font-normal text-muted-foreground">
-                          {product.marketplaceLicense.code}
+                          {product.license.code}
                         </span>
                       </p>
                     )
@@ -447,7 +439,7 @@ export default async function ProductPage(props: {
             </div>
 
             {/* About Author Card */}
-            {product.defaultSupplierPartner && (
+            {product.publisher && (
               <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
                 <h3 className="text-lg font-bold text-foreground">
                   {aboutAuthorLabel}
@@ -456,20 +448,17 @@ export default async function ProductPage(props: {
                   <Avatar className="rounded-full h-12 w-12 flex-shrink-0">
                     <AvatarImage
                       src={
-                        product.defaultSupplierPartner.picture?.id
-                          ? `/api/tenant/${tenantId}/partner/image/${product.defaultSupplierPartner.picture.id}`
+                        product.publisher.picture?.id
+                          ? `/api/tenant/${tenantId}/partner/image/${product.publisher.picture.id}`
                           : NO_IMAGE_URL
                       }
-                      alt={
-                        product.defaultSupplierPartner.simpleFullName ||
-                        authorLabel
-                      }
+                      alt={product.publisher.simpleFullName || authorLabel}
                       size={48}
                     />
                   </Avatar>
                   <div className="flex-1">
                     <p className="font-semibold text-foreground">
-                      {product.defaultSupplierPartner.simpleFullName}
+                      {product.publisher.simpleFullName}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {verifiedContributorLabel}

@@ -29,8 +29,7 @@ export function CartItemCard({
   removeLabel,
 }: Props) {
   const bgGradient =
-    GRADIENT_MAP[item.marketplaceCoverStyle || 'gradient-1'] ||
-    DEFAULT_GRADIENT;
+    GRADIENT_MAP[item.coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden flex">
@@ -38,7 +37,7 @@ export function CartItemCard({
         href={productHref}
         className={`shrink-0 w-24 sm:w-32 min-h-[96px] bg-gradient-to-br ${bgGradient} flex items-center justify-center self-stretch`}>
         <ProductIcon
-          code={item.marketplaceIconCode}
+          code={item.iconCode}
           className="w-10 h-10 sm:w-12 sm:h-12"
         />
       </Link>

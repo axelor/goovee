@@ -155,9 +155,7 @@ export const portalAppConfigFields = {
   marketplaceHeroBgImage: {id: true},
   allowToPublish: true,
   requiresReview: true,
-  marketplaceDefaultUnit: {id: true, name: true},
-  marketplaceDefaultProductFamily: {id: true},
-  marketplaceInAti: true,
+  defaultProductForMarketplace: {id: true, inAti: true},
 } as const satisfies SelectOptions<AOSPortalAppConfig>;
 
 export type PortalAppConfig = Payload<

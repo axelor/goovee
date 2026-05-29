@@ -11,12 +11,11 @@ class SeedLookupError extends Error {
   }
 }
 
-/* Resolves the workspace AND its marketplace pricing defaults by walking
+/* Resolves the workspace AND its marketplace defaults by walking
  * AOSPortalWorkspace → defaultPartnerWorkspace → portalAppConfig. The
- * defaults (unit, productFamily) are read once here and then stamped onto
- * every seeded product, mirroring `saveProduct` in the app. The product
- * currency is resolved per-supplier in run.ts (partner currency, falling
- * back to DEFAULT_CURRENCY_CODE) — there is no workspace-level default. */
+ * default backing product is read once here and used as the `product`
+ * m2o on every seeded MarketplaceProduct, mirroring `saveProduct` in
+ * the app. Tax/currency/unit live on that backing real Product. */
 export async function findWorkspaceByUrl(client: Client, url: string) {
   const workspace = await client.aOSPortalWorkspace.findOne({
     where: {url},
@@ -28,9 +27,13 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
         id: true,
         portalAppConfig: {
           id: true,
-          marketplaceDefaultUnit: {id: true, name: true},
-          marketplaceDefaultProductFamily: {id: true, code: true},
-          marketplaceInAti: true,
+          defaultProductForMarketplace: {
+            id: true,
+            code: true,
+            inAti: true,
+            productTypeSelect: true,
+            saleCurrency: {id: true, code: true},
+          },
           company: {id: true, name: true, timezone: true},
         },
       },
@@ -44,15 +47,22 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
       `Workspace '${url}' not found. Existing: ${existing.map(w => w.url).join(', ')}`,
     );
   }
-  const config = workspace.defaultPartnerWorkspace?.portalAppConfig;
-  if (
-    !config?.marketplaceDefaultUnit?.id ||
-    !config?.marketplaceDefaultProductFamily?.id
-  ) {
+  const rawConfig = workspace.defaultPartnerWorkspace?.portalAppConfig;
+  const backing = rawConfig?.defaultProductForMarketplace;
+  if (!rawConfig || !backing?.id) {
     throw new SeedLookupError(
-      `Workspace '${url}' is missing marketplace pricing defaults. Set marketplaceDefaultUnit and marketplaceDefaultProductFamily on its PortalAppConfig.`,
+      `Workspace '${url}' is missing the default marketplace backing product. Set defaultProductForMarketplace on its PortalAppConfig.`,
     );
   }
+  /* The form's picker is constrained to services, but a direct DB edit
+   * could leave a storable product here — which would generate spurious
+   * stock moves at checkout. Fail fast at seed time. */
+  if (backing.productTypeSelect !== 'service') {
+    throw new SeedLookupError(
+      `Workspace '${url}' default marketplace product '${backing.code}' has productTypeSelect='${backing.productTypeSelect}', expected 'service'.`,
+    );
+  }
+  const config = {...rawConfig, defaultProductForMarketplace: backing};
   return {...workspace, config};
 }
 
@@ -122,17 +132,16 @@ export async function findCustomerPartnerByEmail(
 }
 
 export async function findCategoryByCode(client: Client, code: string) {
-  const category = await client.aOSProductCategory.findOne({
-    where: {code, forMarketPlace: true},
+  const category = await client.aOSMarketplaceCategory.findOne({
+    where: {code},
     select: {id: true, code: true, name: true},
   });
   if (!category) {
-    const existing = await client.aOSProductCategory.find({
-      where: {forMarketPlace: true},
+    const existing = await client.aOSMarketplaceCategory.find({
       select: {code: true},
     });
     throw new SeedLookupError(
-      `Marketplace category '${code}' not found. Existing (forMarketPlace=true): ${existing.map(c => c.code).join(', ') || '(none)'}`,
+      `Marketplace category '${code}' not found. Existing: ${existing.map(c => c.code).join(', ') || '(none)'}`,
     );
   }
   return category;

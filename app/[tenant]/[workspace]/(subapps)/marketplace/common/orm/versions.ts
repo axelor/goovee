@@ -22,12 +22,11 @@ export async function findVersionCount({
 }: {
   client: Client;
   productId: ID;
-  /** Owner preview: count drafts/in-review/rejected too. */
   includeUnpublished?: boolean;
 }) {
   return client.aOSMarketplaceProductVersion.count({
     where: and<AOSMarketplaceProductVersion>([
-      {product: {id: productId}},
+      {marketplaceProduct: {id: productId}},
       !includeUnpublished && {
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       },
@@ -41,7 +40,6 @@ export async function findProductVersions({
   where,
   take,
   skip,
-  /** Owner preview: include drafts/in-review/rejected too. */
   includeUnpublished = false,
 }: {
   productId: ID;
@@ -52,7 +50,7 @@ export async function findProductVersions({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     where: and<AOSMarketplaceProductVersion>([
-      {product: {id: productId}},
+      {marketplaceProduct: {id: productId}},
       !includeUnpublished && {
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       },
@@ -74,8 +72,9 @@ export async function findProductVersions({
   });
 }
 
-/* Single source of truth for `product.currentVersion` and
- * `product.latestVersion`. Call after any create/status-change/delete.
+/* Single source of truth for `marketplaceProduct.currentVersion` and
+ * `marketplaceProduct.latestVersion`. Call after any
+ * create/status-change/delete.
  *
  *   latestVersion  = highest sortkey across ALL versions of the product
  *   currentVersion = highest sortkey among PUBLISHED versions, or null */
@@ -88,26 +87,26 @@ export async function syncProductVersionPointers({
 }): Promise<void> {
   const [latest, currentPublished, product] = await Promise.all([
     client.aOSMarketplaceProductVersion.findOne({
-      where: {product: {id: productId}},
+      where: {marketplaceProduct: {id: productId}},
       orderBy: versionSortOrder,
       select: {id: true},
     }),
     client.aOSMarketplaceProductVersion.findOne({
       where: {
-        product: {id: productId},
+        marketplaceProduct: {id: productId},
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       },
       orderBy: versionSortOrder,
       select: {id: true},
     }),
-    client.aOSProduct.findOne({
+    client.aOSMarketplaceProduct.findOne({
       where: {id: productId},
       select: {id: true, version: true},
     }),
   ]);
   if (!product) return;
 
-  await client.aOSProduct.update({
+  await client.aOSMarketplaceProduct.update({
     data: {
       id: product.id,
       version: product.version,

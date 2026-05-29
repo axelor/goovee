@@ -1,17 +1,12 @@
 import '@/load-swc-env';
 
-import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {manager} from '@/tenant';
 import {hash} from '../../utils/string';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
-import {
-  findCurrencyByCode,
-  findCustomerPartnerByEmail,
-  findPartnerCurrencies,
-  findWorkspaceByUrl,
-} from './lookups';
+import {findDefaultCurrency} from '../../orm';
+import {findCustomerPartnerByEmail, findWorkspaceByUrl} from './lookups';
 import {
   recomputeRatings,
   refreshCurrentVersion,
@@ -135,30 +130,27 @@ async function main() {
       `\x1b[36m→ ${suppliers.length} suppliers: ${suppliers.map(s => s.name).join(', ')}\x1b[0m`,
     );
 
+    const saleCurrency = await findDefaultCurrency(txClient);
+    if (!saleCurrency) {
+      throw new Error(
+        `App-wide default currency not found; cannot seed marketplace products.`,
+      );
+    }
+
     const ctx: WorkspaceContext = {
       workspaceId: workspace.id,
       supplierPartnerId: suppliers[0]!.id /* Default to first supplier */,
+      backingProductId: workspace.config.defaultProductForMarketplace!.id,
       defaults: {
-        unitId: workspace.config.marketplaceDefaultUnit!.id,
-        productFamilyId: workspace.config.marketplaceDefaultProductFamily!.id,
-        inAti: workspace.config.marketplaceInAti === true,
+        inAti: workspace.config.defaultProductForMarketplace?.inAti === true,
+        saleCurrencyId: saleCurrency.id,
       },
     };
 
-    /* Per-supplier currency resolution: each product's saleCurrency
-     * follows its supplier's partner currency, falling back to the
-     * app-wide DEFAULT_CURRENCY_CODE when the supplier has none. Mirrors
-     * the runtime behaviour in saveProduct. */
-    const supplierCurrencyMap = await findPartnerCurrencies(
-      txClient,
-      suppliers.map(s => s.id),
-    );
-    const fallbackCurrency = await findCurrencyByCode(
-      txClient,
-      DEFAULT_CURRENCY_CODE,
-    );
-    const resolveSaleCurrencyId = (supplierId: string) =>
-      supplierCurrencyMap.get(supplierId) ?? fallbackCurrency.id;
+    /* Currency / unit / tax all live on the workspace's backing real
+     * Product (config.defaultProductForMarketplace). The seeded marketplace
+     * products override only salePrice + inAti; the backing product
+     * supplies the rest at checkout time. */
 
     /* Distribute products across suppliers: apps and skills evenly.
      * Use deterministic hash of product code to avoid bias from data ordering. */
@@ -226,7 +218,6 @@ async function main() {
         ctx,
         product,
         supplierIdForProduct,
-        resolveSaleCurrencyId(supplierIdForProduct),
         product.price > 0 ? paidLicenseCodes : freeLicenseCodes,
       );
       seededProductIds.push(productId);

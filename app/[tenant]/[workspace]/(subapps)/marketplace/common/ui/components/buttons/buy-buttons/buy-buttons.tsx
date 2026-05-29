@@ -15,8 +15,8 @@ type Props = {
   currencySymbol: string | null;
   scale?: number;
   description: string | null;
-  marketplaceIconCode: string | null;
-  marketplaceCoverStyle: string | null;
+  iconCode: string | null;
+  coverStyle: string | null;
   currentVersionNumber: string | null;
   cartHref: string;
   addToCartLabel: string;
@@ -37,8 +37,8 @@ export function BuyButtons({
   currencySymbol,
   scale,
   description,
-  marketplaceIconCode,
-  marketplaceCoverStyle,
+  iconCode,
+  coverStyle,
   currentVersionNumber,
   cartHref,
   addToCartLabel,
@@ -72,8 +72,8 @@ export function BuyButtons({
     currencySymbol,
     scale,
     description,
-    marketplaceIconCode,
-    marketplaceCoverStyle,
+    iconCode,
+    coverStyle,
     currentVersionNumber,
   };
 

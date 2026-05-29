@@ -79,10 +79,10 @@ export default async function CheckoutSuccessPage(props: {
         {recent.length > 0 && (
           <ul className="text-left divide-y divide-border rounded border border-border overflow-hidden mb-6">
             {recent.map(row => {
-              const product = row.product;
+              const product = row.marketplaceProduct;
               const version = product?.currentVersion;
               const bgGradient =
-                GRADIENT_MAP[product?.marketplaceCoverStyle || 'gradient-1'] ||
+                GRADIENT_MAP[product?.coverStyle || 'gradient-1'] ||
                 DEFAULT_GRADIENT;
               return (
                 <li
@@ -95,7 +95,7 @@ export default async function CheckoutSuccessPage(props: {
                         bgGradient,
                       )}>
                       <ProductIcon
-                        code={product?.marketplaceIconCode}
+                        code={product?.iconCode}
                         className="w-6 h-6"
                       />
                     </div>

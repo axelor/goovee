@@ -28,6 +28,14 @@ import Image from 'next/image';
 import {useEffect, useMemo, useRef, useState, useTransition} from 'react';
 import {useForm, useFormContext, useWatch} from 'react-hook-form';
 import {saveProduct} from '../../../../actions';
+import {
+  MultiSelector,
+  MultiSelectorContent,
+  MultiSelectorInput,
+  MultiSelectorItem,
+  MultiSelectorList,
+  MultiSelectorTrigger,
+} from '../../multi-select';
 import {GRADIENT_MAP} from '../../../../constants/gradients';
 import {
   DEFAULT_ICON_CODE,
@@ -38,6 +46,7 @@ import type {
   ListCategory,
   ListLicense,
   MyProductWithVersions,
+  Currency,
 } from '../../../../orm';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {ProductIcon} from '../../primitives/product-icon';
@@ -58,12 +67,14 @@ type ProductFormProps = {
   licenses: Cloned<ListLicense>[];
   initial?: Cloned<MyProductWithVersions>;
   defaultType?: MARKETPLACE_TYPE;
-  /** Currency symbol from workspace config (e.g. "$", "€"). Optional —
-   *  if absent we render the input without an adornment. */
-  currencySymbol: string | null;
-  /** Workspace's `PortalAppConfig.marketplaceInAti`. Decides whether the
-   *  price the supplier enters is interpreted as gross (tax-inclusive)
-   *  or net (tax-exclusive). Drives the help-line wording. */
+  /** Currency of the existing listing, or the resolved new-listing fallback
+   *  (partner → app default) for create. Drives the input's currency
+   *  adornment via `.symbol`. */
+  listingCurrency: Cloned<Currency> | null;
+  /** Pulled from the workspace's backing product
+   *  (`PortalAppConfig.defaultProductForMarketplace.inAti`). Decides whether
+   *  the price the supplier enters is interpreted as gross (tax-inclusive)
+   *  or net (tax-exclusive), and drives the input label wording. */
   inAti: boolean;
   onSaved: (productId: string) => void;
   onContinue: () => void;
@@ -80,10 +91,10 @@ function buildDefaults(
       name: '',
       description: '',
       longDescription: '',
-      productCategoryId: '',
-      marketplaceLicenseId: '',
-      marketplaceCoverStyle: 'gradient-1',
-      marketplaceIconCode: DEFAULT_ICON_CODE,
+      categoryIds: [],
+      licenseId: '',
+      coverStyle: 'gradient-1',
+      iconCode: DEFAULT_ICON_CODE,
       documentationUrl: '',
       supportIssuesUrl: '',
       supportContactUrl: '',
@@ -100,16 +111,18 @@ function buildDefaults(
     name: initial.name ?? '',
     description: initial.description ?? '',
     longDescription: initial.longDescription ?? '',
-    productCategoryId: initial.productCategory?.id ?? '',
-    marketplaceLicenseId: initial.marketplaceLicense?.id ?? '',
-    marketplaceCoverStyle: initial.marketplaceCoverStyle ?? 'gradient-1',
-    marketplaceIconCode: initial.marketplaceIconCode ?? DEFAULT_ICON_CODE,
+    categoryIds:
+      initial.categorySet?.map(c => c?.id).filter((id): id is string => !!id) ??
+      [],
+    licenseId: initial.license?.id ?? '',
+    coverStyle: initial.coverStyle ?? 'gradient-1',
+    iconCode: initial.iconCode ?? DEFAULT_ICON_CODE,
     documentationUrl: initial.documentationUrl ?? '',
     supportIssuesUrl: initial.supportIssuesUrl ?? '',
     supportContactUrl: initial.supportContactUrl ?? '',
     salePrice:
       initial.salePrice != null ? Number(initial.salePrice) : undefined,
-    existingImageIds: (initial.portalImageList ?? [])
+    existingImageIds: (initial.pictureList ?? [])
       .map(row => row?.id)
       .filter((id): id is string => !!id),
     newImages: [],
@@ -123,7 +136,7 @@ export function ProductForm({
   licenses,
   initial,
   defaultType,
-  currencySymbol,
+  listingCurrency,
   inAti,
   onSaved,
   onContinue,
@@ -131,6 +144,8 @@ export function ProductForm({
 }: ProductFormProps) {
   const {toast} = useToast();
   const [pending, startTransition] = useTransition();
+
+  const currencySymbol = listingCurrency?.symbol ?? null;
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -226,7 +241,11 @@ export function ProductForm({
               name="salePrice"
               render={({field}) => (
                 <FormItem className="min-w-[200px] flex-1 sm:flex-none">
-                  <FormLabel>{i18n.t('Price')}</FormLabel>
+                  <FormLabel>
+                    {inAti
+                      ? i18n.t('Price (incl. tax)')
+                      : i18n.t('Price (excl. tax)')}
+                  </FormLabel>
                   <FormControl>
                     <div className="relative">
                       {currencySymbol && (
@@ -252,18 +271,13 @@ export function ProductForm({
                       />
                     </div>
                   </FormControl>
-                  <p className="text-xs text-muted-foreground">
-                    {inAti
-                      ? i18n.t('Price includes tax.')
-                      : i18n.t('Price excludes tax.')}
-                  </p>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px_240px]">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_240px]">
             <FormField
               control={control}
               name="name"
@@ -282,31 +296,7 @@ export function ProductForm({
             />
             <FormField
               control={control}
-              name="productCategoryId"
-              render={({field}) => (
-                <FormItem>
-                  <FormLabel>{i18n.t('Category')} *</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder={i18n.t('Select')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map(c => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="marketplaceLicenseId"
+              name="licenseId"
               render={({field}) => (
                 <FormItem>
                   <FormLabel>{i18n.t('License')} *</FormLabel>
@@ -332,6 +322,41 @@ export function ProductForm({
               )}
             />
           </div>
+
+          <FormField
+            control={control}
+            name="categoryIds"
+            render={({field}) => (
+              <FormItem>
+                <FormLabel>{i18n.t('Categories')} *</FormLabel>
+                <FormControl>
+                  <MultiSelector
+                    onValuesChange={field.onChange}
+                    values={field.value ?? []}
+                    className="space-y-0">
+                    <MultiSelectorTrigger
+                      renderLabel={value =>
+                        categories.find(c => c.id === value)?.name
+                      }>
+                      <MultiSelectorInput
+                        placeholder={i18n.t('Select categories')}
+                      />
+                    </MultiSelectorTrigger>
+                    <MultiSelectorContent>
+                      <MultiSelectorList>
+                        {categories.map(c => (
+                          <MultiSelectorItem key={c.id} value={c.id}>
+                            {c.name}
+                          </MultiSelectorItem>
+                        ))}
+                      </MultiSelectorList>
+                    </MultiSelectorContent>
+                  </MultiSelector>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={control}
@@ -374,7 +399,7 @@ export function ProductForm({
 
           <FormField
             control={control}
-            name="marketplaceCoverStyle"
+            name="coverStyle"
             render={({field}) => (
               <FormItem>
                 <FormLabel>{i18n.t('Cover style')} *</FormLabel>
@@ -407,7 +432,7 @@ export function ProductForm({
 
           <FormField
             control={control}
-            name="marketplaceIconCode"
+            name="iconCode"
             render={({field}) => (
               <FormItem>
                 <FormLabel>{i18n.t('Icon')} *</FormLabel>
@@ -704,13 +729,13 @@ function ScreenshotsFormField({
   // Map existing AOSProductPicture rowId -> AOSMetaFile id (for URL).
   const initialImageMap = useMemo(() => {
     const map = new Map<string, string>();
-    for (const row of initial?.portalImageList ?? []) {
+    for (const row of initial?.pictureList ?? []) {
       if (row?.id && row?.picture?.id) {
         map.set(row.id, row.picture.id);
       }
     }
     return map;
-  }, [initial?.portalImageList]);
+  }, [initial?.pictureList]);
 
   const existingImages = useMemo<ExistingImage[]>(
     () =>

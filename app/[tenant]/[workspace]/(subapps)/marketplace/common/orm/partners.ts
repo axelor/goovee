@@ -20,7 +20,7 @@ export async function findPartnerWithFavorite({
     where: {id: userId},
     select: {
       id: true,
-      favouriteProducts: {
+      favouriteMarketplaceProducts: {
         where: {id: productId},
         select: {id: true},
       },

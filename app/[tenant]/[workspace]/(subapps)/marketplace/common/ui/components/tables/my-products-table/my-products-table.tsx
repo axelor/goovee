@@ -41,6 +41,7 @@ import type {
   ListCategory,
   ListLicense,
   ListMyProduct,
+  Currency,
 } from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {EditProductButton} from '../../buttons/edit-product-button';
@@ -69,7 +70,7 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  currencySymbol: string | null;
+  newListingCurrency: Cloned<Currency> | null;
   inAti: boolean;
 };
 
@@ -83,7 +84,7 @@ export function MyProductsTable({
   compatibilityVersions,
   requiresReview,
   allowToPublish,
-  currencySymbol,
+  newListingCurrency,
   inAti,
 }: Props) {
   const responsive = useResponsive();
@@ -98,8 +99,7 @@ export function MyProductsTable({
       desktopClassName: 'w-[38%] min-w-[220px]',
       content: product => {
         const bgGradient =
-          GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] ||
-          DEFAULT_GRADIENT;
+          GRADIENT_MAP[product.coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
         return (
           <div className="flex items-start gap-3">
             <div
@@ -107,10 +107,7 @@ export function MyProductsTable({
                 'w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center bg-gradient-to-br',
                 bgGradient,
               )}>
-              <ProductIcon
-                code={product.marketplaceIconCode}
-                className="w-6 h-6"
-              />
+              <ProductIcon code={product.iconCode} className="w-6 h-6" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 min-w-0">
@@ -259,8 +256,8 @@ export function MyProductsTable({
                       compatibilityVersions={compatibilityVersions}
                       requiresReview={requiresReview}
                       allowToPublish={allowToPublish}
-                      currencySymbol={
-                        product.saleCurrency?.symbol || currencySymbol
+                      listingCurrency={
+                        product.saleCurrency ?? newListingCurrency
                       }
                       inAti={inAti}
                     />

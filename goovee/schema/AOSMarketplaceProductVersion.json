@@ -5,8 +5,9 @@
   "fields": [
     {
       "type": "ManyToOne",
-      "name": "product",
-      "target": "AOSProduct"
+      "name": "marketplaceProduct",
+      "target": "AOSMarketplaceProduct",
+      "required": true
     },
     {
       "type": "DateTime",

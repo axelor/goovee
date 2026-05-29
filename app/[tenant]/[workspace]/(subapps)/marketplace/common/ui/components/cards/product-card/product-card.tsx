@@ -26,8 +26,8 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
     currentVersion,
     averageRating = 0,
     installCount = 0,
-    marketplaceIconCode,
-    marketplaceCoverStyle,
+    iconCode,
+    coverStyle,
     marketplaceTypeSelect,
   } = product;
 
@@ -43,7 +43,7 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
     : freeLabel;
 
   const bgGradient =
-    GRADIENT_MAP[marketplaceCoverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
+    GRADIENT_MAP[coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
 
   return (
     <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${slug}`}>
@@ -51,7 +51,7 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
         {/* Header with gradient and icon */}
         <div
           className={`h-[140px] bg-gradient-to-br ${bgGradient} flex items-center justify-center relative`}>
-          <ProductIcon code={marketplaceIconCode} className="w-16 h-16" />
+          <ProductIcon code={iconCode} className="w-16 h-16" />
           {marketplaceTypeSelect && (
             <div className="absolute top-3 left-3">
               <ProductTypeBadge

@@ -61,11 +61,10 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       mobile: true,
       desktopClassName: 'w-[45%] min-w-[220px]',
       content: purchase => {
-        const product = purchase.product;
+        const product = purchase.marketplaceProduct;
         if (!product) return '—';
         const bgGradient =
-          GRADIENT_MAP[product.marketplaceCoverStyle || 'gradient-1'] ||
-          DEFAULT_GRADIENT;
+          GRADIENT_MAP[product.coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
         return (
           <div className="flex items-start gap-3">
             <div
@@ -73,10 +72,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                 'w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center bg-gradient-to-br',
                 bgGradient,
               )}>
-              <ProductIcon
-                code={product.marketplaceIconCode}
-                className="w-6 h-6"
-              />
+              <ProductIcon code={product.iconCode} className="w-6 h-6" />
             </div>
             <div className="min-w-0">
               {product.slug ? (
@@ -106,8 +102,8 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       desktopClassName: 'w-[18%]',
       content: purchase => (
         <span className="text-sm whitespace-nowrap">
-          {purchase.product?.currentVersion
-            ? `v${formatVersionNumber(purchase.product.currentVersion)}`
+          {purchase.marketplaceProduct?.currentVersion
+            ? `v${formatVersionNumber(purchase.marketplaceProduct.currentVersion)}`
             : '—'}
         </span>
       ),
@@ -195,7 +191,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
         {purchases.map(purchase => {
           const open = openId === purchase.id;
           const Arrow = open ? ChevronUp : ChevronDown;
-          const product = purchase.product;
+          const product = purchase.marketplaceProduct;
           const version = product?.currentVersion;
           const canDownload = product?.id && version?.id;
           return (

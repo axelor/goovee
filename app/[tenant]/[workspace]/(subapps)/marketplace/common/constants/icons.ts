@@ -58,7 +58,7 @@ import {
 } from 'react-icons/lu';
 import type {IconType} from 'react-icons';
 
-/* Stored as `marketplaceIconCode`. Codes are semantic (the icon's purpose)
+/* Stored as `iconCode`. Codes are semantic (the icon's purpose)
  * so suppliers pick by meaning, not by glyph. All drawn from the Feather
  * family for visual consistency. Adding an entry here surfaces it in the
  * product form picker and renders it via <ProductIcon> — nothing else to wire. */

@@ -16,8 +16,8 @@ export type MarketplaceCartItem = {
    * "add to cart" and checkout, which is fine — the server re-fetches
    * fresh values for price and ownership at checkout time. */
   description: string | null;
-  marketplaceIconCode: string | null;
-  marketplaceCoverStyle: string | null;
+  iconCode: string | null;
+  coverStyle: string | null;
   currentVersionNumber: string | null;
 };
 

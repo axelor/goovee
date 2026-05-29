@@ -95,7 +95,7 @@ export async function addProductToFavorites(
       };
     }
 
-    const currentlyFavorite = !!partner.favouriteProducts?.some(
+    const currentlyFavorite = !!partner.favouriteMarketplaceProducts?.some(
       product => product.id === productId,
     );
 

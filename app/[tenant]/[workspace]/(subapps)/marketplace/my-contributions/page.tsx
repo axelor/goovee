@@ -1,4 +1,4 @@
-import {DEFAULT_CURRENCY_SYMBOL, SUBAPP_CODES} from '@/constants';
+import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {NullableValues} from '@/types/util';
 import {
@@ -19,9 +19,9 @@ import {MyContributionsTab} from '../common/constants/tabs';
 import {
   countMyProducts,
   findCompatibilityVersions,
-  findPartnerCurrency,
   findLicenses,
   findProductCategories,
+  resolveNewListingCurrency,
 } from '../common/orm';
 import {PublishNewButton} from '../common/ui/components/buttons/publish-new-button';
 import {Await} from '../common/ui/components/primitives/await';
@@ -74,7 +74,7 @@ export default async function MyContributionsPage(props: {
   }
   if (error) notFound();
 
-  const [categories, licenses, compatibilityVersions, partnerCurrency] =
+  const [categories, licenses, compatibilityVersions, newListingCurrency] =
     await Promise.all([
       findProductCategories({
         client: auth.tenant.client,
@@ -83,13 +83,11 @@ export default async function MyContributionsPage(props: {
       }),
       findLicenses({client: auth.tenant.client}),
       findCompatibilityVersions(auth.tenant.client),
-      findPartnerCurrency({
+      resolveNewListingCurrency({
         client: auth.tenant.client,
         mainPartnerId: auth.user.mainPartnerId,
       }),
     ]);
-
-  const currencySymbol = partnerCurrency?.symbol ?? DEFAULT_CURRENCY_SYMBOL;
 
   const {tab, productsPage} = searchParams;
 
@@ -195,8 +193,11 @@ export default async function MyContributionsPage(props: {
               compatibilityVersions={clone(compatibilityVersions)}
               requiresReview={auth.workspace.config.requiresReview === true}
               allowToPublish={auth.workspace.config.allowToPublish === true}
-              currencySymbol={currencySymbol}
-              inAti={auth.workspace.config.marketplaceInAti === true}
+              newListingCurrency={clone(newListingCurrency)}
+              inAti={
+                auth.workspace.config.defaultProductForMarketplace?.inAti ===
+                true
+              }
             />
           )}
         </div>
@@ -262,7 +263,7 @@ export default async function MyContributionsPage(props: {
             mainPartnerId={auth.user.mainPartnerId}
             client={auth.tenant.client}
             workspace={auth.workspace}
-            currencySymbol={currencySymbol}
+            newListingCurrency={newListingCurrency}
             workspaceURI={workspaceURI}
             workspaceURL={workspaceURL}
             categories={categories}
