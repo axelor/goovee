@@ -269,28 +269,12 @@ async function runCombo({
   });
 
   const goovee = productIds.map(id => {
-    const p = byId.get(id);
-    if (!p) return null;
-    const productCurrency = p.saleCurrency?.code
-      ? {
-          code: p.saleCurrency.code,
-          symbol: p.saleCurrency.symbol ?? '',
-          numberOfDecimals: p.saleCurrency.numberOfDecimals,
-        }
-      : null;
+    const product = byId.get(id);
+    if (!product) return null;
     return {
       productId: id,
-      name: p.name ?? '',
-      price: computePrice(p, {
-        companyId: combo.company.id,
-        companyTimezone: company.timezone,
-        scale: p.saleCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE,
-        productCurrency,
-        viewerCurrency: priceContext.viewerCurrency,
-        defaultCurrency: priceContext.defaultCurrency,
-        conversionLines: priceContext.conversionLines,
-        fiscalPosition: priceContext.fiscalPosition,
-      }),
+      name: product.name ?? '',
+      price: computePrice({product, priceContext, company}),
     };
   });
 

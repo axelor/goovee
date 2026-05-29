@@ -1,57 +1,22 @@
-import {DEFAULT_CURRENCY_CODE, DEFAULT_CURRENCY_SCALE} from '@/constants';
+import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import {
-  computePrice,
-  type ComputedPrice,
-  type ConversionLine,
-  type CurrencyInput,
-  type FiscalPositionInput,
-} from '../utils/price';
+import {computePrice, type ComputedPrice} from '../utils/price';
 import type {PriceableProduct} from './helpers';
-
-export type PriceContext = {
-  conversionLines: ConversionLine[];
-  viewerCurrency: CurrencyInput | null;
-  defaultCurrency: CurrencyInput | null;
-  fiscalPosition: FiscalPositionInput | null;
-};
-
-function toCurrencyInput(
-  c:
-    | {
-        code?: string | null;
-        symbol?: string | null;
-        numberOfDecimals?: number | null;
-      }
-    | null
-    | undefined,
-): CurrencyInput | null {
-  if (!c?.code) return null;
-  return {
-    code: c.code,
-    symbol: c.symbol ?? '',
-    numberOfDecimals: c.numberOfDecimals,
-  };
-}
+import {Payload, SelectOptions} from '@goovee/orm';
+import {AOSTax} from '@/goovee/.generated/models';
 
 export function withPrice<T extends PriceableProduct>(
   product: T,
   workspace: PortalWorkspaceWithConfig,
   priceContext: PriceContext,
 ): T & {price: ComputedPrice} {
-  const productCurrency = toCurrencyInput(product.saleCurrency);
   return {
     ...product,
-    price: computePrice(product, {
-      companyId: workspace.config.company?.id,
-      companyTimezone: workspace.config.company?.timezone,
-      scale: product.saleCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE,
-      productCurrency,
-      viewerCurrency: priceContext.viewerCurrency,
-      defaultCurrency: priceContext.defaultCurrency,
-      conversionLines: priceContext.conversionLines,
-      fiscalPosition: priceContext.fiscalPosition,
+    price: computePrice({
+      product,
+      priceContext,
+      company: workspace.config.company,
     }),
   };
 }
@@ -61,6 +26,9 @@ export function withPrice<T extends PriceableProduct>(
  *  default). Filters the query to just the relevant (from, to) pairs
  *  (in both directions) so we don't pull the entire table. Returns
  *  empty when there's nothing to convert. */
+export type ConversionLine = Awaited<
+  ReturnType<typeof fetchConversionLines>
+>[number];
 export async function fetchConversionLines({
   client,
   fromCodes,
@@ -69,7 +37,7 @@ export async function fetchConversionLines({
   client: Client;
   fromCodes: Array<string | null | undefined>;
   toCodes: Array<string | null | undefined>;
-}): Promise<ConversionLine[]> {
+}) {
   const tos = Array.from(
     new Set(
       toCodes.filter((c): c is string => typeof c === 'string' && c.length > 0),
@@ -119,6 +87,7 @@ export async function fetchConversionLines({
  *  between the product currencies present in the batch and either
  *  target. `computePrice` applies the three-step fallback (viewer →
  *  default → product). */
+export type PriceContext = Awaited<ReturnType<typeof buildPriceContext>>;
 export async function buildPriceContext({
   client,
   mainPartnerId,
@@ -127,31 +96,48 @@ export async function buildPriceContext({
   client: Client;
   mainPartnerId: string | null | undefined;
   productCurrencyCodes: Array<string | null | undefined>;
-}): Promise<PriceContext> {
-  const [partner, fallback, fiscalPosition] = await Promise.all([
-    findPartnerCurrency({client, mainPartnerId}),
-    findDefaultCurrency(client),
-    findPartnerFiscalPosition({client, mainPartnerId}),
-  ]);
-  const viewerCurrency = toCurrencyInput(partner);
-  const defaultCurrency = toCurrencyInput(fallback);
+}) {
+  const [partnerCurrency, fallbackCurrency, fiscalPosition] = await Promise.all(
+    [
+      findPartnerCurrency({client, mainPartnerId}),
+      findDefaultCurrency(client),
+      findPartnerFiscalPosition({client, mainPartnerId}),
+    ],
+  );
   const conversionLines = await fetchConversionLines({
     client,
     fromCodes: productCurrencyCodes,
-    toCodes: [viewerCurrency?.code, defaultCurrency?.code],
+    toCodes: [partnerCurrency?.code, fallbackCurrency?.code],
   });
-  return {conversionLines, viewerCurrency, defaultCurrency, fiscalPosition};
+  return {
+    conversionLines,
+    viewerCurrency: partnerCurrency,
+    defaultCurrency: fallbackCurrency,
+    fiscalPosition,
+  };
 }
 
+const taxRowSelectFields = {
+  id: true,
+  activeTaxLine: {value: true},
+  taxLineList: {
+    select: {value: true, startDate: true, endDate: true},
+  },
+} as const satisfies SelectOptions<AOSTax>;
+
+export type TaxRow = Payload<AOSTax, {select: typeof taxRowSelectFields}>;
 /** Resolves the buyer partner's fiscal position with its taxEquivList,
  *  ready to be passed to `computePrice` for per-buyer tax remapping. */
+export type FiscalPositionInput = NonNullable<
+  Awaited<ReturnType<typeof findPartnerFiscalPosition>>
+>;
 export async function findPartnerFiscalPosition({
   client,
   mainPartnerId,
 }: {
   client: Client;
   mainPartnerId: string | null | undefined;
-}): Promise<FiscalPositionInput | null> {
+}) {
   if (!mainPartnerId) return null;
   const partner = await client.aOSPartner.findOne({
     where: {id: mainPartnerId},
@@ -161,13 +147,7 @@ export async function findPartnerFiscalPosition({
           select: {
             fromTaxSet: {select: {id: true}},
             toTaxSet: {
-              select: {
-                id: true,
-                activeTaxLine: {value: true},
-                taxLineList: {
-                  select: {value: true, startDate: true, endDate: true},
-                },
-              },
+              select: taxRowSelectFields,
             },
           },
         },

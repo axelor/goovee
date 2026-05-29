@@ -1,6 +1,6 @@
-import {DEFAULT_CURRENCY_SCALE} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {t} from '@/locale/server';
+import {ActionResponse} from '@/types/action';
 import {z} from 'zod';
 import {
   buildPriceContext,
@@ -8,13 +8,7 @@ import {
   findCartProductsAvailability,
 } from '../orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import {
-  ComputedPrice,
-  computePrice,
-  round,
-  type CurrencyInput,
-} from '../utils/price';
-import {ActionResponse} from '@/types/action';
+import {ComputedPrice, computePrice, round} from '../utils/price';
 
 /* Per-product availability check shared by validateCart and
  * recheckCartAvailability. Returns a translated error message if the
@@ -109,33 +103,21 @@ export async function validateCart({
     };
   }
 
-  const {conversionLines, viewerCurrency, defaultCurrency} =
-    await buildPriceContext({
-      client,
-      mainPartnerId,
-      productCurrencyCodes: products.map(p => p.saleCurrency?.code),
-    });
+  const priceContext = await buildPriceContext({
+    client,
+    mainPartnerId,
+    productCurrencyCodes: products.map(p => p.saleCurrency?.code),
+  });
 
   const items: ValidatedCartItem[] = [];
   let currency: ComputedPrice['currency'] | null = null;
   for (const product of products) {
     const unavailable = await checkAvailability(product);
     if (unavailable) return {error: true as const, message: unavailable};
-    const productCurrency: CurrencyInput | null = product.saleCurrency?.code
-      ? {
-          code: product.saleCurrency.code,
-          symbol: product.saleCurrency.symbol ?? '',
-          numberOfDecimals: product.saleCurrency.numberOfDecimals,
-        }
-      : null;
-    const price = computePrice(product, {
-      companyId: workspace.config.company?.id,
-      companyTimezone: workspace.config.company?.timezone,
-      scale: product.saleCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE,
-      productCurrency,
-      viewerCurrency,
-      defaultCurrency,
-      conversionLines,
+    const price = computePrice({
+      product,
+      priceContext: priceContext,
+      company: workspace.config.company,
     });
     if (price.ati <= 0) {
       return {

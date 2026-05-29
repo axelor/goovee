@@ -9,7 +9,8 @@
     },
     {
       "type": "String",
-      "name": "code"
+      "name": "code",
+      "required": true
     },
     {
       "type": "String",

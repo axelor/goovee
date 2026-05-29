@@ -86,68 +86,17 @@
  */
 
 import {DEFAULT_CURRENCY_SCALE} from '@/constants';
+import type {
+  TaxRow,
+  AccountManagementRow,
+  ConversionLine,
+  FiscalPositionInput,
+  PriceableProduct,
+  PriceContext,
+} from '../orm';
+import {PortalAppConfig} from '@/orm/workspace';
 
 const DEFAULT_TAX_RATE = 0;
-
-/** A row from `accountManagementList` — minimum fields needed for tax
- *  resolution. Lives at the leaf so it can be referenced both on the
- *  product and on the product family without redeclaring. */
-type TaxLineRow = {
-  value?: unknown;
-  /** ISO date strings — only used when the parent tax has no `activeTaxLine`
-   *  and we need to pick by today's date. */
-  startDate?: string | null;
-  endDate?: string | null;
-};
-
-type TaxRow = {
-  id?: string | null;
-  activeTaxLine?: TaxLineRow | null;
-  taxLineList?: TaxLineRow[] | null;
-};
-
-type AccountManagementRow = {
-  company?: {id?: string | null} | null;
-  saleTaxSet?: TaxRow[] | null;
-};
-
-/** Per-company override row from `Product.productCompanyList`. Mirrors
- *  AOS's `ProductCompanyService.getProductCompany(product, field, company)`:
- *  when a row matches the selling company, its `salePrice` / `inAti`
- *  override the base product fields. */
-type ProductCompanyRow = {
-  company?: {id?: string | null} | null;
-  salePrice?: unknown;
-  inAti?: boolean | null;
-};
-
-/** Shape of the fields a product needs to expose for price compute.
- *  Permissive on the leaf types because callers may pass raw ORM
- *  payloads (BigDecimal) or cloned ones (string / number). */
-export type PriceComputeInput = {
-  salePrice?: unknown;
-  inAti?: boolean | null;
-  /** Product-level account-management overrides. AOS consults these
-   *  before falling back to the product family's list. */
-  accountManagementList?: AccountManagementRow[] | null;
-  productFamily?: {
-    accountManagementList?: AccountManagementRow[] | null;
-  } | null;
-  /** Per-company overrides of `salePrice` / `inAti`. AOS reads these
-   *  via `ProductCompanyService` before falling back to the base product. */
-  productCompanyList?: ProductCompanyRow[] | null;
-};
-
-/** One row from `FiscalPosition.taxEquivList`. */
-export type TaxEquivRow = {
-  fromTaxSet?: Array<{id?: string | null} | null> | null;
-  toTaxSet?: TaxRow[] | null;
-};
-
-/** Buyer's fiscal position — drives per-buyer tax remapping. */
-export type FiscalPositionInput = {
-  taxEquivList?: TaxEquivRow[] | null;
-};
 
 export type ComputedPrice = {
   /** Without tax. */
@@ -163,52 +112,11 @@ export type ComputedPrice = {
 
 /** Minimal currency shape needed for conversion. */
 export type CurrencyInput = {
+  id: string;
+  version: number;
   code: string;
-  symbol: string;
-  numberOfDecimals?: number | null;
-};
-
-/** One row from `appBase.currencyConversionLineList`. */
-export type ConversionLine = {
-  startCurrency?: {code?: string | null} | null;
-  endCurrency?: {code?: string | null} | null;
-  exchangeRate?: unknown;
-  fromDate?: string | null;
-  toDate?: string | null;
-};
-
-export type ComputeOptions = {
-  /** Selling company id (`workspace.config.company.id`). Required when
-   *  the product carries multi-company AccountManagement rows; without
-   *  it we fall back to whatever first row is in the list. */
-  companyId?: string | null;
-  /** IANA timezone of the selling company (`workspace.config.company.timezone`).
-   *  Used to compute "today" for the date-window tax-line fallback so the
-   *  display rate matches what AOS will charge — see the doc comment on
-   *  `todayInTimezone`. Falls back to server clock when null/invalid. */
-  companyTimezone?: string | null;
-  /** Decimal places for the rounded result. Defaults to 2; pass the
-   *  currency's `numberOfDecimals` for currency-aware rounding. */
-  scale?: number;
-  /** Currency of the product's `salePrice` field. Used as the conversion
-   *  source and as the final fallback when no conversion is possible. */
-  productCurrency?: CurrencyInput | null;
-  /** Viewer's preferred currency from their partner record. First
-   *  conversion target. */
-  viewerCurrency?: CurrencyInput | null;
-  /** App-wide fallback currency (`DEFAULT_CURRENCY_CODE`). Second
-   *  conversion target — tried when the viewer currency conversion has
-   *  no matching line, or when there is no viewer currency. */
-  defaultCurrency?: CurrencyInput | null;
-  /** Active CurrencyConversionLine rows from `appBase`, ideally filtered
-   *  to the (productCurrency ↔ viewerCurrency) pair. Used to look
-   *  up exchange rates, mirroring AOS's CurrencyService logic. */
-  conversionLines?: ConversionLine[] | null;
-  /** Buyer partner's fiscal position. When set, each tax in the product's
-   *  saleTaxSet is remapped through `taxEquivList` (matching by tax id in
-   *  `fromTaxSet`) before its value is read — mirroring AOS's
-   *  `FiscalPositionService.getTaxSet`. */
-  fiscalPosition?: FiscalPositionInput | null;
+  symbol: string | null;
+  numberOfDecimals: number | null;
 };
 
 /** AOS-style resolution: try the product's own `accountManagementList`
@@ -223,7 +131,7 @@ export type ComputeOptions = {
  *  overrides (sale account, journal) and rely on the family for the tax
  *  set. */
 function resolveAccountManagement(
-  product: PriceComputeInput,
+  product: PriceableProduct,
   companyId: string | null | undefined,
 ): AccountManagementRow | null {
   if (companyId == null) return null;
@@ -385,20 +293,18 @@ function tryConvert(
  *    1. viewerCurrency — if a productCurrency→viewer conversion line exists
  *    2. defaultCurrency — if a productCurrency→default conversion line exists
  *    3. productCurrency — last-resort, displayed as-is */
-export function computePrice(
-  product: PriceComputeInput,
-  options: ComputeOptions = {},
-): ComputedPrice {
-  const {
-    companyId,
-    companyTimezone,
-    scale = DEFAULT_CURRENCY_SCALE,
-    productCurrency,
-    viewerCurrency,
-    defaultCurrency,
-    conversionLines,
-    fiscalPosition,
-  } = options;
+export function computePrice({
+  product,
+  priceContext,
+  company,
+}: {
+  product: PriceableProduct;
+  priceContext: PriceContext;
+  company: {id: string; timezone: string | null} | null;
+}): ComputedPrice {
+  const {viewerCurrency, defaultCurrency, conversionLines, fiscalPosition} =
+    priceContext;
+  const {id: companyId, timezone: companyTimezone} = company || {};
 
   const today = todayInTimezone(companyTimezone);
   const override =
@@ -409,6 +315,7 @@ export function computePrice(
         ) ?? null);
   const basePrice = override?.salePrice ?? product.salePrice;
   const baseInAti = override?.inAti ?? product.inAti;
+  const baseCurrency = override?.saleCurrency ?? product.saleCurrency;
   const salePrice = Number(basePrice ?? 0);
   const accountManagement = resolveAccountManagement(product, companyId);
   const taxRate = accountManagement
@@ -426,11 +333,11 @@ export function computePrice(
   }
 
   const lines = conversionLines ?? [];
-  const fromCode = productCurrency?.code;
-  let resolvedCurrency: CurrencyInput | null = productCurrency ?? null;
+  const fromCode = baseCurrency?.code;
+  let resolvedCurrency = baseCurrency;
   let convertedWt = wt;
   let convertedAti = ati;
-  let resolvedScale = productCurrency?.numberOfDecimals ?? scale;
+  let resolvedScale = baseCurrency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
 
   if (fromCode) {
     const seen = new Set<string>();
@@ -448,7 +355,7 @@ export function computePrice(
         convertedWt = wtResult.value;
         convertedAti = atiResult.value;
         resolvedCurrency = target;
-        resolvedScale = target.numberOfDecimals ?? scale;
+        resolvedScale = target.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
         break;
       }
     }

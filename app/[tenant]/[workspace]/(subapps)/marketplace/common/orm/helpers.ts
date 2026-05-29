@@ -1,4 +1,5 @@
 import type {
+  AOSAccountManagement,
   AOSMarketplaceProductVersion,
   AOSProduct,
   AOSProductCategory,
@@ -8,12 +9,12 @@ import {and, or} from '@/utils/orm';
 import type {
   Entity,
   OrderByArg,
+  Payload,
   SelectOptions,
   WhereOptions,
 } from '@goovee/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import {type PriceComputeInput} from '../utils/price';
 
 export type QueryProps<T extends Entity> = {
   where?: WhereOptions<T> | null;
@@ -168,19 +169,31 @@ export const versionNumberFields = {
 
 /** Default goovee-orm result shape for lookups that select only id+version. */
 export type ORMRecord = {id: string; version: number};
+export type AccountManagementRow = Payload<
+  AOSAccountManagement,
+  {select: typeof accountManagementSelectFields}
+>;
 
+const accountManagementSelectFields = {
+  company: {id: true},
+  saleTaxSet: {
+    select: {
+      id: true,
+      activeTaxLine: {value: true},
+      taxLineList: {
+        select: {value: true, startDate: true, endDate: true},
+      },
+    },
+  },
+} as const satisfies SelectOptions<AOSAccountManagement>;
 /* Each query that returns a product enriches the row with `price`
  * (wt / ati / taxRate / currency) computed server-side via the same logic
  * AOS Java uses when generating invoice lines. Consumers should read these
  * numbers and never recompute on the client. */
-export type PriceableProduct = PriceComputeInput & {
-  saleCurrency?: {
-    code?: string | null;
-    symbol?: string | null;
-    numberOfDecimals?: number | null;
-  } | null;
-};
-
+export type PriceableProduct = Payload<
+  AOSProduct,
+  {select: typeof priceSelectFields}
+>;
 /** Fields every product query must select to enable price computation.
  *  Exported so cart-validation and other call sites can spread it into
  *  their selects and stay in lockstep with whatever `computePrice` reads. */
@@ -193,38 +206,11 @@ export const priceSelectFields = {
       company: {id: true},
       salePrice: true,
       inAti: true,
+      saleCurrency: {code: true, symbol: true, numberOfDecimals: true},
     },
   },
-  accountManagementList: {
-    select: {
-      id: true,
-      company: {id: true},
-      saleTaxSet: {
-        select: {
-          id: true,
-          activeTaxLine: {value: true},
-          taxLineList: {
-            select: {value: true, startDate: true, endDate: true},
-          },
-        },
-      },
-    },
-  },
+  accountManagementList: {select: accountManagementSelectFields},
   productFamily: {
-    accountManagementList: {
-      select: {
-        id: true,
-        company: {id: true},
-        saleTaxSet: {
-          select: {
-            id: true,
-            activeTaxLine: {value: true},
-            taxLineList: {
-              select: {value: true, startDate: true, endDate: true},
-            },
-          },
-        },
-      },
-    },
+    accountManagementList: {select: accountManagementSelectFields},
   },
 } as const satisfies SelectOptions<AOSProduct>;
