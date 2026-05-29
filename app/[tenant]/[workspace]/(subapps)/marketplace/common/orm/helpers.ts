@@ -196,6 +196,9 @@ const accountManagementSelectFields = {
   },
 } as const satisfies SelectOptions<AOSAccountManagement>;
 
+/** One row from `accountManagementList` — minimum fields needed for tax
+ *  resolution. Defined at the leaf so it can be referenced both on the
+ *  product and on the product family without redeclaring. */
 export type AccountManagementRow = Payload<
   AOSAccountManagement,
   {select: typeof accountManagementSelectFields}
@@ -207,6 +210,9 @@ const productPriceSelectFields = {
   salePrice: true,
   inAti: true,
   saleCurrency: currencySelect,
+  /* Per-company overrides of `salePrice` / `inAti` / `saleCurrency`. AOS
+   * reads these via `ProductCompanyService` before falling back to the
+   * base product fields. */
   productCompanyList: {
     select: {
       company: {id: true},
@@ -215,6 +221,8 @@ const productPriceSelectFields = {
       saleCurrency: currencySelect,
     },
   },
+  /* Product-level account-management overrides. AOS consults these
+   * before falling back to the product family's list. */
   accountManagementList: {select: accountManagementSelectFields},
   productFamily: {
     accountManagementList: {select: accountManagementSelectFields},
@@ -226,15 +234,11 @@ export type PriceableProduct = Payload<
   {select: typeof productPriceSelectFields}
 >;
 
-/* Each query that returns a marketplace product enriches the row with
- * `price` (wt / ati / taxRate / currency) computed server-side via the
- * same logic AOS Java uses when generating invoice lines. Consumers
- * should read these numbers and never recompute on the client.
- *
- * The marketplace product is the listing layer; salePrice/inAti/saleCurrency
- * on it override the corresponding fields on the backing `product` m2o,
- * which still supplies the tax (accountManagement) and the fallback
- * currency. computePrice consumes them via the `priceOverride` argument. */
+/** Fields the MP listing must expose for `withPrice` to compute the
+ *  server-side `price` (wt / ati / taxRate / currency). The listing's
+ *  price-defining fields layer on top of the backing product's via
+ *  `priceOverride` — see `withPrice`. Consumers should read the
+ *  computed `price` and never recompute on the client. */
 export const priceSelectFields = {
   salePrice: true,
   inAti: true,
