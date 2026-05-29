@@ -155,7 +155,7 @@ export async function saveProduct(
           id: payload.id,
           version: current.version,
           ...productData,
-          updatedByPartner: {select: {id: auth.user.mainPartnerId}},
+          updatedByPartner: {select: {id: auth.user.id}},
           ...(toAdd.length || toRemove.length
             ? {
                 categorySet: {
@@ -209,7 +209,7 @@ export async function saveProduct(
             auth.workspace.config.defaultProductForMarketplace?.inAti ?? false,
           saleCurrency: {select: {id: defaultSaleCurrency.id}},
           publisher: {select: {id: auth.user.mainPartnerId}},
-          createdByPartner: {select: {id: auth.user.mainPartnerId}},
+          createdByPartner: {select: {id: auth.user.id}},
           product: {select: {id: backingProductId}},
           portalWorkspace: {select: {id: auth.workspace.id}},
           categorySet: {
