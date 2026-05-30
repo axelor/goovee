@@ -14,13 +14,13 @@ import type {MyProductWithVersions} from '../orm';
 import {
   findMyProductWithVersions,
   findProductsBySearch,
+  generateUniqueProductSlug,
   resolveNewListingCurrency,
   type ProductSearchResult,
   syncProductImages,
 } from '../orm';
 import {productSchema} from '../ui/components/forms/product-form/validator';
 import {ensureAuth} from '../utils/auth-helper';
-import {slugify} from '../utils/slugify';
 
 const loadMyProductForEditSchema = z.object({
   productId: z.string().min(1),
@@ -195,7 +195,11 @@ export async function saveProduct(
           ),
         };
       }
-      const slug = slugify(payload.name);
+      const slug = await generateUniqueProductSlug({
+        client,
+        workspaceId: auth.workspace.id,
+        name: payload.name,
+      });
       const created = await client.aOSMarketplaceProduct.create({
         select: {id: true},
         data: {

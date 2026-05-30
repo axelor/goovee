@@ -294,7 +294,9 @@ A listing is created/edited from a single form. Fields and their rules:
 
 - requires a **workspace default product** to be configured
   (otherwise creation is refused — it's the source of the tax rules);
-- generates the **slug** (the listing's URL) from the name;
+- generates the **slug** (the listing's URL) from the name; if another listing in
+  the workspace already uses that slug, a numeric suffix is appended
+  (my-app, my-app-2, …) to keep it unique within the workspace;
 - sets the **publisher** to the user's **customer** (so the listing is shared
   across everyone under it) and **created-by** to the **user** who created it;
 - sets the **inATI flag** from the workspace default product — when true the seller enters

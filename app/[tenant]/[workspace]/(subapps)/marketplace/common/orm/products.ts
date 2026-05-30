@@ -5,6 +5,7 @@ import {and, or} from '@/utils/orm';
 import type {Payload, SelectOptions} from '@goovee/orm';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import {slugify} from '../utils/slugify';
 import {
   priceSelectFields,
   versionNumberFields,
@@ -212,4 +213,43 @@ export async function findProduct({
     ],
   });
   return withPrice(resolved, workspace, priceContext);
+}
+
+/**
+ * Slug for a new product, unique within its workspace. Matches the
+ * `(portalWorkspace, slug)` DB unique constraint: when `slugify(name)` is
+ * already taken in the workspace, appends the lowest free numeric suffix
+ * (`my-product`, `my-product-2`, `my-product-3`, …).
+ *
+ * The existence check intentionally omits the archived filter — the DB
+ * constraint covers archived rows too, so their slugs are still reserved
+ * even though routing hides them.
+ *
+ * Best-effort: a concurrent create of the same name can still lose the
+ * race and hit the constraint at insert. That rare case surfaces through
+ * the caller's normal error path; we don't retry here.
+ */
+export async function generateUniqueProductSlug({
+  client,
+  workspaceId,
+  name,
+}: {
+  client: Client;
+  workspaceId: ID;
+  name: string;
+}): Promise<string> {
+  const base = slugify(name);
+  const rows = await client.aOSMarketplaceProduct.find({
+    where: {
+      portalWorkspace: {id: workspaceId},
+      OR: [{slug: base}, {slug: {like: `${base}-%`}}],
+    },
+    select: {slug: true},
+  });
+  const taken = new Set(rows.map(r => r.slug));
+  if (!taken.has(base)) return base;
+  for (let n = 2; ; n++) {
+    const candidate = `${base}-${n}`;
+    if (!taken.has(candidate)) return candidate;
+  }
 }
