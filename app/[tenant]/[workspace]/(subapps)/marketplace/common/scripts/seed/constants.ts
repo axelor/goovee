@@ -9,7 +9,7 @@
  * seed.json keeps bare values and the prefix is applied via `demoKey`.
  *
  * Change the prefix HERE and both the seed and reset scripts follow. */
-export const DEMO_PREFIX = 'portal_mkt_demo_';
+export const DEMO_PREFIX = 'portal-mkt-demo-';
 
 /** Prefix a bare seed key (slug, code, name) with the demo marker. */
 export const demoKey = (value: string) => `${DEMO_PREFIX}${value}`;

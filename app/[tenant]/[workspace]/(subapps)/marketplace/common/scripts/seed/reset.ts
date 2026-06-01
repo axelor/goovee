@@ -253,8 +253,8 @@ async function main() {
       );
     }
 
-    /* 4. MetaFile rows whose filePath we stamped (`portal_mkt_demo_…`) — bundles
-     *    + screenshots in one shot. Runs regardless of product matches. */
+    /* 4. MetaFile rows whose filePath carries DEMO_PREFIX — bundle +
+     *    screenshots in one shot. Runs regardless of product matches. */
     counts.metaFiles = Number(
       await txClient.aOSMetaFile.deleteAll({
         where: {filePath: {like: `${DEMO_PREFIX}%`}},

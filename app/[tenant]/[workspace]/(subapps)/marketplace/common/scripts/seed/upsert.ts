@@ -158,11 +158,13 @@ export async function upsertCompatibilityVersion(
   });
 }
 
-/* Single shared zip used as every seeded version's bundle. Lives next
- * to this script so the data file doesn't have to carry per-version
- * paths. Uploaded once per run to deterministic `portal_mkt_demo_bundle.zip`
- * filePath under tenant storage. */
-const SHARED_BUNDLE_FILENAME = `${DEMO_PREFIX}bundle.zip`;
+/* Single shared zip used as every seeded version's bundle. Lives next to
+ * this script under a STABLE name (independent of DEMO_PREFIX) — like the
+ * shared screenshots, only the storage filePath carries the prefix so
+ * reset can match it. Changing DEMO_PREFIX never requires renaming this
+ * file. */
+const BUNDLE_SOURCE_FILE = 'bundle.zip';
+const BUNDLE_FILE_PATH = `${DEMO_PREFIX}bundle.zip`;
 
 export async function upsertSharedBundleMetaFile({
   client,
@@ -171,9 +173,9 @@ export async function upsertSharedBundleMetaFile({
   client: Client;
   storage: string;
 }): Promise<string> {
-  const sourcePath = path.resolve(__dirname, SHARED_BUNDLE_FILENAME);
+  const sourcePath = path.resolve(__dirname, BUNDLE_SOURCE_FILE);
   const buffer = await fsp.readFile(sourcePath);
-  const filePath = SHARED_BUNDLE_FILENAME;
+  const filePath = BUNDLE_FILE_PATH;
   const fileType = 'application/zip';
 
   await pipeline(
@@ -182,7 +184,7 @@ export async function upsertSharedBundleMetaFile({
   );
 
   const payload = {
-    fileName: SHARED_BUNDLE_FILENAME,
+    fileName: BUNDLE_SOURCE_FILE,
     filePath,
     fileType,
     fileSize: String(buffer.length),
@@ -306,7 +308,7 @@ export async function upsertProduct(
     : defaultPublisherPartnerId;
 
   /* Slug carries DEMO_PREFIX like every other seeded key (category/license/
-   * compat resolved above). reset.ts matches it by `slug LIKE 'portal_mkt_demo_%'`,
+   * compat resolved above). reset.ts matches it by `slug LIKE DEMO_PREFIX%`,
    * and it doubles as the re-run idempotency key. */
   const slug = demoKey(product.slug);
   const existing = await client.aOSMarketplaceProduct.findOne({
