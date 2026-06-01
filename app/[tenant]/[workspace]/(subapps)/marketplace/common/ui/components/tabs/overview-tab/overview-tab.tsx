@@ -1,14 +1,15 @@
 import {t} from '@/locale/server';
 import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
 import type {SingleProduct} from '../../../../orm';
+import {getProductScreenshotURL} from '../../../../utils/images';
 import {ScreenshotGallery} from '../../primitives/screenshot-gallery';
 
 interface OverviewTabProps {
   product: SingleProduct;
-  tenantId: string;
+  workspaceURI: string;
 }
 
-export async function OverviewTab({product, tenantId}: OverviewTabProps) {
+export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
   const images = (product.pictureList || []).filter(img => !!img.picture?.id);
 
   const [screenshotsLabel, screenshotAlt, aboutLabel] = await Promise.all([
@@ -30,7 +31,11 @@ export async function OverviewTab({product, tenantId}: OverviewTabProps) {
               .filter(img => img.picture?.id)
               .map(img => ({
                 id: img.id,
-                src: `/api/tenant/${tenantId}/product/image/${img.picture!.id}`,
+                src: getProductScreenshotURL({
+                  workspaceURI,
+                  productId: product.id,
+                  fileId: img.picture!.id,
+                }),
               }))}
             alt={screenshotAlt}
           />

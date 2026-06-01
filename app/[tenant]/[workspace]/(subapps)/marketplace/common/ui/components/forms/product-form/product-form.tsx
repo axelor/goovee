@@ -49,6 +49,7 @@ import type {
   Currency,
 } from '../../../../orm';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
+import {getProductScreenshotURL} from '../../../../utils/images';
 import {ProductIcon} from '../../primitives/product-icon';
 import {
   ACCEPTED_IMAGE_TYPES,
@@ -544,8 +545,9 @@ type ScreenshotsFieldProps = {
   newImages: File[];
   onExistingImagesChange: (next: ExistingImage[]) => void;
   onNewImagesChange: (next: File[]) => void;
-  /** Tenant slug used to build image URLs. */
-  tenant: string;
+  /** Used to build the per-product screenshot image URLs. */
+  workspaceURI: string;
+  productId: string;
   /** Max number of files (existing + new) the user can keep. */
   maxImages: number;
   /** Per-file size cap; oversize files are silently dropped on pick. */
@@ -565,7 +567,8 @@ function ScreenshotsField({
   newImages,
   onExistingImagesChange,
   onNewImagesChange,
-  tenant,
+  workspaceURI,
+  productId,
   maxImages,
   maxImageSize,
 }: ScreenshotsFieldProps) {
@@ -643,7 +646,11 @@ function ScreenshotsField({
           key={rowId}
           className="relative aspect-video w-32 overflow-hidden rounded-lg border border-border bg-muted">
           <Image
-            src={`/api/tenant/${tenant}/product/image/${pictureId}`}
+            src={getProductScreenshotURL({
+              workspaceURI,
+              productId,
+              fileId: pictureId,
+            })}
             alt={i18n.t('Product screenshot {0}', String(index + 1))}
             width={256}
             height={144}
@@ -718,7 +725,7 @@ function ScreenshotsFormField({
 }: {
   initial?: Cloned<MyProductWithVersions>;
 }) {
-  const {tenant} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const {control, setValue} = useFormContext<ProductFormValues>();
   const existingIds = useWatch({control, name: 'existingImageIds'});
   const newImages = useWatch({control, name: 'newImages'});
@@ -780,7 +787,8 @@ function ScreenshotsFormField({
                   shouldDirty: true,
                 })
               }
-              tenant={tenant}
+              workspaceURI={workspaceURI}
+              productId={initial?.id ?? ''}
               maxImages={MAX_IMAGES}
               maxImageSize={MAX_IMAGE_SIZE}
             />

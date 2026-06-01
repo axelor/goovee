@@ -277,7 +277,7 @@ export default async function ProductPage(props: {
           {/* Main Content - Changes with tabs */}
           <div className="lg:col-span-2">
             {tab === ProductTab.Overview && (
-              <OverviewTab product={product} tenantId={tenantId} />
+              <OverviewTab product={product} workspaceURI={workspaceURI} />
             )}
             {tab === ProductTab.Versions && (
               <VersionsTab

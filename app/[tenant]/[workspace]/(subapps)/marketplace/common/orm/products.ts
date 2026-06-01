@@ -252,3 +252,36 @@ export async function generateUniqueProductSlug({
     if (!taken.has(candidate)) return candidate;
   }
 }
+
+/**
+ * Resolves a single screenshot metafile for a marketplace product, in one
+ * access-checked query: the product must pass {@link withProductAccessFilter}
+ * (workspace-scoped, non-archived) AND own a picture pointing at `fileId`.
+ * Returns the picture's metafile (its id) or null. Used by the marketplace
+ * image route to stream the file only when the caller may see the product.
+ */
+export async function getProductScreenshot({
+  client,
+  workspace,
+  productId,
+  fileId,
+}: {
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  productId: ID;
+  fileId: ID;
+}) {
+  const product = await client.aOSMarketplaceProduct.findOne({
+    where: withProductAccessFilter(workspace)({
+      id: productId,
+      pictureList: {picture: {id: fileId}},
+    }),
+    select: {
+      pictureList: {
+        where: {picture: {id: fileId}},
+        select: {picture: {id: true}},
+      },
+    },
+  });
+  return product?.pictureList?.[0]?.picture ?? null;
+}
