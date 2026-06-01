@@ -47,14 +47,22 @@ export function EditProductButton({
 
   const handleOpen = async () => {
     setLoading(true);
-    const result = await loadMyProductForEdit({productId, workspaceURL});
-    setLoading(false);
-    if (!result.success) {
-      toast({variant: 'destructive', title: result.message});
-      return;
+    try {
+      const result = await loadMyProductForEdit({productId, workspaceURL});
+      if (!result.success) {
+        toast({variant: 'destructive', title: result.message});
+        return;
+      }
+      setProduct(result.data);
+      setOpen(true);
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: i18n.t('Failed to load the product. Please try again.'),
+      });
+    } finally {
+      setLoading(false);
     }
-    setProduct(result.data);
-    setOpen(true);
   };
 
   return (

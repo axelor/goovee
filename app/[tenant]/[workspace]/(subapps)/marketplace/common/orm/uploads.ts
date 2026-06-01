@@ -36,47 +36,71 @@ async function uploadFile(file: File, storage: string, client: Client) {
   return meta.id;
 }
 
+/* One ordered screenshot from the product form: an already-saved picture
+ * (referenced by its AOSMarketplaceProductPicture row id) or a freshly-picked
+ * File to upload. Mirrors `ProductImage` in the form validator; redeclared
+ * here to keep the orm layer free of a UI import. */
+export type ProductImageInput =
+  | {kind: 'existing'; id: string; version: number}
+  | {kind: 'new'; file: File};
+
 /* Reconciles a marketplace product's screenshot list against the form
- * submission:
- *   - Deletes any AOSMarketplaceProductPicture rows whose ids aren't in
- *     `keepImageIds`.
- *   - Uploads each file in `newImages` as a MetaFile + creates a fresh
- *     AOSMarketplaceProductPicture linked to the marketplace product.
- * Called from saveProduct after the MP row exists. The form-level cap
- * (10 images / 5 MB each) has already been enforced by Zod. */
+ * submission. `images` is the full ordered list — array index becomes the
+ * persisted `sequence`:
+ *   - Any existing AOSMarketplaceProductPicture row absent from `images` is
+ *     deleted.
+ *   - Each `new` file is uploaded as a MetaFile + linked via a fresh
+ *     AOSMarketplaceProductPicture.
+ *   - Every surviving / new picture gets `sequence = its position`.
+ * Called from saveProduct after the MP row exists. The form-level caps
+ * (count / 5 MB each) have already been enforced by Zod. */
 export async function syncProductImages({
   client,
   productId,
   storage,
-  keepImageIds,
-  newImages,
+  images,
 }: {
   client: Client;
   productId: string;
   storage: string;
-  keepImageIds: string[];
-  newImages: File[];
+  images: ProductImageInput[];
 }) {
   const existing = await client.aOSMarketplaceProductPicture.find({
     where: {marketplaceProduct: {id: productId}},
-    select: {id: true, picture: {id: true}},
+    select: {id: true},
   });
-  const keep = new Set(keepImageIds);
+  const keep = new Set(
+    images.flatMap(img => (img.kind === 'existing' ? [img.id] : [])),
+  );
   const toDelete = existing.filter(row => !keep.has(row.id));
   if (toDelete.length) {
     await client.aOSMarketplaceProductPicture.deleteAll({
       where: {id: {in: toDelete.map(row => row.id)}},
     });
   }
-  for (const file of newImages) {
-    const metaId = await uploadFile(file, storage, client);
-    await client.aOSMarketplaceProductPicture.create({
-      data: {
-        marketplaceProduct: {select: {id: productId}},
-        picture: {select: {id: metaId}},
-      },
-      select: {id: true},
-    });
+
+  /* Walk in order; the index is the target sequence. Existing rows are
+   * re-stamped with the client's loaded version (optimistic-locked against
+   * concurrent edits); new files are uploaded and linked at the same
+   * sequence. */
+  for (let sequence = 0; sequence < images.length; sequence++) {
+    const img = images[sequence];
+    if (img.kind === 'existing') {
+      await client.aOSMarketplaceProductPicture.update({
+        data: {id: img.id, version: img.version, sequence},
+        select: {id: true},
+      });
+    } else {
+      const metaId = await uploadFile(img.file, storage, client);
+      await client.aOSMarketplaceProductPicture.create({
+        data: {
+          marketplaceProduct: {select: {id: productId}},
+          picture: {select: {id: metaId}},
+          sequence,
+        },
+        select: {id: true},
+      });
+    }
   }
 }
 

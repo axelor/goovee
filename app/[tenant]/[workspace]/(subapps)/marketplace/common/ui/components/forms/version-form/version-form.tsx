@@ -136,14 +136,21 @@ export function VersionForm({
   const submit = handleSubmit(
     values => {
       startTransition(async () => {
-        const formData = packIntoFormData({...values, workspaceURL});
-        const result = await saveVersion(formData);
-        if (!result.success) {
-          toast({variant: 'destructive', title: result.message});
-          return;
+        try {
+          const formData = packIntoFormData({...values, workspaceURL});
+          const result = await saveVersion(formData);
+          if (!result.success) {
+            toast({variant: 'destructive', title: result.message});
+            return;
+          }
+          toast({variant: 'success', title: i18n.t('Version saved')});
+          onDone();
+        } catch {
+          toast({
+            variant: 'destructive',
+            title: i18n.t('Failed to save the version. Please try again.'),
+          });
         }
-        toast({variant: 'success', title: i18n.t('Version saved')});
-        onDone();
       });
     },
     () => scrollToFirstError(bodyRef.current),
@@ -217,17 +224,24 @@ export function VersionForm({
     if (!current?.id) return;
     setConfirmUnpublish(false);
     startTransition(async () => {
-      const result = await unpublishVersion({
-        versionId: current.id,
-        productId,
-        workspaceURL,
-      });
-      if (!result.success) {
-        toast({variant: 'destructive', title: result.message});
-        return;
+      try {
+        const result = await unpublishVersion({
+          versionId: current.id,
+          productId,
+          workspaceURL,
+        });
+        if (!result.success) {
+          toast({variant: 'destructive', title: result.message});
+          return;
+        }
+        toast({variant: 'success', title: i18n.t('Version unpublished')});
+        onDone();
+      } catch {
+        toast({
+          variant: 'destructive',
+          title: i18n.t('Failed to unpublish the version. Please try again.'),
+        });
       }
-      toast({variant: 'success', title: i18n.t('Version unpublished')});
-      onDone();
     });
   };
   const positionLabel = creatingNew

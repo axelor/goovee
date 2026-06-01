@@ -106,7 +106,8 @@ export async function findMyProductWithVersions({
       currentVersion: {id: true},
       salePrice: true,
       pictureList: {
-        select: {id: true, picture: {id: true}},
+        select: {id: true, sequence: true, picture: {id: true}},
+        orderBy: {sequence: 'ASC'},
       },
       versionList: {
         select: {

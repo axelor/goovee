@@ -7,7 +7,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogTitle,
 } from '@/ui/components/responsive-dialog';
-import {useResponsive} from '@/ui/hooks';
+import {useResponsive, useToast} from '@/ui/hooks';
 import {useRouter} from 'next/navigation';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
@@ -21,6 +21,7 @@ import type {
 import {ProductForm} from '../../forms/product-form';
 import {VersionForm} from '../../forms/version-form';
 import {Stepper} from '../../primitives/stepper';
+import {loadMyProductForEdit} from '../../../../actions';
 
 type Step = 'product' | 'version';
 
@@ -59,10 +60,59 @@ export function ProductFormDialog({
 }: ProductFormDialogProps) {
   const router = useRouter();
   const responsive = useResponsive();
+  const {toast} = useToast();
   const isSmall = RESPONSIVE_SIZES.some(size => responsive[size]);
 
   const [step, setStep] = useState<Step>('product');
   const [productId, setProductId] = useState<string | undefined>(initial?.id);
+  /* Live snapshot, re-seeded after each save so a repeat save doesn't re-derive
+   * from a stale load (stale version, re-create on create, or drop the
+   * just-uploaded screenshots). */
+  const [product, setProduct] = useState(initial);
+  /* Whether this session persisted anything — drives a listing refresh on
+   * close. The product save commits at "Save & continue" (before the version
+   * step), so even a later Cancel/✕ must refresh the now-stale table. */
+  const savedRef = useRef(false);
+
+  const onProductSaved = useCallback(
+    async (id: string) => {
+      savedRef.current = true;
+      setProductId(id); // sync — unblocks the version step before the refetch
+      /* The save itself already succeeded (ProductForm toasted "Saved"); this
+       * only re-seeds the dialog snapshot. If it fails, the persisted data is
+       * fine but the in-session snapshot is stale, so warn the user. */
+      try {
+        const res = await loadMyProductForEdit({productId: id, workspaceURL});
+        if (res.success) {
+          setProduct(res.data);
+        } else {
+          toast({variant: 'destructive', title: res.message});
+        }
+      } catch {
+        toast({
+          variant: 'destructive',
+          title: i18n.t(
+            'Saved, but could not reload the latest data. Reopen the product to keep editing.',
+          ),
+        });
+      }
+    },
+    [workspaceURL, toast],
+  );
+
+  /* The dialog stays mounted across close/reopen, so reset the session from the
+   * current `initial` on each open. Render-phase adjustment (not an effect);
+   * the `wasOpen` guard fires it once per open. */
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setProduct(initial);
+      setProductId(initial?.id);
+      setStep('product');
+      savedRef.current = false;
+    }
+  }
 
   // Each step is taller than the viewport; without this the scroll position
   // carries over when switching steps (e.g. land at the bottom of the version
@@ -73,7 +123,7 @@ export function ProductFormDialog({
   }, [step]);
 
   const productName =
-    initial?.name ?? (defaultType === MARKETPLACE_TYPE.APP ? '' : '');
+    product?.name ?? (defaultType === MARKETPLACE_TYPE.APP ? '' : '');
   const title =
     mode === 'edit'
       ? `${i18n.t('Edit')} · ${productName}`
@@ -87,16 +137,29 @@ export function ProductFormDialog({
         ? i18n.t('Apps hub · Discover and ship')
         : i18n.t('Skills hub · Open source, free for everyone');
 
-  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      onOpenChange(next);
+      // Refresh the listing once on close if anything was persisted — covers
+      // Cancel / ✕ / Esc / outside-click uniformly, and skips the refresh when
+      // the user opened and closed without saving.
+      if (!next && savedRef.current) {
+        savedRef.current = false;
+        router.refresh();
+      }
+    },
+    [onOpenChange, router],
+  );
+  const close = useCallback(() => handleOpenChange(false), [handleOpenChange]);
   const onDone = useCallback(() => {
+    savedRef.current = true;
     close();
-    router.refresh();
-  }, [close, router]);
+  }, [close]);
 
   const productSaved = Boolean(productId);
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={onOpenChange} isSmall={isSmall}>
+    <ResponsiveDialog open={open} onOpenChange={handleOpenChange} isSmall={isSmall}>
       <ResponsiveDialogContent className="max-w-6xl gap-0 p-0">
         <div
           ref={scrollRef}
@@ -130,15 +193,18 @@ export function ProductFormDialog({
           {/* Body — step owns its own scroll container + sticky footer */}
           {step === 'product' && (
             <ProductForm
+              /* Remount on identity/version change so buildDefaults re-seeds
+               * from the freshly-refetched snapshot after a save. */
+              key={`${product?.id ?? 'new'}:${product?.version ?? 0}`}
               mode={mode}
               workspaceURL={workspaceURL}
               categories={categories}
               licenses={licenses}
-              initial={initial}
+              initial={product}
               defaultType={defaultType}
               listingCurrency={listingCurrency}
               inAti={inAti}
-              onSaved={id => setProductId(id)}
+              onSaved={onProductSaved}
               onContinue={() => setStep('version')}
               onCancel={close}
             />
@@ -148,8 +214,8 @@ export function ProductFormDialog({
               workspaceURI={workspaceURI}
               workspaceURL={workspaceURL}
               productId={productId}
-              versions={initial?.versionList ?? []}
-              productCurrentVersionId={initial?.currentVersion?.id ?? null}
+              versions={product?.versionList ?? []}
+              productCurrentVersionId={product?.currentVersion?.id ?? null}
               compatibilityVersions={compatibilityVersions}
               requiresReview={requiresReview}
               allowToPublish={allowToPublish}

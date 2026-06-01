@@ -194,7 +194,10 @@ export async function findProduct({
         name: true,
         picture: {id: true},
       },
-      pictureList: {select: {picture: {id: true}}},
+      pictureList: {
+        select: {sequence: true, picture: {id: true}},
+        orderBy: {sequence: 'ASC'},
+      },
     },
   });
   if (!product) return null;

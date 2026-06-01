@@ -98,20 +98,28 @@ export function YourReviewCard({
       setEditing(false);
       startTransition(async () => {
         addOptimistic(optimisticData);
-        const result = await saveReview({
-          productId,
-          workspaceURL,
-          rating: values.rating,
-          reviewComment: trimmedComment,
-          reviewedVersionId: values.versionId,
-        });
-        if (!result.success) {
-          toast({variant: 'destructive', title: result.message});
+        try {
+          const result = await saveReview({
+            productId,
+            workspaceURL,
+            rating: values.rating,
+            reviewComment: trimmedComment,
+            reviewedVersionId: values.versionId,
+          });
+          if (!result.success) {
+            toast({variant: 'destructive', title: result.message});
+            setEditing(true); // transition ends → optimistic auto-reverts
+            return;
+          }
+          toast({variant: 'success', title: i18n.t('Review saved')});
+          router.refresh();
+        } catch {
+          toast({
+            variant: 'destructive',
+            title: i18n.t('Failed to save your review. Please try again.'),
+          });
           setEditing(true); // transition ends → optimistic auto-reverts
-          return;
         }
-        toast({variant: 'success', title: i18n.t('Review saved')});
-        router.refresh();
       });
     };
 
@@ -150,13 +158,20 @@ export function YourReviewCard({
     setConfirmDelete(false);
     startTransition(async () => {
       addOptimistic({kind: 'delete'});
-      const result = await deleteReview({productId, workspaceURL});
-      if (!result.success) {
-        toast({variant: 'destructive', title: result.message});
-        return;
+      try {
+        const result = await deleteReview({productId, workspaceURL});
+        if (!result.success) {
+          toast({variant: 'destructive', title: result.message});
+          return;
+        }
+        toast({variant: 'success', title: i18n.t('Review deleted')});
+        router.refresh();
+      } catch {
+        toast({
+          variant: 'destructive',
+          title: i18n.t('Failed to delete your review. Please try again.'),
+        });
       }
-      toast({variant: 'success', title: i18n.t('Review deleted')});
-      router.refresh();
     });
   };
 

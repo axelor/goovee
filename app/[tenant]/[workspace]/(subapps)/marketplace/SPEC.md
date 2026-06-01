@@ -276,19 +276,19 @@ listings — a contributor can only edit listings they publish.
 
 A listing is created/edited from a single form. Fields and their rules:
 
-| Field                                 | Required | Editable | Rules                                                                                                        |
-| ------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| Type                                  | Yes      | Yes      | App or Skill                                                                                                 |
-| Name                                  | Yes      | Yes      | ≤ 120 characters.<br>Slug/URL is set from the name **at create only** — renaming later won't change the URL. |
-| Short description                     | Yes      | Yes      | 1–280 characters                                                                                             |
-| Long description                      | No       | Yes      | ≤ 20,000 characters                                                                                          |
-| Categories                            | Yes      | Yes      | at least one;<br>a listing can have many                                                                     |
-| License                               | Yes      | Yes      | chosen from the workspace's licenses                                                                         |
-| Cover style                           | Yes      | Yes      | a visual preset                                                                                              |
-| Icon                                  | Yes      | Yes      | an icon code                                                                                                 |
-| Documentation / Issues / Contact URLs | No       | Yes      | must be a valid `http(s)` URL if given                                                                       |
-| Price                                 | No       | Yes      | ≥ 0 and ≤ 999,999,999;<br>**defaults to 0 (free)** if omitted                                                |
-| Screenshots                           | No       | Yes      | up to **9** total, each **≤ 5 MB**;<br>JPEG/PNG/WebP/GIF/AVIF<br>(SVG is rejected for security)              |
+| Field                                 | Required | Editable | Rules                                                                                                               |
+| ------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| Type                                  | Yes      | Yes      | App or Skill                                                                                                        |
+| Name                                  | Yes      | Yes      | ≤ 120 characters.<br>Slug/URL is set from the name **at create only** — renaming later won't change the URL.        |
+| Short description                     | Yes      | Yes      | 1–280 characters                                                                                                    |
+| Long description                      | No       | Yes      | ≤ 20,000 characters                                                                                                 |
+| Categories                            | Yes      | Yes      | at least one;<br>a listing can have many                                                                            |
+| License                               | Yes      | Yes      | chosen from the workspace's licenses                                                                                |
+| Cover style                           | Yes      | Yes      | a visual preset                                                                                                     |
+| Icon                                  | Yes      | Yes      | an icon code                                                                                                        |
+| Documentation / Issues / Contact URLs | No       | Yes      | must be a valid `http(s)` URL if given                                                                              |
+| Price                                 | No       | Yes      | ≥ 0 and ≤ 999,999,999;<br>**defaults to 0 (free)** if omitted                                                       |
+| Screenshots                           | No       | Yes      | up to **9** total, each **≤ 5 MB**;<br>JPEG/PNG/WebP/GIF/AVIF<br>(SVG is rejected for security);<br>**reorderable** |
 
 **On create**, the system also:
 
@@ -318,8 +318,9 @@ What is fixed vs. what can change after create:
 
 **On edit**, **updated-by** is set to the editing **contact**.
 
-**Screenshots** are saved to match the form exactly: new files are uploaded, and
-any screenshot the user removed in the form is deleted.
+**Screenshots** are saved to match the form exactly: new files are uploaded, removed
+screenshots are deleted, and the **order is preserved** — the publisher's
+reordering in the form becomes the new sequence.
 
 #### 4.9.2 Creating & editing a version
 

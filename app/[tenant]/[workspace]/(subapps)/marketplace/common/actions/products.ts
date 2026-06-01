@@ -63,7 +63,7 @@ export async function loadMyProductForEdit(
 
 export async function saveProduct(
   formData: FormData,
-): ActionResponse<{productId: string}> {
+): ActionResponse<{productId: string; version: number}> {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
@@ -132,10 +132,22 @@ export async function saveProduct(
 
   try {
     let productId: string;
+    let productVersion: number;
     if (payload.id) {
+      /* Optimistic lock: an edit must carry the version the form was loaded
+       * with so a concurrent save by someone else is rejected (goovee-orm
+       * throws "Optimistic lock failed") instead of silently overwritten. */
+      if (payload.version == null) {
+        return {
+          error: true,
+          message: await t(
+            'This product is missing its version. Reload the product and try again.',
+          ),
+        };
+      }
       const current = await client.aOSMarketplaceProduct.findOne({
         where: {id: payload.id},
-        select: {id: true, version: true, categorySet: {select: {id: true}}},
+        select: {id: true, categorySet: {select: {id: true}}},
       });
       if (!current) {
         return {error: true, message: await t('Product not found')};
@@ -150,10 +162,12 @@ export async function saveProduct(
       );
       const toAdd = [...desired].filter(id => !previous.has(id));
       const toRemove = [...previous].filter(id => !desired.has(id));
-      await client.aOSMarketplaceProduct.update({
+      const updated = await client.aOSMarketplaceProduct.update({
         data: {
           id: payload.id,
-          version: current.version,
+          /* The client's loaded version — NOT a freshly-fetched one — is
+           * what makes the lock meaningful. */
+          version: payload.version,
           ...productData,
           updatedByPartner: {select: {id: auth.user.id}},
           ...(toAdd.length || toRemove.length
@@ -168,6 +182,7 @@ export async function saveProduct(
         select: {id: true},
       });
       productId = payload.id;
+      productVersion = updated.version ?? 0;
     } else {
       const backingProductId =
         auth.workspace.config.defaultProductForMarketplace?.id;
@@ -225,21 +240,28 @@ export async function saveProduct(
         },
       });
       productId = created.id;
+      productVersion = created.version ?? 0;
     }
 
     await syncProductImages({
       client,
       productId,
       storage: auth.tenant.config.aos.storage,
-      keepImageIds: payload.existingImageIds,
-      newImages: payload.newImages,
+      images: payload.images,
     });
 
-    return {success: true, data: {productId}};
+    return {success: true, data: {productId, version: productVersion}};
   } catch (e) {
-    const message =
-      e instanceof Error ? e.message : await t('An error occurred');
-    return {error: true, message};
+    const raw = e instanceof Error ? e.message : '';
+    if (raw.includes('Optimistic lock failed')) {
+      return {
+        error: true,
+        message: await t(
+          'This product was changed by someone else since you opened it. Reload and reapply your changes.',
+        ),
+      };
+    }
+    return {error: true, message: raw || (await t('An error occurred'))};
   }
 }
 
