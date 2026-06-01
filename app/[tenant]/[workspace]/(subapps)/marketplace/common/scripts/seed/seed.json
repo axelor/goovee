@@ -204,8 +204,6 @@
   ],
   "products": [
     {
-      "code": "mkt-demo-bpm-workflow-generator",
-      "slug": "bpm-workflow-generator",
       "name": "BPM Workflow Generator",
       "description": "Generate BPMN workflows from a YAML spec — no clicking around in the editor.",
       "longDescription": "<p>A code-first complement to the BPM Studio. Define your process in a YAML file, run a single command, and the toolkit emits the BPMN XML and registers it against your workflow engine.</p><h3>What it does</h3><ul><li>Compiles YAML process definitions into valid BPMN 2.0 XML.</li><li>Validates against the schema before installing.</li><li>Supports timer events, sub-processes, and inclusive gateways.</li></ul>",
@@ -295,8 +293,6 @@
       "supportContactUrl": "https://support.example.com/bpm-workflow-generator"
     },
     {
-      "code": "mkt-demo-ai-sentiment-analyzer",
-      "slug": "ai-sentiment-analyzer",
       "name": "AI Sentiment Analyzer",
       "description": "Automatically detect tone and sentiment in CRM emails and support tickets.",
       "longDescription": "<p>Leverage local LLMs to categorize incoming communication. Tag tickets as 'Frustrated', 'Happy', or 'Urgent' before a human even reads them.</p><h3>Features</h3><ul><li>Zero-latency processing.</li><li>Customizable sentiment thresholds.</li><li>Dashboard widgets for overall customer health.</li></ul>",
@@ -393,8 +389,6 @@
       "installCount": 234
     },
     {
-      "code": "mkt-demo-smart-invoice-parser",
-      "slug": "smart-invoice-parser",
       "name": "Smart Invoice Parser",
       "description": "Extract data from PDF invoices and auto-create accounting entries.",
       "longDescription": "<p>Stop manual data entry. This app uses OCR and pattern matching to extract vendor, amount, tax, and line items from any PDF invoice.</p><h3>Why use it?</h3><ul><li>99% accuracy on standard formats.</li><li>Learns from corrections.</li><li>Direct integration with Axelor Accounting.</li></ul>",
@@ -685,8 +679,6 @@
       "supportContactUrl": "https://support.example.com/smart-invoice-parser"
     },
     {
-      "code": "mkt-demo-inventory-optimizer",
-      "slug": "inventory-optimizer",
       "name": "Inventory Optimizer",
       "description": "Predictive stock management to reduce waste and prevent stockouts.",
       "longDescription": "<p>Uses historical sales data to suggest optimal reorder points. Works across multiple warehouses.</p>",
@@ -731,8 +723,6 @@
       ]
     },
     {
-      "code": "mkt-demo-crm-gamification",
-      "slug": "crm-gamification",
       "name": "CRM Gamification",
       "description": "Boost sales performance with leaderboards, badges, and real-time challenges.",
       "longDescription": "<p>Turn CRM usage into a friendly competition. Award points for logging calls, updating deals, and closing opportunities.</p>",
@@ -799,8 +789,6 @@
       "supportContactUrl": "https://support.example.com/crm-gamification"
     },
     {
-      "code": "mkt-demo-hr-onboarding-toolkit",
-      "slug": "hr-onboarding-toolkit",
       "name": "HR Onboarding Toolkit",
       "description": "Automate the onboarding process for new hires with checklists and auto-emails.",
       "longDescription": "<p>Create a seamless experience for new employees. Assign tasks to IT, Finance, and Managers automatically.</p>",
@@ -860,8 +848,6 @@
       ]
     },
     {
-      "code": "mkt-demo-sql-query-builder",
-      "slug": "sql-query-builder",
       "name": "Visual SQL Query Builder",
       "description": "Build complex SQL queries without writing a single line of code.",
       "longDescription": "<p>Drag and drop tables, join them visually, and apply filters. Export as SQL or use directly in reports.</p>",
@@ -932,8 +918,6 @@
       "supportContactUrl": "https://support.example.com/sql-query-builder"
     },
     {
-      "code": "mkt-demo-analytics-dashboard-pro",
-      "slug": "analytics-dashboard-pro",
       "name": "Analytics Dashboard Pro",
       "description": "High-performance data visualization for your Axelor dashboard.",
       "longDescription": "<p>Stunning charts and real-time updates for all your key metrics. Supports Drill-down and export to PDF/Excel.</p>",
@@ -1002,8 +986,6 @@
       ]
     },
     {
-      "code": "mkt-demo-warehouse-mapping",
-      "slug": "warehouse-mapping",
       "name": "Visual Warehouse Mapping",
       "description": "Manage your stock locations with a 2D/3D map of your warehouse.",
       "longDescription": "<p>Optimize picking routes and see stock levels by location visually. Integrates with existing inventory modules.</p>",
@@ -1087,8 +1069,6 @@
       "supportContactUrl": "https://support.example.com/warehouse-mapping"
     },
     {
-      "code": "mkt-demo-automatic-translations",
-      "slug": "automatic-translations",
       "name": "Automatic ERP Translator",
       "description": "Translate your product descriptions and field labels using DeepL or Google Translate.",
       "longDescription": "<p>Go global instantly. This skill adds a 'Translate' button to all translatable fields in Axelor.</p>",
@@ -1161,8 +1141,6 @@
       "installCount": 380
     },
     {
-      "code": "mkt-demo-custom-report-engine",
-      "slug": "custom-report-engine",
       "name": "Custom Report Engine",
       "description": "Create pixel-perfect PDF reports using HTML/CSS templates.",
       "longDescription": "<p>Bypass the limitations of standard reporting. Use full HTML/CSS power to design your invoices, quotes, and reports.</p>",
@@ -1263,8 +1241,6 @@
       "supportContactUrl": "https://support.example.com/custom-report-engine"
     },
     {
-      "code": "mkt-demo-chatbot-support",
-      "slug": "chatbot-support",
       "name": "AI Support Chatbot",
       "description": "Deflect common support queries with an AI-powered chatbot that knows your documentation.",
       "longDescription": "<p>Integrate directly with your website and CRM. The chatbot uses RAG to answer questions based on your support articles.</p>",
@@ -1392,8 +1368,6 @@
       "installCount": 654
     },
     {
-      "code": "mkt-demo-recurring-billing",
-      "slug": "recurring-billing",
       "name": "Recurring Billing Manager",
       "description": "Automate subscription invoicing and payment collection.",
       "longDescription": "<p>Perfect for SaaS or service companies. Define billing cycles, auto-generate invoices, and track failed payments.</p>",
@@ -1478,8 +1452,6 @@
       "supportContactUrl": "https://support.example.com/recurring-billing"
     },
     {
-      "code": "mkt-demo-slack-integration",
-      "slug": "slack-integration",
       "name": "Slack Notifier",
       "description": "Send Axelor notifications directly to your Slack channels.",
       "longDescription": "<p>Keep your team updated. Notify Slack when a lead is created, a sale is closed, or a stock level is low.</p>",
@@ -1547,8 +1519,6 @@
       ]
     },
     {
-      "code": "mkt-demo-audit-log-viewer",
-      "slug": "audit-log-viewer",
       "name": "Audit Log Explorer",
       "description": "A powerful UI for searching and filtering through Axelor audit logs.",
       "longDescription": "<p>Easily track who changed what and when. Essential for compliance and troubleshooting.</p>",
@@ -1627,8 +1597,6 @@
       "supportContactUrl": "https://support.example.com/audit-log-viewer"
     },
     {
-      "code": "mkt-demo-leads-enrichment",
-      "slug": "leads-enrichment",
       "name": "Smart Lead Enrichment",
       "description": "Automatically find LinkedIn profiles and company data for your CRM leads.",
       "longDescription": "<p>Save your sales team's time. This app fetches missing data from public APIs based on the lead's email or domain.</p>",
@@ -1695,8 +1663,6 @@
       ]
     },
     {
-      "code": "mkt-demo-iot-connector",
-      "slug": "iot-connector",
       "name": "IoT Device Connector",
       "description": "Connect your manufacturing machines and sensors directly to Axelor.",
       "longDescription": "<p>Track machine uptime, temperature, and performance in real-time. Trigger maintenance alerts automatically.</p>",
@@ -1776,8 +1742,6 @@
       "supportContactUrl": "https://support.example.com/iot-connector"
     },
     {
-      "code": "mkt-demo-expense-scanner",
-      "slug": "expense-scanner",
       "name": "Mobile Expense Scanner",
       "description": "Scan receipts with your phone and auto-create expense claims.",
       "longDescription": "<p>The perfect companion for business travelers. OCR technology extracts amount, date, and merchant automatically.</p>",
@@ -1873,8 +1837,6 @@
       ]
     },
     {
-      "code": "mkt-demo-timesheet-reminder",
-      "slug": "timesheet-reminder",
       "name": "Smart Timesheet Reminders",
       "description": "Automatically nudge employees who haven't filled their timesheets.",
       "longDescription": "<p>Reduce the monthly struggle of chasing timesheets. Sends personalized emails or Slack messages.</p>",
@@ -1968,8 +1930,6 @@
       "supportContactUrl": "https://support.example.com/timesheet-reminder"
     },
     {
-      "code": "mkt-demo-data-anonymizer",
-      "slug": "data-anonymizer",
       "name": "GDPR Data Anonymizer",
       "description": "Anonymize sensitive customer data for testing or staging environments.",
       "longDescription": "<p>Protect your customers' privacy. Replace real names, emails, and phone numbers with realistic dummy data.</p>",
@@ -2022,8 +1982,6 @@
       ]
     },
     {
-      "code": "mkt-demo-draft-product",
-      "slug": "draft-product",
       "name": "Coming Soon App",
       "description": "This product is still in development and only visible to the supplier.",
       "longDescription": "<p>Exciting features are coming soon. This is a placeholder for a future high-value application.</p>",
@@ -2063,8 +2021,6 @@
       "supportContactUrl": "https://support.example.com/draft-product"
     },
     {
-      "code": "mkt-demo-multi-status-product",
-      "slug": "multi-status-product",
       "name": "Agile Planner",
       "description": "Manage your projects with Kanban boards and Sprint planning.",
       "longDescription": "<p>A full-featured project management tool integrated with Axelor Tasks and Projects.</p>",
@@ -2148,8 +2104,6 @@
       ]
     },
     {
-      "code": "mkt-demo-sales-forecast",
-      "slug": "sales-forecast",
       "name": "Predictive Sales Forecast",
       "description": "Use machine learning to predict future sales based on historical trends.",
       "longDescription": "<p>Gain insights into your future revenue. This skill analyzes your CRM history to provide accurate forecasts.</p>",
@@ -2228,8 +2182,6 @@
       "supportContactUrl": "https://support.example.com/sales-forecast"
     },
     {
-      "code": "mkt-demo-email-marketing",
-      "slug": "email-marketing",
       "name": "Integrated Email Marketing",
       "description": "Design and send beautiful email campaigns directly from your CRM.",
       "longDescription": "<p>No need for external tools. Build your lists, design templates, and track open rates within Axelor.</p>",
@@ -2304,8 +2256,6 @@
       ]
     },
     {
-      "code": "mkt-demo-quick-search",
-      "slug": "quick-search",
       "name": "Global Quick Search",
       "description": "A lightning-fast search bar that finds anything in your ERP.",
       "longDescription": "<p>Hit Cmd+K and start typing. Finds products, partners, invoices, and tasks instantly.</p>",
@@ -2371,8 +2321,6 @@
       "supportContactUrl": "https://support.example.com/quick-search"
     },
     {
-      "code": "mkt-demo-password-policy-manager",
-      "slug": "password-policy-manager",
       "name": "Password Policy Manager",
       "description": "Enforce custom complexity and rotation rules for your Axelor users.",
       "longDescription": "<p>Enhance your instance security by defining strict password requirements. Set expiry dates, history limits, and mandatory special character counts.</p>",
@@ -2459,8 +2407,6 @@
       "installCount": 672
     },
     {
-      "code": "mkt-demo-pdf-watermarker",
-      "slug": "pdf-watermarker",
       "name": "PDF Watermarker",
       "description": "Automatically add 'Draft' or 'Confidential' watermarks to generated reports.",
       "longDescription": "<p>Protect your documents by overlaying text or image watermarks on any PDF generated by the system. Supports opacity and rotation settings.</p>",
@@ -2546,8 +2492,6 @@
       "supportContactUrl": "https://support.example.com/pdf-watermarker"
     },
     {
-      "code": "mkt-demo-currency-rate-sync",
-      "slug": "currency-rate-sync",
       "name": "Live Currency Sync",
       "description": "Automatically update your exchange rates daily from ECB or OpenExchange.",
       "longDescription": "<p>Keep your multicurrency accounting accurate without manual data entry. Fetches the latest mid-market rates every night.</p>",
@@ -2633,8 +2577,6 @@
       ]
     },
     {
-      "code": "mkt-demo-linkedin-auto-connector",
-      "slug": "linkedin-auto-connector",
       "name": "LinkedIn Contact Sync",
       "description": "Enrich CRM leads with public LinkedIn data and profile links.",
       "longDescription": "<p>Save time on prospect research. This skill attempts to find LinkedIn profiles based on email addresses and company domains during lead creation.</p>",
@@ -2728,8 +2670,6 @@
       "supportContactUrl": "https://support.example.com/linkedin-auto-connector"
     },
     {
-      "code": "mkt-demo-barcode-generator",
-      "slug": "barcode-generator",
       "name": "Batch Barcode Generator",
       "description": "Generate and print standard barcodes (EAN-13, QR) for your products.",
       "longDescription": "<p>A simple tool to generate barcodes directly from the product view. Supports mass generation for inventory labels.</p>",
@@ -2823,8 +2763,6 @@
       ]
     },
     {
-      "code": "mkt-demo-holiday-calendar-importer",
-      "slug": "holiday-calendar-importer",
       "name": "Public Holiday Importer",
       "description": "Import global public holidays into your HR calendar automatically.",
       "longDescription": "<p>Supports over 100 countries. Automatically marks holidays as non-working days in the resource planner.</p>",
@@ -2901,8 +2839,6 @@
       "supportContactUrl": "https://support.example.com/holiday-calendar-importer"
     },
     {
-      "code": "mkt-demo-db-vacuum-scheduler",
-      "slug": "db-vacuum-scheduler",
       "name": "Database Health Monitor",
       "description": "Schedule database maintenance tasks and monitor table bloat.",
       "longDescription": "<p>A developer utility to keep your PostgreSQL instance performing at its best. Automates VACUUM and ANALYZE tasks during off-peak hours.</p>",
@@ -2980,8 +2916,6 @@
       ]
     },
     {
-      "code": "mkt-demo-jira-bridge",
-      "slug": "jira-bridge",
       "name": "Jira Ticket Sync",
       "description": "Link Axelor tasks with Jira issues for seamless engineering coordination.",
       "longDescription": "<p>Bidirectional sync between Axelor project tasks and Jira issues. Sync status, comments, and time logs automatically.</p>",
@@ -3074,8 +3008,6 @@
       "supportContactUrl": "https://support.example.com/jira-bridge"
     },
     {
-      "code": "mkt-demo-customer-map-viewer",
-      "slug": "customer-map-viewer",
       "name": "Geo-CRM Maps",
       "description": "Visualize your customers and leads on an interactive map.",
       "longDescription": "<p>See where your customers are concentrated. Filter by turnover, industry, or lead status. Includes basic route optimization for sales reps.</p>",
@@ -3143,8 +3075,6 @@
       "installCount": 818
     },
     {
-      "code": "mkt-demo-stock-taking-helper",
-      "slug": "stock-taking-helper",
       "name": "Mobile Inventory Assistant",
       "description": "Simplify your yearly stock take with mobile-friendly forms.",
       "longDescription": "<p>Optimized for handheld scanners. Allows warehouse staff to quickly update quantities and note discrepancies on the fly.</p>",
@@ -3224,8 +3154,6 @@
       "supportContactUrl": "https://support.example.com/stock-taking-helper"
     },
     {
-      "code": "mkt-demo-performance-review-template",
-      "slug": "performance-review-template",
       "name": "Review Template Library",
       "description": "Pre-built templates for annual and quarterly performance reviews.",
       "longDescription": "<p>Stop starting from scratch. Includes standard templates for engineering, sales, and management roles. Fully customizable.</p>",
@@ -3300,8 +3228,6 @@
       ]
     },
     {
-      "code": "mkt-demo-sales-tax-auto-calc",
-      "slug": "sales-tax-auto-calc",
       "name": "Global Tax Calculator",
       "description": "Automatically determine correct tax rates based on customer location.",
       "longDescription": "<p>Handles complex rules for cross-border B2B and B2C transactions. Ensures compliance with regional tax laws automatically.</p>",
@@ -3384,8 +3310,6 @@
       "supportContactUrl": "https://support.example.com/sales-tax-auto-calc"
     },
     {
-      "code": "mkt-demo-json-data-exporter",
-      "slug": "json-data-exporter",
       "name": "Advanced JSON Exporter",
       "description": "Export any record set as a nested JSON for external API consumption.",
       "longDescription": "<p>Go beyond CSV. Define complex export maps to generate perfectly structured JSON files from your Axelor data.</p>",
@@ -3454,8 +3378,6 @@
       ]
     },
     {
-      "code": "mkt-demo-image-optimizer",
-      "slug": "image-optimizer",
       "name": "Cloud Image Resizer",
       "description": "Automatically compress and resize product images upon upload.",
       "longDescription": "<p>Keep your database lean and your UI fast. Automatically generates thumbnails and optimized WebP versions of all uploaded images.</p>",
@@ -3549,8 +3471,6 @@
       "supportContactUrl": "https://support.example.com/image-optimizer"
     },
     {
-      "code": "mkt-demo-sentiment-tagger",
-      "slug": "sentiment-tagger",
       "name": "Ticket Sentiment Tagger",
       "description": "Lightweight AI to tag support tickets based on tone.",
       "longDescription": "<p>A simple skill that runs a sentiment analysis on incoming support ticket descriptions. Flags 'Frustrated' or 'Angry' customers for immediate attention.</p>",
@@ -3620,8 +3540,6 @@
       ]
     },
     {
-      "code": "mkt-demo-predictive-maintenance",
-      "slug": "predictive-maintenance",
       "name": "AI Maintenance Hub",
       "description": "Predict machine failures before they happen using IoT data.",
       "longDescription": "<p>Advanced machine learning models analyze sensor data (vibration, temperature, noise) to predict the 'Remaining Useful Life' of your manufacturing assets.</p>",
@@ -3711,8 +3629,6 @@
       "supportContactUrl": "https://support.example.com/predictive-maintenance"
     },
     {
-      "code": "mkt-demo-smart-asset-tracker",
-      "slug": "smart-asset-tracker",
       "name": "Smart Asset Tracker",
       "description": "Real-time location and status tracking for high-value mobile assets.",
       "longDescription": "<p>Track tools, vehicles, or containers using GPS, BLE, or RFID. Includes geofencing alerts and maintenance scheduling.</p>",
@@ -3793,8 +3709,6 @@
       "installCount": 964
     },
     {
-      "code": "mkt-demo-automated-payroll-pro",
-      "slug": "automated-payroll-pro",
       "name": "Payroll Pro Elite",
       "description": "A comprehensive payroll engine for complex organizational structures.",
       "longDescription": "<p>Automate calculation of salaries, benefits, and deductions across multiple jurisdictions. Generates pay stubs and tax filings with one click.</p>",
@@ -3876,8 +3790,6 @@
       "supportContactUrl": "https://support.example.com/automated-payroll-pro"
     },
     {
-      "code": "mkt-demo-financial-consolidator",
-      "slug": "financial-consolidator",
       "name": "Group Consolidation Studio",
       "description": "Consolidate financial statements across multiple legal entities.",
       "longDescription": "<p>Handles inter-company eliminations, currency translations, and minority interest calculations. Real-time consolidated reporting for multi-entity groups.</p>",
@@ -3966,8 +3878,6 @@
       ]
     },
     {
-      "code": "mkt-demo-omnichannel-support-desk",
-      "slug": "omnichannel-support-desk",
       "name": "Omnichannel Support Desk",
       "description": "Manage Email, WhatsApp, and Slack support from a single unified view.",
       "longDescription": "<p>Don't switch tabs to help your customers. Unified inbox for all communication channels. Includes canned responses and SLA tracking.</p>",
@@ -4043,8 +3953,6 @@
       "supportContactUrl": "https://support.example.com/omnichannel-support-desk"
     },
     {
-      "code": "mkt-demo-bi-report-designer",
-      "slug": "bi-report-designer",
       "name": "Interactive BI Designer",
       "description": "Drag-and-drop dashboard builder with real-time data streaming.",
       "longDescription": "<p>Empower your business users to create their own dashboards. Connect to any Axelor model and visualize data with 20+ chart types.</p>",
@@ -4129,8 +4037,6 @@
       "installCount": 562
     },
     {
-      "code": "mkt-demo-fleet-management-system",
-      "slug": "fleet-management-system",
       "name": "Enterprise Fleet Manager",
       "description": "Manage vehicle maintenance, fuel logs, and driver assignments.",
       "longDescription": "<p>Track total cost of ownership for your entire fleet. Automated alerts for insurance renewals and scheduled maintenance.</p>",
@@ -4212,8 +4118,6 @@
       "supportContactUrl": "https://support.example.com/fleet-management-system"
     },
     {
-      "code": "mkt-demo-talent-acquisition-portal",
-      "slug": "talent-acquisition-portal",
       "name": "Talent Portal Pro",
       "description": "A branded career site and ATS integrated directly with Axelor HR.",
       "longDescription": "<p>Publish job openings with one click. Manage applicants, schedule interviews, and track the hiring pipeline in a single view.</p>",
@@ -4287,8 +4191,6 @@
       "installCount": 836
     },
     {
-      "code": "mkt-demo-real-estate-manager",
-      "slug": "real-estate-manager",
       "name": "Property Management Suite",
       "description": "Manage leases, maintenance requests, and rent collection.",
       "longDescription": "<p>Ideal for commercial and residential property managers. Integrated with accounting to automate rent invoicing and expense tracking.</p>",
@@ -4380,8 +4282,6 @@
       "supportContactUrl": "https://support.example.com/real-estate-manager"
     },
     {
-      "code": "mkt-demo-api-gateway-studio",
-      "slug": "api-gateway-studio",
       "name": "API Gateway Studio",
       "description": "Build, secure, and monitor custom REST/GraphQL APIs for your Axelor data.",
       "longDescription": "<p>Visual API designer for developers. Add rate limiting, API key management, and custom transformations to any internal model.</p>",
@@ -4448,8 +4348,6 @@
       "installCount": 160
     },
     {
-      "code": "mkt-demo-voice-to-crm-notes",
-      "slug": "voice-to-crm-notes",
       "name": "Voice2Notes AI",
       "description": "Convert voice memos from sales reps into structured CRM notes.",
       "longDescription": "<p>Sales reps can dictate their meeting notes on the go. Our AI transcribes and summarizes the audio, tagging relevant contacts and deals automatically.</p>",
@@ -4540,8 +4438,6 @@
       "supportContactUrl": "https://support.example.com/voice-to-crm-notes"
     },
     {
-      "code": "mkt-demo-project-portfolio-optimizer",
-      "slug": "project-portfolio-optimizer",
       "name": "Portfolio Optimizer",
       "description": "Manage project resource allocation across your entire company.",
       "longDescription": "<p>Visualize resource bottlenecks across all active projects. 'What-if' scenarios help you decide which projects to start next based on capacity.</p>",

@@ -124,8 +124,6 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "code",
-        "slug",
         "name",
         "type",
         "coverStyle",
@@ -134,12 +132,6 @@
         "versions"
       ],
       "properties": {
-        "code": {
-          "type": "string",
-          "pattern": "^mkt-demo-[a-z0-9-]+$",
-          "description": "Upsert key. Prefix `mkt-demo-` is mandatory so reset can target seeded rows only."
-        },
-        "slug": {"type": "string", "pattern": "^[a-z0-9-]+$"},
         "name": {"type": "string", "minLength": 1},
         "supplierEmail": {
           "type": "string",

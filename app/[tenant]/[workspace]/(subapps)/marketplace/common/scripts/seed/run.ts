@@ -2,10 +2,12 @@ import '@/load-swc-env';
 
 import {manager} from '@/tenant';
 import {hash} from '../../utils/string';
+import {slugify} from '../../utils/slugify';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
 import {findDefaultCurrency} from '../../orm';
+import {demoKey} from './constants';
 import {findCustomerPartnerByEmail, findWorkspaceByUrl} from './lookups';
 import {
   recomputeRatings,
@@ -16,8 +18,8 @@ import {
   upsertProduct,
   upsertReview,
   upsertScreenshots,
+  uploadScreenshotFiles,
   upsertSharedBundleMetaFile,
-  upsertSharedScreenshotMetaFiles,
   upsertVersion,
   type WorkspaceContext,
 } from './upsert';
@@ -153,18 +155,24 @@ async function main() {
      * supplies the rest at checkout time. */
 
     /* Distribute products across suppliers: apps and skills evenly.
-     * Use deterministic hash of product code to avoid bias from data ordering. */
+     * Use deterministic hash of product slug to avoid bias from data ordering. */
     const appProducts = data.products.filter(p => p.type === 'app');
     const skillProducts = data.products.filter(p => p.type === 'skill');
 
     const productSupplierMap = new Map<string, string>();
     appProducts.forEach(p => {
-      const h = hash(p.code);
-      productSupplierMap.set(p.code, suppliers[h % suppliers.length]!.id);
+      const h = hash(slugify(p.name));
+      productSupplierMap.set(
+        slugify(p.name),
+        suppliers[h % suppliers.length]!.id,
+      );
     });
     skillProducts.forEach(p => {
-      const h = hash(p.code);
-      productSupplierMap.set(p.code, suppliers[h % suppliers.length]!.id);
+      const h = hash(slugify(p.name));
+      productSupplierMap.set(
+        slugify(p.name),
+        suppliers[h % suppliers.length]!.id,
+      );
     });
 
     for (const category of data.categories ?? []) {
@@ -182,15 +190,11 @@ async function main() {
       console.log(`  \x1b[32m✓\x1b[0m license ${row.code}`);
     }
 
-    /* The seed shares two screenshot files (desktop + mobile PWA shots)
-     * across every product. Upload once, link a varying number (0..9)
-     * cycling through them per product. The count cycles deterministically
-     * by product index so re-runs stay stable. */
-    const sharedScreenshotIds = await upsertSharedScreenshotMetaFiles({
-      client: txClient,
-      storage,
-      publicRoot,
-    });
+    /* The shared screenshot files are written to storage once. Each product
+     * gets a varying number of pictures (0..9, cycling deterministically by
+     * index so re-runs stay stable); each picture is its own MetaFile,
+     * cycling through these files. */
+    const screenshots = await uploadScreenshotFiles({storage, publicRoot});
 
     /* One tiny zip shipped with this script is used as the bundle for
      * every seeded version. AOS requires `bundleFile` to be non-null;
@@ -212,7 +216,7 @@ async function main() {
     for (let index = 0; index < data.products.length; index++) {
       const product = data.products[index];
       const supplierIdForProduct =
-        productSupplierMap.get(product.code) || ctx.supplierPartnerId;
+        productSupplierMap.get(slugify(product.name)) || ctx.supplierPartnerId;
       const {id: productId} = await upsertProduct(
         txClient,
         ctx,
@@ -223,14 +227,11 @@ async function main() {
       seededProductIds.push(productId);
 
       const screenshotCount = index % 10; // 0,1,2,…,9,0,1,…
-      const desiredMetaIds = Array.from(
-        {length: screenshotCount},
-        (_, i) => sharedScreenshotIds[i % sharedScreenshotIds.length],
-      );
       await upsertScreenshots({
         client: txClient,
         productId,
-        desiredMetaIds,
+        count: screenshotCount,
+        screenshots,
       });
       const versionByNumber = new Map<
         string,
@@ -276,7 +277,7 @@ async function main() {
         s => s.id === supplierIdForProduct,
       )?.name;
       console.log(
-        `  \x1b[32m✓\x1b[0m product ${product.code} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''}) → ${supplierName}`,
+        `  \x1b[32m✓\x1b[0m product ${demoKey(slugify(product.name))} (${product.versions.length} versions${product.reviews?.length ? `, ${product.reviews.length} reviews` : ''}) → ${supplierName}`,
       );
     }
 

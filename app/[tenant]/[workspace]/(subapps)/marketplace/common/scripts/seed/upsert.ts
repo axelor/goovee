@@ -15,6 +15,7 @@ import {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {syncProductVersionPointers} from '../../orm/versions';
 import {parseVersionNumber} from '../../utils/version-number';
+import {slugify} from '../../utils/slugify';
 import {
   findCategoryByCode,
   findCompatibilityVersionByName,
@@ -55,7 +56,7 @@ const MIME_BY_EXT: Record<string, string> = {
 };
 
 function getRandomIconCode(productCode: string): string {
-  /* Deterministically select an icon based on product code hash
+  /* Deterministically select an icon based on product slug hash
    * so the same icon is always chosen for the same product across runs. */
   let hash = 0;
   for (let i = 0; i < productCode.length; i++) {
@@ -69,7 +70,7 @@ function getRandomLicenseCode(
   productCode: string,
   licenseCodes: string[],
 ): string | null {
-  /* Deterministically select a license code based on product code hash
+  /* Deterministically select a license code based on product slug hash
    * so the same license is always chosen for the same product across runs. */
   if (!licenseCodes.length) return null;
   let hash = 0;
@@ -203,89 +204,109 @@ export async function upsertSharedBundleMetaFile({
   return meta.id;
 }
 
-/* The seed shares two hardcoded screenshot files across every product
- * instead of accepting per-product paths in the JSON. Uploads each file
- * to storage exactly once (deterministic filePath under the
- * SCREENSHOT_PREFIX) and returns the two MetaFile ids; subsequent
- * AOSMarketplaceProductPicture rows just link to these shared ids so a
- * fleet of demo products doesn't bloat the metafile table. */
-const SHARED_SCREENSHOT_ASSETS = [
+/* Screenshot files shared on disk by every seeded product. Each seeded
+ * picture gets its OWN MetaFile row; those MetaFiles cycle through these
+ * few stored files, so a product's N pictures vary across this set instead
+ * of duplicating one file per picture. Add more entries to widen variety. */
+const SCREENSHOT_SOURCE_ASSETS = [
   'pwa/screenshots/desktop-screenshot.png',
   'pwa/screenshots/mobile-screenshot.png',
 ] as const;
 
-export async function upsertSharedScreenshotMetaFiles({
-  client,
+type ScreenshotFile = {
+  fileName: string;
+  filePath: string;
+  fileType: string;
+  fileSize: string;
+  sizeText: string;
+};
+
+/* Writes the shared screenshot files to tenant storage (idempotent
+ * overwrite) and returns their metadata. Creates NO MetaFile rows —
+ * per-picture MetaFile rows are created in upsertScreenshots, cycling
+ * through these filePaths. */
+export async function uploadScreenshotFiles({
   storage,
   publicRoot,
 }: {
-  client: Client;
   storage: string;
   publicRoot: string;
-}): Promise<string[]> {
-  const ids: string[] = [];
-  for (const assetPath of SHARED_SCREENSHOT_ASSETS) {
-    const sourcePath = path.resolve(publicRoot, assetPath);
+}): Promise<ScreenshotFile[]> {
+  const files: ScreenshotFile[] = [];
+  for (const asset of SCREENSHOT_SOURCE_ASSETS) {
+    const sourcePath = path.resolve(publicRoot, asset);
     const buffer = await fsp.readFile(sourcePath);
-    const ext = path.extname(assetPath).toLowerCase();
-    const baseName = path.basename(assetPath);
+    const ext = path.extname(asset).toLowerCase();
+    const baseName = path.basename(asset);
     const filePath = `${SCREENSHOT_PREFIX}-${baseName}`;
-    const fileType = MIME_BY_EXT[ext] ?? 'application/octet-stream';
 
     await pipeline(
       Readable.from(buffer),
       fs.createWriteStream(path.resolve(storage, filePath)),
     );
 
-    const payload = {
+    files.push({
       fileName: baseName,
       filePath,
-      fileType,
+      fileType: MIME_BY_EXT[ext] ?? 'application/octet-stream',
       fileSize: String(buffer.length),
       sizeText: getFileSizeText(buffer.length),
-    };
-    const existing = await client.aOSMetaFile.findOne({
-      where: {filePath},
-      select: {id: true, version: true},
     });
-    const meta = existing
-      ? await client.aOSMetaFile.update({
-          data: {...payload, id: existing.id, version: existing.version},
-          select: {id: true},
-        })
-      : await client.aOSMetaFile.create({data: payload, select: {id: true}});
-    ids.push(meta.id);
   }
-  return ids;
+  return files;
 }
 
-/* Replaces all seeded screenshot links for a marketplace product with a
- * fresh set of length `desiredMetaIds.length`. Allowed to repeat the
- * same metafile across rows — the demo intentionally cycles through the
- * same two shared images to vary the per-product screenshot count.
- * Idempotent via blanket-delete-then-create scoped to our
- * SCREENSHOT_PREFIX. */
+/* Sets a product's seeded screenshots to exactly `count` pictures. Each
+ * picture gets its OWN new MetaFile, cycling through the shared screenshot
+ * files, plus a MarketplaceProductPicture. Idempotent: first removes the
+ * product's existing seeded pictures AND their MetaFiles (scoped to
+ * SCREENSHOT_PREFIX), then recreates. */
 export async function upsertScreenshots({
   client,
   productId,
-  desiredMetaIds,
+  count,
+  screenshots,
 }: {
   client: Client;
   productId: string;
-  /** Ordered list of AOSMetaFile ids to link; duplicates allowed. */
-  desiredMetaIds: string[];
+  /** How many picture rows to create for this product. */
+  count: number;
+  /** Shared on-disk files; created MetaFiles cycle through these. */
+  screenshots: ScreenshotFile[];
 }) {
-  await client.aOSMarketplaceProductPicture.deleteAll({
-    where: {
-      marketplaceProduct: {id: productId},
-      picture: {filePath: {like: `${SCREENSHOT_PREFIX}-%`}},
-    },
+  const seededFilter = {
+    marketplaceProduct: {id: productId},
+    picture: {filePath: {like: `${SCREENSHOT_PREFIX}-%`}},
+  } as const;
+
+  const existing = await client.aOSMarketplaceProductPicture.find({
+    where: seededFilter,
+    select: {picture: {id: true}},
   });
-  for (const metaId of desiredMetaIds) {
+  await client.aOSMarketplaceProductPicture.deleteAll({where: seededFilter});
+  const oldMetaIds = existing
+    .map(p => p.picture?.id)
+    .filter((id: unknown): id is string => typeof id === 'string');
+  if (oldMetaIds.length > 0) {
+    await client.aOSMetaFile.deleteAll({where: {id: {in: oldMetaIds}}});
+  }
+
+  for (let i = 0; i < count; i++) {
+    const screenshot = screenshots[i % screenshots.length]!;
+    const meta = await client.aOSMetaFile.create({
+      data: {
+        fileName: screenshot.fileName,
+        filePath: screenshot.filePath,
+        fileType: screenshot.fileType,
+        fileSize: screenshot.fileSize,
+        sizeText: screenshot.sizeText,
+      },
+      select: {id: true},
+    });
     await client.aOSMarketplaceProductPicture.create({
       data: {
         marketplaceProduct: {select: {id: productId}},
-        picture: {select: {id: metaId}},
+        picture: {select: {id: meta.id}},
       },
       select: {id: true},
     });
@@ -310,14 +331,17 @@ export async function upsertProduct(
   /* Slug carries DEMO_PREFIX like every other seeded key (category/license/
    * compat resolved above). reset.ts matches it by `slug LIKE DEMO_PREFIX%`,
    * and it doubles as the re-run idempotency key. */
-  const slug = demoKey(product.slug);
+  const slug = demoKey(slugify(product.name));
   const existing = await client.aOSMarketplaceProduct.findOne({
     where: {slug},
     select: {id: true, version: true},
   });
 
   /* Randomly select a license code */
-  const selectedLicenseCode = getRandomLicenseCode(product.code, licenseCodes);
+  const selectedLicenseCode = getRandomLicenseCode(
+    slugify(product.name),
+    licenseCodes,
+  );
 
   const data: CreateArgs<AOSMarketplaceProduct> = {
     slug,
@@ -326,7 +350,7 @@ export async function upsertProduct(
     longDescription: product.longDescription ?? null,
     marketplaceTypeSelect: product.type,
     coverStyle: product.coverStyle,
-    iconCode: getRandomIconCode(product.code),
+    iconCode: getRandomIconCode(slugify(product.name)),
     documentationUrl: product.documentationUrl ?? null,
     supportIssuesUrl: product.supportIssuesUrl ?? null,
     supportContactUrl: product.supportContactUrl ?? null,

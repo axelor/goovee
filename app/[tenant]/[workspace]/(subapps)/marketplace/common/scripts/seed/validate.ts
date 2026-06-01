@@ -1,4 +1,5 @@
 import type {ProductSeed, SeedData, VersionSeed} from './validators';
+import {slugify} from '../../utils/slugify';
 
 /* Cross-field validations that JSON Schema / Zod can't express:
  *   - `published` versions must carry both submittedAt and releasedAt;
@@ -11,18 +12,13 @@ import type {ProductSeed, SeedData, VersionSeed} from './validators';
  * can fix several rows in a single pass instead of fail-one-fix-one. */
 export function validateCrossFieldRules(data: SeedData) {
   const errors: string[] = [];
-  const seenCodes = new Set<string>();
   const seenSlugs = new Set<string>();
 
   for (const product of data.products) {
-    if (seenCodes.has(product.code)) {
-      errors.push(`Duplicate product code '${product.code}'.`);
+    if (seenSlugs.has(slugify(product.name))) {
+      errors.push(`Duplicate product slug '${slugify(product.name)}'.`);
     }
-    seenCodes.add(product.code);
-    if (seenSlugs.has(product.slug)) {
-      errors.push(`Duplicate product slug '${product.slug}'.`);
-    }
-    seenSlugs.add(product.slug);
+    seenSlugs.add(slugify(product.name));
     validateProductVersions(product, errors);
     validateProductReviews(product, errors);
   }
@@ -41,11 +37,11 @@ function validateProductVersions(product: ProductSeed, errors: string[]) {
   for (const version of product.versions) {
     if (seenVersionNumbers.has(version.versionNumber)) {
       errors.push(
-        `${product.code}: duplicate version '${version.versionNumber}'.`,
+        `${slugify(product.name)}: duplicate version '${version.versionNumber}'.`,
       );
     }
     seenVersionNumbers.add(version.versionNumber);
-    validateVersionDates(product.code, version, errors);
+    validateVersionDates(slugify(product.name), version, errors);
   }
   validateMonotonicReleaseOrder(product, errors);
 }
@@ -99,7 +95,7 @@ function validateMonotonicReleaseOrder(product: ProductSeed, errors: string[]) {
     const curr = published[i];
     if (curr.releasedAt < prev.releasedAt) {
       errors.push(
-        `${product.code}: v${curr.versionNumber} (released ${new Date(curr.releasedAt).toISOString()}) is older than v${prev.versionNumber} (released ${new Date(prev.releasedAt).toISOString()}). Higher semver must be released later.`,
+        `${slugify(product.name)}: v${curr.versionNumber} (released ${new Date(curr.releasedAt).toISOString()}) is older than v${prev.versionNumber} (released ${new Date(prev.releasedAt).toISOString()}). Higher semver must be released later.`,
       );
     }
   }
@@ -124,7 +120,7 @@ function validateProductReviews(product: ProductSeed, errors: string[]) {
   for (const review of product.reviews) {
     if (seenAuthors.has(review.authorEmail)) {
       errors.push(
-        `${product.code}: duplicate review author '${review.authorEmail}'.`,
+        `${slugify(product.name)}: duplicate review author '${review.authorEmail}'.`,
       );
     }
     seenAuthors.add(review.authorEmail);
@@ -133,7 +129,7 @@ function validateProductReviews(product: ProductSeed, errors: string[]) {
       !versionNumbers.has(review.reviewedVersionNumber)
     ) {
       errors.push(
-        `${product.code}: review references unknown version 'v${review.reviewedVersionNumber}'.`,
+        `${slugify(product.name)}: review references unknown version 'v${review.reviewedVersionNumber}'.`,
       );
     }
   }
