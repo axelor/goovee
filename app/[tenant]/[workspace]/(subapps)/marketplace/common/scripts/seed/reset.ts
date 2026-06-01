@@ -94,7 +94,7 @@ async function main() {
   const {client, config} = tenant;
   const storage = config.aos.storage;
 
-  await client.$transaction(async txClient => {
+  const deleted = await client.$transaction(async txClient => {
     /* Pull the seeded MP rows with the bits we need for the cleanup
      * dance: id+version for optimistic-lock updates, currentVersion +
      * latestVersion to detach the m2o pointers before deleting the
@@ -106,10 +106,24 @@ async function main() {
         version: true,
         currentVersion: {id: true},
         latestVersion: {id: true},
+        categorySet: {select: {id: true}},
       },
     });
     const productIds = products.map(p => p.id);
     const productFilter = {marketplaceProduct: {id: {in: productIds}}} as const;
+
+    const counts = {
+      reviews: 0,
+      downloads: 0,
+      purchases: 0,
+      pictures: 0,
+      versions: 0,
+      products: 0,
+      metaFiles: 0,
+      compatVersions: 0,
+      licenses: 0,
+      categories: 0,
+    };
 
     /* Product-scoped teardown (steps 1–3) only runs when seeded products
      * exist. The MetaFile + dictionary cleanup further down runs
@@ -117,14 +131,22 @@ async function main() {
      * products were already deleted. */
     if (productIds.length > 0) {
       /* 1. Child rows scoped to the seeded marketplace products. */
-      await txClient.aOSMarketplaceReview.deleteAll({where: productFilter});
-      await txClient.aOSMarketplaceDownload.deleteAll({where: productFilter});
-      await txClient.aOSMarketplaceProductPurchase.deleteAll({
-        where: productFilter,
-      });
-      await txClient.aOSMarketplaceProductPicture.deleteAll({
-        where: productFilter,
-      });
+      counts.reviews = Number(
+        await txClient.aOSMarketplaceReview.deleteAll({where: productFilter}),
+      );
+      counts.downloads = Number(
+        await txClient.aOSMarketplaceDownload.deleteAll({where: productFilter}),
+      );
+      counts.purchases = Number(
+        await txClient.aOSMarketplaceProductPurchase.deleteAll({
+          where: productFilter,
+        }),
+      );
+      counts.pictures = Number(
+        await txClient.aOSMarketplaceProductPicture.deleteAll({
+          where: productFilter,
+        }),
+      );
 
       /* 2. Versions — the compatibilitySet M2M must be `remove`d before
        *    the parent rows can be deleted, otherwise the join rows orphan
@@ -155,48 +177,112 @@ async function main() {
           select: {id: true},
         });
       }
+      /* Detach the product's m2m + m2o references before deleting it: the
+       * categorySet join rows must be `remove`d (they'd otherwise orphan
+       * against a missing product), and the currentVersion/latestVersion
+       * pointers nulled before their version rows are deleted below. Both
+       * go in ONE update per product so the optimistic-lock version stays
+       * valid. */
       for (const p of products) {
-        if (!p.currentVersion?.id && !p.latestVersion?.id) continue;
+        const categoryIds =
+          p.categorySet
+            ?.map(row => row.id)
+            .filter((id: unknown): id is string => typeof id === 'string') ??
+          [];
+        const hasPointers = !!(p.currentVersion?.id || p.latestVersion?.id);
+        if (!hasPointers && categoryIds.length === 0) continue;
         await txClient.aOSMarketplaceProduct.update({
           data: {
             id: p.id,
             version: p.version,
-            currentVersion: {select: {id: null}},
-            latestVersion: {select: {id: null}},
+            ...(hasPointers
+              ? {
+                  currentVersion: {select: {id: null}},
+                  latestVersion: {select: {id: null}},
+                }
+              : {}),
+            ...(categoryIds.length ? {categorySet: {remove: categoryIds}} : {}),
           },
           select: {id: true},
         });
       }
-      await txClient.aOSMarketplaceProductVersion.deleteAll({
-        where: productFilter,
+      counts.versions = Number(
+        await txClient.aOSMarketplaceProductVersion.deleteAll({
+          where: productFilter,
+        }),
+      );
+
+      /* Favourites (Partner.favouriteMarketplaceProducts m2m) are
+       * user-created, not seeded, but a tester may have favourited a demo
+       * product. The join is owned on the Partner side with no inverse on
+       * the product, so detach from each partner that favourited one — a
+       * partner may also favourite non-seeded products, so remove only the
+       * seeded ids. */
+      const fans = await txClient.aOSPartner.find({
+        where: {favouriteMarketplaceProducts: {id: {in: productIds}}},
+        select: {
+          id: true,
+          version: true,
+          favouriteMarketplaceProducts: {select: {id: true}},
+        },
       });
+      const seededIds = new Set(productIds);
+      for (const fan of fans) {
+        const toRemove = (fan.favouriteMarketplaceProducts ?? [])
+          .map(row => row.id)
+          .filter(
+            (id: unknown): id is string =>
+              typeof id === 'string' && seededIds.has(id),
+          );
+        if (toRemove.length === 0) continue;
+        await txClient.aOSPartner.update({
+          data: {
+            id: fan.id,
+            version: fan.version,
+            favouriteMarketplaceProducts: {remove: toRemove},
+          },
+          select: {id: true},
+        });
+      }
 
       /* 3. The marketplace products themselves. */
-      await txClient.aOSMarketplaceProduct.deleteAll({
-        where: {id: {in: productIds}},
-      });
+      counts.products = Number(
+        await txClient.aOSMarketplaceProduct.deleteAll({
+          where: {id: {in: productIds}},
+        }),
+      );
     }
 
     /* 4. MetaFile rows whose filePath we stamped (`portal_mkt_demo_…`) — bundles
      *    + screenshots in one shot. Runs regardless of product matches. */
-    await txClient.aOSMetaFile.deleteAll({
-      where: {filePath: {like: `${DEMO_PREFIX}%`}},
-    });
+    counts.metaFiles = Number(
+      await txClient.aOSMetaFile.deleteAll({
+        where: {filePath: {like: `${DEMO_PREFIX}%`}},
+      }),
+    );
 
     /* 5. Seeded dictionaries, matched by the demo prefix on their natural
      *    keys. Done after the products/versions that referenced them are
      *    gone. The prefix keeps these distinct from canonical rows (`MIT`,
      *    `v9.0.0`), so nothing shared is ever touched. The backing real
      *    AOSProduct and partner accounts are likewise left alone. */
-    await txClient.aOSMarketplaceAxelorVersion.deleteAll({
-      where: {name: {like: `${DEMO_PREFIX}%`}},
-    });
-    await txClient.aOSMarketplaceLicense.deleteAll({
-      where: {code: {like: `${DEMO_PREFIX}%`}},
-    });
-    await txClient.aOSMarketplaceCategory.deleteAll({
-      where: {code: {like: `${DEMO_PREFIX}%`}},
-    });
+    counts.compatVersions = Number(
+      await txClient.aOSMarketplaceAxelorVersion.deleteAll({
+        where: {name: {like: `${DEMO_PREFIX}%`}},
+      }),
+    );
+    counts.licenses = Number(
+      await txClient.aOSMarketplaceLicense.deleteAll({
+        where: {code: {like: `${DEMO_PREFIX}%`}},
+      }),
+    );
+    counts.categories = Number(
+      await txClient.aOSMarketplaceCategory.deleteAll({
+        where: {code: {like: `${DEMO_PREFIX}%`}},
+      }),
+    );
+
+    return counts;
   });
 
   // Best-effort: remove the on-disk files matching our prefixes.
@@ -215,10 +301,13 @@ async function main() {
     );
   }
 
+  const totalRows = Object.values(deleted).reduce((sum, n) => sum + n, 0);
   console.log(
-    `\x1b[32m🔥 Reset done — tenant=${tenantId}\x1b[0m\n` +
-      `  All ${DEMO_PREFIX}* rows deleted: products + children, files, categories,\n` +
-      `  licenses, and compat versions.\n` +
+    `\x1b[32m🔥 Reset done — tenant=${tenantId} (${totalRows} ${DEMO_PREFIX}* DB rows deleted)\x1b[0m\n` +
+      `  products ${deleted.products}, versions ${deleted.versions}, reviews ${deleted.reviews}, pictures ${deleted.pictures}\n` +
+      `  purchases ${deleted.purchases}, downloads ${deleted.downloads}\n` +
+      `  categories ${deleted.categories}, licenses ${deleted.licenses}, compat versions ${deleted.compatVersions}\n` +
+      `  meta files ${deleted.metaFiles}\n` +
       `  ${removedFiles} on-disk storage files removed.`,
   );
 }
