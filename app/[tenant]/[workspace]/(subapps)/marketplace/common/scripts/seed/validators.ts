@@ -85,12 +85,13 @@ export type ReviewSeed = z.infer<typeof ReviewSchema>;
 
 export const ProductSchema = z
   .object({
+    /* Internal per-product id: dedup key + deterministic seed for
+     * icon/license/supplier assignment + log label. Not persisted and not
+     * the reset key (the demo marker is applied via DEMO_PREFIX), so it
+     * just needs to be a unique kebab-case string. */
     code: z
       .string()
-      .regex(
-        /^mkt-demo-[a-z0-9-]+$/,
-        "Must start with 'mkt-demo-' so reset can target seeded products only.",
-      ),
+      .regex(/^[a-z0-9-]+$/, 'Lowercase letters, digits and hyphens only.'),
     slug: z.string().regex(/^[a-z0-9-]+$/),
     name: z.string().min(1),
     supplierEmail: z

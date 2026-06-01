@@ -7,6 +7,7 @@ import {getFileSizeText} from '@/utils/files';
 import {sql} from '@/utils/template-string';
 import {BigDecimal, type CreateArgs} from '@goovee/orm';
 import {MARKETPLACE_ICONS} from '../../constants/icons';
+import {DEMO_PREFIX, demoKey} from './constants';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
@@ -41,7 +42,7 @@ export type WorkspaceContext = {
   };
 };
 
-const SCREENSHOT_PREFIX = 'mkt-demo-screenshot';
+const SCREENSHOT_PREFIX = `${DEMO_PREFIX}screenshot`;
 const MIME_BY_EXT: Record<string, string> = {
   '.zip': 'application/zip',
   '.png': 'image/png',
@@ -84,12 +85,13 @@ export async function upsertCategory(
   data: CategorySeed,
   _workspaceId: string,
 ) {
+  const code = demoKey(data.code);
   const existing = await client.aOSMarketplaceCategory.findOne({
-    where: {code: data.code},
+    where: {code},
     select: {id: true, version: true},
   });
   const payload = {
-    code: data.code,
+    code,
     name: data.name,
   };
   if (existing) {
@@ -105,12 +107,13 @@ export async function upsertCategory(
 }
 
 export async function upsertLicense(client: Client, data: LicenseSeed) {
+  const code = demoKey(data.code);
   const existing = await client.aOSMarketplaceLicense.findOne({
-    where: {code: data.code},
+    where: {code},
     select: {id: true, version: true},
   });
   const payload = {
-    code: data.code,
+    code,
     name: data.name,
     url: data.url ?? null,
     description: data.description ?? null,
@@ -133,12 +136,13 @@ export async function upsertCompatibilityVersion(
   client: Client,
   data: CompatibilityVersionSeed,
 ) {
+  const name = demoKey(data.name);
   const existing = await client.aOSMarketplaceAxelorVersion.findOne({
-    where: {name: data.name},
+    where: {name},
     select: {id: true, version: true},
   });
   const payload = {
-    name: data.name,
+    name,
     title: data.title,
     ...(data.releasedOn && {releasedOn: new Date(data.releasedOn)}),
   };
@@ -156,9 +160,9 @@ export async function upsertCompatibilityVersion(
 
 /* Single shared zip used as every seeded version's bundle. Lives next
  * to this script so the data file doesn't have to carry per-version
- * paths. Uploaded once per run to deterministic `mkt-demo-bundle.zip`
+ * paths. Uploaded once per run to deterministic `portal_mkt_demo_bundle.zip`
  * filePath under tenant storage. */
-const SHARED_BUNDLE_FILENAME = 'mkt-demo-bundle.zip';
+const SHARED_BUNDLE_FILENAME = `${DEMO_PREFIX}bundle.zip`;
 
 export async function upsertSharedBundleMetaFile({
   client,
@@ -293,15 +297,18 @@ export async function upsertProduct(
   defaultPublisherPartnerId: string,
   licenseCodes: string[] = [],
 ) {
-  const category = await findCategoryByCode(client, product.categoryCode);
+  const category = await findCategoryByCode(
+    client,
+    demoKey(product.categoryCode),
+  );
   const publisherPartnerId = product.supplierEmail
     ? (await findCustomerPartnerByEmail(client, product.supplierEmail)).id
     : defaultPublisherPartnerId;
 
-  const slug = product.slug;
-  /* Marketplace products are identified across re-runs by slug
-   * (`mkt-demo-…`). The schema has no `code` field — slug is the stable
-   * idempotency key here, mirroring what reset.ts uses for cleanup. */
+  /* Slug carries DEMO_PREFIX like every other seeded key (category/license/
+   * compat resolved above). reset.ts matches it by `slug LIKE 'portal_mkt_demo_%'`,
+   * and it doubles as the re-run idempotency key. */
+  const slug = demoKey(product.slug);
   const existing = await client.aOSMarketplaceProduct.findOne({
     where: {slug},
     select: {id: true, version: true},
@@ -326,7 +333,7 @@ export async function upsertProduct(
     ratingCount: 0,
     categorySet: {select: [{id: category.id}]},
     ...(selectedLicenseCode && {
-      license: {select: {code: selectedLicenseCode}},
+      license: {select: {code: demoKey(selectedLicenseCode)}},
     }),
     salePrice: new BigDecimal(String(product.price)),
     inAti: ctx.defaults.inAti,
@@ -367,7 +374,9 @@ export async function upsertVersion({
 }) {
   const compatIds = await Promise.all(
     (version.compatibilityVersions ?? []).map(name =>
-      findCompatibilityVersionByName(client, name).then(row => ({id: row.id})),
+      findCompatibilityVersionByName(client, demoKey(name)).then(row => ({
+        id: row.id,
+      })),
     ),
   );
 
