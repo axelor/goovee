@@ -49,7 +49,7 @@ export async function ProductHeaderCard({
   const categories = (product.categorySet ?? []).filter(c => !!c?.id);
   const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 
-  const priceScale = product.product?.saleCurrency?.numberOfDecimals ?? 2;
+  const priceScale = product.price.currency.numberOfDecimals;
   const {ati: priceAti} = product.price;
   const paid = priceAti > 0;
 
@@ -75,7 +75,7 @@ export async function ProductHeaderCard({
     ? await formatNumber(priceAti, {
         type: 'DECIMAL',
         scale: priceScale,
-        currency: product.product?.saleCurrency?.symbol ?? undefined,
+        currency: product.price.currency.code,
       })
     : priceFreeLabel;
 
@@ -352,7 +352,7 @@ async function CTAButton({
       productSlug={product.slug ?? ''}
       name={product.name ?? ''}
       priceAti={priceAti}
-      currencySymbol={product.product?.saleCurrency?.symbol ?? null}
+      currencySymbol={product.price.currency.symbol}
       scale={priceScale}
       description={product.description ?? null}
       iconCode={product.iconCode ?? null}

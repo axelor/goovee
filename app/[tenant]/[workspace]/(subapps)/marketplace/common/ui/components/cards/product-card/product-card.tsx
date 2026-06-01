@@ -38,7 +38,7 @@ export async function ProductCard({product, workspaceURI}: ProductCardProps) {
     ? await formatNumber(priceAti, {
         type: 'DECIMAL',
         scale: currency.numberOfDecimals,
-        currency: currency.symbol || undefined,
+        currency: currency.code,
       })
     : freeLabel;
 
