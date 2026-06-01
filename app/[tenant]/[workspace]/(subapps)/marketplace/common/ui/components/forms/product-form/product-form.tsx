@@ -309,9 +309,6 @@ export function ProductForm({
                         {licenses.map(l => (
                           <SelectItem key={l.id} value={l.id}>
                             {l.name}
-                            <span className="ml-2 text-xs text-muted-foreground">
-                              {l.code}
-                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>

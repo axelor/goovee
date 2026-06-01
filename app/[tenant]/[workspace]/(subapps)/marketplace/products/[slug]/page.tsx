@@ -419,16 +419,10 @@ export default async function ProductPage(props: {
                         prefetch={false}
                         className="font-semibold text-foreground hover:underline block">
                         {product.license.name}
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
-                          {product.license.code}
-                        </span>
                       </Link>
                     ) : (
                       <p className="font-semibold text-foreground">
                         {product.license.name}
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
-                          {product.license.code}
-                        </span>
                       </p>
                     )
                   ) : (

@@ -9,7 +9,6 @@ export async function findLicenses({client}: {client: Client}) {
     },
     select: {
       id: true,
-      code: true,
       name: true,
       url: true,
       description: true,

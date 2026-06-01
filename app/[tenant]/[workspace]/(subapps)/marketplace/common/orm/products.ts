@@ -185,7 +185,6 @@ export async function findProduct({
       categorySet: {select: {id: true, name: true}},
       license: {
         id: true,
-        code: true,
         name: true,
         url: true,
       },
