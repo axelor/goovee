@@ -12,9 +12,11 @@ import {
   withMyProductAccessFilter,
   withProductAccessFilter,
   withPublishedProductFilter,
+  withScreenshotAccessFilter,
   type QueryProps,
 } from './helpers';
 import {buildPriceContext, withPrice} from './price';
+import {Maybe} from '@/types/util';
 
 // ---- PRODUCTS ---- //
 
@@ -258,8 +260,8 @@ export async function generateUniqueProductSlug({
 
 /**
  * Resolves a single screenshot metafile for a marketplace product, in one
- * access-checked query: the product must pass {@link withProductAccessFilter}
- * (workspace-scoped, non-archived) AND own a picture pointing at `fileId`.
+ * access-checked query: the product must pass {@link withScreenshotAccessFilter}
+ * AND own a picture pointing at `fileId`.
  * Returns the picture's metafile (its id) or null. Used by the marketplace
  * image route to stream the file only when the caller may see the product.
  */
@@ -268,14 +270,19 @@ export async function getProductScreenshot({
   workspace,
   productId,
   fileId,
+  mainPartnerId,
 }: {
   client: Client;
   workspace: PortalWorkspaceWithConfig;
   productId: ID;
   fileId: ID;
+  mainPartnerId: Maybe<ID>;
 }) {
   const product = await client.aOSMarketplaceProduct.findOne({
-    where: withProductAccessFilter(workspace)({
+    where: withScreenshotAccessFilter(
+      workspace,
+      mainPartnerId,
+    )({
       id: productId,
       pictureList: {picture: {id: fileId}},
     }),

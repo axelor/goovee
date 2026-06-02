@@ -1,8 +1,8 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
-import {ensureAuth} from '../../../../common/utils/auth-helper';
-import {getProductScreenshot} from '../../../../common/orm';
+import {ensureAuth} from '../../../../../common/utils/auth-helper';
+import {getProductScreenshot} from '../../../../../common/orm';
 
 /**
  * Serves a marketplace product screenshot. Lives inside the marketplace app
@@ -17,12 +17,17 @@ export async function GET(
     params: Promise<{
       tenant: string;
       workspace: string;
-      productId: string;
-      id: string;
+      'product-id': string;
+      'file-id': string;
     }>;
   },
 ) {
-  const {tenant: tenantId, workspace, productId, id} = await props.params;
+  const {
+    tenant: tenantId,
+    workspace,
+    'product-id': productId,
+    'file-id': fileId,
+  } = await props.params;
   const {workspaceURL} = workspacePathname({tenant: tenantId, workspace});
 
   const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
@@ -37,7 +42,8 @@ export async function GET(
     client,
     workspace: auth.workspace,
     productId,
-    fileId: id,
+    fileId,
+    mainPartnerId: auth.user?.mainPartnerId,
   });
   if (!picture?.id) {
     return new NextResponse('Picture not found', {status: 404});

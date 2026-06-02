@@ -17,6 +17,7 @@ import type {
 } from '@goovee/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import {Maybe} from '@/types/util';
 
 export type QueryProps<T extends Entity> = {
   where?: WhereOptions<T> | null;
@@ -149,6 +150,23 @@ export function withBundleAccessFilter({
             mainPartnerId,
           ),
         },
+      ]),
+    ]);
+  };
+}
+
+export function withScreenshotAccessFilter(
+  workspace: PortalWorkspaceWithConfig,
+  mainPartnerId: Maybe<ID>,
+) {
+  return function (where?: WhereOptions<AOSMarketplaceProduct>) {
+    return and<AOSMarketplaceProduct>([
+      where,
+      or<AOSMarketplaceProduct>([
+        // must be owned by the caller
+        mainPartnerId && withMyProductAccessFilter(workspace, mainPartnerId)(),
+        // or published
+        withPublishedProductFilter(workspace)(),
       ]),
     ]);
   };
