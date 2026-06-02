@@ -1279,7 +1279,8 @@ export async function up2payCreateOrder({
     addressLine1: $invoice?.address?.addressl4 || '',
     zipCode: $invoice?.address?.zip || '',
     city: $invoice?.address?.city?.name || '',
-    countryCode: $invoice?.address?.country?.alpha2Code || '',
+    // Up2Pay PBX_BILLING expects the ISO 3166-1 numeric country code (e.g. "250" for France), not the alpha-2 code.
+    countryCode: $invoice?.address?.country?.numericCode || '',
   };
 
   const paymentModeId = getPaymentModeId(paymentOptions, PaymentOption.up2pay);
