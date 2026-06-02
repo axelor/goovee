@@ -19,7 +19,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
 import {useToast} from '@/ui/hooks';
@@ -45,6 +44,7 @@ import type {
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {BundleDropzone} from '../../inputs/bundle-dropzone';
+import {FormMessageSpace} from '../form-message-space';
 import {
   MAX_BUNDLE_SIZE,
   versionSchema,
@@ -331,7 +331,7 @@ export function VersionForm({
                       <FormControl>
                         <Input placeholder="1.0.0" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessageSpace />
                     </FormItem>
                   )}
                 />
@@ -369,7 +369,7 @@ export function VersionForm({
                         })}
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessageSpace />
                   </FormItem>
                 )}
               />
@@ -391,7 +391,7 @@ export function VersionForm({
                         }}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessageSpace />
                   </FormItem>
                 )}
               />
@@ -426,7 +426,7 @@ export function VersionForm({
                         }
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessageSpace />
                   </FormItem>
                 )}
               />

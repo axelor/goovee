@@ -9,7 +9,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
 import {
@@ -52,6 +51,7 @@ import type {
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {getProductScreenshotURL} from '../../../../utils/images';
 import {ProductIcon} from '../../primitives/product-icon';
+import {FormMessageSpace} from '../form-message-space';
 import {
   ACCEPTED_IMAGE_TYPES,
   MAX_IMAGES,
@@ -249,7 +249,7 @@ export function ProductForm({
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessageSpace />
                 </FormItem>
               )}
             />
@@ -289,7 +289,7 @@ export function ProductForm({
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessageSpace />
                 </FormItem>
               )}
             />
@@ -308,7 +308,7 @@ export function ProductForm({
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessageSpace />
                 </FormItem>
               )}
             />
@@ -332,7 +332,7 @@ export function ProductForm({
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessageSpace />
                 </FormItem>
               )}
             />
@@ -368,7 +368,7 @@ export function ProductForm({
                     </MultiSelectorContent>
                   </MultiSelector>
                 </FormControl>
-                <FormMessage />
+                <FormMessageSpace />
               </FormItem>
             )}
           />
@@ -385,7 +385,7 @@ export function ProductForm({
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessageSpace />
               </FormItem>
             )}
           />
@@ -407,7 +407,7 @@ export function ProductForm({
                     }}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessageSpace />
               </FormItem>
             )}
           />
@@ -440,7 +440,7 @@ export function ProductForm({
                     })}
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessageSpace />
               </FormItem>
             )}
           />
@@ -481,7 +481,7 @@ export function ProductForm({
                     })}
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessageSpace />
               </FormItem>
             )}
           />
@@ -498,7 +498,7 @@ export function ProductForm({
                   <FormControl>
                     <Input type="url" placeholder="https://" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessageSpace />
                 </FormItem>
               )}
             />
@@ -511,7 +511,7 @@ export function ProductForm({
                   <FormControl>
                     <Input type="url" placeholder="https://" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessageSpace />
                 </FormItem>
               )}
             />
@@ -524,7 +524,7 @@ export function ProductForm({
                   <FormControl>
                     <Input type="url" placeholder="https://" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessageSpace />
                 </FormItem>
               )}
             />
@@ -867,7 +867,7 @@ function ScreenshotsFormField({
     <FormField
       control={control}
       name="images"
-      render={({fieldState}) => (
+      render={() => (
         <FormItem>
           <FormLabel>
             {i18n.t('Screenshots')}{' '}
@@ -889,7 +889,7 @@ function ScreenshotsFormField({
               maxImages={MAX_IMAGES}
             />
           </FormControl>
-          {fieldState.error && <FormMessage />}
+          <FormMessageSpace />
           <p className="text-xs text-muted-foreground">
             {i18n.t(
               'Any image format. Max 5 MB per image, up to {0} per product. The first image is the cover.',
