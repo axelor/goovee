@@ -65,6 +65,9 @@ export async function fetchConversionLines({
   );
   if (froms.length === 0) return [];
 
+  /* Lines are matched on the ISO code, mirroring AOS
+   * `CurrencyServiceImpl.getCurrencyConversionLine` which keys on
+   * `codeISO` (the unique ISO field), not the printing `code`. */
   const appBase = await client.aOSAppBase.findOne({
     where: {OR: [{archived: false}, {archived: null}]},
     select: {
@@ -72,18 +75,18 @@ export async function fetchConversionLines({
         where: {
           OR: [
             {
-              startCurrency: {code: {in: froms}},
-              endCurrency: {code: {in: tos}},
+              startCurrency: {codeISO: {in: froms}},
+              endCurrency: {codeISO: {in: tos}},
             },
             {
-              startCurrency: {code: {in: tos}},
-              endCurrency: {code: {in: froms}},
+              startCurrency: {codeISO: {in: tos}},
+              endCurrency: {codeISO: {in: froms}},
             },
           ],
         },
         select: {
-          startCurrency: {code: true},
-          endCurrency: {code: true},
+          startCurrency: {codeISO: true},
+          endCurrency: {codeISO: true},
           exchangeRate: true,
           fromDate: true,
           toDate: true,
@@ -92,6 +95,22 @@ export async function fetchConversionLines({
     },
   });
   return appBase?.currencyConversionLineList ?? [];
+}
+
+/** Names of the Product fields an admin has flagged as company-specific
+ *  (`appBase.companySpecificProductFieldsSet`). AOS only consults a
+ *  product's per-company override row for fields in this set
+ *  (`ProductCompanyServiceImpl.isCompanySpecificProductFields`). */
+export async function findCompanySpecificProductFields(client: Client) {
+  const appBase = await client.aOSAppBase.findOne({
+    where: {OR: [{archived: false}, {archived: null}]},
+    select: {
+      companySpecificProductFieldsSet: {select: {name: true}},
+    },
+  });
+  return (appBase?.companySpecificProductFieldsSet ?? [])
+    .map(field => field.name)
+    .filter((name): name is string => !!name);
 }
 
 /** Bundle of inputs `computePrice` needs that are *batch-wide* rather
@@ -109,31 +128,38 @@ export async function getPriceContext({
   mainPartnerId: string | null | undefined;
   productCurrencyCodes: Array<string | null | undefined>;
 }) {
-  const [partnerCurrency, fallbackCurrency, fiscalPosition] = await Promise.all(
-    [
-      findPartnerCurrency({client, mainPartnerId}),
-      findDefaultCurrency(client),
-      findPartnerFiscalPosition({client, mainPartnerId}),
-    ],
-  );
+  const [
+    partnerCurrency,
+    fallbackCurrency,
+    fiscalPosition,
+    companySpecificProductFields,
+  ] = await Promise.all([
+    findPartnerCurrency({client, mainPartnerId}),
+    findDefaultCurrency(client),
+    findPartnerFiscalPosition({client, mainPartnerId}),
+    findCompanySpecificProductFields(client),
+  ]);
   const conversionLines = await fetchConversionLines({
     client,
     fromCodes: productCurrencyCodes,
-    toCodes: [partnerCurrency?.code, fallbackCurrency?.code],
+    toCodes: [partnerCurrency?.codeISO, fallbackCurrency?.codeISO],
   });
   return {
     conversionLines,
     viewerCurrency: partnerCurrency,
     defaultCurrency: fallbackCurrency,
     fiscalPosition,
+    companySpecificProductFields,
   };
 }
 
 const taxRowSelectFields = {
   id: true,
-  activeTaxLine: {value: true},
+  /* Line ids matter: AOS collects resolved tax lines into a Set, so a
+   * TaxLine shared by two taxes is counted once. */
+  activeTaxLine: {id: true, value: true},
   taxLineList: {
-    select: {value: true, startDate: true, endDate: true},
+    select: {id: true, value: true, startDate: true, endDate: true},
   },
 } as const satisfies SelectOptions<AOSTax>;
 

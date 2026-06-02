@@ -490,18 +490,19 @@ the **global default currency (EUR)**, else the listing's own currency as-is.
 
 The computation mirrors the AOS sales-order pricing path, step by step:
 
-1. **Resolve the price fields** (price, inATI, currency): use the per-company
-   entry on the product matching the selling company, or the product's base
-   values when there is no company-specific entry.
+1. **Resolve the price fields** (price, inATI, currency): a per-company entry
+   on the product is used only for fields the admin has flagged as
+   company-specific; otherwise the product's base values apply.
 2. **Resolve the tax setup** from the workspace default product's account
    management (then its product family), filtered to the selling company. A
    product-level entry with no tax set is skipped as an accounting-only override.
-3. **Apply the buyer's fiscal position** (if any): each tax is remapped through
-   the tax-equivalence rules — e.g. a domestic tax swapped for an EU/export one.
-   One tax can map to several.
+3. **Apply the buyer's fiscal position** (if any): if an equivalence rule's
+   source taxes exactly match the product's whole tax set, the set is swapped
+   for the rule's target taxes — e.g. a domestic tax swapped for an EU/export
+   one. Otherwise the original taxes are kept.
 4. **Pick each tax rate**: use the active tax line, otherwise the tax line whose
    date window contains today (evaluated in the company's timezone). Summing the
-   picked rates gives the total tax rate.
+   picked rates (each shared line counted once) gives the total tax rate.
 5. **Compute WT and ATI**:
    - tax-inclusive — `WT = price / (1 + rate)`, `ATI = price`
    - tax-exclusive — `WT = price`, `ATI = WT + WT * rate`

@@ -24,6 +24,11 @@
       "name": "currencyConversionLineList",
       "target": "AOSCurrencyConversionLine",
       "mappedBy": "appBase"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "companySpecificProductFieldsSet",
+      "target": "AOSMetaField"
     }
   ]
 }

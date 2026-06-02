@@ -119,7 +119,7 @@ export async function findProducts({
     client,
     mainPartnerId,
     productCurrencyCodes: products.map(
-      p => p.saleCurrency?.code ?? p.product?.saleCurrency?.code,
+      p => p.saleCurrency?.codeISO ?? p.product?.saleCurrency?.codeISO,
     ),
   });
 
@@ -214,7 +214,7 @@ export async function findProduct({
     client,
     mainPartnerId,
     productCurrencyCodes: [
-      resolved.saleCurrency?.code ?? resolved.product?.saleCurrency?.code,
+      resolved.saleCurrency?.codeISO ?? resolved.product?.saleCurrency?.codeISO,
     ],
   });
   return withPrice(resolved, workspace, priceContext);

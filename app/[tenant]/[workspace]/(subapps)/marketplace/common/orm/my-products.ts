@@ -64,7 +64,7 @@ export async function findMyProducts({
     client,
     mainPartnerId,
     productCurrencyCodes: products.map(
-      p => p.saleCurrency?.code ?? p.product?.saleCurrency?.code,
+      p => p.saleCurrency?.codeISO ?? p.product?.saleCurrency?.codeISO,
     ),
   });
 

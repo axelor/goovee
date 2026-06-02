@@ -84,7 +84,7 @@ export async function validateCart({
     mainPartnerId,
     productCurrencyCodes: products.map(
       product =>
-        product.saleCurrency?.code ?? product.product?.saleCurrency?.code,
+        product.saleCurrency?.codeISO ?? product.product?.saleCurrency?.codeISO,
     ),
   });
 

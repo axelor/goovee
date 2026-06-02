@@ -173,6 +173,9 @@ export function withScreenshotAccessFilter(
 
 export const currencySelect = {
   code: true,
+  /* Conversion lines are matched on the ISO code (AOS
+   * `CurrencyServiceImpl` keys on `codeISO`, not the printing `code`). */
+  codeISO: true,
   symbol: true,
   numberOfDecimals: true,
 } as const satisfies SelectOptions<AOSCurrency>;
@@ -205,9 +208,11 @@ const accountManagementSelectFields = {
   saleTaxSet: {
     select: {
       id: true,
-      activeTaxLine: {value: true},
+      /* Line ids matter: AOS collects resolved tax lines into a Set, so a
+       * TaxLine shared by two taxes is counted once. */
+      activeTaxLine: {id: true, value: true},
       taxLineList: {
-        select: {value: true, startDate: true, endDate: true},
+        select: {id: true, value: true, startDate: true, endDate: true},
       },
     },
   },
@@ -259,7 +264,13 @@ export type PriceableProduct = Payload<
 export const priceSelectFields = {
   salePrice: true,
   inAti: true,
-  saleCurrency: {id: true, code: true, symbol: true, numberOfDecimals: true},
+  saleCurrency: {
+    id: true,
+    code: true,
+    codeISO: true,
+    symbol: true,
+    numberOfDecimals: true,
+  },
   product: productPriceSelectFields,
 } as const satisfies SelectOptions<AOSMarketplaceProduct>;
 
