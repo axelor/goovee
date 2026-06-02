@@ -138,7 +138,7 @@ export async function findVersionForDownload({
     where: withBundleAccessFilter({
       workspace,
       mainPartnerId: mainPartnerId ?? undefined,
-      productId: String(productId),
+      productId,
     })({id: versionId}),
     select: {
       id: true,

@@ -8,8 +8,8 @@ import {AOSTax} from '@/goovee/.generated/models';
 
 /** Enriches an MP listing row with the computed `price`. The listing's
  *  own `salePrice` / `inAti` / `saleCurrency` are fed through as
- *  `priceOverride` — they win over the backing product's matching
- *  fields. Tax / accountManagement / fallback currency still come from
+ *  `priceOverride` — they win over the workspace default product's
+ *  matching fields. Tax / accountManagement / fallback currency still come from
  *  `mp.product` (same path AOS takes on the SO line). */
 export function withPrice<T extends PriceableMarketplaceProduct>(
   mp: T,

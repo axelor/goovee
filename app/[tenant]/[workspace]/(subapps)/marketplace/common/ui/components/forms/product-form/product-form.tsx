@@ -80,7 +80,7 @@ type ProductFormProps = {
    *  (partner → app default) for create. Drives the input's currency
    *  adornment via `.symbol`. */
   listingCurrency: Cloned<Currency> | null;
-  /** Pulled from the workspace's backing product
+  /** Pulled from the workspace default product
    *  (`PortalAppConfig.defaultProductForMarketplace.inAti`). Decides whether
    *  the price the supplier enters is interpreted as gross (tax-inclusive)
    *  or net (tax-exclusive), and drives the input label wording. */

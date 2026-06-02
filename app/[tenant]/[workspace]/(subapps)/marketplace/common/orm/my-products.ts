@@ -71,6 +71,26 @@ export async function findMyProducts({
   return products.map(p => withPrice(p, workspace, priceContext));
 }
 
+/** Lightweight ownership check: resolves the product only if it lives in
+ *  the workspace and is published by the caller's partner. Use this when
+ *  an action just needs to verify ownership, not load the edit payload. */
+export async function findMyProductAccess({
+  productId,
+  mainPartnerId,
+  client,
+  workspace,
+}: {
+  productId: ID;
+  mainPartnerId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+}) {
+  return client.aOSMarketplaceProduct.findOne({
+    where: withMyProductAccessFilter(workspace, mainPartnerId)({id: productId}),
+    select: {id: true},
+  });
+}
+
 export type MyProductWithVersions = NonNullable<
   Awaited<ReturnType<typeof findMyProductWithVersions>>
 >;

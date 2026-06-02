@@ -87,7 +87,7 @@ export async function recordPurchases(
         data: {
           partner: {select: {id: partnerId}},
           marketplaceProduct: {select: {id: productId}},
-          ...(invoiceId ? {invoice: {select: {id: String(invoiceId)}}} : {}),
+          ...(invoiceId ? {invoice: {select: {id: invoiceId}}} : {}),
           purchasedAt: now,
         },
         select: {id: true},
@@ -129,8 +129,8 @@ export async function attachOrderToPurchases(
       data: {
         id: row.id,
         version: row.version,
-        invoice: {select: {id: String(invoiceId)}},
-        saleOrder: {select: {id: String(saleOrderId)}},
+        invoice: {select: {id: invoiceId}},
+        saleOrder: {select: {id: saleOrderId}},
       },
       select: {id: true},
     });

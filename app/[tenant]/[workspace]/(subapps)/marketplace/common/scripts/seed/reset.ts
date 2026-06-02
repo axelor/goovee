@@ -22,7 +22,7 @@ import {DEMO_PREFIX} from './constants';
  * and reset only ever removes seed-created rows.
  *
  * Intentionally NOT touched:
- *   - The backing real AOSProduct (e.g. `defaultProductForMarketplace`)
+ *   - The workspace default AOSProduct (`defaultProductForMarketplace`)
  *     — shared, owned by the workspace config.
  *   - Partner / customer accounts referenced as publishers/authors.
  *
@@ -264,8 +264,8 @@ async function main() {
     /* 5. Seeded dictionaries, matched by the demo prefix on their natural
      *    keys. Done after the products/versions that referenced them are
      *    gone. The prefix keeps these distinct from canonical rows (`MIT`,
-     *    `v9.0.0`), so nothing shared is ever touched. The backing real
-     *    AOSProduct and partner accounts are likewise left alone. */
+     *    `v9.0.0`), so nothing shared is ever touched. The workspace
+     *    default AOSProduct and partner accounts are likewise left alone. */
     counts.compatVersions = Number(
       await txClient.aOSMarketplaceAxelorVersion.deleteAll({
         where: {name: {like: `${DEMO_PREFIX}%`}},

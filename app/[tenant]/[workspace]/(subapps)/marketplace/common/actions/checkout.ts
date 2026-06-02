@@ -139,7 +139,7 @@ export async function createStripeCheckoutSession(props: {
     const cancelUrl = `${parsed.data.workspaceURL}/${SUBAPP_CODES.marketplace}/cart/checkout/cancel`;
 
     const session = await createStripeOrder({
-      customer: {id: String(payerId), email: emailAddress},
+      customer: {id: payerId, email: emailAddress},
       name: await t('Marketplace purchase'),
       amount: cart.total,
       currency: cart.currencyCode,
@@ -251,13 +251,13 @@ export async function checkout(
   if (!tenantId)
     return {error: true, message: await t('Tenant ID is missing.')};
 
-  const {auth, error: authError} = await ensureAuth(
-    parsed.data.workspaceURL,
-    tenantId,
-    {allowGuest: false},
-  );
+  const {
+    auth,
+    error: authError,
+    message: authMessage,
+  } = await ensureAuth(parsed.data.workspaceURL, tenantId, {allowGuest: false});
   if (authError) {
-    return {error: true, message: await t('Sign in required.')};
+    return {error: true, message: authMessage};
   }
   const {client, config} = auth.tenant;
   const mainPartnerId = auth.user.mainPartnerId;

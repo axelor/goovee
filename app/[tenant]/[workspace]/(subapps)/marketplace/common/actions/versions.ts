@@ -10,10 +10,11 @@ import {headers} from 'next/headers';
 import {z} from 'zod';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {
-  findMyProductWithVersions,
+  findMyProductAccess,
   syncProductVersionPointers,
   updateVersionStatus,
   uploadBundle,
+  withMyProductAccessFilter,
 } from '../orm';
 import {
   MAX_BUNDLE_SIZE,
@@ -39,9 +40,12 @@ export async function saveVersion(
   }
   const payload = parsed.data;
 
-  const {error, auth} = await ensureAuth(payload.workspaceURL, tenantId);
-  if (error || !auth.user) {
-    return {error: true, message: await t('Unauthorized')};
+  const {error, message, auth} = await ensureAuth(
+    payload.workspaceURL,
+    tenantId,
+  );
+  if (error) {
+    return {error: true, message};
   }
   const {client} = auth.tenant;
 
@@ -61,30 +65,32 @@ export async function saveVersion(
     return {error: true, message: await t('Invalid version number')};
   }
 
-  const existingProduct = await findMyProductWithVersions({
-    productId: payload.productId,
-    mainPartnerId: auth.user.mainPartnerId,
-    client,
-    workspace: auth.workspace,
-  });
+  /* Independent guards, fetched in parallel: caller owns the product, and
+   * no other version of it holds the same (vMajor, vMinor, vPatch,
+   * vPreRelease) tuple. */
+  const [existingProduct, duplicate] = await Promise.all([
+    findMyProductAccess({
+      productId: payload.productId,
+      mainPartnerId: auth.user.mainPartnerId,
+      client,
+      workspace: auth.workspace,
+    }),
+    client.aOSMarketplaceProductVersion.findOne({
+      where: {
+        marketplaceProduct: {id: payload.productId},
+        vMajor: parts.vMajor,
+        vMinor: parts.vMinor,
+        vPatch: parts.vPatch,
+        vPreRelease:
+          parts.vPreRelease === null ? {eq: null} : {eq: parts.vPreRelease},
+        ...(payload.id ? {id: {ne: payload.id}} : {}),
+      },
+      select: {id: true},
+    }),
+  ]);
   if (!existingProduct) {
     return {error: true, message: await t('Product not found')};
   }
-
-  /* App-level uniqueness: no other version of this product can hold the
-   * same (vMajor, vMinor, vPatch, vPreRelease) tuple. */
-  const duplicate = await client.aOSMarketplaceProductVersion.findOne({
-    where: {
-      marketplaceProduct: {id: payload.productId},
-      vMajor: parts.vMajor,
-      vMinor: parts.vMinor,
-      vPatch: parts.vPatch,
-      vPreRelease:
-        parts.vPreRelease === null ? {eq: null} : {eq: parts.vPreRelease},
-      ...(payload.id ? {id: {ne: payload.id}} : {}),
-    },
-    select: {id: true},
-  });
   if (duplicate) {
     return {
       error: true,
@@ -239,24 +245,22 @@ export async function unpublishVersion(
   }
   const {versionId, productId, workspaceURL} = parsed.data;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error || !auth.user) {
-    return {error: true, message: await t('Unauthorized')};
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error) {
+    return {error: true, message};
   }
   const {client} = auth.tenant;
 
-  const owned = await findMyProductWithVersions({
-    productId,
-    mainPartnerId: auth.user.mainPartnerId,
-    client,
-    workspace: auth.workspace,
-  });
-  if (!owned) {
-    return {error: true, message: await t('Product not found')};
-  }
-
+  /* Ownership check fused into the version lookup: the m2o filter only
+   * resolves versions of products published by the caller's partner. */
   const current = await client.aOSMarketplaceProductVersion.findOne({
-    where: {id: versionId, marketplaceProduct: {id: productId}},
+    where: {
+      id: versionId,
+      marketplaceProduct: withMyProductAccessFilter(
+        auth.workspace,
+        auth.user.mainPartnerId,
+      )({id: productId}),
+    },
     select: {id: true, version: true, statusSelect: true},
   });
   if (!current) {

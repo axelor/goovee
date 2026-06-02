@@ -142,17 +142,18 @@ async function main() {
     const ctx: WorkspaceContext = {
       workspaceId: workspace.id,
       supplierPartnerId: suppliers[0]!.id /* Default to first supplier */,
-      backingProductId: workspace.config.defaultProductForMarketplace!.id,
+      workspaceDefaultProductId:
+        workspace.config.defaultProductForMarketplace!.id,
       defaults: {
         inAti: workspace.config.defaultProductForMarketplace?.inAti === true,
         saleCurrencyId: saleCurrency.id,
       },
     };
 
-    /* Currency / unit / tax all live on the workspace's backing real
-     * Product (config.defaultProductForMarketplace). The seeded marketplace
-     * products override only salePrice + inAti; the backing product
-     * supplies the rest at checkout time. */
+    /* Currency / unit / tax all live on the workspace default Product
+     * (config.defaultProductForMarketplace). The seeded marketplace
+     * products override only salePrice + inAti; the workspace default
+     * product supplies the rest at checkout time. */
 
     /* Distribute products across suppliers: apps and skills evenly.
      * Use deterministic hash of product slug to avoid bias from data ordering. */

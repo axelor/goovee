@@ -13,9 +13,9 @@ class SeedLookupError extends Error {
 
 /* Resolves the workspace AND its marketplace defaults by walking
  * AOSPortalWorkspace → defaultPartnerWorkspace → portalAppConfig. The
- * default backing product is read once here and used as the `product`
+ * workspace default product is read once here and used as the `product`
  * m2o on every seeded MarketplaceProduct, mirroring `saveProduct` in
- * the app. Tax/currency/unit live on that backing real Product. */
+ * the app. Tax/currency/unit live on that workspace default Product. */
 export async function findWorkspaceByUrl(client: Client, url: string) {
   const workspace = await client.aOSPortalWorkspace.findOne({
     where: {url},
@@ -48,21 +48,24 @@ export async function findWorkspaceByUrl(client: Client, url: string) {
     );
   }
   const rawConfig = workspace.defaultPartnerWorkspace?.portalAppConfig;
-  const backing = rawConfig?.defaultProductForMarketplace;
-  if (!rawConfig || !backing?.id) {
+  const workspaceDefaultProduct = rawConfig?.defaultProductForMarketplace;
+  if (!rawConfig || !workspaceDefaultProduct?.id) {
     throw new SeedLookupError(
-      `Workspace '${url}' is missing the default marketplace backing product. Set defaultProductForMarketplace on its PortalAppConfig.`,
+      `Workspace '${url}' is missing the workspace default product. Set defaultProductForMarketplace on its PortalAppConfig.`,
     );
   }
   /* The form's picker is constrained to services, but a direct DB edit
    * could leave a storable product here — which would generate spurious
    * stock moves at checkout. Fail fast at seed time. */
-  if (backing.productTypeSelect !== 'service') {
+  if (workspaceDefaultProduct.productTypeSelect !== 'service') {
     throw new SeedLookupError(
-      `Workspace '${url}' default marketplace product '${backing.code}' has productTypeSelect='${backing.productTypeSelect}', expected 'service'.`,
+      `Workspace '${url}' default product '${workspaceDefaultProduct.code}' has productTypeSelect='${workspaceDefaultProduct.productTypeSelect}', expected 'service'.`,
     );
   }
-  const config = {...rawConfig, defaultProductForMarketplace: backing};
+  const config = {
+    ...rawConfig,
+    defaultProductForMarketplace: workspaceDefaultProduct,
+  };
   return {...workspace, config};
 }
 

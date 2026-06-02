@@ -10,7 +10,6 @@ import {
   priceSelectFields,
   versionNumberFields,
   withMyProductAccessFilter,
-  withProductAccessFilter,
   withPublishedProductFilter,
   withScreenshotAccessFilter,
   type QueryProps,
@@ -20,6 +19,8 @@ import {Maybe} from '@/types/util';
 
 // ---- PRODUCTS ---- //
 
+/** Resolves a product visitors may interact with (favorite, review):
+ *  workspace-scoped, non-archived AND carrying a published version. */
 export async function findProductAccess<
   T extends SelectOptions<AOSMarketplaceProduct>,
 >({
@@ -34,7 +35,7 @@ export async function findProductAccess<
   select?: T;
 }): Promise<Payload<AOSMarketplaceProduct, {select: T}> | null> {
   return client.aOSMarketplaceProduct.findOne({
-    where: withProductAccessFilter(workspace)({id: productId}),
+    where: withPublishedProductFilter(workspace)({id: productId}),
     select: select as T,
   });
 }

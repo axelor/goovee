@@ -60,10 +60,8 @@ export function withPublishedProductFilter(
   };
 }
 
-export function getCategoryAccessFilter() {
-  return and<AOSMarketplaceCategory>([
-    {OR: [{archived: false}, {archived: null}]},
-  ]);
+export function getCategoryAccessFilter(): WhereOptions<AOSMarketplaceCategory> {
+  return {OR: [{archived: false}, {archived: null}]};
 }
 
 export function withCategoryAccessFilter() {
@@ -219,7 +217,7 @@ export type AccountManagementRow = Payload<
   {select: typeof accountManagementSelectFields}
 >;
 
-/** Fields the backing real `Product` must expose for tax/currency
+/** Fields the workspace default `Product` must expose for tax/currency
  *  resolution. Used by `computePrice` directly. */
 const productPriceSelectFields = {
   salePrice: true,
@@ -251,8 +249,8 @@ export type PriceableProduct = Payload<
 
 /** Fields the MP listing must expose for `withPrice` to compute the
  *  server-side `price` (wt / ati / taxRate / currency). The listing's
- *  price-defining fields layer on top of the backing product's via
- *  `priceOverride` — see `withPrice`. Consumers should read the
+ *  price-defining fields layer on top of the workspace default
+ *  product's via `priceOverride` — see `withPrice`. Consumers should read the
  *  computed `price` and never recompute on the client. */
 export const priceSelectFields = {
   salePrice: true,

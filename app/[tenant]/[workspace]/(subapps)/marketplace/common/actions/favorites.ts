@@ -47,7 +47,10 @@ export async function addProductToFavorites(
   const {productId, workspaceURL, workspaceURI, returnUrl, isFavorite} =
     result.data;
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId);
+  const {error, message, auth, forceLogin} = await ensureAuth(
+    workspaceURL,
+    tenantId,
+  );
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -58,22 +61,26 @@ export async function addProductToFavorites(
     );
   }
   if (error) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
+    return {error: true, message};
   }
 
   const client = auth.tenant.client;
   const userId = auth.user.id;
 
   try {
-    const product = await findProductAccess({
-      recordId: productId,
-      client,
-      workspace: auth.workspace,
-      select: {id: true},
-    });
+    const [product, partner] = await Promise.all([
+      findProductAccess({
+        recordId: productId,
+        client,
+        workspace: auth.workspace,
+        select: {id: true},
+      }),
+      findPartnerWithFavorite({
+        client,
+        userId,
+        productId,
+      }),
+    ]);
 
     if (!product) {
       return {
@@ -81,12 +88,6 @@ export async function addProductToFavorites(
         message: await t('Product not found or access denied'),
       };
     }
-
-    const partner = await findPartnerWithFavorite({
-      client,
-      userId,
-      productId,
-    });
 
     if (!partner) {
       return {
@@ -96,7 +97,7 @@ export async function addProductToFavorites(
     }
 
     const currentlyFavorite = !!partner.favouriteMarketplaceProducts?.some(
-      product => product.id === productId,
+      fav => fav.id === productId,
     );
 
     if (currentlyFavorite === isFavorite) {

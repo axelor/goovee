@@ -18,6 +18,7 @@ import {
   findProductAccess,
   removeRating,
   replaceRating,
+  withProductAccessFilter,
 } from '../orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import {ensureAuth} from '../utils/auth-helper';
@@ -37,33 +38,42 @@ export async function saveReview(
     };
   }
   const payload = parsed.data;
-  const {error, auth} = await ensureAuth(payload.workspaceURL, tenantId);
-  if (error || !auth.user) {
-    return {error: true, message: await t('Unauthorized')};
+  const {error, message, auth} = await ensureAuth(
+    payload.workspaceURL,
+    tenantId,
+  );
+  if (error) {
+    return {error: true, message};
   }
   const {client} = auth.tenant;
 
-  const product = await findProductAccess({
-    recordId: payload.productId,
-    client,
-    workspace: auth.workspace,
-    select: {id: true},
-  });
-  if (!product) {
-    return {error: true, message: await t('Product not found')};
-  }
-
   if (payload.reviewedVersionId) {
+    /* Single query covering both guards: the reviewed version must be
+     * published AND belong to an accessible product. The version's own
+     * PUBLISHED status implies the product has a published version, so
+     * the plain access filter suffices here. */
     const matchingVersion = await client.aOSMarketplaceProductVersion.findOne({
       where: {
         id: payload.reviewedVersionId,
-        marketplaceProduct: {id: payload.productId},
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+        marketplaceProduct: withProductAccessFilter(auth.workspace)({
+          id: payload.productId,
+        }),
       },
       select: {id: true},
     });
     if (!matchingVersion) {
       return {error: true, message: await t('Invalid version')};
+    }
+  } else {
+    const product = await findProductAccess({
+      recordId: payload.productId,
+      client,
+      workspace: auth.workspace,
+      select: {id: true},
+    });
+    if (!product) {
+      return {error: true, message: await t('Product not found')};
     }
   }
 
@@ -155,9 +165,9 @@ export async function deleteReview(
     };
   }
   const {productId, workspaceURL} = parsed.data;
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error || !auth.user) {
-    return {error: true, message: await t('Unauthorized')};
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error) {
+    return {error: true, message};
   }
   const {client} = auth.tenant;
 

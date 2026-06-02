@@ -33,10 +33,10 @@ import type {
 export type WorkspaceContext = {
   workspaceId: string;
   supplierPartnerId: string;
-  /** The workspace's backing real Product (PortalAppConfig.defaultProductForMarketplace).
+  /** The workspace default Product (PortalAppConfig.defaultProductForMarketplace).
    *  Every seeded MarketplaceProduct points at this; tax/currency/unit
    *  live there and the marketplace product only overrides salePrice/inAti. */
-  backingProductId: string;
+  workspaceDefaultProductId: string;
   defaults: {
     inAti: boolean;
     saleCurrencyId: string;
@@ -364,7 +364,7 @@ export async function upsertProduct(
     salePrice: new BigDecimal(String(product.price)),
     inAti: ctx.defaults.inAti,
     saleCurrency: {select: {id: ctx.defaults.saleCurrencyId}},
-    product: {select: {id: ctx.backingProductId}},
+    product: {select: {id: ctx.workspaceDefaultProductId}},
     portalWorkspace: {select: {id: ctx.workspaceId}},
     publisher: {select: {id: publisherPartnerId}},
     createdByPartner: {select: {id: publisherPartnerId}},

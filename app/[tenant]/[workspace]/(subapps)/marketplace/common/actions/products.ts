@@ -18,6 +18,7 @@ import {
   resolveNewListingCurrency,
   type ProductSearchResult,
   syncProductImages,
+  withMyProductAccessFilter,
 } from '../orm';
 import {productSchema} from '../ui/components/forms/product-form/validator';
 import {ensureAuth} from '../utils/auth-helper';
@@ -44,9 +45,9 @@ export async function loadMyProductForEdit(
   }
   const {productId, workspaceURL} = parsed.data;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error || !auth.user) {
-    return {error: true, message: await t('Unauthorized')};
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error) {
+    return {error: true, message};
   }
 
   const product = await findMyProductWithVersions({
@@ -86,9 +87,9 @@ export async function saveProduct(
   }
   const payload = parsed.data;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error || !auth.user) {
-    return {error: true, message: await t('Unauthorized')};
+  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  if (error) {
+    return {error: true, message};
   }
   const {client} = auth.tenant;
 
@@ -99,23 +100,11 @@ export async function saveProduct(
     };
   }
 
-  if (payload.id) {
-    const existing = await findMyProductWithVersions({
-      productId: payload.id,
-      mainPartnerId: auth.user.mainPartnerId,
-      client,
-      workspace: auth.workspace,
-    });
-    if (!existing) {
-      return {error: true, message: await t('Product not found')};
-    }
-  }
-
   /* The form supplies marketplace identity + price overrides only. The
-   * backing real Product is fixed per workspace via
+   * workspace default Product is fixed per workspace via
    * `PortalAppConfig.defaultProductForMarketplace` (a service product with
    * the right accounting/tax setup). Tax, currency, unit etc. are read
-   * from that backing Product at checkout time. */
+   * from that workspace default Product at checkout time. */
   const productData = {
     name: payload.name,
     description: payload.description ?? null,
@@ -145,8 +134,13 @@ export async function saveProduct(
           ),
         };
       }
+      /* Ownership check fused with the categorySet fetch: the filter only
+       * resolves products published by the caller's partner. */
       const current = await client.aOSMarketplaceProduct.findOne({
-        where: {id: payload.id},
+        where: withMyProductAccessFilter(
+          auth.workspace,
+          auth.user.mainPartnerId,
+        )({id: payload.id}),
         select: {id: true, categorySet: {select: {id: true}}},
       });
       if (!current) {
@@ -155,11 +149,7 @@ export async function saveProduct(
       /* m2m: compute add/remove diff so the update applies exactly the
        * requested set without dropping rows that are still selected. */
       const desired = new Set(payload.categoryIds);
-      const previous = new Set(
-        (current.categorySet ?? [])
-          .map(c => c?.id)
-          .filter((id): id is string => !!id),
-      );
+      const previous = new Set((current.categorySet ?? []).map(c => c.id));
       const toAdd = [...desired].filter(id => !previous.has(id));
       const toRemove = [...previous].filter(id => !desired.has(id));
       const updated = await client.aOSMarketplaceProduct.update({
@@ -184,13 +174,13 @@ export async function saveProduct(
       productId = payload.id;
       productVersion = updated.version ?? 0;
     } else {
-      const backingProductId =
+      const workspaceDefaultProductId =
         auth.workspace.config.defaultProductForMarketplace?.id;
-      if (!backingProductId) {
+      if (!workspaceDefaultProductId) {
         return {
           error: true,
           message: await t(
-            "Marketplace isn't configured for this workspace: missing default backing product. Contact your admin.",
+            "Marketplace isn't configured for this workspace: missing workspace default product. Contact your admin.",
           ),
         };
       }
@@ -220,16 +210,16 @@ export async function saveProduct(
         data: {
           ...productData,
           slug,
-          /* Seed inAti from the workspace's backing product so the
+          /* Seed inAti from the workspace default product so the
            * salePrice the user just typed is interpreted in the same
-           * basis as the configured backing product. Admin can flip it
+           * basis as that configured product. Admin can flip it
            * later per-MP if needed. */
           inAti:
             auth.workspace.config.defaultProductForMarketplace?.inAti ?? false,
           saleCurrency: {select: {id: defaultSaleCurrency.id}},
           publisher: {select: {id: auth.user.mainPartnerId}},
           createdByPartner: {select: {id: auth.user.id}},
-          product: {select: {id: backingProductId}},
+          product: {select: {id: workspaceDefaultProductId}},
           portalWorkspace: {select: {id: auth.workspace.id}},
           categorySet: {
             select: payload.categoryIds.map(id => ({id})),
