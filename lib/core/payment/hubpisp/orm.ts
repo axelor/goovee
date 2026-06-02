@@ -115,7 +115,7 @@ export type PendingHubPispStartupContext = {
  * Returns all pending HUB PISP contexts that have a resourceId, used to resume polling on restart.
  * Callers split the result by whether paymentRequestResourceId is set:
  * - set: resume pollPaymentRequestStatus
- * - null: resume pollPaymentLinkStatus
+ * - null: reconcile the link once and re-arm its expiry backstop (no polling loop)
  */
 export async function findAllPendingHubPispContexts({
   client,

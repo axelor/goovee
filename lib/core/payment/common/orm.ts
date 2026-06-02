@@ -117,7 +117,7 @@ export async function updatePaymentContextData({
       data: Promise.resolve(context),
       updatedOn: new Date(),
     },
-    select: {id: true},
+    select: {id: true, version: true},
   });
 
   return result;

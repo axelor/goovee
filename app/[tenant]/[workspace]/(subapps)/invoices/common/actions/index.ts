@@ -1443,7 +1443,6 @@ export async function initiatePispPayment({
       name: [$invoice?.partner?.firstName, $invoice?.partner?.name]
         .filter(Boolean)
         .join(' '),
-      email: pispEmail,
     };
     const currencyCode = $invoice?.currency?.code || DEFAULT_CURRENCY_CODE;
     const response = await createHubPispPaymentLink({
