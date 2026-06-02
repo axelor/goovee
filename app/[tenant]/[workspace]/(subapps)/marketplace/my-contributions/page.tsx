@@ -80,6 +80,7 @@ export default async function MyContributionsPage(props: {
         client: auth.tenant.client,
         workspace: auth.workspace,
         take: 100,
+        orderBy: {sequence: 'ASC'},
       }),
       findLicenses({client: auth.tenant.client}),
       findCompatibilityVersions(auth.tenant.client),

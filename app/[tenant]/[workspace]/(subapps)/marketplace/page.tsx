@@ -122,6 +122,7 @@ export default async function Page(props: {
     client,
     workspace: auth.workspace,
     take: 100,
+    orderBy: {sequence: 'ASC'},
   });
 
   const getOrderBy = (
