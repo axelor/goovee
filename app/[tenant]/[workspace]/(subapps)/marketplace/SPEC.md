@@ -213,10 +213,11 @@ Paid listings go through a cart → checkout flow:
       the sale order + invoice, then links them back to the ownership rows.
 
    **Invoicing address selection.** The address is taken from the **customer**
-   account (not the individual contact): among the customer's addresses marked
-   as _invoicing_ addresses, it uses the one flagged **default**, or — if none is
-   flagged — the **first** invoicing address on file. If the customer has **no**
-   invoicing address, the order/invoice is skipped (see below).
+   account (not the individual contact): among the customer's **non-archived**
+   addresses marked as _invoicing_ addresses, it uses the one flagged
+   **default**, or — if none is flagged — the **first** invoicing address on
+   file. If the customer has **no** usable invoicing address, the order/invoice
+   is skipped (see below).
 
    **Access is granted independently of invoicing.** If there's no invoicing
    address, or order/invoice creation fails, the buyer **still keeps access** —
@@ -440,6 +441,28 @@ State rules, exactly as enforced:
 | Unpublished | No                 | No                           |
 | Rejected    | No                 | No                           |
 
+### 5.4 Archived records
+
+Records can be **archived** in the AOS. The general rule: an archived record
+stays attached to whatever already references it, but is **never selected for
+new use** — it disappears from listings, pickers, and any step that creates a
+new reference. Concretely:
+
+- **Listings** — invisible to everyone (see [§5.1](#51-listing-visibility)).
+- **Versions** — not shown in the Versions tab, not downloadable, and never
+  elected as the listing's **current** or **latest** version.
+- **Reviews** — no longer shown on the listing page.
+- **Purchases** — hidden from My Purchases (the customer's access itself is
+  unaffected).
+- **Compatibility targets** — removed from the version form's picker; versions
+  already labelled with them keep the label.
+- **Invoicing addresses** — skipped when picking the address for a new order
+  (see [§4.6](#46-buying--checkout)).
+
+Two checks deliberately **do** see archived records, so identifiers stay
+reserved: slug generation (an archived listing keeps its URL) and the
+version-number duplicate check (an archived version's number can't be reused).
+
 ---
 
 ## 6. Pricing & currency
@@ -570,6 +593,14 @@ Set by an admin in the AOS; each affects storefront behaviour:
   access but the failure is only written to the server console — there's no
   automated retry or AOS alert, so it must be caught and reconciled
   manually.
+- **Archiving a review doesn't fix the aggregates.** The review disappears from
+  the listing page, but the average rating and rating count are only recomputed
+  when a review is saved or deleted through the storefront — an AOS-side archive
+  leaves the old rating baked into the average.
+- **Version-number uniqueness is app-level only.** Unlike slugs (backed by a
+  database constraint), the "must be unique within the listing" rule for version
+  numbers is enforced only by the save-time check — two simultaneous saves of
+  the same number could both get through.
 
 ---
 

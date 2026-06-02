@@ -26,6 +26,7 @@ export async function findVersionCount({
 }) {
   return client.aOSMarketplaceProductVersion.count({
     where: and<AOSMarketplaceProductVersion>([
+      {OR: [{archived: false}, {archived: null}]},
       {marketplaceProduct: {id: productId}},
       !includeUnpublished && {
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
@@ -50,6 +51,7 @@ export async function findProductVersions({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     where: and<AOSMarketplaceProductVersion>([
+      {OR: [{archived: false}, {archived: null}]},
       {marketplaceProduct: {id: productId}},
       !includeUnpublished && {
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
@@ -87,12 +89,16 @@ export async function syncProductVersionPointers({
 }): Promise<void> {
   const [latest, currentPublished, product] = await Promise.all([
     client.aOSMarketplaceProductVersion.findOne({
-      where: {marketplaceProduct: {id: productId}},
+      where: {
+        OR: [{archived: false}, {archived: null}],
+        marketplaceProduct: {id: productId},
+      },
       orderBy: versionSortOrder,
       select: {id: true},
     }),
     client.aOSMarketplaceProductVersion.findOne({
       where: {
+        OR: [{archived: false}, {archived: null}],
         marketplaceProduct: {id: productId},
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       },

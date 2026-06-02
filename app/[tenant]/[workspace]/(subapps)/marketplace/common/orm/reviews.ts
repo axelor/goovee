@@ -24,6 +24,7 @@ export async function findProductReviews({
     ...(skip ? {skip} : {}),
     ...(orderBy ? {orderBy} : {}),
     where: and<AOSMarketplaceReview>([
+      {OR: [{archived: false}, {archived: null}]},
       {marketplaceProduct: {id: productId}},
       where,
     ]),

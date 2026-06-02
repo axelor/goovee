@@ -28,6 +28,10 @@
     {
       "type": "String",
       "name": "reviewComment"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
     }
   ]
 }

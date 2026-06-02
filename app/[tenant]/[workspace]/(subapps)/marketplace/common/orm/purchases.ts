@@ -35,6 +35,7 @@ export async function findPurchases({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     where: {
+      OR: [{archived: false}, {archived: null}],
       partner: {id: mainPartnerId},
       ...(purchaseIds?.length ? {id: {in: purchaseIds}} : {}),
     },

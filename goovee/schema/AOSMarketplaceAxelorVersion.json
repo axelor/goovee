@@ -16,6 +16,10 @@
     {
       "type": "DateTime",
       "name": "releasedOn"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
     }
   ]
 }

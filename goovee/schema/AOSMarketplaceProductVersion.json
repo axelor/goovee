@@ -60,6 +60,10 @@
       "type": "ManyToMany",
       "name": "compatibilitySet",
       "target": "AOSMarketplaceAxelorVersion"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
     }
   ]
 }

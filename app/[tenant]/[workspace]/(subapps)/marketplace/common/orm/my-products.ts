@@ -154,6 +154,7 @@ export type CompatibilityVersion = Awaited<
 
 export async function findCompatibilityVersions(client: Client) {
   return client.aOSMarketplaceAxelorVersion.find({
+    where: {OR: [{archived: false}, {archived: null}]},
     select: {id: true, title: true, name: true, releasedOn: true},
     orderBy: {releasedOn: 'DESC'},
   });

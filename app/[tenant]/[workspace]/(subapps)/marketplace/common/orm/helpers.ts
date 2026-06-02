@@ -117,6 +117,7 @@ export function withBundleAccessFilter({
     const productAccess = getProductAccessFilter(workspace);
     return and<AOSMarketplaceProductVersion>([
       where,
+      {OR: [{archived: false}, {archived: null}]},
       {marketplaceProduct: {id: productId}},
       or<AOSMarketplaceProductVersion>([
         // Free + published. `salePrice <= 0` excludes NULL in SQL, so

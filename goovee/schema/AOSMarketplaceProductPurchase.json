@@ -29,6 +29,10 @@
       "type": "DateTime",
       "name": "purchasedAt",
       "required": true
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
     }
   ]
 }
