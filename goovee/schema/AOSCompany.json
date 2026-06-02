@@ -5,7 +5,8 @@
   "fields": [
     {
       "type": "String",
-      "name": "name"
+      "name": "name",
+      "required": true
     },
     {"name": "logo", "type": "ManyToOne", "target": "AOSMetaFile"},
     {
