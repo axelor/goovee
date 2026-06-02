@@ -1,0 +1,6 @@
+{
+  "title": "Up2Pay: Incorrect country code sent in billing information",
+  "type": "fix",
+  "description": "Up2Pay's PBX_BILLING expects the ISO 3166-1 numeric country code (e.g. \"250\" for France) in the <CountryCode> field, but the invoice billing payload was sending the alpha-2 code (e.g. \"FR\").",
+  "scope": ["invoices", "core"]
+}
