@@ -171,9 +171,9 @@ export const findInvoice = async ({
           },
         },
         partner: {
+          firstName: true,
           simpleFullName: true,
           fixedPhone: true,
-          firstName: true,
           emailAddress: {
             address: true,
           },
@@ -211,6 +211,7 @@ export const findInvoice = async ({
           country: {
             name: true,
             alpha2Code: true,
+            numericCode: true,
           },
           city: {
             name: true,

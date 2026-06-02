@@ -169,6 +169,7 @@ export type Invoice = {
       version: number;
       name: string | null;
       alpha2Code: string | null;
+      numericCode: string | null;
     } | null;
     zip: string | null;
     city: {

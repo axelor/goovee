@@ -2,7 +2,7 @@ import {experimental_taintUniqueValue} from 'react';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {formatAmountForUp2pay, hasKeys, join} from './utils';
 import {createHMAC} from './crypto';
-import {CURRENCY_CODE} from './constants';
+import {CURRENCY_CODE, DEFAULT_BILLING_COUNTRY_CODE} from './constants';
 
 const defaultCurrencyCode = CURRENCY_CODE[DEFAULT_CURRENCY_CODE];
 
@@ -45,7 +45,7 @@ export function getPaymentURL({
   }
 
   const shoppingCart = `<?xml version="1.0" encoding="utf-8"?><shoppingcart><total><totalQuantity>1</totalQuantity></total></shoppingcart>`;
-  const billing = `<?xml version="1.0" encoding="utf-8"?><Billing><Address><FirstName>${billingInfo?.firstName || ''}</FirstName><LastName>${billingInfo?.lastName || ''}</LastName><Address1>${billingInfo?.addressLine1 || ''}</Address1><ZipCode>${billingInfo?.zipCode || ''}</ZipCode><City>${billingInfo?.city || ''}</City><CountryCode>${billingInfo?.countryCode || '250'}</CountryCode></Address></Billing>`;
+  const billing = `<?xml version="1.0" encoding="utf-8"?><Billing><Address><FirstName>${billingInfo?.firstName || ''}</FirstName><LastName>${billingInfo?.lastName || ''}</LastName><Address1>${billingInfo?.addressLine1 || ''}</Address1><ZipCode>${billingInfo?.zipCode || ''}</ZipCode><City>${billingInfo?.city || ''}</City><CountryCode>${billingInfo?.countryCode || DEFAULT_BILLING_COUNTRY_CODE}</CountryCode></Address></Billing>`;
 
   const payload = {
     PBX_SITE: process.env.UP2PAY_SITE,

@@ -21,6 +21,11 @@
       "type": "String",
       "name": "alpha2Code",
       "column": "alpha2code"
+    },
+    {
+      "type": "String",
+      "name": "numericCode",
+      "column": "numeric_code"
     }
   ]
 }

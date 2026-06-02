@@ -78,6 +78,12 @@ export const CURRENCY_CODE: Record<string, number> = {
   EUR: 978,
 };
 
+/**
+ * Default billing country code used in PBX_BILLING when the invoice address
+ * has no country. ISO 3166-1 numeric code for France ("250").
+ */
+export const DEFAULT_BILLING_COUNTRY_CODE = '250';
+
 /** Query params injected by Up2Pay on redirect (PBX_RETOUR) plus app-level params */
 export const UP2PAY_REDIRECT_PARAMS = [
   'status',
