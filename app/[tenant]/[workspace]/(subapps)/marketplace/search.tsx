@@ -114,7 +114,7 @@ export function Search({
               ? results.map(product => (
                   <CommandItem
                     key={product.id}
-                    value={product.slug ?? product.id}
+                    value={product.slug}
                     onSelect={handleRedirection}
                     className="flex items-center gap-3 px-3 py-2 cursor-pointer">
                     <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center flex-shrink-0">

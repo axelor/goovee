@@ -97,10 +97,7 @@ export async function validateCart({
     if (product.isOwned) {
       return {
         error: true as const,
-        message: await t(
-          '{0} is already in your purchases.',
-          product.name ?? product.slug ?? product.id,
-        ),
+        message: await t('{0} is already in your purchases.', product.name),
       };
     }
     const price = computePrice({
@@ -116,10 +113,7 @@ export async function validateCart({
     if (price.ati <= 0) {
       return {
         error: true,
-        message: await t(
-          '{0} is not a paid product.',
-          product.name ?? product.slug ?? product.id,
-        ),
+        message: await t('{0} is not a paid product.', product.name),
       };
     }
     /* Currency identity is the ISO code — it's what the payment
@@ -130,7 +124,7 @@ export async function validateCart({
         error: true,
         message: await t(
           '{0} could not be priced in a supported currency.',
-          product.name ?? product.slug ?? product.id,
+          product.name,
         ),
       };
     }
@@ -145,8 +139,8 @@ export async function validateCart({
     }
     items.push({
       productId: product.id,
-      productSlug: product.slug ?? '',
-      name: product.name ?? '',
+      productSlug: product.slug,
+      name: product.name,
       priceAti: price.ati,
       scale: price.currency.numberOfDecimals,
       currencyCodeISO: price.currency.codeISO,
@@ -209,10 +203,7 @@ export async function recheckCartAvailability({
     if (product.isOwned) {
       return {
         error: true as const,
-        message: await t(
-          '{0} is already in your purchases.',
-          product.name ?? product.slug ?? product.id,
-        ),
+        message: await t('{0} is already in your purchases.', product.name),
       };
     }
   }

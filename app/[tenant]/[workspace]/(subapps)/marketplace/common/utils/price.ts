@@ -102,7 +102,7 @@ export function computePrice({
   const today = todayInTimezone(companyTimezone);
 
   const {salePrice: _salePrice, inAti, saleCurrency} = priceOverride;
-  const salePrice = Number(_salePrice ?? 0);
+  const salePrice = Number(_salePrice);
 
   /* Resolve the tax percentage through the strict core. If the tax
    * configuration is broken (any PriceComputationError), show the price

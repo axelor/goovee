@@ -162,7 +162,7 @@ export default async function Page(props: {
   const totalPages = getPages(products, limit);
 
   const categoryNames = await Promise.all(
-    categories.map((cat: ListCategory) => tattr(cat.name ?? '')),
+    categories.map((cat: ListCategory) => tattr(cat.name)),
   );
 
   return (

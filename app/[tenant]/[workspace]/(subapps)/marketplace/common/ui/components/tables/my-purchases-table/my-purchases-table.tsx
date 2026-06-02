@@ -102,7 +102,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       desktopClassName: 'w-[18%]',
       content: purchase => (
         <span className="text-sm whitespace-nowrap">
-          {purchase.marketplaceProduct?.currentVersion
+          {purchase.marketplaceProduct.currentVersion
             ? `v${formatVersionNumber(purchase.marketplaceProduct.currentVersion)}`
             : '—'}
         </span>

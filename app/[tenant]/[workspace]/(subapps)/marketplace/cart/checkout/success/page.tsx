@@ -80,9 +80,9 @@ export default async function CheckoutSuccessPage(props: {
           <ul className="text-left divide-y divide-border rounded border border-border overflow-hidden mb-6">
             {recent.map(row => {
               const product = row.marketplaceProduct;
-              const version = product?.currentVersion;
+              const version = product.currentVersion;
               const bgGradient =
-                GRADIENT_MAP[product?.coverStyle || 'gradient-1'] ||
+                GRADIENT_MAP[product.coverStyle || 'gradient-1'] ||
                 DEFAULT_GRADIENT;
               return (
                 <li
@@ -95,22 +95,22 @@ export default async function CheckoutSuccessPage(props: {
                         bgGradient,
                       )}>
                       <ProductIcon
-                        code={product?.iconCode}
+                        code={product.iconCode}
                         className="w-6 h-6"
                       />
                     </div>
                     <div className="min-w-0">
                       <div className="font-medium text-foreground truncate">
-                        {product?.name}
+                        {product.name}
                       </div>
-                      {product?.description && (
+                      {product.description && (
                         <div className="text-xs text-muted-foreground line-clamp-2">
                           <InnerHTML content={product.description} />
                         </div>
                       )}
                     </div>
                   </div>
-                  {product?.id && version?.id ? (
+                  {version?.id ? (
                     <Button asChild variant="outline" size="sm">
                       <a
                         href={`${marketplaceBase}/api/products/${product.id}/versions/${version.id}/download`}>

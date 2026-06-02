@@ -170,8 +170,8 @@ export async function ProductHeaderCard({
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">{byLabel}</span>
               <span className="font-semibold text-foreground">
-                {product.publisher?.simpleFullName ||
-                  product.publisher?.name ||
+                {product.publisher.simpleFullName ||
+                  product.publisher.name ||
                   ''}
               </span>
             </div>
@@ -338,8 +338,8 @@ async function CTAButton({
   return (
     <BuyButtons
       productId={product.id}
-      productSlug={product.slug ?? ''}
-      name={product.name ?? ''}
+      productSlug={product.slug}
+      name={product.name}
       priceAti={priceAti}
       currencySymbol={product.price.currency.symbol}
       scale={priceScale}

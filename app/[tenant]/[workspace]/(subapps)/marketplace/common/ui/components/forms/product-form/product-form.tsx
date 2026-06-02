@@ -127,7 +127,7 @@ function buildDefaults(
     marketplaceTypeSelect:
       (initial.marketplaceTypeSelect as MARKETPLACE_TYPE) ??
       MARKETPLACE_TYPE.SKILL,
-    name: initial.name ?? '',
+    name: initial.name,
     description: initial.description ?? '',
     longDescription: initial.longDescription ?? '',
     categoryIds:

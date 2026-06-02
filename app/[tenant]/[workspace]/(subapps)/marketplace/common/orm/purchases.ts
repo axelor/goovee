@@ -77,9 +77,7 @@ export async function recordPurchases(
     },
     select: {marketplaceProduct: {id: true}},
   });
-  const existingIds = new Set(
-    existing.map(row => row.marketplaceProduct?.id).filter(Boolean) as string[],
-  );
+  const existingIds = new Set(existing.map(row => row.marketplaceProduct.id));
   const missing = productIds.filter(id => !existingIds.has(id));
   const now = new Date();
   for (const productId of missing) {
