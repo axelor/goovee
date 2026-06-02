@@ -1,9 +1,7 @@
-'use server';
-
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {t} from '@/locale/server';
-import {Badge, Button} from '@/ui/components';
+import type {Cloned} from '@/types/util';
 import {
   Pagination,
   PaginationContent,
@@ -12,16 +10,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
+import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';
-import {ChevronLeft, ChevronRight, Download} from 'lucide-react';
+import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {
   findProductVersions,
   type ListProductVersion,
   type SingleProduct,
 } from '../../../../orm';
-import {formatVersionNumber} from '../../../../utils/version-number';
+import {VersionCard} from '../../cards/version-card/version-card';
 
 interface VersionsTabProps {
   product: SingleProduct;
@@ -50,7 +49,7 @@ export async function VersionsTab({
 
   const canDownload = await canDownloadPromise;
 
-  const versionsResult = await findProductVersions({
+  const versions = await findProductVersions({
     productId: product.id,
     client,
     take: VERSIONS_PAGE_SIZE,
@@ -58,27 +57,13 @@ export async function VersionsTab({
     includeUnpublished: preview,
   });
 
-  const totalVersionCount = getTotal(versionsResult);
+  const totalVersionCount = getTotal(versions);
   const totalVersionPages = Math.ceil(totalVersionCount / VERSIONS_PAGE_SIZE);
 
-  const [
-    noVersionsLabel,
-    latestLabel,
-    compatibleLabel,
-    noCompatibleLabel,
-    downloadLabel,
-    previousLabel,
-    nextLabel,
-    inactiveLabel,
-  ] = await Promise.all([
+  const [noVersionsLabel, previousLabel, nextLabel] = await Promise.all([
     t('No versions available'),
-    t('Latest'),
-    t('Compatible:'),
-    t('No compatible versions specified'),
-    t('Download'),
     t('Previous'),
     t('Next'),
-    t('Inactive in preview'),
   ]);
 
   if (totalVersionCount === 0) {
@@ -92,69 +77,19 @@ export async function VersionsTab({
   return (
     <>
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        {versionsResult.map((version: ListProductVersion, index) => (
+        {versions.map((version, index) => (
           <div
             key={version.id}
-            className={cn(
-              'flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center p-4 sm:p-5',
-              {
-                'border-b border-border': index < versionsResult.length - 1,
-              },
-            )}>
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h3 className="font-semibold text-foreground">
-                  v{formatVersionNumber(version)}
-                </h3>
-                {version.id === currentVersionId && (
-                  <Badge variant="success">{latestLabel}</Badge>
-                )}
-              </div>
-              {version.compatibilitySet &&
-              version.compatibilitySet.length > 0 ? (
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className="text-xs text-muted-foreground">
-                    {compatibleLabel}
-                  </span>
-                  {version.compatibilitySet.map(axelorVersion => (
-                    <Badge
-                      key={axelorVersion.id}
-                      variant="outline"
-                      className="text-xs">
-                      {axelorVersion.title}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {noCompatibleLabel}
-                </p>
-              )}
-            </div>
-            {preview ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 flex-shrink-0 rounded-full"
-                disabled
-                title={inactiveLabel}>
-                <Download size={16} />
-                {downloadLabel}
-              </Button>
-            ) : canDownload ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 flex-shrink-0 rounded-full"
-                asChild>
-                <a
-                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
-                  download>
-                  <Download size={16} />
-                  {downloadLabel}
-                </a>
-              </Button>
-            ) : null}
+            className={cn({
+              'border-b border-border': index < versions.length - 1,
+            })}>
+            <VersionCard
+              version={clone(version)}
+              isLatest={version.id === currentVersionId}
+              preview={preview}
+              canDownload={canDownload}
+              downloadHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+            />
           </div>
         ))}
       </div>
