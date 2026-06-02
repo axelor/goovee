@@ -100,7 +100,12 @@ export async function fetchConversionLines({
 /** Names of the Product fields an admin has flagged as company-specific
  *  (`appBase.companySpecificProductFieldsSet`). AOS only consults a
  *  product's per-company override row for fields in this set
- *  (`ProductCompanyServiceImpl.isCompanySpecificProductFields`). */
+ *  (`ProductCompanyServiceImpl.isCompanySpecificProductFields`).
+ *
+ *  Not part of `getPriceContext`: marketplace listings always price via
+ *  their own sealed fields, so per-company field resolution never runs
+ *  here. This helper feeds the core's `getSaleUnitPrice` (level 1) when
+ *  a caller prices a bare product. */
 export async function findCompanySpecificProductFields(client: Client) {
   const appBase = await client.aOSAppBase.findOne({
     where: {OR: [{archived: false}, {archived: null}]},
@@ -128,17 +133,13 @@ export async function getPriceContext({
   mainPartnerId: string | null | undefined;
   productCurrencyCodes: Array<string | null | undefined>;
 }) {
-  const [
-    partnerCurrency,
-    fallbackCurrency,
-    fiscalPosition,
-    companySpecificProductFields,
-  ] = await Promise.all([
-    findPartnerCurrency({client, mainPartnerId}),
-    findDefaultCurrency(client),
-    findPartnerFiscalPosition({client, mainPartnerId}),
-    findCompanySpecificProductFields(client),
-  ]);
+  const [partnerCurrency, fallbackCurrency, fiscalPosition] = await Promise.all(
+    [
+      findPartnerCurrency({client, mainPartnerId}),
+      findDefaultCurrency(client),
+      findPartnerFiscalPosition({client, mainPartnerId}),
+    ],
+  );
   const conversionLines = await fetchConversionLines({
     client,
     fromCodes: productCurrencyCodes,
@@ -149,7 +150,6 @@ export async function getPriceContext({
     viewerCurrency: partnerCurrency,
     defaultCurrency: fallbackCurrency,
     fiscalPosition,
-    companySpecificProductFields,
   };
 }
 

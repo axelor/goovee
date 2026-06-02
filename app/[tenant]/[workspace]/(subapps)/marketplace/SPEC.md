@@ -490,9 +490,10 @@ the **global default currency (EUR)**, else the listing's own currency as-is.
 
 The computation mirrors the AOS sales-order pricing path, step by step:
 
-1. **Resolve the price fields** (price, inATI, currency): a per-company entry
-   on the product is used only for fields the admin has flagged as
-   company-specific; otherwise the product's base values apply.
+1. **Resolve the price fields** (price, inATI, currency): the listing's own
+   three values are used as-is — like an AOS sale-order line, a listing owns
+   its price once created. The per-company price overrides AOS supports on
+   products never apply to a listing.
 2. **Resolve the tax setup** from the workspace default product's account
    management (then its product family), filtered to the selling company. A
    product-level entry with no tax set is skipped as an accounting-only override.

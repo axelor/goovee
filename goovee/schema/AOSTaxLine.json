@@ -13,7 +13,8 @@
     },
     {
       "type": "Date",
-      "name": "startDate"
+      "name": "startDate",
+      "required": true
     },
     {
       "type": "Date",

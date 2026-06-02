@@ -1,4 +1,5 @@
 import type {Client} from '@/goovee/.generated/client';
+import {round} from '@/product/pricing';
 import {t} from '@/locale/server';
 import {ActionResponse} from '@/types/action';
 import {z} from 'zod';
@@ -8,7 +9,7 @@ import {
   findCartProductsAvailability,
 } from '../orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import {ComputedPrice, computePrice, round} from '../utils/price';
+import {ComputedPrice, computePrice} from '../utils/price';
 
 export const CartProductIdsSchema = z
   .array(z.string().min(1))

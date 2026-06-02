@@ -6,12 +6,14 @@
     {
       "type": "ManyToOne",
       "name": "startCurrency",
-      "target": "AOSCurrency"
+      "target": "AOSCurrency",
+      "required": true
     },
     {
       "type": "ManyToOne",
       "name": "endCurrency",
-      "target": "AOSCurrency"
+      "target": "AOSCurrency",
+      "required": true
     },
     {
       "type": "Decimal",
@@ -19,7 +21,8 @@
     },
     {
       "type": "Date",
-      "name": "fromDate"
+      "name": "fromDate",
+      "required": true
     },
     {
       "type": "Date",
