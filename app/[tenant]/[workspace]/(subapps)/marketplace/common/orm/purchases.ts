@@ -136,3 +136,30 @@ export async function attachOrderToPurchases(
     });
   }
 }
+
+/* Determines if a user can download a product based on purchase state. */
+export async function canDownloadProduct({
+  client,
+  productId,
+  publisherId,
+  mainPartnerId,
+  paid,
+}: {
+  client: Client;
+  productId: ID;
+  publisherId: ID;
+  mainPartnerId: ID | null | undefined;
+  paid: boolean;
+}): Promise<boolean> {
+  if (!paid) return true;
+  if (!mainPartnerId) return false;
+  if (publisherId && mainPartnerId === publisherId) return true;
+  const purchase = await client.aOSMarketplaceProductPurchase.findOne({
+    where: {
+      partner: {id: mainPartnerId},
+      marketplaceProduct: {id: productId},
+    },
+    select: {id: true},
+  });
+  return !!purchase;
+}

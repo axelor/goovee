@@ -33,6 +33,7 @@ interface VersionsTabProps {
   preview?: boolean;
   /** Returns the URL for a given page number (preserves other search params). */
   buildPageHref: (page: number) => string;
+  canDownloadPromise: Promise<boolean>;
 }
 
 export async function VersionsTab({
@@ -43,8 +44,11 @@ export async function VersionsTab({
   currentVersionId,
   preview = false,
   buildPageHref,
+  canDownloadPromise,
 }: VersionsTabProps) {
   const VERSIONS_PAGE_SIZE = 8;
+
+  const canDownload = await canDownloadPromise;
 
   const versionsResult = await findProductVersions({
     productId: product.id,
@@ -137,7 +141,7 @@ export async function VersionsTab({
                 <Download size={16} />
                 {downloadLabel}
               </Button>
-            ) : (
+            ) : canDownload ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -150,7 +154,7 @@ export async function VersionsTab({
                   {downloadLabel}
                 </a>
               </Button>
-            )}
+            ) : null}
           </div>
         ))}
       </div>

@@ -21,7 +21,11 @@ import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {MARKETPLACE_VERSION_STATUS_LABELS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
-import {findProduct, findVersionCount} from '../../common/orm';
+import {
+  canDownloadProduct,
+  findProduct,
+  findVersionCount,
+} from '../../common/orm';
 import {ProductHeaderCard} from '../../common/ui/components/cards/product-header-card';
 import {NoticeBanner} from '../../common/ui/components/primitives/notice-banner';
 import {TooltipDate} from '../../common/ui/components/primitives/tooltip-date';
@@ -36,6 +40,7 @@ import {
   type ProductSearchParams,
 } from '../../common/utils/validators';
 import {formatVersionNumber} from '../../common/utils/version-number';
+import {isPaid} from '../../common/utils/price';
 
 export default async function ProductPage(props: {
   params: Promise<{tenant: string; workspace: string; slug: string}>;
@@ -123,6 +128,14 @@ export default async function ProductPage(props: {
   const tabNavLink = (tabValue: ProductTab) => productUrl({tab: tabValue});
 
   const ratingCount = Number(product.ratingCount || 0);
+
+  const canDownloadPromise = canDownloadProduct({
+    client,
+    productId: product.id,
+    publisherId: product.publisher.id,
+    mainPartnerId: auth.user?.mainPartnerId,
+    paid: isPaid(product.price.ati),
+  });
 
   const [
     overviewLabel,
@@ -214,6 +227,7 @@ export default async function ProductPage(props: {
           workspaceURI={workspaceURI}
           tenantId={tenantId}
           preview={preview}
+          canDownloadPromise={canDownloadPromise}
         />
       </div>
 
@@ -288,6 +302,7 @@ export default async function ProductPage(props: {
                 currentVersionId={product.currentVersion?.id}
                 preview={preview}
                 buildPageHref={page => productUrl({versionPage: page})}
+                canDownloadPromise={canDownloadPromise}
               />
             )}
             {tab === ProductTab.Reviews && (

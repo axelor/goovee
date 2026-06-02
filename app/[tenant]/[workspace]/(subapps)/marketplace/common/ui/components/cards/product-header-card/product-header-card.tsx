@@ -30,6 +30,7 @@ export interface ProductHeaderCardProps {
   tenantId: string;
   /** Owner preview: render the buyer's CTA but inactive (no cart/checkout). */
   preview?: boolean;
+  canDownloadPromise: Promise<boolean>;
 }
 
 export async function ProductHeaderCard({
@@ -40,6 +41,7 @@ export async function ProductHeaderCard({
   workspaceURI,
   tenantId,
   preview = false,
+  canDownloadPromise,
 }: ProductHeaderCardProps) {
   const bgGradient =
     GRADIENT_MAP[product.coverStyle || 'gradient-1'] || DEFAULT_GRADIENT;
@@ -217,7 +219,6 @@ export async function ProductHeaderCard({
           <CTAButton
             product={product}
             user={user}
-            client={client}
             workspaceURI={workspaceURI}
             tenantId={tenantId}
             paid={paid}
@@ -225,6 +226,7 @@ export async function ProductHeaderCard({
             priceScale={priceScale}
             downloadZipLabel={downloadZipLabel}
             preview={preview}
+            canDownloadPromise={canDownloadPromise}
           />
 
           {product.documentationUrl && (
@@ -242,7 +244,6 @@ export async function ProductHeaderCard({
 async function CTAButton({
   product,
   user,
-  client,
   workspaceURI,
   tenantId,
   paid,
@@ -250,10 +251,10 @@ async function CTAButton({
   priceScale,
   downloadZipLabel,
   preview,
+  canDownloadPromise,
 }: {
   product: SingleProduct;
   user?: {id: ID; mainPartnerId?: ID};
-  client: Client;
   workspaceURI: string;
   tenantId: string;
   paid: boolean;
@@ -261,6 +262,7 @@ async function CTAButton({
   priceScale: number;
   downloadZipLabel: string;
   preview: boolean;
+  canDownloadPromise: Promise<boolean>;
 }) {
   // Preview: show the buyer's CTA exactly as a shopper would see it, but
   // inert — no cart writes, no checkout, no draft-bundle download.
@@ -295,20 +297,7 @@ async function CTAButton({
     );
   }
 
-  const mainPartnerId = user?.mainPartnerId;
-  const isOwner = !!mainPartnerId && product.publisher?.id === mainPartnerId;
-  const owns = !!(
-    paid &&
-    mainPartnerId &&
-    (await client.aOSMarketplaceProductPurchase.findOne({
-      where: {
-        partner: {id: mainPartnerId},
-        marketplaceProduct: {id: product.id},
-      },
-      select: {id: true},
-    }))
-  );
-  const canDownload = !paid || isOwner || owns;
+  const canDownload = await canDownloadPromise;
 
   if (canDownload) {
     return (
