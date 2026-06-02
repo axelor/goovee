@@ -25,6 +25,7 @@ import {packIntoFormData} from '@/utils/formdata';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {ChevronLeft, ChevronRight, Plus, Star, X} from 'lucide-react';
 import Image from 'next/image';
+import type {ReactNode} from 'react';
 import {useEffect, useMemo, useRef, useState, useTransition} from 'react';
 import {useForm, useFormContext, useWatch} from 'react-hook-form';
 import {saveProduct} from '../../../../actions';
@@ -62,6 +63,12 @@ import {
 
 const COVER_CODES = Object.keys(GRADIENT_MAP);
 
+/** The data a successful `saveProduct` returns ({productId, version}). */
+type SaveProductData = Extract<
+  Awaited<ReturnType<typeof saveProduct>>,
+  {success: true}
+>['data'];
+
 type ProductFormProps = {
   mode: 'create' | 'edit';
   workspaceURL: string;
@@ -78,9 +85,17 @@ type ProductFormProps = {
    *  the price the supplier enters is interpreted as gross (tax-inclusive)
    *  or net (tax-exclusive), and drives the input label wording. */
   inAti: boolean;
-  onSaved: (productId: string) => void;
-  onContinue: () => void;
+  onSaved: (data: SaveProductData) => void;
   onCancel: () => void;
+  /** Mounter-supplied primary action, so the form stays unaware of any
+   *  surrounding flow (e.g. the dialog's "continue to version" step). When
+   *  omitted, a plain Save button is rendered for standalone mounts. */
+  renderPrimaryAction?: (api: {
+    submit: () => void;
+    pending: boolean;
+    isDirty: boolean;
+    isSaved: boolean;
+  }) => ReactNode;
 };
 
 function buildDefaults(
@@ -147,8 +162,8 @@ export function ProductForm({
   listingCurrency,
   inAti,
   onSaved,
-  onContinue,
   onCancel,
+  renderPrimaryAction,
 }: ProductFormProps) {
   const {toast} = useToast();
   const [pending, startTransition] = useTransition();
@@ -186,8 +201,7 @@ export function ProductForm({
             version: result.data.version,
             images: values.images.filter(img => img.kind === 'existing'),
           });
-          onSaved(result.data.productId);
-          onContinue();
+          onSaved(result.data);
         } catch {
           toast({
             variant: 'destructive',
@@ -198,19 +212,6 @@ export function ProductForm({
     },
     () => scrollToFirstError(bodyRef.current),
   );
-
-  const handleContinue = () => {
-    if (!productId && !formState.isDirty) {
-      // Nothing to continue with yet — must save first.
-      submit();
-      return;
-    }
-    if (formState.isDirty) {
-      submit();
-    } else {
-      onContinue();
-    }
-  };
 
   return (
     <Form {...form}>
@@ -539,11 +540,18 @@ export function ProductForm({
           disabled={pending}>
           {i18n.t('Cancel')}
         </Button>
-        <Button type="button" disabled={pending} onClick={handleContinue}>
-          {formState.isDirty || !productId
-            ? i18n.t('Save & continue')
-            : i18n.t('Continue')}
-        </Button>
+        {renderPrimaryAction ? (
+          renderPrimaryAction({
+            submit,
+            pending,
+            isDirty: formState.isDirty,
+            isSaved: Boolean(productId),
+          })
+        ) : (
+          <Button type="button" disabled={pending} onClick={submit}>
+            {i18n.t('Save')}
+          </Button>
+        )}
       </div>
     </Form>
   );
@@ -691,8 +699,7 @@ function ScreenshotsField({
         /* Resolve preview inline so the thumbnail list stays 1:1 with
          * `images` — the index below indexes the form array directly. A
          * not-yet-ready URL just renders an empty (muted) slot for a frame. */
-        const key =
-          img.kind === 'existing' ? img.id : keyForFile(img.file);
+        const key = img.kind === 'existing' ? img.id : keyForFile(img.file);
         const src =
           img.kind === 'existing'
             ? getImgSrc(img.id)
@@ -835,7 +842,10 @@ function ScreenshotsFormField({
     );
     const accepted = valid.slice(0, Math.max(0, remaining));
     if (accepted.length) {
-      commit([...images, ...accepted.map(file => ({kind: 'new' as const, file}))]);
+      commit([
+        ...images,
+        ...accepted.map(file => ({kind: 'new' as const, file})),
+      ]);
     }
     /* Tell the user when files were dropped on the floor — otherwise an
      * oversize/unsupported image, or one past the cap, just silently

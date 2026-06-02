@@ -1,6 +1,7 @@
 import {RESPONSIVE_SIZES} from '@/constants';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
+import {Button} from '@/ui/components/button';
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
@@ -74,20 +75,42 @@ export function ProductFormDialog({
    * step), so even a later Cancel/✕ must refresh the now-stale table. */
   const savedRef = useRef(false);
 
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      onOpenChange(next);
+      // Refresh the listing once on close if anything was persisted — covers
+      // Cancel / ✕ / Esc / outside-click uniformly, and skips the refresh when
+      // the user opened and closed without saving.
+      if (!next && savedRef.current) {
+        savedRef.current = false;
+        router.refresh();
+      }
+    },
+    [onOpenChange, router],
+  );
+  const close = useCallback(() => handleOpenChange(false), [handleOpenChange]);
+  const onDone = useCallback(() => {
+    savedRef.current = true;
+    close();
+  }, [close]);
+
   const onProductSaved = useCallback(
     async (id: string) => {
       savedRef.current = true;
       setProductId(id); // sync — unblocks the version step before the refetch
       /* The save itself already succeeded (ProductForm toasted "Saved"); this
-       * only re-seeds the dialog snapshot. If it fails, the persisted data is
-       * fine but the in-session snapshot is stale, so warn the user. */
+       * only re-seeds the dialog snapshot. If the reload fails the persisted
+       * data is fine, but the in-session form would be stale (and, on create,
+       * still id-less — a follow-up save would create a duplicate). So warn and
+       * close; `savedRef` makes the close refresh the listing, and the user can
+       * reopen via Edit to keep going. */
       try {
         const res = await loadMyProductForEdit({productId: id, workspaceURL});
         if (res.success) {
           setProduct(res.data);
-        } else {
-          toast({variant: 'destructive', title: res.message});
+          return;
         }
+        toast({variant: 'destructive', title: res.message});
       } catch {
         toast({
           variant: 'destructive',
@@ -96,8 +119,9 @@ export function ProductFormDialog({
           ),
         });
       }
+      close();
     },
-    [workspaceURL, toast],
+    [workspaceURL, toast, close],
   );
 
   /* The dialog stays mounted across close/reopen, so reset the session from the
@@ -137,29 +161,13 @@ export function ProductFormDialog({
         ? i18n.t('Apps hub · Discover and ship')
         : i18n.t('Skills hub · Open source, free for everyone');
 
-  const handleOpenChange = useCallback(
-    (next: boolean) => {
-      onOpenChange(next);
-      // Refresh the listing once on close if anything was persisted — covers
-      // Cancel / ✕ / Esc / outside-click uniformly, and skips the refresh when
-      // the user opened and closed without saving.
-      if (!next && savedRef.current) {
-        savedRef.current = false;
-        router.refresh();
-      }
-    },
-    [onOpenChange, router],
-  );
-  const close = useCallback(() => handleOpenChange(false), [handleOpenChange]);
-  const onDone = useCallback(() => {
-    savedRef.current = true;
-    close();
-  }, [close]);
-
   const productSaved = Boolean(productId);
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={handleOpenChange} isSmall={isSmall}>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      isSmall={isSmall}>
       <ResponsiveDialogContent className="max-w-6xl gap-0 p-0">
         <div
           ref={scrollRef}
@@ -204,9 +212,25 @@ export function ProductFormDialog({
               defaultType={defaultType}
               listingCurrency={listingCurrency}
               inAti={inAti}
-              onSaved={onProductSaved}
-              onContinue={() => setStep('version')}
+              onSaved={({productId}) => {
+                setStep('version'); // advance immediately; snapshot reloads async
+                onProductSaved(productId);
+              }}
               onCancel={close}
+              renderPrimaryAction={({submit, pending, isDirty, isSaved}) =>
+                isDirty || !isSaved ? (
+                  <Button type="button" disabled={pending} onClick={submit}>
+                    {i18n.t('Save & continue')}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => setStep('version')}>
+                    {i18n.t('Continue')}
+                  </Button>
+                )
+              }
             />
           )}
           {step === 'version' && productId && (
