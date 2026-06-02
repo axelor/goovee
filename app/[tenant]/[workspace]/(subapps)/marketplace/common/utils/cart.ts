@@ -21,14 +21,16 @@ export type ValidatedCartItem = {
   name: string;
   priceAti: number;
   scale: number;
-  currencyCode: string;
+  /** ISO 4217 code — the machine identity fed to payment providers and
+   *  the AOS order endpoint. Display uses `currencySymbol`. */
+  currencyCodeISO: string;
   currencySymbol: string | null;
 };
 
 export type ValidatedCart = {
   items: ValidatedCartItem[];
   total: number;
-  currencyCode: string;
+  currencyCodeISO: string;
 };
 
 /* Validate a list of product ids against the current DB state for the
@@ -120,7 +122,10 @@ export async function validateCart({
         ),
       };
     }
-    if (!price.currency.code) {
+    /* Currency identity is the ISO code — it's what the payment
+     * providers and the AOS order endpoint consume; the printing code
+     * and symbol are display-only. */
+    if (!price.currency.codeISO) {
       return {
         error: true,
         message: await t(
@@ -130,7 +135,7 @@ export async function validateCart({
       };
     }
     if (!currency) currency = price.currency;
-    else if (currency.code !== price.currency.code) {
+    else if (currency.codeISO !== price.currency.codeISO) {
       return {
         error: true,
         message: await t(
@@ -144,7 +149,7 @@ export async function validateCart({
       name: product.name ?? '',
       priceAti: price.ati,
       scale: price.currency.numberOfDecimals,
-      currencyCode: price.currency.code,
+      currencyCodeISO: price.currency.codeISO,
       currencySymbol: price.currency.symbol || null,
     });
   }
@@ -158,7 +163,7 @@ export async function validateCart({
     data: {
       items,
       total: round(total, currency.numberOfDecimals),
-      currencyCode: currency.code,
+      currencyCodeISO: currency.codeISO,
     },
   };
 }

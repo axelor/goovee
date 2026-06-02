@@ -142,7 +142,7 @@ export async function createStripeCheckoutSession(props: {
       customer: {id: payerId, email: emailAddress},
       name: await t('Marketplace purchase'),
       amount: cart.total,
-      currency: cart.currencyCode,
+      currency: cart.currencyCodeISO,
       context,
       tenantId: auth.tenant.id,
       client: auth.tenant.client,
@@ -182,7 +182,7 @@ export async function paypalCreateOrder(props: {
   try {
     const response = await createPaypalOrder({
       amount: cart.total,
-      currency: cart.currencyCode,
+      currency: cart.currencyCodeISO,
       email: emailAddress,
       client: auth.tenant.client,
       context,
@@ -225,7 +225,7 @@ export async function payboxCreateOrder(props: {
   try {
     const response = await createPayboxOrder({
       amount: cart.total,
-      currency: cart.currencyCode,
+      currency: cart.currencyCodeISO,
       email: emailAddress,
       context,
       client: auth.tenant.client,

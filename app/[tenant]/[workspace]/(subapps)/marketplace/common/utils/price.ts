@@ -52,8 +52,15 @@ export type ComputedPrice = {
   /** Total applied tax percentage (sum of all matched tax lines). */
   taxRate: number;
   /** The currency `wt`/`ati` are expressed in — the buyer's own currency
-   *  when a conversion was possible, otherwise the listing's. */
-  currency: {code: string; symbol: string; numberOfDecimals: number};
+   *  when a conversion was possible, otherwise the listing's. `codeISO`
+   *  is the machine identity (payment providers, the AOS order
+   *  endpoint); `code` is the printing code, for display only. */
+  currency: {
+    code: string;
+    codeISO: string;
+    symbol: string;
+    numberOfDecimals: number;
+  };
 };
 
 /** Computes what a listing costs, as the storefront should display it:
@@ -159,6 +166,7 @@ export function computePrice({
     taxRate,
     currency: {
       code: resolvedCurrency?.code ?? '',
+      codeISO: resolvedCurrency?.codeISO ?? '',
       symbol: resolvedCurrency?.symbol ?? '',
       numberOfDecimals: resolvedScale,
     },
