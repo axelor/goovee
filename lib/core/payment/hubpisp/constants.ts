@@ -9,13 +9,14 @@ export type HubPispConsentStatus =
   (typeof HUBPISP_CONSENT_STATUS)[keyof typeof HUBPISP_CONSENT_STATUS];
 
 export const HUBPISP_TRANSACTION_STATUS = {
-  ACCP: 'ACCP', // Accepted by creditor agent — non-terminal
-  ACSC: 'ACSC', // Settlement confirmed — terminal, success
-  ACSP: 'ACSP', // Accepted, will execute — non-terminal
-  ACTC: 'ACTC', // Authentication & validation done — non-terminal
-  CANC: 'CANC', // Cancelled — terminal, failure
-  PDNG: 'PDNG', // Pending — non-terminal
-  RJCT: 'RJCT', // Rejected — terminal, failure
+  // Terminal (Final = OUI) — a final outcome has been reached, stop polling.
+  ACSC: 'ACSC', // success — debtor account debited, cannot be cancelled
+  CANC: 'CANC', // failure — cancelled after a cancellation request
+  RJCT: 'RJCT', // failure — payment request rejected
+  // Non-terminal (Final = NON) — keep polling until terminal.
+  ACSP: 'ACSP', // accepted, will execute (cannot be cancelled)
+  ACTC: 'ACTC', // auth + validation done (can still be cancelled)
+  PDNG: 'PDNG', // still being processed; further checks to come
 } as const;
 
 export type HubPispTransactionStatus =

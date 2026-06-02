@@ -13,7 +13,7 @@ const activePolls = new Set<string>();
 
 // Polling intervals in milliseconds
 const POLL_INTERVAL_INST = 10_000; // 10s for SCTInst (completes in ~10s)
-const POLL_INTERVAL_SCT = 30_000; // 30s for SCT (can take up to 1 business day)
+const POLL_INTERVAL_SCT = 5 * 60_000; // 5min for SCT (settles in ~1 business day; no need to poll tightly)
 
 // Max polling duration in milliseconds
 const MAX_POLL_DURATION_INST = 2 * 60 * 1000; // 2 minutes for SCTInst

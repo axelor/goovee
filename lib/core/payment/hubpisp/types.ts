@@ -18,7 +18,6 @@ export type HubPispContextData = PaymentContextData & {
 
 export type PsuInfo = {
   name: string;
-  email?: string;
 };
 
 export type PageConsentInfo = {

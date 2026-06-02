@@ -16,7 +16,7 @@ import {
   HubPispLocalInstrument,
 } from './constants';
 import type {HubPispContextData, PageConsentInfo, PsuInfo} from './types';
-import {pollPaymentLinkStatus} from './pollLink';
+import {scheduleLinkExpiryCheck} from './pollLink';
 
 export async function createHubPispPaymentLink({
   amount,
@@ -94,12 +94,14 @@ export async function createHubPispPaymentLink({
     context: {...context, resourceId},
   });
 
-  pollPaymentLinkStatus({
+  // Link-state changes are driven by the webhook
+  // We only schedule a single expiry backstop check instead of polling GET payment-link.
+  scheduleLinkExpiryCheck({
     resourceId,
     contextId,
     tenantId,
     localInstrument,
-    expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
+    delaySeconds: HUBPISP_DEFAULT_EXPIRE_IN,
   });
 
   return {resourceId, consentHref, contextId};

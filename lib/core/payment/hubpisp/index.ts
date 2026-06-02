@@ -73,7 +73,7 @@ export async function createPaymentLink(
     beneficiary: {
       creditor: {name: beneficiaryName},
       creditorAccount: {iban},
-      creditorAgent: bicFi ? {bic: bicFi} : undefined,
+      creditorAgent: bicFi ? {bicFi} : undefined,
     },
     requestedExecutionDate,
     consentInfo: {
