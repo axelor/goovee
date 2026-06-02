@@ -3,35 +3,12 @@ import {t} from '@/locale/server';
 import {ActionResponse} from '@/types/action';
 import {z} from 'zod';
 import {
-  buildPriceContext,
+  getPriceContext,
   findCartProducts,
   findCartProductsAvailability,
 } from '../orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {ComputedPrice, computePrice, round} from '../utils/price';
-
-/* Per-product availability check shared by validateCart and
- * recheckCartAvailability. Returns a translated error message if the
- * product can't be granted to the partner right now, null otherwise. */
-type AvailabilityRow = {
-  id: string;
-  name: string | null;
-  slug: string | null;
-  currentVersion: {id: string} | null;
-  marketplaceProductPurchaseList: Array<{id: string}> | null;
-};
-async function checkAvailability(
-  product: AvailabilityRow,
-): Promise<string | null> {
-  const label = product.name ?? product.slug ?? product.id;
-  if (!product.currentVersion) {
-    return t('{0} has no published version.', label);
-  }
-  if ((product.marketplaceProductPurchaseList?.length ?? 0) > 0) {
-    return t('{0} is already in your purchases.', label);
-  }
-  return null;
-}
 
 export const CartProductIdsSchema = z
   .array(z.string().min(1))
@@ -82,9 +59,8 @@ export async function validateCart({
   }
 
   /* Single query for everything checkout needs:
-   *   - workspace access (`getProductAccessFilter`) so private/foreign
-   *     products are filtered out at the DB level rather than slipped
-   *     through;
+   *   - product access (`withPublishedProductFilter`) so products
+   *   are filtered out at the DB level rather than slipped through;
    *   - per-partner ownership rows via the
    *     `marketplaceProductPurchaseList` back-relation — non-empty
    *     means the partner already owns this product;
@@ -103,27 +79,35 @@ export async function validateCart({
     };
   }
 
-  const priceContext = await buildPriceContext({
+  const priceContext = await getPriceContext({
     client,
     mainPartnerId,
     productCurrencyCodes: products.map(
-      mp => mp.saleCurrency?.code ?? mp.product?.saleCurrency?.code,
+      product =>
+        product.saleCurrency?.code ?? product.product?.saleCurrency?.code,
     ),
   });
 
   const items: ValidatedCartItem[] = [];
   let currency: ComputedPrice['currency'] | null = null;
-  for (const mp of products) {
-    const unavailable = await checkAvailability(mp);
-    if (unavailable) return {error: true as const, message: unavailable};
+  for (const product of products) {
+    if (product.isOwned) {
+      return {
+        error: true as const,
+        message: await t(
+          '{0} is already in your purchases.',
+          product.name ?? product.slug ?? product.id,
+        ),
+      };
+    }
     const price = computePrice({
-      product: mp.product,
+      product: product.product,
       priceContext,
       company: workspace.config.company,
       priceOverride: {
-        salePrice: mp.salePrice,
-        saleCurrency: mp.saleCurrency,
-        inAti: mp.inAti,
+        salePrice: product.salePrice,
+        saleCurrency: product.saleCurrency,
+        inAti: product.inAti,
       },
     });
     if (price.ati <= 0) {
@@ -131,7 +115,7 @@ export async function validateCart({
         error: true,
         message: await t(
           '{0} is not a paid product.',
-          mp.name ?? mp.slug ?? mp.id,
+          product.name ?? product.slug ?? product.id,
         ),
       };
     }
@@ -140,7 +124,7 @@ export async function validateCart({
         error: true,
         message: await t(
           '{0} could not be priced in a supported currency.',
-          mp.name ?? mp.slug ?? mp.id,
+          product.name ?? product.slug ?? product.id,
         ),
       };
     }
@@ -154,9 +138,9 @@ export async function validateCart({
       };
     }
     items.push({
-      productId: mp.id,
-      productSlug: mp.slug ?? '',
-      name: mp.name ?? '',
+      productId: product.id,
+      productSlug: product.slug ?? '',
+      name: product.name ?? '',
       priceAti: price.ati,
       scale: price.currency.numberOfDecimals,
       currencyCode: price.currency.code,
@@ -216,8 +200,15 @@ export async function recheckCartAvailability({
     };
   }
   for (const product of products) {
-    const unavailable = await checkAvailability(product);
-    if (unavailable) return {error: true as const, message: unavailable};
+    if (product.isOwned) {
+      return {
+        error: true as const,
+        message: await t(
+          '{0} is already in your purchases.',
+          product.name ?? product.slug ?? product.id,
+        ),
+      };
+    }
   }
   return {success: true as const};
 }

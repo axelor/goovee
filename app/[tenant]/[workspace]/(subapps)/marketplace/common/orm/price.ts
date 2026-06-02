@@ -99,8 +99,8 @@ export async function fetchConversionLines({
  *  lines covering this batch, and the buyer's fiscal position. Built
  *  once per request, reused across every product in the batch. See
  *  `utils/price.ts` for how these get consumed. */
-export type PriceContext = Awaited<ReturnType<typeof buildPriceContext>>;
-export async function buildPriceContext({
+export type PriceContext = Awaited<ReturnType<typeof getPriceContext>>;
+export async function getPriceContext({
   client,
   mainPartnerId,
   productCurrencyCodes,
@@ -177,7 +177,7 @@ export async function findPartnerFiscalPosition({
 
 /** Looks up the app-wide fallback currency (`DEFAULT_CURRENCY_CODE`) in
  *  `AOSCurrency`. Used at product create time (`saveProduct`) and at
- *  display time (`buildPriceContext`). Returns null if the row is missing
+ *  display time (`getPriceContext`). Returns null if the row is missing
  *  — callers decide whether that's a hard failure (create) or a soft
  *  fallback (display). */
 export async function findDefaultCurrency(client: Client) {

@@ -15,7 +15,7 @@ import {
   withScreenshotAccessFilter,
   type QueryProps,
 } from './helpers';
-import {buildPriceContext, withPrice} from './price';
+import {getPriceContext, withPrice} from './price';
 import {Maybe} from '@/types/util';
 
 // ---- PRODUCTS ---- //
@@ -114,7 +114,7 @@ export async function findProducts({
       currentVersion: {id: true, ...versionNumberFields},
     },
   });
-  const priceContext = await buildPriceContext({
+  const priceContext = await getPriceContext({
     client,
     mainPartnerId,
     productCurrencyCodes: products.map(
@@ -209,7 +209,7 @@ export async function findProduct({
     preview && !product.currentVersion
       ? {...product, currentVersion: product.latestVersion}
       : product;
-  const priceContext = await buildPriceContext({
+  const priceContext = await getPriceContext({
     client,
     mainPartnerId,
     productCurrencyCodes: [

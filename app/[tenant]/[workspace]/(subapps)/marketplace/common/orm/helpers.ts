@@ -60,18 +60,15 @@ export function withPublishedProductFilter(
   };
 }
 
-export function getCategoryAccessFilter(_workspace: PortalWorkspaceWithConfig) {
+export function getCategoryAccessFilter() {
   return and<AOSMarketplaceCategory>([
     {OR: [{archived: false}, {archived: null}]},
   ]);
 }
 
-export function withCategoryAccessFilter(workspace: PortalWorkspaceWithConfig) {
+export function withCategoryAccessFilter() {
   return function (where?: WhereOptions<AOSMarketplaceCategory>) {
-    return and<AOSMarketplaceCategory>([
-      where,
-      getCategoryAccessFilter(workspace),
-    ]);
+    return and<AOSMarketplaceCategory>([where, getCategoryAccessFilter()]);
   };
 }
 

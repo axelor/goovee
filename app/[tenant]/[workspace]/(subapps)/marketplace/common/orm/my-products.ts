@@ -11,7 +11,7 @@ import {
   withMyProductAccessFilter,
   type QueryProps,
 } from './helpers';
-import {buildPriceContext, withPrice} from './price';
+import {getPriceContext, withPrice} from './price';
 
 export type ListMyProduct = Awaited<ReturnType<typeof findMyProducts>>[number];
 
@@ -60,7 +60,7 @@ export async function findMyProducts({
       latestVersion: {id: true, ...versionNumberFields, statusSelect: true},
     },
   });
-  const priceContext = await buildPriceContext({
+  const priceContext = await getPriceContext({
     client,
     mainPartnerId,
     productCurrencyCodes: products.map(

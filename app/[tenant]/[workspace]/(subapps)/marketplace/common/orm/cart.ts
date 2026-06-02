@@ -1,6 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
-import {priceSelectFields, withProductAccessFilter} from './helpers';
+import {priceSelectFields, withPublishedProductFilter} from './helpers';
+import {ID} from '@/types';
 
 export type CartProduct = Awaited<ReturnType<typeof findCartProducts>>[number];
 
@@ -15,29 +16,26 @@ export async function findCartProducts({
   mainPartnerId: string;
   productIds: string[];
 }) {
-  const products = await client.aOSMarketplaceProduct.find({
-    where: withProductAccessFilter(workspace)({id: {in: productIds}}),
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      ...priceSelectFields,
-      currentVersion: {id: true, statusSelect: true},
-    },
-  });
-  const owned = await client.aOSMarketplaceProductPurchase.find({
-    where: {
-      partner: {id: mainPartnerId},
-      marketplaceProduct: {id: {in: productIds}},
-    },
-    select: {marketplaceProduct: {id: true}},
-  });
-  const ownedIds = new Set(
-    owned.map(o => o.marketplaceProduct?.id).filter(Boolean) as string[],
-  );
+  const [products, ownedIds] = await Promise.all([
+    client.aOSMarketplaceProduct.find({
+      where: withPublishedProductFilter(workspace)({id: {in: productIds}}),
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        currentVersion: {id: true, statusSelect: true},
+        ...priceSelectFields,
+      },
+    }),
+    findOwnedProductIds({
+      productIds,
+      client,
+      mainPartnerId,
+    }),
+  ]);
   return products.map(p => ({
     ...p,
-    marketplaceProductPurchaseList: ownedIds.has(p.id) ? [{id: p.id}] : [],
+    isOwned: ownedIds.has(p.id),
   }));
 }
 
@@ -56,15 +54,37 @@ export async function findCartProductsAvailability({
   mainPartnerId: string;
   productIds: string[];
 }) {
-  const products = await client.aOSMarketplaceProduct.find({
-    where: withProductAccessFilter(workspace)({id: {in: productIds}}),
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      currentVersion: {id: true},
-    },
-  });
+  const [products, ownedIds] = await Promise.all([
+    client.aOSMarketplaceProduct.find({
+      where: withPublishedProductFilter(workspace)({id: {in: productIds}}),
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        currentVersion: {id: true, statusSelect: true},
+      },
+    }),
+    findOwnedProductIds({
+      productIds,
+      client,
+      mainPartnerId,
+    }),
+  ]);
+  return products.map(p => ({
+    ...p,
+    isOwned: ownedIds.has(p.id),
+  }));
+}
+
+async function findOwnedProductIds({
+  productIds,
+  client,
+  mainPartnerId,
+}: {
+  productIds: ID[];
+  client: Client;
+  mainPartnerId: ID;
+}): Promise<Set<string>> {
   const owned = await client.aOSMarketplaceProductPurchase.find({
     where: {
       partner: {id: mainPartnerId},
@@ -72,11 +92,6 @@ export async function findCartProductsAvailability({
     },
     select: {marketplaceProduct: {id: true}},
   });
-  const ownedIds = new Set(
-    owned.map(o => o.marketplaceProduct?.id).filter(Boolean) as string[],
-  );
-  return products.map(p => ({
-    ...p,
-    marketplaceProductPurchaseList: ownedIds.has(p.id) ? [{id: p.id}] : [],
-  }));
+  const ownedIds = new Set(owned.map(o => o.marketplaceProduct.id));
+  return ownedIds;
 }

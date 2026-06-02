@@ -60,10 +60,14 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
   const {productIds, workspaceURL} = input;
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return err(await t('Tenant ID is missing.'));
-  const {auth, error: authError} = await ensureAuth(workspaceURL, tenantId, {
+  const {
+    auth,
+    error: authError,
+    message: authMessage,
+  } = await ensureAuth(workspaceURL, tenantId, {
     allowGuest: false,
   });
-  if (authError) return err(await t('Sign in required.'));
+  if (authError) return err(authMessage);
   const {client, config} = auth.tenant;
 
   const cartResult = await validateCart({

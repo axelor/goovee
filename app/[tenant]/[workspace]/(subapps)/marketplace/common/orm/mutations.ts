@@ -75,9 +75,9 @@ export async function createDownloadRecord({
   partnerId?: ID | null;
 }): Promise<ORMRecord> {
   const data: CreateArgs<AOSMarketplaceDownload> = {
-    marketplaceProduct: {select: {id: String(productId)}},
-    productVersion: {select: {id: String(versionId)}},
-    ...(partnerId && {partner: {select: {id: String(partnerId)}}}),
+    marketplaceProduct: {select: {id: productId}},
+    productVersion: {select: {id: versionId}},
+    ...(partnerId && {partner: {select: {id: partnerId}}}),
   };
   return client.aOSMarketplaceDownload.create({
     data,
@@ -94,7 +94,7 @@ export async function incrementInstallCount({
 }: {
   client: Client;
   productId: ID;
-}) {
+}): Promise<void> {
   await client.$raw(
     sql`
       UPDATE portal_marketplace_product

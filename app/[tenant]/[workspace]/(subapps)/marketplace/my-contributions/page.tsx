@@ -78,7 +78,6 @@ export default async function MyContributionsPage(props: {
     await Promise.all([
       findProductCategories({
         client: auth.tenant.client,
-        workspace: auth.workspace,
         take: 100,
         orderBy: {sequence: 'ASC'},
       }),

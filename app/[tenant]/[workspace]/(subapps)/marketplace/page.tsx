@@ -120,7 +120,6 @@ export default async function Page(props: {
 
   const categories = await findProductCategories({
     client,
-    workspace: auth.workspace,
     take: 100,
     orderBy: {sequence: 'ASC'},
   });
