@@ -279,12 +279,12 @@ A listing is created/edited from a single form. Fields and their rules:
 
 | Field                                 | Required | Editable | Rules                                                                                                               |
 | ------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| Type                                  | Yes      | Yes      | App or Skill                                                                                                        |
+| Type                                  | Yes      | No       | App or Skill;<br>fixed at create — like the slug, it cannot be changed on edit                                      |
 | Name                                  | Yes      | Yes      | ≤ 120 characters.<br>Slug/URL is set from the name **at create only** — renaming later won't change the URL.        |
 | Short description                     | Yes      | Yes      | 1–280 characters                                                                                                    |
 | Long description                      | No       | Yes      | ≤ 20,000 characters                                                                                                 |
 | Categories                            | Yes      | Yes      | at least one;<br>a listing can have many                                                                            |
-| License                               | Yes      | Yes      | chosen from the workspace's licenses                                                                                |
+| License                               | Yes      | Yes      | chosen from the licenses catalogue (shared tenant-wide, not per-workspace)                                          |
 | Cover style                           | Yes      | Yes      | a visual preset                                                                                                     |
 | Icon                                  | Yes      | Yes      | an icon code                                                                                                        |
 | Documentation / Issues / Contact URLs | No       | Yes      | must be a valid `http(s)` URL if given                                                                              |
@@ -344,11 +344,13 @@ version, not the listing. Fields and rules:
   parts.
 - To decide which version is newest, they are compared **major → minor → patch**
   numerically. If those are equal, a version **without** a tag is newer than one
-  **with** a tag — so `1.2.3` is newer than `1.2.3-rc2`.
+  **with** a tag — so `1.2.3` is newer than `1.2.3-rc2`. Two tagged versions
+  compare by tag, lexicographically.
 
 On save, the bundle is uploaded (when provided), the compatibility set is
-diffed, **submission/publish dates are set** (see lifecycle), and the
-listing's current/latest version pointers are recomputed.
+diffed, the **submission date is set at create** and the **publish date on
+first publish** (see lifecycle), and the listing's current/latest version
+pointers are recomputed.
 
 **Version lifecycle:**
 
@@ -408,8 +410,9 @@ State rules, exactly as enforced:
 - **My Purchases** — the listings owned by the user's customer, with purchase
   date and links to the order/invoice.
 - **My Contributions** (login required) — the contributor area, covering: an
-  overview of their listings, their listings (any status, where versions are
-  managed), revenue from their listings, and their public profile.
+  overview of their listings, and their listings (any status, where versions
+  are managed). The **Revenue** and **Profile** tabs exist but are not
+  implemented yet (they show "Coming soon").
 
 ---
 
@@ -473,9 +476,11 @@ stored on the listing — it comes from the workspace default product. Marketpla
 prices are computed the same way AOS prices a sales-order line, so
 what a buyer sees is what they are invoiced.
 
-**Free vs Paid** is decided by the final all-tax-included price: **≤ 0 is Free**,
-otherwise Paid. Free listings skip payment entirely; paid listings require
-checkout and ownership before download.
+**Free vs Paid** is decided by the listing's price: **≤ 0 (or unset) is
+Free**, otherwise Paid. (Checkout applies the same test to the final
+all-tax-included amount; tax and currency conversion preserve the sign, so the
+two tests always agree.) Free listings skip payment entirely; paid listings
+require checkout and ownership before download.
 
 **Currency shown**: the **user's** currency if a conversion to it exists, else
 the **global default currency (EUR)**, else the listing's own currency as-is.

@@ -44,7 +44,10 @@ export function withProductAccessFilter(workspace: PortalWorkspaceWithConfig) {
 
 export function getPublishedProductFilter(): WhereOptions<AOSMarketplaceProduct> {
   return {
-    versionList: {statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED},
+    versionList: {
+      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      OR: [{archived: false}, {archived: null}],
+    },
   };
 }
 

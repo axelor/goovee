@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {COVER_STYLES} from '../../../../constants/gradients';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 
 export const MAX_BUNDLE_SIZE = 20 * 1024 * 1024; // 20 MB
@@ -36,7 +37,7 @@ export const productSchema = z.object({
     .array(z.string().min(1))
     .min(1, 'At least one category is required'),
   licenseId: z.string().min(1, 'License is required'),
-  coverStyle: z.string().min(1, 'Cover is required'),
+  coverStyle: z.enum(COVER_STYLES, 'Cover is required'),
   iconCode: z.string().min(1, 'Icon is required'),
   documentationUrl: optionalUrl,
   supportIssuesUrl: optionalUrl,

@@ -36,7 +36,11 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from '../../multi-select';
-import {GRADIENT_MAP} from '../../../../constants/gradients';
+import {
+  COVER_STYLES,
+  GRADIENT_MAP,
+  type CoverStyle,
+} from '../../../../constants/gradients';
 import {
   DEFAULT_ICON_CODE,
   MARKETPLACE_ICONS,
@@ -60,8 +64,6 @@ import {
   type ProductFormValues,
   type ProductImage,
 } from './validator';
-
-const COVER_CODES = Object.keys(GRADIENT_MAP);
 
 /** The data a successful `saveProduct` returns ({productId, version}). */
 type SaveProductData = Extract<
@@ -132,7 +134,7 @@ function buildDefaults(
       initial.categorySet?.map(c => c?.id).filter((id): id is string => !!id) ??
       [],
     licenseId: initial.license?.id ?? '',
-    coverStyle: initial.coverStyle ?? 'gradient-1',
+    coverStyle: (initial.coverStyle as CoverStyle) ?? 'gradient-1',
     iconCode: initial.iconCode ?? DEFAULT_ICON_CODE,
     documentationUrl: initial.documentationUrl ?? '',
     supportIssuesUrl: initial.supportIssuesUrl ?? '',
@@ -420,7 +422,7 @@ export function ProductForm({
                 <FormLabel>{i18n.t('Cover style')} *</FormLabel>
                 <FormControl>
                   <div className="grid grid-cols-5 gap-2 md:grid-cols-10">
-                    {COVER_CODES.map(code => {
+                    {COVER_STYLES.map(code => {
                       const selected = field.value === code;
                       return (
                         <button

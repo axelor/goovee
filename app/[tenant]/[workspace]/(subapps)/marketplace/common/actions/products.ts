@@ -109,7 +109,6 @@ export async function saveProduct(
     name: payload.name,
     description: payload.description ?? null,
     longDescription: payload.longDescription || null,
-    marketplaceTypeSelect: payload.marketplaceTypeSelect,
     coverStyle: payload.coverStyle,
     iconCode: payload.iconCode,
     documentationUrl: payload.documentationUrl || null,
@@ -209,6 +208,9 @@ export async function saveProduct(
         select: {id: true},
         data: {
           ...productData,
+          /* Type is fixed at create — like slug, inAti and saleCurrency it
+           * is never rewritten on edit (the form disables the field too). */
+          marketplaceTypeSelect: payload.marketplaceTypeSelect,
           slug,
           /* Seed inAti from the workspace default product so the
            * salePrice the user just typed is interpreted in the same
