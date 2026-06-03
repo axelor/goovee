@@ -1,7 +1,18 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceProductPurchase} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
+import {BigDecimal} from '@goovee/orm';
 import {versionNumberFields, type QueryProps} from './helpers';
+
+/** Price captured at checkout, persisted on each new purchase row. */
+export type PurchasePriceInput = {
+  productId: string;
+  priceWt: number;
+  priceAti: number;
+  taxRate: number;
+  /** ISO 4217 code of the charged currency; resolved to a Currency FK. */
+  currencyCodeISO: string;
+};
 
 // ---- PURCHASES / OWNERSHIP ---- //
 
@@ -59,17 +70,20 @@ export async function findPurchases({
   });
 }
 
-/* Returns the purchase-row ids for every marketplace product in
- * `productIds` owned by the partner (newly created here plus any
- * already-owned). Callers use these to scope the success page to
- * exactly this checkout. */
+/* Returns the purchase-row ids for every marketplace product in `items`
+ * owned by the partner (newly created here plus any already-owned). Each new
+ * row captures the price the buyer was charged. Callers use the returned ids
+ * to scope the success page to exactly this checkout. */
 export async function recordPurchases(
   client: Client,
   partnerId: ID,
-  productIds: string[],
+  items: PurchasePriceInput[],
   invoiceId: ID | null = null,
 ): Promise<string[]> {
-  if (!productIds.length) return [];
+  if (!items.length) return [];
+  const productIds = items.map(item => item.productId);
+  const byProductId = new Map(items.map(item => [item.productId, item]));
+
   const existing = await client.aOSMarketplaceProductPurchase.find({
     where: {
       partner: {id: partnerId},
@@ -79,8 +93,19 @@ export async function recordPurchases(
   });
   const existingIds = new Set(existing.map(row => row.marketplaceProduct.id));
   const missing = productIds.filter(id => !existingIds.has(id));
+
+  // Resolve charged-currency FKs by ISO code (the cart is single-currency, but
+  // resolve per distinct code to stay correct regardless).
+  const currencyIdByCode = await resolveCurrencyIds(
+    client,
+    missing.map(id => byProductId.get(id)!.currencyCodeISO),
+  );
+
   const now = new Date();
   for (const productId of missing) {
+    const item = byProductId.get(productId)!;
+    const currencyId = currencyIdByCode.get(item.currencyCodeISO);
+    if (!currencyId) continue; // unknown currency — can't price the row
     try {
       await client.aOSMarketplaceProductPurchase.create({
         data: {
@@ -88,6 +113,10 @@ export async function recordPurchases(
           marketplaceProduct: {select: {id: productId}},
           ...(invoiceId ? {invoice: {select: {id: invoiceId}}} : {}),
           purchasedAt: now,
+          priceWt: new BigDecimal(String(item.priceWt)),
+          priceAti: new BigDecimal(String(item.priceAti)),
+          taxRate: new BigDecimal(String(item.taxRate)),
+          currency: {select: {id: currencyId}},
         },
         select: {id: true},
       });
@@ -106,6 +135,24 @@ export async function recordPurchases(
     select: {id: true},
   });
   return rows.map(row => row.id);
+}
+
+/** Maps distinct ISO currency codes to their Currency record ids. */
+async function resolveCurrencyIds(
+  client: Client,
+  codes: string[],
+): Promise<Map<string, string>> {
+  const distinct = [...new Set(codes)];
+  if (!distinct.length) return new Map();
+  const currencies = await client.aOSCurrency.find({
+    where: {codeISO: {in: distinct}},
+    select: {codeISO: true},
+  });
+  return new Map(
+    currencies
+      .filter(currency => currency.codeISO)
+      .map(currency => [currency.codeISO!, currency.id]),
+  );
 }
 
 export async function attachOrderToPurchases(

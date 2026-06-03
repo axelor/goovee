@@ -327,7 +327,17 @@ export async function checkout(
   let purchaseIds: string[] = [];
   try {
     await client.$transaction(async txClient => {
-      purchaseIds = await recordPurchases(txClient, mainPartnerId, productIds);
+      purchaseIds = await recordPurchases(
+        txClient,
+        mainPartnerId,
+        cart.items.map(item => ({
+          productId: item.productId,
+          priceWt: item.priceWt,
+          priceAti: item.priceAti,
+          taxRate: item.taxRate,
+          currencyCodeISO: item.currencyCodeISO,
+        })),
+      );
       await markPaymentAsProcessed({
         contextId: paymentContextId,
         version: paymentContextVersion,

@@ -31,6 +31,27 @@
       "required": true
     },
     {
+      "type": "Decimal",
+      "name": "priceWt",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "priceAti",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "taxRate",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency",
+      "required": true
+    },
+    {
       "type": "Boolean",
       "name": "archived"
     }

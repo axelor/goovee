@@ -19,7 +19,11 @@ export type ValidatedCartItem = {
   productId: string;
   productSlug: string;
   name: string;
+  /** Price without tax — persisted on the purchase record for revenue. */
+  priceWt: number;
   priceAti: number;
+  /** Applied tax rate — persisted alongside the price for revenue. */
+  taxRate: number;
   scale: number;
   /** ISO 4217 code — the machine identity fed to payment providers and
    *  the AOS order endpoint. Display uses `currencySymbol`. */
@@ -141,7 +145,9 @@ export async function validateCart({
       productId: product.id,
       productSlug: product.slug,
       name: product.name,
+      priceWt: price.wt,
       priceAti: price.ati,
+      taxRate: price.taxRate,
       scale: price.currency.numberOfDecimals,
       currencyCodeISO: price.currency.codeISO,
       currencySymbol: price.currency.symbol || null,
