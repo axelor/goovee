@@ -472,75 +472,44 @@ version-number duplicate check (an archived version's number can't be reused).
 
 Each listing sets only three price-related fields: its **price**, whether that
 price **includes tax** (inATI), and its **currency**. The **tax rate** is not
-stored on the listing — it comes from the workspace default product. Marketplace
-prices are computed the same way AOS prices a sales-order line, so
-what a buyer sees is what they are invoiced.
+stored on the listing — it comes from the workspace default product.
 
-**Free vs Paid** is decided by the listing's price: **≤ 0 (or unset) is
-Free**, otherwise Paid. (Checkout applies the same test to the final
-all-tax-included amount; tax and currency conversion preserve the sign, so the
-two tests always agree.) Free listings skip payment entirely; paid listings
-require checkout and ownership before download.
+Marketplace prices are computed exactly the way AOS prices a sales-order line,
+so what a buyer sees is what they are invoiced. The full step-by-step rules — tax
+resolution, fiscal position, WT/ATI, currency conversion — are documented in
+[Product pricing](../../../../../lib/core/product/PRICING.md). On top of those
+rules the marketplace applies the policy below.
 
-**Currency shown**: the **user's** currency if a conversion to it exists, else
-the **global default currency (EUR)**, else the listing's own currency as-is.
+- **The listing owns its price.** Its own price, inATI and currency are used
+  as-is; only the **tax setup comes from the workspace default product**, using
+  that product's tax configuration for the **workspace's company** (the Company
+  setting in [§7](#7-workspace-configuration)). (AOS's per-company product price
+  overrides don't apply to a listing.)
+- **Free vs Paid** is decided by the listing's price: **≤ 0 (or unset) is
+  Free**, otherwise Paid. Checkout applies the same test to the final ATI amount;
+  tax and currency conversion preserve the sign, so the two tests always agree.
+  Free listings skip payment entirely; paid listings require checkout and
+  ownership before download.
+- **Which currency is shown.** The price is shown in the first currency that has
+  a usable exchange rate:
 
-<details>
-<summary><strong>How the price is computed, in detail</strong></summary>
+  1. the **user's currency** — the currency on the user's customer (a contact
+     uses its customer's currency);
+  2. the **global default currency (EUR)** — for a guest, or when no rate to the
+     user's currency exists;
+  3. the **listing's own currency** — left as-is when neither conversion is
+     possible.
 
-The computation mirrors the AOS sales-order pricing path, step by step:
+  A broken tax setup likewise degrades to a 0% rate rather than failing the page.
 
-1. **Resolve the price fields** (price, inATI, currency): the listing's own
-   three values are used as-is — like an AOS sale-order line, a listing owns
-   its price once created. The per-company price overrides AOS supports on
-   products never apply to a listing.
-2. **Resolve the tax setup** from the workspace default product's account
-   management (then its product family), filtered to the selling company. A
-   product-level entry with no tax set is skipped as an accounting-only override.
-3. **Apply the buyer's fiscal position** (if any): if an equivalence rule's
-   source taxes exactly match the product's whole tax set, the set is swapped
-   for the rule's target taxes — e.g. a domestic tax swapped for an EU/export
-   one. Otherwise the original taxes are kept.
-4. **Pick each tax rate**: use the active tax line, otherwise the tax line whose
-   date window contains today (evaluated in the company's timezone). Summing the
-   picked rates (each shared line counted once) gives the total tax rate.
-5. **Compute WT and ATI**:
-   - tax-inclusive — `WT = price / (1 + rate)`, `ATI = price`
-   - tax-exclusive — `WT = price`, `ATI = WT + WT * rate`
-6. **Convert into a display currency.** The listing's own currency is the
-   source amount; the WT and ATI figures are converted to the first target that
-   has a usable rate:
-
-   1. the **user's currency** — the currency on the user's customer (a contact
-      uses its customer's currency);
-   2. the **global default currency (EUR)** — used when there is no logged-in
-      user (a guest) or no rate to the user's currency exists;
-   3. the **listing's own currency** — left as-is when neither conversion is
-      possible.
-
-   Rates come from the same currency-conversion lines AOS uses.
-   For a source → target pair it first looks for a **direct** rate valid for
-   today's date; if there isn't one, it takes the **reverse** line and inverts
-   the rate. Date-validity filtering applies to both directions.
-
-7. **Round** the WT and ATI amounts to the number of decimal places defined by
-   the display currency.
-
-**Known simplifications vs AOS:**
-
-- **No price lists.** AOS applies a buyer's sale price list (discounts, markups);
-  the marketplace shows the catalogue price, so a buyer who has a price list
-  would be invoiced differently than the displayed price.
-- **No unit conversion.** Listings always sell quantity 1 in the product's
-  natural unit.
-- **Rounding** is at the display currency's decimals rather than the unit-price
-  decimal setting, and **arithmetic** is float64 rather than BigDecimal — so a
-  sub-cent difference from AOS is theoretically possible. To stay safe, checkout
-  doesn't require an exact match: the amount the provider captured must equal the
-  quoted total within a **tolerance of half the currency's smallest unit** (e.g.
-  €0.005); anything larger is rejected as a mismatch.
-
-</details>
+- **Quantity 1, no unit conversion.** Listings always sell a single item in the
+  product's natural unit; a buyer cannot choose a different unit or quantity.
+- **Rounding & tolerance.** Displayed amounts are rounded to the currency's
+  number of decimal places. Because that rounding can differ from AOS by a
+  fraction of the currency's smallest unit, checkout doesn't require an exact
+  match: the amount the provider captured must equal the quoted total within
+  **half the currency's smallest unit** (e.g. €0.005); anything larger is
+  rejected as a mismatch.
 
 ---
 
