@@ -47,7 +47,9 @@ cascades through display currencies rather than failing a page).
    AOS uses: for a source → target pair it first looks for a **direct** rate
    valid for today's date, else takes the **reverse** line and inverts the rate.
    Date-validity filtering applies to both directions. Currencies are matched by
-   their ISO code (`codeISO`), never the printing code.
+   their ISO code (`codeISO`), never the printing code. The rate is rounded the
+   way AOS rounds it — a direct rate to **6** decimals, an inverted rate at **8**
+   then re-scaled to 6 (half-up).
 7. **(Optional) re-express in a requested unit, for a quantity.** After the
    currency step the per-unit price can be converted from the product's sale
    unit (`salesUnit ?? unit`) to a different unit and multiplied by a quantity,
@@ -99,10 +101,12 @@ admin would read the original error, or degrade (see Strictness).
 - **No price lists.** AOS finishes by running a buyer's sale price list
   (discounts / markups / replacement prices) over the unit price; this core (and
   so every consumer) surfaces the catalogue price.
-- **Arithmetic** is float64 rather than BigDecimal, and **rounding** is left to
-  the caller. For realistic prices and rates the results agree with AOS; drift is
-  theoretical (a consumer that needs to guard against it — like marketplace
-  checkout — applies its own tolerance).
+- **Arithmetic** is float64 rather than BigDecimal, and **final rounding** is
+  left to the caller (exchange rates, which feed the computed value, are rounded
+  to AOS's scales internally — see step 6). AOS carries 20 decimals through its
+  intermediate tax math; float64's ~15–17 significant digits agree with that for
+  realistic prices, so any remaining drift is theoretical (a consumer that needs
+  to guard against it — like marketplace checkout — applies its own tolerance).
 
 See the header comment in `pricing.ts` for the exact AOS services each step
 mirrors.

@@ -121,13 +121,16 @@
  *   sale price list (discounts / markups / replacement prices) over the
  *   unit price; callers surface the catalogue price, so a buyer who has
  *   a price list would be invoiced differently than displayed.
- * - No rounding is applied here — both levels return raw values and the
- *   caller rounds at whatever scale its context requires. AOS rounds at
- *   its configurable unit-price precision (often 4 decimals).
- * - Arithmetic is plain float64 instead of BigDecimal, and exchange
- *   rates are applied unrounded where AOS first rounds them to 6
- *   decimals (8 for an inverted rate). For realistic prices and rates
- *   the rounded results agree; drift is theoretical.
+ * - Final amounts are not rounded here — both levels return raw values
+ *   and the caller rounds at the scale its context needs (AOS rounds the
+ *   unit price to its configurable unit-price precision; a storefront
+ *   rounds to the display currency's decimals). Exchange rates, however,
+ *   ARE rounded exactly as AOS rounds them (see `getExchangeRate`), since
+ *   that feeds into the computed value rather than just its presentation.
+ * - Arithmetic is plain float64 instead of BigDecimal. AOS carries 20
+ *   decimals through its intermediate tax math; float64's ~15–17
+ *   significant digits agree with that for realistic prices, so any
+ *   remaining drift is theoretical.
  */
 
 import type {BigDecimal} from '@goovee/orm';
@@ -538,6 +541,11 @@ export function round(value: number, scale: number): number {
   return Math.round(value * factor) / factor;
 }
 
+/** Scales AOS rounds exchange rates to (`AppBaseService`): a rate to 6
+ *  decimals, an inverted rate at 8 before being re-scaled to 6. */
+const EXCHANGE_RATE_SCALE = 6;
+const EXCHANGE_RATE_REVERSION_SCALE = 8;
+
 /** Finds the exchange rate between two currencies for today, the way
  *  AOS does (`CurrencyServiceImpl.getCurrencyConversionRateAtDate`):
  *
@@ -547,6 +555,12 @@ export function round(value: number, scale: number): number {
  *
  *  Lines are matched on `codeISO` — the unique ISO code AOS keys on —
  *  never the printing `code` (those can differ, e.g. "¥" vs "JPY").
+ *
+ *  The rate is rounded exactly as AOS does (`CurrencyServiceImpl`): a
+ *  direct rate to 6 decimals; an inverted rate is computed at 8 decimals
+ *  and then re-scaled to 6. Half-up throughout. (Final amounts are still
+ *  rounded by the caller, at its own scale.)
+ *
  *  Errors: no line in either direction → CURRENCY_1; a line whose rate
  *  is zero or unreadable → CURRENCY_2. */
 export function getExchangeRate(
@@ -578,7 +592,7 @@ export function getExchangeRate(
         `Unusable exchange rate for ${fromCode} → ${toCode}`,
       );
     }
-    return rate;
+    return round(rate, EXCHANGE_RATE_SCALE);
   }
 
   const inverse = matchLine(toCode, fromCode);
@@ -590,7 +604,11 @@ export function getExchangeRate(
         `Unusable exchange rate for ${toCode} → ${fromCode}`,
       );
     }
-    return 1 / rate;
+    /* AOS inverts at 8 decimals, then re-scales the rate to 6. */
+    return round(
+      round(1 / rate, EXCHANGE_RATE_REVERSION_SCALE),
+      EXCHANGE_RATE_SCALE,
+    );
   }
 
   throw new PriceComputationError(
