@@ -257,7 +257,15 @@ export default async function MyContributionsPage(props: {
 
       {/* Content */}
       <div>
-        {tab === MyContributionsTab.Overview && <OverviewTab />}
+        {tab === MyContributionsTab.Overview && (
+          <OverviewTab
+            mainPartnerId={auth.user.mainPartnerId}
+            client={auth.tenant.client}
+            workspace={auth.workspace}
+            workspaceURI={workspaceURI}
+            tenantId={tenantId}
+          />
+        )}
         {tab === MyContributionsTab.Products && (
           <ProductsTab
             mainPartnerId={auth.user.mainPartnerId}

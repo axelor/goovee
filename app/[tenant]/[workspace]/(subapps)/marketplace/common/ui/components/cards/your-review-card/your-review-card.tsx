@@ -23,7 +23,7 @@ import {useOptimistic, useState, useTransition} from 'react';
 import {deleteReview, saveReview} from '../../../../actions';
 import type {MyReview} from '../../../../orm';
 import {Rating} from '../../primitives/rating';
-import {ReviewerAvatar} from '../../primitives/reviewer-avatar';
+import {PartnerAvatar} from '../../primitives/partner-avatar';
 import {TooltipDate} from '../../primitives/tooltip-date';
 import {PromptCard} from './prompt-card';
 import {ReviewEditForm, type ReviewFormValues} from './review-edit-form';
@@ -180,10 +180,7 @@ export function YourReviewCard({
       <div className={cn(REVIEW_CARD_SHELL, 'space-y-3')}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
-            <ReviewerAvatar
-              partner={displayReview.author}
-              tenantId={tenantId}
-            />
+            <PartnerAvatar partner={displayReview.author} tenantId={tenantId} />
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="font-bold text-foreground text-sm">

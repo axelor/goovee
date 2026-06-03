@@ -208,7 +208,11 @@ Paid listings go through a cart → checkout flow:
       already owned. If something changed (e.g. the buyer bought it in another
       tab, or the publisher pulled a version), the grant is blocked.
    3. **Grants access** — records the ownership rows (for the customer) and marks
-      the payment as processed, in one transaction.
+      the payment as processed, in one transaction. Each ownership row also
+      **captures the price the buyer was charged** — the without-tax and
+      tax-inclusive amounts, the tax rate, and the charged currency — so the
+      purchase is a self-contained record for revenue reporting
+      (see [§4.10](#410-my-purchases--my-contributions)).
    4. **Creates the order** — picks the buyer's invoicing address and creates
       the sale order + invoice, then links them back to the ownership rows.
 
@@ -409,10 +413,39 @@ State rules, exactly as enforced:
 
 - **My Purchases** — the listings owned by the user's customer, with purchase
   date and links to the order/invoice.
-- **My Contributions** (login required) — the contributor area, covering: an
-  overview of their listings, and their listings (any status, where versions
-  are managed). The **Revenue** and **Profile** tabs exist but are not
-  implemented yet (they show "Coming soon").
+- **My Contributions** (login required) — the contributor area, covering an
+  **Overview**, the contributor's **listings** (any status, where versions are
+  managed), and **Revenue** / **Profile** tabs that are not implemented yet
+  (they show "Coming soon").
+
+#### 4.10.1 Contributions overview
+
+The Overview summarises activity across the contributor's own listings:
+
+- **Headline figures** — **revenue**, **sales**, **installs**, and **average
+  rating** for the **last full calendar month**, across all of the contributor's
+  listings. Each card names the **month it covers** in parentheses by the number
+  (e.g. "(May)") and a **trend** comparing that month to the one before — an up /
+  down / flat indicator labelled with the compared month (e.g. "+12% vs Apr"). With no
+  earlier month to compare against, the trend reads as **"Baseline"** instead.
+  (Sales count purchases in the month; installs count downloads in the month;
+  rating is the average of reviews left that month; revenue is summed by purchase
+  date.)
+- **Revenue** — the headline figure (last full month) and a **12-month chart**
+  are shown in the **contributor's own currency**. Because each purchase stores
+  the price in the _buyer's_ charged currency (see [§4.6](#46-buying--checkout)),
+  amounts are **converted** to the contributor's currency using the exchange
+  rate for the **sale date** (the purchase date in the workspace company's
+  timezone — the same as-of date checkout priced at), so the converted figure
+  stays consistent with what was charged. A purchase with no available exchange
+  rate is left out rather than counted at face value. Revenue is the
+  **without-tax** (net) amount.
+- **Pending actions** — versions of theirs that are **in review** or sitting as
+  a **draft**, plus a rollup of **new reviews** left on their listings in the
+  last 7 days. Capped to a handful, versions first.
+- **Recent activity** — a merged, newest-first feed of **reviews**,
+  **downloads**, and **purchases** across their listings, each with the actor's
+  name and a relative time.
 
 ---
 
@@ -577,6 +610,11 @@ Set by an admin in the AOS; each affects storefront behaviour:
   database constraint), the "must be unique within the listing" rule for version
   numbers is enforced only by the save-time check — two simultaneous saves of
   the same number could both get through.
+- **Contributions revenue can under-report across currencies.** The overview
+  converts each purchase to the contributor's currency at its purchase-date
+  rate; a purchase whose charged currency has no exchange rate to the
+  contributor's currency is **left out** of the revenue total and chart (rather
+  than counted at face value), so revenue can be lower than the raw takings.
 
 ---
 

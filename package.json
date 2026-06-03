@@ -132,6 +132,7 @@
     "react-intersection-observer": "^9.13.1",
     "react-scroll": "^1.9.3",
     "react-select": "^5.10.2",
+    "recharts": "^2.15.0",
     "sanitize-html": "^2.17.3",
     "sass": "^1.80.6",
     "scrollcue": "^2.0.0",

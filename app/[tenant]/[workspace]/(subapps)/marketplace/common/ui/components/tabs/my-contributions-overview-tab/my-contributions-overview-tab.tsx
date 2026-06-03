@@ -1,236 +1,96 @@
-import {t} from '@/locale/server';
-import {Skeleton} from '@/ui/components/skeleton';
-import {Construction} from 'lucide-react';
-import {NoticeBanner} from '../../primitives/notice-banner';
+import type {Client} from '@/goovee/.generated/client';
+import type {ID} from '@/types';
+import {Suspense} from 'react';
+import {
+  getAvgRatingStat,
+  getInstallsStat,
+  getPendingActions,
+  getRecentActivity,
+  getRevenueSummary,
+  getSalesStat,
+} from '../../../../orm';
+import type {PortalWorkspaceWithConfig} from '../../../../utils/auth-helper';
 import {Swipe} from '../../primitives/swipe';
+import {PendingActions, PendingActionsSkeleton} from './pending-actions';
+import {RecentActivity, RecentActivitySkeleton} from './recent-activity';
+import {RevenuePanel, RevenuePanelSkeleton} from './revenue-panel';
+import {
+  AvgRatingStatCard,
+  InstallsStatCard,
+  RevenueStatCard,
+  SalesStatCard,
+  StatCardInnerSkeleton,
+} from './stats-cards';
 
-const stats = [
-  {
-    label: 'Lifetime revenue',
-    value: '$42 240',
-    change: '+15.8% vs last month',
-    icon: '💰',
-    bgColor: 'bg-success/15',
-  },
-  {
-    label: 'App sales',
-    value: '287',
-    change: '+12.4% vs last month',
-    icon: '🛍️',
-    bgColor: 'bg-palette-amber-light',
-  },
-  {
-    label: 'Skill installs',
-    value: '15 630',
-    change: '+8.2% vs last month',
-    icon: '📥',
-    bgColor: 'bg-palette-blue-light',
-  },
-  {
-    label: 'Avg. rating',
-    value: '4.6',
-    change: '+0.1 vs last month',
-    icon: '⭐',
-    bgColor: 'bg-palette-pink-light',
-  },
-];
+interface OverviewTabProps {
+  mainPartnerId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  workspaceURI: string;
+  tenantId: string;
+}
 
-const pendingActions = [
-  {
-    id: 1,
-    title: 'Custom CRM Boost is in review',
-    description: 'Submitted 2 hours ago',
-    icon: '⚠️',
-    bgColor: 'bg-palette-amber-light',
-  },
-  {
-    id: 2,
-    title: 'Workflow Replay draft',
-    description: 'Add screenshots & description',
-    icon: '📝',
-    bgColor: 'bg-palette-purple-light',
-    hasAction: true,
-  },
-  {
-    id: 3,
-    title: '3 new reviews on Studio Form Builder',
-    description: 'Average 4.5★',
-    icon: '🔔',
-    bgColor: 'bg-palette-red-light',
-  },
-];
+const PENDING_ACTIONS_LIMIT = 5;
+const RECENT_ACTIVITY_LIMIT = 5;
 
-const recentActivity = [
-  {
-    id: 1,
-    initials: 'S',
-    name: 'Sara K.',
-    action: 'left a 4★ review on',
-    product: 'Studio Form Builder Pro',
-    time: '2h ago',
-    bgColor: 'bg-palette-amber-light',
-  },
-  {
-    id: 2,
-    initials: 'P',
-    name: 'Pierre L.',
-    action: 'downloaded',
-    product: 'Data Quality Linter v1.4.0',
-    time: '5h ago',
-    bgColor: 'bg-palette-blue-light',
-  },
-  {
-    id: 3,
-    initials: 'T',
-    name: 'Tom B.',
-    action: 'purchased',
-    product: 'Helpdesk Boost · $99',
-    time: '8h ago',
-    bgColor: 'bg-success/15',
-  },
-  {
-    id: 4,
-    initials: 'É',
-    name: 'Émilie R.',
-    action: 'left a 5★ review on',
-    product: 'Studio Form Builder Pro',
-    time: '1d ago',
-    bgColor: 'bg-palette-pink-light',
-  },
-];
-
-export async function OverviewTab() {
-  const [
-    revenueHeadingLabel,
-    viewDetailsLabel,
-    pendingActionsLabel,
-    recentActivityLabel,
-    comingSoonTitle,
-    comingSoonDescription,
-  ] = await Promise.all([
-    t('Revenue · last 12 months'),
-    t('View details →'),
-    t('Pending actions'),
-    t('Recent activity'),
-    t('Coming soon'),
-    t(
-      'This section is still being built; what you see below is a preview of the layout.',
-    ),
-  ]);
+/* Each query is kicked off here and its promise handed to an independently
+ * Suspended section, so a slow query (revenue) never blocks the fast panels.
+ * The revenue promise is shared by the stat card and the chart, so it runs
+ * once. */
+export function OverviewTab({
+  mainPartnerId,
+  client,
+  workspace,
+  workspaceURI,
+  tenantId,
+}: OverviewTabProps) {
+  const ctx = {client, workspace, mainPartnerId};
+  const sales = getSalesStat(ctx);
+  const installs = getInstallsStat(ctx);
+  const avgRating = getAvgRatingStat(ctx);
+  const revenue = getRevenueSummary(ctx);
+  const pending = getPendingActions({...ctx, take: PENDING_ACTIONS_LIMIT});
+  const activity = getRecentActivity({...ctx, take: RECENT_ACTIVITY_LIMIT});
 
   return (
     <div className="space-y-6">
-      <NoticeBanner
-        icon={Construction}
-        title={comingSoonTitle}
-        description={comingSoonDescription}
-      />
-      {/* Stats Carousel */}
+      {/* Each card Suspends on its own query, so they stream in independently
+          (no boundary around the whole row). */}
       <Swipe
         className="!w-[284px] !h-[160px]"
-        items={stats.map(stat => (
-          <div
-            key={stat.label}
-            className="flex flex-col justify-between h-full">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {stat.label}
-              </span>
-              <div className={`${stat.bgColor} rounded-lg p-2`}>
-                {stat.icon}
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-foreground">
-                {stat.value}
-              </div>
-              <div className="text-xs text-success-dark">{stat.change}</div>
-            </div>
-          </div>
-        ))}
+        items={[
+          <Suspense key="revenue" fallback={<StatCardInnerSkeleton />}>
+            <RevenueStatCard revenue={revenue} />
+          </Suspense>,
+          <Suspense key="sales" fallback={<StatCardInnerSkeleton />}>
+            <SalesStatCard sales={sales} />
+          </Suspense>,
+          <Suspense key="installs" fallback={<StatCardInnerSkeleton />}>
+            <InstallsStatCard installs={installs} />
+          </Suspense>,
+          <Suspense key="avg-rating" fallback={<StatCardInnerSkeleton />}>
+            <AvgRatingStatCard avgRating={avgRating} />
+          </Suspense>,
+        ]}
       />
 
-      {/* Revenue Chart and Pending Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Revenue Chart */}
-        <div className="lg:col-span-2 bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-foreground">
-              {revenueHeadingLabel}
-            </h3>
-            <button className="text-sm text-muted-foreground hover:text-foreground">
-              {viewDetailsLabel}
-            </button>
-          </div>
-          <Skeleton className="w-full h-64 rounded-lg" />
-        </div>
+        <Suspense fallback={<RevenuePanelSkeleton />}>
+          <RevenuePanel revenue={revenue} />
+        </Suspense>
 
-        {/* Pending Actions */}
-        <div className="bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
-          <h3 className="text-xl font-semibold text-foreground">
-            {pendingActionsLabel}
-          </h3>
-          <div className="space-y-3">
-            {pendingActions.map(action => (
-              <div
-                key={action.id}
-                className="border-b border-border pb-3 last:border-0 last:pb-0">
-                <div className="flex gap-3">
-                  <div
-                    className={`${action.bgColor} rounded-lg w-8 h-8 flex items-center justify-center flex-shrink-0`}>
-                    {action.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-foreground truncate">
-                      {action.title}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {action.description}
-                    </div>
-                  </div>
-                  {action.hasAction && (
-                    <button className="ml-2 flex-shrink-0">→</button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Suspense fallback={<PendingActionsSkeleton />}>
+          <PendingActions pending={pending} workspaceURI={workspaceURI} />
+        </Suspense>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-card rounded-lg border border-border p-4 md:p-6 space-y-4">
-        <h3 className="text-xl font-semibold text-foreground">
-          {recentActivityLabel}
-        </h3>
-        <div className="space-y-4">
-          {recentActivity.map(activity => (
-            <div
-              key={activity.id}
-              className="border-b border-border pb-4 last:border-0 last:pb-0 flex items-center gap-4">
-              <div
-                className={`${activity.bgColor} rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-semibold text-sm`}>
-                {activity.initials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm text-foreground">
-                  <span className="font-bold">{activity.name}</span>
-                  <span className="text-muted-foreground">
-                    {' '}
-                    {activity.action}{' '}
-                  </span>
-                  <span className="font-bold text-primary">
-                    {activity.product}
-                  </span>
-                </div>
-              </div>
-              <div className="text-xs text-muted-foreground flex-shrink-0">
-                {activity.time}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Suspense fallback={<RecentActivitySkeleton />}>
+        <RecentActivity
+          activity={activity}
+          workspaceURI={workspaceURI}
+          tenantId={tenantId}
+        />
+      </Suspense>
     </div>
   );
 }

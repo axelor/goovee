@@ -517,21 +517,31 @@ export function computeWtAti(
  *  format IS `YYYY-MM-DD`, the same shape the dates have in the
  *  database — which is what makes the plain string comparisons in the
  *  window checks valid. */
-export function todayInTimezone(timezone: string | null | undefined): string {
-  if (!timezone) return new Date().toISOString().slice(0, 10);
+/** Formats a date as `YYYY-MM-DD` in the given IANA timezone. Used as the
+ *  as-of date for exchange-rate lookups, so a price (or a past sale) resolves
+ *  the same rate the company's calendar day implies. */
+export function dateInTimezone(
+  date: Date,
+  timezone: string | null | undefined,
+): string {
+  if (!timezone) return date.toISOString().slice(0, 10);
   try {
     return new Intl.DateTimeFormat('en-CA', {
       timeZone: timezone,
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-    }).format(new Date());
+    }).format(date);
   } catch {
     /* Invalid IANA string on the company row — don't fail rendering;
      * fall back to UTC server time. The misconfiguration only shows
      * around midnight rollovers, same as if the field were unset. */
-    return new Date().toISOString().slice(0, 10);
+    return date.toISOString().slice(0, 10);
   }
+}
+
+export function todayInTimezone(timezone: string | null | undefined): string {
+  return dateInTimezone(new Date(), timezone);
 }
 
 /** Half-up rounding to `scale` decimal places: round(119.58804, 2) →

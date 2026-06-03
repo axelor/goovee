@@ -2,6 +2,9 @@ import {z} from 'zod';
 
 export const REVIEW_COMMENT_MAX_LENGTH = 1500;
 
+/** How far back the contributor dashboard's "new reviews" rollup looks. */
+export const RECENT_REVIEW_WINDOW_DAYS = 7;
+
 export const saveReviewSchema = z.object({
   productId: z.string().min(1),
   workspaceURL: z.string().min(1),

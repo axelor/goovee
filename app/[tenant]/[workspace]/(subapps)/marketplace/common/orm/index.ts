@@ -10,5 +10,6 @@ export * from './products';
 export * from './purchases';
 export * from './ratings';
 export * from './reviews';
+export * from './statistics';
 export * from './uploads';
 export * from './versions';

@@ -1,7 +1,7 @@
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {cn} from '@/utils/css';
 
-type ReviewerAvatarProps = {
+type PartnerAvatarProps = {
   partner: {
     simpleFullName: string | null;
     picture: {id: string} | null;
@@ -13,12 +13,12 @@ type ReviewerAvatarProps = {
   fallbackClassName?: string;
 };
 
-export function ReviewerAvatar({
+export function PartnerAvatar({
   partner,
   tenantId,
   size = 40,
   fallbackClassName = 'bg-muted',
-}: ReviewerAvatarProps) {
+}: PartnerAvatarProps) {
   const pictureId = partner.picture?.id;
   const initial = (partner.simpleFullName?.[0] ?? '?').toUpperCase();
   const style = {width: size, height: size};

@@ -27,7 +27,7 @@ import {
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {YourReviewCard} from '../../cards/your-review-card';
 import {Rating} from '../../primitives/rating';
-import {ReviewerAvatar} from '../../primitives/reviewer-avatar';
+import {PartnerAvatar} from '../../primitives/partner-avatar';
 import {TooltipDate} from '../../primitives/tooltip-date';
 
 interface ReviewsTabProps {
@@ -201,7 +201,7 @@ export async function ReviewsTab({
               key={review.id}
               className="bg-card rounded-lg border border-border p-6 space-y-3">
               <div className="flex items-start gap-3">
-                <ReviewerAvatar partner={review.author} tenantId={tenantId} />
+                <PartnerAvatar partner={review.author} tenantId={tenantId} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-foreground text-sm">
