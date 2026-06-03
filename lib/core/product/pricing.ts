@@ -93,15 +93,34 @@
  *     → axelor-base/.../ProductCompanyServiceImpl.get
  *
  * ──────────────────────────────────────────────────────────────────────
+ * Unit conversion (COEFF only)
+ * ──────────────────────────────────────────────────────────────────────
+ * Both levels can optionally quote a price in a unit OTHER than the
+ * product's sale unit, for a given quantity — e.g. a price per gram for
+ * a product priced per kilogram. Pass a requested unit (and the
+ * conversion lines); the per-unit WT/ATI are converted AFTER currency
+ * conversion — mirroring AOS `ProductRestServiceImpl`, which multiplies
+ * the already currency/tax-resolved price by the coefficient mapping the
+ * requested unit to the sale unit. The line total is then unit price ×
+ * quantity.
+ *
+ * Only coefficient conversions are supported (`UnitConversion.typeSelect
+ * == TYPE_COEFF`): forward = `coef`, reverse = `1/coef`. AOS also allows
+ * Groovy formula lines (`typeSelect == TYPE_FORMULA`); we do NOT evaluate
+ * them — a formula line, a null `typeSelect`, or any unknown value throws
+ * `UNIT_CONVERSION_FORMULA_UNSUPPORTED`. (This is stricter than AOS,
+ * which treats a null `typeSelect` as the formula branch.) Because COEFF
+ * lines never reference product fields, conversion needs no product
+ * context. Callers omitting the requested unit price one item in the
+ * product's own unit, exactly as before.
+ *
+ * ──────────────────────────────────────────────────────────────────────
  * Known differences vs AOS (precision only — the logic is identical)
  * ──────────────────────────────────────────────────────────────────────
  * - Price lists are not applied. AOS finishes by running the buyer's
  *   sale price list (discounts / markups / replacement prices) over the
  *   unit price; callers surface the catalogue price, so a buyer who has
  *   a price list would be invoiced differently than displayed.
- * - No unit conversion. AOS can quote a price per requested unit (e.g.
- *   per gram for a product sold per kilogram); this module prices one
- *   item in the product's own unit.
  * - No rounding is applied here — both levels return raw values and the
  *   caller rounds at whatever scale its context requires. AOS rounds at
  *   its configurable unit-price precision (often 4 decimals).
@@ -180,6 +199,18 @@ export type PricingConversionLine = {
   toDate: string | null;
 };
 
+/** One unit-conversion line: how to turn a value in `startUnit` into a
+ *  value in `endUnit`. Only `TYPE_COEFF` lines are usable here — the
+ *  value is multiplied by `coef` (or `1/coef` in reverse). `typeSelect`
+ *  is nullable in the schema; anything that isn't `TYPE_COEFF` (formula,
+ *  null, unknown) is rejected — see `getUnitCoefficient`. */
+export type PricingUnitConversion = {
+  startUnit: {id: string};
+  endUnit: {id: string};
+  coef: DecimalLike;
+  typeSelect: number | null;
+};
+
 type SaleFieldName = 'salePrice' | 'inAti' | 'saleCurrency';
 
 /** What level 1 needs from a product: the sale price fields, the
@@ -189,6 +220,12 @@ export type PricingProduct = {
   salePrice: DecimalLike | null;
   inAti: boolean | null;
   saleCurrency: PricingCurrency | null;
+  /** The unit the `salePrice` is expressed in, used only when a caller
+   *  asks for a price in a different unit (`getSaleUnitPrice` resolves
+   *  `salesUnit ?? unit`). Optional because unit pricing is opt-in —
+   *  callers that never convert units (e.g. the marketplace) omit them. */
+  unit?: {id: string} | null;
+  salesUnit?: {id: string} | null;
   productCompanyList:
     | readonly {
         company: {id: string} | null;
@@ -216,7 +253,18 @@ export type PriceComputationErrorCode =
   /** No exchange-rate line exists between the two currencies, in either direction. */
   | 'CURRENCY_1'
   /** An exchange-rate line exists but its rate is zero or unreadable. */
-  | 'CURRENCY_2';
+  | 'CURRENCY_2'
+  /** No conversion line exists between the two units, in either direction. */
+  | 'UNIT_CONVERSION_1'
+  /** A conversion line exists but its coefficient is zero or unreadable. */
+  | 'UNIT_CONVERSION_2'
+  /** The matching conversion line isn't coefficient-based (a Groovy
+   *  formula, a null type, or an unknown type); we don't evaluate it. */
+  | 'UNIT_CONVERSION_FORMULA_UNSUPPORTED'
+  /** A price was requested in a specific unit, but the product has no
+   *  sale unit (`salesUnit ?? unit`) to convert from. AOS throws here too
+   *  — `UnitConversionServiceImpl.convert` rejects a null source unit. */
+  | 'UNIT_CONVERSION_NO_SOURCE_UNIT';
 
 export class PriceComputationError extends Error {
   constructor(
@@ -551,6 +599,71 @@ export function getExchangeRate(
   );
 }
 
+/** AOS `UnitConversionRepository.TYPE_COEFF`: a conversion line whose
+ *  coefficient is a plain number. The other type, `TYPE_FORMULA` (2), is
+ *  a Groovy expression we deliberately don't support. */
+const TYPE_COEFF = 1;
+
+/** The factor that turns a value in `fromUnitId` into a value in
+ *  `toUnitId`, mirroring `UnitConversionServiceImpl.getCoefficient`:
+ *
+ *  - same unit → 1, no lookup;
+ *  - a direct from→to line → its `coef`;
+ *  - failing that, the reverse to→from line → `1/coef`.
+ *
+ *  Only coefficient lines are honoured. A matching line that is a Groovy
+ *  formula (or has a null/unknown `typeSelect`) throws
+ *  UNIT_CONVERSION_FORMULA_UNSUPPORTED — we never evaluate Groovy. A line
+ *  whose coefficient is zero or unreadable throws UNIT_CONVERSION_2, and
+ *  no line in either direction throws UNIT_CONVERSION_1.
+ *
+ *  To turn a per-unit PRICE expressed in the sale unit into the price per
+ *  a requested unit, call `getUnitCoefficient(requestedUnitId,
+ *  saleUnitId, …)` and multiply — the same argument order AOS uses in
+ *  `ProductRestServiceImpl` (`convert(requestedUnit, saleUnit, price)`). */
+export function getUnitCoefficient(
+  fromUnitId: string,
+  toUnitId: string,
+  conversions: readonly PricingUnitConversion[],
+): number {
+  if (fromUnitId === toUnitId) return 1;
+
+  const direct = conversions.find(
+    c => c.startUnit.id === fromUnitId && c.endUnit.id === toUnitId,
+  );
+  if (direct != null) return coefOf(direct, false);
+
+  const reverse = conversions.find(
+    c => c.startUnit.id === toUnitId && c.endUnit.id === fromUnitId,
+  );
+  if (reverse != null) return coefOf(reverse, true);
+
+  throw new PriceComputationError(
+    'UNIT_CONVERSION_1',
+    `No unit conversion between ${fromUnitId} and ${toUnitId}`,
+  );
+}
+
+/** Reads a usable coefficient off one matched line, inverting it when the
+ *  line was matched in reverse. Rejects non-coefficient lines and
+ *  zero/unreadable coefficients exactly where AOS does. */
+function coefOf(line: PricingUnitConversion, inverted: boolean): number {
+  if (line.typeSelect !== TYPE_COEFF) {
+    throw new PriceComputationError(
+      'UNIT_CONVERSION_FORMULA_UNSUPPORTED',
+      'Only coefficient-based unit conversions are supported',
+    );
+  }
+  const coef = Number(line.coef);
+  if (!Number.isFinite(coef) || coef === 0) {
+    throw new PriceComputationError(
+      'UNIT_CONVERSION_2',
+      'Unit conversion coefficient is zero or unreadable',
+    );
+  }
+  return inverted ? 1 / coef : coef;
+}
+
 /** Level 2 — "price THESE VALUES" — mirroring
  *  `ProductPriceServiceImpl.getConvertedPrice`. Use this when the price
  *  belongs to something other than the product: in AOS that's a
@@ -561,8 +674,17 @@ export function getExchangeRate(
  *  `sourceInAti` says which basis `price` is expressed in, and is OUR
  *  parameter, not AOS's — AOS re-reads the flag off the product and
  *  thereby assumes the supplied price uses the product's basis. Our
- *  callers own their basis, so it must be explicit. Returns unrounded
- *  values; the caller rounds at whatever scale its context requires. */
+ *  callers own their basis, so it must be explicit.
+ *
+ *  Optionally prices in a unit other than `price`'s own. When `unit` is
+ *  supplied, the per-unit WT/ATI are converted from `saleUnitId` to
+ *  `requestedUnitId` AFTER currency conversion (the AOS order), then the
+ *  line totals are computed as unit price × `qty`. Omit `unit` (and
+ *  `qty` defaults to 1) to price one item in the price's own unit.
+ *
+ *  Returns unrounded values; `wt`/`ati` are the per-(requested-)unit
+ *  price and `wtTotal`/`atiTotal` are those times `qty`. The caller
+ *  rounds at whatever scale its context requires. */
 export function getConvertedPrice({
   price,
   sourceInAti,
@@ -571,6 +693,9 @@ export function getConvertedPrice({
   toCurrency,
   conversionLines,
   today,
+  unit,
+  unitConversions,
+  qty = 1,
 }: {
   price: number;
   sourceInAti: boolean;
@@ -579,7 +704,20 @@ export function getConvertedPrice({
   toCurrency: PricingCurrency | null | undefined;
   conversionLines: readonly PricingConversionLine[];
   today: string;
-}): {wt: number; ati: number; taxRate: number} {
+  /** Quote the price in `requestedUnitId` instead of `saleUnitId` (the
+   *  unit `price` is expressed in). Omit to keep the price's own unit. */
+  unit?: {requestedUnitId: string; saleUnitId: string} | null;
+  unitConversions?: readonly PricingUnitConversion[];
+  /** Quantity in the requested (or sale) unit; defaults to 1. */
+  qty?: number;
+}): {
+  wt: number;
+  ati: number;
+  taxRate: number;
+  qty: number;
+  wtTotal: number;
+  atiTotal: number;
+} {
   const taxRate = getTotalTaxRateInPercentage(taxLineSet);
   let {wt, ati} = computeWtAti(price, sourceInAti, taxRate);
 
@@ -595,7 +733,20 @@ export function getConvertedPrice({
   wt *= rate;
   ati *= rate;
 
-  return {wt, ati, taxRate};
+  /* Unit conversion, after currency, mirroring AOS `ProductRestServiceImpl`:
+   * the per-unit price in the sale unit is multiplied by the coefficient
+   * that maps the requested unit to the sale unit. */
+  if (unit && unit.requestedUnitId !== unit.saleUnitId) {
+    const coef = getUnitCoefficient(
+      unit.requestedUnitId,
+      unit.saleUnitId,
+      unitConversions ?? [],
+    );
+    wt *= coef;
+    ati *= coef;
+  }
+
+  return {wt, ati, taxRate, qty, wtTotal: wt * qty, atiTotal: ati * qty};
 }
 
 /** Level 1 — "price THIS PRODUCT for this company, in this currency" —
@@ -605,7 +756,20 @@ export function getConvertedPrice({
  *
  *  Strict throughout: any missing configuration throws a
  *  `PriceComputationError`, exactly where AOS would throw. There is no
- *  fallback currency here — degradation policy belongs to the caller. */
+ *  fallback currency here — degradation policy belongs to the caller.
+ *
+ *  Pass `requestedUnit` to quote the price in a unit other than the
+ *  product's sale unit (`salesUnit ?? unit`), and `qty` for the line
+ *  total — see `getConvertedPrice`.
+ *
+ *  Echoes back the resolved `unitId` — the requested unit when one was
+ *  given, otherwise the product's own sale unit (`salesUnit ?? unit`),
+ *  which this function picks internally so the caller would not otherwise
+ *  know it. Only the id: the core never sees a unit's display name (cf.
+ *  currency, where the core works in `codeISO` and the caller attaches
+ *  the symbol). It is `null` only when no unit was requested AND the
+ *  product carries no unit — requesting a unit with no source unit to
+ *  convert from throws `UNIT_CONVERSION_NO_SOURCE_UNIT`. */
 export function getSaleUnitPrice({
   product,
   company,
@@ -613,6 +777,9 @@ export function getSaleUnitPrice({
   toCurrency,
   conversionLines,
   companySpecificProductFields,
+  requestedUnit,
+  unitConversions,
+  qty = 1,
 }: {
   product: PricingProduct;
   company: {id: string; timezone?: string | null} | null;
@@ -620,7 +787,19 @@ export function getSaleUnitPrice({
   toCurrency: PricingCurrency;
   conversionLines: readonly PricingConversionLine[];
   companySpecificProductFields: readonly string[];
-}): {wt: number; ati: number; taxRate: number} {
+  /** Quote in this unit instead of the product's `salesUnit ?? unit`. */
+  requestedUnit?: {id: string} | null;
+  unitConversions?: readonly PricingUnitConversion[];
+  qty?: number;
+}): {
+  wt: number;
+  ati: number;
+  taxRate: number;
+  qty: number;
+  wtTotal: number;
+  atiTotal: number;
+  unitId: string | null;
+} {
   const companyId = company?.id;
   const today = todayInTimezone(company?.timezone);
 
@@ -650,15 +829,39 @@ export function getSaleUnitPrice({
     today,
   });
 
-  return getConvertedPrice({
-    price: Number(salePrice ?? 0),
-    sourceInAti: Boolean(inAti),
-    taxLineSet,
-    fromCurrency: saleCurrency,
-    toCurrency,
-    conversionLines,
-    today,
-  });
+  /* The sale price is expressed in the product's sale unit. When a
+   * caller asks for a different unit we must have a source unit to
+   * convert from; AOS likewise throws on a null source unit rather than
+   * silently leaving the price unconverted. */
+  const saleUnitId = product.salesUnit?.id ?? product.unit?.id;
+  let unit: {requestedUnitId: string; saleUnitId: string} | null = null;
+  if (requestedUnit?.id) {
+    if (!saleUnitId) {
+      throw new PriceComputationError(
+        'UNIT_CONVERSION_NO_SOURCE_UNIT',
+        'A unit was requested but the product has no sale unit to convert from',
+      );
+    }
+    unit = {requestedUnitId: requestedUnit.id, saleUnitId};
+  }
+
+  return {
+    ...getConvertedPrice({
+      price: Number(salePrice ?? 0),
+      sourceInAti: Boolean(inAti),
+      taxLineSet,
+      fromCurrency: saleCurrency,
+      toCurrency,
+      conversionLines,
+      today,
+      unit,
+      unitConversions,
+      qty,
+    }),
+    /* The unit the returned price is expressed in: the requested one, or
+     * the product's own sale unit that we resolved above. */
+    unitId: requestedUnit?.id ?? saleUnitId ?? null,
+  };
 }
 
 function toNumberOrNull(value: unknown): number | null {

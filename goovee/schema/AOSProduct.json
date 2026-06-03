@@ -91,6 +91,11 @@
     },
     {
       "type": "ManyToOne",
+      "name": "salesUnit",
+      "target": "AOSUnit"
+    },
+    {
+      "type": "ManyToOne",
       "name": "productFamily",
       "target": "AOSProductFamily"
     },

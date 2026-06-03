@@ -1,0 +1,32 @@
+{
+  "name": "AOSUnitConversion",
+  "table": "base_unit_conversion",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "startUnit",
+      "target": "AOSUnit",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "endUnit",
+      "target": "AOSUnit",
+      "required": true
+    },
+    {
+      "type": "Decimal",
+      "name": "coef",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "typeSelect"
+    },
+    {
+      "type": "Int",
+      "name": "entitySelect"
+    }
+  ]
+}
