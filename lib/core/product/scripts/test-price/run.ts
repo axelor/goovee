@@ -41,6 +41,7 @@ import {
   getDiscountedPrice,
   type PricingPriceList,
 } from '../../price-list';
+import {processBatch} from './batch';
 import {
   loadAppConfig,
   loadCompanies,
@@ -280,6 +281,7 @@ async function fetchSaleOrderPrice({
   productId,
   companyId,
   partnerId,
+  fiscalPositionId,
   currencyId,
   unitId,
   today,
@@ -288,67 +290,66 @@ async function fetchSaleOrderPrice({
   config: {aos: {url: string; auth: Parameters<typeof getAOSAuthHeaders>[0]}};
   productId: string;
   companyId: string;
-  partnerId: string | null;
+  partnerId: string;
+  fiscalPositionId: string | null;
   currencyId: string;
   unitId: string | null;
   today: string;
   inAti: boolean;
 }): Promise<PriceResult> {
-  try {
-    const res = await axios.post(
-      `${config.aos.url}/ws/action`,
-      {
-        model: 'com.axelor.apps.sale.db.SaleOrderLine',
-        action: 'action-sale-order-line-method-get-product-information',
-        data: {
-          context: {
-            _model: 'com.axelor.apps.sale.db.SaleOrderLine',
-            product: {id: Number(productId)},
-            qty: 1,
-            ...(unitId ? {unit: {id: Number(unitId)}} : {}),
-            _parent: {
-              _model: 'com.axelor.apps.sale.db.SaleOrder',
-              company: {id: Number(companyId)},
-              ...(partnerId ? {clientPartner: {id: Number(partnerId)}} : {}),
-              currency: {id: Number(currencyId)},
-              inAti,
-              creationDate: today,
-            },
+  /* No try/catch: any network or non-2xx HTTP error propagates and crashes
+   * the run (the preflight already confirmed AOS is up, so a failure now is
+   * real, not a price verdict). Mirrors fetchAosPrices. */
+  const res = await axios.post(
+    `${config.aos.url}/ws/action`,
+    {
+      model: 'com.axelor.apps.sale.db.SaleOrderLine',
+      action: 'action-sale-order-line-method-get-product-information',
+      data: {
+        context: {
+          _model: 'com.axelor.apps.sale.db.SaleOrderLine',
+          product: {id: Number(productId)},
+          qty: 1,
+          ...(unitId ? {unit: {id: Number(unitId)}} : {}),
+          _parent: {
+            _model: 'com.axelor.apps.sale.db.SaleOrder',
+            company: {id: Number(companyId)},
+            clientPartner: {id: Number(partnerId)},
+            currency: {id: Number(currencyId)},
+            /* The SO-line tax reads `saleOrder.fiscalPosition` — set it so the
+             * fiscal-position tax remap is applied, as a real order (which
+             * copies it from the partner) would. */
+            ...(fiscalPositionId
+              ? {fiscalPosition: {id: Number(fiscalPositionId)}}
+              : {}),
+            inAti,
+            creationDate: today,
           },
         },
       },
-      {headers: getAOSAuthHeaders(config.aos.auth)},
-    );
-    const blocks = res.data?.data ?? [];
-    for (const block of blocks) {
-      const values = block?.values;
-      if (values && values.price != null) {
-        return {
-          ok: true,
-          wt: Number(values.price),
-          ati: Number(values.inTaxPrice),
-        };
-      }
+    },
+    {headers: getAOSAuthHeaders(config.aos.auth)},
+  );
+  const blocks = res.data?.data ?? [];
+  for (const block of blocks) {
+    const values = block?.values;
+    if (values && values.price != null) {
+      return {
+        ok: true,
+        wt: Number(values.price),
+        ati: Number(values.inTaxPrice),
+      };
     }
-    /* No price came back → surface whatever the action reported (an error,
-     * an alert, or a flash), else just "no price". */
-    const note = blocks
-      .map(
-        (b: {error?: string; alert?: string; flash?: string}) =>
-          b?.error ?? b?.alert ?? b?.flash,
-      )
-      .find(Boolean);
-    return {
-      ok: false,
-      error: String(note ?? res.data?.error ?? 'no price'),
-    };
-  } catch (err) {
-    if (axios.isAxiosError(err) && err.response?.data) {
-      const data = err.response.data as {message?: string};
-      return {ok: false, error: data.message ?? `HTTP ${err.response.status}`};
-    }
-    throw err;
   }
+  /* HTTP 200 but no price → a legitimate "can't price" (e.g. an unconvertible
+   * currency); surface the action's note as a so-error result (not a crash). */
+  const note = blocks
+    .map(
+      (b: {error?: string; alert?: string; flash?: string}) =>
+        b?.error ?? b?.alert ?? b?.flash,
+    )
+    .find(Boolean);
+  return {ok: false, error: String(note ?? res.data?.error ?? 'no price')};
 }
 
 /** The endpoint entry normalised to a price/error result. */
@@ -390,20 +391,33 @@ type Row = {
 
 /** Scores one product across the three prices: gv (goovee), so (the true
  *  sale-order / invoice line) and ep (the indicational endpoint).
- *  gv ≠ so → failure; gv == so but ep differs → partial; all three agree →
- *  success. The so comparison is the real correctness signal. */
+ *
+ *  Stage 1 — errors, on gv vs ep: both error → they agree it can't be priced
+ *  (success); exactly one errors → failure.
+ *  Stage 2 — both gv and ep produced a value:
+ *    - no buyer (no sale order to reference) → gv vs ep: match → success, else
+ *      → partial;
+ *    - buyer → gv vs so: mismatch → failure; match → then vs ep: all three
+ *      match → success, else → partial. */
 function compare3(
   product: PriceProduct,
   gv: GooveePrice,
-  so: PriceResult,
+  so: PriceResult | null,
   ep: PriceResult,
   nb: number,
 ): Row {
-  const status: RowStatus = !eq(gv, so, nb)
-    ? 'failure'
-    : eq(gv, ep, nb)
-      ? 'success'
-      : 'partial';
+  let status: RowStatus;
+  if (!gv.ok || !ep.ok) {
+    status = !gv.ok && !ep.ok ? 'success' : 'failure';
+  } else if (so === null) {
+    status = eq(gv, ep, nb) ? 'success' : 'partial';
+  } else {
+    status = !eq(gv, so, nb)
+      ? 'failure'
+      : eq(gv, ep, nb)
+        ? 'success'
+        : 'partial';
+  }
   const fmt = (r: GooveePrice | PriceResult) =>
     r.ok
       ? `${round(r.wt, nb)}/${round(r.ati, nb)}`
@@ -413,7 +427,7 @@ function compare3(
     productId: product.id,
     name: (product.name ?? product.code ?? product.id).slice(0, 28),
     gv: fmt(gv),
-    so: fmt(so),
+    so: so === null ? 'n/a' : fmt(so),
     ep: fmt(ep),
   };
 }
@@ -442,12 +456,35 @@ function renderRows(rows: Row[]): void {
   }
 }
 
+/** Up-front reachability check: the public app-info endpoint answers 200
+ *  without auth when the back end is up. If it doesn't, tell the invoker
+ *  plainly and stop — rather than failing deep in the sweep. After this passes
+ *  the run assumes AOS is reachable and lets any later network error crash. */
+async function assertAosReachable(config: {aos: {url: string}}): Promise<void> {
+  const url = `${config.aos.url}/ws/public/app/info`;
+  try {
+    await axios.get(url, {timeout: 10_000});
+  } catch (err) {
+    const why = axios.isAxiosError(err)
+      ? err.response
+        ? `HTTP ${err.response.status}`
+        : (err.code ?? 'no response')
+      : String(err);
+    console.error(
+      `${RED}AOS back end is not accessible at ${url} (${why}). Is it running?${RESET}`,
+    );
+    process.exit(1);
+  }
+}
+
 async function main() {
   const tenantId = values.tenant ?? DEFAULT_TENANT;
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) throw new Error(`Tenant ${tenantId} not found.`);
   const {client, config} = tenant;
   const verbose = Boolean(values.verbose);
+
+  await assertAosReachable(config);
 
   const [appConfig, companySpecificProductFields, unitConversions] =
     await Promise.all([
@@ -524,30 +561,40 @@ async function main() {
           [currencyOverride.codeISO],
         );
 
-        /* The three price sources for this combo: gv (computed locally), ep
-         * (batched endpoint), and so (per-product onchange — fired together). */
-        const aosById = await fetchAosPrices({
-          config,
-          productIds: products.map(p => p.id),
-          partnerId: partnerSample.id,
-          companyId,
-          currencyId: currencyOverride.id,
-          unitId: values.unit ?? null,
-        });
-        const sos = await Promise.all(
-          products.map(product =>
-            fetchSaleOrderPrice({
-              config,
-              productId: product.id,
-              companyId,
-              partnerId: partnerSample.id,
-              currencyId: currencyOverride.id,
-              unitId: values.unit ?? null,
-              today,
-              inAti: atiPrimary,
-            }),
+        /* The two AOS sources for this combo — ep (batched endpoint) and so
+         * (per-product onchange) — are fetched in parallel; gv is then computed
+         * locally from the already-loaded data. No buyer → no sale order to
+         * price against, so skip `so` (compared gv-vs-ep). Otherwise carry the
+         * buyer's fiscal position so the onchange applies the same tax remap a
+         * real order would. */
+        const partnerId = partnerSample.id;
+        const fiscalPositionId =
+          partnerSample.partner?.fiscalPosition?.id ?? null;
+        const [aosById, sos] = await Promise.all([
+          fetchAosPrices({
+            config,
+            productIds: products.map(p => p.id),
+            partnerId: partnerSample.id,
+            companyId,
+            currencyId: currencyOverride.id,
+            unitId: values.unit ?? null,
+          }),
+          processBatch(products, product =>
+            partnerId == null
+              ? Promise.resolve(null)
+              : fetchSaleOrderPrice({
+                  config,
+                  productId: product.id,
+                  companyId,
+                  partnerId,
+                  fiscalPositionId,
+                  currencyId: currencyOverride.id,
+                  unitId: values.unit ?? null,
+                  today,
+                  inAti: atiPrimary,
+                }),
           ),
-        );
+        ]);
 
         const rows = products.map((product, i) =>
           compare3(
