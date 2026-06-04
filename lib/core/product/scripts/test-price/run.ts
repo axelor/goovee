@@ -1,16 +1,21 @@
 /* Product price-parity test.
  *
- * Sweeps products × companies × buyers × currencies, prices each one with the
- * core's INVOICE path (`getSaleUnitPrice` + `roundSaleUnitPrice`, the
- * sale-order/invoice-line pairing), and compares it against AOS's
- * `/ws/aos/product/price` endpoint. That endpoint is only INDICATIONAL — its
- * `applyPriceList` round-trip can sit a cent off the invoiced line — so some
- * cross-currency ATI mismatches are expected (see price-list.ts), while
- * same-currency rows and the new target-currency-decimal rounding should match.
+ * Sweeps products × companies × buyers × currencies and scores each product
+ * across THREE prices:
+ *   gv — goovee: the core's invoice price (getSaleUnitPrice + roundSaleUnitPrice)
+ *   so — the TRUE AOS sale-order / invoice line price, computed via the product
+ *        onchange action on a transient line (no order is persisted)
+ *   ep — AOS's /ws/aos/product/price endpoint (only INDICATIONAL: its
+ *        applyPriceList round-trip can sit a cent off the invoiced line)
  *
- * Pure product test: no marketplace involvement. Every dimension the endpoint
- * accepts (product, company, partner, currency, unit) is a CLI flag; with none,
- * it sweeps sensible defaults.
+ * Per product:  gv ≠ so → FAILURE;  gv == so but ep differs → PARTIAL;
+ *               all three agree → SUCCESS.
+ * gv-vs-so is the real correctness signal; ep is the bonus. The run exits
+ * non-zero only on a failure (partials are fine).
+ *
+ * Pure product test: no marketplace involvement, nothing persisted. Every
+ * dimension (product, company, partner, currency, unit) is a CLI flag; with
+ * none it sweeps sensible defaults.
  *
  * Run:  pnpm test-price -- --help
  */
@@ -96,14 +101,14 @@ const {values} = parseArgs({
 
 if (values.help) {
   console.log(`
-Product price-parity test — our INVOICE price (getSaleUnitPrice +
-roundSaleUnitPrice, the sale-order/invoice-line pairing) vs AOS.
+Product price-parity test — scores each product across three prices:
+  gv  goovee invoice price (getSaleUnitPrice + roundSaleUnitPrice)
+  so  the TRUE AOS sale-order / invoice line price (product onchange action,
+      computed on a transient line — NO order is persisted)
+  ep  AOS /ws/aos/product/price endpoint (only indicational)
 
-The AOS reference is the /ws/aos/product/price endpoint, which is only
-INDICATIONAL: its applyPriceList round-trip can sit a cent off the invoiced
-line (see price-list.ts). So a few mismatches here are expected and are the
-known endpoint↔invoice gap, not a bug in our price. (TODO: repoint the
-reference to actual order-line creation.)
+gv ≠ so → FAILURE; gv == so but ep differs → PARTIAL (the known endpoint↔
+invoice gap); all three agree → SUCCESS. Exits non-zero only on a failure.
 
 Defaults sweep every sellable product, every company, one buyer per distinct
 (fiscal position, currency, sale price list) + a no-buyer row, and a curated
@@ -262,63 +267,177 @@ async function fetchAosPrices({
   return new Map(entries.map(entry => [String(entry.productId), entry]));
 }
 
+type PriceResult =
+  | {ok: true; wt: number; ati: number}
+  | {ok: false; error: string};
+
+/** Fetches the TRUE sale-order / invoice line price by running the product
+ *  onchange action on a TRANSIENT line — the same computation the SO form
+ *  fires, with NO order persisted. The `_parent` carries the order context
+ *  (company / buyer / currency / inAti) the price resolution needs. */
+async function fetchSaleOrderPrice({
+  config,
+  productId,
+  companyId,
+  partnerId,
+  currencyId,
+  unitId,
+  today,
+  inAti,
+}: {
+  config: {aos: {url: string; auth: Parameters<typeof getAOSAuthHeaders>[0]}};
+  productId: string;
+  companyId: string;
+  partnerId: string | null;
+  currencyId: string;
+  unitId: string | null;
+  today: string;
+  inAti: boolean;
+}): Promise<PriceResult> {
+  try {
+    const res = await axios.post(
+      `${config.aos.url}/ws/action`,
+      {
+        model: 'com.axelor.apps.sale.db.SaleOrderLine',
+        action: 'action-sale-order-line-method-get-product-information',
+        data: {
+          context: {
+            _model: 'com.axelor.apps.sale.db.SaleOrderLine',
+            product: {id: Number(productId)},
+            qty: 1,
+            ...(unitId ? {unit: {id: Number(unitId)}} : {}),
+            _parent: {
+              _model: 'com.axelor.apps.sale.db.SaleOrder',
+              company: {id: Number(companyId)},
+              ...(partnerId ? {clientPartner: {id: Number(partnerId)}} : {}),
+              currency: {id: Number(currencyId)},
+              inAti,
+              creationDate: today,
+            },
+          },
+        },
+      },
+      {headers: getAOSAuthHeaders(config.aos.auth)},
+    );
+    const blocks = res.data?.data ?? [];
+    for (const block of blocks) {
+      const values = block?.values;
+      if (values && values.price != null) {
+        return {
+          ok: true,
+          wt: Number(values.price),
+          ati: Number(values.inTaxPrice),
+        };
+      }
+    }
+    /* No price came back → surface whatever the action reported (an error,
+     * an alert, or a flash), else just "no price". */
+    const note = blocks
+      .map(
+        (b: {error?: string; alert?: string; flash?: string}) =>
+          b?.error ?? b?.alert ?? b?.flash,
+      )
+      .find(Boolean);
+    return {
+      ok: false,
+      error: String(note ?? res.data?.error ?? 'no price'),
+    };
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.data) {
+      const data = err.response.data as {message?: string};
+      return {ok: false, error: data.message ?? `HTTP ${err.response.status}`};
+    }
+    throw err;
+  }
+}
+
+/** The endpoint entry normalised to a price/error result. */
+function endpointResult(entry: AosPriceEntry | undefined): PriceResult {
+  if (!entry || entry.errorMessage) {
+    return {ok: false, error: entry?.errorMessage ?? 'no entry'};
+  }
+  const wt = Number(entry.prices?.find(p => p.type === 'WT')?.price);
+  const ati = Number(entry.prices?.find(p => p.type === 'ATI')?.price);
+  if (!Number.isFinite(wt)) return {ok: false, error: 'no price'};
+  return {ok: true, wt, ati};
+}
+
+/** Two results agree when both price to the same wt/ati (rounded), or both
+ *  error — neither could price, so they agree on that. */
+function eq(
+  a: {ok: true; wt: number; ati: number} | {ok: false},
+  b: {ok: true; wt: number; ati: number} | {ok: false},
+  nb: number,
+): boolean {
+  if (!a.ok || !b.ok) return !a.ok && !b.ok;
+  const eps = 0.5 * 10 ** -nb;
+  return (
+    Math.abs(round(a.wt, nb) - round(b.wt, nb)) < eps &&
+    Math.abs(round(a.ati, nb) - round(b.ati, nb)) < eps
+  );
+}
+
+type RowStatus = 'success' | 'partial' | 'failure';
+
 type Row = {
-  ok: boolean;
+  status: RowStatus;
   productId: string;
   name: string;
-  goovee: string;
-  aos: string;
+  gv: string;
+  so: string;
+  ep: string;
 };
 
-function compareRow(
+/** Scores one product across the three prices: gv (goovee), so (the true
+ *  sale-order / invoice line) and ep (the indicational endpoint).
+ *  gv ≠ so → failure; gv == so but ep differs → partial; all three agree →
+ *  success. The so comparison is the real correctness signal. */
+function compare3(
   product: PriceProduct,
-  goovee: GooveePrice,
-  aos: AosPriceEntry | undefined,
+  gv: GooveePrice,
+  so: PriceResult,
+  ep: PriceResult,
   nb: number,
 ): Row {
-  const name = (product.name ?? product.code ?? product.id).slice(0, 30);
-  const aosErr = aos?.errorMessage;
-  if (!goovee.ok || aosErr) {
-    /* Both sides failing is a match — the core throws exactly where AOS does. */
-    const ok = !goovee.ok && !!aosErr;
-    return {
-      ok,
-      productId: product.id,
-      name,
-      goovee: goovee.ok ? `${goovee.wt}/${goovee.ati}` : `err:${goovee.error}`,
-      aos: aosErr ? `err:${aosErr}` : '(priced)',
-    };
-  }
-  const aosWt = Number(aos?.prices?.find(p => p.type === 'WT')?.price);
-  const aosAti = Number(aos?.prices?.find(p => p.type === 'ATI')?.price);
-  const aosCode = aos?.currency?.code;
-  const eps = 0.5 * 10 ** -nb;
-  const ok =
-    Math.abs(round(goovee.wt, nb) - round(aosWt, nb)) < eps &&
-    Math.abs(round(goovee.ati, nb) - round(aosAti, nb)) < eps &&
-    goovee.currencyCode === aosCode;
+  const status: RowStatus = !eq(gv, so, nb)
+    ? 'failure'
+    : eq(gv, ep, nb)
+      ? 'success'
+      : 'partial';
+  const fmt = (r: GooveePrice | PriceResult) =>
+    r.ok
+      ? `${round(r.wt, nb)}/${round(r.ati, nb)}`
+      : `err:${r.error.slice(0, 22)}`;
   return {
-    ok,
+    status,
     productId: product.id,
-    name,
-    goovee: `${goovee.wt}/${goovee.ati} ${goovee.currencyCode}`,
-    aos: `${aosWt}/${aosAti} ${aosCode ?? '-'}`,
+    name: (product.name ?? product.code ?? product.id).slice(0, 28),
+    gv: fmt(gv),
+    so: fmt(so),
+    ep: fmt(ep),
   };
 }
+
+const YELLOW = '\x1b[33m';
+const STATUS_ICON: Record<RowStatus, string> = {
+  success: `${GREEN}✔`,
+  partial: `${YELLOW}◐`,
+  failure: `${RED}✖`,
+};
 
 function renderRows(rows: Row[]): void {
   const w = {
     id: Math.max(2, ...rows.map(r => r.productId.length)),
-    name: Math.min(30, Math.max(4, ...rows.map(r => r.name.length))),
-    gv: Math.max(20, ...rows.map(r => r.goovee.length)),
-    aos: Math.max(20, ...rows.map(r => r.aos.length)),
+    name: Math.min(28, Math.max(4, ...rows.map(r => r.name.length))),
+    gv: Math.max(12, ...rows.map(r => r.gv.length)),
+    so: Math.max(12, ...rows.map(r => r.so.length)),
+    ep: Math.max(12, ...rows.map(r => r.ep.length)),
   };
   const pad = (s: string, n: number) => s.padEnd(n);
   for (const r of rows) {
     console.log(
-      `  ${r.ok ? GREEN + '✔' : RED + '✖'}${RESET}  ` +
-        `${pad(r.productId, w.id)}  ${pad(r.name, w.name)}  ` +
-        `${DIM}gv${RESET} ${pad(r.goovee, w.gv)}  ${DIM}aos${RESET} ${pad(r.aos, w.aos)}`,
+      `  ${STATUS_ICON[r.status]}${RESET}  ${pad(r.productId, w.id)}  ${pad(r.name, w.name)}  ` +
+        `${DIM}gv${RESET} ${pad(r.gv, w.gv)}  ${DIM}so${RESET} ${pad(r.so, w.so)}  ${DIM}ep${RESET} ${pad(r.ep, w.ep)}`,
     );
   }
 }
@@ -373,8 +492,9 @@ async function main() {
       `nbDecimal=${nb} computeMethod=${appConfig.computeMethodDiscountSelect}${RESET}`,
   );
 
-  let totalChecks = 0;
-  let totalMismatches = 0;
+  let totSuccess = 0;
+  let totPartial = 0;
+  let totFailure = 0;
 
   for (const company of companies) {
     const companyId = company.id;
@@ -396,71 +516,91 @@ async function main() {
         : [];
 
       for (const currencyOverride of currencyOptions) {
-        const partnerCurrency = partnerSample.partner?.currency ?? null;
-
-        /* Conversion lines for this combo: from each product currency to
-         * the override and/or the buyer's currency. */
+        /* Conversion lines for this combo: from each product currency to the
+         * target (override) currency. */
         const conversionLines = await loadConversionLines(
           client,
           products.map(p => p.saleCurrency?.codeISO),
-          [currencyOverride?.codeISO, partnerCurrency?.codeISO],
+          [currencyOverride.codeISO],
         );
 
+        /* The three price sources for this combo: gv (computed locally), ep
+         * (batched endpoint), and so (per-product onchange — fired together). */
         const aosById = await fetchAosPrices({
           config,
           productIds: products.map(p => p.id),
           partnerId: partnerSample.id,
           companyId,
-          currencyId: currencyOverride?.id ?? null,
+          currencyId: currencyOverride.id,
           unitId: values.unit ?? null,
         });
+        const sos = await Promise.all(
+          products.map(product =>
+            fetchSaleOrderPrice({
+              config,
+              productId: product.id,
+              companyId,
+              partnerId: partnerSample.id,
+              currencyId: currencyOverride.id,
+              unitId: values.unit ?? null,
+              today,
+              inAti: atiPrimary,
+            }),
+          ),
+        );
 
-        const rows: Row[] = [];
-        for (const product of products) {
-          const toCurrency =
-            currencyOverride ?? partnerCurrency ?? product.saleCurrency;
-          if (!toCurrency) continue; // product with no currency at all
-          const goovee = computeGooveePrice({
+        const rows = products.map((product, i) =>
+          compare3(
             product,
-            company: {...company, id: companyId},
-            partner: partnerSample,
-            toCurrency,
-            conversionLines,
-            companySpecificProductFields,
-            appConfig,
-            priceList,
-            priceListLines,
-            requestedUnit,
-            unitConversions,
-            atiPrimary,
-          });
-          rows.push(compareRow(product, goovee, aosById.get(product.id), nb));
-        }
+            computeGooveePrice({
+              product,
+              company: {...company, id: companyId},
+              partner: partnerSample,
+              toCurrency: currencyOverride,
+              conversionLines,
+              companySpecificProductFields,
+              appConfig,
+              priceList,
+              priceListLines,
+              requestedUnit,
+              unitConversions,
+              atiPrimary,
+            }),
+            sos[i],
+            endpointResult(aosById.get(product.id)),
+            nb,
+          ),
+        );
 
-        const mismatches = rows.filter(r => !r.ok).length;
-        totalChecks += rows.length;
-        totalMismatches += mismatches;
+        const fail = rows.filter(r => r.status === 'failure').length;
+        const part = rows.filter(r => r.status === 'partial').length;
+        const succ = rows.length - fail - part;
+        totSuccess += succ;
+        totPartial += part;
+        totFailure += fail;
 
         const label =
-          `company=${company.name ?? companyId} buyer=${partnerSample.label}` +
-          (currencyOverride ? ` cur=${currencyOverride.code}` : '') +
+          `company=${company.name ?? companyId} buyer=${partnerSample.label} ` +
+          `cur=${currencyOverride.code}` +
           (priceList ? ` [priceList ${priceList.id}]` : '');
+        const icon = fail ? `${RED}✖` : part ? `${YELLOW}◐` : `${GREEN}✔`;
         console.log(
-          `\n${mismatches === 0 ? GREEN + '✔' : RED + '✖'}${RESET} ${BOLD}${label}${RESET}  ` +
-            `${rows.length - mismatches}/${rows.length} match` +
-            (mismatches ? `  ${RED}(${mismatches} mismatched)${RESET}` : ''),
+          `\n${icon}${RESET} ${BOLD}${label}${RESET}  ` +
+            `${succ} ok / ${part} partial / ${fail} fail (of ${rows.length})`,
         );
-        const visible = verbose ? rows : rows.filter(r => !r.ok);
+        const visible = verbose
+          ? rows
+          : rows.filter(r => r.status !== 'success');
         if (visible.length) renderRows(visible);
       }
     }
   }
 
   console.log(
-    `\n${totalMismatches === 0 ? GREEN : RED}${totalChecks - totalMismatches}/${totalChecks} ` +
-      `matches across all combinations.${RESET}\n`,
+    `\n${totFailure === 0 ? GREEN : RED}${totSuccess} success / ${totPartial} partial / ` +
+      `${totFailure} failure across all combinations.${RESET}\n`,
   );
-  process.exit(totalMismatches === 0 ? 0 : 1);
+  process.exit(totFailure === 0 ? 0 : 1);
 }
 
 main().catch(err => {
