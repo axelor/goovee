@@ -74,6 +74,10 @@ export default async function MyContributionsPage(props: {
   }
   if (error) notFound();
 
+  /* Contributions is a seller-only area; non-sellers can't reach it even by
+   * typing the URL. */
+  if (!auth.workspace.config.allowToPublish) notFound();
+
   const [categories, licenses, compatibilityVersions, newListingCurrency] =
     await Promise.all([
       findProductCategories({

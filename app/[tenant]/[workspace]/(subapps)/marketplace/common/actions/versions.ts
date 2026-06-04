@@ -49,7 +49,7 @@ export async function saveVersion(
   }
   const {client} = auth.tenant;
 
-  if (!payload.id && !auth.workspace.config.allowToPublish) {
+  if (!auth.workspace.config.allowToPublish) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
@@ -248,6 +248,13 @@ export async function unpublishVersion(
   const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
   if (error) {
     return {error: true, message};
+  }
+
+  if (!auth.workspace.config.allowToPublish) {
+    return {
+      error: true,
+      message: await t('Publishing is not allowed in this workspace'),
+    };
   }
   const {client} = auth.tenant;
 

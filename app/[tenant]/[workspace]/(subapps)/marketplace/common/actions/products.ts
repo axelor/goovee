@@ -50,6 +50,13 @@ export async function loadMyProductForEdit(
     return {error: true, message};
   }
 
+  if (!auth.workspace.config.allowToPublish) {
+    return {
+      error: true,
+      message: await t('Publishing is not allowed in this workspace'),
+    };
+  }
+
   const product = await findMyProductWithVersions({
     productId,
     mainPartnerId: auth.user.mainPartnerId,
@@ -93,7 +100,7 @@ export async function saveProduct(
   }
   const {client} = auth.tenant;
 
-  if (!payload.id && !auth.workspace.config.allowToPublish) {
+  if (!auth.workspace.config.allowToPublish) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),

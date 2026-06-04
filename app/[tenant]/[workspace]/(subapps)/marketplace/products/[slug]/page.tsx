@@ -80,6 +80,12 @@ export default async function ProductPage(props: {
 
   const {tab, reviewPage, versionPage, preview} = searchParams;
 
+  /* Preview of an unpublished product is a logged-in, seller-only capability:
+   * anyone requesting it without an account or publishing rights gets a 404. */
+  if (preview && (!auth.user || !auth.workspace.config.allowToPublish)) {
+    notFound();
+  }
+
   const product = await findProduct({
     slug: params.slug,
     client,
