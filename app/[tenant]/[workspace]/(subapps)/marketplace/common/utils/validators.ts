@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {MyContributionsTab, ProductTab} from '../constants/tabs';
 
 export const PAGE_SIZE = 12;
@@ -117,6 +118,40 @@ export const myAccountParamsSchema = z.object({
 });
 
 export type MyAccountParams = z.infer<typeof myAccountParamsSchema>;
+
+/* My Account → Favorites: page/limit pagination + name/description search
+ * over saved products. */
+export const myFavoritesSearchParamsSchema = z.object({
+  page: z
+    .string()
+    .transform(val => parseInt(val, 10))
+    .pipe(z.number().positive())
+    .catch(1)
+    .default(1),
+  limit: z
+    .string()
+    .transform(val => parseInt(val, 10))
+    .pipe(z.number().positive().max(100))
+    .catch(10)
+    .default(10),
+  search: z
+    .string()
+    .transform(val => val.trim())
+    .pipe(z.string().min(1))
+    .optional()
+    .catch(undefined),
+  priceType: z.enum(['free', 'paid', 'all']).catch('all').default('all'),
+  /* Narrowed to the known marketplace types (or 'all'); anything else falls
+   * back to 'all'. */
+  type: z
+    .union([z.enum(MARKETPLACE_TYPE), z.literal('all')])
+    .catch('all')
+    .default('all'),
+});
+
+export type MyFavoritesSearchParams = z.infer<
+  typeof myFavoritesSearchParamsSchema
+>;
 
 /* Checkout success page. `id` carries the purchase-row ids from this
  * checkout — repeated query keys (?id=1&id=2) arrive as an array, a single

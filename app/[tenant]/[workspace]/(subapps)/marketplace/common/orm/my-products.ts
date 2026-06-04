@@ -181,24 +181,4 @@ export async function countMyProducts({
   return Number(count);
 }
 
-export async function isProductFavorited({
-  userId,
-  productId,
-  client,
-}: {
-  userId: ID;
-  productId: ID;
-  client: Client;
-}): Promise<boolean> {
-  const favorite = await client.aOSPartner.findOne({
-    where: {
-      id: userId,
-      favouriteMarketplaceProducts: {id: productId},
-    },
-    select: {id: true},
-  });
-
-  return !!favorite;
-}
-
 // ---- CONTRIBUTOR DASHBOARD ---- //

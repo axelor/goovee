@@ -3,31 +3,6 @@ import type {ID} from '@/types';
 
 // ---- PARTNER LOOKUPS ---- //
 
-export type PartnerWithFavorite = NonNullable<
-  Awaited<ReturnType<typeof findPartnerWithFavorite>>
->;
-
-export async function findPartnerWithFavorite({
-  client,
-  userId,
-  productId,
-}: {
-  client: Client;
-  userId: ID;
-  productId: ID;
-}) {
-  return client.aOSPartner.findOne({
-    where: {id: userId},
-    select: {
-      id: true,
-      favouriteMarketplaceProducts: {
-        where: {id: productId},
-        select: {id: true},
-      },
-    },
-  });
-}
-
 export type PartnerInvoicingAddresses = NonNullable<
   Awaited<ReturnType<typeof findPartnerInvoicingAddresses>>
 >;

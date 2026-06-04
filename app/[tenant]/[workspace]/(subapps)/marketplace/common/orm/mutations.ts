@@ -30,37 +30,6 @@ export async function updateVersionStatus({
   });
 }
 
-// ---- PARTNER FAVORITES ---- //
-
-/** Sets a marketplace product's presence on the partner's
- *  favouriteMarketplaceProducts list to the requested state. Pass
- *  `isFavorite: true` to add, `false` to remove. Caller is expected to
- *  skip the call when the desired state already matches current state. */
-export async function setPartnerFavorite({
-  client,
-  userId,
-  version,
-  productId,
-  isFavorite,
-}: {
-  client: Client;
-  userId: ID;
-  version: number;
-  productId: ID;
-  isFavorite: boolean;
-}): Promise<ORMRecord> {
-  return client.aOSPartner.update({
-    data: {
-      id: userId,
-      version,
-      favouriteMarketplaceProducts: isFavorite
-        ? {select: {id: productId}}
-        : {remove: productId},
-    },
-    select: {id: true},
-  });
-}
-
 // ---- DOWNLOAD TELEMETRY ---- //
 
 export async function createDownloadRecord({

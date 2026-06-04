@@ -15,6 +15,11 @@ interface AddToFavoriteButtonProps {
   workspaceURL: string;
   workspaceURI: string;
   isFavorite?: boolean;
+  /**
+   * - `overlay` (default): boxed button for image overlays (product cards/header).
+   * - `bare`: just the heart icon, for inline use in tables/lists.
+   */
+  variant?: 'overlay' | 'bare';
 }
 
 export function AddToFavoriteButton({
@@ -22,6 +27,7 @@ export function AddToFavoriteButton({
   workspaceURL,
   workspaceURI,
   isFavorite: initialIsFavorite = false,
+  variant = 'overlay',
 }: AddToFavoriteButtonProps) {
   const pathname = usePathname();
   const {toast} = useToast();
@@ -65,17 +71,24 @@ export function AddToFavoriteButton({
     ? i18n.t('Remove from favorites')
     : i18n.t('Add to favorites');
 
+  const bare = variant === 'bare';
+
   return (
     <Button
       onClick={handleClick}
       disabled={isPending}
-      variant="outline"
+      variant={bare ? 'ghost' : 'outline'}
       size="icon"
       title={label}
       aria-label={label}
-      className="rounded-full bg-card/90 backdrop-blur-sm shadow-sm hover:bg-card">
+      className={cn(
+        'rounded-full',
+        bare
+          ? 'h-auto w-auto p-1.5 hover:bg-muted'
+          : 'bg-card/90 backdrop-blur-sm shadow-sm hover:bg-card',
+      )}>
       <Heart
-        size={18}
+        size={bare ? 16 : 18}
         className={cn('shrink-0', {
           'fill-red-500 text-red-500': isFavorite,
         })}
