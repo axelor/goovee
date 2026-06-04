@@ -20,7 +20,7 @@ import {
 } from '@/ui/components/pagination';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
-import {getPaginationButtons, getSkip} from '@/utils/pagination';
+import {getPages, getPaginationButtons, getSkip} from '@/utils/pagination';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
@@ -86,7 +86,7 @@ export default async function FavoritesPage(props: {
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
   const favoritesHref = `${marketplaceBase}/my-account/favorites`;
 
-  const {products, total} = await findFavoriteProducts({
+  const products = await findFavoriteProducts({
     client: auth.tenant.client,
     workspace: auth.workspace,
     userId: auth.user.id,
@@ -98,7 +98,8 @@ export default async function FavoritesPage(props: {
     skip: getSkip(limit, page),
   });
 
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  // @ts-expect-error: goovee adds `_count` to nested rows, but types are wrong
+  const totalPages = getPages(products, limit);
   const filtered = Boolean(search) || type !== 'all' || priceType !== 'all';
 
   const typeOptions = await Promise.all(

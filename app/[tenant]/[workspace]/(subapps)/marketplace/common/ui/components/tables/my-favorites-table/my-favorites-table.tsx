@@ -45,7 +45,7 @@ type Props = {
   marketplaceBase: string;
   /** A search/type/price filter is active — changes the empty state to
    *  "no results" instead of the "nothing saved yet" call to action. */
-  filtered?: boolean;
+  filtered: boolean;
 };
 
 export function MyFavoritesTable({

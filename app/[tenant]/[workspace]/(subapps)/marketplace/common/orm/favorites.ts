@@ -2,7 +2,6 @@ import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and, or} from '@/utils/orm';
-import {getTotal} from '@/utils/pagination';
 import type {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {
@@ -61,7 +60,7 @@ export async function isProductFavorited({
 
 export type ListFavoriteProduct = Awaited<
   ReturnType<typeof findFavoriteProducts>
->['products'][number];
+>[number];
 
 /** A page of the products a partner has favourited, scoped to those still
  *  accessible (workspace, non-archived, with a published version) so removed/
@@ -138,12 +137,6 @@ export async function findFavoriteProducts({
   });
 
   const favorites = partner?.favouriteMarketplaceProducts ?? [];
-  /* goovee attaches a window `_count` to paginated rows, but only the
-   * top-level find() exposes it in the types — read it off the nested rows. */
-  const total =
-    take == null
-      ? favorites.length
-      : getTotal(favorites as unknown as {_count?: string | null}[]);
 
   const priceContext = await getPriceContext({
     client,
@@ -154,11 +147,7 @@ export async function findFavoriteProducts({
     ),
   });
 
-  const products = favorites.map(product =>
-    withPrice(product, workspace, priceContext),
-  );
-
-  return {products, total};
+  return favorites.map(product => withPrice(product, workspace, priceContext));
 }
 
 // ---- FAVORITE MUTATIONS ---- //
