@@ -60,6 +60,15 @@ cascades through display currencies rather than failing a page).
    convert from. Omit the requested unit to price one item in the product's own
    unit.
 
+   **This mirrors the quick-price ENDPOINT, not the invoice.** In AOS the only
+   place a price is coefficient-converted by unit is `ProductRestServiceImpl`
+   (the read-only `/ws/aos/product/price` quote). A sale-order / invoice line
+   never unit-converts — it prices via the unit-less `getSaleUnitPrice`, and
+   picking a product forces the line's unit back to the product's sale unit,
+   where the catalogue price is already expressed. So this step is an
+   endpoint-style convenience for an app that wants per-requested-unit quoting;
+   there is no invoiced number to validate it against, only the endpoint.
+
 Both levels return the per-unit `wt` and `ati`, the applied `taxRate` (a
 percentage), the `qty`, and the line totals `wtTotal` / `atiTotal` (`wt`/`ati` ×
 `qty`). Level 1 additionally echoes the resolved `unitId`. Values are **raw** —
@@ -111,14 +120,27 @@ discount rules, the compute-method modes (fold the discount into the price vs
 keep it separate), and the line-selection logic. Like this core it works in
 float64 and leaves final rounding to the caller.
 
+The **billable line total** — what you actually charge — is `getLineTotal` in
+the same module, a port of `SaleOrderLineComputeServiceImpl.computeValues`. It
+takes the unit price plus the buyer's resolved discount and quantity and
+returns `exTaxTotal` / `inTaxTotal`, rounded to the currency's decimals. This
+matters under the SEPARATE compute method, where the discount is **not** in the
+unit price: the discounted amount only surfaces in the line total. `wt`/`ati`
+from this core are the unit price; `getLineTotal` is the line amount.
+
 ## Known simplifications vs AOS
 
 - **Arithmetic** is float64 rather than BigDecimal, and **final rounding** is
   left to the caller (exchange rates, which feed the computed value, are rounded
   to AOS's scales internally — see step 6). AOS carries 20 decimals through its
-  intermediate tax math; float64's ~15–17 significant digits agree with that for
-  realistic prices, so any remaining drift is theoretical (a consumer that needs
-  to guard against it — like marketplace checkout — applies its own tolerance).
+  intermediate tax math and rounds half-up; float64's ~15–17 significant digits
+  agree for realistic prices, but the gap is **not purely theoretical**: a value
+  that lands exactly on a half-cent can round the wrong way (e.g. a 5% discount
+  of 613.30 is exactly 582.635 → AOS 582.64, but float64 holds 582.6349… → 582.63
+  — a one-cent break). It is rare (~1 in several thousand combinations) and a
+  consumer needing exactness applies its own tolerance (marketplace checkout
+  does). The fix, deferred, is to move the hot path onto the `BigDecimal` the
+  goovee ORM already exports (`@goovee/orm`), which mirrors Java's exactly.
 
 See the header comment in `pricing.ts` for the exact AOS services each step
 mirrors.

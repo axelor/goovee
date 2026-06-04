@@ -11,7 +11,16 @@
  * Per product:  gv ≠ so → FAILURE;  gv == so but ep differs → PARTIAL;
  *               all three agree → SUCCESS.
  * gv-vs-so is the real correctness signal; ep is the bonus. The run exits
- * non-zero only on a failure (partials are fine).
+ * non-zero only on a failure (partials are fine). Both the unit price and the
+ * billable line total (exTaxTotal/inTaxTotal) are compared against so — the
+ * total is the only place a SEPARATE-mode discount surfaces.
+ *
+ * Unit conversion (--unit) is the exception: AOS invoice lines never
+ * unit-convert price — only the quick-price endpoint does (see the pricing-core
+ * doc in pricing.ts). So when a product's requested unit differs from its sale
+ * unit, so is NOT a valid reference; gv's discounted line total is validated
+ * against ep instead (indicational, so partial at worst). --unit is therefore
+ * left out of the default sweep.
  *
  * Pure product test: no marketplace involvement, nothing persisted. Every
  * dimension (product, company, partner, currency, unit) is a CLI flag; with
@@ -37,8 +46,11 @@ import {
   todayInTimezone,
 } from '../../pricing';
 import {
+  AMOUNT_TYPE,
   getDefaultPriceList,
-  getDiscountedPrice,
+  getLineTotal,
+  getPriceListLine,
+  getReplacedPriceAndDiscounts,
   type PricingPriceList,
 } from '../../price-list';
 import {processBatch} from './batch';
@@ -139,8 +151,23 @@ Options:
 }
 
 type GooveePrice =
-  | {ok: true; wt: number; ati: number; currencyCode: string}
+  | {
+      ok: true;
+      wt: number;
+      ati: number;
+      currencyCode: string;
+      /** The billable line totals (qty 1) — unit price after the residual
+       *  price-list discount, rounded to the currency. */
+      exTaxTotal: number;
+      inTaxTotal: number;
+    }
   | {ok: false; error: string};
+
+/* The quantity every price is computed at. A single knob so the unit-price
+ * vs line-total relationship is explicit: at LINE_QTY the line total divided
+ * by it is the discounted unit price (relied on by eqTotalToUnit). The sweep
+ * doesn't vary quantity. */
+const LINE_QTY = 1;
 
 function computeGooveePrice({
   product,
@@ -182,7 +209,7 @@ function computeGooveePrice({
       toCurrency,
       conversionLines,
       companySpecificProductFields,
-      qty: 1,
+      qty: LINE_QTY,
       ...(requestedUnit ? {requestedUnit, unitConversions} : {}),
     });
 
@@ -192,9 +219,13 @@ function computeGooveePrice({
      * is NOT the endpoint's applyPriceList round-trip.) */
     let {wt, ati} = roundSaleUnitPrice(result, atiPrimary, nb);
 
-    /* Price-list discount, invoice-style: applied on the primary basis via
-     * SaleOrderLineDiscountServiceImpl's composition (getDiscountedPrice,
-     * which honours the folded price), then the other basis re-derived. */
+    /* Price-list discount, invoice-style: resolve it on the primary basis the
+     * way the SO-line fill step does (getReplacedPriceAndDiscounts). INCLUDE
+     * folds it into the unit price (price set); SEPARATE leaves the unit price
+     * at catalogue and reports the residual discount, which the line total
+     * then applies. The non-primary basis is re-derived from the primary. */
+    let discountTypeSelect: number = AMOUNT_TYPE.NONE;
+    let discountAmount = 0;
     if (partner.id != null && priceList) {
       const productLines = priceListLines.filter(
         line => line.product?.id === product.id,
@@ -205,28 +236,54 @@ function computeGooveePrice({
           )
         : [];
       const primary = atiPrimary ? ati : wt;
-      const discounted = round(
-        getDiscountedPrice({
-          priceList,
-          productLines,
-          categoryLines,
-          qty: 1,
-          price: primary,
-          computeMethodDiscountSelect: appConfig.computeMethodDiscountSelect,
-          nbDecimalForUnitPrice: nb,
-        }),
+      const line = getPriceListLine(
+        productLines,
+        categoryLines,
+        LINE_QTY,
+        primary,
+      );
+      const discounts = getReplacedPriceAndDiscounts(
+        priceList,
+        line,
+        primary,
+        appConfig.computeMethodDiscountSelect,
         nb,
       );
+      discountTypeSelect = discounts.discountTypeSelect;
+      discountAmount = discounts.discountAmount;
+      const newPrimary = round(discounts.price ?? primary, nb);
       if (atiPrimary) {
-        ati = discounted;
-        wt = convertUnitPrice(true, result.taxRate, discounted, nb);
+        ati = newPrimary;
+        wt = convertUnitPrice(true, result.taxRate, newPrimary, nb);
       } else {
-        wt = discounted;
-        ati = convertUnitPrice(false, result.taxRate, discounted, nb);
+        wt = newPrimary;
+        ati = convertUnitPrice(false, result.taxRate, newPrimary, nb);
       }
     }
 
-    return {ok: true, wt, ati, currencyCode: toCurrency.code ?? ''};
+    /* The billable line total (qty 1), mirroring SaleOrderLineComputeService:
+     * apply the residual discount on the primary basis, take ×qty rounded to
+     * the order currency's decimals, derive the other basis off the tax rate. */
+    const {exTaxTotal, inTaxTotal} = getLineTotal({
+      wt,
+      ati,
+      discountTypeSelect,
+      discountAmount,
+      qty: LINE_QTY,
+      taxRate: result.taxRate,
+      inAti: atiPrimary,
+      currencyDecimals: toCurrency.numberOfDecimals ?? nb,
+      nbDecimalForUnitPrice: nb,
+    });
+
+    return {
+      ok: true,
+      wt,
+      ati,
+      currencyCode: toCurrency.code ?? '',
+      exTaxTotal,
+      inTaxTotal,
+    };
   } catch (err) {
     return {
       ok: false,
@@ -269,7 +326,15 @@ async function fetchAosPrices({
 }
 
 type PriceResult =
-  | {ok: true; wt: number; ati: number}
+  | {
+      ok: true;
+      wt: number;
+      ati: number;
+      /** Line totals — only the sale-order (`so`) source returns these; the
+       *  endpoint (`ep`) prices a unit only, so it leaves them undefined. */
+      exTaxTotal?: number;
+      inTaxTotal?: number;
+    }
   | {ok: false; error: string};
 
 /** Fetches the TRUE sale-order / invoice line price by running the product
@@ -282,6 +347,7 @@ async function fetchSaleOrderPrice({
   companyId,
   partnerId,
   fiscalPositionId,
+  priceListId,
   currencyId,
   unitId,
   today,
@@ -292,6 +358,7 @@ async function fetchSaleOrderPrice({
   companyId: string;
   partnerId: string;
   fiscalPositionId: string | null;
+  priceListId: string | null;
   currencyId: string;
   unitId: string | null;
   today: string;
@@ -322,6 +389,10 @@ async function fetchSaleOrderPrice({
             ...(fiscalPositionId
               ? {fiscalPosition: {id: Number(fiscalPositionId)}}
               : {}),
+            /* The discount fill reads `saleOrder.priceList` (a real order
+             * copies it from the partner). Without it the price list never
+             * applies and the totals come back undiscounted. */
+            ...(priceListId ? {priceList: {id: Number(priceListId)}} : {}),
             inAti,
             creationDate: today,
           },
@@ -338,6 +409,8 @@ async function fetchSaleOrderPrice({
         ok: true,
         wt: Number(values.price),
         ati: Number(values.inTaxPrice),
+        exTaxTotal: Number(values.exTaxTotal),
+        inTaxTotal: Number(values.inTaxTotal),
       };
     }
   }
@@ -378,6 +451,63 @@ function eq(
   );
 }
 
+/** The billable line totals agree (ex-tax and in-tax). Returns true when
+ *  either side lacks totals — there is nothing to disprove, so it never turns
+ *  a row red on its own. */
+function eqTotal(
+  a: GooveePrice | PriceResult,
+  b: GooveePrice | PriceResult,
+  nb: number,
+): boolean {
+  if (!a.ok || !b.ok) return true;
+  /* Either side missing or non-numeric totals (e.g. AOS omitted them, or a
+   * stray NaN from a missing field) → can't disprove, so don't fail the row on
+   * the total alone; the unit-price check still applies. */
+  if (
+    a.exTaxTotal == null ||
+    a.inTaxTotal == null ||
+    b.exTaxTotal == null ||
+    b.inTaxTotal == null
+  ) {
+    return true;
+  }
+  if (
+    !Number.isFinite(a.exTaxTotal) ||
+    !Number.isFinite(a.inTaxTotal) ||
+    !Number.isFinite(b.exTaxTotal) ||
+    !Number.isFinite(b.inTaxTotal)
+  ) {
+    return true;
+  }
+  const eps = 0.5 * 10 ** -nb;
+  return (
+    Math.abs(a.exTaxTotal - b.exTaxTotal) < eps &&
+    Math.abs(a.inTaxTotal - b.inTaxTotal) < eps
+  );
+}
+
+/** gv's discounted unit price matches ep's unit price. Used only for the
+ *  unit-converted case: ep folds the discount into its unit price, and gv's
+ *  line total ÷ LINE_QTY is that same discounted unit-converted price, so the
+ *  two are the comparable pair (dividing by LINE_QTY keeps this correct even
+ *  if the quantity ever changes). */
+function eqTotalToUnit(gv: GooveePrice, ep: PriceResult, nb: number): boolean {
+  if (!gv.ok || !ep.ok) return false;
+  if (
+    !Number.isFinite(gv.exTaxTotal) ||
+    !Number.isFinite(gv.inTaxTotal) ||
+    !Number.isFinite(ep.wt) ||
+    !Number.isFinite(ep.ati)
+  ) {
+    return false;
+  }
+  const eps = 0.5 * 10 ** -nb;
+  return (
+    Math.abs(gv.exTaxTotal / LINE_QTY - ep.wt) < eps &&
+    Math.abs(gv.inTaxTotal / LINE_QTY - ep.ati) < eps
+  );
+}
+
 type RowStatus = 'success' | 'partial' | 'failure';
 
 type Row = {
@@ -387,6 +517,8 @@ type Row = {
   gv: string;
   so: string;
   ep: string;
+  gvTot: string;
+  soTot: string;
 };
 
 /** Scores one product across the three prices: gv (goovee), so (the true
@@ -397,38 +529,56 @@ type Row = {
  *  Stage 2 — both gv and ep produced a value:
  *    - no buyer (no sale order to reference) → gv vs ep: match → success, else
  *      → partial;
- *    - buyer → gv vs so: mismatch → failure; match → then vs ep: all three
- *      match → success, else → partial. */
+ *    - buyer → gv vs so: a unit-price OR a line-total mismatch → failure;
+ *      both match → then vs ep (unit price): all three match → success, else
+ *      → partial. The line total is the billable amount and the only place a
+ *      SEPARATE-mode discount shows up.
+ *
+ *  `unitConverted` — gv priced in a unit other than the sale unit. AOS invoice
+ *  lines never unit-convert price (only the endpoint does, see the pricing-core
+ *  doc), so `so` is not a valid reference: instead compare gv's discounted line
+ *  total (qty 1) against `ep`'s unit price — the one path that unit-converts.
+ *  `ep` is indicational, so a mismatch is partial, never a failure. */
 function compare3(
   product: PriceProduct,
   gv: GooveePrice,
   so: PriceResult | null,
   ep: PriceResult,
   nb: number,
+  unitConverted: boolean,
 ): Row {
   let status: RowStatus;
   if (!gv.ok || !ep.ok) {
     status = !gv.ok && !ep.ok ? 'success' : 'failure';
+  } else if (unitConverted) {
+    status = eqTotalToUnit(gv, ep, nb) ? 'success' : 'partial';
   } else if (so === null) {
     status = eq(gv, ep, nb) ? 'success' : 'partial';
   } else {
-    status = !eq(gv, so, nb)
-      ? 'failure'
-      : eq(gv, ep, nb)
-        ? 'success'
-        : 'partial';
+    status =
+      !eq(gv, so, nb) || !eqTotal(gv, so, nb)
+        ? 'failure'
+        : eq(gv, ep, nb)
+          ? 'success'
+          : 'partial';
   }
   const fmt = (r: GooveePrice | PriceResult) =>
     r.ok
       ? `${round(r.wt, nb)}/${round(r.ati, nb)}`
       : `err:${r.error.slice(0, 22)}`;
+  const fmtTot = (r: GooveePrice | PriceResult) =>
+    r.ok && r.exTaxTotal != null && r.inTaxTotal != null
+      ? `${round(r.exTaxTotal, nb)}/${round(r.inTaxTotal, nb)}`
+      : '-';
   return {
     status,
     productId: product.id,
     name: (product.name ?? product.code ?? product.id).slice(0, 28),
     gv: fmt(gv),
-    so: so === null ? 'n/a' : fmt(so),
+    so: so === null || unitConverted ? 'n/a' : fmt(so),
     ep: fmt(ep),
+    gvTot: fmtTot(gv),
+    soTot: so === null || unitConverted ? 'n/a' : fmtTot(so),
   };
 }
 
@@ -446,12 +596,15 @@ function renderRows(rows: Row[]): void {
     gv: Math.max(12, ...rows.map(r => r.gv.length)),
     so: Math.max(12, ...rows.map(r => r.so.length)),
     ep: Math.max(12, ...rows.map(r => r.ep.length)),
+    gvTot: Math.max(10, ...rows.map(r => r.gvTot.length)),
+    soTot: Math.max(10, ...rows.map(r => r.soTot.length)),
   };
   const pad = (s: string, n: number) => s.padEnd(n);
   for (const r of rows) {
     console.log(
       `  ${STATUS_ICON[r.status]}${RESET}  ${pad(r.productId, w.id)}  ${pad(r.name, w.name)}  ` +
-        `${DIM}gv${RESET} ${pad(r.gv, w.gv)}  ${DIM}so${RESET} ${pad(r.so, w.so)}  ${DIM}ep${RESET} ${pad(r.ep, w.ep)}`,
+        `${DIM}gv${RESET} ${pad(r.gv, w.gv)}  ${DIM}so${RESET} ${pad(r.so, w.so)}  ${DIM}ep${RESET} ${pad(r.ep, w.ep)}  ` +
+        `${DIM}Σgv${RESET} ${pad(r.gvTot, w.gvTot)}  ${DIM}Σso${RESET} ${pad(r.soTot, w.soTot)}`,
     );
   }
 }
@@ -588,6 +741,7 @@ async function main() {
                   companyId,
                   partnerId,
                   fiscalPositionId,
+                  priceListId: priceList?.id ?? null,
                   currencyId: currencyOverride.id,
                   unitId: values.unit ?? null,
                   today,
@@ -616,6 +770,13 @@ async function main() {
             sos[i],
             endpointResult(aosById.get(product.id)),
             nb,
+            /* Did gv unit-convert this product? AOS invoice lines never
+             * unit-convert price (only the quick-price endpoint does), so when
+             * the requested unit differs from the sale unit `so` can't be the
+             * reference — validate gv against `ep` instead. */
+            requestedUnit != null &&
+              requestedUnit.id !==
+                (product.salesUnit?.id ?? product.unit?.id ?? null),
           ),
         );
 

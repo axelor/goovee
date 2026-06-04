@@ -104,6 +104,17 @@
  * requested unit to the sale unit. The line total is then unit price ×
  * quantity.
  *
+ * IMPORTANT — this mirrors the quick-price ENDPOINT, not the invoice. In
+ * AOS the ONLY place a price is coefficient-converted by unit is
+ * `ProductRestServiceImpl` (the read-only /ws/aos/product/price quote). A
+ * sale-order / invoice line never does: `SaleOrderLinePriceServiceImpl`
+ * prices via the 6-arg `getSaleUnitPrice` (no unit param), and picking a
+ * product forces the line's unit back to the product's sale unit, where
+ * the catalogue price is already expressed. So unit conversion here is an
+ * endpoint-style convenience for a product-selling app that wants
+ * per-requested-unit quoting — there is no invoiced number to match it
+ * against; only the endpoint validates it (see scripts/test-price).
+ *
  * Only coefficient conversions are supported (`UnitConversion.typeSelect
  * == TYPE_COEFF`): forward = `coef`, reverse = `1/coef`. AOS also allows
  * Groovy formula lines (`typeSelect == TYPE_FORMULA`); we do NOT evaluate
