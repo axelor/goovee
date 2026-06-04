@@ -128,7 +128,6 @@ export default async function MyContributionsPage(props: {
     overviewLabel,
     productsLabel,
     revenueLabel,
-    profileLabel,
     comingSoonTitle,
     comingSoonDescription,
   ] = await Promise.all([
@@ -141,7 +140,6 @@ export default async function MyContributionsPage(props: {
     t('Overview'),
     t('Products'),
     t('Revenue'),
-    t('Profile'),
     t('Coming soon'),
     t(
       'This section is still being built; what you see below is a preview of the layout.',
@@ -260,15 +258,6 @@ export default async function MyContributionsPage(props: {
             }`}>
             {revenueLabel}
           </Link>
-          <Link
-            href={tabNavLink(MyContributionsTab.Profile)}
-            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              tab === MyContributionsTab.Profile
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
-            }`}>
-            {profileLabel}
-          </Link>
         </div>
       </div>
 
@@ -298,7 +287,6 @@ export default async function MyContributionsPage(props: {
           />
         )}
         {tab === MyContributionsTab.Revenue && comingSoonBanner}
-        {tab === MyContributionsTab.Profile && comingSoonBanner}
       </div>
     </div>
   );

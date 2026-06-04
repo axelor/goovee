@@ -480,9 +480,19 @@ export default async function ProductPage(props: {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full rounded-full">
-                  {viewProfileLabel}
-                </Button>
+                {product.publisher.isInDirectory &&
+                  product.publisher.isCustomer &&
+                  !product.publisher.archived && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full rounded-full">
+                      <Link
+                        href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`}>
+                        {viewProfileLabel}
+                      </Link>
+                    </Button>
+                  )}
               </div>
             )}
           </div>

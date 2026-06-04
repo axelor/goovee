@@ -8,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
+import {Button} from '@/ui/components';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {
@@ -64,6 +65,7 @@ export default async function MyAccountPage(props: {
     favoritesDescLabel,
     contributionsLabel,
     contributionsDescLabel,
+    partnerProfileLabel,
   ] = await Promise.all([
     t('Marketplace'),
     t('My account'),
@@ -74,6 +76,7 @@ export default async function MyAccountPage(props: {
     t('Your saved products.'),
     t('My contributions'),
     t('Manage your published products.'),
+    t('See partner profile'),
   ]);
 
   const cards: Array<{
@@ -133,11 +136,19 @@ export default async function MyAccountPage(props: {
 
       {/* Header */}
       <div className="pb-6">
-        <div className="space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {myAccountLabel}
-          </h1>
-          <p className="text-muted-foreground text-sm">{descLabel}</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+              {myAccountLabel}
+            </h1>
+            <p className="text-muted-foreground text-sm">{descLabel}</p>
+          </div>
+          <Button asChild variant="outline" className="rounded-full">
+            <Link
+              href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${auth.user.mainPartnerId}`}>
+              {partnerProfileLabel}
+            </Link>
+          </Button>
         </div>
       </div>
 

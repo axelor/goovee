@@ -9,5 +9,4 @@ export enum MyContributionsTab {
   Overview = 'overview',
   Products = 'products',
   Revenue = 'revenue',
-  Profile = 'profile',
 }

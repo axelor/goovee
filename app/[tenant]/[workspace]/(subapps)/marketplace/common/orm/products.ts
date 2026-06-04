@@ -196,6 +196,9 @@ export async function findProduct({
         simpleFullName: true,
         name: true,
         picture: {id: true},
+        isInDirectory: true,
+        isCustomer: true,
+        archived: true,
       },
       pictureList: {
         select: {sequence: true, picture: {id: true}},
