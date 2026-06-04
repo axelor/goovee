@@ -90,7 +90,7 @@ export async function ProductsListTab({
                       ['pointer-events-none opacity-50']: page <= 1,
                     })}
                     href={{
-                      pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions`,
+                      pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                       query: {
                         tab: paramName === 'skillsPage' ? 'skills' : 'apps',
                         [paramName]: Math.max(1, page - 1),
@@ -117,7 +117,7 @@ export async function ProductsListTab({
                           scroll={false}
                           replace
                           href={{
-                            pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions`,
+                            pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                             query: {
                               tab:
                                 paramName === 'skillsPage' ? 'skills' : 'apps',
@@ -140,7 +140,7 @@ export async function ProductsListTab({
                       ['pointer-events-none opacity-50']: page >= totalPages,
                     })}
                     href={{
-                      pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions`,
+                      pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                       query: {
                         tab: paramName === 'skillsPage' ? 'skills' : 'apps',
                         [paramName]: page + 1,

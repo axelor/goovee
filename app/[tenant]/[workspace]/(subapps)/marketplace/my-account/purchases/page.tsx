@@ -27,14 +27,14 @@ import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
-import {findPurchases} from '../common/orm';
-import {MyPurchasesTable} from '../common/ui/components/tables/my-purchases-table';
-import {ensureAuth} from '../common/utils/auth-helper';
+import {findPurchases} from '../../common/orm';
+import {MyPurchasesTable} from '../../common/ui/components/tables/my-purchases-table';
+import {ensureAuth} from '../../common/utils/auth-helper';
 import {
   myPurchasesParamsSchema,
   myPurchasesSearchParamsSchema,
   type MyPurchasesSearchParams,
-} from '../common/utils/validators';
+} from '../../common/utils/validators';
 
 export default async function MyPurchasesPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -66,7 +66,7 @@ export default async function MyPurchasesPage(props: {
   if (forceLogin) {
     redirect(
       getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-purchases`,
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/purchases`,
         workspaceURI,
         tenant: tenantId,
       }),
@@ -102,14 +102,19 @@ export default async function MyPurchasesPage(props: {
   const totalPages = getPages(purchases, limit);
 
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
-  const purchasesHref = `${marketplaceBase}/my-purchases`;
+  const purchasesHref = `${marketplaceBase}/my-account/purchases`;
 
-  const [marketplaceLabel, myPurchasesLabel, myPurchasesDescLabel] =
-    await Promise.all([
-      t('Marketplace'),
-      t('My purchases'),
-      t("Review and manage the apps you've purchased from the marketplace."),
-    ]);
+  const [
+    marketplaceLabel,
+    myAccountLabel,
+    myPurchasesLabel,
+    myPurchasesDescLabel,
+  ] = await Promise.all([
+    t('Marketplace'),
+    t('My account'),
+    t('My purchases'),
+    t("Review and manage the apps you've purchased from the marketplace."),
+  ]);
 
   return (
     <div className="min-h-screen container pb-6">
@@ -122,6 +127,16 @@ export default async function MyPurchasesPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link href={marketplaceBase}>{marketplaceLabel}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                asChild
+                className="text-foreground-muted cursor-pointer truncate text-md">
+                <Link href={`${marketplaceBase}/my-account`}>
+                  {myAccountLabel}
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

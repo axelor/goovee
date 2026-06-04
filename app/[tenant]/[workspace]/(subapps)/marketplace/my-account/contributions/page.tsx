@@ -15,26 +15,26 @@ import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
-import {MyContributionsTab} from '../common/constants/tabs';
+import {MyContributionsTab} from '../../common/constants/tabs';
 import {
   countMyProducts,
   findCompatibilityVersions,
   findLicenses,
   findProductCategories,
   resolveNewListingCurrency,
-} from '../common/orm';
-import {PublishNewButton} from '../common/ui/components/buttons/publish-new-button';
-import {Await} from '../common/ui/components/primitives/await';
+} from '../../common/orm';
+import {PublishNewButton} from '../../common/ui/components/buttons/publish-new-button';
+import {Await} from '../../common/ui/components/primitives/await';
 import {Construction} from 'lucide-react';
-import {NoticeBanner} from '../common/ui/components/primitives/notice-banner';
-import {OverviewTab} from '../common/ui/components/tabs/my-contributions-overview-tab';
-import {ProductsTab} from '../common/ui/components/tabs/products-tab';
-import {ensureAuth} from '../common/utils/auth-helper';
+import {NoticeBanner} from '../../common/ui/components/primitives/notice-banner';
+import {OverviewTab} from '../../common/ui/components/tabs/my-contributions-overview-tab';
+import {ProductsTab} from '../../common/ui/components/tabs/products-tab';
+import {ensureAuth} from '../../common/utils/auth-helper';
 import {
   myContributionsParamsSchema,
   myContributionsSearchParamsSchema,
   type MyContributionsSearchParams,
-} from '../common/utils/validators';
+} from '../../common/utils/validators';
 
 export default async function MyContributionsPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -66,7 +66,7 @@ export default async function MyContributionsPage(props: {
   if (forceLogin) {
     redirect(
       getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions`,
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
         workspaceURI,
         tenant: tenantId,
       }),
@@ -113,11 +113,12 @@ export default async function MyContributionsPage(props: {
       Object.keys(params).length > 0
         ? `?${new URLSearchParams(params).toString()}`
         : '';
-    return `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-contributions${queryStr}`;
+    return `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions${queryStr}`;
   };
 
   const [
     marketplaceLabel,
+    myAccountLabel,
     myContribLabel,
     manageDescLabel,
     overviewLabel,
@@ -128,6 +129,7 @@ export default async function MyContributionsPage(props: {
     comingSoonDescription,
   ] = await Promise.all([
     t('Marketplace'),
+    t('My account'),
     t('My contributions'),
     t(
       "Manage the plugins and apps you've published on the Axelor marketplace.",
@@ -162,6 +164,17 @@ export default async function MyContributionsPage(props: {
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
                   {marketplaceLabel}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                asChild
+                className="text-foreground-muted cursor-pointer truncate text-md">
+                <Link
+                  href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`}>
+                  {myAccountLabel}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>

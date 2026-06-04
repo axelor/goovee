@@ -109,6 +109,15 @@ export type MyPurchasesSearchParams = z.infer<
   typeof myPurchasesSearchParamsSchema
 >;
 
+/* My Account hub landing — only needs the tenant/workspace route params; each
+ * sub-route (purchases/contributions/favorites) owns its own search params. */
+export const myAccountParamsSchema = z.object({
+  tenant: z.string(),
+  workspace: z.string(),
+});
+
+export type MyAccountParams = z.infer<typeof myAccountParamsSchema>;
+
 /* Checkout success page. `id` carries the purchase-row ids from this
  * checkout — repeated query keys (?id=1&id=2) arrive as an array, a single
  * one as a string; normalize both to a clean string[]. */

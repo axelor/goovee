@@ -43,7 +43,7 @@ export default async function CheckoutSuccessPage(props: {
   if (forceLogin) {
     redirect(
       getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-purchases`,
+        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/purchases`,
         workspaceURI,
         tenant: tenantId,
       }),
@@ -130,7 +130,9 @@ export default async function CheckoutSuccessPage(props: {
         )}
 
         <Button asChild>
-          <Link href={`${marketplaceBase}/my-purchases`}>{viewAllLabel}</Link>
+          <Link href={`${marketplaceBase}/my-account/purchases`}>
+            {viewAllLabel}
+          </Link>
         </Button>
       </div>
     </div>
