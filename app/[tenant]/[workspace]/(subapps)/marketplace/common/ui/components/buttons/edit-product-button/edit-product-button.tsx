@@ -9,8 +9,8 @@ import type {
   ListCategory,
   ListLicense,
   MyProductWithVersions,
-  Currency,
 } from '../../../../orm';
+import type {Currency} from '@/product/orm';
 import {ProductFormDialog} from '../../dialogs/product-form-dialog';
 
 type Props = {

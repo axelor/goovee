@@ -17,11 +17,8 @@ import {RECENT_REVIEW_WINDOW_DAYS} from '../constants/review';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {formatVersionNumber} from '../utils/version-number';
-import {
-  withMyProductAccessFilter,
-  type Currency,
-  type QueryProps,
-} from './helpers';
+import {withMyProductAccessFilter, type QueryProps} from './helpers';
+import type {Currency} from '@/product/orm';
 import {getPriceContext} from './price';
 
 type ContributionQuery = {

@@ -1,54 +1,34 @@
-/* Self-contained ORM fetches for the product price-parity script. Kept
- * local to the core product dir on purpose: this is a pure product test
- * with no marketplace coupling, so it reads what the core's
- * `getSaleUnitPrice` / `applyPriceList` need directly from the generated
- * client rather than borrowing any subapp's query layer. */
+/* ORM fetches for the product price-parity script. The generic select
+ * fragments and side-data fetches come from the core data layer
+ * (`@/product/orm`); this file adds only the test-specific queries (product
+ * filters, partner sampling, price-list lines) and the extra product columns
+ * the test needs on top of the core fragment. */
 import type {Client} from '@/goovee/.generated/client';
+import type {AOSPartner, AOSProduct} from '@/goovee/.generated/models';
+import type {SelectOptions} from '@goovee/orm';
+import {
+  currencySelect,
+  fetchConversionLines,
+  productPriceSelectFields,
+  taxSelectFields,
+} from '@/product/orm';
 
-const currencySelect = {
-  codeISO: true,
-  code: true,
-  symbol: true,
-  numberOfDecimals: true,
-} as const;
+/** Company-specific product fields — the core fetch, under the script's name. */
+export {findCompanySpecificProductFields as loadCompanySpecificProductFields} from '@/product/orm';
 
-const taxSelect = {
-  id: true,
-  activeTaxLine: {id: true, value: true},
-  taxLineList: {
-    select: {id: true, value: true, startDate: true, endDate: true},
-  },
-} as const;
-
-const accountManagementSelect = {
-  company: {id: true},
-  saleTaxSet: {select: taxSelect},
-} as const;
-
-/** Everything the core's level-1 `getSaleUnitPrice` reads off a product:
- *  the sale price fields, per-company overrides, the tax configuration
- *  (own + family), the units, and the category (for price-list fallback). */
+/** The core's priceable-product fragment, plus the extra columns this test
+ *  needs: a label, the units (for the `--unit` dimension) and the category
+ *  (for price-list fallback). The app owns the product query; core owns the
+ *  fragment. */
 const productPriceSelect = {
+  ...productPriceSelectFields,
   name: true,
   code: true,
-  salePrice: true,
-  inAti: true,
   sellable: true,
-  saleCurrency: currencySelect,
   unit: {id: true},
   salesUnit: {id: true},
   productCategory: {id: true},
-  productCompanyList: {
-    select: {
-      company: {id: true},
-      salePrice: true,
-      inAti: true,
-      saleCurrency: currencySelect,
-    },
-  },
-  accountManagementList: {select: accountManagementSelect},
-  productFamily: {accountManagementList: {select: accountManagementSelect}},
-} as const;
+} as const satisfies SelectOptions<AOSProduct>;
 
 export type PriceProduct = Awaited<ReturnType<typeof loadProducts>>[number];
 export type CurrencyRow = Awaited<ReturnType<typeof loadCurrencies>>[number];
@@ -73,19 +53,6 @@ export async function loadAppConfig(client: Client) {
       appBase?.computeMethodDiscountSelect ?? 0,
     ),
   };
-}
-
-/** Names of the product fields an admin flagged company-specific
- *  (`AppBase.companySpecificProductFieldsSet`) — the core consults a
- *  product's per-company override row only for these. */
-export async function loadCompanySpecificProductFields(client: Client) {
-  const appBase = await client.aOSAppBase.findOne({
-    where: {OR: [{archived: false}, {archived: null}]},
-    select: {companySpecificProductFieldsSet: {select: {name: true}}},
-  });
-  return (appBase?.companySpecificProductFieldsSet ?? [])
-    .map(field => field.name)
-    .filter((name): name is string => !!name);
 }
 
 export async function loadProducts(
@@ -154,7 +121,7 @@ const partnerSelect = {
     taxEquivList: {
       select: {
         fromTaxSet: {select: {id: true}},
-        toTaxSet: {select: taxSelect},
+        toTaxSet: {select: taxSelectFields},
       },
     },
   },
@@ -170,7 +137,7 @@ const partnerSelect = {
       },
     },
   },
-} as const;
+} as const satisfies SelectOptions<AOSPartner>;
 
 function partnerLabel(partner: {
   fullName?: string | null;
@@ -247,48 +214,14 @@ export async function loadPartnerSamples(
   ];
 }
 
-/** Exchange-rate lines covering the given currency pairs, in both
- *  directions (matched on `codeISO`, as the core does). */
+/** Exchange-rate lines for the given currency pairs — the core fetch, with
+ *  the script's positional signature. */
 export async function loadConversionLines(
   client: Client,
   fromCodes: Array<string | null | undefined>,
   toCodes: Array<string | null | undefined>,
 ) {
-  const clean = (codes: Array<string | null | undefined>) =>
-    Array.from(
-      new Set(codes.filter((c): c is string => typeof c === 'string' && !!c)),
-    );
-  const froms = clean(fromCodes);
-  const tos = clean(toCodes);
-  if (froms.length === 0 || tos.length === 0) return [];
-
-  const appBase = await client.aOSAppBase.findOne({
-    where: {OR: [{archived: false}, {archived: null}]},
-    select: {
-      currencyConversionLineList: {
-        where: {
-          OR: [
-            {
-              startCurrency: {codeISO: {in: froms}},
-              endCurrency: {codeISO: {in: tos}},
-            },
-            {
-              startCurrency: {codeISO: {in: tos}},
-              endCurrency: {codeISO: {in: froms}},
-            },
-          ],
-        },
-        select: {
-          startCurrency: {codeISO: true},
-          endCurrency: {codeISO: true},
-          exchangeRate: true,
-          fromDate: true,
-          toDate: true,
-        },
-      },
-    },
-  });
-  return appBase?.currencyConversionLineList ?? [];
+  return fetchConversionLines({client, fromCodes, toCodes});
 }
 
 export type PriceListLineRow = Awaited<

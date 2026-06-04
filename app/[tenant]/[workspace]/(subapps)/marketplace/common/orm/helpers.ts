@@ -1,10 +1,7 @@
 import type {
-  AOSAccountManagement,
   AOSMarketplaceProduct,
   AOSMarketplaceCategory,
   AOSMarketplaceProductVersion,
-  AOSProduct,
-  AOSCurrency,
 } from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and, or} from '@/utils/orm';
@@ -18,6 +15,7 @@ import type {
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {Maybe} from '@/types/util';
+import {productPriceSelectFields} from '@/product/orm';
 
 export type QueryProps<T extends Entity> = {
   where?: WhereOptions<T> | null;
@@ -171,17 +169,6 @@ export function withScreenshotAccessFilter(
   };
 }
 
-export const currencySelect = {
-  code: true,
-  /* Conversion lines are matched on the ISO code (AOS
-   * `CurrencyServiceImpl` keys on `codeISO`, not the printing `code`). */
-  codeISO: true,
-  symbol: true,
-  numberOfDecimals: true,
-} as const satisfies SelectOptions<AOSCurrency>;
-
-export type Currency = Payload<AOSCurrency, {select: typeof currencySelect}>;
-
 /* Canonical ordering for version listings: highest sort tuple first.
  * vPreRelease NULLs sort ABOVE tags on DESC so `1.2.3` > `1.2.3-rc2`. */
 export const versionSortOrder = {
@@ -202,59 +189,6 @@ export const versionNumberFields = {
 
 /** Default goovee-orm result shape for lookups that select only id+version. */
 export type ORMRecord = {id: string; version: number};
-
-const accountManagementSelectFields = {
-  company: {id: true},
-  saleTaxSet: {
-    select: {
-      id: true,
-      /* Line ids matter: AOS collects resolved tax lines into a Set, so a
-       * TaxLine shared by two taxes is counted once. */
-      activeTaxLine: {id: true, value: true},
-      taxLineList: {
-        select: {id: true, value: true, startDate: true, endDate: true},
-      },
-    },
-  },
-} as const satisfies SelectOptions<AOSAccountManagement>;
-
-/** One row from `accountManagementList` — minimum fields needed for tax
- *  resolution. Defined at the leaf so it can be referenced both on the
- *  product and on the product family without redeclaring. */
-export type AccountManagementRow = Payload<
-  AOSAccountManagement,
-  {select: typeof accountManagementSelectFields}
->;
-
-/** Fields the workspace default `Product` must expose for tax/currency
- *  resolution. Used by `computePrice` directly. */
-const productPriceSelectFields = {
-  salePrice: true,
-  inAti: true,
-  saleCurrency: currencySelect,
-  /* Per-company overrides of `salePrice` / `inAti` / `saleCurrency`. AOS
-   * reads these via `ProductCompanyService` before falling back to the
-   * base product fields. */
-  productCompanyList: {
-    select: {
-      company: {id: true},
-      salePrice: true,
-      inAti: true,
-      saleCurrency: currencySelect,
-    },
-  },
-  /* Product-level account-management overrides. AOS consults these
-   * before falling back to the product family's list. */
-  accountManagementList: {select: accountManagementSelectFields},
-  productFamily: {
-    accountManagementList: {select: accountManagementSelectFields},
-  },
-} as const satisfies SelectOptions<AOSProduct>;
-
-export type PriceableProduct = Payload<
-  AOSProduct,
-  {select: typeof productPriceSelectFields}
->;
 
 /** Fields the MP listing must expose for `withPrice` to compute the
  *  server-side `price` (wt / ati / taxRate / currency). The listing's

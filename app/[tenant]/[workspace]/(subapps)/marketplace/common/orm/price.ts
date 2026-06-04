@@ -1,10 +1,14 @@
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
+import {
+  fetchConversionLines,
+  findCurrencyByCodeISO,
+  findPartnerCurrency,
+  findPartnerFiscalPosition,
+} from '@/product/orm';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {computePrice, type ComputedPrice} from '../utils/price';
-import {currencySelect, type PriceableMarketplaceProduct} from './helpers';
-import {Payload, SelectOptions} from '@goovee/orm';
-import {AOSTax} from '@/goovee/.generated/models';
+import type {PriceableMarketplaceProduct} from './helpers';
 
 /** Enriches an MP listing row with the computed `price`. The listing's
  *  own `salePrice` / `inAti` / `saleCurrency` are fed through as
@@ -31,98 +35,11 @@ export function withPrice<T extends PriceableMarketplaceProduct>(
   };
 }
 
-/** One row from `appBase.currencyConversionLineList`. */
-export type ConversionLine = Awaited<
-  ReturnType<typeof fetchConversionLines>
->[number];
-
-/** Fetches the conversion lines needed to convert between the given
- *  product currencies and any of the conversion targets (viewer +
- *  default). Filters the query to just the relevant (from, to) pairs
- *  (in both directions) so we don't pull the entire table. Returns
- *  empty when there's nothing to convert. */
-export async function fetchConversionLines({
-  client,
-  fromCodes,
-  toCodes,
-}: {
-  client: Client;
-  fromCodes: Array<string | null | undefined>;
-  toCodes: Array<string | null | undefined>;
-}) {
-  const tos = Array.from(
-    new Set(
-      toCodes.filter((c): c is string => typeof c === 'string' && c.length > 0),
-    ),
-  );
-  if (tos.length === 0) return [];
-  const froms = Array.from(
-    new Set(
-      fromCodes.filter(
-        (c): c is string => typeof c === 'string' && c.length > 0,
-      ),
-    ),
-  );
-  if (froms.length === 0) return [];
-
-  /* Lines are matched on the ISO code, mirroring AOS
-   * `CurrencyServiceImpl.getCurrencyConversionLine` which keys on
-   * `codeISO` (the unique ISO field), not the printing `code`. */
-  const appBase = await client.aOSAppBase.findOne({
-    where: {OR: [{archived: false}, {archived: null}]},
-    select: {
-      currencyConversionLineList: {
-        where: {
-          OR: [
-            {
-              startCurrency: {codeISO: {in: froms}},
-              endCurrency: {codeISO: {in: tos}},
-            },
-            {
-              startCurrency: {codeISO: {in: tos}},
-              endCurrency: {codeISO: {in: froms}},
-            },
-          ],
-        },
-        select: {
-          startCurrency: {codeISO: true},
-          endCurrency: {codeISO: true},
-          exchangeRate: true,
-          fromDate: true,
-          toDate: true,
-        },
-      },
-    },
-  });
-  return appBase?.currencyConversionLineList ?? [];
-}
-
-/** Names of the Product fields an admin has flagged as company-specific
- *  (`appBase.companySpecificProductFieldsSet`). AOS only consults a
- *  product's per-company override row for fields in this set
- *  (`ProductCompanyServiceImpl.isCompanySpecificProductFields`).
- *
- *  Not part of `getPriceContext`: marketplace listings always price via
- *  their own sealed fields, so per-company field resolution never runs
- *  here. This helper feeds the core's `getSaleUnitPrice` (level 1) when
- *  a caller prices a bare product. */
-export async function findCompanySpecificProductFields(client: Client) {
-  const appBase = await client.aOSAppBase.findOne({
-    where: {OR: [{archived: false}, {archived: null}]},
-    select: {
-      companySpecificProductFieldsSet: {select: {name: true}},
-    },
-  });
-  return (appBase?.companySpecificProductFieldsSet ?? [])
-    .map(field => field.name)
-    .filter((name): name is string => !!name);
-}
-
-/** Bundle of inputs `computePrice` needs that are *batch-wide* rather
- *  than per-product: the viewer/default currencies, the conversion
- *  lines covering this batch, and the buyer's fiscal position. Built
- *  once per request, reused across every product in the batch. See
- *  `utils/price.ts` for how these get consumed. */
+/** Bundle of inputs `computePrice` needs that are *batch-wide* rather than
+ *  per-product: the viewer/default currencies (the storefront display
+ *  cascade), the conversion lines covering this batch, and the buyer's
+ *  fiscal position. Built once per request via the core fetches, reused
+ *  across every product in the batch. */
 export type PriceContext = Awaited<ReturnType<typeof getPriceContext>>;
 export async function getPriceContext({
   client,
@@ -153,81 +70,13 @@ export async function getPriceContext({
   };
 }
 
-const taxRowSelectFields = {
-  id: true,
-  /* Line ids matter: AOS collects resolved tax lines into a Set, so a
-   * TaxLine shared by two taxes is counted once. */
-  activeTaxLine: {id: true, value: true},
-  taxLineList: {
-    select: {id: true, value: true, startDate: true, endDate: true},
-  },
-} as const satisfies SelectOptions<AOSTax>;
-
-/** One tax in a product's `saleTaxSet`, with just the fields needed
- *  for rate resolution (active value, or a date-windowed line). */
-export type TaxRow = Payload<AOSTax, {select: typeof taxRowSelectFields}>;
-
-/** Shape `computePrice` consumes for per-buyer tax remapping. */
-export type FiscalPositionInput = NonNullable<
-  Awaited<ReturnType<typeof findPartnerFiscalPosition>>
->;
-
-/** Loads the buyer partner's fiscal position with its `taxEquivList`,
- *  ready to feed `computePrice`. Returns null when the partner has
- *  none — `computePrice` then uses each tax as-is. */
-export async function findPartnerFiscalPosition({
-  client,
-  mainPartnerId,
-}: {
-  client: Client;
-  mainPartnerId: string | null | undefined;
-}) {
-  if (!mainPartnerId) return null;
-  const partner = await client.aOSPartner.findOne({
-    where: {id: mainPartnerId},
-    select: {
-      fiscalPosition: {
-        taxEquivList: {
-          select: {
-            fromTaxSet: {select: {id: true}},
-            toTaxSet: {
-              select: taxRowSelectFields,
-            },
-          },
-        },
-      },
-    },
-  });
-  return partner?.fiscalPosition ?? null;
-}
-
-/** Looks up the app-wide fallback currency (`DEFAULT_CURRENCY_CODE`) in
- *  `AOSCurrency`. Used at product create time (`saveProduct`) and at
- *  display time (`getPriceContext`). Returns null if the row is missing
- *  — callers decide whether that's a hard failure (create) or a soft
- *  fallback (display). */
+/** The app-wide fallback currency (`DEFAULT_CURRENCY_CODE`) — a thin wrapper
+ *  over the core's `findCurrencyByCodeISO`; the choice of *which* code is the
+ *  app's policy. Used at product create time (`saveProduct`) and at display
+ *  time (`getPriceContext`). Returns null if the row is missing — callers
+ *  decide whether that's a hard failure (create) or a soft fallback (display). */
 export async function findDefaultCurrency(client: Client) {
-  return client.aOSCurrency.findOne({
-    where: {code: DEFAULT_CURRENCY_CODE},
-    select: currencySelect,
-  });
-}
-
-export async function findPartnerCurrency({
-  client,
-  mainPartnerId,
-}: {
-  client: Client;
-  mainPartnerId: string | null | undefined;
-}) {
-  if (!mainPartnerId) return null;
-  const partner = await client.aOSPartner.findOne({
-    where: {id: mainPartnerId},
-    select: {
-      currency: currencySelect,
-    },
-  });
-  return partner?.currency ?? null;
+  return findCurrencyByCodeISO({client, codeISO: DEFAULT_CURRENCY_CODE});
 }
 
 /** Resolves the currency to use for a brand-new marketplace listing:

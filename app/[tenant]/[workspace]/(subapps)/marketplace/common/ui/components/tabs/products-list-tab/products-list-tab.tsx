@@ -19,8 +19,8 @@ import {
   type CompatibilityVersion,
   type ListCategory,
   type ListLicense,
-  type Currency,
 } from '../../../../orm';
+import type {Currency} from '@/product/orm';
 import {MyProductsTable} from '../../tables/my-products-table';
 
 type ProductsListTabProps = {

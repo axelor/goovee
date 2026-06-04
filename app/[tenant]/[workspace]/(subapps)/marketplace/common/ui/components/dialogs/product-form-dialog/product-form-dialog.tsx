@@ -17,8 +17,8 @@ import type {
   ListCategory,
   ListLicense,
   MyProductWithVersions,
-  Currency,
 } from '../../../../orm';
+import type {Currency} from '@/product/orm';
 import {ProductForm} from '../../forms/product-form';
 import {VersionForm} from '../../forms/version-form';
 import {Stepper} from '../../primitives/stepper';

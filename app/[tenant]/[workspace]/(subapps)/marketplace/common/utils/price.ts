@@ -35,12 +35,8 @@ import {
   round,
   todayInTimezone,
 } from '@/product/pricing';
-import type {
-  ConversionLine,
-  Currency,
-  PriceableProduct,
-  PriceContext,
-} from '../orm';
+import type {ConversionLine, Currency, PriceableProduct} from '@/product/orm';
+import type {PriceContext} from '../orm';
 
 const DEFAULT_TAX_RATE = 0;
 

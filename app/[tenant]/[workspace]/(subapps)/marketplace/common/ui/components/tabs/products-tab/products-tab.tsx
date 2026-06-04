@@ -7,8 +7,8 @@ import {
   type CompatibilityVersion,
   type ListCategory,
   type ListLicense,
-  type Currency,
 } from '../../../../orm';
+import type {Currency} from '@/product/orm';
 import type {PortalWorkspaceWithConfig} from '../../../../utils/auth-helper';
 import {ProductsListTab} from '../products-list-tab';
 

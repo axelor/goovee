@@ -50,8 +50,8 @@ import type {
   ListCategory,
   ListLicense,
   MyProductWithVersions,
-  Currency,
 } from '../../../../orm';
+import type {Currency} from '@/product/orm';
 import {scrollToFirstError} from '../../../../utils/scroll-to-error';
 import {getProductScreenshotURL} from '../../../../utils/images';
 import {ProductIcon} from '../../primitives/product-icon';

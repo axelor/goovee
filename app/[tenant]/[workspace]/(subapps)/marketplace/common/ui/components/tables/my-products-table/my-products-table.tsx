@@ -41,8 +41,8 @@ import type {
   ListCategory,
   ListLicense,
   ListMyProduct,
-  Currency,
 } from '../../../../orm';
+import type {Currency} from '@/product/orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {EditProductButton} from '../../buttons/edit-product-button';
 import {ProductIcon} from '../../primitives/product-icon';
