@@ -96,11 +96,23 @@ admin would read the original error, or degrade (see Strictness).
 | `UNIT_CONVERSION_FORMULA_UNSUPPORTED` | The matching conversion line is a Groovy formula (or a null / unknown type) — not coefficient-based.         |
 | `UNIT_CONVERSION_NO_SOURCE_UNIT`      | A unit was requested but the product has no sale unit (`salesUnit ?? unit`) to convert from.                 |
 
+## Price-list discounts
+
+AOS finishes pricing by running the buyer's sale price list — discounts,
+markups and replacement prices — over the catalogue unit price. That step lives
+in the companion module **`price-list.ts`** (a faithful port of
+`PriceListService`, `PartnerPriceListServiceImpl.getDefaultPriceList` and the
+`SaleOrderLineDiscountServiceImpl` composition). It is kept separate because it
+is an adjustment applied _after_ a catalogue price exists, and not every
+consumer wants it: `getSaleUnitPrice` here returns the catalogue price, and a
+caller who has a buyer applies the price list as the next step
+(`getDefaultPriceList` → `getDiscountedPrice`). See that module's header for the
+discount rules, the compute-method modes (fold the discount into the price vs
+keep it separate), and the line-selection logic. Like this core it works in
+float64 and leaves final rounding to the caller.
+
 ## Known simplifications vs AOS
 
-- **No price lists.** AOS finishes by running a buyer's sale price list
-  (discounts / markups / replacement prices) over the unit price; this core (and
-  so every consumer) surfaces the catalogue price.
 - **Arithmetic** is float64 rather than BigDecimal, and **final rounding** is
   left to the caller (exchange rates, which feed the computed value, are rounded
   to AOS's scales internally — see step 6). AOS carries 20 decimals through its

@@ -9,6 +9,10 @@
     },
     {
       "type": "Int",
+      "name": "computeMethodDiscountSelect"
+    },
+    {
+      "type": "Int",
       "name": "mapApiSelect"
     },
     {

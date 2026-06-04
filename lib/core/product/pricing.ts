@@ -117,10 +117,11 @@
  * ──────────────────────────────────────────────────────────────────────
  * Known differences vs AOS (precision only — the logic is identical)
  * ──────────────────────────────────────────────────────────────────────
- * - Price lists are not applied. AOS finishes by running the buyer's
+ * - Price lists are not applied HERE. AOS finishes by running the buyer's
  *   sale price list (discounts / markups / replacement prices) over the
- *   unit price; callers surface the catalogue price, so a buyer who has
- *   a price list would be invoiced differently than displayed.
+ *   unit price; this module returns the catalogue price and the caller
+ *   applies the buyer's price list as the next step — that logic is the
+ *   companion module `price-list.ts`.
  * - Final amounts are not rounded here — both levels return raw values
  *   and the caller rounds at the scale its context needs (AOS rounds the
  *   unit price to its configurable unit-price precision; a storefront
@@ -505,6 +506,58 @@ export function computeWtAti(
     };
   }
   return {wt: price, ati: price + (price * taxRate) / 100};
+}
+
+/** Converts a unit price from one tax basis to the other, mirroring
+ *  `TaxService.convertUnitPrice`: given the price IS in the `priceIsAti`
+ *  basis, return it in the opposite basis, rounded half-up to `scale`.
+ *  (`taxRate` is a percentage; rate 0 is identity.) Unlike `computeWtAti`,
+ *  which yields both bases unrounded, this is the single-direction,
+ *  rounded primitive AOS reuses when re-expressing an already-resolved
+ *  price — e.g. around the price-list step (`applyPriceList`). */
+export function convertUnitPrice(
+  priceIsAti: boolean,
+  taxRate: number,
+  price: number,
+  scale: number,
+): number {
+  const rate = taxRate / 100;
+  if (priceIsAti) return round(price / (1 + rate), scale);
+  return round(price + price * rate, scale);
+}
+
+/** Rounds a WT/ATI unit-price pair the way an AOS sale-order / invoice line
+ *  stores it — which is the number that actually gets INVOICED, and is NOT
+ *  what the `/ws/aos/product/price` endpoint returns (see `price-list.ts`
+ *  `applyPriceList`). A line has ONE primary basis (the order's `inAti`
+ *  orientation): that basis is rounded to `scale`, and the OTHER basis is
+ *  then derived FROM the rounded primary via `convertUnitPrice` — not
+ *  rounded independently. So a WT line stores `price = round(wt)` and
+ *  `inTaxPrice = convertUnitPrice(false, rate, price)`, and an ATI line does
+ *  the mirror.
+ *
+ *  This deriving-from-the-rounded-primary is why the invoice can differ by a
+ *  cent from an independent round of each basis: e.g. WT 360.8748 → 360.87,
+ *  then ATI = 360.87 × 1.2 = 433.044 → 433.04 (an independent round of the
+ *  514.80×rate ATI would give 433.05). Feed the unrounded `wt`/`ati`/`taxRate`
+ *  from `getConvertedPrice`/`getSaleUnitPrice`; get back the invoice pair. */
+export function roundSaleUnitPrice(
+  {wt, ati, taxRate}: {wt: number; ati: number; taxRate: number},
+  primaryInAti: boolean,
+  scale: number,
+): {wt: number; ati: number} {
+  if (primaryInAti) {
+    const atiRounded = round(ati, scale);
+    return {
+      ati: atiRounded,
+      wt: convertUnitPrice(true, taxRate, atiRounded, scale),
+    };
+  }
+  const wtRounded = round(wt, scale);
+  return {
+    wt: wtRounded,
+    ati: convertUnitPrice(false, taxRate, wtRounded, scale),
+  };
 }
 
 /** Today's date as `YYYY-MM-DD` in the given IANA timezone (e.g.
