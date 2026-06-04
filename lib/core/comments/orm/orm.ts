@@ -104,13 +104,13 @@ async function getPopularCommentsBySorting({
             JSON_AGG(
               JSON_BUILD_OBJECT(
                 'id',
-                mailMessageFile.id,
+                mailMessageFile.id::text,
                 'version',
                 mailMessageFile.version,
                 'attachmentFile',
                 JSON_BUILD_OBJECT(
                   'id',
-                  metaFile.id,
+                  metaFile.id::text,
                   'version',
                   metaFile.version,
                   'fileName',
@@ -136,7 +136,7 @@ async function getPopularCommentsBySorting({
             CASE
               WHEN author.id IS NOT NULL THEN JSON_BUILD_OBJECT(
                 'id',
-                author.id,
+                author.id::text,
                 'version',
                 author.version,
                 'fullName',
@@ -146,12 +146,17 @@ async function getPopularCommentsBySorting({
             CASE
               WHEN partner.id IS NOT NULL THEN JSON_BUILD_OBJECT(
                 'id',
-                partner.id,
+                partner.id::text,
                 'version',
                 partner.version,
                 'picture',
                 CASE
-                  WHEN picture.id IS NOT NULL THEN JSON_BUILD_OBJECT('id', picture.id, 'version', picture.version)
+                  WHEN picture.id IS NOT NULL THEN JSON_BUILD_OBJECT(
+                    'id',
+                    picture.id::text,
+                    'version',
+                    picture.version
+                  )
                 END,
                 'simpleFullName',
                 partner.simple_full_name,
@@ -184,7 +189,7 @@ async function getPopularCommentsBySorting({
             JSON_AGG(
               JSON_BUILD_OBJECT(
                 'id',
-                childComment.id,
+                childComment.id::text,
                 'version',
                 childComment.version,
                 'note',
@@ -197,12 +202,17 @@ async function getPopularCommentsBySorting({
                 CASE
                   WHEN childPartner.id IS NOT NULL THEN JSON_BUILD_OBJECT(
                     'id',
-                    childPartner.id,
+                    childPartner.id::text,
                     'version',
                     childPartner.version,
                     'picture',
                     CASE
-                      WHEN picture.id IS NOT NULL THEN JSON_BUILD_OBJECT('id', picture.id, 'version', picture.version)
+                      WHEN picture.id IS NOT NULL THEN JSON_BUILD_OBJECT(
+                        'id',
+                        picture.id::text,
+                        'version',
+                        picture.version
+                      )
                     END,
                     'simpleFullName',
                     childPartner.simple_full_name,
@@ -214,7 +224,7 @@ async function getPopularCommentsBySorting({
                 CASE
                   WHEN childAuthor.id IS NOT NULL THEN JSON_BUILD_OBJECT(
                     'id',
-                    childAuthor.id,
+                    childAuthor.id::text,
                     'version',
                     childAuthor.version,
                     'fullName',
