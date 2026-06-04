@@ -24,7 +24,7 @@ import {
   Textarea,
 } from '@/ui/components';
 import {useQuantity, useToast} from '@/ui/hooks';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {computeTotal} from '@/utils/cart';
 import {getProductImageURL} from '@/utils/files';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';

@@ -1,6 +1,5 @@
 'use client';
 
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Button} from '@/ui/components';
 import Link from 'next/link';
 import {useMarketplaceCart} from '../../../../hooks/use-marketplace-cart';
@@ -44,8 +43,7 @@ export function CartContent({
   browseHref,
   checkoutHref,
 }: Props) {
-  const {workspaceURL} = useWorkspace();
-  const {cart, loaded, removeItem} = useMarketplaceCart(workspaceURL);
+  const {cart, loaded, removeItem} = useMarketplaceCart();
 
   if (!loaded) {
     return <div className="h-32 rounded-lg bg-muted/40 animate-pulse" />;

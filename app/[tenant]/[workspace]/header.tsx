@@ -22,8 +22,7 @@ import {Icon} from '@/ui/components';
 import {PortalWorkspace} from '@/orm/workspace';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
-import Cart from '@/app/[tenant]/[workspace]/cart';
-import MarketplaceCart from '@/app/[tenant]/[workspace]/marketplace-cart';
+import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
@@ -67,15 +66,13 @@ export default function Header({
   isTopNavigation = false,
   workspaces,
   workspace,
-  showCart,
-  showMarketplaceCart,
+  cartCodes = [],
 }: {
   subapps: any;
   isTopNavigation?: boolean;
   workspaces: {id: string; name: string | null; url: string | null}[];
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
-  showCart?: boolean | null;
-  showMarketplaceCart?: boolean | null;
+  cartCodes?: string[];
 }) {
   const router = useRouter();
   const {data: session} = authClient.useSession();
@@ -97,8 +94,7 @@ export default function Header({
     : false;
 
   const shouldDisplayIcons = visible && !loading;
-  const showCartIcon = showCart && shouldDisplayIcons;
-  const showMarketplaceCartIcon = showMarketplaceCart && shouldDisplayIcons;
+  const showCartIcon = shouldDisplayIcons && cartCodes.length > 0;
   const isFixedHeader = workspace?.config?.isFixedHeader;
 
   return (
@@ -151,8 +147,7 @@ export default function Header({
                   );
                 })}
             {user && <Notification />}
-            {showCartIcon && <Cart />}
-            {showMarketplaceCartIcon && <MarketplaceCart />}
+            {showCartIcon && <CartIcon enabledCodes={cartCodes} />}
             <Account baseURL={workspaceURI} tenant={tenant} />
           </div>
         )}

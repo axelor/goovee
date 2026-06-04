@@ -19,8 +19,7 @@ import {Account} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useNavigationVisibility} from '@/ui/hooks';
-import Cart from '@/app/[tenant]/[workspace]/cart';
-import MarketplaceCart from '@/app/[tenant]/[workspace]/marketplace-cart';
+import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {toWorkspaceURI} from '@/utils/workspace';
@@ -171,8 +170,7 @@ export function MobileMenu({
   subapps,
   workspaces,
   workspace,
-  showCart,
-  showMarketplaceCart,
+  cartCodes = [],
 }: any) {
   const router = useRouter();
   const redirect = () => router.push('/notifications');
@@ -205,8 +203,7 @@ export function MobileMenu({
             onClick={redirect}
           />
         )}
-        {showCart && <Cart />}
-        {showMarketplaceCart && <MarketplaceCart />}
+        {cartCodes.length > 0 && <CartIcon enabledCodes={cartCodes} />}
 
         {user && <Notification />}
         <Account baseURL={workspaceURI} tenant={tenant} />

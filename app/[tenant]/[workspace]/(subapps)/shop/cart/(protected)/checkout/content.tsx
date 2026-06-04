@@ -20,7 +20,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/ui/components';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {scale} from '@/utils';
 import {computeTotal} from '@/utils/cart';
 import {getProductImageURL} from '@/utils/files';

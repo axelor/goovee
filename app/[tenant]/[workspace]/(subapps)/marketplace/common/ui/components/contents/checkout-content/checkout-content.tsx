@@ -46,7 +46,7 @@ export function CheckoutContent({workspace}: Props) {
   const router = useRouter();
   const {workspaceURI, workspaceURL} = useWorkspace();
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
-  const {cart, loaded, clearCart} = useMarketplaceCart(workspaceURL);
+  const {cart, loaded, clearCart} = useMarketplaceCart();
   const {toast} = useToast();
   const productIds = cart.items.map(item => item.productId);
 

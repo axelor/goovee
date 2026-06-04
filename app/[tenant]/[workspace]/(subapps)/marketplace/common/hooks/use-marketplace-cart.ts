@@ -1,7 +1,10 @@
 'use client';
 
-import {getitem, setitem} from '@/storage/local';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback} from 'react';
+
+// ---- CORE IMPORTS ---- //
+import {SUBAPP_CODES} from '@/constants';
+import {useCartSlice} from '@/app/[tenant]/[workspace]/cart/cart-store';
 
 export type MarketplaceCartItem = {
   productId: string;
@@ -25,87 +28,54 @@ export type MarketplaceCart = {
   items: MarketplaceCartItem[];
 };
 
-const CHANGED_EVENT = 'marketplace-cart-changed';
-
 function emptyCart(): MarketplaceCart {
   return {items: []};
 }
 
-function storageKey(workspaceURL: string) {
-  return `marketplace-cart-${workspaceURL}`;
+/** Count semantics for the unified cart icon: distinct products. */
+export function marketplaceCartCount(stored: unknown): number {
+  const cart = stored as MarketplaceCart | null;
+  return cart?.items?.length ?? 0;
 }
 
-/* localStorage-backed cart for the marketplace subapp. Same-tab updates
- * are broadcast via a custom DOM event so multiple components reading
- * the cart stay in sync without a context provider. Cross-tab sync is
- * out of scope (the shop cart doesn't do it either). */
-export function useMarketplaceCart(workspaceURL: string) {
-  const key = storageKey(workspaceURL);
-  const [cart, setCart] = useState<MarketplaceCart>(emptyCart);
-  const [loaded, setLoaded] = useState(false);
-  /* Ref tracks the latest cart so the mutation helpers can read it
-   * synchronously and return a promise that resolves only after the
-   * storage write has flushed — callers like "Buy now" depend on the
-   * write completing before they navigate. */
-  const cartRef = useRef(cart);
-  useEffect(() => {
-    cartRef.current = cart;
-  }, [cart]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      const data = (await getitem(key)) as MarketplaceCart | null;
-      if (!cancelled) {
-        setCart(data ?? emptyCart());
-        setLoaded(true);
-      }
-    };
-    load();
-    const onChanged = () => load();
-    window.addEventListener(CHANGED_EVENT, onChanged);
-    return () => {
-      cancelled = true;
-      window.removeEventListener(CHANGED_EVENT, onChanged);
-    };
-  }, [key]);
-
-  const write = useCallback(
-    async (next: MarketplaceCart) => {
-      cartRef.current = next;
-      setCart(next);
-      await setitem(key, next);
-      window.dispatchEvent(new Event(CHANGED_EVENT));
-    },
-    [key],
-  );
+/* Cart for the marketplace subapp. State lives in the shared CartProvider
+ * (scoped to the logged-in user — items can only be added while signed in, so
+ * a guest just gets an empty key); dedup and counting live here. */
+export function useMarketplaceCart() {
+  const {
+    value: cart,
+    loaded,
+    setValue,
+  } = useCartSlice<MarketplaceCart>(SUBAPP_CODES.marketplace, emptyCart());
 
   const addItem = useCallback(
     async (item: MarketplaceCartItem) => {
-      const current = cartRef.current;
-      if (current.items.some(i => i.productId === item.productId)) return;
-      await write({...current, items: [...current.items, item]});
+      await setValue(prev =>
+        prev.items.some(cartItem => cartItem.productId === item.productId)
+          ? prev
+          : {...prev, items: [...prev.items, item]},
+      );
     },
-    [write],
+    [setValue],
   );
 
   const removeItem = useCallback(
     async (productId: string) => {
-      const current = cartRef.current;
-      await write({
-        ...current,
-        items: current.items.filter(i => i.productId !== productId),
-      });
+      await setValue(prev => ({
+        ...prev,
+        items: prev.items.filter(cartItem => cartItem.productId !== productId),
+      }));
     },
-    [write],
+    [setValue],
   );
 
   const clearCart = useCallback(async () => {
-    await write(emptyCart());
-  }, [write]);
+    await setValue(() => emptyCart());
+  }, [setValue]);
 
   const isInCart = useCallback(
-    (productId: string) => cart.items.some(i => i.productId === productId),
+    (productId: string) =>
+      cart.items.some(cartItem => cartItem.productId === productId),
     [cart],
   );
 

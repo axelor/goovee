@@ -8,7 +8,7 @@ import {Payments} from '@/ui/components/payment';
 import {SUBAPP_CODES} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {i18n} from '@/locale';
 import type {SuccessResponse} from '@/types/action';
 import {PortalWorkspace, Subapp} from '@/orm/workspace';

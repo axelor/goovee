@@ -8,7 +8,7 @@ import {MdOutlineRefresh} from 'react-icons/md';
 // ---- CORE IMPORTS ---- //
 import {Button} from '@/ui/components/button';
 import {Dialog, DialogContent, DialogTitle} from '@/ui/components/dialog';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';

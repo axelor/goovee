@@ -1,6 +1,5 @@
 'use client';
 
-import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Button} from '@/ui/components';
 import {ArrowRight, ShoppingCart} from 'lucide-react';
 import Link from 'next/link';
@@ -46,8 +45,7 @@ export function BuyButtons({
   inCartLabel,
 }: Props) {
   const router = useRouter();
-  const {workspaceURL} = useWorkspace();
-  const {addItem, isInCart, loaded} = useMarketplaceCart(workspaceURL);
+  const {addItem, isInCart, loaded} = useMarketplaceCart();
 
   if (!loaded) {
     return <div className="h-11 rounded-full bg-muted animate-pulse" />;
