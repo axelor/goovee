@@ -49,7 +49,7 @@ _ownership_ is tracked at the **customer** level.
 | Persona                     | Can do                                                                                                                                                                     | Notes                                                                                                                                                    |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Visitor (guest)**         | Browse, search, open any published listing, read reviews                                                                                                                   | No login required to look around.<br>Any action that changes data (buy, favourite, review, download a paid item) redirects to login first.               |
-| **Member / Buyer**          | Everything a visitor can, plus:<br>favourite, buy, download, write/edit a review, see their purchases                                                                      | A logged-in **user** (a customer or one of its contacts).<br>Purchases belong to the **customer**, so they're shared with everyone under it.             |
+| **Member / Buyer**          | Everything a visitor can, plus:<br>favourite, buy, download, write/edit a review, see their purchases & favourites                                                         | A logged-in **user** (a customer or one of its contacts).<br>Purchases belong to the **customer**, so they're shared with everyone under it.             |
 | **Contributor / Publisher** | Everything a member can, plus:<br>create listings, upload versions/bundles, manage the version lifecycle, see their contributions & revenue                                | Only when the workspace **allows publishing**.<br>The listing is published under the user's **customer**, so everyone under that customer can manage it. |
 | **Workspace admin**         | Configure the storefront:<br>branding, whether publishing is allowed, whether submissions need review, payment options, and the workspace default product used for pricing | Configured in AOS, not in the storefront UI.<br>See [§7](#7-workspace-configuration).                                                                    |
 
@@ -134,16 +134,38 @@ Each listing has a page (addressed by its slug) that exposes:
   (gated, see [§4.7](#47-downloading--installs)).
 - **Reviews** — the reviews and the viewer's own review.
 - **Support** — documentation / issues / contact links.
+- **About the author** — the publisher's identity, with a link through to the
+  seller's profile in the **Directory**. The link appears only when the seller
+  is a (non-archived) customer that is listed in the Directory; otherwise the
+  author is shown without a profile link.
 
-**Preview mode:** a contributor can open their _unpublished_ listing in a
-preview that surfaces its current draft status; all actions are inert in
-preview.
+**Preview mode:** a contributor in a publishing-enabled workspace can open their
+_unpublished_ listing in a preview that surfaces its current draft status; all
+actions are inert in preview. Preview is **seller-only**: a preview request from
+a guest, or in a workspace where publishing is off, falls back to the normal
+visit — the published listing, or "not found" when nothing is published.
 
 ### 4.4 Favourites
 
-A logged-in user can toggle a listing as a favourite. Favourites are
-**per-user** — not shared with the customer's other contacts. Guests are
-redirected to login.
+A logged-in user can toggle a listing as a favourite from its listing page.
+Favourites are **per-user** — not shared with the customer's other contacts.
+Guests are redirected to login.
+
+The user's favourites are collected on a dedicated **Favourites** list under
+[My Account](#410-my-account), which shows each saved listing with its price,
+rating, and install count, and a link through to the listing. The list:
+
+- **searches** by listing **name or description** (the same two fields as the
+  catalogue search), with a clear button;
+- **filters** by **type** (All / App / Skill) and **price** (All / Free / Paid),
+  the same filters the catalogue offers;
+- is **paginated**.
+
+Only still-available favourites appear — a favourited listing that is archived
+or has lost its published version drops out of the list (the catalogue
+visibility rule from [§5.1](#51-listing-visibility)). A row can be
+**un-favourited in place**: the heart toggles immediately and the listing stays
+in view so it can be re-added; it only leaves the list on the next load.
 
 ### 4.5 The primary action
 
@@ -185,7 +207,12 @@ listing, or **Download ZIP** for a free one.
 
 Paid listings go through a cart → checkout flow:
 
-1. **Cart** holds the chosen paid items.
+1. **Cart** holds the chosen paid items. The cart is stored in the browser and
+   **scoped to the signed-in user**, so two accounts sharing a browser never see
+   each other's items (items can only be added while signed in). It is reached
+   from a cart icon shared with the other apps in the workspace: when more than
+   one app has a cart the icon opens a chooser, otherwise it links straight to
+   the one cart.
 2. **Checkout** validates the cart and starts payment. Validation enforces:
    workspace access, _paid-only_ (free items can't be checked out), the listing
    is published, **not already owned**, and that all items resolve to a
@@ -212,7 +239,7 @@ Paid listings go through a cart → checkout flow:
       **captures the price the buyer was charged** — the without-tax and
       tax-inclusive amounts, the tax rate, and the charged currency — so the
       purchase is a self-contained record for revenue reporting
-      (see [§4.10](#410-my-purchases--my-contributions)).
+      (see [§4.10](#410-my-account)).
    4. **Creates the order** — picks the buyer's invoicing address and creates
       the sale order + invoice, then links them back to the ownership rows.
 
@@ -272,10 +299,13 @@ counting failure never fails the download.
 
 ### 4.9 Publishing & versions (contributors)
 
-Publishing is only available when the workspace **allows publishing**.
-**Creating** a listing or a version is refused otherwise ("Publishing is not
-allowed in this workspace"). **Editing** is always scoped to the caller's own
-listings — a contributor can only edit listings they publish.
+Every contributor operation requires the workspace to **allow publishing** —
+creating, editing, and unpublishing a listing or version, loading a listing to
+edit, opening the contributor area, and previewing an unpublished listing. When
+publishing is off, these are all refused ("Publishing is not allowed in this
+workspace"; the contributor area itself returns "not found"). Beyond that gate,
+every operation is scoped to the caller's own listings — a contributor can only
+act on listings they publish.
 
 #### 4.9.1 Creating & editing a listing
 
@@ -321,7 +351,7 @@ What is fixed vs. what can change after create:
   listing), so if an admin changes the workspace default product or its tax setup, the
   listing's applied tax changes.
 
-**On edit**, **updated-by** is set to the editing **contact**.
+**On edit**, **updated-by** is set to the editing **user**.
 
 **Screenshots** are saved to match the form exactly: new files are uploaded, removed
 screenshots are deleted, and the **order is preserved** — the publisher's
@@ -409,14 +439,22 @@ State rules, exactly as enforced:
   or none if nothing is published. This is what buyers see and download, and it
   is the version badged **"Latest"** in the Versions tab.
 
-### 4.10 My Purchases & My Contributions
+### 4.10 My Account
+
+A logged-in user's marketplace activity lives under **My Account**, a hub that
+links to the sections below and through to the user's own profile in the
+**Directory**. The buyer sections are available to every logged-in user; the
+contributor section appears only when the workspace allows publishing.
 
 - **My Purchases** — the listings owned by the user's customer, with purchase
-  date and links to the order/invoice.
-- **My Contributions** (login required) — the contributor area, covering an
-  **Overview**, the contributor's **listings** (any status, where versions are
-  managed), and **Revenue** / **Profile** tabs that are not implemented yet
-  (they show "Coming soon").
+  date and links to the order/invoice. Paginated.
+- **Favourites** — the user's saved listings (see [§4.4](#44-favourites)).
+- **My Contributions** — the contributor area, available **only when the
+  workspace allows publishing**. The hub omits this entry for non-publishers,
+  and the page returns "not found" if opened directly without that permission.
+  It covers an **Overview**, the contributor's **listings** (any status, where
+  versions are managed), and a **Revenue** tab that is not implemented yet
+  (it shows "Coming soon").
 
 #### 4.10.1 Contributions overview
 
@@ -553,7 +591,7 @@ Set by an admin in the AOS; each affects storefront behaviour:
 | Setting                                              | Effect                                                                                                                                                                     |
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Branding (hero title / description / background)** | Presentation of the landing area.                                                                                                                                          |
-| **Allow publishing**                                 | If off, contributors cannot create listings or versions.                                                                                                                   |
+| **Allow publishing**                                 | If off, every contributor action is blocked — creating, editing, unpublishing, and previewing listings/versions — and the contributor area is hidden.                      |
 | **Requires review**                                  | If on, submitted versions go to _In review_ instead of publishing immediately.                                                                                             |
 | **Online payment enabled**                           | Required for paid checkout to function.                                                                                                                                    |
 | **Payment options**                                  | Which of Stripe / PayPal / Paybox are offered at checkout.                                                                                                                 |
@@ -564,17 +602,18 @@ Set by an admin in the AOS; each affects storefront behaviour:
 
 ## 8. Permissions summary
 
-| Action                                   | Guest | Member     | Publisher        | Notes                      |
-| ---------------------------------------- | ----- | ---------- | ---------------- | -------------------------- |
-| Browse / search / view published listing | ✅    | ✅         | ✅               |                            |
-| Download free published version          | ✅    | ✅         | ✅               | no login required          |
-| Favourite a listing                      | ❌    | ✅         | ✅               | per-user                   |
-| Buy a paid listing                       | ❌    | ✅         | ✅               |                            |
-| Download paid version                    | ❌    | owned only | ✅ (own listing) |                            |
-| Write / edit a review                    | ❌    | ✅         | ✅               | one per listing            |
-| Create a listing / upload versions       | ❌    | ❌         | ✅               | needs _Allow publishing_   |
-| Preview own unpublished listing          | ❌    | ❌         | ✅               |                            |
-| View My Purchases / My Contributions     | ❌    | ✅ / —     | ✅               | contributions = publishers |
+| Action                                        | Guest | Member     | Publisher        | Notes                    |
+| --------------------------------------------- | ----- | ---------- | ---------------- | ------------------------ |
+| Browse / search / view published listing      | ✅    | ✅         | ✅               |                          |
+| Download free published version               | ✅    | ✅         | ✅               | no login required        |
+| Favourite a listing                           | ❌    | ✅         | ✅               | per-user                 |
+| Buy a paid listing                            | ❌    | ✅         | ✅               |                          |
+| Download paid version                         | ❌    | owned only | ✅ (own listing) |                          |
+| Write / edit a review                         | ❌    | ✅         | ✅               | one per listing          |
+| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅               | needs _Allow publishing_ |
+| Preview own unpublished listing               | ❌    | ❌         | ✅               | needs _Allow publishing_ |
+| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅               | any logged-in user       |
+| View My Contributions                         | ❌    | ❌         | ✅               | needs _Allow publishing_ |
 
 ---
 
