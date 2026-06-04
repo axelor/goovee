@@ -1,14 +1,16 @@
 /* Product price-parity test.
  *
- * Sweeps products × companies × buyers × currencies, prices each one with
- * the CORE pricing path (`getSaleUnitPrice` + the literal `applyPriceList`),
- * and compares it against AOS's own `/ws/aos/product/price` endpoint — the
- * same code AOS runs behind that endpoint is what this core mirrors, so any
- * mismatch is a real divergence.
+ * Sweeps products × companies × buyers × currencies, prices each one with the
+ * core's INVOICE path (`getSaleUnitPrice` + `roundSaleUnitPrice`, the
+ * sale-order/invoice-line pairing), and compares it against AOS's
+ * `/ws/aos/product/price` endpoint. That endpoint is only INDICATIONAL — its
+ * `applyPriceList` round-trip can sit a cent off the invoiced line — so some
+ * cross-currency ATI mismatches are expected (see price-list.ts), while
+ * same-currency rows and the new target-currency-decimal rounding should match.
  *
- * This is a pure product test: no marketplace involvement. Every dimension
- * the endpoint accepts (product, company, partner, currency, unit) is a CLI
- * flag; with none, it sweeps sensible defaults.
+ * Pure product test: no marketplace involvement. Every dimension the endpoint
+ * accepts (product, company, partner, currency, unit) is a CLI flag; with none,
+ * it sweeps sensible defaults.
  *
  * Run:  pnpm test-price -- --help
  */
@@ -58,6 +60,13 @@ const CYAN = '\x1b[36m';
 const BOLD = '\x1b[1m';
 const RESET = '\x1b[0m';
 
+/* The default target currencies (ISO codes) the sweep prices into. A spread
+ * that exercises conversion and the error path: EUR (base, rate 1), GBP/CHF
+ * (European), USD/CNY (distinct, 2-decimal), JPY (distinct, 0-decimal — guards
+ * the target-currency-decimal rounding), and INR (no exchange rate from EUR,
+ * so both sides error identically — shows the CURRENCY_1 path). */
+const DEFAULT_CURRENCIES = ['EUR', 'GBP', 'CHF', 'USD', 'CNY', 'JPY', 'INR'];
+
 type AosPriceEntry = {
   productId: number;
   prices?: Array<{type: 'WT' | 'ATI'; price: string}>;
@@ -97,8 +106,9 @@ known endpoint↔invoice gap, not a bug in our price. (TODO: repoint the
 reference to actual order-line creation.)
 
 Defaults sweep every sellable product, every company, one buyer per distinct
-(fiscal position, currency, sale price list) + a no-buyer row, and no currency
-override (AOS picks the buyer's, then the product's, currency).
+(fiscal position, currency, sale price list) + a no-buyer row, and a curated
+set of target currencies — a few European, a few distinct, and one with no
+exchange rate (to show the error path): ${DEFAULT_CURRENCIES.join(', ')}.
 
 Usage:
   pnpm test-price [-- <options>]
@@ -108,8 +118,8 @@ Options:
   --company <id>     Selling company id (repeatable). Default: all companies.
   --partner <id>     Buyer partner id (repeatable). Default: one per
                      (fiscalPosition, currency, priceList) + none.
-  --currency <c>     Target currency code or id (repeatable), or 'all'.
-                     Default: none (AOS picks buyer/product currency).
+  --currency <c>     Target currency code or id (repeatable). Override the
+                     default curated set above.
   --unit <id>        Quote every product in this unit id (needs conversions).
   --limit <n>        Cap the number of products (quick runs).
   --all-products     Include non-sellable / all products, not just sellable.
@@ -334,7 +344,12 @@ async function main() {
       limit: values.limit ? Number(values.limit) : undefined,
     }),
     loadCompanies(client, values.company),
-    loadCurrencies(client, values.currency),
+    loadCurrencies(
+      client,
+      values.currency && values.currency.length > 0
+        ? values.currency
+        : DEFAULT_CURRENCIES,
+    ),
     loadPartnerSamples(client, {
       ids: values.partner,
       allPartners: values['all-partners'],
@@ -347,13 +362,14 @@ async function main() {
   const nb = appConfig.nbDecimalForUnitPrice;
   const requestedUnit = values.unit ? {id: values.unit} : null;
   const atiPrimary = Boolean(values['ati-primary']);
-  const currencyOptions: Array<CurrencyRow | null> =
-    currencies.length > 0 ? currencies : [null];
+  if (currencies.length === 0)
+    throw new Error('No target currencies resolved.');
+  const currencyOptions: CurrencyRow[] = currencies;
   const priceListLinesCache = new Map<string, PriceListLineRow[]>();
 
   console.log(
     `\n${CYAN}→ tenant=${tenantId} products=${products.length} companies=${companies.length} ` +
-      `partners=${partners.length} currencies=${currencies.length || '(buyer/product)'} ` +
+      `partners=${partners.length} currencies=${currencies.map(c => c.code).join('/')} ` +
       `nbDecimal=${nb} computeMethod=${appConfig.computeMethodDiscountSelect}${RESET}`,
   );
 

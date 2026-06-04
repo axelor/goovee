@@ -88,17 +88,13 @@ export async function loadCompanies(client: Client, ids?: string[]) {
   });
 }
 
-/** Resolves `--currency` values (ISO/printing code or id) to currency
- *  rows; `'all'` returns every currency. Empty input → no override (AOS
- *  then picks the partner's or the product's currency). */
+/** Resolves currency identifiers (ISO/printing code or numeric id) to
+ *  currency rows. Empty input → empty. */
 export async function loadCurrencies(
   client: Client,
   values: string[] | undefined,
 ) {
   if (!values || values.length === 0) return [];
-  if (values.includes('all')) {
-    return client.aOSCurrency.find({select: currencySelect});
-  }
   /* Route numeric values to the bigint `id`, everything else to the code
    * columns — mixing a non-numeric into an `id IN (…)` clause makes
    * Postgres fail to cast it to bigint. */

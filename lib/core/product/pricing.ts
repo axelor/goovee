@@ -814,6 +814,19 @@ export function getConvertedPrice({
   wt *= rate;
   ati *= rate;
 
+  /* Round the converted amount to the TARGET currency's own decimals, the
+   * way AOS does inside the conversion itself
+   * (`CurrencyServiceImpl.getAmountCurrencyConvertedUsingExchangeRate`:
+   * `amount.multiply(rate).setScale(endCurrency.numberOfDecimals)`), and only
+   * when a real conversion happened (rate != 1, mirroring AOS's `!= ONE`
+   * guard). Skipping this diverges for any currency whose decimals differ
+   * from the unit-price scale — e.g. JPY (0 decimals): 8960.25 vs 8960. The
+   * caller still applies the final unit-price rounding on top. */
+  if (rate !== 1 && toCurrency?.numberOfDecimals != null) {
+    wt = round(wt, toCurrency.numberOfDecimals);
+    ati = round(ati, toCurrency.numberOfDecimals);
+  }
+
   /* Unit conversion, after currency, mirroring AOS `ProductRestServiceImpl`:
    * the per-unit price in the sale unit is multiplied by the coefficient
    * that maps the requested unit to the sale unit. */
