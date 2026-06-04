@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://goovee.axelor.com/directory/seed.schema.json",
+  "title": "Directory seed",
+  "description": "Demo directory profiles for the directory subapp. Source of truth is scripts/seed/validators.ts (Zod). Keep this file in sync.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profiles"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "IDE pointer to this schema file. Ignored at runtime."
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/Profile"}
+    },
+    "contacts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/Contact"}
+    }
+  },
+  "$defs": {
+    "Profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["email", "portalCompanyName", "description"],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Upsert key — the customer account to list. Skipped if no AOSPartner with this email exists, or the partner is not a customer."
+        },
+        "portalCompanyName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Heading shown on the directory card/detail (AOSPartner.portalCompanyName)."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Rich-text HTML stored on AOSPartner.directoryCompanyDescription."
+        },
+        "showEmail": {"type": "boolean", "description": "Default true."},
+        "showPhone": {"type": "boolean", "description": "Default true."},
+        "showWebsite": {"type": "boolean", "description": "Default true."},
+        "showAddress": {"type": "boolean", "description": "Default true."}
+      }
+    },
+    "Contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["email", "linkedinLink"],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Upsert key — the contact account to list under its company. Skipped if no AOSPartner with this email exists, or the partner is not a contact."
+        },
+        "linkedinLink": {
+          "type": "string",
+          "format": "uri",
+          "description": "Demo LinkedIn URL written to AOSPartner.linkedinLink."
+        },
+        "showFunction": {"type": "boolean", "description": "Default true."},
+        "showEmail": {"type": "boolean", "description": "Default true."},
+        "showPhone": {"type": "boolean", "description": "Default true."},
+        "showLinkedin": {"type": "boolean", "description": "Default true."}
+      }
+    }
+  }
+}

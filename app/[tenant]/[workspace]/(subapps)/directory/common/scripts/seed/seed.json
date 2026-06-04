@@ -1,0 +1,211 @@
+{
+  "$schema": "./seed.schema.json",
+  "profiles": [
+    {
+      "email": "info@axelor.com",
+      "portalCompanyName": "Axelor",
+      "description": "<p><strong>Axelor</strong> is the company behind the open-source business application platform used by thousands of organisations to run their operations end to end. We combine a low-code studio with a complete suite of ready-to-use modules so teams can model their processes once and adapt them as the business evolves.</p><h3>What we do</h3><ul><li>Open-source ERP, CRM and BPM built on a single data model</li><li>Low-code studio for custom objects, forms, workflows and dashboards</li><li>Industry editions for manufacturing, distribution, services and the public sector</li><li>Hosting, support and integration through a worldwide partner network</li></ul><p>Our mission is to give every organisation the freedom to own and shape its software. From a two-person workshop to a multi-site group, customers rely on Axelor to replace scattered tools with one coherent, fully customisable system.</p>"
+    },
+    {
+      "email": "contact@123-services.fr",
+      "portalCompanyName": "123 Services",
+      "description": "<p><strong>123 Services</strong> takes the day-to-day running of buildings off our clients' hands so they can focus on their core business. We provide integrated facility management and on-site support to offices, retail spaces and light-industrial sites across France.</p><h3>Our services</h3><ul><li>Cleaning, maintenance and technical upkeep</li><li>Reception, mail handling and on-site logistics</li><li>Preventive maintenance contracts with guaranteed response times</li><li>Single point of contact and consolidated monthly reporting</li></ul><p>With regional teams and a 24/7 dispatch desk, we keep premises safe, compliant and pleasant to work in. Clients value our transparent pricing and the fact that one coordinator owns every request from start to finish.</p>"
+    },
+    {
+      "email": "contact@dekimpe-eng.com",
+      "portalCompanyName": "DE KIMPE Engineering",
+      "description": "<p><strong>DE KIMPE Engineering</strong> is a mechanical design and industrial engineering firm that turns demanding specifications into manufacturable products. We work alongside manufacturers from first concept through to production-ready documentation.</p><h3>Capabilities</h3><ul><li>3D mechanical design and detailed drafting</li><li>Finite-element analysis and design validation</li><li>Prototyping, tolerance studies and design-for-manufacture reviews</li><li>Technical documentation and production hand-off</li></ul><p>Our engineers bring decades of combined experience across automotive, machinery and special-purpose equipment. We pride ourselves on rigorous validation: every design leaves our office checked, simulated and ready for the shop floor.</p>"
+    },
+    {
+      "email": "contact@esl-banking.fr",
+      "portalCompanyName": "ESL Banking",
+      "description": "<p><strong>ESL Banking</strong> is a regional bank serving individuals, professionals and corporates with a relationship-first approach. We pair the stability of an established institution with the responsiveness of a local partner who knows the territory.</p><h3>What we offer</h3><ul><li>Current accounts, savings and lending for individuals and businesses</li><li>Corporate financing, cash management and treasury services</li><li>Advisory for investment, wealth and succession planning</li><li>Secure online and mobile banking</li></ul><p>We believe finance should be built on long-term partnerships, not one-off transactions. Dedicated advisors stay with clients as their needs grow, and our credit decisions are made by people who understand the regional economy.</p>"
+    },
+    {
+      "email": "contact@gerard-solutions.fr",
+      "portalCompanyName": "GERARD Solutions",
+      "description": "<p><strong>GERARD Solutions</strong> is an IT consultancy that helps public-sector bodies and mid-sized organisations modernise their information systems without disruption. We cover the full lifecycle: advisory, integration, hosting and managed operations.</p><h3>Areas of expertise</h3><ul><li>Application integration and system modernisation</li><li>Sovereign and hybrid cloud hosting</li><li>Managed services with 24/7 supervision</li><li>Cybersecurity audits and compliance support</li></ul><p>Our consultants combine deep technical knowledge with a pragmatic, budget-aware approach to public procurement. We deliver projects that go live on time and keep running long after the launch.</p>"
+    },
+    {
+      "email": "contact@masson.fr",
+      "portalCompanyName": "MASSON SA",
+      "description": "<p><strong>MASSON SA</strong> manufactures high-precision metal components for some of the most demanding supply chains in Europe. From machining to surface treatment, we control the full production chain in-house to guarantee quality and traceability.</p><h3>Production</h3><ul><li>CNC machining of complex parts in small and medium series</li><li>Sheet-metal forming, welding and assembly</li><li>Surface treatment and finishing</li><li>Full dimensional inspection and material traceability</li></ul><p>We supply tier-one customers in automotive and aerospace who cannot compromise on tolerances or delivery dates. Our quality system is certified to industry standards, and continuous investment in our machine park keeps us at the leading edge.</p>"
+    },
+    {
+      "email": "contact@silverelec.com",
+      "portalCompanyName": "SILVER Electronics",
+      "description": "<p><strong>SILVER Electronics</strong> designs and assembles electronic products for consumer and industrial markets. We take ideas from schematic to shipped product, handling design, sourcing and manufacturing under one roof.</p><h3>From prototype to volume</h3><ul><li>Electronic and PCB design</li><li>Rapid prototyping and pre-series runs</li><li>SMT and through-hole assembly</li><li>Functional testing, sourcing and supply-chain management</li></ul><p>Whether a customer needs a hundred boards or a hundred thousand, our flexible lines scale with demand. Engineers and production staff sit side by side, so design feedback reaches the factory floor immediately and quality stays high.</p>"
+    },
+    {
+      "email": "contact@top-components.com",
+      "portalCompanyName": "TOP Components",
+      "description": "<p><strong>TOP Components</strong> is an electronic-parts distributor supplying integrators, manufacturers and repair workshops worldwide. We keep hard-to-find connectors, semiconductors and passives in stock so our customers never stall a production line waiting for a part.</p><h3>Why customers choose us</h3><ul><li>Broad catalogue of connectors, components and accessories</li><li>Same-day dispatch on stocked items</li><li>Sourcing service for obsolete and allocated parts</li><li>Quality-controlled, traceable supply</li></ul><p>Backed by a large warehouse and a sourcing team with deep distributor relationships, we turn urgent shortages into quick deliveries. Reliability and authenticity of parts are at the heart of everything we ship.</p>"
+    },
+    {
+      "email": "contact@wm-cinetics.com",
+      "portalCompanyName": "WM Cinetics",
+      "description": "<p><strong>WM Cinetics</strong> engineers motion-control and robotics systems that bring automated production lines to life. We design, build and commission turnkey cells that move, position and handle parts with precision and speed.</p><h3>Solutions</h3><ul><li>Custom motion-control and servo systems</li><li>Robotic handling and assembly cells</li><li>Line integration, commissioning and operator training</li><li>Retrofits and performance upgrades for existing equipment</li></ul><p>Our multidisciplinary team covers mechanics, electronics and software, so a project stays coherent from first sketch to final acceptance. Manufacturers come to us when off-the-shelf automation isn't enough and they need a system built around their process.</p>"
+    },
+    {
+      "email": "info@azinno.com",
+      "portalCompanyName": "AZ Inno",
+      "description": "<p><strong>AZ Inno</strong> is an innovation studio that turns early-stage ideas into market-ready products. We partner with founders and corporate teams to validate concepts, build prototypes and ship the first commercial versions of hardware and software.</p><h3>How we work</h3><ul><li>Discovery, user research and concept validation</li><li>Hardware and software prototyping</li><li>Product design, engineering and industrialisation</li><li>Go-to-market support for the first releases</li></ul><p>We move fast, test early and stay close to real users so good ideas survive contact with the market. Clients value a single team that can carry a product from a whiteboard sketch to something they can sell.</p>"
+    },
+    {
+      "email": "info@blueberry-telecom.fr",
+      "portalCompanyName": "BLUEBERRY TELECOM",
+      "description": "<p><strong>BLUEBERRY TELECOM</strong> connects businesses with fast, reliable networks and modern communication tools. We provide the connectivity and telephony backbone that companies depend on every day, with support that actually answers the phone.</p><h3>Our offer</h3><ul><li>High-speed fibre and business internet access</li><li>Cloud telephony and unified communications</li><li>Managed networks, SD-WAN and Wi-Fi</li><li>Proactive monitoring and guaranteed service levels</li></ul><p>From a single office to a multi-site network, we design connectivity that scales and stays up. Our customers get enterprise-grade infrastructure with the attentiveness of a local operator.</p>"
+    },
+    {
+      "email": "info@bourgeois-industries.fr",
+      "portalCompanyName": "BOURGEOIS INDUSTRIE",
+      "description": "<p><strong>BOURGEOIS INDUSTRIE</strong> operates heavy manufacturing plants producing industrial equipment and tooling for European industry. With large-format machining and assembly capacity, we handle projects that few workshops can take on.</p><h3>Capabilities</h3><ul><li>Heavy machining and fabrication of large parts</li><li>Industrial equipment and special tooling</li><li>Assembly, testing and on-site installation</li><li>Maintenance and refurbishment of capital equipment</li></ul><p>Our plants combine experienced operators with substantial production capacity, allowing us to deliver demanding one-off pieces and recurring series alike. Customers trust us with the parts their own production depends on.</p>"
+    },
+    {
+      "email": "info@dg-technologies.com",
+      "portalCompanyName": "DG Technologies",
+      "description": "<p><strong>DG Technologies</strong> develops embedded systems and IoT platforms that make industrial assets connected and intelligent. We build the hardware, firmware and cloud software that let machines report, optimise and predict.</p><h3>What we build</h3><ul><li>Embedded electronics and firmware</li><li>IoT gateways and connectivity</li><li>Cloud platforms for telemetry and remote control</li><li>Predictive-maintenance analytics and dashboards</li></ul><p>By owning the full stack from sensor to dashboard, we deliver connected products that are robust in the field and easy to operate. Industrial customers rely on us to turn raw machine data into decisions that cut downtime and cost.</p>"
+    },
+    {
+      "email": "info@sasaki-components.com",
+      "portalCompanyName": "SASAKI Components",
+      "description": "<p><strong>SASAKI Components</strong> supplies high-tolerance mechanical parts to automotive and machinery manufacturers. Precision, repeatability and on-time delivery are the foundations of everything we make.</p><h3>Manufacturing</h3><ul><li>Precision machining and grinding</li><li>High-volume series production</li><li>In-line and final quality inspection</li><li>Full material certification and traceability</li></ul><p>Our production is built around statistical quality control, so customers receive parts that meet specification batch after batch. Long-standing relationships with major OEMs reflect the consistency we deliver.</p>"
+    },
+    {
+      "email": "info@tgm-consulting.com",
+      "portalCompanyName": "TGM Consulting",
+      "description": "<p><strong>TGM Consulting</strong> advises companies on operations, supply chain and digital transformation. We help leaders turn strategy into measurable results, working hands-on with their teams rather than leaving a report on the shelf.</p><h3>Practice areas</h3><ul><li>Operations and supply-chain optimisation</li><li>Digital transformation and ERP programmes</li><li>Process redesign and change management</li><li>Performance measurement and continuous improvement</li></ul><p>Our consultants combine industry experience with a practical, data-driven method. We stay until the change is embedded and the numbers move, not just until the slides are delivered.</p>"
+    },
+    {
+      "email": "info@apollo.fr",
+      "portalCompanyName": "APOLLO",
+      "description": "<p><strong>APOLLO</strong> designs lighting and energy-efficient electrical systems for commercial and residential projects. We blend technical performance with good design so spaces are well-lit, comfortable and economical to run.</p><h3>Services</h3><ul><li>Lighting design and photometric studies</li><li>Energy-efficient electrical installations</li><li>Smart lighting and building controls</li><li>Retrofit projects and energy-saving audits</li></ul><p>From shops and offices to homes, we deliver installations that cut energy bills while improving the look and feel of a space. Architects and developers partner with us to get lighting right from the very first plans.</p>"
+    },
+    {
+      "email": "a.picard@msn.com",
+      "portalCompanyName": "Anna Picard",
+      "description": "<p><strong>Anna Picard</strong> is an independent consultant specialising in project management and business analysis for software rollouts. I help organisations deliver complex projects on time by bridging the gap between business needs and technical teams.</p><h3>How I can help</h3><ul><li>Requirements gathering and business analysis</li><li>Project planning, coordination and reporting</li><li>Stakeholder management and change support</li><li>Vendor selection and rollout coordination</li></ul><p>With hands-on experience across ERP and custom software projects, I keep initiatives focused, transparent and moving forward. Clients appreciate clear communication and a calm hand when projects get complicated.</p>"
+    },
+    {
+      "email": "l.parker@msn.com",
+      "portalCompanyName": "Laura Parker",
+      "description": "<p><strong>Laura Parker</strong> is a freelance UX designer focused on B2B portals and data-heavy applications. I design interfaces that make complex information clear, so users can get their work done without fighting the software.</p><h3>What I offer</h3><ul><li>User research and usability testing</li><li>Information architecture and interaction design</li><li>Wireframes, prototypes and design systems</li><li>Close collaboration with development teams</li></ul><p>I specialise in the kind of dense, professional tools where good design makes the biggest difference. My goal is always the same: interfaces that feel obvious, even when the underlying problem is anything but.</p>"
+    },
+    {
+      "email": "p.meyer@yahoo.com",
+      "portalCompanyName": "Philippe Meyer",
+      "description": "<p><strong>Philippe Meyer</strong> is an independent integration specialist focused on connecting ERP and e-commerce systems. I build the bridges that let business applications share data reliably, so teams stop re-keying information by hand.</p><h3>Services</h3><ul><li>ERP and e-commerce integration</li><li>API design and middleware development</li><li>Data migration and synchronisation</li><li>Monitoring and long-term maintenance of integrations</li></ul><p>I deliver integrations that are robust, well-documented and easy to maintain once I've handed them over. Clients rely on me to make their systems talk to each other cleanly and to keep them talking.</p>"
+    },
+    {
+      "email": "s.mitchell@yahoo.com",
+      "portalCompanyName": "Sandra Mitchell",
+      "description": "<p><strong>Sandra Mitchell</strong> is a self-employed accountant providing bookkeeping and advisory services to small businesses and the self-employed. I take the stress out of the numbers so my clients can concentrate on running their business.</p><h3>What I do</h3><ul><li>Bookkeeping and accounts preparation</li><li>Tax returns and compliance</li><li>Cash-flow planning and budgeting</li><li>Practical financial advice for owners</li></ul><p>I work closely with each client, explaining things in plain language and flagging issues before they become problems. Reliable, discreet and always on time, I'm the financial partner small businesses can count on.</p>"
+    }
+  ],
+  "contacts": [
+    {
+      "email": "j.roger@123-services.fr",
+      "linkedinLink": "https://www.linkedin.com/in/jean-marc-roger"
+    },
+    {
+      "email": "d.roche@123-services.fr",
+      "linkedinLink": "https://www.linkedin.com/in/dominique-roche"
+    },
+    {
+      "email": "t.roy@123-services.fr",
+      "linkedinLink": "https://www.linkedin.com/in/thierry-roy"
+    },
+    {
+      "email": "k.guillot@esl-banking.fr",
+      "linkedinLink": "https://www.linkedin.com/in/kevin-guillot"
+    },
+    {
+      "email": "j.noel@esl-banking.fr",
+      "linkedinLink": "https://www.linkedin.com/in/jean-nicolas-noel"
+    },
+    {
+      "email": "p.meunier@esl-banking.fr",
+      "linkedinLink": "https://www.linkedin.com/in/paul-meunier"
+    },
+    {
+      "email": "f.gerard@gerard-solutions.fr",
+      "linkedinLink": "https://www.linkedin.com/in/fabrice-gerard"
+    },
+    {
+      "email": "x.nguyen@gerard-solutions.fr",
+      "linkedinLink": "https://www.linkedin.com/in/xavier-nguyen"
+    },
+    {
+      "email": "x.masson@masson.fr",
+      "linkedinLink": "https://www.linkedin.com/in/xavier-masson"
+    },
+    {
+      "email": "c.sanchez@masson.fr",
+      "linkedinLink": "https://www.linkedin.com/in/catherine-sanchez"
+    },
+    {
+      "email": "y.li@silverelec.com",
+      "linkedinLink": "https://www.linkedin.com/in/yang-li"
+    },
+    {
+      "email": "a.zhang@top-components.com",
+      "linkedinLink": "https://www.linkedin.com/in/annie-zhang"
+    },
+    {
+      "email": "c.wilson@wm-cinetics.com",
+      "linkedinLink": "https://www.linkedin.com/in/charles-wilson"
+    },
+    {
+      "email": "j.muller@azinno.com",
+      "linkedinLink": "https://www.linkedin.com/in/jan-muller"
+    },
+    {
+      "email": "e.rousseau@blueberry-telecom.fr",
+      "linkedinLink": "https://www.linkedin.com/in/elisabeth-rousseau"
+    },
+    {
+      "email": "b.blanc@blueberry-telecom.fr",
+      "linkedinLink": "https://www.linkedin.com/in/bernard-blanc"
+    },
+    {
+      "email": "l.bourgeois@bourgeois-industries.fr",
+      "linkedinLink": "https://www.linkedin.com/in/luc-bourgeois"
+    },
+    {
+      "email": "z.arafi@bourgeois-industries.fr",
+      "linkedinLink": "https://www.linkedin.com/in/zohra-arafi"
+    },
+    {
+      "email": "j.charles@bourgeois-industries.fr",
+      "linkedinLink": "https://www.linkedin.com/in/jeannot-charles"
+    },
+    {
+      "email": "a.sasaki@sasaki-components.com",
+      "linkedinLink": "https://www.linkedin.com/in/amaya-sasaki"
+    },
+    {
+      "email": "k.thompson@tgm-consulting.com",
+      "linkedinLink": "https://www.linkedin.com/in/kenneth-thompson"
+    },
+    {
+      "email": "s.garcia@tgm-consulting.com",
+      "linkedinLink": "https://www.linkedin.com/in/steven-garcia"
+    },
+    {
+      "email": "e.martinez@tgm-consulting.com",
+      "linkedinLink": "https://www.linkedin.com/in/edward-martinez"
+    },
+    {
+      "email": "l.david@apollo.fr",
+      "linkedinLink": "https://www.linkedin.com/in/laurent-david"
+    },
+    {
+      "email": "l.michel@apollo.fr",
+      "linkedinLink": "https://www.linkedin.com/in/loic-michel"
+    },
+    {
+      "email": "d.garcia@apollo.fr",
+      "linkedinLink": "https://www.linkedin.com/in/daniel-garcia"
+    }
+  ]
+}
