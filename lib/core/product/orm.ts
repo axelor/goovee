@@ -2,29 +2,37 @@
  * pricing functions need, kept beside them so a consuming app reads the
  * right shape without re-deriving it.
  *
+ * Each fragment's `Payload` type IS the pricing functions' input type
+ * (`PriceableProduct` → `getSaleUnitPrice`, `PriceListLineRow` → the discount
+ * step, …) — defined here, consumed by `pricing/`. Add a field to a fragment
+ * and it flows straight into the function that reads it.
+ *
  * Two mechanisms, by who owns the fetch:
  *  - SELECT FRAGMENTS (`currencySelect`, `productPriceSelectFields`, …) —
  *    for data that rides on a row the APP already fetches (a product, a
  *    listing) alongside everything else it needs. The app spreads the
- *    fragment into its OWN query; the resulting row structurally satisfies
- *    the matching `Pricing*` input of `pricing.ts` / `price-list.ts`.
- *    Fetching the product stays the app's concern.
+ *    fragment into its OWN query; the resulting row IS the matching pricing
+ *    input. Fetching the product stays the app's concern.
  *  - FETCH FUNCTIONS (`fetchConversionLines`, `findPartnerFiscalPosition`,
  *    …) — for data that exists ONLY to feed pricing, on rows the app never
  *    otherwise touches (exchange rates, the buyer's fiscal position, the
- *    company-specific-field set, a currency lookup). The app just calls
- *    these and hands the result to the pricing functions.
+ *    company-specific-field set, price lists / their lines, unit conversions).
+ *    The app just calls these and hands the result to the pricing functions.
  *
  * This is the ONLY file in `core/product` that talks to the ORM client; the
- * compute layer stays pure and unit-testable without a database. */
+ * compute layer imports only the `Payload` types from here, so it stays
+ * unit-testable without a database. */
 import type {Client} from '@/goovee/.generated/client';
 import type {
   AOSAccountManagement,
   AOSCurrency,
   AOSCurrencyConversionLine,
   AOSFiscalPosition,
+  AOSPriceList,
+  AOSPriceListLine,
   AOSProduct,
   AOSTax,
+  AOSUnitConversion,
 } from '@/goovee/.generated/models';
 import type {Payload, SelectOptions} from '@goovee/orm';
 
@@ -78,6 +86,13 @@ export const productPriceSelectFields = {
   salePrice: true,
   inAti: true,
   saleCurrency: currencySelect,
+  /* The sale unit (`salesUnit ?? unit`) the price is expressed in, and the
+   * category — both pricing inputs: the unit for an optional unit conversion,
+   * the category for price-list lines that target a category rather than the
+   * product. */
+  unit: {id: true},
+  salesUnit: {id: true},
+  productCategory: {id: true},
   /* Per-company overrides of `salePrice` / `inAti` / `saleCurrency`. AOS
    * reads these via `ProductCompanyService` before falling back to the
    * base product fields. */
@@ -100,6 +115,54 @@ export const productPriceSelectFields = {
 export type PriceableProduct = Payload<
   AOSProduct,
   {select: typeof productPriceSelectFields}
+>;
+
+/** The price-list fields `getDefaultPriceList` needs: the general discount and
+ *  the active-window flags. Lives on the buyer's `salePartnerPriceList
+ *  .priceListSet` (see `findPartnerSalePriceLists`). */
+export const priceListSelectFields = {
+  generalDiscount: true,
+  isActive: true,
+  applicationBeginDate: true,
+  applicationEndDate: true,
+} as const satisfies SelectOptions<AOSPriceList>;
+
+export type PriceListRow = Payload<
+  AOSPriceList,
+  {select: typeof priceListSelectFields}
+>;
+
+/** One price-list line: the rule (`typeSelect`/`amountTypeSelect`/`amount`),
+ *  the quantity threshold, and what it targets (a product or a category).
+ *  Fetched per price list by `fetchPriceListLines`; `getPriceListLine`
+ *  partitions product- vs category-lines. */
+export const priceListLineSelectFields = {
+  typeSelect: true,
+  amountTypeSelect: true,
+  amount: true,
+  minQty: true,
+  product: {id: true},
+  productCategory: {id: true},
+} as const satisfies SelectOptions<AOSPriceListLine>;
+
+export type PriceListLineRow = Payload<
+  AOSPriceListLine,
+  {select: typeof priceListLineSelectFields}
+>;
+
+/** One unit-conversion line — the COEFF coefficient between two units (the
+ *  pricing core honours only `typeSelect === TYPE_COEFF`). Fetched globally by
+ *  `fetchUnitConversions`. */
+export const unitConversionSelectFields = {
+  startUnit: {id: true},
+  endUnit: {id: true},
+  coef: true,
+  typeSelect: true,
+} as const satisfies SelectOptions<AOSUnitConversion>;
+
+export type UnitConversionRow = Payload<
+  AOSUnitConversion,
+  {select: typeof unitConversionSelectFields}
 >;
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -255,5 +318,47 @@ export async function findCurrencyByCodeISO({
   return client.aOSCurrency.findOne({
     where: {codeISO},
     select: currencySelect,
+  });
+}
+
+/** The COEFF unit-conversion lines (`entitySelect = 0`, ENTITY_ALL) the pricing
+ *  core uses to quote a price in a unit other than the product's sale unit.
+ *  Global, pricing-only side data — mirrors `fetchConversionLines`. The core
+ *  (`getUnitCoefficient`) picks the right line and rejects non-COEFF ones. */
+export async function fetchUnitConversions(client: Client) {
+  return client.aOSUnitConversion.find({
+    where: {entitySelect: 0},
+    select: unitConversionSelectFields,
+  });
+}
+
+/** The buyer's candidate sale price lists — the `priceListSet` of their
+ *  `salePartnerPriceList`. Hand the result to the pure `getDefaultPriceList`
+ *  (it keeps the single active one whose window contains today). Empty when the
+ *  partner has none. */
+export async function findPartnerSalePriceLists({
+  client,
+  mainPartnerId,
+}: {
+  client: Client;
+  mainPartnerId: string | null | undefined;
+}): Promise<PriceListRow[]> {
+  if (!mainPartnerId) return [];
+  const partner = await client.aOSPartner.findOne({
+    where: {id: mainPartnerId},
+    select: {
+      salePartnerPriceList: {priceListSet: {select: priceListSelectFields}},
+    },
+  });
+  return partner?.salePartnerPriceList?.priceListSet ?? [];
+}
+
+/** All lines of one price list, with the product / category they target — the
+ *  core partitions these per product (its lines vs its category's) the way
+ *  AOS's two queries do. */
+export async function fetchPriceListLines(client: Client, priceListId: string) {
+  return client.aOSPriceListLine.find({
+    where: {priceList: {id: priceListId}},
+    select: priceListLineSelectFields,
   });
 }

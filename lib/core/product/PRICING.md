@@ -1,15 +1,55 @@
 # Product pricing core
 
-A faithful TypeScript port of the AOS sales-order pricing path
-(`pricing.ts`). Given a price, a tax setup and a target currency it returns the
-**WT** (without-tax) and **ATI** (all-tax-included) amounts — the same numbers
-AOS would invoice.
+A faithful TypeScript port of the AOS sales-order pricing path. Given a price, a
+tax setup and a target currency it returns the **WT** (without-tax) and **ATI**
+(all-tax-included) amounts — the same numbers AOS would invoice.
 
-The module is **generic**: it knows nothing about any subapp. It defines its own
-structural input types (the `Pricing*` family) so callers feed it their own ORM
-result shapes, and it is the single place product pricing logic lives. The
-marketplace is one consumer; see its `SPEC.md` §6 for the policy it layers on
+The module lives in the **`pricing/` folder**, split by concern and re-exported
+from `pricing/index.ts` (import everything from `@/product/pricing`):
+
+- `types` / `errors` — the _computed_ shapes (`ResolvedTaxLine`,
+  `ResolvedDiscount`), the enums, error codes, and the error class. (The
+  _input_ shapes are the `Payload` types of `../orm`'s fragments — see below.)
+- `util` — half-up rounding, timezone "today", per-company field reads.
+- `tax` — tax resolution, WT/ATI, basis conversion + invoice pairing.
+- `conversion` — currency exchange rate, unit coefficient.
+- `discount` — the buyer's price-list discount primitives.
+- `line-total` — the billable `exTaxTotal` / `inTaxTotal`.
+- `catalogue` — `getSaleUnitPrice` / `getConvertedPrice`.
+- `apply-price-list` — the product-price ENDPOINT's quirky variant (reference).
+- `quote` — `quoteProductPrice`, the one call for display + charge (below).
+
+The module is **subapp-agnostic**: it knows nothing about any subapp. Its input
+types are the `Payload` types of the select fragments in the co-located data
+layer **`../orm.ts`** (`PriceableProduct`, `Currency`, `TaxRow`, `ConversionLine`,
+`FiscalPositionInput`, `PriceListRow`, `PriceListLineRow`, `UnitConversionRow`).
+So adding a field a pricing function reads is a _single_ edit — extend the
+fragment, and it flows straight into the function's accepted input.
+
+This keeps the boundary that matters: `core/product` depends only on types it
+owns (its own `orm.ts` fragments over the goovee ORM) — **never** on a subapp's
+shapes. `orm.ts` is the one file here that calls the ORM client; the compute
+layer imports only its _types_, so it stays unit-testable without a database.
+The marketplace is one consumer; see its `SPEC.md` §6 for the policy it layers on
 top.
+
+## One call: `quoteProductPrice`
+
+For a complete priced line — what to **display** and what to **charge** — call
+`quoteProductPrice` (in `quote.ts`). It chains the steps below (catalogue unit
+price → invoice rounding → the buyer's price-list discount → the billable line
+total) and returns one object:
+
+- `unitPrice {wt, ati}` — the headline per-unit price (the discounted price when
+  the compute method folds it in, the catalogue price otherwise);
+- `discount {type, amount} | null` — the separate discount to show, present
+  **only** when the compute method keeps it separate (so the display honours the
+  admin's intent: a folded discount shows no badge);
+- `priceDiscounted`, `exTaxTotal`, `inTaxTotal` — **charge `inTaxTotal`**.
+
+It is strict (throws like the rest of the core); a storefront wraps it with its
+own degradation policy and product fetch, the parity test wraps it to compare
+against AOS.
 
 ## Strictness
 
@@ -109,19 +149,19 @@ admin would read the original error, or degrade (see Strictness).
 
 AOS finishes pricing by running the buyer's sale price list — discounts,
 markups and replacement prices — over the catalogue unit price. That step lives
-in the companion module **`price-list.ts`** (a faithful port of
-`PriceListService`, `PartnerPriceListServiceImpl.getDefaultPriceList` and the
-`SaleOrderLineDiscountServiceImpl` composition). It is kept separate because it
-is an adjustment applied _after_ a catalogue price exists, and not every
-consumer wants it: `getSaleUnitPrice` here returns the catalogue price, and a
-caller who has a buyer applies the price list as the next step
-(`getDefaultPriceList` → `getDiscountedPrice`). See that module's header for the
-discount rules, the compute-method modes (fold the discount into the price vs
-keep it separate), and the line-selection logic. Like this core it works in
-float64 and leaves final rounding to the caller.
+in **`discount.ts`** (a faithful port of `PriceListService`,
+`PartnerPriceListServiceImpl.getDefaultPriceList` and the
+`SaleOrderLineDiscountServiceImpl` composition). It is an adjustment applied
+_after_ a catalogue price exists, and not every consumer wants it:
+`getSaleUnitPrice` returns the catalogue price, and a caller who has a buyer
+applies the price list as the next step (`getDefaultPriceList` →
+`getDiscountedPrice`). See that file's header for the discount rules, the
+compute-method modes (fold the discount into the price vs keep it separate), and
+the line-selection logic. Like the rest of the core it works in float64 and
+leaves final rounding to the caller.
 
 The **billable line total** — what you actually charge — is `getLineTotal` in
-the same module, a port of `SaleOrderLineComputeServiceImpl.computeValues`. It
+`line-total.ts`, a port of `SaleOrderLineComputeServiceImpl.computeValues`. It
 takes the unit price plus the buyer's resolved discount and quantity and
 returns `exTaxTotal` / `inTaxTotal`, rounded to the currency's decimals. This
 matters under the SEPARATE compute method, where the discount is **not** in the
@@ -142,5 +182,5 @@ from this core are the unit price; `getLineTotal` is the line amount.
   does). The fix, deferred, is to move the hot path onto the `BigDecimal` the
   goovee ORM already exports (`@goovee/orm`), which mirrors Java's exactly.
 
-See the header comment in `pricing.ts` for the exact AOS services each step
-mirrors.
+See the header comment in `catalogue.ts` (and each concern file) for the exact
+AOS services each step mirrors.

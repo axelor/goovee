@@ -9,25 +9,29 @@ import type {SelectOptions} from '@goovee/orm';
 import {
   currencySelect,
   fetchConversionLines,
+  fiscalPositionSelectFields,
+  priceListSelectFields,
   productPriceSelectFields,
-  taxSelectFields,
 } from '@/product/orm';
 
-/** Company-specific product fields — the core fetch, under the script's name. */
-export {findCompanySpecificProductFields as loadCompanySpecificProductFields} from '@/product/orm';
+/** Side data the test gets straight from the core data layer, under the
+ *  script's names — no inline selects. */
+export {
+  fetchPriceListLines as loadPriceListLines,
+  fetchUnitConversions as loadUnitConversions,
+  findCompanySpecificProductFields as loadCompanySpecificProductFields,
+} from '@/product/orm';
+export type {PriceListLineRow} from '@/product/orm';
 
-/** The core's priceable-product fragment, plus the extra columns this test
- *  needs: a label, the units (for the `--unit` dimension) and the category
- *  (for price-list fallback). The app owns the product query; core owns the
- *  fragment. */
+/** The core's priceable-product fragment (which already carries the price,
+ *  tax, unit and category fields pricing reads) plus the few columns this test
+ *  needs only for display/filtering. The app owns the product query; core owns
+ *  the pricing fragment. */
 const productPriceSelect = {
   ...productPriceSelectFields,
   name: true,
   code: true,
   sellable: true,
-  unit: {id: true},
-  salesUnit: {id: true},
-  productCategory: {id: true},
 } as const satisfies SelectOptions<AOSProduct>;
 
 export type PriceProduct = Awaited<ReturnType<typeof loadProducts>>[number];
@@ -113,25 +117,9 @@ const partnerSelect = {
   simpleFullName: true,
   name: true,
   currency: currencySelect,
-  fiscalPosition: {
-    taxEquivList: {
-      select: {
-        fromTaxSet: {select: {id: true}},
-        toTaxSet: {select: taxSelectFields},
-      },
-    },
-  },
+  fiscalPosition: fiscalPositionSelectFields,
   salePartnerPriceList: {
-    priceListSet: {
-      select: {
-        id: true,
-        title: true,
-        isActive: true,
-        generalDiscount: true,
-        applicationBeginDate: true,
-        applicationEndDate: true,
-      },
-    },
+    priceListSet: {select: priceListSelectFields},
   },
 } as const satisfies SelectOptions<AOSPartner>;
 
@@ -218,38 +206,4 @@ export async function loadConversionLines(
   toCodes: Array<string | null | undefined>,
 ) {
   return fetchConversionLines({client, fromCodes, toCodes});
-}
-
-export type PriceListLineRow = Awaited<
-  ReturnType<typeof loadPriceListLines>
->[number];
-
-/** All lines of one price list, with the product / category they target —
- *  the script partitions these per product (product lines vs its category's)
- *  the way AOS's two queries do. */
-export async function loadPriceListLines(client: Client, priceListId: string) {
-  return client.aOSPriceListLine.find({
-    where: {priceList: {id: priceListId}},
-    select: {
-      typeSelect: true,
-      amountTypeSelect: true,
-      amount: true,
-      minQty: true,
-      product: {id: true},
-      productCategory: {id: true},
-    },
-  });
-}
-
-/** Unit-conversion lines (COEFF), for the optional `--unit` dimension. */
-export async function loadUnitConversions(client: Client) {
-  return client.aOSUnitConversion.find({
-    where: {entitySelect: 0},
-    select: {
-      startUnit: {id: true},
-      endUnit: {id: true},
-      coef: true,
-      typeSelect: true,
-    },
-  });
 }

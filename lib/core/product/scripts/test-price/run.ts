@@ -38,21 +38,13 @@ import {manager} from '@/tenant';
 import {getAOSAuthHeaders} from '@/tenant/auth';
 
 import {
-  convertUnitPrice,
-  getSaleUnitPrice,
+  getDefaultPriceList,
   PriceComputationError,
+  quoteProductPrice,
   round,
-  roundSaleUnitPrice,
   todayInTimezone,
 } from '../../pricing';
-import {
-  AMOUNT_TYPE,
-  getDefaultPriceList,
-  getLineTotal,
-  getPriceListLine,
-  getReplacedPriceAndDiscounts,
-  type PricingPriceList,
-} from '../../price-list';
+import type {PriceListRow} from '@/product/orm';
 import {processBatch} from './batch';
 import {
   loadAppConfig,
@@ -193,7 +185,7 @@ function computeGooveePrice({
     nbDecimalForUnitPrice: number;
     computeMethodDiscountSelect: number;
   };
-  priceList: (PricingPriceList & {id: string}) | null;
+  priceList: PriceListRow | null;
   priceListLines: PriceListLineRow[];
   requestedUnit: {id: string} | null;
   unitConversions: Awaited<ReturnType<typeof loadUnitConversions>>;
@@ -202,87 +194,33 @@ function computeGooveePrice({
   atiPrimary: boolean;
 }): GooveePrice {
   try {
-    const result = getSaleUnitPrice({
+    /* The whole gv pipeline is the core's quoteProductPrice; the test only
+     * reads the unit price + line totals and ignores the display fields. quote
+     * partitions the price-list lines per product/category itself; no buyer →
+     * no price list (gate it to null). */
+    const quote = quoteProductPrice({
       product,
       company: {id: company.id, timezone: company.timezone},
       fiscalPosition: partner.partner?.fiscalPosition ?? null,
       toCurrency,
       conversionLines,
       companySpecificProductFields,
+      priceList: partner.id != null ? priceList : null,
+      priceListLines,
+      computeMethodDiscountSelect: appConfig.computeMethodDiscountSelect,
+      inAti: atiPrimary,
       qty: LINE_QTY,
       ...(requestedUnit ? {requestedUnit, unitConversions} : {}),
-    });
-
-    const nb = appConfig.nbDecimalForUnitPrice;
-    /* Invoice pairing: round the primary basis, derive the other from it —
-     * the way a sale-order / invoice line stores price + inTaxPrice. (This
-     * is NOT the endpoint's applyPriceList round-trip.) */
-    let {wt, ati} = roundSaleUnitPrice(result, atiPrimary, nb);
-
-    /* Price-list discount, invoice-style: resolve it on the primary basis the
-     * way the SO-line fill step does (getReplacedPriceAndDiscounts). INCLUDE
-     * folds it into the unit price (price set); SEPARATE leaves the unit price
-     * at catalogue and reports the residual discount, which the line total
-     * then applies. The non-primary basis is re-derived from the primary. */
-    let discountTypeSelect: number = AMOUNT_TYPE.NONE;
-    let discountAmount = 0;
-    if (partner.id != null && priceList) {
-      const productLines = priceListLines.filter(
-        line => line.product?.id === product.id,
-      );
-      const categoryLines = product.productCategory?.id
-        ? priceListLines.filter(
-            line => line.productCategory?.id === product.productCategory?.id,
-          )
-        : [];
-      const primary = atiPrimary ? ati : wt;
-      const line = getPriceListLine(
-        productLines,
-        categoryLines,
-        LINE_QTY,
-        primary,
-      );
-      const discounts = getReplacedPriceAndDiscounts(
-        priceList,
-        line,
-        primary,
-        appConfig.computeMethodDiscountSelect,
-        nb,
-      );
-      discountTypeSelect = discounts.discountTypeSelect;
-      discountAmount = discounts.discountAmount;
-      const newPrimary = round(discounts.price ?? primary, nb);
-      if (atiPrimary) {
-        ati = newPrimary;
-        wt = convertUnitPrice(true, result.taxRate, newPrimary, nb);
-      } else {
-        wt = newPrimary;
-        ati = convertUnitPrice(false, result.taxRate, newPrimary, nb);
-      }
-    }
-
-    /* The billable line total (qty 1), mirroring SaleOrderLineComputeService:
-     * apply the residual discount on the primary basis, take ×qty rounded to
-     * the order currency's decimals, derive the other basis off the tax rate. */
-    const {exTaxTotal, inTaxTotal} = getLineTotal({
-      wt,
-      ati,
-      discountTypeSelect,
-      discountAmount,
-      qty: LINE_QTY,
-      taxRate: result.taxRate,
-      inAti: atiPrimary,
-      currencyDecimals: toCurrency.numberOfDecimals ?? nb,
-      nbDecimalForUnitPrice: nb,
+      nbDecimalForUnitPrice: appConfig.nbDecimalForUnitPrice,
     });
 
     return {
       ok: true,
-      wt,
-      ati,
+      wt: quote.unitPrice.wt,
+      ati: quote.unitPrice.ati,
       currencyCode: toCurrency.code ?? '',
-      exTaxTotal,
-      inTaxTotal,
+      exTaxTotal: quote.exTaxTotal,
+      inTaxTotal: quote.inTaxTotal,
     };
   } catch (err) {
     return {
