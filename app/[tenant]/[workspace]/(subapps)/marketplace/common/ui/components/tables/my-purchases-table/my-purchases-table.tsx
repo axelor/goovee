@@ -1,6 +1,6 @@
 'use client';
 
-import {RESPONSIVE_SIZES, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
+import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
@@ -127,7 +127,7 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       content: purchase =>
         purchase.saleOrder?.id ? (
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.orders}${SUBAPP_PAGE.orders}/${purchase.saleOrder.id}`}
+            href={`${workspaceURI}/${SUBAPP_CODES.orders}/${purchase.saleOrder.id}`}
             className="text-sm text-primary hover:underline">
             {purchase.saleOrder.saleOrderSeq ?? i18n.t('View')}
           </Link>
