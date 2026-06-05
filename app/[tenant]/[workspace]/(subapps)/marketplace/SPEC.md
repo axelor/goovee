@@ -582,6 +582,12 @@ rules the marketplace applies the policy below.
   **half the currency's smallest unit** (e.g. €0.005); anything larger is
   rejected as a mismatch.
 
+**Beyond today's behaviour.** The pricing core supports more than the
+marketplace uses today — chiefly **time-bound price-list discounts** (for one
+buyer, or marketplace-wide) and **unit conversion**. The marketplace applies
+neither to listings yet. To build such a feature on the core, see the
+[pricing composition guide](../../../../../lib/core/product/COMPOSITION.md).
+
 ---
 
 ## 7. Workspace configuration
