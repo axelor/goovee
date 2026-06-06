@@ -24,7 +24,7 @@ export function ProductTypeSelect({
     const params = new URLSearchParams(searchParams);
     params.set('type', value);
     params.delete('page');
-    router.push(`?${params.toString()}`);
+    router.push(`?${params.toString()}`, {scroll: false});
   };
 
   return (
