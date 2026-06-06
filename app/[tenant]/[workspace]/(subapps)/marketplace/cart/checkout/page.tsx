@@ -13,7 +13,7 @@ import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
-import {CheckoutContent} from '../../common/ui/components/contents/checkout-content';
+import {CheckoutContent} from '../../common/ui/components/checkout/checkout-content';
 import {ensureAuth} from '../../common/utils/auth-helper';
 
 export default async function CheckoutPage(props: {

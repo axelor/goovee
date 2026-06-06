@@ -33,10 +33,10 @@ import {
   type ListCategory,
   type ListProduct,
 } from './common/orm';
-import {ProductCard} from './common/ui/components/cards/product-card';
-import {PriceTypeSelect} from './common/ui/components/inputs/price-type-select';
-import {ProductSortSelect} from './common/ui/components/inputs/product-sort-select';
-import {ProductTypeSelect} from './common/ui/components/inputs/product-type-select';
+import {ProductCard} from './common/ui/components/product/product-card';
+import {PriceTypeSelect} from './common/ui/components/product/price-type-select';
+import {ProductSortSelect} from './common/ui/components/product/product-sort-select';
+import {ProductTypeSelect} from './common/ui/components/product/product-type-select';
 import {ensureAuth} from './common/utils/auth-helper';
 import {
   PAGE_SIZE,

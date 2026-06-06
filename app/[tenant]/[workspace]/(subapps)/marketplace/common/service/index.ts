@@ -2,8 +2,8 @@ import {t} from '@/locale/server';
 import type {Tenant} from '@/tenant';
 import {getAOSAuthHeaders} from '@/tenant/auth';
 import axios from 'axios';
-import type {ValidatedCart} from '../utils/cart';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {ValidatedCart} from '../utils/cart';
 
 type CreateOrderArgs = {
   cart: ValidatedCart;

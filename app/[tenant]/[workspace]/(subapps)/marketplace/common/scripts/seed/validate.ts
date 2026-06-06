@@ -1,5 +1,5 @@
-import type {ProductSeed, SeedData, VersionSeed} from './validators';
 import {slugify} from '../../utils/slugify';
+import type {ProductSeed, SeedData, VersionSeed} from './validators';
 
 /* Cross-field validations that JSON Schema / Zod can't express:
  *   - `published` versions must carry both submittedAt and releasedAt;

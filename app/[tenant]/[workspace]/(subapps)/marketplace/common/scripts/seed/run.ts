@@ -1,24 +1,24 @@
 import '@/load-swc-env';
 
 import {manager} from '@/tenant';
-import {hash} from '../../utils/string';
-import {slugify} from '../../utils/slugify';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseArgs} from 'node:util';
 import {findDefaultCurrency} from '../../orm';
+import {slugify} from '../../utils/slugify';
+import {hash} from '../../utils/string';
 import {demoKey} from './constants';
 import {findCustomerPartnerByEmail, findWorkspaceByUrl} from './lookups';
 import {
   recomputeRatings,
   refreshCurrentVersion,
+  uploadScreenshotFiles,
   upsertCategory,
   upsertCompatibilityVersion,
   upsertLicense,
   upsertProduct,
   upsertReview,
   upsertScreenshots,
-  uploadScreenshotFiles,
   upsertSharedBundleMetaFile,
   upsertVersion,
   type WorkspaceContext,

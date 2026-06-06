@@ -26,13 +26,13 @@ import {
   findProduct,
   findVersionCount,
 } from '../../common/orm';
-import {ProductHeaderCard} from '../../common/ui/components/cards/product-header-card';
-import {NoticeBanner} from '../../common/ui/components/primitives/notice-banner';
-import {TooltipDate} from '../../common/ui/components/primitives/tooltip-date';
-import {OverviewTab} from '../../common/ui/components/tabs/overview-tab';
-import {ReviewsTab} from '../../common/ui/components/tabs/reviews-tab';
-import {SupportTab} from '../../common/ui/components/tabs/support-tab';
-import {VersionsTab} from '../../common/ui/components/tabs/versions-tab';
+import {ProductHeaderCard} from '../../common/ui/components/product/product-header-card';
+import {NoticeBanner} from '../../common/ui/components/shared/notice-banner';
+import {TooltipDate} from '../../common/ui/components/shared/tooltip-date';
+import {OverviewTab} from '../../common/ui/components/product/overview-tab';
+import {ReviewsTab} from '../../common/ui/components/reviews/reviews-tab';
+import {SupportTab} from '../../common/ui/components/product/support-tab';
+import {VersionsTab} from '../../common/ui/components/versions/versions-tab';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {
   productPageParamsSchema,

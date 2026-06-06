@@ -19,7 +19,7 @@ import {
 import {
   MAX_BUNDLE_SIZE,
   versionSchema,
-} from '../ui/components/forms/version-form/validator';
+} from '../ui/components/versions/version-form/validator';
 import {ensureAuth} from '../utils/auth-helper';
 import {parseVersionNumber} from '../utils/version-number';
 

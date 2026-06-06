@@ -28,9 +28,9 @@ import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
 import {findFavoriteProducts} from '../../common/orm';
-import {PriceTypeSelect} from '../../common/ui/components/inputs/price-type-select';
-import {ProductTypeSelect} from '../../common/ui/components/inputs/product-type-select';
-import {MyFavoritesTable} from '../../common/ui/components/tables/my-favorites-table';
+import {PriceTypeSelect} from '../../common/ui/components/product/price-type-select';
+import {ProductTypeSelect} from '../../common/ui/components/product/product-type-select';
+import {MyFavoritesTable} from '../../common/ui/components/favorites/my-favorites-table';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {FavoritesSearch} from './search';
 import {

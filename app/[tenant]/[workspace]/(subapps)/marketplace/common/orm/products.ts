@@ -1,6 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import {ID} from '@/types';
+import {Maybe} from '@/types/util';
 import {and, or} from '@/utils/orm';
 import type {Payload, SelectOptions} from '@goovee/orm';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
@@ -15,7 +16,6 @@ import {
   type QueryProps,
 } from './helpers';
 import {getPriceContext, withPrice} from './price';
-import {Maybe} from '@/types/util';
 
 // ---- PRODUCTS ---- //
 

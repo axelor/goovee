@@ -20,7 +20,7 @@ import {
   syncProductImages,
   withMyProductAccessFilter,
 } from '../orm';
-import {productSchema} from '../ui/components/forms/product-form/validator';
+import {productSchema} from '../ui/components/product/product-form/validator';
 import {ensureAuth} from '../utils/auth-helper';
 
 const loadMyProductForEditSchema = z.object({

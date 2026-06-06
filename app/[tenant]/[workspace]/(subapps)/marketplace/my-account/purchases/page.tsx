@@ -28,7 +28,7 @@ import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {findPurchases} from '../../common/orm';
-import {MyPurchasesTable} from '../../common/ui/components/tables/my-purchases-table';
+import {MyPurchasesTable} from '../../common/ui/components/purchases/my-purchases-table';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {
   myPurchasesParamsSchema,

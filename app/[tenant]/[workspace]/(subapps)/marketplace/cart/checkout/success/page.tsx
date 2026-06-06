@@ -13,7 +13,7 @@ import {
   GRADIENT_MAP,
 } from '../../../common/constants/gradients';
 import {findPurchases} from '../../../common/orm';
-import {ProductIcon} from '../../../common/ui/components/primitives/product-icon';
+import {ProductIcon} from '../../../common/ui/components/shared/product-icon';
 import {ensureAuth} from '../../../common/utils/auth-helper';
 import {checkoutSuccessSearchParamsSchema} from '../../../common/utils/validators';
 

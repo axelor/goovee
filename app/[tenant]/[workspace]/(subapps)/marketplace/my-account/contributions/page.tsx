@@ -23,12 +23,12 @@ import {
   findProductCategories,
   resolveNewListingCurrency,
 } from '../../common/orm';
-import {PublishNewButton} from '../../common/ui/components/buttons/publish-new-button';
-import {Await} from '../../common/ui/components/primitives/await';
+import {PublishNewButton} from '../../common/ui/components/product/publish-new-button';
+import {Await} from '../../common/ui/components/shared/await';
 import {Construction} from 'lucide-react';
-import {NoticeBanner} from '../../common/ui/components/primitives/notice-banner';
-import {OverviewTab} from '../../common/ui/components/tabs/my-contributions-overview-tab';
-import {ProductsTab} from '../../common/ui/components/tabs/products-tab';
+import {NoticeBanner} from '../../common/ui/components/shared/notice-banner';
+import {OverviewTab} from '../../common/ui/components/contributions/my-contributions-overview-tab';
+import {ProductsTab} from '../../common/ui/components/contributions/products-tab';
 import {ensureAuth} from '../../common/utils/auth-helper';
 import {
   myContributionsParamsSchema,

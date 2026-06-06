@@ -1,7 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
+import {ID} from '@/types';
 import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {priceSelectFields, withPublishedProductFilter} from './helpers';
-import {ID} from '@/types';
 
 export type CartProduct = Awaited<ReturnType<typeof findCartProducts>>[number];
 

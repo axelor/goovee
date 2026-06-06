@@ -11,7 +11,7 @@ import {
 import {workspacePathname} from '@/utils/workspace';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {CartContent} from '../common/ui/components/contents/cart-content';
+import {CartContent} from '../common/ui/components/cart/cart-content';
 import {ensureAuth} from '../common/utils/auth-helper';
 
 export default async function CartPage(props: {

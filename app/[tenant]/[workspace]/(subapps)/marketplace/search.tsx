@@ -19,8 +19,8 @@ import {useRouter} from 'next/navigation';
 import {ChangeEvent, useCallback, useMemo, useRef, useState} from 'react';
 import {searchProducts} from './common/actions';
 import type {ProductSearchResult} from './common/orm';
-import {ProductIcon} from './common/ui/components/primitives/product-icon';
-import {ProductTypeBadge} from './common/ui/components/primitives/product-type-badge';
+import {ProductIcon} from './common/ui/components/shared/product-icon';
+import {ProductTypeBadge} from './common/ui/components/shared/product-type-badge';
 
 export function Search({
   className,

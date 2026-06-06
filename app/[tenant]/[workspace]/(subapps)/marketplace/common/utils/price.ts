@@ -26,6 +26,7 @@
  */
 
 import {DEFAULT_CURRENCY_SCALE} from '@/constants';
+import type {ConversionLine, Currency, PriceableProduct} from '@/product/orm';
 import {
   computeWtAti,
   getExchangeRate,
@@ -35,7 +36,6 @@ import {
   round,
   todayInTimezone,
 } from '@/product/pricing';
-import type {ConversionLine, Currency, PriceableProduct} from '@/product/orm';
 import type {PriceContext} from '../orm';
 
 const DEFAULT_TAX_RATE = 0;
