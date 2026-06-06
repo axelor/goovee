@@ -23,230 +23,80 @@ import {
 import {Input} from '@/ui/components/input';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {packIntoFormData} from '@/utils/formdata';
-import {zodResolver} from '@hookform/resolvers/zod';
 import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Info,
+  Loader2,
   Plus,
   Trash2,
 } from 'lucide-react';
-import {useMemo, useRef, useState, useTransition} from 'react';
-import {useForm, useWatch} from 'react-hook-form';
-import {saveVersion, unpublishVersion} from '../../../../actions';
+import {useWatch} from 'react-hook-form';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
-import type {
-  CompatibilityVersion,
-  MyProductWithVersions,
-} from '../../../../orm';
-import {formatVersionNumber} from '../../../../utils/version-number';
-import {scrollToFirstError} from '../../../../utils/scroll-to-error';
+import type {CompatibilityVersion} from '../../../../orm';
+import type {VersionStepModel} from '../../product/product-form-dialog/use-product-edit';
 import {BundleDropzone} from '../bundle-dropzone';
 import {FormMessageSpace} from '../../shared/form-message-space';
-import {
-  MAX_BUNDLE_SIZE,
-  versionSchema,
-  type VersionFormValues,
-} from './validator';
-
-type ExistingVersion = NonNullable<
-  Cloned<MyProductWithVersions>['versionList']
->[number];
+import {MAX_BUNDLE_SIZE} from './validator';
 
 type VersionFormProps = {
+  /** Version-step model from `useProductEdit` (state + handlers live there). */
+  vm: VersionStepModel;
   workspaceURI: string;
-  workspaceURL: string;
   productId: string;
-  versions: ExistingVersion[];
-  productCurrentVersionId: string | null;
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
-  onCancel: () => void;
-  onDone: () => void;
 };
 
-const BLANK_FORM_VALUES = (productId: string): VersionFormValues => ({
-  productId,
-  versionNumber: '',
-  changelog: '',
-  statusSelect: MARKETPLACE_VERSION_STATUS.DRAFT,
-  compatibilitySetIds: [],
-});
-
 export function VersionForm({
+  vm,
   workspaceURI,
-  workspaceURL,
   productId,
-  versions,
-  productCurrentVersionId,
   compatibilityVersions,
   requiresReview,
   allowToPublish,
-  onCancel,
-  onDone,
 }: VersionFormProps) {
   const {toast} = useToast();
-  const [pending, startTransition] = useTransition();
-  /** When true, we are editing/creating a brand-new version (not yet saved). */
-  const [creatingNew, setCreatingNew] = useState(() => versions.length === 0);
-  /** Index in the `versions` array we are currently editing (when not creatingNew). */
-  const [index, setIndex] = useState(0);
-  const [slideDir, setSlideDir] = useState<'next' | 'prev'>('next');
-  const [confirmUnpublish, setConfirmUnpublish] = useState(false);
+  const {
+    form,
+    bodyRef,
+    pending,
+    current,
+    total,
+    creatingNew,
+    awaitingNext,
+    slideDir,
+    index,
+    displayTotal,
+    positionLabel,
+    goPrev,
+    goNext,
+    addNew,
+    discardNew,
+    saveAsDraft,
+    publish,
+    isPublished,
+    canUnpublish,
+    canSaveAsDraft,
+    isUnpublishingCurrent,
+    hasOtherPublished,
+    confirmUnpublish,
+    setConfirmUnpublish,
+    runUnpublish,
+    cancel,
+  } = vm;
+  const {control, setValue, formState} = form;
 
-  const current = creatingNew ? undefined : versions[index];
-
-  const defaultValues = useMemo<VersionFormValues>(() => {
-    if (!current) return BLANK_FORM_VALUES(productId);
-    return {
-      id: current.id,
-      productId,
-      versionNumber: formatVersionNumber(current),
-      changelog: current.changelog ?? '',
-      statusSelect:
-        current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED
-          ? MARKETPLACE_VERSION_STATUS.PUBLISHED
-          : MARKETPLACE_VERSION_STATUS.DRAFT,
-      compatibilitySetIds: (current.compatibilitySet ?? []).map(c => c.id),
-      existingBundleFileId: current.bundleFile?.id,
-    };
-  }, [current, productId]);
-
-  const form = useForm<VersionFormValues>({
-    resolver: zodResolver(versionSchema),
-    defaultValues,
-    values: defaultValues,
-    mode: 'onSubmit',
-  });
-
-  const {control, handleSubmit, setValue, formState} = form;
   const existingBundleFileId = useWatch({
     control,
     name: 'existingBundleFileId',
   });
-  const bodyRef = useRef<HTMLDivElement>(null);
 
   const downloadHref = current
     ? `${workspaceURI}/marketplace/api/products/${productId}/versions/${current.id}/download`
     : undefined;
-
-  const submit = handleSubmit(
-    values => {
-      startTransition(async () => {
-        try {
-          const formData = packIntoFormData({...values, workspaceURL});
-          const result = await saveVersion(formData);
-          if (!result.success) {
-            toast({variant: 'destructive', title: result.message});
-            return;
-          }
-          toast({variant: 'success', title: i18n.t('Version saved')});
-          onDone();
-        } catch {
-          toast({
-            variant: 'destructive',
-            title: i18n.t('Failed to save the version. Please try again.'),
-          });
-        }
-      });
-    },
-    () => scrollToFirstError(bodyRef.current),
-  );
-
-  const guardedNavigate = (move: () => void, dir: 'next' | 'prev') => {
-    if (formState.isDirty) {
-      toast({
-        variant: 'destructive',
-        title: i18n.t('Save the current version before switching'),
-      });
-      return;
-    }
-    setSlideDir(dir);
-    move();
-  };
-
-  const goPrev = () =>
-    guardedNavigate(
-      () => setIndex(i => (i - 1 + versions.length) % versions.length),
-      'prev',
-    );
-  const goNext = () =>
-    guardedNavigate(() => setIndex(i => (i + 1) % versions.length), 'next');
-
-  const addNew = () => {
-    if (formState.isDirty) {
-      toast({
-        variant: 'destructive',
-        title: i18n.t('Save the current version first'),
-      });
-      return;
-    }
-    setSlideDir('next');
-    setCreatingNew(true);
-  };
-
-  const discardNew = () => {
-    setCreatingNew(false);
-    setIndex(0);
-  };
-
-  const total = versions.length + (creatingNew ? 1 : 0);
-  const isPublished =
-    !!current?.id &&
-    current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED;
-  const canUnpublish =
-    !!current?.id &&
-    (current.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED ||
-      current.statusSelect === MARKETPLACE_VERSION_STATUS.IN_REVIEW);
-  // Save-as-draft makes sense for anything that isn't already live or queued.
-  const canSaveAsDraft = !canUnpublish;
-
-  /* When the version being unpublished is the live (currentVersion) one,
-   * `syncProductVersionPointers` will auto-promote the next-highest published
-   * version. If none exist, the product gets unlisted until a new version
-   * is published — the dialog wording reflects which case applies. */
-  const isUnpublishingCurrent =
-    !!current?.id && current.id === productCurrentVersionId;
-  const hasOtherPublished =
-    isUnpublishingCurrent &&
-    versions.some(
-      v =>
-        v.id !== current?.id &&
-        v.statusSelect === MARKETPLACE_VERSION_STATUS.PUBLISHED,
-    );
-
-  const openUnpublish = () => setConfirmUnpublish(true);
-
-  const runUnpublish = () => {
-    if (!current?.id) return;
-    setConfirmUnpublish(false);
-    startTransition(async () => {
-      try {
-        const result = await unpublishVersion({
-          versionId: current.id,
-          productId,
-          workspaceURL,
-        });
-        if (!result.success) {
-          toast({variant: 'destructive', title: result.message});
-          return;
-        }
-        toast({variant: 'success', title: i18n.t('Version unpublished')});
-        onDone();
-      } catch {
-        toast({
-          variant: 'destructive',
-          title: i18n.t('Failed to unpublish the version. Please try again.'),
-        });
-      }
-    });
-  };
-  const positionLabel = creatingNew
-    ? `1 / ${total} (${i18n.t('new')})`
-    : `${index + 1} / ${total}`;
 
   return (
     <Form {...form}>
@@ -258,14 +108,14 @@ export function VersionForm({
               <h3 className="text-lg font-semibold text-foreground">
                 {i18n.t('Versions')}
               </h3>
-              {total > 1 && (
+              {displayTotal > 1 && (
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
                     onClick={goPrev}
-                    disabled={creatingNew || versions.length <= 1}>
+                    disabled={creatingNew || total <= 1 || awaitingNext}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span>{positionLabel}</span>
@@ -274,14 +124,18 @@ export function VersionForm({
                     variant="ghost"
                     size="icon"
                     onClick={goNext}
-                    disabled={creatingNew || versions.length <= 1}>
-                    <ChevronRight className="h-4 w-4" />
+                    disabled={creatingNew || total <= 1 || awaitingNext}>
+                    {awaitingNext ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-2">
-              {creatingNew && versions.length > 0 && (
+              {creatingNew && total > 0 && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -298,7 +152,7 @@ export function VersionForm({
                   variant="outline"
                   size="sm"
                   onClick={addNew}
-                  disabled={creatingNew}>
+                  disabled={creatingNew || awaitingNext}>
                   <Plus className="mr-1 h-4 w-4" />
                   {i18n.t('Add new version')}
                 </Button>
@@ -312,125 +166,131 @@ export function VersionForm({
           />
 
           <div className="overflow-hidden">
-            <div
-              key={`${creatingNew ? 'new' : current?.id}-${index}`}
-              className={cn(
-                'rounded-xl border border-border bg-card p-6 shadow-sm space-y-8',
-                'animate-in fade-in duration-300',
-                slideDir === 'next'
-                  ? 'slide-in-from-right-12'
-                  : 'slide-in-from-left-12',
-              )}>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto] md:items-end">
+            {awaitingNext ? (
+              <div className="flex items-center justify-center rounded-xl border border-border bg-card p-12 shadow-sm">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div
+                key={`${creatingNew ? 'new' : current?.id}-${index}`}
+                className={cn(
+                  'rounded-xl border border-border bg-card p-6 shadow-sm space-y-8',
+                  'animate-in fade-in duration-300',
+                  slideDir === 'next'
+                    ? 'slide-in-from-right-12'
+                    : 'slide-in-from-left-12',
+                )}>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto] md:items-end">
+                  <FormField
+                    control={control}
+                    name="versionNumber"
+                    render={({field}) => (
+                      <FormItem>
+                        <FormLabel>{i18n.t('Version number')} *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="1.0.0" {...field} />
+                        </FormControl>
+                        <FormMessageSpace />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={control}
-                  name="versionNumber"
+                  name="compatibilitySetIds"
                   render={({field}) => (
                     <FormItem>
-                      <FormLabel>{i18n.t('Version number')} *</FormLabel>
+                      <FormLabel>{i18n.t('Axelor compatibility')} *</FormLabel>
                       <FormControl>
-                        <Input placeholder="1.0.0" {...field} />
+                        <div className="flex flex-wrap gap-2">
+                          {compatibilityVersions.map(v => {
+                            const selected = field.value?.includes(v.id);
+                            return (
+                              <button
+                                key={v.id}
+                                type="button"
+                                onClick={() => {
+                                  const next = selected
+                                    ? field.value.filter(id => id !== v.id)
+                                    : [...(field.value ?? []), v.id];
+                                  field.onChange(next);
+                                }}
+                                className={cn(
+                                  'rounded-full border px-3 py-1 text-sm font-medium transition-colors',
+                                  selected
+                                    ? 'border-foreground bg-foreground text-background'
+                                    : 'border-border bg-background text-muted-foreground hover:border-foreground/50',
+                                )}>
+                                {v.title}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </FormControl>
+                      <FormMessageSpace />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name="changelog"
+                  render={({field}) => (
+                    <FormItem>
+                      <FormLabel>{i18n.t('Changelog')}</FormLabel>
+                      <FormControl>
+                        <RichTextEditor
+                          content={current?.changelog ?? ''}
+                          onChange={field.onChange}
+                          classNames={{
+                            wrapperClassName: 'overflow-visible',
+                            toolbarClassName: 'mt-0',
+                            editorClassName: 'px-4',
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessageSpace />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={control}
+                  name="bundleFile"
+                  render={({field}) => (
+                    <FormItem>
+                      <FormLabel>
+                        {i18n.t('Bundle file (.zip, up to 20 MB)')} *
+                      </FormLabel>
+                      <FormControl>
+                        <BundleDropzone
+                          file={field.value}
+                          existingFileName={
+                            existingBundleFileId
+                              ? current?.bundleFile?.fileName
+                              : null
+                          }
+                          existingFileSizeText={current?.bundleFile?.sizeText}
+                          downloadHref={downloadHref}
+                          maxSize={MAX_BUNDLE_SIZE}
+                          onFile={file =>
+                            setValue('bundleFile', file, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            })
+                          }
+                          onError={message =>
+                            toast({variant: 'destructive', title: message})
+                          }
+                        />
                       </FormControl>
                       <FormMessageSpace />
                     </FormItem>
                   )}
                 />
               </div>
-
-              <FormField
-                control={control}
-                name="compatibilitySetIds"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>{i18n.t('Axelor compatibility')} *</FormLabel>
-                    <FormControl>
-                      <div className="flex flex-wrap gap-2">
-                        {compatibilityVersions.map(v => {
-                          const selected = field.value?.includes(v.id);
-                          return (
-                            <button
-                              key={v.id}
-                              type="button"
-                              onClick={() => {
-                                const next = selected
-                                  ? field.value.filter(id => id !== v.id)
-                                  : [...(field.value ?? []), v.id];
-                                field.onChange(next);
-                              }}
-                              className={cn(
-                                'rounded-full border px-3 py-1 text-sm font-medium transition-colors',
-                                selected
-                                  ? 'border-foreground bg-foreground text-background'
-                                  : 'border-border bg-background text-muted-foreground hover:border-foreground/50',
-                              )}>
-                              {v.title}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </FormControl>
-                    <FormMessageSpace />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="changelog"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>{i18n.t('Changelog')}</FormLabel>
-                    <FormControl>
-                      <RichTextEditor
-                        content={current?.changelog ?? ''}
-                        onChange={field.onChange}
-                        classNames={{
-                          wrapperClassName: 'overflow-visible',
-                          toolbarClassName: 'mt-0',
-                          editorClassName: 'px-4',
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessageSpace />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={control}
-                name="bundleFile"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>
-                      {i18n.t('Bundle file (.zip, up to 20 MB)')} *
-                    </FormLabel>
-                    <FormControl>
-                      <BundleDropzone
-                        file={field.value}
-                        existingFileName={
-                          existingBundleFileId
-                            ? current?.bundleFile?.fileName
-                            : null
-                        }
-                        existingFileSizeText={current?.bundleFile?.sizeText}
-                        downloadHref={downloadHref}
-                        maxSize={MAX_BUNDLE_SIZE}
-                        onFile={file =>
-                          setValue('bundleFile', file, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          })
-                        }
-                        onError={message =>
-                          toast({variant: 'destructive', title: message})
-                        }
-                      />
-                    </FormControl>
-                    <FormMessageSpace />
-                  </FormItem>
-                )}
-              />
-            </div>
+            )}
           </div>
         </section>
       </div>
@@ -442,8 +302,8 @@ export function VersionForm({
             <Button
               type="button"
               variant="outline"
-              disabled={pending}
-              onClick={openUnpublish}
+              disabled={pending || awaitingNext}
+              onClick={() => setConfirmUnpublish(true)}
               className="text-destructive hover:text-destructive">
               {i18n.t('Unpublish')}
             </Button>
@@ -453,7 +313,7 @@ export function VersionForm({
           <Button
             type="button"
             variant="ghost"
-            onClick={onCancel}
+            onClick={cancel}
             disabled={pending}>
             {i18n.t('Cancel')}
           </Button>
@@ -461,11 +321,10 @@ export function VersionForm({
             <Button
               type="button"
               variant="outline"
-              disabled={pending || (!!current?.id && !formState.isDirty)}
-              onClick={() => {
-                setValue('statusSelect', MARKETPLACE_VERSION_STATUS.DRAFT);
-                submit();
-              }}>
+              disabled={
+                pending || awaitingNext || (!!current?.id && !formState.isDirty)
+              }
+              onClick={saveAsDraft}>
               {i18n.t('Save as draft')}
             </Button>
           )}
@@ -473,15 +332,13 @@ export function VersionForm({
             type="button"
             disabled={
               pending ||
+              awaitingNext ||
               (!!current?.id &&
                 !formState.isDirty &&
                 isPublished &&
                 !requiresReview)
             }
-            onClick={() => {
-              setValue('statusSelect', MARKETPLACE_VERSION_STATUS.PUBLISHED);
-              submit();
-            }}>
+            onClick={publish}>
             {isPublished && !requiresReview
               ? i18n.t('Save')
               : requiresReview

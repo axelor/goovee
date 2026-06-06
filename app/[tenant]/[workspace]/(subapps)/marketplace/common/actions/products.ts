@@ -10,9 +10,10 @@ import {BigDecimal} from '@goovee/orm';
 import {headers} from 'next/headers';
 import {z} from 'zod';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
-import type {MyProductWithVersions} from '../orm';
+import type {MyProductForEdit} from '../orm';
 import {
-  findMyProductWithVersions,
+  countPublishedVersions,
+  findMyProductForEdit,
   findProductsBySearch,
   generateUniqueProductSlug,
   resolveNewListingCurrency,
@@ -31,7 +32,13 @@ type LoadMyProductForEditInput = z.infer<typeof loadMyProductForEditSchema>;
 
 export async function loadMyProductForEdit(
   input: LoadMyProductForEditInput,
-): ActionResponse<Cloned<MyProductWithVersions>> {
+): ActionResponse<{
+  product: Cloned<MyProductForEdit>;
+  /* Loaded once with the product (not per version page); drives the
+   * unpublish-confirmation wording. The session can't change it — a
+   * publish/unpublish closes the dialog. */
+  publishedCount: number;
+}> {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
@@ -57,16 +64,24 @@ export async function loadMyProductForEdit(
     };
   }
 
-  const product = await findMyProductWithVersions({
-    productId,
-    mainPartnerId: auth.user.mainPartnerId,
-    client: auth.tenant.client,
-    workspace: auth.workspace,
-  });
+  const [product, publishedCount] = await Promise.all([
+    findMyProductForEdit({
+      productId,
+      mainPartnerId: auth.user.mainPartnerId,
+      client: auth.tenant.client,
+      workspace: auth.workspace,
+    }),
+    countPublishedVersions({
+      productId,
+      mainPartnerId: auth.user.mainPartnerId,
+      client: auth.tenant.client,
+      workspace: auth.workspace,
+    }),
+  ]);
   if (!product) {
     return {error: true, message: await t('Product not found')};
   }
-  return {success: true, data: clone(product)};
+  return {success: true, data: {product: clone(product), publishedCount}};
 }
 
 export async function saveProduct(

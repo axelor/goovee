@@ -20,14 +20,10 @@ import {
 } from '@/ui/components/select';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {packIntoFormData} from '@/utils/formdata';
-import {zodResolver} from '@hookform/resolvers/zod';
 import {ChevronLeft, ChevronRight, Plus, Star, X} from 'lucide-react';
 import Image from 'next/image';
-import type {ReactNode} from 'react';
-import {useEffect, useMemo, useRef, useState, useTransition} from 'react';
-import {useForm, useFormContext, useWatch} from 'react-hook-form';
-import {saveProduct} from '../../../../actions';
+import {useEffect, useMemo, useRef, useState} from 'react';
+import {useFormContext, useWatch} from 'react-hook-form';
 import {
   MultiSelector,
   MultiSelectorContent,
@@ -36,23 +32,16 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from '../../shared/multi-select';
-import {
-  COVER_STYLES,
-  GRADIENT_MAP,
-  type CoverStyle,
-} from '../../../../constants/gradients';
-import {
-  DEFAULT_ICON_CODE,
-  MARKETPLACE_ICONS,
-} from '../../../../constants/icons';
+import {COVER_STYLES, GRADIENT_MAP} from '../../../../constants/gradients';
+import {MARKETPLACE_ICONS} from '../../../../constants/icons';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import type {
   ListCategory,
   ListLicense,
-  MyProductWithVersions,
+  MyProductForEdit,
 } from '../../../../orm';
 import type {Currency} from '@/product/orm';
-import {scrollToFirstError} from '../../../../utils/scroll-to-error';
+import type {ProductStepModel} from '../product-form-dialog/use-product-edit';
 import {getProductScreenshotURL} from '../../../../utils/images';
 import {ProductIcon} from '../../shared/product-icon';
 import {FormMessageSpace} from '../../shared/form-message-space';
@@ -60,24 +49,17 @@ import {
   ACCEPTED_IMAGE_TYPES,
   MAX_IMAGES,
   MAX_IMAGE_SIZE,
-  productSchema,
   type ProductFormValues,
   type ProductImage,
 } from './validator';
 
-/** The data a successful `saveProduct` returns ({productId, version}). */
-type SaveProductData = Extract<
-  Awaited<ReturnType<typeof saveProduct>>,
-  {success: true}
->['data'];
-
 type ProductFormProps = {
+  /** Product-step model from `useProductEdit` (form + handlers live there). */
+  vm: ProductStepModel;
   mode: 'create' | 'edit';
-  workspaceURL: string;
   categories: Cloned<ListCategory>[];
   licenses: Cloned<ListLicense>[];
-  initial?: Cloned<MyProductWithVersions>;
-  defaultType?: MARKETPLACE_TYPE;
+  initial?: Cloned<MyProductForEdit>;
   /** Currency of the existing listing, or the resolved new-listing fallback
    *  (partner → app default) for create. Drives the input's currency
    *  adornment via `.symbol`. */
@@ -87,133 +69,29 @@ type ProductFormProps = {
    *  the price the supplier enters is interpreted as gross (tax-inclusive)
    *  or net (tax-exclusive), and drives the input label wording. */
   inAti: boolean;
-  onSaved: (data: SaveProductData) => void;
-  onCancel: () => void;
-  /** Mounter-supplied primary action, so the form stays unaware of any
-   *  surrounding flow (e.g. the dialog's "continue to version" step). When
-   *  omitted, a plain Save button is rendered for standalone mounts. */
-  renderPrimaryAction?: (api: {
-    submit: () => void;
-    pending: boolean;
-    isDirty: boolean;
-    isSaved: boolean;
-  }) => ReactNode;
 };
 
-function buildDefaults(
-  initial: Cloned<MyProductWithVersions> | undefined,
-  defaultType: MARKETPLACE_TYPE | undefined,
-): ProductFormValues {
-  if (!initial) {
-    return {
-      marketplaceTypeSelect: defaultType ?? MARKETPLACE_TYPE.SKILL,
-      name: '',
-      description: '',
-      longDescription: '',
-      categoryIds: [],
-      licenseId: '',
-      coverStyle: 'gradient-1',
-      iconCode: DEFAULT_ICON_CODE,
-      documentationUrl: '',
-      supportIssuesUrl: '',
-      supportContactUrl: '',
-      salePrice: undefined,
-      images: [],
-    };
-  }
-  return {
-    id: initial.id,
-    version: initial.version ?? undefined,
-    marketplaceTypeSelect:
-      (initial.marketplaceTypeSelect as MARKETPLACE_TYPE) ??
-      MARKETPLACE_TYPE.SKILL,
-    name: initial.name,
-    description: initial.description ?? '',
-    longDescription: initial.longDescription ?? '',
-    categoryIds:
-      initial.categorySet?.map(c => c?.id).filter((id): id is string => !!id) ??
-      [],
-    licenseId: initial.license?.id ?? '',
-    coverStyle: (initial.coverStyle as CoverStyle) ?? 'gradient-1',
-    iconCode: initial.iconCode ?? DEFAULT_ICON_CODE,
-    documentationUrl: initial.documentationUrl ?? '',
-    supportIssuesUrl: initial.supportIssuesUrl ?? '',
-    supportContactUrl: initial.supportContactUrl ?? '',
-    salePrice:
-      initial.salePrice != null ? Number(initial.salePrice) : undefined,
-    /* Ordered by `sequence` at load (see findMyProductWithVersions). Array
-     * position here becomes the persisted sequence on the next save; id +
-     * version round-trip so re-sequencing is optimistic-locked. */
-    images: (initial.pictureList ?? [])
-      .filter((row): row is NonNullable<typeof row> => !!row?.id)
-      .map(row => ({
-        kind: 'existing' as const,
-        id: row.id,
-        version: row.version ?? 0,
-      })),
-  };
-}
-
 export function ProductForm({
+  vm,
   mode,
-  workspaceURL,
   categories,
   licenses,
   initial,
-  defaultType,
   listingCurrency,
   inAti,
-  onSaved,
-  onCancel,
-  renderPrimaryAction,
 }: ProductFormProps) {
-  const {toast} = useToast();
-  const [pending, startTransition] = useTransition();
-
+  const {
+    form,
+    bodyRef,
+    pending,
+    isDirty,
+    saved,
+    save,
+    continueToVersion,
+    cancel,
+  } = vm;
+  const {control} = form;
   const currencySymbol = listingCurrency?.symbol ?? null;
-
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
-    defaultValues: buildDefaults(initial, defaultType),
-    mode: 'onSubmit',
-  });
-
-  const {control, handleSubmit, formState} = form;
-  const productId = initial?.id;
-  const bodyRef = useRef<HTMLDivElement>(null);
-
-  const submit = handleSubmit(
-    values => {
-      startTransition(async () => {
-        try {
-          const formData = packIntoFormData({...values, workspaceURL});
-          const result = await saveProduct(formData);
-          if (!result.success) {
-            toast({variant: 'destructive', title: result.message});
-            return;
-          }
-          toast({variant: 'success', title: i18n.t('Saved')});
-          /* Reset to what's now persisted so the dirty check settles. Adopt the
-           * new row version the save returned so a follow-up in-session save
-           * doesn't trip the optimistic lock against a stale version. The
-           * just-uploaded `new` items don't have row ids until the next load,
-           * so drop them here; surviving existing items keep their order. */
-          form.reset({
-            ...values,
-            version: result.data.version,
-            images: values.images.filter(img => img.kind === 'existing'),
-          });
-          onSaved(result.data);
-        } catch {
-          toast({
-            variant: 'destructive',
-            title: i18n.t('Failed to save the product. Please try again.'),
-          });
-        }
-      });
-    },
-    () => scrollToFirstError(bodyRef.current),
-  );
 
   return (
     <Form {...form}>
@@ -538,20 +416,17 @@ export function ProductForm({
         <Button
           type="button"
           variant="ghost"
-          onClick={onCancel}
+          onClick={cancel}
           disabled={pending}>
           {i18n.t('Cancel')}
         </Button>
-        {renderPrimaryAction ? (
-          renderPrimaryAction({
-            submit,
-            pending,
-            isDirty: formState.isDirty,
-            isSaved: Boolean(productId),
-          })
+        {isDirty || !saved ? (
+          <Button type="button" disabled={pending} onClick={save}>
+            {i18n.t('Save & continue')}
+          </Button>
         ) : (
-          <Button type="button" disabled={pending} onClick={submit}>
-            {i18n.t('Save')}
+          <Button type="button" disabled={pending} onClick={continueToVersion}>
+            {i18n.t('Continue')}
           </Button>
         )}
       </div>
@@ -790,11 +665,7 @@ function ScreenshotsField({
  * FormField scaffold. All presentation/preview concerns live in
  * ScreenshotsField. Separate subcomponent so the useWatch subscription
  * doesn't re-render the whole ProductForm. */
-function ScreenshotsFormField({
-  initial,
-}: {
-  initial?: Cloned<MyProductWithVersions>;
-}) {
+function ScreenshotsFormField({initial}: {initial?: Cloned<MyProductForEdit>}) {
   const {workspaceURI} = useWorkspace();
   const {toast} = useToast();
   const {control, setValue} = useFormContext<ProductFormValues>();

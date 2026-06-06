@@ -8,6 +8,7 @@ import {
   versionNumberFields,
   versionSortOrder,
   withBundleAccessFilter,
+  withMyProductAccessFilter,
   type QueryProps,
 } from './helpers';
 
@@ -72,6 +73,84 @@ export async function findProductVersions({
     },
     orderBy: versionSortOrder,
   });
+}
+
+export type MyProductVersion = Awaited<
+  ReturnType<typeof findMyProductVersions>
+>[number];
+
+/* Versions for the product-edit screen: every status (draft, in-review,
+ * published, unpublished), newest first, scoped to a product the caller
+ * publishes. Paginated — a `take` makes goovee attach `_count` (the total for
+ * this filter) to each returned row, so no separate count query is needed. */
+export async function findMyProductVersions({
+  productId,
+  mainPartnerId,
+  client,
+  workspace,
+  take,
+  skip,
+}: {
+  productId: ID;
+  mainPartnerId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+  take: number;
+  skip: number;
+}) {
+  return client.aOSMarketplaceProductVersion.find({
+    take,
+    ...(skip ? {skip} : {}),
+    where: {
+      marketplaceProduct: withMyProductAccessFilter(
+        workspace,
+        mainPartnerId,
+      )({
+        id: productId,
+      }),
+    },
+    orderBy: versionSortOrder,
+    select: {
+      id: true,
+      version: true,
+      ...versionNumberFields,
+      changelog: true,
+      statusSelect: true,
+      dateOfPublish: true,
+      bundleFile: {id: true, fileName: true, sizeText: true},
+      compatibilitySet: {
+        select: {id: true, title: true, name: true},
+      },
+    },
+  });
+}
+
+/* How many published (non-archived) versions the product has. Drives the
+ * unpublish-confirmation wording without loading the whole version list. */
+export async function countPublishedVersions({
+  productId,
+  mainPartnerId,
+  client,
+  workspace,
+}: {
+  productId: ID;
+  mainPartnerId: ID;
+  client: Client;
+  workspace: PortalWorkspaceWithConfig;
+}): Promise<number> {
+  const count = await client.aOSMarketplaceProductVersion.count({
+    where: {
+      OR: [{archived: false}, {archived: null}],
+      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
+      marketplaceProduct: withMyProductAccessFilter(
+        workspace,
+        mainPartnerId,
+      )({
+        id: productId,
+      }),
+    },
+  });
+  return Number(count);
 }
 
 /* Single source of truth for `marketplaceProduct.currentVersion` and

@@ -4,6 +4,13 @@ import {VERSION_NUMBER_PATTERN} from '../../../../utils/version-number';
 
 export const MAX_BUNDLE_SIZE = 20 * 1024 * 1024; // 20 MB
 
+/** How many versions the edit dialog loads per page (initial + each fetch). */
+export const VERSIONS_PAGE_SIZE = 8;
+
+/** Prefetch the next page once this many loaded entries remain ahead of the
+ *  current position, so paging stays ahead of the user without blocking. */
+export const VERSIONS_PREFETCH_AHEAD = 3;
+
 export const versionSchema = z
   .object({
     id: z.string().optional(),

@@ -7,7 +7,6 @@ import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
 import {
   priceSelectFields,
   versionNumberFields,
-  versionSortOrder,
   withMyProductAccessFilter,
   type QueryProps,
 } from './helpers';
@@ -91,11 +90,13 @@ export async function findMyProductAccess({
   });
 }
 
-export type MyProductWithVersions = NonNullable<
-  Awaited<ReturnType<typeof findMyProductWithVersions>>
+export type MyProductForEdit = NonNullable<
+  Awaited<ReturnType<typeof findMyProductForEdit>>
 >;
 
-export async function findMyProductWithVersions({
+/* Product metadata for the edit dialog. Versions are loaded separately and
+ * paginated (see `findMyProductVersions`), so they are not selected here. */
+export async function findMyProductForEdit({
   productId,
   mainPartnerId,
   client,
@@ -128,21 +129,6 @@ export async function findMyProductWithVersions({
       pictureList: {
         select: {id: true, sequence: true, picture: {id: true}},
         orderBy: {sequence: 'ASC'},
-      },
-      versionList: {
-        select: {
-          id: true,
-          version: true,
-          ...versionNumberFields,
-          changelog: true,
-          statusSelect: true,
-          dateOfPublish: true,
-          bundleFile: {id: true, fileName: true, sizeText: true},
-          compatibilitySet: {
-            select: {id: true, title: true, name: true},
-          },
-        },
-        orderBy: versionSortOrder,
       },
     },
   });

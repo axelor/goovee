@@ -8,7 +8,7 @@ import type {
   CompatibilityVersion,
   ListCategory,
   ListLicense,
-  MyProductWithVersions,
+  MyProductForEdit,
 } from '../../../../orm';
 import type {Currency} from '@/product/orm';
 import {ProductFormDialog} from '../product-form-dialog';
@@ -40,9 +40,8 @@ export function EditProductButton({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [product, setProduct] = useState<Cloned<MyProductWithVersions> | null>(
-    null,
-  );
+  const [product, setProduct] = useState<Cloned<MyProductForEdit> | null>(null);
+  const [publishedCount, setPublishedCount] = useState(0);
   const {toast} = useToast();
 
   const handleOpen = async () => {
@@ -53,7 +52,8 @@ export function EditProductButton({
         toast({variant: 'destructive', title: result.message});
         return;
       }
-      setProduct(result.data);
+      setProduct(result.data.product);
+      setPublishedCount(result.data.publishedCount);
       setOpen(true);
     } catch {
       toast({
@@ -94,6 +94,7 @@ export function EditProductButton({
           listingCurrency={listingCurrency}
           inAti={inAti}
           initial={product}
+          initialPublishedCount={publishedCount}
         />
       )}
     </>
