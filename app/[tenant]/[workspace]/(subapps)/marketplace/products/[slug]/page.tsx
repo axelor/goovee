@@ -242,6 +242,7 @@ export default async function ProductPage(props: {
         <div className="container flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Link
             href={tabNavLink(ProductTab.Overview)}
+            replace
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Overview
@@ -252,6 +253,7 @@ export default async function ProductPage(props: {
           </Link>
           <Link
             href={tabNavLink(ProductTab.Versions)}
+            replace
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Versions
@@ -270,6 +272,7 @@ export default async function ProductPage(props: {
           </Link>
           <Link
             href={tabNavLink(ProductTab.Reviews)}
+            replace
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Reviews
@@ -280,6 +283,7 @@ export default async function ProductPage(props: {
           </Link>
           <Link
             href={tabNavLink(ProductTab.Support)}
+            replace
             className={cn(
               'px-6 pt-4 pb-3 font-medium transition-colors border-b-2',
               tab === ProductTab.Support

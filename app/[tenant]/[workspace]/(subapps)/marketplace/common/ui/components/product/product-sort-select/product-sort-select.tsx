@@ -15,7 +15,7 @@ export function ProductSortSelect({currentSort}: ProductSortSelectProps) {
     const params = new URLSearchParams(searchParams);
     params.set('sort', sortValue);
     params.delete('page');
-    router.push(`?${params.toString()}`, {scroll: false});
+    router.replace(`?${params.toString()}`, {scroll: false});
   };
 
   return (

@@ -223,6 +223,7 @@ export default async function MyContributionsPage(props: {
         <div className="border-b border-border flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Link
             href={tabNavLink(MyContributionsTab.Overview)}
+            replace
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
               tab === MyContributionsTab.Overview
                 ? 'text-primary border-primary'
@@ -232,6 +233,7 @@ export default async function MyContributionsPage(props: {
           </Link>
           <Link
             href={tabNavLink(MyContributionsTab.Products)}
+            replace
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
               tab === MyContributionsTab.Products
                 ? 'text-primary border-primary'
@@ -251,6 +253,7 @@ export default async function MyContributionsPage(props: {
           </Link>
           <Link
             href={tabNavLink(MyContributionsTab.Revenue)}
+            replace
             className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
               tab === MyContributionsTab.Revenue
                 ? 'text-primary border-primary'

@@ -101,6 +101,7 @@ export async function VersionsTab({
               <PaginationPrevious asChild>
                 <Link
                   scroll={false}
+                  replace
                   href={buildPageHref(Math.max(1, versionPage - 1))}
                   className={cn({
                     ['pointer-events-none opacity-50']: versionPage <= 1,
@@ -124,7 +125,7 @@ export async function VersionsTab({
               return (
                 <PaginationItem key={value}>
                   <PaginationLink isActive={versionPage === value} asChild>
-                    <Link scroll={false} href={buildPageHref(value)}>
+                    <Link scroll={false} replace href={buildPageHref(value)}>
                       {value}
                     </Link>
                   </PaginationLink>
@@ -135,6 +136,7 @@ export async function VersionsTab({
               <PaginationNext asChild>
                 <Link
                   scroll={false}
+                  replace
                   href={buildPageHref(
                     Math.min(totalVersionPages, versionPage + 1),
                   )}

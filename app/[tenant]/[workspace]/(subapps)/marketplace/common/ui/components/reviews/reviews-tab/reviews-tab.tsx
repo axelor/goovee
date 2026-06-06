@@ -243,6 +243,7 @@ export async function ReviewsTab({
               <PaginationPrevious asChild>
                 <Link
                   scroll={false}
+                  replace
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage > 1 ? `&reviewPage=${reviewPage - 1}` : ''}`}
                   className={cn({
                     ['pointer-events-none opacity-50']: reviewPage <= 1,
@@ -268,6 +269,7 @@ export async function ReviewsTab({
                   <PaginationLink isActive={reviewPage === value} asChild>
                     <Link
                       scroll={false}
+                      replace
                       href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews&reviewPage=${value}`}>
                       {value}
                     </Link>
@@ -279,6 +281,7 @@ export async function ReviewsTab({
               <PaginationNext asChild>
                 <Link
                   scroll={false}
+                  replace
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}?tab=reviews${reviewPage < totalReviewPages ? `&reviewPage=${reviewPage + 1}` : ''}`}
                   className={cn({
                     ['pointer-events-none opacity-50']:
