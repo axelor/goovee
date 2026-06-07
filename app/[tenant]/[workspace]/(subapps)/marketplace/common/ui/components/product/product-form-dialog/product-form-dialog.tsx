@@ -159,7 +159,7 @@ export function ProductFormDialog({
       ? i18n.t('Update metadata or release a new version')
       : defaultType === MARKETPLACE_TYPE.APP
         ? i18n.t('Apps hub · Discover and ship')
-        : i18n.t('Skills hub · Open source, free for everyone');
+        : i18n.t('Skills hub · Discover and ship');
 
   const productSaved = Boolean(productId);
 
