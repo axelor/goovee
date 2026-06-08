@@ -293,6 +293,9 @@ counting failure never fails the download.
   edit or delete afterwards.
 - A review requires a **star rating (1–5)**; the **comment is optional**, and it
   may optionally reference a specific **published** version.
+- **A user cannot review their own listing.** The publishing customer and all of
+  its contacts are blocked from reviewing listings published under that customer —
+  the write-a-review card is hidden for them, and the server rejects the attempt.
 - The listing's **average rating** and **rating count** are maintained
   automatically as reviews are added, changed, or removed.
 - Guests are prompted to log in to review.
@@ -608,18 +611,18 @@ Set by an admin in the AOS; each affects storefront behaviour:
 
 ## 8. Permissions summary
 
-| Action                                        | Guest | Member     | Publisher        | Notes                    |
-| --------------------------------------------- | ----- | ---------- | ---------------- | ------------------------ |
-| Browse / search / view published listing      | ✅    | ✅         | ✅               |                          |
-| Download free published version               | ✅    | ✅         | ✅               | no login required        |
-| Favourite a listing                           | ❌    | ✅         | ✅               | per-user                 |
-| Buy a paid listing                            | ❌    | ✅         | ✅               |                          |
-| Download paid version                         | ❌    | owned only | ✅ (own listing) |                          |
-| Write / edit a review                         | ❌    | ✅         | ✅               | one per listing          |
-| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅               | needs _Allow publishing_ |
-| Preview own unpublished listing               | ❌    | ❌         | ✅               | needs _Allow publishing_ |
-| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅               | any logged-in user       |
-| View My Contributions                         | ❌    | ❌         | ✅               | needs _Allow publishing_ |
+| Action                                        | Guest | Member     | Publisher         | Notes                               |
+| --------------------------------------------- | ----- | ---------- | ----------------- | ----------------------------------- |
+| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                     |
+| Download free published version               | ✅    | ✅         | ✅                | no login required                   |
+| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                            |
+| Buy a paid listing                            | ❌    | ✅         | ✅                |                                     |
+| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                     |
+| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing |
+| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_            |
+| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_            |
+| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                  |
+| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_            |
 
 ---
 

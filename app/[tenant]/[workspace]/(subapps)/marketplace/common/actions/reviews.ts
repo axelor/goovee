@@ -47,6 +47,7 @@ export async function saveReview(
   }
   const {client} = auth.tenant;
 
+  let publisherId: string;
   if (payload.reviewedVersionId) {
     /* Single query covering both guards: the reviewed version must be
      * published AND belong to an accessible product. The version's own
@@ -60,21 +61,31 @@ export async function saveReview(
           id: payload.productId,
         }),
       },
-      select: {id: true},
+      select: {marketplaceProduct: {publisher: {id: true}}},
     });
     if (!matchingVersion) {
       return {error: true, message: await t('Invalid version')};
     }
+    publisherId = matchingVersion.marketplaceProduct.publisher.id;
   } else {
     const product = await findProductAccess({
       recordId: payload.productId,
       client,
       workspace: auth.workspace,
-      select: {id: true},
+      select: {id: true, publisher: {id: true}},
     });
     if (!product) {
       return {error: true, message: await t('Product not found')};
     }
+    publisherId = product.publisher.id;
+  }
+
+  // The publisher and its members cannot review their own product.
+  if (publisherId === auth.user.mainPartnerId) {
+    return {
+      error: true,
+      message: await t('You cannot review your own product'),
+    };
   }
 
   try {

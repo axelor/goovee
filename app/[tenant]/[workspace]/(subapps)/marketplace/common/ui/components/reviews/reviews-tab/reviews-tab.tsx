@@ -124,21 +124,26 @@ export async function ReviewsTab({
       : 0;
   };
 
-  const yourReviewCard = preview ? null : (
-    <YourReviewCard
-      productId={product.id}
-      workspaceURL={workspaceURL}
-      user={user}
-      loginHref={loginHref}
-      tenantId={tenantId}
-      initial={myReview ? clone(myReview) : null}
-      versions={publishedVersions.map(v => ({
-        id: v.id,
-        versionNumber: formatVersionNumber(v),
-      }))}
-      defaultVersionId={product.currentVersion?.id ?? undefined}
-    />
-  );
+  // The publisher and its members cannot review their own product.
+  const isPublisherMember =
+    !!user && user.mainPartnerId === product.publisher.id;
+
+  const yourReviewCard =
+    preview || isPublisherMember ? null : (
+      <YourReviewCard
+        productId={product.id}
+        workspaceURL={workspaceURL}
+        user={user}
+        loginHref={loginHref}
+        tenantId={tenantId}
+        initial={myReview ? clone(myReview) : null}
+        versions={publishedVersions.map(v => ({
+          id: v.id,
+          versionNumber: formatVersionNumber(v),
+        }))}
+        defaultVersionId={product.currentVersion?.id ?? undefined}
+      />
+    );
 
   if (totalReviewCount === 0) {
     return (
