@@ -1,0 +1,37 @@
+{
+  "name": "StagedUpload",
+  "table": "portal_staged_upload",
+  "synchronize": true,
+  "fields": [
+    {
+      "type": "String",
+      "name": "token",
+      "unique": true,
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "purpose",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "owner",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "metaFile",
+      "target": "AOSMetaFile"
+    },
+    {
+      "type": "DateTime",
+      "name": "expiresAt"
+    },
+    {
+      "type": "DateTime",
+      "name": "consumedAt"
+    }
+  ]
+}
