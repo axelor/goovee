@@ -2,6 +2,7 @@ import {experimental_taintUniqueValue} from 'react';
 import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
+import {getPartnerImageURL} from '@/utils/files';
 import {
   betterAuth,
   type BetterAuthOptions,
@@ -268,6 +269,7 @@ export const auth = betterAuth({
         isContact,
         mainPartner,
         localization,
+        picture,
       } = partner;
 
       return {
@@ -280,7 +282,10 @@ export const auth = betterAuth({
           mainPartnerId: isContact ? mainPartner?.id : undefined,
           tenantId,
           locale: localization?.code,
-          image: user.image,
+          image:
+            picture?.id && tenantId
+              ? getPartnerImageURL(picture.id, tenantId)
+              : undefined,
         },
         session: session,
       };

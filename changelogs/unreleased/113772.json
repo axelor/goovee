@@ -1,0 +1,6 @@
+{
+  "title": "Show the logged-in user's avatar in the top header",
+  "type": "feature",
+  "description": "The top-header account control now displays the logged-in user's profile picture instead of a generic icon. Falls back to the user's initials, and then a placeholder icon, when no avatar is set. The session now exposes the partner picture as the user image.",
+  "scope": ["core"]
+}

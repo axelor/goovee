@@ -21,9 +21,13 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
 } from '@/ui/components';
 import type {ID} from '@/types';
 import {getLoginURL} from '@/utils/url';
+import {getInitials} from '@/utils/names';
 
 export function Account({
   baseURL = '',
@@ -38,6 +42,10 @@ export function Account({
 
   const {data: session} = authClient.useSession();
   const [confirmationDialog, setConfirmationDialog] = useState(false);
+
+  const user = session?.user;
+  const userName = user?.simpleFullName || user?.name || '';
+  const initials = getInitials(userName);
 
   const openConfirmation = () => {
     setConfirmationDialog(true);
@@ -65,8 +73,23 @@ export function Account({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger>
-          <MdOutlineAccountCircle className="cursor-pointer text-foreground text-2xl" />
+        <DropdownMenuTrigger className="rounded-full outline-none">
+          {loggedin ? (
+            <Avatar className="h-8 w-8 cursor-pointer">
+              <AvatarImage
+                src={user?.image || undefined}
+                alt={userName}
+                size={32}
+              />
+              <AvatarFallback className="bg-muted text-foreground text-sm font-medium">
+                {initials || (
+                  <MdOutlineAccountCircle className="text-foreground text-2xl" />
+                )}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <MdOutlineAccountCircle className="cursor-pointer text-foreground text-2xl" />
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {loggedin ? (

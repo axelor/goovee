@@ -7,15 +7,16 @@ export function toTitleCase(name: string, allUpper = false) {
   return allUpper ? res : capitalize(res);
 }
 
-export function getInitials(fullName?: string) {
+export function getInitials(fullName?: string): string {
   if (!fullName) return '';
 
-  const nameParts = fullName.split(' ');
+  const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+
+  if (nameParts.length === 0) return '';
 
   const firstInitial = nameParts[0].charAt(0).toUpperCase();
+  if (nameParts.length === 1) return firstInitial;
+
   const lastInitial = nameParts[nameParts.length - 1].charAt(0).toUpperCase();
-
-  const initials = firstInitial + lastInitial;
-
-  return initials;
+  return firstInitial + lastInitial;
 }
