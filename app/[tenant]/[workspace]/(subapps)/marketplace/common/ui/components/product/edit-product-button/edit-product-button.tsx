@@ -11,7 +11,7 @@ import type {
   MyProductForEdit,
 } from '../../../../orm';
 import type {Currency} from '@/product/orm';
-import {ProductFormDialog} from '../product-form-dialog';
+import {ProductFormDialog} from '../product-edit';
 
 type Props = {
   workspaceURI: string;
@@ -22,7 +22,11 @@ type Props = {
   compatibilityVersions: Cloned<CompatibilityVersion>[];
   requiresReview: boolean;
   allowToPublish: boolean;
+  /** The listing's own currency (its `saleCurrency`, falling back to the
+   *  workspace default) — resolved by the caller. */
   listingCurrency: Cloned<Currency> | null;
+  /** The listing's own tax basis (its `inAti`, falling back to the workspace
+   *  default) — resolved by the caller. */
   inAti: boolean;
 };
 
@@ -41,7 +45,6 @@ export function EditProductButton({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Cloned<MyProductForEdit> | null>(null);
-  const [publishedCount, setPublishedCount] = useState(0);
   const {toast} = useToast();
 
   const handleOpen = async () => {
@@ -53,7 +56,6 @@ export function EditProductButton({
         return;
       }
       setProduct(result.data.product);
-      setPublishedCount(result.data.publishedCount);
       setOpen(true);
     } catch {
       toast({
@@ -94,7 +96,6 @@ export function EditProductButton({
           listingCurrency={listingCurrency}
           inAti={inAti}
           initial={product}
-          initialPublishedCount={publishedCount}
         />
       )}
     </>

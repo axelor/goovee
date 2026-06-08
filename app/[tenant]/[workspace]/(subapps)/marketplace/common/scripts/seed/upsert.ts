@@ -460,7 +460,7 @@ export async function upsertVersion({
 }
 
 /* Promotes the marketplace product's `currentVersion` and `latestVersion`
- * pointers (matches what `saveVersion` does in the live app). */
+ * pointers (matches what `saveProductWithVersions` does in the live app). */
 export async function refreshCurrentVersion(client: Client, productId: string) {
   await syncProductVersionPointers({client, productId});
 }

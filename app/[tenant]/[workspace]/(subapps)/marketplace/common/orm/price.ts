@@ -72,7 +72,7 @@ export async function getPriceContext({
 
 /** The app-wide fallback currency (`DEFAULT_CURRENCY_CODE`) — a thin wrapper
  *  over the core's `findCurrencyByCodeISO`; the choice of *which* code is the
- *  app's policy. Used at product create time (`saveProduct`) and at display
+ *  app's policy. Used at product create time (`saveProductWithVersions`) and at display
  *  time (`getPriceContext`). Returns null if the row is missing — callers
  *  decide whether that's a hard failure (create) or a soft fallback (display). */
 export async function findDefaultCurrency(client: Client) {
@@ -82,7 +82,7 @@ export async function findDefaultCurrency(client: Client) {
 /** Resolves the currency to use for a brand-new marketplace listing:
  *  publisher's partner currency → app-wide default (`DEFAULT_CURRENCY_CODE`).
  *  Single source of truth shared between the create form (display symbol)
- *  and `saveProduct` (FK stamped on insert), so the price the supplier
+ *  and `saveProductWithVersions` (FK stamped on insert), so the price the supplier
  *  types is interpreted in the same currency that gets persisted.
  *  Existing listings keep their own `saleCurrency` — this helper is not
  *  consulted on edit. */

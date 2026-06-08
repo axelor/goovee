@@ -14,7 +14,7 @@ class SeedLookupError extends Error {
 /* Resolves the workspace AND its marketplace defaults by walking
  * AOSPortalWorkspace → defaultPartnerWorkspace → portalAppConfig. The
  * workspace default product is read once here and used as the `product`
- * m2o on every seeded MarketplaceProduct, mirroring `saveProduct` in
+ * m2o on every seeded MarketplaceProduct, mirroring `saveProductWithVersions` in
  * the app. Tax/currency/unit live on that workspace default Product. */
 export async function findWorkspaceByUrl(client: Client, url: string) {
   const workspace = await client.aOSPortalWorkspace.findOne({

@@ -126,6 +126,18 @@ export async function findMyProductForEdit({
       license: {id: true},
       currentVersion: {id: true},
       salePrice: true,
+      /* Selected so the inline edit host (no listing row to read from) can show
+       * the price-input currency adornment and tax-basis label from the
+       * listing's own values; the dialog ignores them (it gets both from the
+       * listing row). */
+      saleCurrency: {
+        id: true,
+        code: true,
+        codeISO: true,
+        symbol: true,
+        numberOfDecimals: true,
+      },
+      inAti: true,
       pictureList: {
         select: {id: true, sequence: true, picture: {id: true}},
         orderBy: {sequence: 'ASC'},

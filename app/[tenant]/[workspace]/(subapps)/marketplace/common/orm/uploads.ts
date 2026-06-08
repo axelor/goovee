@@ -52,7 +52,7 @@ export type ProductImageInput =
  *   - Each `new` file is uploaded as a MetaFile + linked via a fresh
  *     AOSMarketplaceProductPicture.
  *   - Every surviving / new picture gets `sequence = its position`.
- * Called from saveProduct after the MP row exists. The form-level caps
+ * Called from saveProductWithVersions after the MP row exists. The form-level caps
  * (count / 5 MB each) have already been enforced by Zod. */
 export async function syncProductImages({
   client,

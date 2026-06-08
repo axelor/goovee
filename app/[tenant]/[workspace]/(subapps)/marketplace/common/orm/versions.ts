@@ -125,34 +125,6 @@ export async function findMyProductVersions({
   });
 }
 
-/* How many published (non-archived) versions the product has. Drives the
- * unpublish-confirmation wording without loading the whole version list. */
-export async function countPublishedVersions({
-  productId,
-  mainPartnerId,
-  client,
-  workspace,
-}: {
-  productId: ID;
-  mainPartnerId: ID;
-  client: Client;
-  workspace: PortalWorkspaceWithConfig;
-}): Promise<number> {
-  const count = await client.aOSMarketplaceProductVersion.count({
-    where: {
-      OR: [{archived: false}, {archived: null}],
-      statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-      marketplaceProduct: withMyProductAccessFilter(
-        workspace,
-        mainPartnerId,
-      )({
-        id: productId,
-      }),
-    },
-  });
-  return Number(count);
-}
-
 /* Single source of truth for `marketplaceProduct.currentVersion` and
  * `marketplaceProduct.latestVersion`. Call after any
  * create/status-change/delete.

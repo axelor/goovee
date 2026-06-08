@@ -12,7 +12,7 @@ import type {
   ListLicense,
 } from '../../../../orm';
 import type {Currency} from '@/product/orm';
-import {ProductFormDialog} from '../product-form-dialog';
+import {ProductFormDialog} from '../product-edit';
 
 type Props = {
   workspaceURI: string;
