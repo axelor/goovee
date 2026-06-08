@@ -3,6 +3,7 @@ import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
 import Link from 'next/link';
 import type {ActivityItem} from '../../../../orm';
+import {ProductTab} from '../../../../constants/tabs';
 import {PartnerAvatar} from '../../shared/partner-avatar';
 import {TooltipDate} from '../../shared/tooltip-date';
 
@@ -90,7 +91,9 @@ async function ActivityRow({
           <span className="font-bold">{name}</span>
           <span className="text-muted-foreground"> {action} </span>
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${item.marketplaceProduct.slug}`}
+            href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${item.marketplaceProduct.slug}${
+              item.kind === 'review' ? `?tab=${ProductTab.Reviews}` : ''
+            }`}
             className="font-bold text-primary hover:underline">
             {item.marketplaceProduct.name}
           </Link>
