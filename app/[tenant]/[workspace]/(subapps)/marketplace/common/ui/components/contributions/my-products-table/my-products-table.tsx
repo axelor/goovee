@@ -259,7 +259,7 @@ export function MyProductsTable({
                       listingCurrency={
                         product.saleCurrency ?? newListingCurrency
                       }
-                      inAti={inAti}
+                      inAti={product.inAti ?? inAti}
                     />
                     {product.currentVersion ? (
                       <Link
