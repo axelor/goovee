@@ -2,6 +2,7 @@ import axios from 'axios';
 import {findLocaleLanguage, translate} from '@/locale/utils';
 import {DEFAULT_LOCALE} from '@/locale';
 import {getEnv} from '@/environment';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 const rest = axios.create();
 
@@ -17,7 +18,7 @@ export const i18n = (() => {
       try {
         const result = await rest
           .get(
-            `${getEnv()?.GOOVEE_PUBLIC_HOST}/api/tenant/${tenant}/locales/${locale}`,
+            `${getEnv()?.GOOVEE_PUBLIC_HOST}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`,
           )
           .then(result => result?.data || {})
           .catch(() => ({}));
@@ -31,7 +32,7 @@ export const i18n = (() => {
     } else {
       const fetchLocale = async (locale: string) =>
         rest
-          .get(`/locales/${locale}.json`)
+          .get(withBasePath(`/locales/${locale}.json`))
           .then(r => (r?.status === 200 && r?.data ? r.data : {}))
           .catch(() => ({}));
 

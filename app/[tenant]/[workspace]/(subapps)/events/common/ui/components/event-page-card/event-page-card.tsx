@@ -20,6 +20,7 @@ import {
 } from '@/ui/components';
 import {cn} from '@/utils/css';
 import {formatDateTime} from '@/lib/core/locale/formatters';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -85,8 +86,10 @@ export const EventPageCard = ({
           <Image
             src={
               eventDetails.eventImage?.id
-                ? `${workspaceURI}/${SUBAPP_CODES.events}/api/event/${eventDetails.slug}/image`
-                : NO_IMAGE_URL
+                ? withBasePath(
+                    `${workspaceURI}/${SUBAPP_CODES.events}/api/event/${eventDetails.slug}/image`,
+                  )
+                : withBasePath(NO_IMAGE_URL)
             }
             alt={`${eventDetails.eventTitle} image`}
             fill

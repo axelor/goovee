@@ -4,6 +4,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import axios from 'axios';
 
 import {store} from './store';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 const EnvironmentContext = React.createContext<any>({});
 
@@ -16,9 +17,12 @@ export function Environment({children}: {children: React.ReactNode}) {
   useEffect(() => {
     const getEnvironment = async () => {
       const result = await rest
-        .get(`/api/config`)
+        .get(withBasePath('/api/config'))
         .then(result => result?.data || {})
-        .catch(() => ({}))
+        .catch(err => {
+          console.error('[goovee] Failed to load /api/config:', err);
+          return {};
+        })
         .finally(() => {
           setLoading(false);
         });

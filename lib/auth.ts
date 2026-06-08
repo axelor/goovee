@@ -19,6 +19,7 @@ import {
   OAuthInviteRegisterSchema,
   OAuthRegisterSchema,
 } from './core/auth/validation-utils';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 const showKeycloakOauth = process.env.SHOW_KEYCLOAK_OAUTH === 'true';
 
@@ -30,7 +31,7 @@ const ERROR_CODES = defineErrorCodes({
 
 const options = {
   onAPIError: {
-    errorURL: '/auth/error',
+    errorURL: withBasePath('/auth/error'),
   },
   databaseHooks: {
     user: {
@@ -235,6 +236,8 @@ if (betterAuthSecret) {
 
 export const auth = betterAuth({
   ...options,
+  baseURL: process.env.BETTER_AUTH_URL,
+  basePath: withBasePath('/api/auth'),
   plugins: [
     ...options.plugins,
     customSession(async ({user, session}, ctx) => {

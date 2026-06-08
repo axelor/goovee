@@ -3,6 +3,7 @@
 import {useEffect, useLayoutEffect, useRef} from 'react';
 
 // ---- CORE IMPORTS ---- //
+import {withBasePath} from '@/lib/core/path/base-path';
 import {PaymentSource} from '@/lib/core/payment/common/type';
 import {
   PaymentUpdateStatus,
@@ -30,7 +31,9 @@ export function usePaymentSSE({
   useEffect(() => {
     if (!entityId || !source || !contextId) return;
 
-    const url = `/api/payment/sse?source=${source}&entityId=${entityId}&contextId=${contextId}`;
+    const url = withBasePath(
+      `/api/payment/sse?source=${source}&entityId=${entityId}&contextId=${contextId}`,
+    );
     const es = new EventSource(url);
 
     es.addEventListener('payment', (event: MessageEvent) => {

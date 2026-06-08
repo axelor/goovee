@@ -2,8 +2,10 @@ import Link from 'next/link';
 import type {Cloned} from '@/types/util';
 import Image from 'next/image';
 
+// ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import type {PortalWorkspace} from '@/orm/workspace';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export default function Footer({
   workspace,
@@ -35,7 +37,7 @@ export default function Footer({
             className="flex items-center">
             <div className="text-xs">{i18n.t('Powered by')}</div>
             <Image
-              src="/images/axelor.png"
+              src={withBasePath('/images/axelor.png')}
               alt="Axelor Logo"
               width={50}
               height={25}

@@ -18,6 +18,7 @@ import {Skeleton} from '@/ui/components';
 import type {RawNewsCategory} from '@/subapps/news/common/types';
 import styles from '@/subapps/news/common/ui/styles/news.module.scss';
 import Image from 'next/image';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export const CategorySlider = ({
   title = '',
@@ -96,8 +97,10 @@ export const CategorySlider = ({
                       fill
                       src={
                         image?.id
-                          ? `${workspaceURI}/${SUBAPP_CODES.news}/api/category/${slug}/image`
-                          : NO_IMAGE_URL
+                          ? withBasePath(
+                              `${workspaceURI}/${SUBAPP_CODES.news}/api/category/${slug}/image`,
+                            )
+                          : withBasePath(NO_IMAGE_URL)
                       }
                       alt={'Category image'}
                       className="rounded-md object-cover"

@@ -18,6 +18,7 @@ import {ChevronLeft, ChevronRight} from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
 
 // ---- LOCAL IMPORTS ---- //
@@ -68,8 +69,10 @@ export default async function Page(props: {
   }
 
   const imageURL = workspace.config.ticketHeroBgImage?.id
-    ? `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/hero/background`
-    : IMAGE_URL;
+    ? withBasePath(
+        `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/hero/background`,
+      )
+    : withBasePath(IMAGE_URL);
 
   return (
     <>

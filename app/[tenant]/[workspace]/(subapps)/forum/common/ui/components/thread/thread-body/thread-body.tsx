@@ -19,6 +19,7 @@ import {
 import {getPartnerImageURL} from '@/utils/files';
 import {formatDateTime} from '@/locale/formatters';
 import {cn} from '@/utils/css';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {SEE_LESS, SEE_MORE} from '@/subapps/forum/common/constants';
@@ -69,7 +70,9 @@ export const ThreadBody = ({
               id: attachment?.metaFile?.id,
               type: attachment?.metaFile?.fileType,
               name: attachment?.metaFile?.fileName,
-              url: `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${attachment?.metaFile?.id}`,
+              url: withBasePath(
+                `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${attachment?.metaFile?.id}`,
+              ),
             });
           }
           return acc;

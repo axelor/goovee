@@ -5,6 +5,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {Container} from '@/ui/components';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -104,7 +105,9 @@ const Content = ({order}: {order: DetailOrder}) => {
                       </div>
                       <div className="flex justify-end">
                         <DownloadButton
-                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`}
+                          downloadURL={withBasePath(
+                            `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/invoice/${record.id}`,
+                          )}
                           title={i18n.t(DOWNLOAD_PDF)}
                           className="border-none p-0"
                         />
@@ -133,7 +136,9 @@ const Content = ({order}: {order: DetailOrder}) => {
                       <div className="flex justify-end">
                         <DownloadButton
                           title={i18n.t(DOWNLOAD_PDF)}
-                          downloadURL={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`}
+                          downloadURL={withBasePath(
+                            `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${id}/customer-delivery/${record.id}`,
+                          )}
                           className="border-none p-0"
                         />
                       </div>

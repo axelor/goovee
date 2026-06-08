@@ -17,6 +17,7 @@ import {
   URL_PARAMS,
 } from '@/constants';
 import {PortalWorkspace} from '@/orm/workspace';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {Group, SearchResult} from '@/subapps/forum/common/types/forum';
@@ -36,8 +37,8 @@ export function Hero({
   const {update} = useSearchParams();
 
   const imageURL = workspace?.config?.forumHeroBgImage?.id
-    ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/hero/background`
-    : IMAGE_URL;
+    ? withBasePath(`${workspaceURI}/${SUBAPP_CODES.forum}/api/hero/background`)
+    : withBasePath(IMAGE_URL);
 
   const handleSearch = (term: string) => {
     if (!term.length) {
@@ -120,7 +121,9 @@ export function Hero({
       image={imageURL}
       groupImg={
         selectedGroup?.image?.id &&
-        `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${selectedGroup?.id}/image`
+        withBasePath(
+          `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${selectedGroup?.id}/image`,
+        )
       }
       background={
         (workspace?.config?.forumHeroOverlayColorSelect ||

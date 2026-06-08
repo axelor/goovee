@@ -1,6 +1,7 @@
 import {auth} from '@/lib/auth';
 import {getSessionCookie} from 'better-auth/cookies';
 import {NextRequest, NextResponse} from 'next/server';
+import {getBasePath} from '@/lib/core/path/base-path';
 
 export const TENANT_HEADER = 'x-tenant-id';
 export const WORKSPACE_HEADER = 'x-workspace-id';
@@ -52,7 +53,7 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const tenant = extractTenant(pathname, process.env.GOOVEE_PUBLIC_BASE_PATH);
+  const tenant = extractTenant(pathname, getBasePath());
 
   if (isMultiTenancy) {
     if (!tenant) return notFound(req);

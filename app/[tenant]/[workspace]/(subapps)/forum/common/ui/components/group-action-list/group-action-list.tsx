@@ -27,6 +27,7 @@ import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -103,8 +104,10 @@ export const GroupActionList = ({
           const imageId =
             memberGroup?.forumGroup?.image?.id || (group as Group)?.image?.id;
           const groupImage = imageId
-            ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${id}/image`
-            : NO_IMAGE_URL;
+            ? withBasePath(
+                `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${id}/image`,
+              )
+            : withBasePath(NO_IMAGE_URL);
 
           return (
             <Collapsible key={group?.id}>

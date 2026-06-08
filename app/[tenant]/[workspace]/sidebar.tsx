@@ -26,6 +26,7 @@ import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
 import {useEnvironment} from '@/lib/core/environment';
 import {CHAT_TYPE} from '@/constants';
+import {toWorkspaceURI} from '@/utils/workspace';
 
 export function Sidebar({
   subapps,
@@ -40,7 +41,7 @@ export function Sidebar({
 }) {
   const {data: session} = authClient.useSession();
   const [collapsed, setCollapsed] = useState(false);
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const env = useEnvironment();
   const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
 
@@ -84,9 +85,10 @@ export function Sidebar({
                 {workspaces.map((workspace: any) => (
                   <SelectItem
                     key={workspace.url}
-                    value={
-                      workspace.url.replace(env.GOOVEE_PUBLIC_HOST, '') || '/'
-                    }>
+                    value={toWorkspaceURI(
+                      workspace.url,
+                      env.GOOVEE_PUBLIC_HOST,
+                    )}>
                     {workspace.name || workspace.url}
                   </SelectItem>
                 ))}

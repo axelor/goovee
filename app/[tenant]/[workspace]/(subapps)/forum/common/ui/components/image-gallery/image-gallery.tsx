@@ -9,6 +9,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatNumber} from '@/locale/formatters';
 import {i18n} from '@/locale';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {MAX_IMAGES_BEFORE_OVERLAY} from '@/subapps/forum/common/constants';
@@ -53,8 +54,10 @@ export const ImageGallery = ({
               fill
               src={
                 image?.metaFile?.id
-                  ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${image.metaFile.id}`
-                  : NO_IMAGE_URL
+                  ? withBasePath(
+                      `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${image.metaFile.id}`,
+                    )
+                  : withBasePath(NO_IMAGE_URL)
               }
               alt={image?.metaFile?.fileName || i18n.t('post image')}
               className="object-cover"

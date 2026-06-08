@@ -8,6 +8,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {Button} from '@/ui/components/button';
 import {i18n} from '@/locale';
 import type {PortalAppConfig} from '@/orm/workspace';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export function HomeCarousel({
   images,
@@ -35,7 +36,9 @@ export function HomeCarousel({
             <div
               className="flex items-center relative bg-center bg-no-repeat bg-cover h-[750px] p-4 md:p-20"
               style={{
-                backgroundImage: `url("${workspaceURI}/${SUBAPP_CODES.shop}/api/carousel/${item.id}/image")`,
+                backgroundImage: `url("${withBasePath(
+                  `${workspaceURI}/${SUBAPP_CODES.shop}/api/carousel/${item.id}/image`,
+                )}")`,
               }}>
               <div className="absolute top-0 left-0 w-full h-full bg-black/[.15]" />
               <div className="space-y-10 md:w-1/2 z-20">

@@ -3,6 +3,7 @@ import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
 import {findWorkspaces} from '@/orm/workspace';
 import {clone} from '@/utils';
+import {getPortalRoot} from '@/utils/workspace';
 
 export function extractSearchParams({
   searchParams,
@@ -18,7 +19,9 @@ export function extractSearchParams({
   const tenantId =
     searchParams?.tenant && decodeURIComponent(searchParams.tenant);
 
-  const workspaceURL = `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}${workspaceURI}`;
+  const workspaceURL = `${getPortalRoot(
+    getPublicEnvironment().GOOVEE_PUBLIC_HOST,
+  )}${workspaceURI || ''}`;
 
   return {
     workspaceURI,

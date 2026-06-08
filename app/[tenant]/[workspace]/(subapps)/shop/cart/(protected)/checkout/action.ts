@@ -19,6 +19,8 @@ import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {markPaymentAsProcessed} from '@/lib/core/payment/common/orm';
+import {withBasePath} from '@/lib/core/path/base-path';
+import {ensureLeadingSlash} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -772,8 +774,8 @@ export async function payboxCreateOrder({
       email: payerEmail,
       context: cart,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_response=true`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_error=true`,
+        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
       },
     });
 

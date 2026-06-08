@@ -1,4 +1,5 @@
 import type {JSX} from 'react';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {$wrapNodeInElement, mergeRegister} from '@lexical/utils';
@@ -167,11 +168,11 @@ export function InsertImageDialog({
                   ? {
                       altText:
                         'Daylight fir trees forest glacier green high ice landscape',
-                      src: '/website/images/landscape.jpg',
+                      src: withBasePath('/website/images/landscape.jpg'),
                     }
                   : {
                       altText: 'Yellow flower in tilt shift lens',
-                      src: '/website/images/yellow-flower.jpg',
+                      src: withBasePath('/website/images/yellow-flower.jpg'),
                     },
               )
             }>

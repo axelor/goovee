@@ -26,6 +26,8 @@ import {findWorkspaceByURL} from '@/orm/workspace';
 import {revalidatePath} from 'next/cache';
 import {getTranslation} from '../locale/server';
 import {UserType} from './types';
+import {withBasePath} from '@/lib/core/path/base-path';
+import {toWorkspaceURI} from '@/utils/workspace';
 import {type Tenant, type TenantConfig} from '../tenant';
 import type {Partner} from '@/types';
 import type {PortalWorkspace} from '@/orm/workspace';
@@ -150,7 +152,7 @@ export async function registerByInvite({
       localizationId: localization?.id,
     });
 
-    const uri = `${workspace.url.replace(process.env.GOOVEE_PUBLIC_HOST!, '')}`;
+    const uri = toWorkspaceURI(workspace.url, process.env.GOOVEE_PUBLIC_HOST);
 
     revalidatePath('/', 'layout');
 
@@ -162,7 +164,7 @@ export async function registerByInvite({
     });
 
     return {
-      query: `?callbackurl=${encodeURIComponent(`${invite.workspace?.url}/`)}&workspaceURI=${encodeURIComponent(`${uri}/`)}&tenant=${tenantId}`,
+      query: `?callbackurl=${encodeURIComponent(`${workspace.url}/`)}&workspaceURI=${encodeURIComponent(`${uri}/`)}&tenant=${tenantId}`,
     };
   } catch (err) {
     throw new Error(
@@ -636,7 +638,7 @@ export async function registerByKeycloak({
   workspaceURI: string;
   client: Client;
 }): Promise<void> {
-  const workspaceURL = `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}${workspaceURI}`;
+  const workspaceURL = `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
   const localization = await findRegistrationLocalization({
     locale,
     client,

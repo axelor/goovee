@@ -21,6 +21,7 @@ import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {encodeFilter, getLoginURL} from '@/utils/url';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
@@ -228,7 +229,9 @@ export default async function Page(props: {
             commentField="note"
             createComment={createComment}
             fetchComments={fetchComments}
-            attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`}
+            attachmentDownloadUrl={withBasePath(
+              `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
+            )}
           />
         </div>
       )}

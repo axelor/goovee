@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {i18n} from '@/locale';
 import {Skeleton} from '@/ui/components';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -48,7 +49,7 @@ export const SocialMedia = ({
               <Avatar
                 className={`w-8 h-8 bg-[${color}] p-1 rounded cursor-pointer`}>
                 <AvatarImage
-                  src={image}
+                  src={withBasePath(image)}
                   alt={`Visit ${redirectUrl}`}
                   size={32}
                 />

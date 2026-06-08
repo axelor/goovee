@@ -1,6 +1,6 @@
 import {redirect} from 'next/navigation';
 
-// ---- CORE IMPORTS ---- //I
+// ---- CORE IMPORTS ---- //
 import {workspacePathname} from '@/utils/workspace';
 
 export default async function Page(props: {

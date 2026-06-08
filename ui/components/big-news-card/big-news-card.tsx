@@ -8,6 +8,7 @@ import React from 'react';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {formatRelativeTime} from '@/locale/formatters';
 import {BadgeList} from '@/ui/components';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 type NewsCategory = {
   id: string;
@@ -53,8 +54,10 @@ export function BigNewsCard({
       <Image
         src={
           image?.id
-            ? `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`
-            : NO_IMAGE_URL
+            ? withBasePath(
+                `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`,
+              )
+            : withBasePath(NO_IMAGE_URL)
         }
         alt={image?.fileName || 'News image'}
         fill

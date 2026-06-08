@@ -1,4 +1,5 @@
 import type {JSX} from 'react';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 import {
   $isCodeNode,
@@ -1120,7 +1121,7 @@ export default function ToolbarPlugin({
                   onClick={() =>
                     insertGifOnClick({
                       altText: 'Cat typing on a laptop',
-                      src: '/website/images/cat-typing.gif',
+                      src: withBasePath('/website/images/cat-typing.gif'),
                     })
                   }
                   className="item">

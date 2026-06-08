@@ -14,6 +14,7 @@ import {
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {NOTIFICATIONS_OPTIONS} from '@/app/[tenant]/[workspace]/(subapps)/forum/common/constants';
@@ -66,8 +67,10 @@ export const GroupNotification = ({group}: groupNotificationPros) => {
             <AvatarImage
               src={
                 group.forumGroup?.image?.id
-                  ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.forumGroup?.id}/image`
-                  : NO_IMAGE_URL
+                  ? withBasePath(
+                      `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.forumGroup?.id}/image`,
+                    )
+                  : withBasePath(NO_IMAGE_URL)
               }
               alt={forumGroup.name}
               size={24}

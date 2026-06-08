@@ -16,6 +16,7 @@ import {HeroSearch, Search} from '@/ui/components';
 import type {OverlayColor} from '@/types';
 import {PortalWorkspace} from '@/orm/workspace';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {SearchItem} from '@/subapps/news/common/ui/components';
@@ -36,8 +37,8 @@ export function Hero({
 
   const {workspaceURL, workspaceURI} = useWorkspace();
   const imageURL = workspace?.config?.newsHeroBgImage?.id
-    ? `${workspaceURI}/${SUBAPP_CODES.news}/api/hero/background`
-    : IMAGE_URL;
+    ? withBasePath(`${workspaceURI}/${SUBAPP_CODES.news}/api/hero/background`)
+    : withBasePath(IMAGE_URL);
 
   const handleClick = (slug: string) => {
     router.push(

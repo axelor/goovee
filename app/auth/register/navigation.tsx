@@ -8,6 +8,7 @@ import {useSearchParams} from 'next/navigation';
 import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
 import {Separator} from '@/ui/components/separator';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export default function Navigation({
   showGoogleOauth,
@@ -51,7 +52,7 @@ export default function Navigation({
               <Link href={`/auth/register/google?${searchQuery}`}>
                 <Image
                   alt="Google"
-                  src="/images/google.svg"
+                  src={withBasePath('/images/google.svg')}
                   height={24}
                   width={24}
                   className="me-2"

@@ -1,4 +1,5 @@
 import type {JSX} from 'react';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 import {$createCodeNode} from '@lexical/code';
 import {
@@ -286,7 +287,7 @@ function getBaseOptions(editor: LexicalEditor, showModal: ShowModal) {
       onSelect: () =>
         editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
           altText: 'Cat typing on a laptop',
-          src: '/website/images/cat-typing.gif',
+          src: withBasePath('/website/images/cat-typing.gif'),
         }),
     }),
     new ComponentPickerOption('Image', {

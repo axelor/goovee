@@ -30,6 +30,7 @@ import {
   fetchComments,
   createComment,
 } from '@/subapps/quotations/common/actions';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 const Content = ({
   quotation,
@@ -123,7 +124,9 @@ const Content = ({
                 showRepliesInMainThread
                 createComment={createComment}
                 fetchComments={fetchComments}
-                attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.quotations}/api/comments/attachments/${quotation.id}`}
+                attachmentDownloadUrl={withBasePath(
+                  `${workspaceURI}/${SUBAPP_CODES.quotations}/api/comments/attachments/${quotation.id}`,
+                )}
                 trackingField="body"
                 commentField="body"
                 disableReply

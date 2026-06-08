@@ -9,6 +9,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {formatDate} from '@/lib/core/locale/formatters';
 import {Variant} from '@/ui/components/tag';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {ORDER_TYPE} from '@/subapps/orders/common/constants/orders';
@@ -72,7 +73,9 @@ export const Informations = ({
                 variant="outline"
                 className="flex items-center gap-2 bg-white hover:bg-white text-success hover:text-success border-success !font-medium basis-full md:basis-0">
                 <a
-                  href={`${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderId}/attachment`}>
+                  href={withBasePath(
+                    `${workspaceURI}/${SUBAPP_CODES.orders}/api/order/${orderId}/attachment`,
+                  )}>
                   <MdOutlineFileDownload className="text-2xl" />{' '}
                   {i18n.t('Download order')}
                 </a>

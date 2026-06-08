@@ -21,6 +21,7 @@ import NotificationManager, {NotificationType} from '@/notification';
 import {SEARCH_PARAMS} from '@/constants';
 import type {PortalWorkspace} from '@/orm/workspace';
 import {getPartnerId} from '@/utils';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {inviteTemplate} from '../../../common/constants/template';
@@ -336,7 +337,9 @@ export async function sendInvites({
       sendMail({
         subject: workspace?.name || workspace.url,
         email,
-        link: `${process.env.GOOVEE_PUBLIC_HOST}/auth/register/invite/${invite.id}/email?${SEARCH_PARAMS.TENANT_ID}=${tenantId}`,
+        link: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
+          `/auth/register/invite/${invite.id}/email?${SEARCH_PARAMS.TENANT_ID}=${tenantId}`,
+        )}`,
       });
     } catch (err) {
       inviteError = true;

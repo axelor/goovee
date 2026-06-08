@@ -8,6 +8,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatRelativeTime} from '@/locale/formatters';
 import {BadgeList, Skeleton} from '@/ui/components';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
@@ -33,8 +34,10 @@ export const NewsCard = ({
         <Image
           src={
             image?.id
-              ? `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`
-              : NO_IMAGE_URL
+              ? withBasePath(
+                  `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
+                )
+              : withBasePath(NO_IMAGE_URL)
           }
           alt={image?.fileName || 'News image'}
           fill

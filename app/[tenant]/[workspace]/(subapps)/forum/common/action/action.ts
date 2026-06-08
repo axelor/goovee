@@ -34,6 +34,7 @@ import {addComment, findComments} from '@/comments/orm';
 import {getStoragePath} from '@/storage/index';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 //----LOCAL IMPORTS -----//
 import {
@@ -1042,7 +1043,9 @@ export const createComment: CreateComment = async formData => {
                     user.simpleFullName || user.name || '',
                   ),
                   body: comment.note ?? '',
-                  url: `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                  url: withBasePath(
+                    `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                  ),
                   tag: NotificationTag.forumReply(parentComment.id),
                 },
                 getReplacementTitle: count =>
@@ -1090,7 +1093,9 @@ export const createComment: CreateComment = async formData => {
                       user.simpleFullName || user.name || '',
                     ),
                     body: comment.note ?? '',
-                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                    url: withBasePath(
+                      `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                    ),
                     tag: NotificationTag.forumPostComment(post.id),
                   },
                   getReplacementTitle: count =>

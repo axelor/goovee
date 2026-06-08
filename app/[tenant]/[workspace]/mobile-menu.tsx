@@ -24,6 +24,7 @@ import {useNavigationVisibility} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
+import {toWorkspaceURI} from '@/utils/workspace';
 
 function MobileSidebar({subapps, workspaces, workspace}: any) {
   const pathname = usePathname();
@@ -32,7 +33,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
 
   const user = session?.user;
 
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {workspaceURI} = useWorkspace();
   const env = useEnvironment();
   const router = useRouter();
 
@@ -75,9 +76,10 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
                   {workspaces.map((workspace: any) => (
                     <SelectItem
                       key={workspace.url}
-                      value={
-                        workspace.url.replace(env.GOOVEE_PUBLIC_HOST, '') || '/'
-                      }>
+                      value={toWorkspaceURI(
+                        workspace.url,
+                        env.GOOVEE_PUBLIC_HOST,
+                      )}>
                       {workspace.name || workspace.url}
                     </SelectItem>
                   ))}

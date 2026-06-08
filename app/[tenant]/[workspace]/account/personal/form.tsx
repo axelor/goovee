@@ -51,6 +51,7 @@ import {Title} from '../common/ui/components';
 import {update, updateProfileImage, generateOTPForUpdate} from './action';
 import {RoleLabel} from '../common/constants';
 import {getLoginURL} from '@/utils/url';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 const formSchema = z
   .object({
@@ -237,7 +238,7 @@ export default function Personal({
             workspaceURI,
             tenant,
           });
-          window.location.href = loginURL;
+          window.location.href = withBasePath(loginURL);
         } else {
           handleCancelEditEmail();
           router.refresh();

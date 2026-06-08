@@ -27,6 +27,7 @@ import {BadgeList} from '@/ui/components/badge-list';
 import {FileIcon} from '@/ui/components/file-icon';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
 import {findEvents} from './(subapps)/events/common/orm/event';
@@ -50,13 +51,13 @@ export async function Home({
   apps: any[];
 }) {
   const imageURL = workspace.config?.homepageHeroBgImage?.id
-    ? `${workspaceURI}/api/home/hero/background`
-    : IMAGE_URL;
+    ? withBasePath(`${workspaceURI}/api/home/hero/background`)
+    : withBasePath(IMAGE_URL);
 
   const logoId = workspace.logo?.id || workspace.config?.company?.logo?.id;
   const logoURL = logoId
-    ? `${workspaceURI}/api/workspace/logo/image`
-    : DEFAULT_LOGO_URL;
+    ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
+    : withBasePath(DEFAULT_LOGO_URL);
 
   const showNews =
     workspace.config?.isHomepageDisplayNews &&
@@ -491,7 +492,7 @@ async function HyperlinkCard({
           rel="noopener noreferrer"
           className="block p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
           <Image
-            src={`${workspaceURI}/api/hyperlink/${item.id}/logo`}
+            src={withBasePath(`${workspaceURI}/api/hyperlink/${item.id}/logo`)}
             alt={item.title || 'Related Link'}
             width={200}
             height={100}

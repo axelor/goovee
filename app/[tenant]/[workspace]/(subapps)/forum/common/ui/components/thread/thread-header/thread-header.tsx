@@ -4,6 +4,7 @@
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {Group} from '@/subapps/forum/common/types/forum';
@@ -16,8 +17,10 @@ export const ThreadHeader = ({group}: {group: Group | undefined}) => {
         <AvatarImage
           src={
             group?.image?.id
-              ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.id}/image`
-              : NO_IMAGE_URL
+              ? withBasePath(
+                  `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.id}/image`,
+                )
+              : withBasePath(NO_IMAGE_URL)
           }
           alt={group?.name}
           size={24}

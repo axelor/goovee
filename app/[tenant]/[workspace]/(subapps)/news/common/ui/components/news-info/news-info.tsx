@@ -14,6 +14,7 @@ import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {BadgeList, Skeleton, InnerHTML} from '@/ui/components';
 import {PortalWorkspace} from '@/orm/workspace';
 import {cn} from '@/utils/css';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsCategory, NewsImage} from '@/subapps/news/common/types';
@@ -71,8 +72,10 @@ export const NewsInfo = ({
           <Image
             src={
               image?.id
-                ? `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`
-                : NO_IMAGE_URL
+                ? withBasePath(
+                    `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`,
+                  )
+                : withBasePath(NO_IMAGE_URL)
             }
             alt={image?.fileName || 'News image'}
             fill

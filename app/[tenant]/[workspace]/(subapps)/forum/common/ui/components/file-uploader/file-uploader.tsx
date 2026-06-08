@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/ui/components';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {FileDesc} from '@/subapps/forum/common/ui/components';
@@ -103,7 +104,7 @@ export const FileUploader = ({
                     <div className="w-[24.063rem] h-[18.313rem] relative my-2">
                       <Image
                         fill
-                        src={'/images/upload.png'}
+                        src={withBasePath('/images/upload.png')}
                         className="aspect-auto"
                         objectFit="contain"
                         alt="Upload png"

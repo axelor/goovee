@@ -23,6 +23,7 @@ import {
 import {zodParseFormData} from '@/utils/formdata';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {findNews} from '@/subapps/news/common/orm/news';
@@ -225,7 +226,9 @@ export const createComment: CreateComment = async formData => {
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name;
-      const newsUrl = `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}#comment-${comment.id}`;
+      const newsUrl = withBasePath(
+        `${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${newsItem.slug}#comment-${comment.id}`,
+      );
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,

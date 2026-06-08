@@ -34,6 +34,7 @@ import {
 import {useToast} from '@/ui/hooks/use-toast';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -246,8 +247,10 @@ export const CreatePost = ({
                                     fill
                                     src={
                                       group?.image?.id
-                                        ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.id}/image`
-                                        : NO_IMAGE_URL
+                                        ? withBasePath(
+                                            `${workspaceURI}/${SUBAPP_CODES.forum}/api/group/${group.id}/image`,
+                                          )
+                                        : withBasePath(NO_IMAGE_URL)
                                     }
                                     alt={group.name}
                                     objectFit="cover"

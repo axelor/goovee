@@ -5,6 +5,7 @@ import type {
   NodeKey,
 } from 'lexical';
 import type {JSX} from 'react';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 import './ImageNode.css';
 
@@ -186,7 +187,7 @@ function LazyImage({
 function BrokenImage(): JSX.Element {
   return (
     <img
-      src="/website/images/image-broken.svg"
+      src={withBasePath('/website/images/image-broken.svg')}
       style={{
         height: 200,
         opacity: 0.2,

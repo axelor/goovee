@@ -10,6 +10,7 @@ import {Dialog, DialogContent, DialogTitle} from '@/ui/components';
 import {i18n} from '@/locale';
 import Image from 'next/image';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {Thread} from '@/subapps/forum/common/ui/components';
@@ -63,8 +64,10 @@ export const ThreadPopup = ({
                         className="rounded-t-lg object-contain"
                         src={
                           image?.id
-                            ? `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${image?.metaFile?.id}`
-                            : NO_IMAGE_URL
+                            ? withBasePath(
+                                `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post?.id}/attachment/${image?.metaFile?.id}`,
+                              )
+                            : withBasePath(NO_IMAGE_URL)
                         }
                         alt={image?.metaFile?.fileName || i18n.t('post image')}
                         sizes="(min-width:768px) 544px, 100vw"

@@ -7,6 +7,7 @@ import {Serwist} from 'serwist';
 import type {NotificationPayload} from './types';
 import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
 import {CacheFirstWithSWR} from './locale-strategy';
+import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/utils';
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the
@@ -43,6 +44,13 @@ const serwist = new Serwist({
 });
 
 const channel = new BroadcastChannel(PUSH_CHANNEL);
+const scopeBasePath = normalizePathPrefix(
+  new URL(self.registration.scope).pathname,
+);
+
+function withScopeBasePath(path: string) {
+  return withPathPrefix(scopeBasePath, path);
+}
 
 self.addEventListener('push', event => {
   const data: NotificationPayload | undefined = event.data?.json();
@@ -51,8 +59,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'Notification';
   const options: NotificationOptions & {renotify?: boolean} = {
     body: data.body,
-    icon: data.icon ?? '/pwa/icons/icon-192x192.png',
-    badge: data.badge ?? '/pwa/icons/icon-72x72.png',
+    icon: data.icon ?? withScopeBasePath('/pwa/icons/icon-192x192.png'),
+    badge: data.badge ?? withScopeBasePath('/pwa/icons/icon-72x72.png'),
     dir: data.dir,
     lang: data.lang,
     requireInteraction: data.requireInteraction,
@@ -87,9 +95,11 @@ self.addEventListener('notificationclick', event => {
     const tag = event.notification.tag;
     if (tenantId) {
       try {
-        const readUrl = tag
-          ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
-          : `/api/tenant/${tenantId}/push/notifications/read/${notification?.id}`;
+        const readUrl = withScopeBasePath(
+          tag
+            ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
+            : `/api/tenant/${tenantId}/push/notifications/read/${notification?.id}`,
+        );
         await fetch(readUrl, {method: 'POST'});
         // Notify all tabs to remove this notification from their unread state
         channel.postMessage({type: MSG_TYPE.READ, notification, tag});
@@ -99,7 +109,7 @@ self.addEventListener('notificationclick', event => {
     }
 
     if (self.clients.openWindow) {
-      return self.clients.openWindow(url);
+      return self.clients.openWindow(withScopeBasePath(url || '/'));
     }
   };
 

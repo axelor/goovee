@@ -1,6 +1,7 @@
 import {experimental_taintUniqueValue} from 'react';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {encodeFilter as encode} from '@/utils/url';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {formatAmountForPaybox, hasKeys, join} from './utils';
 import {createHMAC} from './crypto';
 import {getPublicEnvironment} from '@/environment';
@@ -43,7 +44,7 @@ export function getPaymentURL({
     PBX_ATTENTE: url?.success,
     PBX_REFUSE: url?.failure,
     PBX_ANNULE: url?.failure,
-    PBX_REPONDRE_A: `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}/api/payment/paybox/validate`,
+    PBX_REPONDRE_A: `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}${withBasePath('/api/payment/paybox/validate')}`,
     PBX_RETOUR: 'reference:R;error:E;transaction:S;sign:K',
     PBX_TIME: new Date().toISOString(),
   };

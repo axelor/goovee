@@ -12,6 +12,7 @@ import {
   SUBAPP_CODES,
 } from '@/constants';
 import type {PortalWorkspace} from '@/orm/workspace';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import Search from './search';
@@ -26,8 +27,10 @@ export const Hero = ({
   const renderSearch = () => <Search workspaceURL={workspace.url} />;
 
   const imageURL = workspace?.config?.resourcesHeroBgImage?.id
-    ? `${workspaceURI}/${SUBAPP_CODES.resources}/api/hero/background`
-    : IMAGE_URL;
+    ? withBasePath(
+        `${workspaceURI}/${SUBAPP_CODES.resources}/api/hero/background`,
+      )
+    : withBasePath(IMAGE_URL);
 
   return (
     <>

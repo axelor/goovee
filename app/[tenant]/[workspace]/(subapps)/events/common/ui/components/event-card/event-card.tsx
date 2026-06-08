@@ -18,6 +18,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {formatDateTime} from '@/locale/formatters';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -40,12 +41,16 @@ function getListEventImageURL({
     cat => cat.thumbnailImage?.id || cat.image?.id,
   );
   if (categoryWithImage) {
-    return `${workspaceURI}/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.thumbnailImage?.id || categoryWithImage.image?.id}`;
+    return withBasePath(
+      `${workspaceURI}/${SUBAPP_CODES.events}/api/category/${categoryWithImage.id}/image/${categoryWithImage.thumbnailImage?.id || categoryWithImage.image?.id}`,
+    );
   }
   if (event.eventImage?.id) {
-    return `${workspaceURI}/${SUBAPP_CODES.events}/api/event/${event.slug}/image`;
+    return withBasePath(
+      `${workspaceURI}/${SUBAPP_CODES.events}/api/event/${event.slug}/image`,
+    );
   }
-  return NO_IMAGE_URL;
+  return withBasePath(NO_IMAGE_URL);
 }
 
 export const EventCard = ({event}: EventCardProps) => {

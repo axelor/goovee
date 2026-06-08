@@ -10,6 +10,7 @@ import {BadgeList, Skeleton} from '@/ui/components';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {i18n} from '@/lib/core/locale';
 import {BigNewsCard} from '@/ui/components/big-news-card';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
@@ -80,8 +81,10 @@ export const LeadStories = ({
                     className="rounded-t-lg object-cover"
                     src={
                       image?.id
-                        ? `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`
-                        : NO_IMAGE_URL
+                        ? withBasePath(
+                            `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`,
+                          )
+                        : withBasePath(NO_IMAGE_URL)
                     }
                     alt={image?.fileName || i18n.t('News image')}
                   />

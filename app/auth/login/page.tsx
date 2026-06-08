@@ -9,6 +9,7 @@ import {canRegisterForWorkspace} from '@/orm/workspace';
 import {DEFAULT_TENANT, SEARCH_PARAMS} from '@/constants';
 import {TenancyType, manager} from '@/tenant';
 import {isSameOrigin} from '@/utils/url';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export default async function Page(props: {
   searchParams: Promise<{[key: string]: string}>;
@@ -47,7 +48,7 @@ export default async function Page(props: {
   }
 
   const workspaceURL = workspaceURI
-    ? `${process.env.GOOVEE_PUBLIC_HOST}${workspaceURI}`
+    ? `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`
     : '';
 
   let canRegister;

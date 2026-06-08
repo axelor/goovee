@@ -1,5 +1,8 @@
 import type {ID} from '@/types';
 
+// ---- CORE IMPORTS ---- //
+import {withBasePath} from '@/lib/core/path/base-path';
+
 export function getFileSizeText(fileSize: number) {
   if (!fileSize) return '';
 
@@ -76,10 +79,10 @@ export function getPartnerImageURL(
   const {noimage, noimageSrc} = options;
 
   if (!(id && tenant)) {
-    return noimage ? noimageSrc || '/images/user.png' : '';
+    return noimage ? withBasePath(noimageSrc || '/images/user.png') : '';
   }
 
-  return `/api/tenant/${tenant}/partner/image/${id}`;
+  return withBasePath(`/api/tenant/${tenant}/partner/image/${id}`);
 }
 
 export function getProductImageURL(
@@ -90,8 +93,8 @@ export function getProductImageURL(
   const {noimage, noimageSrc} = options;
 
   if (!(id && tenant)) {
-    return noimage ? noimageSrc || '/images/no-image.png' : '';
+    return noimage ? withBasePath(noimageSrc || '/images/no-image.png') : '';
   }
 
-  return `/api/tenant/${tenant}/product/image/${id}`;
+  return withBasePath(`/api/tenant/${tenant}/product/image/${id}`);
 }

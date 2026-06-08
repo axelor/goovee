@@ -8,6 +8,7 @@ import {isCommentEnabled, Comments} from '@/comments';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {PortalWorkspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -61,7 +62,9 @@ export const ThreadFooter = ({
       {...(!isAllowToComment && {
         placeholder: JOIN_GROUP_TO_COMMENT,
       })}
-      attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}`}
+      attachmentDownloadUrl={withBasePath(
+        `${workspaceURI}/${SUBAPP_CODES.forum}/api/comments/attachments/${post.id}`,
+      )}
     />
   ) : (
     <div />

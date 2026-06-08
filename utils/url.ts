@@ -53,6 +53,9 @@ export function isSameOrigin(url: string, base: string): boolean {
   }
 }
 
+export const ensureLeadingSlash = (path: string) =>
+  path.startsWith('/') ? path : `/${path}`;
+
 export function getLoginURL(params: {
   callbackurl?: string;
   workspaceURI?: string;

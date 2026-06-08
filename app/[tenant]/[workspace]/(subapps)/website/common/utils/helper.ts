@@ -8,6 +8,7 @@ import {
   MetaSelection,
   ImageType,
 } from '../types/templates';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 type FileURLProps = {
   websiteSlug: string;
@@ -34,7 +35,9 @@ export function getMetaFileURL(
   );
   const mountType = encodeURIComponent(props.mountType);
 
-  return `${workspaceURI}/${SUBAPP_CODES.website}/api/templates/${mountType}/${websiteSlug}/${websitePageSlug}/${contentId}/${path}/${metaFile.id}`;
+  return withBasePath(
+    `${workspaceURI}/${SUBAPP_CODES.website}/api/templates/${mountType}/${websiteSlug}/${websitePageSlug}/${contentId}/${path}/${metaFile.id}`,
+  );
 }
 
 export function getPaddingBottom(image?: ImageType): string {

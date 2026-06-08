@@ -22,6 +22,7 @@ import {
 } from '@/comments';
 import {zodParseFormData} from '@/utils/formdata';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -829,7 +830,9 @@ export const createComment: CreateComment = async formData => {
       .replace(/\s+/g, ' ')
       .trim();
 
-    const ticketUrl = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
+    const ticketUrl = withBasePath(
+      `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
+    );
     const userName = user.simpleFullName || user.name || '';
 
     const contacts = uniqueById(

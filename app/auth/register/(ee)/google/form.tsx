@@ -13,6 +13,7 @@ import {UserType} from '@/auth/types';
 import {i18n, l10n} from '@/locale';
 import {useEnvironment} from '@/lib/core/environment';
 import {isSameOrigin} from '@/utils/url';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {useToast} from '@/ui/hooks';
 import {
   Form,
@@ -126,9 +127,11 @@ export default function SignUp({
   const host = env.GOOVEE_PUBLIC_HOST!;
   const decoded = callbackurl ? decodeURIComponent(callbackurl) : '';
   const redirection =
-    (decoded && isSameOrigin(decoded, host) && decoded) ||
-    (workspaceURI && isSameOrigin(workspaceURI, host) && workspaceURI) ||
-    '/';
+    (decoded && isSameOrigin(decoded, host) && withBasePath(decoded)) ||
+    (workspaceURI &&
+      isSameOrigin(workspaceURI, host) &&
+      withBasePath(workspaceURI)) ||
+    withBasePath('/');
 
   const showDirectoryControls = form.watch(
     'showProfileAsContactOnDirectory',
@@ -146,7 +149,9 @@ export default function SignUp({
     await authClient.signIn.social({
       provider: 'google',
       callbackURL: redirection,
-      errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      errorCallbackURL: withBasePath(
+        `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      ),
       requestSignUp: true,
       additionalData: {
         ...values,
@@ -507,7 +512,7 @@ export default function SignUp({
             <Button variant="outline-success" className="w-full rounded-full">
               <Image
                 alt="Google"
-                src="/images/google.svg"
+                src={withBasePath('/images/google.svg')}
                 height={24}
                 width={24}
                 className="me-2"

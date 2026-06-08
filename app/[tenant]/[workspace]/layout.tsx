@@ -10,6 +10,7 @@ import {findWorkspace, findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
+import {getBasePath} from '@/lib/core/path/base-path';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
@@ -105,8 +106,11 @@ export default async function Layout(props: {
         );
   }
 
+  const host = process.env.GOOVEE_PUBLIC_HOST!;
+  const baseUrl = `${host}${getBasePath()}`;
+
   const workspaces = await findWorkspaces({
-    url: process.env.GOOVEE_PUBLIC_HOST,
+    url: baseUrl,
     user,
     client,
   })

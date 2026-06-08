@@ -1,6 +1,9 @@
 'use client';
 
-import {ReactElement, CSSProperties, ReactNode} from 'react';
+import {CSSProperties, ReactNode} from 'react';
+
+// ---- CORE IMPORTS ---- //
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export type BackgroundImageProps = {
   src?: string;
@@ -21,7 +24,7 @@ export function BackgroundImage({
   className,
   children,
 }: BackgroundImageProps) {
-  const url = src || defaultSrc;
+  const url = src || withBasePath(defaultSrc);
 
   return (
     <div

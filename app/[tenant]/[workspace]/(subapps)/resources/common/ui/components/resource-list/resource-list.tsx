@@ -12,6 +12,7 @@ import {download} from '@/utils/files';
 import {formatDate} from '@/locale/formatters';
 import {FileIcon} from '@/ui/components/file-icon';
 import {SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {DmsFile} from '@/subapps/resources/common/types';
@@ -30,7 +31,9 @@ export function ResourceList({resources}: ResourceListProps) {
 
   const handleDownload = (record: DmsFile) => (event: React.MouseEvent) => {
     event.stopPropagation();
-    const href = `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${record.id}`;
+    const href = withBasePath(
+      `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${record.id}`,
+    );
     download(record, href);
   };
 

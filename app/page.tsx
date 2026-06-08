@@ -12,6 +12,7 @@ import {getSession} from '@/auth';
 import {clone, getPartnerId} from '@/utils';
 import {TenancyType, manager} from '@/tenant';
 import {DEFAULT_TENANT} from '@/constants';
+import {getBasePath, withBasePath} from '@/lib/core/path/base-path';
 
 export default async function Page(props: {
   searchParams: Promise<{workspaceURI?: string; tenant?: string}>;
@@ -34,8 +35,11 @@ export default async function Page(props: {
 
   const {client} = tenant;
 
+  const host = process.env.GOOVEE_PUBLIC_HOST!;
+  const baseUrl = `${host}${getBasePath()}`;
+
   const workspaces = await findWorkspaces({
-    url: process.env.GOOVEE_PUBLIC_HOST,
+    url: baseUrl,
     user,
     client,
   });
@@ -47,7 +51,7 @@ export default async function Page(props: {
   const workspaceURI = decodeURIComponent(searchParams.workspaceURI || '');
 
   if (workspaceURI) {
-    const url = `${process.env.GOOVEE_PUBLIC_HOST}${decodeURIComponent(workspaceURI)}`;
+    const url = `${host}${withBasePath(workspaceURI)}`;
 
     const workspaceApps = await findSubapps({
       user,
@@ -71,7 +75,7 @@ export default async function Page(props: {
     });
 
     if (defaultWorkspace?.workspace?.url) {
-      const url = defaultWorkspace?.workspace?.url;
+      const url = defaultWorkspace.workspace.url;
       const apps = await findSubapps({url, user, client});
       if (apps?.length) {
         redirectURL = `${url}/${apps[0].code}`;

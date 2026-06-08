@@ -4,6 +4,7 @@
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {DocViewer} from '@/ui/components';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {DmsFile} from '@/subapps/resources/common/types';
@@ -15,7 +16,9 @@ export default function PDFViewer({record}: {record: DmsFile}) {
     <DocViewer
       documents={[
         {
-          uri: `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${record?.id}`,
+          uri: withBasePath(
+            `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${record?.id}`,
+          ),
         },
       ]}
     />

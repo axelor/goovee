@@ -92,24 +92,6 @@ export const TAB_TITLES = [
   // },
 ];
 
-export const FORUM_GROUP = [
-  {
-    id: 1,
-    name: 'Group 1',
-    img: '/images/group-1.png',
-  },
-  {
-    id: 2,
-    name: 'Group 2',
-    img: '/images/group-1.png',
-  },
-  {
-    id: 3,
-    name: 'Group 3',
-    img: '/images/group-1.png',
-  },
-];
-
 export const HEADING_LEVEL: Level[] = [1, 2, 3, 4, 5, 6];
 
 export const TEXT_ALIGNMENT = [
@@ -148,12 +130,6 @@ export const NOTIFICATIONS_OPTIONS = [
     value: 'none',
   },
 ];
-
-export const GROUP = {
-  name: 'Group name',
-  desc: 'Mi eget leo viverra cras pharetra enim viverra. Ac at non pretium etiam viverra. Ac at non pretium etiam',
-  image: '/images/group-img.png',
-};
 
 export const GROUPS_ORDER_BY = {
   isPin: ORDER_BY.DESC,

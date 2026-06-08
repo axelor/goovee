@@ -14,6 +14,7 @@ import {
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Skeleton} from '@/ui/components';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {NEWS} from '@/subapps/news/common/constants';
@@ -46,7 +47,7 @@ export const Breadcrumbs = ({
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
-              href={`${workspaceURI}/news`}
+              href={withBasePath(`${workspaceURI}/news`)}
               className="text-xs font-normal text-stone-400">
               {i18n.t(NEWS)}
             </BreadcrumbLink>
@@ -57,7 +58,9 @@ export const Breadcrumbs = ({
               <React.Fragment key={item.id}>
                 <BreadcrumbItem>
                   <BreadcrumbLink
-                    href={`${workspaceURI}/news/${generateRoute(i)}`}
+                    href={withBasePath(
+                      `${workspaceURI}/news/${generateRoute(i)}`,
+                    )}
                     className="text-xs font-normal text-stone-400">
                     {item.title}
                   </BreadcrumbLink>

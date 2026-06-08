@@ -15,6 +15,8 @@ import {isPaymentOptionAvailable} from '@/utils/payment';
 import {TENANT_HEADER} from '@/proxy';
 import {manager} from '@/tenant';
 import {scale} from '@/utils';
+import {withBasePath} from '@/lib/core/path/base-path';
+import {ensureLeadingSlash} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEvent} from '@/subapps/events/common/orm/event';
@@ -324,8 +326,8 @@ export async function payboxCreateOrder(props: {
       context: values,
       client,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_response=true`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_error=true`,
+        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
       },
     });
     return {success: true, order: response};

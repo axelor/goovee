@@ -5,6 +5,7 @@ import {
   genericOAuthClient,
 } from 'better-auth/client/plugins';
 import type {Auth} from './auth';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 /*
  * NOTE: better-auth refetches the session on window focus by default (refetchOnWindowFocus: true).
@@ -12,7 +13,9 @@ import type {Auth} from './auth';
  * underlying data hasn't changed. Avoid using the `user` object directly in useEffect/useCallback
  * dependency arrays — use a stable primitive like `user?.id` instead to prevent unintended re-runs.
  */
+
 export const authClient = createAuthClient({
+  basePath: withBasePath('/api/auth'),
   plugins: [
     {
       id: 'credentials',

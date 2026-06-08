@@ -16,6 +16,7 @@ import type {PortalWorkspace} from '@/orm/workspace';
 import {HeroSearch, Search} from '@/ui/components';
 import type {OverlayColor} from '@/types';
 import {useToast} from '@/ui/hooks';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {getAllEvents} from '@/subapps/events/common/actions/actions';
@@ -68,8 +69,8 @@ export const Hero = ({
   );
 
   const imageURL = workspace?.config?.eventHeroBgImage?.id
-    ? `${workspaceURI}/${SUBAPP_CODES.events}/api/hero/background`
-    : IMAGE_URL;
+    ? withBasePath(`${workspaceURI}/${SUBAPP_CODES.events}/api/hero/background`)
+    : withBasePath(IMAGE_URL);
   return (
     <HeroSearch
       title={workspace?.config?.eventHeroTitle || i18n.t(BANNER_TITLES.events)}

@@ -9,6 +9,7 @@ import type {PortalWorkspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import type {User} from '@/types';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
@@ -810,7 +811,9 @@ export async function CommentsWrapper({
           commentField="note"
           createComment={createComment}
           fetchComments={fetchComments}
-          attachmentDownloadUrl={`${workspaceURI}/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`}
+          attachmentDownloadUrl={withBasePath(
+            `${workspaceURI}/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`,
+          )}
         />
       </div>
     </div>

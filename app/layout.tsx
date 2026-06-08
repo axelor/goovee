@@ -15,6 +15,7 @@ import {
   DEFAULT_APP_TEMPLATE_TITLE,
 } from '@/constants';
 import {SerwistProvider} from '@/pwa/serwist';
+import {withBasePath} from '@/lib/core/path/base-path';
 import './globals.css';
 import 'swiper/css';
 import 'swiper/css/free-mode';
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
     default: DEFAULT_APP_TEMPLATE_TITLE,
   },
   description: APP_DESCRIPTION,
-  manifest: '/manifest',
+  manifest: withBasePath('/manifest'),
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -80,7 +81,11 @@ export default async function RootLayout({
         <body className={fontSans.className}>
           <Environment>
             <Locale>
-              <SerwistProvider swUrl="/sw.js">{children}</SerwistProvider>
+              <SerwistProvider
+                swUrl={withBasePath('/sw.js')}
+                options={{scope: withBasePath('/')}}>
+                {children}
+              </SerwistProvider>
             </Locale>
             <Toaster />
           </Environment>

@@ -5,10 +5,13 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {download} from '@/utils/files';
 import {SUBAPP_CODES} from '@/constants';
 import type {DmsFile} from '@/subapps/resources/common/types';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export default function DownloadIcon({record}: {record: DmsFile}) {
   const {workspaceURI} = useWorkspace();
-  const href = `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${record?.id}`;
+  const href = withBasePath(
+    `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${record?.id}`,
+  );
 
   const handleDownload = () => {
     download(record, href);

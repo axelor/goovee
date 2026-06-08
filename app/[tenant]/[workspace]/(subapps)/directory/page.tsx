@@ -18,6 +18,7 @@ import {
 import {clone} from '@/utils';
 import {getPaginationButtons, getPages, getSkip} from '@/utils/pagination';
 import {workspacePathname} from '@/utils/workspace';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEntries, findMapConfig} from './common/orm';
@@ -59,8 +60,10 @@ export default async function Page(props: {
 
   const pages = getPages(partners, limit);
   const imageURL = workspace.config?.directoryHeroBgImage?.id
-    ? `${workspaceURI}/${SUBAPP_CODES.directory}/api/hero/background`
-    : IMAGE_URL;
+    ? withBasePath(
+        `${workspaceURI}/${SUBAPP_CODES.directory}/api/hero/background`,
+      )
+    : withBasePath(IMAGE_URL);
 
   return (
     <>

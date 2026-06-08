@@ -12,6 +12,7 @@ import {useEnvironment} from '@/lib/core/environment';
 import {NotificationDTO} from './types';
 import {authClient} from '@/lib/auth-client';
 import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 interface PushContextType {
   permission: NotificationPermission;
@@ -55,7 +56,9 @@ export function PushProvider({
   const fetchNotifications = useCallback(async () => {
     if (!tenant || !userId) return;
     try {
-      const response = await fetch(`/api/tenant/${tenant}/push/notifications`);
+      const response = await fetch(
+        withBasePath(`/api/tenant/${tenant}/push/notifications`),
+      );
       if (response.ok) {
         const data: NotificationDTO[] = await response.json();
         setUnreadNotifications(data);
@@ -70,7 +73,7 @@ export function PushProvider({
       if (!tenant) return;
       try {
         const response = await fetch(
-          `/api/tenant/${tenant}/push/notifications/read/${id}`,
+          withBasePath(`/api/tenant/${tenant}/push/notifications/read/${id}`),
           {method: 'POST'},
         );
         if (response.ok) {
@@ -91,7 +94,7 @@ export function PushProvider({
     if (!tenant) return;
     try {
       const response = await fetch(
-        `/api/tenant/${tenant}/push/notifications/read/all`,
+        withBasePath(`/api/tenant/${tenant}/push/notifications/read/all`),
         {method: 'POST'},
       );
       if (response.ok) {
@@ -109,7 +112,7 @@ export function PushProvider({
     async (sub: PushSubscription) => {
       if (!tenant) return;
       try {
-        await fetch(`/api/tenant/${tenant}/push/subscribe`, {
+        await fetch(withBasePath(`/api/tenant/${tenant}/push/subscribe`), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -198,7 +201,7 @@ export function PushProvider({
     if (subscription && tenant) {
       try {
         await subscription.unsubscribe();
-        await fetch(`/api/tenant/${tenant}/push/unsubscribe`, {
+        await fetch(withBasePath(`/api/tenant/${tenant}/push/unsubscribe`), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

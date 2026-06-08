@@ -21,6 +21,7 @@ import {useToast} from '@/ui/hooks';
 // ---- LOCAL IMPORTS ---- //
 import {useEnvironment} from '@/lib/core/environment';
 import {isSameOrigin} from '@/utils/url';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 export default function Content({
   canRegister,
@@ -56,7 +57,9 @@ export default function Content({
   const callbackurl = searchParams.get('callbackurl');
   const decoded = callbackurl ? decodeURIComponent(callbackurl) : '';
   const redirection =
-    decoded && isSameOrigin(decoded, env.GOOVEE_PUBLIC_HOST!) ? decoded : '/';
+    decoded && isSameOrigin(decoded, env.GOOVEE_PUBLIC_HOST!)
+      ? withBasePath(decoded)
+      : withBasePath('/');
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -111,7 +114,9 @@ export default function Content({
     await authClient.signIn.social({
       provider: 'google',
       callbackURL: redirection,
-      errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      errorCallbackURL: withBasePath(
+        `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      ),
       additionalData: {
         tenantId,
       },
@@ -129,7 +134,9 @@ export default function Content({
     await authClient.signIn.oauth2({
       providerId: 'keycloak',
       callbackURL: redirection,
-      errorCallbackURL: `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      errorCallbackURL: withBasePath(
+        `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+      ),
       additionalData: {
         tenantId,
         workspaceURI,
@@ -261,7 +268,7 @@ export default function Content({
                   disabled={submitting}>
                   <Image
                     alt="Google"
-                    src="/images/google.svg"
+                    src={withBasePath('/images/google.svg')}
                     height={24}
                     width={24}
                     className="me-2"
@@ -293,7 +300,7 @@ export default function Content({
                     alt="Google"
                     src={
                       env.GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE ||
-                      '/images/keycloak.svg'
+                      withBasePath('/images/keycloak.svg')
                     }
                     height={24}
                     width={24}

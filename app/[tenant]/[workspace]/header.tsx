@@ -29,6 +29,8 @@ import {cn} from '@/utils/css';
 import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
+import {withBasePath} from '@/lib/core/path/base-path';
+import {toWorkspaceURI} from '@/utils/workspace';
 
 function Logo({
   workspace,
@@ -38,8 +40,8 @@ function Logo({
   const {workspaceURI} = useWorkspace();
   const logoId = workspace.logo?.id || workspace.config?.company?.logo?.id;
   const logoURL = logoId
-    ? `${workspaceURI}/api/workspace/logo/image`
-    : DEFAULT_LOGO_URL;
+    ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
+    : withBasePath(DEFAULT_LOGO_URL);
 
   return (
     <Link href={workspaceURI}>
@@ -160,10 +162,10 @@ export default function Header({
                   {workspaces?.map(workspace => (
                     <SelectItem
                       key={workspace.url}
-                      value={
-                        workspace.url?.replace(env.GOOVEE_PUBLIC_HOST, '') ||
-                        '/'
-                      }>
+                      value={toWorkspaceURI(
+                        workspace.url ?? '',
+                        env.GOOVEE_PUBLIC_HOST,
+                      )}>
                       {workspace.name || workspace.url}
                     </SelectItem>
                   ))}

@@ -8,6 +8,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatRelativeTime} from '@/locale/formatters';
 import {BadgeList, Skeleton} from '@/ui/components';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
@@ -36,8 +37,10 @@ export const NewsList = ({
         className="flex-shrink-0 w-[150px] h-[93px] object-cover rounded-lg"
         src={
           image?.id
-            ? `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`
-            : NO_IMAGE_URL
+            ? withBasePath(
+                `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
+              )
+            : withBasePath(NO_IMAGE_URL)
         }
       />
       <div className="w-full flex flex-col gap-1 justify-between">

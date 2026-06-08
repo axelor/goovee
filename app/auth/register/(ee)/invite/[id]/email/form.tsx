@@ -26,6 +26,7 @@ import {Separator} from '@/ui/components';
 import {SEARCH_PARAMS} from '@/constants';
 import {cn} from '@/utils/css';
 import {authClient} from '@/lib/auth-client';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 import Link from 'next/link';
 
@@ -352,7 +353,7 @@ export default function SignUp({
                 href={`/auth/register/invite/${inviteId}/google?${searchQuery}`}>
                 <Image
                   alt="Google"
-                  src="/images/google.svg"
+                  src={withBasePath('/images/google.svg')}
                   height={24}
                   width={24}
                   className="me-2"

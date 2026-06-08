@@ -20,6 +20,7 @@ import {withMattermostSync} from '@/lib/core/mattermost';
 import {RESET_PASSWORD} from '@/constants';
 import {findInviteById} from '@/app/auth/register/common/orm/register';
 import {registerByInvite} from '@/lib/core/auth/orm';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {
   EmailRegisterOTPSchema,
   InviteEmailRegisterOTPSchema,
@@ -554,7 +555,9 @@ const credentials = {
 
         const user = await findGooveeUserByEmail(email, client);
 
-        const link = `${process.env.GOOVEE_PUBLIC_HOST}/auth/reset-password/${email}?${searchQuery}`;
+        const link = `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
+          `/auth/reset-password/${email}?${searchQuery}`,
+        )}`;
 
         if (user) {
           const mailService = NotificationManager.getService(

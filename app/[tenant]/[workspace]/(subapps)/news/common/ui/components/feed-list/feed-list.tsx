@@ -11,6 +11,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatRelativeTime} from '@/locale/formatters';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {i18n} from '@/lib/core/locale';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
@@ -40,8 +41,10 @@ export const FeedList = ({
             index,
           ) => {
             const imageUrl = image?.id
-              ? `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`
-              : NO_IMAGE_URL;
+              ? withBasePath(
+                  `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
+                )
+              : withBasePath(NO_IMAGE_URL);
 
             return (
               <React.Fragment key={id}>

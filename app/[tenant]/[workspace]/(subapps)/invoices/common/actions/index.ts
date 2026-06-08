@@ -50,6 +50,8 @@ import {
 } from '@/lib/core/payment/stripe/constants';
 import type {CountryCode} from '@/lib/core/payment/stripe/types';
 import {scale} from '@/utils';
+import {withBasePath} from '@/lib/core/path/base-path';
+import {ensureLeadingSlash} from '@/utils/url';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -1043,8 +1045,8 @@ export async function payboxCreateOrder({
         paymentModeId,
       },
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}/${uri}?paybox_error=true${token ? `&token=${token}` : ''}`,
+        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`))}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true${token ? `&token=${token}` : ''}`))}`,
       },
     });
 
@@ -1349,13 +1351,17 @@ export async function up2payCreateOrder({
       },
       billingInfo,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
-          isPartialPayment
-            ? INVOICE_PAYMENT_OPTIONS.PARTIAL
-            : INVOICE_PAYMENT_OPTIONS.TOTAL
-        }${token ? `&token=${token}` : ''}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}${token ? `&token=${token}` : ''}`,
-        cancel: `${process.env.GOOVEE_PUBLIC_HOST}${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}${token ? `&token=${token}` : ''}`,
+        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
+          ensureLeadingSlash(
+            `${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
+              isPartialPayment
+                ? INVOICE_PAYMENT_OPTIONS.PARTIAL
+                : INVOICE_PAYMENT_OPTIONS.TOTAL
+            }${token ? `&token=${token}` : ''}`,
+          ),
+        )}`,
+        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}${token ? `&token=${token}` : ''}`))}`,
+        cancel: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}${token ? `&token=${token}` : ''}`))}`,
       },
     });
 
@@ -1452,15 +1458,15 @@ export async function initiatePispPayment({
   const host = process.env.GOOVEE_PUBLIC_HOST;
   const tokenSuffix = token ? `&token=${token}` : '';
 
-  const successfulReportUrl = `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.SUCCESS}${tokenSuffix}`;
-  const unsuccessfulReportUrl = `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.CANCELLED}${tokenSuffix}`;
+  const successfulReportUrl = `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.SUCCESS}${tokenSuffix}`))}`;
+  const unsuccessfulReportUrl = `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.CANCELLED}${tokenSuffix}`))}`;
 
   const pageConsentInfo = {
     pageTimeout: 1200,
     pageTimeoutUnit: 'SECONDS' as const,
     pageUserTimeout: 300,
     pageUserTimeoutUnit: 'SECONDS' as const,
-    pageTimeOutReturnURL: `${host}${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.EXPIRED}${tokenSuffix}`,
+    pageTimeOutReturnURL: `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.EXPIRED}${tokenSuffix}`))}`,
   };
 
   const pispEmail = token

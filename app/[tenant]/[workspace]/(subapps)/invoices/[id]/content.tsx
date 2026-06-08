@@ -15,6 +15,7 @@ import {
   PaymentUpdateStatus,
   PAYMENT_UPDATE_STATUS,
 } from '@/lib/core/payment/sse/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
@@ -99,7 +100,9 @@ export default function Content({
         <div className="col-span-12 lg:col-span-9">
           <Invoice
             invoiceId={id}
-            downloadURL={`${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`}
+            downloadURL={withBasePath(
+              `${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
+            )}
           />
         </div>
 

@@ -21,6 +21,7 @@ import {
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
 import {useToast} from '@/ui/hooks';
+import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ----//
 
@@ -50,7 +51,7 @@ export default function SignUp({
 
   const searchParams = useSearchParams();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
-  const redirection = workspaceURL || '/';
+  const redirection = workspaceURL || withBasePath('/');
 
   const {toast} = useToast();
 
@@ -66,7 +67,9 @@ export default function SignUp({
     await authClient.signIn.social({
       provider: 'google',
       callbackURL: redirection,
-      errorCallbackURL: `/auth/error?tenantId=${tenantId}${workspaceURL ? `&workspaceURI=${new URL(workspaceURL).pathname}` : ''}`,
+      errorCallbackURL: withBasePath(
+        `/auth/error?tenantId=${tenantId}${workspaceURL ? `&workspaceURI=${new URL(workspaceURL).pathname}` : ''}`,
+      ),
       requestSignUp: true,
       additionalData: {
         ...values,
@@ -139,7 +142,7 @@ export default function SignUp({
             <Button variant="outline-success" className="w-full rounded-full">
               <Image
                 alt="Google"
-                src="/images/google.svg"
+                src={withBasePath('/images/google.svg')}
                 height={24}
                 width={24}
                 className="me-2"
