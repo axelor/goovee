@@ -94,6 +94,7 @@ export default async function MyPurchasesPage(props: {
 
   const purchases = await findPurchases({
     client: auth.tenant.client,
+    workspaceId: auth.workspace.id,
     mainPartnerId: auth.user.mainPartnerId,
     take: limit,
     skip: getSkip(limit, page),

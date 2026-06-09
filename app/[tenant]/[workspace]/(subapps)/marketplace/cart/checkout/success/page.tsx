@@ -53,6 +53,7 @@ export default async function CheckoutSuccessPage(props: {
 
   const recent = await findPurchases({
     client: auth.tenant.client,
+    workspaceId: auth.workspace.id,
     mainPartnerId: auth.user.mainPartnerId,
     purchaseIds,
   });

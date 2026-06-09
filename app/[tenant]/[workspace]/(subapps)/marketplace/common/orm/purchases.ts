@@ -31,12 +31,16 @@ export type MarketplacePurchase = Awaited<
 
 export async function findPurchases({
   client,
+  workspaceId,
   mainPartnerId,
   take,
   skip,
   purchaseIds,
 }: {
   client: Client;
+  /** Listings are scoped to a single workspace, so purchases of products in
+   *  another workspace of the same tenant must not surface here. */
+  workspaceId: ID;
   mainPartnerId: ID;
   /** When provided, restricts the result to these purchase rows (still
    *  partner-scoped, so it's safe against tampered ids). */
@@ -48,6 +52,7 @@ export async function findPurchases({
     where: {
       OR: [{archived: false}, {archived: null}],
       partner: {id: mainPartnerId},
+      marketplaceProduct: {portalWorkspace: {id: workspaceId}},
       ...(purchaseIds?.length ? {id: {in: purchaseIds}} : {}),
     },
     orderBy: {purchasedAt: 'DESC'},
