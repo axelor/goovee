@@ -1,28 +1,38 @@
 export class CacheNode<K, V> {
   key: K;
   value: V;
+  expiresAt: number | null;
   prev: CacheNode<K, V> | null = null;
   next: CacheNode<K, V> | null = null;
 
-  constructor(key: K, value: V) {
+  constructor(key: K, value: V, expiresAt: number | null = null) {
     this.key = key;
     this.value = value;
+    this.expiresAt = expiresAt;
   }
 }
 
 export class LRUCache<K, V> {
   private capacity: number;
+  private ttlMs: number | null;
   private cache: Map<K, CacheNode<K, V>> = new Map();
   private head: CacheNode<K, V> | null = null;
   private tail: CacheNode<K, V> | null = null;
 
-  constructor(capacity: number) {
+  constructor(capacity: number, ttlMs?: number) {
     this.capacity = capacity;
+    this.ttlMs = ttlMs ?? null;
   }
 
   get(key: K): V | null {
     const node = this.cache.get(key);
     if (!node) return null;
+
+    if (node.expiresAt != null && node.expiresAt <= Date.now()) {
+      this.removeNode(node);
+      this.cache.delete(key);
+      return null;
+    }
 
     this.moveToHead(node);
     return node.value;
@@ -34,16 +44,29 @@ export class LRUCache<K, V> {
     if (node) {
       // Update value and move node to head
       node.value = value;
+      node.expiresAt = this.expiry();
       this.moveToHead(node);
     } else {
       if (this.cache.size >= this.capacity) {
         this.removeTail();
       }
 
-      const newNode = new CacheNode(key, value);
+      const newNode = new CacheNode(key, value, this.expiry());
       this.addNode(newNode);
       this.cache.set(key, newNode);
     }
+  }
+
+  delete(key: K): void {
+    const node = this.cache.get(key);
+    if (!node) return;
+
+    this.removeNode(node);
+    this.cache.delete(key);
+  }
+
+  private expiry(): number | null {
+    return this.ttlMs == null ? null : Date.now() + this.ttlMs;
   }
 
   private addNode(node: CacheNode<K, V>): void {

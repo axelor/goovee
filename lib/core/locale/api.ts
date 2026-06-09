@@ -1,12 +1,30 @@
 import path from 'path';
 import fs from 'fs/promises';
-import {cache} from 'react';
+import {createHash} from 'crypto';
 
 import {manager} from '@/tenant';
+import {LRUCache} from '@/tenant/lru';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findLocaleLanguage} from '@/locale/utils';
 
-const tcache: Record<string, Record<string, string>> = {};
+type Translations = Record<string, string | null | undefined>;
+
+type TranslationBundle = {
+  translations: Translations;
+  hash: string;
+};
+
+const BUNDLE_CACHE_CAPACITY = 100;
+const BUNDLE_CACHE_TTL_MS = 60 * 1000;
+
+/* The cache stores promises so concurrent requests for a cold or expired
+ * bundle share a single load instead of each hitting the DB. */
+const bundleCache = new LRUCache<string, Promise<TranslationBundle>>(
+  BUNDLE_CACHE_CAPACITY,
+  BUNDLE_CACHE_TTL_MS,
+);
+
+const tcache: Record<string, Translations> = {};
 const localesDir = path.resolve(process.cwd(), 'public', 'locales');
 const localesPromise = fs.readdir(localesDir).catch(() => [] as string[]);
 
@@ -14,16 +32,13 @@ const includeLanguage = () => {
   return process.env.INCLUDE_LANGUAGE === 'true';
 };
 
-const findGeneralTranslations = cache(async function findGeneralTranslations(
-  locale: string,
-  keys?: string[],
-) {
+async function findGeneralTranslations(locale: string): Promise<Translations> {
   if (!locale) {
     return {};
   }
 
-  const readFile = async (l: string) => {
-    const fileName = `${l}.json`;
+  const readFile = async (code: string) => {
+    const fileName = `${code}.json`;
     const locales = await localesPromise;
     if (!locales.includes(fileName)) {
       return {};
@@ -37,107 +52,105 @@ const findGeneralTranslations = cache(async function findGeneralTranslations(
     }
   };
 
-  // locale language
-  const lang = findLocaleLanguage(locale);
-
-  const readwritecache = async (l: string) => {
-    if (tcache[l]) {
-      return tcache[l];
+  const readwritecache = async (code: string) => {
+    if (tcache[code]) {
+      return tcache[code];
     } else {
-      const result = await readFile(l);
-      tcache[l] = result;
+      const result = await readFile(code);
+      tcache[code] = result;
       return result;
     }
   };
 
-  let data: Record<string, string | undefined | null> = {};
+  const lang = findLocaleLanguage(locale);
 
-  await Promise.all([
-    ...(lang !== locale && includeLanguage() ? [readwritecache(lang)] : []),
+  const [langTranslations, localeTranslations] = await Promise.all([
+    lang !== locale && includeLanguage() ? readwritecache(lang) : {},
     readwritecache(locale),
-  ]).then(([langTranslations, localeTranslations]) => {
-    data = Object.assign(data, langTranslations, localeTranslations);
-  });
+  ]);
 
-  if (keys) {
-    return keys.reduce(
-      (a, k) => {
-        a[k] = data[k];
-        return a;
-      },
-      {} as Record<string, string | null | undefined>,
-    );
-  }
+  return {...langTranslations, ...localeTranslations};
+}
 
-  return data;
-});
-
-const findTenantTranslations = cache(async function findTenantTranslations(
+async function findTenantTranslations(
   locale: string,
   tenantId: string,
-  keys?: string[],
-) {
+): Promise<Translations> {
   if (!(locale && tenantId)) {
     return {};
   }
 
-  let data: Record<string, string | undefined | null> = {};
-
-  const find = async (locale: string) => {
+  const find = async (language: string): Promise<Translations> => {
     try {
       const tenant = await manager.getTenant(tenantId);
       if (!tenant) return {};
-      return tenant.client.aOSMetaTranslation
-        .find({
-          where: {language: locale, ...(keys ? {key: {in: keys}} : {})},
-          select: {key: true, value: true},
-        })
-        .then(t =>
-          t.reduce(
-            (acc, i) => {
-              if (i.key) {
-                acc[i.key] = i.value;
-              }
-              return acc;
-            },
-            {} as Record<string, string | null | undefined>,
-          ),
-        );
+      const rows = await tenant.client.aOSMetaTranslation.find({
+        where: {language},
+        select: {key: true, value: true},
+      });
+      return rows.reduce<Translations>((acc, row) => {
+        if (row.key) {
+          acc[row.key] = row.value;
+        }
+        return acc;
+      }, {});
     } catch (err) {
       console.error(err);
       return {};
     }
   };
 
-  // locale language
   const lang = findLocaleLanguage(locale);
 
-  await Promise.all([
-    ...(lang !== locale && includeLanguage() ? [find(lang)] : []),
+  const [langTranslations, localeTranslations] = await Promise.all([
+    lang !== locale && includeLanguage() ? find(lang) : {},
     find(locale),
-  ]).then(([langTranslations, translations]) => {
-    data = {...data, ...langTranslations, ...translations};
-  });
+  ]);
 
-  return data;
-});
+  return {...langTranslations, ...localeTranslations};
+}
 
-export const findTranslations = cache(async function findTranslations(
+function computeHash(translations: Translations): string {
+  // Sort so the hash is insensitive to DB row order.
+  const entries = Object.keys(translations)
+    .sort()
+    .map(key => [key, translations[key]]);
+
+  return createHash('sha1').update(JSON.stringify(entries)).digest('hex');
+}
+
+async function loadTranslationBundle(
+  locale: string,
+  tenantId?: string,
+): Promise<TranslationBundle> {
+  const [generalTranslations, tenantTranslations] = await Promise.all([
+    findGeneralTranslations(locale),
+    tenantId ? findTenantTranslations(locale, tenantId) : {},
+  ]);
+
+  const translations = {...generalTranslations, ...tenantTranslations};
+
+  return {translations, hash: computeHash(translations)};
+}
+
+export function findTranslations(
   locale: string = DEFAULT_LOCALE,
   tenantId?: string,
-  keys?: string[],
-) {
+): Promise<TranslationBundle> {
   if (!locale) {
-    return {};
+    locale = DEFAULT_LOCALE;
   }
 
-  let data: Record<string, string | undefined | null> = {};
-  await Promise.all([
-    findGeneralTranslations(locale, keys),
-    ...(tenantId ? [findTenantTranslations(locale, tenantId, keys)] : []),
-  ]).then(([generalTranslations, tenantTranslations]) => {
-    data = Object.assign(data, generalTranslations, tenantTranslations);
-  });
+  const cacheKey = `${tenantId ?? ''}:${locale}`;
 
-  return data;
-});
+  const cached = bundleCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const bundle = loadTranslationBundle(locale, tenantId);
+  bundleCache.put(cacheKey, bundle);
+  bundle.catch(() => bundleCache.delete(cacheKey));
+
+  return bundle;
+}

@@ -1,4 +1,3 @@
-import {cache} from 'react';
 import {headers} from 'next/headers';
 import {getSession} from '@/auth';
 
@@ -6,17 +5,6 @@ import {TENANT_HEADER} from '@/proxy';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findTranslations} from '@/locale/api';
 import {translate} from '@/locale/utils';
-
-const getTranslations = cache(async function getBundle(
-  locale = DEFAULT_LOCALE,
-  tenant: string,
-  key?: string,
-) {
-  if (!key) {
-    return {};
-  }
-  return await findTranslations(locale, tenant, [key]);
-});
 
 export async function getTranslation(
   {
@@ -52,9 +40,9 @@ export async function getTranslation(
     locale = DEFAULT_LOCALE;
   }
 
-  const translations = await getTranslations(locale, tenant, key);
+  const {translations} = await findTranslations(locale, tenant);
 
-  return translate(translations as any, key, ...interpolations);
+  return translate(translations, key, ...interpolations);
 }
 
 export const t = getTranslation.bind(null, {});

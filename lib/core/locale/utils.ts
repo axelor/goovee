@@ -1,7 +1,7 @@
 import {MAX_SCALE, MIN_SCALE} from '@/locale/contants';
 
 export function translate(
-  translations: Record<string, string>,
+  translations: Record<string, string | null | undefined>,
   text: string,
   ...interpolations: string[]
 ) {

@@ -3,10 +3,9 @@
 /// <reference lib="webworker" />
 import {defaultCache} from '@serwist/next/worker';
 import type {PrecacheEntry, SerwistGlobalConfig} from 'serwist';
-import {Serwist} from 'serwist';
+import {Serwist, StaleWhileRevalidate} from 'serwist';
 import type {NotificationPayload} from './types';
 import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
-import {CacheFirstWithSWR} from './locale-strategy';
 import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/utils';
 
 // This declares the value of `injectionPoint` to TypeScript.
@@ -27,16 +26,15 @@ const serwist = new Serwist({
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
-    // Locale translations are large and rarely change.
-    // Within maxAgeSeconds: served from cache with no network hit.
-    // After maxAgeSeconds: stale response returned immediately, cache
-    // updated in background. Must be listed before defaultCache to
-    // override the default NetworkFirst rule for /api/**.
+    /* Locale translations: served from cache instantly, revalidated in the
+     * background on every load. The API route sets ETag + Cache-Control:
+     * no-cache, so the background fetch is a bodyless 304 via the browser
+     * HTTP cache unless translations actually changed. Must be listed before
+     * defaultCache to override the default NetworkFirst rule for /api/**. */
     {
       matcher: /\/api\/tenant\/[^/]+\/locales\//,
-      handler: new CacheFirstWithSWR({
+      handler: new StaleWhileRevalidate({
         cacheName: 'locale-translations',
-        maxAgeSeconds: 24 * 60 * 60, // 24h freshness window
       }),
     },
     ...defaultCache,
