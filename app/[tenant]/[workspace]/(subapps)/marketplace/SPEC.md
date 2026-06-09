@@ -350,9 +350,12 @@ What is fixed vs. what can change after create:
 - The **inATI flag** and **currency** are set at create and never change on
   edit.
 - The **price amount** can be edited later.
-- The **tax rate** is read live from the workspace default product (not stored on the
-  listing), so if an admin changes the workspace default product or its tax setup, the
-  listing's applied tax changes.
+- The **tax rate** is not stored on the listing — it is read live from the
+  product the listing was bound to at create (the workspace default product at
+  that time). Editing **that product's** tax setup changes the listing's applied
+  tax live. **Re-pointing the workspace default product to a different product
+  does nothing to existing listings** — they stay bound to the product they were
+  created with.
 
 **On edit**, **updated-by** is set to the editing **user**.
 
