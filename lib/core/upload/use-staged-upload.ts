@@ -39,16 +39,23 @@ export interface UseStagedUpload {
   /** Live per-file state (one entry per uploaded file). */
   uploads: StagedUploadItem[];
   /**
-   * Stage one or many files. Each file is uploaded independently and gets its
-   * own claim token, at most `concurrency` in flight at once (extras sit in
-   * `queued`). Resolves (never rejects) once all have settled, with the results
-   * that succeeded in input order; failures stay in `uploads` with an error
-   * status.
+   * Stage one or many files. Synchronous — returns immediately, before any
+   * upload starts, with two channels:
+   * - `ids` — one per input file, input-aligned (`ids[i]` ↔ `files[i]`), never
+   *   filtered. The stable handle for binding/grouping and for
+   *   `abort`/`retry`/`remove`; look an entry up with
+   *   `uploads.find(u => u.id === ids[i])`.
+   * - `done` — resolves (never rejects) with the tokens that succeeded by the
+   *   time this call settled, in input order; failed/aborted items are omitted.
+   *   Each item's authoritative, still-evolving status (errors, aborts, later
+   *   retries) lives in `uploads`, keyed by the returned ids.
+   *
+   * At most `concurrency` uploads run at once (extras sit in `queued`).
    */
   upload: (
     files: File | File[],
     options: StageOptions,
-  ) => Promise<StagedUpload[]>;
+  ) => {ids: string[]; done: Promise<StagedUpload[]>};
   /**
    * Re-send a failed or aborted item under the same id, reusing the original
    * file and options. No-op if the id is unknown or still in flight. A retry may
@@ -259,7 +266,7 @@ export function useStagedUpload({
   );
 
   const upload = useCallback(
-    async (files: File | File[], options: StageOptions) => {
+    (files: File | File[], options: StageOptions) => {
       const list = Array.isArray(files) ? files : [files];
       const items: StagedUploadItem[] = list.map(file => ({
         id: `u${nextIdRef.current++}`,
@@ -273,29 +280,35 @@ export function useStagedUpload({
       });
       setUploads(prev => [...prev, ...items]);
 
-      // run at most `concurrency` uploads at once; results keep input order
-      const results: (StagedUpload | null)[] = new Array(items.length).fill(
-        null,
-      );
-      let cursor = 0;
-      const worker = async () => {
-        while (cursor < items.length) {
-          const index = cursor++;
-          const {id} = items[index];
-          // cancelled or removed before it started — skip, no request opened
-          if (statusRef.current.get(id) !== 'queued') continue;
-          try {
-            results[index] = await uploadOne(id, list[index], options);
-          } catch {
-            // failure/abort is recorded in the item's state
+      const done = (async () => {
+        // run at most `concurrency` uploads at once; results keep input order
+        const results: (StagedUpload | null)[] = new Array(items.length).fill(
+          null,
+        );
+        let cursor = 0;
+        const worker = async () => {
+          while (cursor < items.length) {
+            const index = cursor++;
+            const {id} = items[index];
+            // cancelled or removed before it started — skip, no request opened
+            if (statusRef.current.get(id) !== 'queued') continue;
+            try {
+              results[index] = await uploadOne(id, list[index], options);
+            } catch {
+              // failure/abort is recorded in the item's state
+            }
           }
-        }
-      };
-      // clamp to ≥1 so a bad `concurrency` can't leave items stuck queued
-      const workers = Math.min(Math.max(1, concurrency), items.length);
-      await Promise.all(Array.from({length: workers}, worker));
+        };
+        // clamp to ≥1 so a bad `concurrency` can't leave items stuck queued
+        const workers = Math.min(Math.max(1, concurrency), items.length);
+        await Promise.all(Array.from({length: workers}, worker));
 
-      return results.filter((result): result is StagedUpload => result != null);
+        return results.filter(
+          (result): result is StagedUpload => result != null,
+        );
+      })();
+
+      return {ids: items.map(item => item.id), done};
     },
     [uploadOne, concurrency],
   );
