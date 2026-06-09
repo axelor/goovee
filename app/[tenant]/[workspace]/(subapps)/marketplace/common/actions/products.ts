@@ -398,6 +398,17 @@ export async function saveProductWithVersions(
           ) {
             throw new Error('INVALID_TRANSITION');
           }
+          /* Unpublish is only valid from a live version (published or in
+           * review). The UI never offers it for other states, so this rejects
+           * a stale or forged request. */
+          if (
+            effectiveStatus === MARKETPLACE_VERSION_STATUS.UNPUBLISHED &&
+            currentVersion.statusSelect !==
+              MARKETPLACE_VERSION_STATUS.PUBLISHED &&
+            currentVersion.statusSelect !== MARKETPLACE_VERSION_STATUS.IN_REVIEW
+          ) {
+            throw new Error('CANNOT_UNPUBLISH');
+          }
           const existingCompatibilityIds = (
             currentVersion.compatibilitySet ?? []
           ).map(compatibility => compatibility.id);
@@ -511,6 +522,14 @@ export async function saveProductWithVersions(
         error: true,
         message: await t(
           'A published or in-review version cannot be saved as a draft. Unpublish it first.',
+        ),
+      };
+    }
+    if (errorMessage === 'CANNOT_UNPUBLISH') {
+      return {
+        error: true,
+        message: await t(
+          'Only published or in-review versions can be unpublished.',
         ),
       };
     }
