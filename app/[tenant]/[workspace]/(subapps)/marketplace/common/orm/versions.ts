@@ -158,17 +158,34 @@ export async function syncProductVersionPointers({
     }),
     client.aOSMarketplaceProduct.findOne({
       where: {id: productId},
-      select: {id: true, version: true},
+      select: {
+        id: true,
+        version: true,
+        latestVersion: {id: true},
+        currentVersion: {id: true},
+      },
     }),
   ]);
   if (!product) return;
+
+  const nextLatest = latest?.id ?? null;
+  const nextCurrent = currentPublished?.id ?? null;
+  /* Idempotent: only write when a pointer actually moved, so a version edit that
+   * didn't change any status (e.g. a changelog or compatibility tweak) doesn't
+   * needlessly rewrite — and bump the version of — the product row. */
+  if (
+    (product.latestVersion?.id ?? null) === nextLatest &&
+    (product.currentVersion?.id ?? null) === nextCurrent
+  ) {
+    return;
+  }
 
   await client.aOSMarketplaceProduct.update({
     data: {
       id: product.id,
       version: product.version,
-      latestVersion: {select: {id: latest?.id ?? null}},
-      currentVersion: {select: {id: currentPublished?.id ?? null}},
+      latestVersion: {select: {id: nextLatest}},
+      currentVersion: {select: {id: nextCurrent}},
     },
     select: {id: true},
   });

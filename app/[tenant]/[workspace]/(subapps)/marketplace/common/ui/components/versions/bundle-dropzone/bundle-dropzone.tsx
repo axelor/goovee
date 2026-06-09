@@ -1,12 +1,24 @@
 import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
+import {Progress} from '@/ui/components/progress/progress';
 import {cn} from '@/utils/css';
-import {FileArchive, Upload} from 'lucide-react';
+import {CheckCircle2, FileArchive, Upload, X} from 'lucide-react';
 import {useRef, useState} from 'react';
 
+/** A bundle being staged this session — progress while uploading, then the
+ *  terminal state. Drives the dropzone's current-file display. */
+export type StagedBundle = {
+  fileName: string;
+  /** 0–100 while uploading. */
+  progress: number;
+  status: 'queued' | 'uploading' | 'success' | 'error';
+  error?: string;
+};
+
 type BundleDropzoneProps = {
-  /** The newly-picked file, if any. */
-  file?: File | null;
+  /** The staged upload for this version's bundle (uploading / done / failed
+   *  this session). Takes precedence over the existing-bundle display. */
+  staged?: StagedBundle | null;
   /** Details of the already-uploaded bundle (when editing an existing version). */
   existingFileName?: string | null;
   existingFileSizeText?: string | null;
@@ -16,27 +28,26 @@ type BundleDropzoneProps = {
   onFile: (file: File) => void;
   /** Called with a ready-to-display message when a drop/pick is rejected. */
   onError: (message: string) => void;
-};
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  /** Drop the staged bundle (aborting it if still uploading) and revert to the
+   *  existing / empty state. */
+  onClear?: () => void;
 };
 
 /**
  * Click-or-drag zone for a single .zip bundle. Owns its drag state and runs
  * .zip/size validation, emitting the accepted file via `onFile` or a localized
- * reason via `onError`.
+ * reason via `onError`. The caller stages the file and feeds back live progress
+ * via `staged`; the zone renders the upload progress / ready / error state.
  */
 export function BundleDropzone({
-  file,
+  staged,
   existingFileName,
   existingFileSizeText,
   downloadHref,
   maxSize,
   onFile,
   onError,
+  onClear,
 }: BundleDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   /* Depth counter: dragenter/dragleave also fire when crossing child element
@@ -82,6 +93,9 @@ export function BundleDropzone({
 
   const browse = () => fileInputRef.current?.click();
 
+  const isUploading =
+    staged?.status === 'queued' || staged?.status === 'uploading';
+
   return (
     <div
       role="button"
@@ -119,12 +133,30 @@ export function BundleDropzone({
       )}>
       <FileArchive className="h-10 w-10 shrink-0 text-muted-foreground" />
       <div className="min-w-0 flex-1">
-        {file ? (
+        {staged ? (
           <>
-            <p className="truncate text-sm text-foreground">{file.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {formatFileSize(file.size)}
+            <p className="truncate text-sm text-foreground">
+              {staged.fileName}
             </p>
+            {isUploading && (
+              <div className="mt-1.5 flex items-center gap-2">
+                <Progress value={staged.progress} className="h-1.5 flex-1" />
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {staged.progress}%
+                </span>
+              </div>
+            )}
+            {staged.status === 'success' && (
+              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5 text-palette-green" />
+                {i18n.t('Ready to save')}
+              </p>
+            )}
+            {staged.status === 'error' && (
+              <p className="mt-0.5 text-xs text-destructive">
+                {staged.error ?? i18n.t('Upload failed. Try again.')}
+              </p>
+            )}
           </>
         ) : existingFileName && downloadHref ? (
           <>
@@ -159,6 +191,19 @@ export function BundleDropzone({
         className="hidden"
         onChange={handlePick}
       />
+      {staged && onClear && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={e => {
+            e.stopPropagation();
+            onClear();
+          }}>
+          <X className="mr-1 h-4 w-4" />
+          {i18n.t('Remove')}
+        </Button>
+      )}
       <Button
         type="button"
         variant="outline"
@@ -168,7 +213,7 @@ export function BundleDropzone({
           browse();
         }}>
         <Upload className="mr-1 h-4 w-4" />
-        {file || existingFileName ? i18n.t('Replace') : i18n.t('Upload')}
+        {staged || existingFileName ? i18n.t('Replace') : i18n.t('Upload')}
       </Button>
     </div>
   );

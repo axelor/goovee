@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {uploadTokenSchema} from '@/lib/core/upload/validators';
 import {COVER_STYLES} from '../../../../constants/gradients';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 
@@ -15,8 +16,6 @@ export const ACCEPTED_IMAGE_TYPES = [
   'image/gif',
   'image/avif',
 ] as const;
-export const ACCEPTED_IMAGE_MESSAGE =
-  'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed';
 
 const optionalUrl = z.union([z.httpUrl(), z.literal('')]).optional();
 
@@ -48,12 +47,12 @@ export const productSchema = z.object({
     .max(999_999_999, 'Price is unrealistically high')
     .optional(),
   /* Ordered list of screenshots — array index IS the persisted
-   * `sequence`. Each member is either an already-saved picture
-   * (referenced by its AOSMarketplaceProductPicture row id) or a
-   * newly-picked File to upload. Existing rows whose id is absent from
-   * this array are unlinked + deleted server-side. The File rides
-   * through FormData nested in the array — `packIntoFormData` swaps it
-   * for a placeholder + blob transparently. */
+   * `sequence`. Each member is either an already-saved picture (referenced by
+   * its AOSMarketplaceProductPicture row id) or a newly-picked file that was
+   * pre-uploaded via the stage route (referenced by its opaque single-use
+   * token, redeemed server-side). Existing rows whose id is absent from this
+   * array are unlinked + deleted server-side. Size/type are enforced at stage
+   * time by the `marketplace:screenshot` policy. */
   images: z
     .array(
       z.discriminatedUnion('kind', [
@@ -64,16 +63,7 @@ export const productSchema = z.object({
            * existing picture is optimistic-locked against concurrent edits. */
           version: z.number(),
         }),
-        z
-          .object({kind: z.literal('new'), file: z.instanceof(File)})
-          .refine(({file}) => file.size <= MAX_IMAGE_SIZE, {
-            message: 'Each image must be 5 MB or less',
-          })
-          .refine(
-            ({file}) =>
-              (ACCEPTED_IMAGE_TYPES as readonly string[]).includes(file.type),
-            {message: ACCEPTED_IMAGE_MESSAGE},
-          ),
+        z.object({kind: z.literal('new'), token: uploadTokenSchema}),
       ]),
     )
     .refine(arr => arr.length <= MAX_IMAGES, {

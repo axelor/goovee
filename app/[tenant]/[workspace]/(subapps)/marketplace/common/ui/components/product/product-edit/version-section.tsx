@@ -286,7 +286,7 @@ export function VersionSection({
                 variant="ghost"
                 size="icon"
                 onClick={model.goPrev}
-                disabled={!model.canPrev || model.loadingMore}>
+                disabled={!model.canPrev || model.awaitingNext}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span>
@@ -298,8 +298,8 @@ export function VersionSection({
                 variant="ghost"
                 size="icon"
                 onClick={model.goNext}
-                disabled={!model.canNext || model.loadingMore}>
-                {model.loadingMore ? (
+                disabled={!model.canNext || model.awaitingNext}>
+                {model.awaitingNext ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <ChevronRight className="h-4 w-4" />
@@ -337,7 +337,9 @@ export function VersionSection({
         <p className="py-8 text-center text-sm text-muted-foreground">
           {i18n.t('No versions yet. Add one to publish this product.')}
         </p>
-      ) : model.loadingMore ? (
+      ) : model.awaitingNext ? (
+        /* Parked at the frontier: the entry being fetched isn't loaded yet, so
+            show a spinner in its place (the navigator already points at it). */
         <div className="flex items-center justify-center p-12">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
@@ -382,7 +384,10 @@ export function VersionSection({
           <VersionFields
             key={namePrefix}
             namePrefix={namePrefix}
+            rowKey={model.currentRowKey}
             existingBundle={currentVersionMeta?.bundle}
+            bundleUpload={model.bundleUpload}
+            bundleItemByRow={model.bundleItemByRow}
             compatibilityVersions={compatibilityVersions}
             workspaceURI={workspaceURI}
             productId={model.productId}

@@ -1,9 +1,18 @@
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
+import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
 import {packIntoFormData} from '@/utils/formdata';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {useCallback, useMemo, useRef, useState, useTransition} from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
 import {useFieldArray, useForm, type FieldPath} from 'react-hook-form';
 import {
   loadProductVersions,
@@ -13,7 +22,10 @@ import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
 import type {MyProductForEdit, MyProductVersion} from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
-import {VERSIONS_PAGE_SIZE} from '../../versions/version-form/validator';
+import {
+  VERSIONS_PAGE_SIZE,
+  VERSIONS_PREFETCH_AHEAD,
+} from '../../versions/version-form/validator';
 import {buildProductDefaults} from '../product-form/product-defaults';
 import {
   combinedEditSchema,
@@ -121,6 +133,41 @@ export function useProductEditForm({
   const {toast} = useToast();
   const [pending, startTransition] = useTransition();
 
+  /* Staged uploads live here — the editor session — not in the leaf fields, so
+   * an in-flight screenshot/bundle upload survives version navigation and the
+   * dialog's product-collapse (both unmount the leaves, which would otherwise
+   * abort the upload). Only opaque tokens land in the form; bytes never do. */
+  const {tenant} = useWorkspace();
+  const screenshotUpload = useStagedUpload({tenant});
+  const bundleUpload = useStagedUpload({tenant});
+  /* Each version row's in-flight bundle item, keyed by its stable field-array
+   * id (rhfId), so the per-version dropzone re-finds its progress after the
+   * remount on navigation. */
+  const bundleItemByRow = useRef<Map<string, string>>(new Map());
+  /* Object-URL previews for new screenshots: by token once staged, by upload
+   * item id while still in flight. Held here so they outlive the dialog
+   * collapse that unmounts ScreenshotsFormField. */
+  const previewByToken = useRef<Map<string, string>>(new Map());
+  const previewByItem = useRef<Map<string, string>>(new Map());
+
+  /* Aggregate upload state — drives the Save button's disabled state and the
+   * submit guard. */
+  const uploadsBusy = screenshotUpload.isUploading || bundleUpload.isUploading;
+  const uploadsHaveError =
+    screenshotUpload.uploads.some(item => item.status === 'error') ||
+    bundleUpload.uploads.some(item => item.status === 'error');
+
+  /* Revoke every screenshot object URL when the editor session unmounts. The
+   * maps outlive individual field mounts (the dialog collapse), so the leaf
+   * field can't own this cleanup. */
+  useEffect(
+    () => () => {
+      previewByToken.current.forEach(url => URL.revokeObjectURL(url));
+      previewByItem.current.forEach(url => URL.revokeObjectURL(url));
+    },
+    [],
+  );
+
   const productId = initial?.id ?? '';
   /* Product seed for the combined form's root values (blank in create mode,
    * with the type preselected). */
@@ -150,7 +197,12 @@ export function useProductEditForm({
   );
   const [total, setTotal] = useState(initialTotal);
   const [cursor, setCursor] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
+  /* True only while a *parked* "next" waits for the next page (prefetch usually
+   * loaded it already, so this is rare); drives the nav's loading affordance. */
+  const [awaitingNext, setAwaitingNext] = useState(false);
+  /* The in-flight next-page request, or null when idle — shared so a parked
+   * "next" and a background prefetch await the same fetch, never double-load. */
+  const loadingRef = useRef<Promise<boolean> | null>(null);
 
   const form = useForm<CombinedEditValues>({
     resolver: zodResolver(combinedEditSchema),
@@ -189,49 +241,60 @@ export function useProductEditForm({
   const namePrefix = (
     isNew ? `newVersions.${cursor}` : `versions.${cursor - newCount}`
   ) as FieldPath<CombinedEditValues>;
+  /* Stable identity (field-array rhfId) of the row under the cursor — keys its
+   * bundle upload so live progress survives the per-version remount (namePrefix
+   * is index-based and shifts as new rows are added/discarded). */
+  const currentRowKey =
+    (isNew
+      ? newVersionsFA.fields[cursor]?.rhfId
+      : versionsFA.fields[cursor - newCount]?.rhfId) ?? namePrefix;
 
   /* ---- pagination ---- */
 
-  const loadMore = useCallback(async (): Promise<boolean> => {
-    if (loadingMore || versionsFA.fields.length >= total) return false;
-    setLoadingMore(true);
-    try {
-      const result = await loadProductVersions({
-        productId,
-        workspaceURL,
-        skip: versionsFA.fields.length,
-        take: VERSIONS_PAGE_SIZE,
-      });
-      if (!result.success) {
-        toast({variant: 'destructive', title: result.message});
-        return false;
+  const loadMore = useCallback((): Promise<boolean> => {
+    /* Dedupe: a parked "next" and a background prefetch share one request. */
+    if (loadingRef.current) return loadingRef.current;
+    if (versionsFA.fields.length >= total) return Promise.resolve(false);
+    const request = (async () => {
+      try {
+        const result = await loadProductVersions({
+          productId,
+          workspaceURL,
+          skip: versionsFA.fields.length,
+          take: VERSIONS_PAGE_SIZE,
+        });
+        if (!result.success) {
+          toast({variant: 'destructive', title: result.message});
+          return false;
+        }
+        const next = result.data.versions.map(versionToRow);
+        versionsFA.append(next);
+        /* Fold the appended rows into the form's baseline: `resetDefaultValues`
+         * recomputes dirty against the larger `defaultValues` without touching
+         * current values, so appended rows read as pristine while edits already
+         * made to earlier rows keep their value and stay dirty. An appended row
+         * left out of the baseline would count as dirty and be re-written on save
+         * (demoting a rejected version to draft). */
+        const grownServerRows = [...serverRowsRef.current, ...next];
+        serverRowsRef.current = grownServerRows;
+        resetDefaultValues({
+          ...productBaseline,
+          versions: grownServerRows,
+          newVersions: [],
+        });
+        setLoadedMeta(previous => [
+          ...previous,
+          ...result.data.versions.map(versionToMeta),
+        ]);
+        setTotal(result.data.total);
+        return next.length > 0;
+      } finally {
+        loadingRef.current = null;
       }
-      const next = result.data.versions.map(versionToRow);
-      versionsFA.append(next);
-      /* Fold the appended rows into the form's baseline: `resetDefaultValues`
-       * recomputes dirty against the larger `defaultValues` without touching
-       * current values, so appended rows read as pristine while edits already
-       * made to earlier rows keep their value and stay dirty. An appended row
-       * left out of the baseline would count as dirty and be re-written on save
-       * (demoting a rejected version to draft). */
-      const grownServerRows = [...serverRowsRef.current, ...next];
-      serverRowsRef.current = grownServerRows;
-      resetDefaultValues({
-        ...productBaseline,
-        versions: grownServerRows,
-        newVersions: [],
-      });
-      setLoadedMeta(previous => [
-        ...previous,
-        ...result.data.versions.map(versionToMeta),
-      ]);
-      setTotal(result.data.total);
-      return next.length > 0;
-    } finally {
-      setLoadingMore(false);
-    }
+    })();
+    loadingRef.current = request;
+    return request;
   }, [
-    loadingMore,
     versionsFA,
     total,
     productId,
@@ -241,23 +304,49 @@ export function useProductEditForm({
     productBaseline,
   ]);
 
+  /* Background-load the next page once only `VERSIONS_PREFETCH_AHEAD` loaded
+   * entries remain ahead of `at`, so paging stays ahead of the user without a
+   * blocking spinner. Deduped via loadMore's in-flight ref. */
+  const prefetchAhead = useCallback(
+    (at: number) => {
+      if (!hasMore) return;
+      if (totalShown - 1 - at <= VERSIONS_PREFETCH_AHEAD) void loadMore();
+    },
+    [hasMore, totalShown, loadMore],
+  );
+
   /* ---- navigation ---- */
 
   const goPrev = useCallback(
-    () => setCursor(cursor => Math.max(0, cursor - 1)),
-    [],
+    /* Wrap from the first entry to the last, but only once everything is loaded
+     * — never jump to an unloaded tail. */
+    () =>
+      setCursor(prev => (prev > 0 ? prev - 1 : hasMore ? 0 : totalShown - 1)),
+    [hasMore, totalShown],
   );
 
-  const goNext = useCallback(async () => {
-    /* Stepping off the last loaded existing row (the tail) while more pages
-     * remain → pull the next page in, then advance onto it. */
-    if (!isNew && cursor === totalShown - 1 && hasMore) {
-      const appended = await loadMore();
-      if (appended) setCursor(cursor => cursor + 1);
+  const goNext = useCallback(() => {
+    if (cursor < totalShown - 1) {
+      const next = cursor + 1;
+      setCursor(next);
+      prefetchAhead(next);
       return;
     }
-    setCursor(cursor => Math.min(totalShown - 1, cursor + 1));
-  }, [isNew, cursor, totalShown, hasMore, loadMore]);
+    /* On the last loaded entry with more pages remaining: park, pull the next
+     * page, then step onto it. Prefetch has usually loaded it already, so this
+     * rarely actually waits. */
+    if (hasMore) {
+      setAwaitingNext(true);
+      loadMore()
+        .then(appended => {
+          if (appended) setCursor(cursor => cursor + 1);
+        })
+        .finally(() => setAwaitingNext(false));
+      return;
+    }
+    /* Everything loaded, on the last entry — wrap to the first. */
+    setCursor(0);
+  }, [cursor, totalShown, hasMore, loadMore, prefetchAhead]);
 
   const addNew = useCallback(() => {
     /* New rows are at the front; the just-appended one is the last new row, so
@@ -268,9 +357,16 @@ export function useProductEditForm({
 
   const discardCurrentNew = useCallback(() => {
     if (!isNew) return;
+    /* Drop this row's staged bundle too. Otherwise an in-flight or failed
+     * upload lingers in the hook after the row is gone — a failed one would
+     * keep `uploadsHaveError` true (Save stuck disabled) with no UI left to
+     * clear it. */
+    const itemId = bundleItemByRow.current.get(currentRowKey);
+    if (itemId) bundleUpload.remove(itemId);
+    bundleItemByRow.current.delete(currentRowKey);
     newVersionsFA.remove(cursor);
     setCursor(cursor => Math.max(0, cursor - 1));
-  }, [isNew, cursor, newVersionsFA]);
+  }, [isNew, cursor, currentRowKey, bundleUpload, newVersionsFA]);
 
   /* ---- status staging ---- */
 
@@ -289,15 +385,49 @@ export function useProductEditForm({
 
   const save = handleSubmit(
     values => {
+      /* Tokens commit to the form only once their upload succeeds, so in-flight
+       * or failed uploads are absent from `values` — guard here too (not just by
+       * disabling Save) against a programmatic submit slipping through. */
+      if (uploadsBusy) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t('Please wait for uploads to finish.'),
+        });
+        return;
+      }
+      if (uploadsHaveError) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t(
+            'Some uploads failed. Remove or retry them, then save.',
+          ),
+        });
+        return;
+      }
       startTransition(async () => {
         try {
-          /* Only dirty existing rows + all new rows are sent (upsert-only).
-           * The dirty flags are authoritative: `loadMore` advances the form
-           * baseline, so a paginated-but-untouched row isn't flagged dirty.
-           * Each sent row gets its loaded lock counter from the server snapshot
-           * (the counter isn't an editable field, so this is its source). */
+          /* Send only what changed (see `savePayloadSchema`):
+           *  - `product`: on create, or when a product field is dirty. RHF's
+           *    `dirtyFields` is the source — any dirty top-level key that isn't a
+           *    version array or `images` is a product field. It carries the row's
+           *    `version` lock and is omitted on a versions-only edit, so the
+           *    product row (and its heavy `longDescription`) never goes over the
+           *    wire.
+           *  - `images`: only when the screenshot list changed — the full ordered
+           *    list (positional), or `[]` when the user cleared them all.
+           *  - `id`: always on edit, to scope ownership server-side.
+           * Existing version rows stay upsert-only: only the dirty ones are sent,
+           * each stamped with the lock counter the form was loaded with (not an
+           * editable field, so the server snapshot is its source). */
+          const {
+            id,
+            images,
+            versions: existingRows,
+            newVersions,
+            ...productBlock
+          } = values;
           const dirtyVersions = (dirtyFields.versions ?? []) as unknown[];
-          const changedExisting = values.versions
+          const changedExisting = existingRows
             .map((row, index) => ({
               row,
               version: serverRowsRef.current[index]?.version,
@@ -305,15 +435,21 @@ export function useProductEditForm({
             }))
             .filter(({dirty}) => dirty)
             .map(({row, version}) => ({...row, version}));
+          const productChanged = Object.keys(dirtyFields).some(
+            key =>
+              key !== 'versions' && key !== 'newVersions' && key !== 'images',
+          );
+          const imagesChanged = ((dirtyFields.images ?? []) as unknown[]).some(
+            Boolean,
+          );
           const formData = packIntoFormData({
-            ...values,
+            id,
+            ...(id == null || productChanged ? {product: productBlock} : {}),
+            ...(imagesChanged ? {images} : {}),
             versions: changedExisting,
-            newVersions: values.newVersions,
+            newVersions,
             workspaceURL,
           });
-          // TODO(payload-size): every bundle File rides in this one FormData,
-          // which will exceed the Server Action body limit with several large
-          // bundles. Move bundles to a separate upload step before shipping.
           const result = await saveProductWithVersions(formData);
           if (!result.success) {
             toast({variant: 'destructive', title: result.message});
@@ -371,20 +507,44 @@ export function useProductEditForm({
     pending,
     /* version navigator */
     namePrefix,
+    currentRowKey,
     isNew,
     /* Read-only context for the version under the cursor (undefined for new
      * rows) — the status transitions and the existing-bundle display. */
     currentVersionMeta: isNew ? undefined : loadedMeta[cursor - newCount],
-    position: {current: totalShown === 0 ? 0 : cursor + 1, total: totalShown},
+    /* `total` is the real count (existing versions + new rows this session),
+     * not how many are currently loaded — pagination grows the loaded set on
+     * demand, but the navigator should show the true total from the start. */
+    position: {
+      /* While parked at the frontier awaiting the next page, anticipate the
+       * entry being fetched (the next slot) so the user lands on it with a
+       * spinner instead of appearing stuck on the last loaded one. */
+      current:
+        totalShown === 0 ? 0 : awaitingNext ? totalShown + 1 : cursor + 1,
+      total: total + newCount,
+    },
     goPrev,
     goNext,
-    canPrev: cursor > 0,
-    canNext: cursor < totalShown - 1 || hasMore,
-    loadingMore,
+    /* Circular once fully loaded: prev wraps from the first to the last, next
+     * wraps from the last to the first. While more pages remain, prev at the
+     * first is disabled (can't wrap to an unloaded tail) and next keeps paging. */
+    canPrev: cursor > 0 || (!hasMore && totalShown > 1),
+    canNext: totalShown > 1 || hasMore,
+    awaitingNext,
     addNew,
     discardCurrentNew,
     setStatus,
     save,
+    /* staged uploads (lifted to the session) */
+    screenshotStaging: {
+      upload: screenshotUpload,
+      previewByToken,
+      previewByItem,
+    },
+    bundleUpload,
+    bundleItemByRow,
+    uploadsBusy,
+    uploadsHaveError,
   };
 }
 

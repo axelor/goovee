@@ -4,27 +4,29 @@ import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
+import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import {clone} from '@/utils';
 import {unpackFromFormData} from '@/utils/formdata';
+import {getTotal} from '@/utils/pagination';
 import {BigDecimal} from '@goovee/orm';
-import fs from 'fs';
 import {headers} from 'next/headers';
 import {z} from 'zod';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
-import type {MyProductForEdit} from '../orm';
+import type {MyProductForEdit, MyProductVersion} from '../orm';
 import {
   findMyProductForEdit,
+  findMyProductVersions,
   findProductsBySearch,
   generateUniqueProductSlug,
   resolveNewListingCurrency,
   type ProductSearchResult,
   syncProductImages,
   syncProductVersionPointers,
-  uploadBundle,
   withMyProductAccessFilter,
 } from '../orm';
-import {combinedEditSchema} from '../ui/components/product/product-edit/combined-validator';
+import {savePayloadSchema} from '../ui/components/product/product-edit/combined-validator';
+import {VERSIONS_PAGE_SIZE} from '../ui/components/versions/version-form/validator';
 import {ensureAuth} from '../utils/auth-helper';
 import {parseVersionNumber} from '../utils/version-number';
 
@@ -38,6 +40,8 @@ export async function loadMyProductForEdit(
   input: LoadMyProductForEditInput,
 ): ActionResponse<{
   product: Cloned<MyProductForEdit>;
+  versions: Cloned<MyProductVersion>[];
+  total: number;
 }> {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
@@ -64,16 +68,35 @@ export async function loadMyProductForEdit(
     };
   }
 
-  const product = await findMyProductForEdit({
-    productId,
-    mainPartnerId: auth.user.mainPartnerId,
-    client: auth.tenant.client,
-    workspace: auth.workspace,
-  });
+  /* Load the product and its first page of versions together so the edit dialog
+   * opens fully populated in one round-trip. Mirrors the full-page editor route. */
+  const [product, versions] = await Promise.all([
+    findMyProductForEdit({
+      productId,
+      mainPartnerId: auth.user.mainPartnerId,
+      client: auth.tenant.client,
+      workspace: auth.workspace,
+    }),
+    findMyProductVersions({
+      productId,
+      mainPartnerId: auth.user.mainPartnerId,
+      client: auth.tenant.client,
+      workspace: auth.workspace,
+      skip: 0,
+      take: VERSIONS_PAGE_SIZE,
+    }),
+  ]);
   if (!product) {
     return {error: true, message: await t('Product not found')};
   }
-  return {success: true, data: {product: clone(product)}};
+  return {
+    success: true,
+    data: {
+      product: clone(product),
+      versions: clone(versions),
+      total: getTotal(versions),
+    },
+  };
 }
 
 const searchProductsSchema = z.object({
@@ -140,11 +163,17 @@ export async function saveProductWithVersions(
     return {error: true, message: await t('Workspace is required')};
   }
   const {workspaceURL: _workspaceURL, ...rest} = raw;
-  const parsed = combinedEditSchema.safeParse(rest);
+  /* The editor only sends what changed (see `savePayloadSchema`): `product` is
+   * present on create or a product-field edit and absent on a versions-only
+   * edit; `images` is present only when the screenshots changed. So an
+   * unchanged product / picture set is never re-written — no needless bump of
+   * its optimistic-lock version, no false conflict with a concurrent edit. */
+  const parsed = savePayloadSchema.safeParse(rest);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
   const payload = parsed.data;
+  const product = payload.product;
 
   const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
   if (error) {
@@ -158,12 +187,6 @@ export async function saveProductWithVersions(
   }
   const {client} = auth.tenant;
   const requiresReview = auth.workspace.config.requiresReview === true;
-
-  const storage = auth.tenant.config.aos.storage;
-  if (!storage) {
-    return {error: true, message: await t('Storage not configured')};
-  }
-  if (!fs.existsSync(storage)) fs.mkdirSync(storage, {recursive: true});
 
   /* Parse every version number up front, map each row's staged status to its
    * effective status (publish → in-review when the workspace requires it), and
@@ -199,28 +222,12 @@ export async function saveProductWithVersions(
     prepared.push({row, parts, effectiveStatus});
   }
 
-  const productData = {
-    name: payload.name,
-    description: payload.description ?? null,
-    longDescription: payload.longDescription || null,
-    coverStyle: payload.coverStyle,
-    iconCode: payload.iconCode,
-    documentationUrl: payload.documentationUrl || null,
-    supportIssuesUrl: payload.supportIssuesUrl || null,
-    supportContactUrl: payload.supportContactUrl || null,
-    license: {select: {id: payload.licenseId}},
-    salePrice: new BigDecimal(String(payload.salePrice ?? 0)),
-  };
-
   try {
     /* Assigned the new id in the create branch; carries the given id on edit. */
     let productId = payload.id ?? '';
     await client.$transaction(async txClient => {
       if (payload.id) {
-        /* Edit: ownership-checked update with the category m2m diff and the
-         * optimistic lock the form was loaded with. */
-        if (payload.version == null) throw new Error('MISSING_VERSION');
-        const productVersion = payload.version;
+        /* Edit: verify ownership first (always). */
         const current = await txClient.aOSMarketplaceProduct.findOne({
           where: withMyProductAccessFilter(
             auth.workspace,
@@ -229,32 +236,55 @@ export async function saveProductWithVersions(
           select: {id: true, categorySet: {select: {id: true}}},
         });
         if (!current) throw new Error('PRODUCT_NOT_FOUND');
-        const desired = new Set(payload.categoryIds);
-        const previous = new Set(
-          (current.categorySet ?? []).map(category => category.id),
-        );
-        const toAdd = [...desired].filter(id => !previous.has(id));
-        const toRemove = [...previous].filter(id => !desired.has(id));
-        await txClient.aOSMarketplaceProduct.update({
-          data: {
-            id: payload.id,
-            version: productVersion,
-            ...productData,
-            updatedByPartner: {select: {id: auth.user.id}},
-            ...(toAdd.length || toRemove.length
-              ? {
-                  categorySet: {
-                    ...(toAdd.length ? {select: toAdd.map(id => ({id}))} : {}),
-                    ...(toRemove.length ? {remove: toRemove} : {}),
-                  },
-                }
-              : {}),
-          },
-          select: {id: true},
-        });
+        /* Rewrite the product row only when a product field actually changed —
+         * the editor omits the product block on a versions-only save, so it's
+         * left untouched (no needless write, no bumped optimistic-lock version,
+         * no false conflict with a concurrent product edit). Uses the category
+         * m2m diff and the lock the form was loaded with. */
+        if (product) {
+          if (product.version == null) throw new Error('MISSING_VERSION');
+          const productVersion = product.version;
+          const desired = new Set(product.categoryIds);
+          const previous = new Set(
+            (current.categorySet ?? []).map(category => category.id),
+          );
+          const toAdd = [...desired].filter(id => !previous.has(id));
+          const toRemove = [...previous].filter(id => !desired.has(id));
+          await txClient.aOSMarketplaceProduct.update({
+            data: {
+              id: payload.id,
+              version: productVersion,
+              name: product.name,
+              description: product.description ?? null,
+              longDescription: product.longDescription || null,
+              coverStyle: product.coverStyle,
+              iconCode: product.iconCode,
+              documentationUrl: product.documentationUrl || null,
+              supportIssuesUrl: product.supportIssuesUrl || null,
+              supportContactUrl: product.supportContactUrl || null,
+              license: {select: {id: product.licenseId}},
+              salePrice: new BigDecimal(String(product.salePrice ?? 0)),
+              updatedByPartner: {select: {id: auth.user.id}},
+              ...(toAdd.length || toRemove.length
+                ? {
+                    categorySet: {
+                      ...(toAdd.length
+                        ? {select: toAdd.map(id => ({id}))}
+                        : {}),
+                      ...(toRemove.length ? {remove: toRemove} : {}),
+                    },
+                  }
+                : {}),
+            },
+            select: {id: true},
+          });
+        }
       } else {
-        /* Create: mirror the standalone product create — type, slug, currency,
-         * inAti and ownership are stamped once and never rewritten on edit. */
+        /* Create: the schema requires a product block when there's no id, so a
+         * new listing always carries its full fields (and their defaults). Type/
+         * slug/currency/inAti/ownership are stamped once and never rewritten on
+         * edit. */
+        if (!product) throw new Error('MISSING_PRODUCT');
         const workspaceDefaultProductId =
           auth.workspace.config.defaultProductForMarketplace?.id;
         if (!workspaceDefaultProductId) throw new Error('MP_NOT_CONFIGURED');
@@ -266,13 +296,22 @@ export async function saveProductWithVersions(
         const slug = await generateUniqueProductSlug({
           client: txClient,
           workspaceId: auth.workspace.id,
-          name: payload.name,
+          name: product.name,
         });
         const created = await txClient.aOSMarketplaceProduct.create({
           select: {id: true},
           data: {
-            ...productData,
-            marketplaceTypeSelect: payload.marketplaceTypeSelect,
+            name: product.name,
+            description: product.description ?? null,
+            longDescription: product.longDescription || null,
+            coverStyle: product.coverStyle,
+            iconCode: product.iconCode,
+            documentationUrl: product.documentationUrl || null,
+            supportIssuesUrl: product.supportIssuesUrl || null,
+            supportContactUrl: product.supportContactUrl || null,
+            license: {select: {id: product.licenseId}},
+            salePrice: new BigDecimal(String(product.salePrice ?? 0)),
+            marketplaceTypeSelect: product.marketplaceTypeSelect,
             slug,
             inAti:
               auth.workspace.config.defaultProductForMarketplace?.inAti ??
@@ -282,7 +321,7 @@ export async function saveProductWithVersions(
             createdByPartner: {select: {id: auth.user.id}},
             product: {select: {id: workspaceDefaultProductId}},
             portalWorkspace: {select: {id: auth.workspace.id}},
-            categorySet: {select: payload.categoryIds.map(id => ({id}))},
+            categorySet: {select: product.categoryIds.map(id => ({id}))},
             averageRating: new BigDecimal('0'),
             ratingCount: 0,
             installCount: 0,
@@ -291,12 +330,18 @@ export async function saveProductWithVersions(
         productId = created.id;
       }
 
-      await syncProductImages({
-        client: txClient,
-        productId,
-        storage,
-        images: payload.images,
-      });
+      /* Reconcile screenshots only when they changed — the editor omits the
+       * `images` list otherwise, so a versions-only or product-only save won't
+       * re-sequence (and re-version) every picture. An empty list is still sent
+       * when the user clears all screenshots, so it reconciles to none. */
+      if (payload.images !== undefined) {
+        await syncProductImages({
+          client: txClient,
+          productId,
+          owner: auth.user.id,
+          images: payload.images,
+        });
+      }
 
       for (const {row, parts, effectiveStatus} of prepared) {
         /* No other version of this product may hold the same number. */
@@ -314,13 +359,17 @@ export async function saveProductWithVersions(
         });
         if (duplicate) throw new Error('DUP_VERSION');
 
+        /* Redeem the pre-staged bundle (when the row carries a token) to its
+         * meta_file id. Runs inside this transaction, so a later throw rolls
+         * the single-use consume back and the token stays valid for retry. */
         let uploadedFileId: string | null = null;
-        if (row.bundleFile) {
-          uploadedFileId = await uploadBundle(
-            row.bundleFile,
-            storage,
-            txClient,
-          );
+        if (row.bundleToken) {
+          uploadedFileId = await redeemUpload({
+            token: row.bundleToken,
+            purpose: 'marketplace:bundle',
+            owner: auth.user.id,
+            client: txClient,
+          });
         }
         const compatibilityRefs = row.compatibilitySetIds.map(id => ({id}));
 
@@ -389,8 +438,8 @@ export async function saveProductWithVersions(
             },
           });
         } else {
-          /* The schema requires a bundle on every new row (no id), so the
-           * upload above always ran and produced an id. */
+          /* The schema requires a bundle token on every new row (no id), so the
+           * redeem above always ran and produced an id. */
           await txClient.aOSMarketplaceProductVersion.create({
             select: {id: true},
             data: {
@@ -413,8 +462,12 @@ export async function saveProductWithVersions(
       }
 
       /* Recompute current/latest once from the full DB state — correct no
-       * matter how many rows changed status (incl. bulk unpublish). */
-      await syncProductVersionPointers({client: txClient, productId});
+       * matter how many rows changed status (incl. bulk unpublish). Only needed
+       * when versions actually changed; a product-only edit leaves the pointers
+       * (and the product row) untouched. */
+      if (rows.length > 0) {
+        await syncProductVersionPointers({client: txClient, productId});
+      }
     });
 
     return {success: true, data: {productId}};
@@ -428,6 +481,14 @@ export async function saveProductWithVersions(
         error: true,
         message: await t(
           'This product was changed by someone else since you opened it. Reload and reapply your changes.',
+        ),
+      };
+    }
+    if (errorMessage === 'Upload not redeemable') {
+      return {
+        error: true,
+        message: await t(
+          'An uploaded file is no longer available. Re-select your screenshots and bundle, then save again.',
         ),
       };
     }
@@ -447,6 +508,14 @@ export async function saveProductWithVersions(
     }
     if (errorMessage === 'PRODUCT_NOT_FOUND') {
       return {error: true, message: await t('Product not found')};
+    }
+    if (errorMessage === 'MISSING_PRODUCT') {
+      return {
+        error: true,
+        message: await t(
+          'Product details are required when creating a listing. Reload and try again.',
+        ),
+      };
     }
     if (errorMessage === 'MISSING_VERSION') {
       return {

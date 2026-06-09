@@ -3,10 +3,8 @@ import type {Currency} from '@/product/orm';
 import type {Cloned} from '@/types/util';
 import {Button} from '@/ui/components/button';
 import {Form} from '@/ui/components/form';
-import {useToast} from '@/ui/hooks';
 import {Loader2} from 'lucide-react';
-import {useEffect, useRef, useState, type ElementType} from 'react';
-import {loadProductVersions} from '../../../../actions';
+import {useRef, useState, type ElementType} from 'react';
 import {MARKETPLACE_TYPE} from '../../../../constants/marketplace-types';
 import type {
   CompatibilityVersion,
@@ -15,8 +13,8 @@ import type {
   MyProductForEdit,
   MyProductVersion,
 } from '../../../../orm';
-import {VERSIONS_PAGE_SIZE} from '../../versions/version-form/validator';
 import {ProductCollapsible} from './product-collapsible';
+import {ScreenshotStagingProvider} from './screenshot-staging-context';
 import {useProductEditForm} from './use-product-edit-form';
 import {VersionSection} from './version-section';
 
@@ -33,6 +31,10 @@ export type ProductEditDialogBodyProps = {
   inAti: boolean;
   /** The product being edited; absent in create mode. */
   initial?: Cloned<MyProductForEdit>;
+  /** First page of existing versions, fetched together with the product (in the
+   *  trigger) so the dialog opens fully populated. Empty for create. */
+  initialVersions?: Cloned<MyProductVersion>[];
+  initialTotal?: number;
   /** Fixed product type for create mode. */
   defaultType?: MARKETPLACE_TYPE;
   /** Dismiss the dialog (Cancel / ✕). */
@@ -47,9 +49,9 @@ export type ProductEditDialogBodyProps = {
 
 /**
  * Combined editor mounted inside the dialog: the product (collapsible) and the
- * version surface in one scroll, saved once. On edit it loads the first page of
- * versions before mounting the form (the combined model seeds from them); create
- * starts with no versions. The full-page route uses `ProductEditPage` instead;
+ * version surface in one scroll, saved once. The product and its first page of
+ * versions are fetched together by the trigger and passed in, so the dialog
+ * opens fully populated. The full-page route uses `ProductEditPage` instead;
  * both drive the same `useProductEditForm`.
  */
 export function ProductEditDialogBody({
@@ -64,6 +66,8 @@ export function ProductEditDialogBody({
   listingCurrency,
   inAti,
   initial,
+  initialVersions = [],
+  initialTotal = 0,
   defaultType,
   onClose,
   onSaved,
@@ -71,44 +75,6 @@ export function ProductEditDialogBody({
   Description = 'p',
   scrollContainerClassName,
 }: ProductEditDialogBodyProps) {
-  const {toast} = useToast();
-  const productId = initial?.id;
-
-  const [versions, setVersions] = useState<Cloned<MyProductVersion>[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(Boolean(productId));
-  const [error, setError] = useState(false);
-  const [retry, setRetry] = useState(0);
-
-  /* Edit: pull the first page of versions before mounting the form. Create has
-   * no versions yet, so this never runs. */
-  useEffect(() => {
-    if (!productId) return;
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-    (async () => {
-      const res = await loadProductVersions({
-        productId,
-        workspaceURL,
-        skip: 0,
-        take: VERSIONS_PAGE_SIZE,
-      });
-      if (cancelled) return;
-      if (res.success) {
-        setVersions(res.data.versions);
-        setTotal(res.data.total);
-      } else {
-        setError(true);
-        toast({variant: 'destructive', title: res.message});
-      }
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [productId, workspaceURL, retry, toast]);
-
   const productName = initial?.name ?? '';
   const title =
     mode === 'edit'
@@ -134,42 +100,24 @@ export function ProductEditDialogBody({
         </Description>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center p-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      ) : error ? (
-        <div className="flex flex-col items-center justify-center gap-4 p-12">
-          <p className="text-sm text-muted-foreground">
-            {i18n.t('Could not load versions.')}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setRetry(n => n + 1)}>
-            {i18n.t('Retry')}
-          </Button>
-        </div>
-      ) : (
-        <DialogForm
-          mode={mode}
-          initial={initial}
-          defaultType={defaultType}
-          initialVersions={versions}
-          initialTotal={total}
-          workspaceURI={workspaceURI}
-          workspaceURL={workspaceURL}
-          categories={categories}
-          licenses={licenses}
-          compatibilityVersions={compatibilityVersions}
-          requiresReview={requiresReview}
-          allowToPublish={allowToPublish}
-          listingCurrency={listingCurrency}
-          inAti={inAti}
-          onClose={onClose}
-          onSaved={onSaved}
-        />
-      )}
+      <DialogForm
+        mode={mode}
+        initial={initial}
+        defaultType={defaultType}
+        initialVersions={initialVersions}
+        initialTotal={initialTotal}
+        workspaceURI={workspaceURI}
+        workspaceURL={workspaceURL}
+        categories={categories}
+        licenses={licenses}
+        compatibilityVersions={compatibilityVersions}
+        requiresReview={requiresReview}
+        allowToPublish={allowToPublish}
+        listingCurrency={listingCurrency}
+        inAti={inAti}
+        onClose={onClose}
+        onSaved={onSaved}
+      />
     </div>
   );
 }
@@ -230,44 +178,62 @@ function DialogForm({
 
   return (
     <Form {...model.form}>
-      <div className="space-y-6 p-6 pb-24">
-        <ProductCollapsible
-          expanded={productExpanded}
-          onOpenChange={setProductExpanded}
-          categories={categories}
-          licenses={licenses}
-          initial={initial}
-          listingCurrency={listingCurrency}
-          inAti={inAti}
-        />
-        <div ref={versionRef}>
-          <VersionSection
-            model={model}
-            requiresReview={requiresReview}
-            allowToPublish={allowToPublish}
-            compatibilityVersions={compatibilityVersions}
-            workspaceURI={workspaceURI}
+      <ScreenshotStagingProvider value={model.screenshotStaging}>
+        <div className="space-y-6 p-6 pb-24">
+          <ProductCollapsible
+            expanded={productExpanded}
+            onOpenChange={setProductExpanded}
+            categories={categories}
+            licenses={licenses}
+            initial={initial}
+            listingCurrency={listingCurrency}
+            inAti={inAti}
           />
+          <div ref={versionRef}>
+            <VersionSection
+              model={model}
+              requiresReview={requiresReview}
+              allowToPublish={allowToPublish}
+              compatibilityVersions={compatibilityVersions}
+              workspaceURI={workspaceURI}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* One combined save for the whole dialog. */}
-      <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onClose}
-          disabled={model.pending}>
-          {i18n.t('Cancel')}
-        </Button>
-        <Button
-          type="button"
-          onClick={model.save}
-          disabled={model.pending || !isDirty}>
-          {model.pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {i18n.t('Save')}
-        </Button>
-      </div>
+        {/* One combined save for the whole dialog. */}
+        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
+          {model.uploadsBusy ? (
+            <span className="mr-auto text-sm text-muted-foreground">
+              {i18n.t('Uploads in progress…')}
+            </span>
+          ) : (
+            model.uploadsHaveError && (
+              <span className="mr-auto text-sm text-destructive">
+                {i18n.t('Fix failed uploads to save.')}
+              </span>
+            )
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            disabled={model.pending}>
+            {i18n.t('Cancel')}
+          </Button>
+          <Button
+            type="button"
+            onClick={model.save}
+            disabled={
+              model.pending ||
+              !isDirty ||
+              model.uploadsBusy ||
+              model.uploadsHaveError
+            }>
+            {model.pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {i18n.t('Save')}
+          </Button>
+        </div>
+      </ScreenshotStagingProvider>
     </Form>
   );
 }

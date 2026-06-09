@@ -1,8 +1,8 @@
 import {z} from 'zod';
+import {uploadTokenSchema} from '@/lib/core/upload/validators';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';
 import {VERSION_NUMBER_PATTERN} from '../../../../utils/version-number';
 import {productSchema} from '../product-form/validator';
-import {MAX_BUNDLE_SIZE} from '../../versions/version-form/validator';
 
 /**
  * One editable version row in the combined page editor. Like the dialog's
@@ -35,18 +35,17 @@ export const versionRowSchema = z
     compatibilitySetIds: z
       .array(z.string())
       .min(1, 'Pick at least one compatibility version'),
-    bundleFile: z
-      .instanceof(File)
-      .refine(file => file.size <= MAX_BUNDLE_SIZE, {
-        message: 'Bundle must be 20 MB or less',
-      })
-      .optional(),
+    /* Single-use token for a pre-staged bundle (purpose `marketplace:bundle`),
+     * redeemed server-side. Absent when editing an existing version without
+     * replacing its bundle. Size/type are enforced at stage time by the
+     * policy. */
+    bundleToken: uploadTokenSchema.optional(),
   })
   .superRefine((values, context) => {
-    if (!values.id && !values.bundleFile) {
+    if (!values.id && !values.bundleToken) {
       context.addIssue({
         code: 'custom',
-        path: ['bundleFile'],
+        path: ['bundleToken'],
         message: 'Bundle file is required for a new version',
       });
     }
@@ -69,3 +68,46 @@ export const combinedEditSchema = z.object({
 });
 
 export type CombinedEditValues = z.infer<typeof combinedEditSchema>;
+
+/* The product fields as a self-contained block (the lock `version` plus every
+ * editable column), reused by the save payload below. */
+export const productEditBlockSchema = productSchema.omit({
+  id: true,
+  images: true,
+});
+
+export type ProductEditBlock = z.infer<typeof productEditBlockSchema>;
+
+/**
+ * What `saveProductWithVersions` actually receives. The form above always holds
+ * the *whole* product (for live field validation), but the editor only *sends*
+ * what changed, so here the product and images are optional:
+ *
+ *   - `id` present     → editing that listing (scopes ownership); absent → create.
+ *   - `product` present → create, or an edit that changed a product field. The
+ *     block reuses the product rules, so a present product is always complete
+ *     (this is how create still carries its required defaults). Absent → a
+ *     versions-only edit: the product row is left untouched.
+ *   - `images` present → the full ordered screenshot list to reconcile (it's
+ *     positional, so it's all-or-nothing); absent → screenshots untouched.
+ *   - `versions`/`newVersions` are already upsert-only (only changed/new rows).
+ */
+export const savePayloadSchema = z
+  .object({
+    id: z.string().optional(),
+    product: productEditBlockSchema.optional(),
+    images: productSchema.shape.images.optional(),
+    versions: z.array(versionRowSchema),
+    newVersions: z.array(versionRowSchema),
+  })
+  .superRefine((data, context) => {
+    if (!data.id && !data.product) {
+      context.addIssue({
+        code: 'custom',
+        path: ['product'],
+        message: 'Product details are required when creating a listing',
+      });
+    }
+  });
+
+export type SavePayload = z.infer<typeof savePayloadSchema>;

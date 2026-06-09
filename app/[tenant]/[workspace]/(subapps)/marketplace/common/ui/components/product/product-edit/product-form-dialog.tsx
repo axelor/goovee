@@ -6,6 +6,7 @@ import {
   ResponsiveDialogTitle,
 } from '@/ui/components/responsive-dialog';
 import {useResponsive} from '@/ui/hooks';
+import {cn} from '@/utils/css';
 import {useRouter} from 'next/navigation';
 import {
   ProductEditDialogBody,
@@ -46,7 +47,16 @@ export function ProductFormDialog({
           {...body}
           Title={ResponsiveDialogTitle}
           Description={ResponsiveDialogDescription}
-          scrollContainerClassName="max-h-[90vh] overflow-y-auto overscroll-contain"
+          /* Desktop dialog is a fixed 90vh so its height stays steady while the
+           * user works in it — collapsing/expanding the product or paging
+           * between versions (incl. the brief loading state at the frontier);
+           * the drawer (mobile) sizes to content, capped at 90vh. Custom thin
+           * scrollbar, native arrow buttons hidden. */
+          scrollContainerClassName={cn(
+            'overflow-y-auto overscroll-contain',
+            '[scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border',
+            isSmall ? 'max-h-[90vh]' : 'h-[90vh]',
+          )}
           onClose={() => onOpenChange(false)}
           onSaved={() => {
             onOpenChange(false);

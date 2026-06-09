@@ -9,6 +9,7 @@ import type {
   ListCategory,
   ListLicense,
   MyProductForEdit,
+  MyProductVersion,
 } from '../../../../orm';
 import type {Currency} from '@/product/orm';
 import {ProductFormDialog} from '../product-edit';
@@ -45,6 +46,8 @@ export function EditProductButton({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Cloned<MyProductForEdit> | null>(null);
+  const [versions, setVersions] = useState<Cloned<MyProductVersion>[]>([]);
+  const [total, setTotal] = useState(0);
   const {toast} = useToast();
 
   const handleOpen = async () => {
@@ -56,6 +59,8 @@ export function EditProductButton({
         return;
       }
       setProduct(result.data.product);
+      setVersions(result.data.versions);
+      setTotal(result.data.total);
       setOpen(true);
     } catch {
       toast({
@@ -96,6 +101,8 @@ export function EditProductButton({
           listingCurrency={listingCurrency}
           inAti={inAti}
           initial={product}
+          initialVersions={versions}
+          initialTotal={total}
         />
       )}
     </>

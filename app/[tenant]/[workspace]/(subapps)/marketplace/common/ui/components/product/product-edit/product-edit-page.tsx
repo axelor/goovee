@@ -16,6 +16,7 @@ import type {
 } from '../../../../orm';
 import type {Currency} from '@/product/orm';
 import {ProductFields} from './product-fields';
+import {ScreenshotStagingProvider} from './screenshot-staging-context';
 import {VersionSection} from './version-section';
 import {useProductEditForm} from './use-product-edit-form';
 
@@ -71,41 +72,59 @@ export function ProductEditPage({
 
   return (
     <Form {...model.form}>
-      <div className="space-y-6 pb-24">
-        <ProductFields
-          categories={categories}
-          licenses={licenses}
-          initial={initial}
-          listingCurrency={listingCurrency}
-          inAti={inAti}
-        />
+      <ScreenshotStagingProvider value={model.screenshotStaging}>
+        <div className="space-y-6 pb-24">
+          <ProductFields
+            categories={categories}
+            licenses={licenses}
+            initial={initial}
+            listingCurrency={listingCurrency}
+            inAti={inAti}
+          />
 
-        <VersionSection
-          model={model}
-          requiresReview={requiresReview}
-          allowToPublish={allowToPublish}
-          compatibilityVersions={compatibilityVersions}
-          workspaceURI={workspaceURI}
-        />
-      </div>
+          <VersionSection
+            model={model}
+            requiresReview={requiresReview}
+            allowToPublish={allowToPublish}
+            compatibilityVersions={compatibilityVersions}
+            workspaceURI={workspaceURI}
+          />
+        </div>
 
-      {/* One combined save for the whole page. */}
-      <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={leave}
-          disabled={model.pending}>
-          {i18n.t('Cancel')}
-        </Button>
-        <Button
-          type="button"
-          onClick={model.save}
-          disabled={model.pending || !isDirty}>
-          {model.pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {i18n.t('Save')}
-        </Button>
-      </div>
+        {/* One combined save for the whole page. */}
+        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
+          {model.uploadsBusy ? (
+            <span className="mr-auto text-sm text-muted-foreground">
+              {i18n.t('Uploads in progress…')}
+            </span>
+          ) : (
+            model.uploadsHaveError && (
+              <span className="mr-auto text-sm text-destructive">
+                {i18n.t('Fix failed uploads to save.')}
+              </span>
+            )
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={leave}
+            disabled={model.pending}>
+            {i18n.t('Cancel')}
+          </Button>
+          <Button
+            type="button"
+            onClick={model.save}
+            disabled={
+              model.pending ||
+              !isDirty ||
+              model.uploadsBusy ||
+              model.uploadsHaveError
+            }>
+            {model.pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {i18n.t('Save')}
+          </Button>
+        </div>
+      </ScreenshotStagingProvider>
     </Form>
   );
 }
