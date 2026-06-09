@@ -1,6 +1,7 @@
 import {BetterAuthPlugin, defineErrorCodes} from 'better-auth';
 import {APIError, createAuthEndpoint} from 'better-auth/api';
 import {setSessionCookie} from 'better-auth/cookies';
+import {after} from 'next/server';
 import {z} from 'zod';
 
 import {compare, hash} from '@/auth/utils';
@@ -563,18 +564,25 @@ const credentials = {
           const mailService = NotificationManager.getService(
             NotificationType.mail,
           );
-          createOTP({
-            entity: email,
-            scope: Scope.ResetPassword,
-            client,
-            force: true,
-          }).then(result => {
-            result?.otp &&
-              mailService?.notify({
-                subject: 'Goovee Password Reset',
-                to: email,
-                html: resetPasswordEmailHTML({email, otp: result.otp, link}),
+          after(async () => {
+            try {
+              const result = await createOTP({
+                entity: email,
+                scope: Scope.ResetPassword,
+                client,
+                force: true,
               });
+
+              if (result?.otp) {
+                await mailService?.notify({
+                  subject: 'Goovee Password Reset',
+                  to: email,
+                  html: resetPasswordEmailHTML({email, otp: result.otp, link}),
+                });
+              }
+            } catch (err) {
+              console.error('[AUTH] Failed to send password reset mail', err);
+            }
           });
         }
 

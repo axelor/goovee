@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import {NextResponse} from 'next/server';
+import {NextResponse, after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/tenant';
@@ -34,16 +34,17 @@ function forwardToLegacy(request: Request): boolean {
   // so the legacy ERP receives exactly what Up2Pay sent and can verify its own signature.
   const forwardUrl = `${legacyUrl}${new URL(request.url).search}`;
 
-  fetch(forwardUrl, {method: 'GET'})
-    .then(res =>
+  after(async () => {
+    try {
+      const res = await fetch(forwardUrl, {method: 'GET'});
       console.log('[UP2PAY][WEBHOOK] Forwarded to legacy ERP', {
         status: res.status,
         forwardUrl,
-      }),
-    )
-    .catch(err =>
-      console.error('[UP2PAY][WEBHOOK] Legacy forward failed', {error: err}),
-    );
+      });
+    } catch (err) {
+      console.error('[UP2PAY][WEBHOOK] Legacy forward failed', {error: err});
+    }
+  });
 
   return true;
 }
@@ -244,12 +245,14 @@ export async function GET(request: Request) {
       }
 
       if (paymentContext.payer) {
-        notifyInvoicePaymentSuccess({
-          invoiceId: entityId,
-          payer: paymentContext.payer,
-          tenantId,
-          client,
-        });
+        after(() =>
+          notifyInvoicePaymentSuccess({
+            invoiceId: entityId,
+            payer: paymentContext.payer!,
+            tenantId,
+            client,
+          }),
+        );
       }
       break;
     }

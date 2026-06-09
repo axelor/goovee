@@ -38,7 +38,7 @@ export async function sendCommentMail(props: {
   const note = sanitizeHtml(comment.note || '');
   const parentNote = sanitizeHtml(parentComment?.note || '');
 
-  reciepients.forEach(async partner => {
+  for (const partner of reciepients) {
     const t = getTranslation.bind(null, {
       locale: partner.localization?.code || DEFAULT_LOCALE,
       tenant,
@@ -97,7 +97,7 @@ export async function sendCommentMail(props: {
       to: partner.emailAddress?.address,
       html: doc,
     });
-  });
+  }
 }
 
 export async function sendTrackMail(props: {
@@ -126,7 +126,7 @@ export async function sendTrackMail(props: {
     return;
   }
 
-  reciepients.forEach(async partner => {
+  for (const partner of reciepients) {
     const t = getTranslation.bind(null, {
       locale: partner.localization?.code || DEFAULT_LOCALE,
       tenant,
@@ -180,7 +180,7 @@ export async function sendTrackMail(props: {
       to: partner.emailAddress?.address,
       html: doc,
     });
-  });
+  }
 }
 
 async function generateHTML(body: {

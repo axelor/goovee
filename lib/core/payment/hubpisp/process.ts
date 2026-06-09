@@ -1,5 +1,6 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
+import {after} from 'next/server';
 import {
   markPaymentAsCancelled,
   markPaymentAsFailed,
@@ -28,6 +29,7 @@ export async function applyTransactionStatus({
   client,
   tenantId,
   config,
+  deferNotifications = false,
 }: {
   paymentContext: PaymentContext;
   transactionStatus: string;
@@ -35,6 +37,7 @@ export async function applyTransactionStatus({
   client: Client;
   tenantId: string;
   config: TenantConfig;
+  deferNotifications?: boolean;
 }): Promise<boolean> {
   switch (transactionStatus) {
     case HUBPISP_TRANSACTION_STATUS.CANC:
@@ -75,7 +78,13 @@ export async function applyTransactionStatus({
       return true;
 
     case HUBPISP_TRANSACTION_STATUS.ACSC:
-      await processAcscPayment({paymentContext, client, tenantId, config});
+      await processAcscPayment({
+        paymentContext,
+        client,
+        tenantId,
+        config,
+        deferNotifications,
+      });
       return true;
 
     default:
@@ -88,11 +97,13 @@ export async function processAcscPayment({
   client,
   tenantId,
   config,
+  deferNotifications = false,
 }: {
   paymentContext: PaymentContext;
   client: Client;
   tenantId: string;
   config: TenantConfig;
+  deferNotifications?: boolean;
 }): Promise<void> {
   const source = paymentContext.data?.source;
   const entityId = paymentContext.data?.id;
@@ -121,12 +132,19 @@ export async function processAcscPayment({
       }
 
       if (paymentContext.payer) {
-        notifyInvoicePaymentSuccess({
-          invoiceId: entityId,
-          payer: paymentContext.payer,
-          tenantId,
-          client,
-        });
+        const notifyPaymentSuccess = () =>
+          notifyInvoicePaymentSuccess({
+            invoiceId: entityId,
+            payer: paymentContext.payer!,
+            tenantId,
+            client,
+          });
+
+        if (deferNotifications) {
+          after(notifyPaymentSuccess);
+        } else {
+          await notifyPaymentSuccess();
+        }
       }
       break;
     }

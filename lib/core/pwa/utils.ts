@@ -123,69 +123,73 @@ export async function notifyUser({
   }
 
   // 3. Send the real-time push notification to all active devices
-  const subscriptions = await client.pushSubscription.find({
-    where: {partner: {id: userId}},
-    select: {
-      id: true,
-      endpoint: true,
-      p256dh: true,
-      auth: true,
-      version: true,
-      expiresAt: true,
-    },
-  });
+  try {
+    const subscriptions = await client.pushSubscription.find({
+      where: {partner: {id: userId}},
+      select: {
+        id: true,
+        endpoint: true,
+        p256dh: true,
+        auth: true,
+        version: true,
+        expiresAt: true,
+      },
+    });
 
-  if (!subscriptions?.length) return;
+    if (!subscriptions?.length) return;
 
-  const pushPayload: NotificationPayload = {
-    ...payload,
-    title: pushTitle,
-    tenantId,
-    workspaceURL,
-    notification: dbNotification,
-  };
+    const pushPayload: NotificationPayload = {
+      ...payload,
+      title: pushTitle,
+      tenantId,
+      workspaceURL,
+      notification: dbNotification,
+    };
 
-  await Promise.all(
-    subscriptions.map(async sub => {
-      if (!sub.endpoint || !sub.p256dh || !sub.auth) return;
+    await Promise.all(
+      subscriptions.map(async sub => {
+        if (!sub.endpoint || !sub.p256dh || !sub.auth) return;
 
-      if (sub.expiresAt && sub.expiresAt < new Date()) {
-        await client.pushSubscription.delete({
-          id: sub.id,
-          version: sub.version,
-        });
-        return;
-      }
-
-      const result = await sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
-          },
-        },
-        pushPayload,
-      );
-
-      if (result.error) {
-        if (result.message === 'expired') {
+        if (sub.expiresAt && sub.expiresAt < new Date()) {
           await client.pushSubscription.delete({
             id: sub.id,
             version: sub.version,
           });
-        } else {
-          console.error('Error sending notification:', {
-            result,
-            subId: sub.id,
-            notificationId: pushPayload.notification?.id,
-          });
+          return;
         }
-      }
 
-      return result;
-    }),
-  );
+        const result = await sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth,
+            },
+          },
+          pushPayload,
+        );
+
+        if (result.error) {
+          if (result.message === 'expired') {
+            await client.pushSubscription.delete({
+              id: sub.id,
+              version: sub.version,
+            });
+          } else {
+            console.error('Error sending notification:', {
+              result,
+              subId: sub.id,
+              notificationId: pushPayload.notification?.id,
+            });
+          }
+        }
+
+        return result;
+      }),
+    );
+  } catch (error) {
+    console.error('Failed to send push notification:', {userId, error});
+  }
 }
 
 export default webpush;

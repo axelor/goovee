@@ -6,6 +6,7 @@ import {headers} from 'next/headers';
 import path from 'path';
 import {pipeline} from 'stream';
 import {promisify} from 'util';
+import {after} from 'next/server';
 import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
@@ -627,45 +628,50 @@ export async function addPost({
       const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${group.id}?searchid=${post.id}#post-${post.id}`;
 
       for (const reciever of subscribers) {
+        const member = reciever.member;
         if (
-          reciever.member?.id &&
-          reciever.member.id !== user.id // exclude the post author
+          member?.id &&
+          member.id !== user.id // exclude the post author
         ) {
           const tr = getTranslation.bind(null, {
-            locale: reciever.member.localization?.code || DEFAULT_LOCALE,
+            locale: member.localization?.code || DEFAULT_LOCALE,
             tenant: tenantId,
           });
-          notifyUser({
-            userId: reciever.member.id,
-            tenantId,
-            workspaceURL,
-            client,
-            payload: {
-              title: await tr(
-                '{0} created a new post',
-                user.simpleFullName || user.name || '',
-              ),
-              body: post?.title ?? '',
-              url: postLink,
-              tag: NotificationTag.forumNewPost(post.id),
-            },
+          after(async () => {
+            await notifyUser({
+              userId: member.id,
+              tenantId,
+              workspaceURL,
+              client,
+              payload: {
+                title: await tr(
+                  '{0} created a new post',
+                  user.simpleFullName || user.name || '',
+                ),
+                body: post?.title ?? '',
+                url: postLink,
+                tag: NotificationTag.forumNewPost(post.id),
+              },
+            });
           });
         }
       }
 
       if (post?.author && post?.forumGroup) {
-        sendEmailNotifications({
-          type: ContentType.POST,
-          title: post?.title ?? '',
-          content: post?.content ?? '',
-          author: {
-            id: post.author.id,
-            simpleFullName: post.author.simpleFullName ?? '',
-          },
-          group: {name: post.forumGroup.name ?? ''},
-          subscribers,
-          link: postLink,
-        });
+        after(() =>
+          sendEmailNotifications({
+            type: ContentType.POST,
+            title: post?.title ?? '',
+            content: post?.content ?? '',
+            author: {
+              id: post.author!.id,
+              simpleFullName: post.author!.simpleFullName ?? '',
+            },
+            group: {name: post.forumGroup!.name ?? ''},
+            subscribers,
+            link: postLink,
+          }),
+        );
       }
     }
     revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
@@ -1032,24 +1038,29 @@ export const createComment: CreateComment = async formData => {
                   parentComment.partner.localization?.code || DEFAULT_LOCALE,
                 tenant: tenantId,
               });
-              notifyUser({
-                userId: parentComment.partner.id,
-                tenantId,
-                workspaceURL,
-                client,
-                payload: {
-                  title: await tr(
-                    '{0} replied to your comment',
-                    user.simpleFullName || user.name || '',
-                  ),
-                  body: comment.note ?? '',
-                  url: withBasePath(
-                    `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
-                  ),
-                  tag: NotificationTag.forumReply(parentComment.id),
-                },
-                getReplacementTitle: count =>
-                  tr('You have {0} new replies to your comment', String(count)),
+              after(async () => {
+                await notifyUser({
+                  userId: parentComment.partner!.id,
+                  tenantId,
+                  workspaceURL,
+                  client,
+                  payload: {
+                    title: await tr(
+                      '{0} replied to your comment',
+                      user.simpleFullName || user.name || '',
+                    ),
+                    body: comment.note ?? '',
+                    url: withBasePath(
+                      `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                    ),
+                    tag: NotificationTag.forumReply(parentComment.id),
+                  },
+                  getReplacementTitle: count =>
+                    tr(
+                      'You have {0} new replies to your comment',
+                      String(count),
+                    ),
+                });
               });
 
               const replySubscriber = notificationRecievers.find(
@@ -1057,22 +1068,24 @@ export const createComment: CreateComment = async formData => {
               );
 
               if (replySubscriber) {
-                sendEmailNotifications({
-                  type: ContentType.COMMENT,
-                  title: post.title ?? '',
-                  content: comment.note ?? '',
-                  author: {
-                    id: comment?.partner?.id ?? '',
-                    simpleFullName:
-                      comment?.partner?.simpleFullName ?? 'Unknown User',
-                  },
-                  postAuthor: {
-                    id: post?.author?.id ?? '',
-                  },
-                  group: post.forumGroup,
-                  subscribers: [replySubscriber],
-                  link: postLink,
-                });
+                after(() =>
+                  sendEmailNotifications({
+                    type: ContentType.COMMENT,
+                    title: post.title ?? '',
+                    content: comment.note ?? '',
+                    author: {
+                      id: comment?.partner?.id ?? '',
+                      simpleFullName:
+                        comment?.partner?.simpleFullName ?? 'Unknown User',
+                    },
+                    postAuthor: {
+                      id: post?.author?.id ?? '',
+                    },
+                    group: post.forumGroup,
+                    subscribers: [replySubscriber],
+                    link: postLink,
+                  }),
+                );
               }
             }
           } else {
@@ -1082,48 +1095,52 @@ export const createComment: CreateComment = async formData => {
                   locale: reciever.member.localization?.code || DEFAULT_LOCALE,
                   tenant: tenantId,
                 });
-                notifyUser({
-                  userId: reciever.member.id,
-                  tenantId,
-                  workspaceURL,
-                  client,
-                  payload: {
-                    title: await tr(
-                      '{0} added a comment',
-                      user.simpleFullName || user.name || '',
-                    ),
-                    body: comment.note ?? '',
-                    url: withBasePath(
-                      `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
-                    ),
-                    tag: NotificationTag.forumPostComment(post.id),
-                  },
-                  getReplacementTitle: count =>
-                    tr(
-                      'You have {0} new comments on "{1}"',
-                      String(count),
-                      post.title ?? '',
-                    ),
+                after(async () => {
+                  await notifyUser({
+                    userId: reciever.member!.id,
+                    tenantId,
+                    workspaceURL,
+                    client,
+                    payload: {
+                      title: await tr(
+                        '{0} added a comment',
+                        user.simpleFullName || user.name || '',
+                      ),
+                      body: comment.note ?? '',
+                      url: withBasePath(
+                        `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                      ),
+                      tag: NotificationTag.forumPostComment(post.id),
+                    },
+                    getReplacementTitle: count =>
+                      tr(
+                        'You have {0} new comments on "{1}"',
+                        String(count),
+                        post.title ?? '',
+                      ),
+                  });
                 });
               }
             }
 
-            sendEmailNotifications({
-              type: ContentType.COMMENT,
-              title: post.title ?? '',
-              content: comment.note ?? '',
-              author: {
-                id: comment?.partner?.id ?? '',
-                simpleFullName:
-                  comment?.partner?.simpleFullName ?? 'Unknown User',
-              },
-              postAuthor: {
-                id: post?.author?.id ?? '',
-              },
-              group: post.forumGroup,
-              subscribers: notificationRecievers,
-              link: postLink,
-            });
+            after(() =>
+              sendEmailNotifications({
+                type: ContentType.COMMENT,
+                title: post.title ?? '',
+                content: comment.note ?? '',
+                author: {
+                  id: comment?.partner?.id ?? '',
+                  simpleFullName:
+                    comment?.partner?.simpleFullName ?? 'Unknown User',
+                },
+                postAuthor: {
+                  id: post?.author?.id ?? '',
+                },
+                group: post.forumGroup,
+                subscribers: notificationRecievers,
+                link: postLink,
+              }),
+            );
           }
         }
       }

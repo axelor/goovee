@@ -3,6 +3,7 @@
 import {z} from 'zod';
 import {headers} from 'next/headers';
 import {revalidatePath} from 'next/cache';
+import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
@@ -239,31 +240,37 @@ export async function sendInvites({
   function sendMail({email, link, subject}: any) {
     const mailService = NotificationManager.getService(NotificationType.mail);
 
-    if (mailConfig && isValidMailConfig(mailConfig)) {
-      const {template} = mailConfig;
+    after(async () => {
+      try {
+        if (mailConfig && isValidMailConfig(mailConfig)) {
+          const {template} = mailConfig;
 
-      mailService?.notify({
-        to: email,
-        subject: template?.subject || 'Greetings from Goovee',
-        html: replacePlaceholders({
-          content: template?.content,
-          values: {
-            context: {
-              link,
+          await mailService?.notify({
+            to: email,
+            subject: template?.subject || 'Greetings from Goovee',
+            html: replacePlaceholders({
+              content: template?.content,
+              values: {
+                context: {
+                  link,
+                  email,
+                },
+              },
+            }),
+          });
+        } else {
+          await mailService?.notify(
+            inviteTemplate({
+              subject,
               email,
-            },
-          },
-        }),
-      });
-    } else {
-      mailService?.notify(
-        inviteTemplate({
-          subject,
-          email,
-          link,
-        }),
-      );
-    }
+              link,
+            }),
+          );
+        }
+      } catch (err) {
+        console.error('[INVITE] Failed to send invite mail', err);
+      }
+    });
   }
 
   for (const email of emailAddresses) {

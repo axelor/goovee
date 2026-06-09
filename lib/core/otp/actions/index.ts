@@ -1,4 +1,5 @@
 // ---- CORE IMPORTS ---- //
+import {after} from 'next/server';
 import {getTranslation} from '@/locale/server';
 import NotificationManager, {NotificationType} from '@/notification';
 import {
@@ -116,33 +117,38 @@ export async function generateOTP({
     }
 
     const mailService = NotificationManager.getService(NotificationType.mail);
+    if (!result?.otp) return;
 
-    if (mailConfig && isValidMailConfig(mailConfig)) {
-      const {template} = mailConfig;
+    after(async () => {
+      try {
+        if (mailConfig && isValidMailConfig(mailConfig)) {
+          const {template} = mailConfig;
 
-      result?.otp &&
-        mailService?.notify({
-          to: email,
-          subject: template?.subject || 'Greetings from Goovee',
-          html: replacePlaceholders({
-            content: template?.content,
-            values: {
-              context: {
-                otp: result.otp,
-                email,
+          await mailService?.notify({
+            to: email,
+            subject: template?.subject || 'Greetings from Goovee',
+            html: replacePlaceholders({
+              content: template?.content,
+              values: {
+                context: {
+                  otp: result.otp,
+                  email,
+                },
               },
-            },
-          }),
-        });
-    } else {
-      result?.otp &&
-        mailService?.notify(
-          otpTemplate({
-            email,
-            otp: result.otp,
-          }),
-        );
-    }
+            }),
+          });
+        } else {
+          await mailService?.notify(
+            otpTemplate({
+              email,
+              otp: result.otp,
+            }),
+          );
+        }
+      } catch (err) {
+        console.error('[OTP] Failed to send OTP mail', err);
+      }
+    });
   } catch (err) {
     return error(
       await getTranslation(

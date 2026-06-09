@@ -206,6 +206,7 @@ export async function POST(
     client,
     tenantId,
     config,
+    deferNotifications: true,
   });
 
   if (!isTerminal) {

@@ -1,6 +1,7 @@
 'use server';
 
 import {z} from 'zod';
+import {after} from 'next/server';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ----//
@@ -250,13 +251,15 @@ export async function register(
       paymentMode!,
     );
 
-    createInvoice({
-      workspace,
-      config,
-      registrationId: registration.id,
-      currencyCode: $event.currency?.code,
-      paymentModeId,
-    }).then(res => {
+    after(async () => {
+      const res = await createInvoice({
+        workspace,
+        config,
+        registrationId: registration.id,
+        currencyCode: $event.currency?.code,
+        paymentModeId,
+      });
+
       if (res.error) {
         console.error('Invoice creation failed:', res.message);
       }
@@ -279,27 +282,31 @@ export async function register(
       locale: contact.localization?.code || DEFAULT_LOCALE,
       tenant: tenantId,
     });
-    notifyUser({
-      userId: contact.id,
-      tenantId,
-      workspaceURL,
-      client,
-      payload: {
-        title: await tr('You have been registered for an event!'),
-        body: `${registration.event!.eventTitle}`,
-        url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
-        tag: NotificationTag.event(registration.event!.id),
-      },
+    after(async () => {
+      await notifyUser({
+        userId: contact.id,
+        tenantId,
+        workspaceURL,
+        client,
+        payload: {
+          title: await tr('You have been registered for an event!'),
+          body: `${registration.event!.eventTitle}`,
+          url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
+          tag: NotificationTag.event(registration.event!.id),
+        },
+      });
     });
   }
 
-  generateRegistrationMailAction({
-    eventId,
-    participants,
-    workspaceURL,
-    client,
-    config,
-  });
+  after(() =>
+    generateRegistrationMailAction({
+      eventId,
+      participants,
+      workspaceURL,
+      client,
+      config,
+    }),
+  );
 
   return {success: true, data: clone(registration)};
 }
@@ -487,27 +494,29 @@ export const createComment: CreateComment = async formData => {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,
       });
-      notifyUser({
-        userId: parentComment.partner.id,
-        tenantId,
-        workspaceURL,
-        client,
-        payload: {
-          title: await tr(
-            '{0} replied to your comment on {1}',
-            userName,
-            event.eventTitle ?? '',
-          ),
-          body: comment.note ?? '',
-          url: `${eventUrl}#comment-${comment.id}`,
-          tag: NotificationTag.eventReply(parentComment.id),
-        },
-        getReplacementTitle: count =>
-          tr(
-            'You have {0} new replies to your comment on "{1}"',
-            String(count),
-            event.eventTitle ?? '',
-          ),
+      after(async () => {
+        await notifyUser({
+          userId: parentComment.partner!.id,
+          tenantId,
+          workspaceURL,
+          client,
+          payload: {
+            title: await tr(
+              '{0} replied to your comment on {1}',
+              userName,
+              event.eventTitle ?? '',
+            ),
+            body: comment.note ?? '',
+            url: `${eventUrl}#comment-${comment.id}`,
+            tag: NotificationTag.eventReply(parentComment.id),
+          },
+          getReplacementTitle: count =>
+            tr(
+              'You have {0} new replies to your comment on "{1}"',
+              String(count),
+              event.eventTitle ?? '',
+            ),
+        });
       });
     }
 

@@ -1,5 +1,6 @@
 'use server';
 
+import {after} from 'next/server';
 import {revalidatePath} from 'next/cache';
 import {headers} from 'next/headers';
 import {ZodIssueCode} from 'zod';
@@ -164,6 +165,7 @@ export async function mutate(
           data: createData,
           workspaceUserId: workspace.workspaceUser?.id,
           client: txClient,
+          backgroundClient: client,
           user,
           subapp,
           workspace,
@@ -210,6 +212,7 @@ export async function mutate(
         data: updateData,
         workspaceUserId: workspace.workspaceUser?.id,
         client: auth.tenant.client,
+        backgroundClient: auth.tenant.client,
         user: auth.user,
         subapp: auth.subapp,
         workspace,
@@ -288,6 +291,7 @@ export async function updateAssignment(
       data: updateData,
       workspaceUserId: workspaceUser?.id,
       client: auth.tenant.client,
+      backgroundClient: auth.tenant.client,
       user: auth.user,
       subapp: auth.subapp,
       workspace,
@@ -366,6 +370,7 @@ export async function closeTicket(
       data: updateData,
       workspaceUserId: workspaceUser?.id,
       client,
+      backgroundClient: client,
       user: auth.user,
       subapp: auth.subapp,
       workspace,
@@ -439,6 +444,7 @@ export async function cancelTicket(
       data: updateData,
       workspaceUserId: workspaceUser?.id,
       client,
+      backgroundClient: client,
       user: auth.user,
       subapp: auth.subapp,
       workspace,
@@ -848,27 +854,29 @@ export const createComment: CreateComment = async formData => {
           locale: partner.localization?.code || DEFAULT_LOCALE,
           tenant: tenantId,
         });
-        notifyUser({
-          userId: partner.id,
-          tenantId,
-          workspaceURL,
-          client,
-          payload: {
-            title: await tr(
-              '{0} replied to your comment on {1}',
-              userName,
-              ticket.name,
-            ),
-            body: commentBody,
-            url: `${ticketUrl}#comment-${comment.id}`,
-            tag: NotificationTag.ticketReply(parentComment.id),
-          },
-          getReplacementTitle: count =>
-            tr(
-              'You have {0} new replies to your comment on "{1}"',
-              String(count),
-              ticket.name,
-            ),
+        after(async () => {
+          await notifyUser({
+            userId: partner.id,
+            tenantId,
+            workspaceURL,
+            client,
+            payload: {
+              title: await tr(
+                '{0} replied to your comment on {1}',
+                userName,
+                ticket.name,
+              ),
+              body: commentBody,
+              url: `${ticketUrl}#comment-${comment.id}`,
+              tag: NotificationTag.ticketReply(parentComment.id),
+            },
+            getReplacementTitle: count =>
+              tr(
+                'You have {0} new replies to your comment on "{1}"',
+                String(count),
+                ticket.name,
+              ),
+          });
         });
       }
     } else {
@@ -877,39 +885,42 @@ export const createComment: CreateComment = async formData => {
           locale: contact.localization?.code || DEFAULT_LOCALE,
           tenant: tenantId,
         });
-        notifyUser({
-          userId: contact.id,
-          tenantId,
-          workspaceURL,
-          client,
-          payload: {
-            title: await tr(
-              '{0} added a comment on {1}',
-              userName,
-              String(ticket.name),
-            ),
-            body: commentBody,
-            url: `${ticketUrl}#comment-${comment.id}`,
-            tag: NotificationTag.ticketComment(ticket.id),
-          },
-          getReplacementTitle: count =>
-            tr(
-              'You have {0} new comments on "{1}"',
-              String(count),
-              String(ticket.name),
-            ),
+        after(async () => {
+          await notifyUser({
+            userId: contact.id,
+            tenantId,
+            workspaceURL,
+            client,
+            payload: {
+              title: await tr(
+                '{0} added a comment on {1}',
+                userName,
+                String(ticket.name),
+              ),
+              body: commentBody,
+              url: `${ticketUrl}#comment-${comment.id}`,
+              tag: NotificationTag.ticketComment(ticket.id),
+            },
+            getReplacementTitle: count =>
+              tr(
+                'You have {0} new comments on "{1}"',
+                String(count),
+                String(ticket.name),
+              ),
+          });
         });
       }
     }
 
-    getMailRecipients({
-      contacts,
-      client,
-      workspaceURL,
-    })
-      .then(reciepients => {
+    after(async () => {
+      try {
+        const reciepients = await getMailRecipients({
+          contacts,
+          client,
+          workspaceURL,
+        });
         if (reciepients.length) {
-          return sendCommentMail({
+          await sendCommentMail({
             comment,
             parentComment,
             ticketLink: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
@@ -919,11 +930,11 @@ export const createComment: CreateComment = async formData => {
             tenant: tenantId,
           });
         }
-      })
-      .catch(e => {
+      } catch (e) {
         console.error('Error sending comment email: ');
         console.error(e);
-      });
+      }
+    });
 
     return {success: true, data: clone(res)};
   } catch (e) {

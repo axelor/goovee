@@ -1,5 +1,6 @@
 'use server';
 
+import {after} from 'next/server';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
@@ -115,27 +116,29 @@ export const createComment: CreateComment = async formData => {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,
       });
-      notifyUser({
-        userId: parentComment.partner.id,
-        tenantId,
-        client,
-        workspaceURL,
-        payload: {
-          title: await tr(
-            '{0} replied to your comment on {1}',
-            userName ?? '',
-            quotation.saleOrderSeq ?? '',
-          ),
-          body: comment.body ?? '',
-          url: `${quotationUrl}#comment-${comment.id}`,
-          tag: NotificationTag.quotationReply(parentComment.id),
-        },
-        getReplacementTitle: count =>
-          tr(
-            'You have {0} new replies to your comment on "{1}"',
-            String(count),
-            quotation.saleOrderSeq ?? '',
-          ),
+      after(async () => {
+        await notifyUser({
+          userId: parentComment.partner!.id,
+          tenantId,
+          client,
+          workspaceURL,
+          payload: {
+            title: await tr(
+              '{0} replied to your comment on {1}',
+              userName ?? '',
+              quotation.saleOrderSeq ?? '',
+            ),
+            body: comment.body ?? '',
+            url: `${quotationUrl}#comment-${comment.id}`,
+            tag: NotificationTag.quotationReply(parentComment.id),
+          },
+          getReplacementTitle: count =>
+            tr(
+              'You have {0} new replies to your comment on "{1}"',
+              String(count),
+              quotation.saleOrderSeq ?? '',
+            ),
+        });
       });
     }
 

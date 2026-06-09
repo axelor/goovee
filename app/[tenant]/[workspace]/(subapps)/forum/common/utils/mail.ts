@@ -75,7 +75,7 @@ export const sendEmailNotifications = async ({
           user: subscriber.member?.simpleFullName || '',
         });
 
-        mailService.notify({
+        await mailService.notify({
           to: subscriber.member.emailAddress.address,
           subject: `New ${type}: ${title}`,
           html: emailContent,

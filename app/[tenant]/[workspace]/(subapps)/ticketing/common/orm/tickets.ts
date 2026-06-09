@@ -1,6 +1,7 @@
 import type {Entity, Payload, SelectOptions, UpdateArgs} from '@goovee/orm';
 import type {ID} from '@/types';
 import axios from 'axios';
+import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {getAOSAuthHeaders} from '@/tenant/auth';
@@ -82,6 +83,7 @@ export async function createTicket({
   data,
   workspaceUserId,
   client,
+  backgroundClient,
   user,
   subapp,
   workspace,
@@ -91,6 +93,7 @@ export async function createTicket({
   data: CreateTicketInfo;
   workspaceUserId?: ID;
   client: Client;
+  backgroundClient?: Client;
   user: UserCtx;
   subapp: SubappCtx;
   workspace: WorkspaceCtx;
@@ -190,7 +193,7 @@ export async function createTicket({
       isInternal: true,
       progress: true,
       createdByContact: {id: true, name: true, localization: {code: true}},
-      project: {name: true},
+      project: {id: true, name: true},
       ...(managedBy && {
         managedByContact: {id: true, name: true, localization: {code: true}},
       }),
@@ -269,62 +272,71 @@ export async function createTicket({
       value: newTicket.managedByContact?.name ?? '',
     });
   }
-  try {
-    if (workspaceUserId) {
-      addComment({
-        modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: user.id,
-        workspaceUserId: workspaceUserId,
-        recordId: newTicket.id,
-        subject: `Record Created by ${user.simpleFullName}`,
-        messageBody: {title: 'Record created', tracks: tracks, tags: []},
-        messageType: MAIL_MESSAGE_TYPE.notification,
-        client,
-        trackingField: 'publicBody',
-        commentField: 'note',
-      });
-    }
-  } catch (e) {
-    console.error('Error adding comment');
-    console.error(e);
-  }
-
   const contacts = uniqueById([
     newTicket.createdByContact,
     newTicket.managedByContact,
   ]).filter(c => String(c.id) !== String(user.id)); // exclude the ticket creator — they performed the action
 
-  for (const contact of contacts) {
-    const tr = getTranslation.bind(null, {
-      locale: contact.localization?.code || DEFAULT_LOCALE,
-      tenant: tenantId,
-    });
-    notifyUser({
-      userId: contact.id,
-      tenantId,
-      client,
-      workspaceURL,
-      payload: {
-        title: await tr('{0} created a new ticket', user.simpleFullName ?? ''),
-        body: await tr(
-          '{0} created a new ticket: {1}',
-          user.simpleFullName ?? '',
-          String(newTicket.name),
-        ),
-        url: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
-        tag: NotificationTag.ticketUpdate(newTicket.id),
-      },
-    });
-  }
+  after(async () => {
+    // Use backgroundClient when called inside a transaction — txClient is dead by the time after() fires.
+    const sideEffectClient = backgroundClient ?? client;
 
-  getMailRecipients({
-    contacts,
-    client,
-    workspaceURL,
-  })
-    .then(reciepients => {
+    try {
+      if (workspaceUserId) {
+        await addComment({
+          modelName: ModelMap[SUBAPP_CODES.ticketing]!,
+          userId: user.id,
+          workspaceUserId: workspaceUserId,
+          recordId: newTicket.id,
+          subject: `Record Created by ${user.simpleFullName}`,
+          messageBody: {title: 'Record created', tracks: tracks, tags: []},
+          messageType: MAIL_MESSAGE_TYPE.notification,
+          client: sideEffectClient,
+          trackingField: 'publicBody',
+          commentField: 'note',
+        });
+      }
+    } catch (e) {
+      console.error('Error adding comment');
+      console.error(e);
+    }
+
+    await Promise.all(
+      contacts.map(async contact => {
+        const tr = getTranslation.bind(null, {
+          locale: contact.localization?.code || DEFAULT_LOCALE,
+          tenant: tenantId,
+        });
+        await notifyUser({
+          userId: contact.id,
+          tenantId,
+          client: sideEffectClient,
+          workspaceURL,
+          payload: {
+            title: await tr(
+              '{0} created a new ticket',
+              user.simpleFullName ?? '',
+            ),
+            body: await tr(
+              '{0} created a new ticket: {1}',
+              user.simpleFullName ?? '',
+              String(newTicket.name),
+            ),
+            url: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+            tag: NotificationTag.ticketUpdate(newTicket.id),
+          },
+        });
+      }),
+    );
+
+    try {
+      const reciepients = await getMailRecipients({
+        contacts,
+        client: sideEffectClient,
+        workspaceURL,
+      });
       if (reciepients.length) {
-        return sendTrackMail({
+        await sendTrackMail({
           author: user.simpleFullName || '',
           type: 'create',
           tracks,
@@ -335,11 +347,11 @@ export async function createTicket({
           tenant: tenantId,
         });
       }
-    })
-    .catch(e => {
+    } catch (e) {
       console.error('Error sending tracking email: ');
       console.error(e);
-    });
+    }
+  });
 
   return newTicket;
 }
@@ -361,6 +373,7 @@ export type UTicket = Payload<AOSProjectTask, {select: typeof updateSelect}>;
 export async function updateTicket({
   data,
   client,
+  backgroundClient,
   user,
   subapp,
   workspace,
@@ -371,6 +384,7 @@ export async function updateTicket({
 }: {
   data: UpdateTicketInfo;
   client: Client;
+  backgroundClient?: Client;
   user: UserCtx;
   subapp: SubappCtx;
   workspace: WorkspaceCtx;
@@ -541,63 +555,69 @@ export async function updateTicket({
     });
   }
 
-  try {
-    if (workspaceUserId && !fromWS) {
-      addComment({
-        modelName: ModelMap[SUBAPP_CODES.ticketing]!,
-        userId: user.id,
-        workspaceUserId: workspaceUserId,
-        recordId: newTicket.id,
-        subject: `Record Updated by ${user.simpleFullName}`,
-        messageBody: {title: 'Record updated', tracks: tracks, tags: []},
-        messageType: MAIL_MESSAGE_TYPE.notification,
-        client,
-        trackingField: 'publicBody',
-        commentField: 'note',
-      });
-    }
-  } catch (e) {
-    console.log('Error adding comment');
-    console.error(e);
-  }
-
   const contacts = uniqueById([
     newTicket.createdByContact,
     newTicket.managedByContact,
     oldTicket?.managedByContact,
   ]).filter(c => String(c.id) !== String(user.id)); // exclude the user who performed the update
 
-  for (const contact of contacts) {
-    const tr = getTranslation.bind(null, {
-      locale: contact.localization?.code || DEFAULT_LOCALE,
-      tenant: tenant.id,
-    });
-    notifyUser({
-      userId: contact.id,
-      tenantId: tenant.id,
-      client,
-      workspaceURL,
-      payload: {
-        title: await tr('{0} updated a ticket', user.simpleFullName ?? ''),
-        body: await tr(
-          '{0} updated a ticket: {1}',
-          user.simpleFullName ?? '',
-          String(newTicket.name),
-        ),
-        url: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
-        tag: NotificationTag.ticketUpdate(newTicket.id),
-      },
-    });
-  }
+  after(async () => {
+    // Use backgroundClient when called inside a transaction — txClient is dead by the time after() fires.
+    const sideEffectClient = backgroundClient ?? client;
 
-  getMailRecipients({
-    contacts,
-    client,
-    workspaceURL,
-  })
-    .then(reciepients => {
+    try {
+      if (workspaceUserId && !fromWS) {
+        await addComment({
+          modelName: ModelMap[SUBAPP_CODES.ticketing]!,
+          userId: user.id,
+          workspaceUserId: workspaceUserId,
+          recordId: newTicket.id,
+          subject: `Record Updated by ${user.simpleFullName}`,
+          messageBody: {title: 'Record updated', tracks: tracks, tags: []},
+          messageType: MAIL_MESSAGE_TYPE.notification,
+          client: sideEffectClient,
+          trackingField: 'publicBody',
+          commentField: 'note',
+        });
+      }
+    } catch (e) {
+      console.log('Error adding comment');
+      console.error(e);
+    }
+
+    await Promise.all(
+      contacts.map(async contact => {
+        const tr = getTranslation.bind(null, {
+          locale: contact.localization?.code || DEFAULT_LOCALE,
+          tenant: tenant.id,
+        });
+        await notifyUser({
+          userId: contact.id,
+          tenantId: tenant.id,
+          client: sideEffectClient,
+          workspaceURL,
+          payload: {
+            title: await tr('{0} updated a ticket', user.simpleFullName ?? ''),
+            body: await tr(
+              '{0} updated a ticket: {1}',
+              user.simpleFullName ?? '',
+              String(newTicket.name),
+            ),
+            url: `${workspaceURL}/${SUBAPP_CODES.ticketing}/projects/${newTicket.project?.id}/tickets/${newTicket.id}`,
+            tag: NotificationTag.ticketUpdate(newTicket.id),
+          },
+        });
+      }),
+    );
+
+    try {
+      const reciepients = await getMailRecipients({
+        contacts,
+        client: sideEffectClient,
+        workspaceURL,
+      });
       if (reciepients.length) {
-        return sendTrackMail({
+        await sendTrackMail({
           author: user.simpleFullName || '',
           type: 'update',
           tracks,
@@ -608,11 +628,11 @@ export async function updateTicket({
           tenant: tenant.id,
         });
       }
-    })
-    .catch(e => {
+    } catch (e) {
       console.error('Error sending tracking email: ');
       console.error(e);
-    });
+    }
+  });
   return newTicket;
 }
 

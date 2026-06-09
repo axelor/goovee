@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import sanitizeHtml from 'sanitize-html';
-import {NextResponse} from 'next/server';
+import {NextResponse, after} from 'next/server';
 import {z} from 'zod';
 
 import {manager} from '@/tenant';
@@ -170,7 +170,7 @@ async function sendMail({
   const html =
     mail?.body || (await notificationTemplate({user, tenantId, app, entity}));
 
-  mailService?.notify({
+  await mailService?.notify({
     to: user.email,
     subject:
       mail?.subject ||
@@ -205,7 +205,7 @@ async function sendSystemNotification({
   };
   client: Client;
 }) {
-  notifyUser({
+  await notifyUser({
     userId: user.id,
     tenantId,
     workspaceURL: workspace.url,
@@ -254,19 +254,26 @@ async function sendNotifications(data: {
       client,
     });
 
-    processBatch(subscribers, async ({user, entity}) => {
-      sendMail({user, tenantId, mail, entity, app});
-      sendSystemNotification({
-        user,
-        tenantId,
-        mail,
-        entity,
-        app,
-        workspace,
-        client,
-      });
+    await processBatch(subscribers, async ({user, entity}) => {
+      await Promise.all([
+        sendMail({user, tenantId, mail, entity, app}),
+        sendSystemNotification({
+          user,
+          tenantId,
+          mail,
+          entity,
+          app,
+          workspace,
+          client,
+        }),
+      ]);
     });
-  } catch (err) {}
+  } catch (err) {
+    console.error(
+      '[NOTIFICATIONS] Failed to process webhook notifications',
+      err,
+    );
+  }
 }
 
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
@@ -348,15 +355,17 @@ export async function POST(request: Request) {
     return response('Invalid App', 401);
   }
 
-  sendNotifications({
-    tenantId,
-    code,
-    recordId: String(record.id),
-    mail,
-    client,
-    workspace,
-    app,
-  });
+  after(() =>
+    sendNotifications({
+      tenantId,
+      code,
+      recordId: String(record.id),
+      mail,
+      client,
+      workspace,
+      app,
+    }),
+  );
 
   return response('Success', 200);
 }

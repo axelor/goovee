@@ -1,6 +1,7 @@
 'use server';
 
 import {z} from 'zod';
+import {after} from 'next/server';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
@@ -233,27 +234,29 @@ export const createComment: CreateComment = async formData => {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,
       });
-      notifyUser({
-        userId: parentComment.partner.id,
-        tenantId,
-        workspaceURL,
-        client,
-        payload: {
-          title: await tr(
-            '{0} replied to your comment on {1}',
-            userName ?? '',
-            newsItem.title ?? '',
-          ),
-          body: comment.note ?? '',
-          url: newsUrl,
-          tag: NotificationTag.newsReply(parentComment.id),
-        },
-        getReplacementTitle: count =>
-          tr(
-            'You have {0} new replies to your comment on "{1}"',
-            String(count),
-            newsItem.title ?? '',
-          ),
+      after(async () => {
+        await notifyUser({
+          userId: parentComment.partner!.id,
+          tenantId,
+          workspaceURL,
+          client,
+          payload: {
+            title: await tr(
+              '{0} replied to your comment on {1}',
+              userName ?? '',
+              newsItem.title ?? '',
+            ),
+            body: comment.note ?? '',
+            url: newsUrl,
+            tag: NotificationTag.newsReply(parentComment.id),
+          },
+          getReplacementTitle: count =>
+            tr(
+              'You have {0} new replies to your comment on "{1}"',
+              String(count),
+              newsItem.title ?? '',
+            ),
+        });
       });
     }
 

@@ -42,7 +42,7 @@ export async function notifyInvoicePaymentSuccess({
       locale: user.localization?.code || DEFAULT_LOCALE,
       tenant: tenantId,
     });
-    notifyUser({
+    await notifyUser({
       userId: user.id,
       tenantId,
       client,

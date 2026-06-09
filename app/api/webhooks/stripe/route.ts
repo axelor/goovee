@@ -1,5 +1,5 @@
 import {experimental_taintUniqueValue} from 'react';
-import {NextResponse} from 'next/server';
+import {NextResponse, after} from 'next/server';
 import {headers} from 'next/headers';
 import Stripe from 'stripe';
 
@@ -255,12 +255,14 @@ export async function POST(req: Request) {
 
             notifyPaymentUpdate(source, sourceId, paymentContext.id);
             if (paymentContext.payer) {
-              notifyInvoicePaymentSuccess({
-                invoiceId: sourceId,
-                payer: paymentContext.payer,
-                tenantId,
-                client,
-              });
+              after(() =>
+                notifyInvoicePaymentSuccess({
+                  invoiceId: sourceId,
+                  payer: paymentContext.payer!,
+                  tenantId,
+                  client,
+                }),
+              );
             }
 
             break;

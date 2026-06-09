@@ -1,0 +1,14 @@
+{
+  "title": "Schedule background side effects with next/server after()",
+  "type": "change",
+  "description": "Replace fire-and-forget promise chains with after() across server actions and API routes. Fixes async forEach in ticketing mail utilities, uses a background client for deferred ticket operations to avoid closed-transaction errors, and adds error handling to all background tasks.",
+  "scope": [
+    "core",
+    "events",
+    "forum",
+    "news",
+    "quotations",
+    "ticketing",
+    "invoices"
+  ]
+}
