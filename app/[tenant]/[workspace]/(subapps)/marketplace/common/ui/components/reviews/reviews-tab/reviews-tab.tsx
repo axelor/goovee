@@ -95,7 +95,10 @@ export async function ReviewsTab({
   const ratingAggregates = await client.aOSMarketplaceReview.aggregate({
     count: {id: true},
     groupBy: {rating: true},
-    where: {marketplaceProduct: {id: product.id}},
+    where: {
+      marketplaceProduct: {id: product.id},
+      OR: [{archived: false}, {archived: null}],
+    },
   });
 
   const ratingDistribution = {
