@@ -1,8 +1,13 @@
+// GOOVEE_PUBLIC_* vars are read from process.env at request time (not build time).
+// force-dynamic ensures this layout is never statically rendered and cached at build,
+// which would freeze env values and break runtime injection across environments.
+export const dynamic = 'force-dynamic';
+
 import {Poppins as FontSans} from 'next/font/google';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {Environment} from '@/environment';
+import {Environment, getPublicEnvironment} from '@/environment';
 import {findTheme} from '@/orm/theme';
 import {Toaster} from '@/ui/components/toaster';
 
@@ -70,7 +75,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const theme = await findTheme();
+  const [theme, env] = await Promise.all([findTheme(), getPublicEnvironment()]);
 
   return (
     <Theme theme={theme}>
@@ -79,7 +84,7 @@ export default async function RootLayout({
           <meta name="mobile-web-app-capable" content="yes" />
         </head>
         <body className={fontSans.className}>
-          <Environment>
+          <Environment value={env}>
             <Locale>
               <SerwistProvider
                 swUrl={withBasePath('/sw.js')}
