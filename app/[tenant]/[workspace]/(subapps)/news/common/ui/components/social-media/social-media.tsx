@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {i18n} from '@/locale';
 import {Skeleton} from '@/ui/components';
+import {useEnvironment} from '@/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
@@ -22,6 +23,7 @@ type SocialMediaProps = {
 export const SocialMedia = ({
   availableSocials: availableSocialsProps,
 }: SocialMediaProps) => {
+  const env = useEnvironment();
   const availableSocials = SOCIAL_ICONS.filter(icon =>
     availableSocialsProps?.includes(icon.name),
   );
@@ -38,7 +40,7 @@ export const SocialMedia = ({
 
       <div className="flex gap-6">
         {availableSocials.map(({key, name, color, image}) => {
-          const redirectUrl = getSocialURL(name);
+          const redirectUrl = getSocialURL(name, env);
           return (
             <Link
               key={key}

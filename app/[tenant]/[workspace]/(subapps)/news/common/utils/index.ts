@@ -1,35 +1,34 @@
-// ---- CORE IMPORTS ---- //
-import {getEnv} from '@/environment';
-
 export * from './common';
 
-export function getSocialURL(code: string) {
+type Environment = Record<string, string | undefined>;
+
+export function getSocialURL(code: string, env: Environment) {
   switch (code) {
     case 'linkedin':
-      return getLinkedinURL();
+      return getLinkedinURL(env);
     case 'twitter':
-      return getTwitterURL();
+      return getTwitterURL(env);
     case 'instagram':
-      return getInstagramURL();
+      return getInstagramURL(env);
     case 'whatsapp':
-      return getWhatsappURL();
+      return getWhatsappURL(env);
     default:
       return '';
   }
 }
 
-export function getLinkedinURL() {
-  return getEnv()?.GOOVEE_PUBLIC_LINKEDIN_URL;
+export function getLinkedinURL(env: Environment) {
+  return env?.GOOVEE_PUBLIC_LINKEDIN_URL;
 }
 
-export function getTwitterURL() {
-  return getEnv()?.GOOVEE_PUBLIC_TWITTER_URL;
+export function getTwitterURL(env: Environment) {
+  return env?.GOOVEE_PUBLIC_TWITTER_URL;
 }
 
-export function getInstagramURL() {
-  return getEnv()?.GOOVEE_PUBLIC_INSTAGRAM_URL;
+export function getInstagramURL(env: Environment) {
+  return env?.GOOVEE_PUBLIC_INSTAGRAM_URL;
 }
 
-export function getWhatsappURL() {
-  return getEnv()?.GOOVEE_PUBLIC_WHATSAPP_URL;
+export function getWhatsappURL(env: Environment) {
+  return env?.GOOVEE_PUBLIC_WHATSAPP_URL;
 }

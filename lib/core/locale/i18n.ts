@@ -1,7 +1,6 @@
 import axios from 'axios';
 import {findLocaleLanguage, translate} from '@/locale/utils';
 import {DEFAULT_LOCALE} from '@/locale';
-import {getEnv} from '@/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 const rest = axios.create();
@@ -9,7 +8,11 @@ const rest = axios.create();
 export const i18n = (() => {
   let translations: Record<string, string> = {};
 
-  async function load(locale: string = DEFAULT_LOCALE, tenant?: string) {
+  async function load(
+    locale: string = DEFAULT_LOCALE,
+    tenant?: string,
+    host?: string,
+  ) {
     if (!locale) {
       return {};
     }
@@ -18,7 +21,7 @@ export const i18n = (() => {
       try {
         const result = await rest
           .get(
-            `${getEnv()?.GOOVEE_PUBLIC_HOST}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`,
+            `${host ?? ''}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`,
           )
           .then(result => result?.data || {})
           .catch(() => ({}));
