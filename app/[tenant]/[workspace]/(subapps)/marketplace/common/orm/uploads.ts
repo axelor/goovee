@@ -39,6 +39,17 @@ export async function syncProductImages({
     where: {marketplaceProduct: {id: productId}},
     select: {id: true},
   });
+  const existingIds = new Set(existing.map(row => row.id));
+
+  /* Each `existing` image must reference a picture row that belongs to this
+   * product. The id/version come straight from the client form; without this
+   * guard a publisher could re-sequence another product's picture by id. */
+  for (const img of images) {
+    if (img.kind === 'existing' && !existingIds.has(img.id)) {
+      throw new Error('PICTURE_NOT_FOUND');
+    }
+  }
+
   const keep = new Set(
     images.flatMap(img => (img.kind === 'existing' ? [img.id] : [])),
   );

@@ -492,6 +492,14 @@ export async function saveProductWithVersions(
         ),
       };
     }
+    if (errorMessage === 'PICTURE_NOT_FOUND') {
+      return {
+        error: true,
+        message: await t(
+          'A selected screenshot is no longer available. Reload the product and try again.',
+        ),
+      };
+    }
     if (errorMessage === 'DUP_VERSION') {
       return {
         error: true,
