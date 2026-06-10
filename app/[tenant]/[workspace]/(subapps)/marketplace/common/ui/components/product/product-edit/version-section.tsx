@@ -118,14 +118,18 @@ function StatusPill({label, tone}: StatusPillInfo) {
 /**
  * What saving will do to the version under the cursor, keyed on its real
  * persisted status (not the staged intent) and the workspace review policy.
- * `currentStatus` is null for an unsaved new row.
+ * `currentStatus` is null for an unsaved new row. A rejected version also
+ * surfaces the reviewer's latest rejection reason so the author knows what to
+ * fix before resubmitting.
  */
 function ReviewStatusAlert({
   requiresReview,
   currentStatus,
+  rejectionReason,
 }: {
   requiresReview: boolean;
   currentStatus: string | null;
+  rejectionReason?: string;
 }) {
   // Rejected or unpublished — saving brings the version back into circulation,
   // either directly or via review depending on the workspace flag.
@@ -133,6 +137,30 @@ function ReviewStatusAlert({
     currentStatus === STATUS.REJECTED ||
     currentStatus === STATUS.UNPUBLISHED
   ) {
+    const resubmitHint = requiresReview
+      ? i18n.t(
+          'You may submit this version for review again. It becomes visible once approved.',
+        )
+      : i18n.t(
+          'You may publish this version again. Changes are visible to the community immediately.',
+        );
+    if (currentStatus === STATUS.REJECTED && rejectionReason) {
+      return (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>{i18n.t('Rejected')}</AlertTitle>
+          <AlertDescription className="space-y-1">
+            <p>
+              <span className="font-medium">
+                {i18n.t('Rejection reason')}:{' '}
+              </span>
+              {rejectionReason}
+            </p>
+            <p>{resubmitHint}</p>
+          </AlertDescription>
+        </Alert>
+      );
+    }
     const title =
       currentStatus === STATUS.REJECTED
         ? i18n.t('Rejected')
@@ -141,15 +169,7 @@ function ReviewStatusAlert({
       <Alert variant="primary">
         <Info className="h-4 w-4" />
         <AlertTitle>{title}</AlertTitle>
-        <AlertDescription>
-          {requiresReview
-            ? i18n.t(
-                'You may submit this version for review again. It becomes visible once approved.',
-              )
-            : i18n.t(
-                'You may publish this version again. Changes are visible to the community immediately.',
-              )}
-        </AlertDescription>
+        <AlertDescription>{resubmitHint}</AlertDescription>
       </Alert>
     );
   }
@@ -348,6 +368,7 @@ export function VersionSection({
           <ReviewStatusAlert
             requiresReview={requiresReview}
             currentStatus={currentVersionMeta?.originalStatus ?? null}
+            rejectionReason={currentVersionMeta?.rejectionReason}
           />
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm text-muted-foreground">

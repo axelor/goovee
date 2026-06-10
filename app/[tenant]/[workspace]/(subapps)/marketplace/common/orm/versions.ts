@@ -121,6 +121,14 @@ export async function findMyProductVersions({
       compatibilitySet: {
         select: {id: true, title: true, name: true},
       },
+      /* No nested `take`: it would LIMIT the batched child query across the
+       * whole page, not per version (goovee-orm#31). Rows are append-only, so
+       * id DESC is newest-first and the consumer reads `rejectionList[0]`.
+       * TODO: once goovee-orm#32 ships, ask for `take: 1` here instead. */
+      rejectionList: {
+        select: {id: true, reason: true, dateOfRejection: true},
+        orderBy: {id: 'DESC'},
+      },
     },
   });
 }

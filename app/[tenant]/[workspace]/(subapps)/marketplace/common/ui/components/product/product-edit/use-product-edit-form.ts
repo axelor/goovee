@@ -46,6 +46,7 @@ type VersionStatus = VersionRowValues['statusSelect'];
 export type VersionMeta = {
   originalStatus: string;
   bundle?: {id: string; fileName?: string; sizeText?: string};
+  rejectionReason?: string;
 };
 
 function versionToMeta(version: ExistingVersion): VersionMeta {
@@ -58,6 +59,9 @@ function versionToMeta(version: ExistingVersion): VersionMeta {
           sizeText: version.bundleFile.sizeText ?? undefined,
         }
       : undefined,
+    /* Rejections come newest-first; the author only ever needs the reason of
+     * the rejection they are responding to. */
+    rejectionReason: version.rejectionList?.[0]?.reason,
   };
 }
 

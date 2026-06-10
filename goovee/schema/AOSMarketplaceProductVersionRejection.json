@@ -1,0 +1,22 @@
+{
+  "name": "AOSMarketplaceProductVersionRejection",
+  "table": "portal_marketplace_product_version_rejection",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceProductVersion",
+      "target": "AOSMarketplaceProductVersion",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "reason",
+      "required": true
+    },
+    {
+      "type": "DateTime",
+      "name": "dateOfRejection"
+    }
+  ]
+}

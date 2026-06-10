@@ -62,6 +62,12 @@
       "target": "AOSMarketplaceAxelorVersion"
     },
     {
+      "type": "OneToMany",
+      "name": "rejectionList",
+      "target": "AOSMarketplaceProductVersionRejection",
+      "mappedBy": "marketplaceProductVersion"
+    },
+    {
       "type": "Boolean",
       "name": "archived"
     }
