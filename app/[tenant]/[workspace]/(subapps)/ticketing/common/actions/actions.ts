@@ -21,7 +21,6 @@ import {
   FetchCommentsPropsSchema,
   isCommentEnabled,
 } from '@/comments';
-import {zodParseFormData} from '@/utils/formdata';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 
@@ -823,16 +822,17 @@ export async function searchTickets({
   return {success: true, data: clone(tickets)};
 }
 
-export const createComment: CreateComment = async formData => {
+export const createComment: CreateComment = async props => {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {workspaceURL, workspaceURI, ...rest} = zodParseFormData(
-    formData,
-    CreateCommentPropsSchema,
-  );
+  const parsed = CreateCommentPropsSchema.safeParse(props);
+  if (!parsed.success) {
+    return {error: true, message: await t('Invalid request')};
+  }
+  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
   const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
 
@@ -876,16 +876,19 @@ export const createComment: CreateComment = async formData => {
   }
 
   try {
-    const res = await addComment({
-      modelName,
-      userId: auth.user.id,
-      workspaceUserId: workspaceUser.id,
-      client,
-      commentField: 'note',
-      trackingField: 'publicBody',
-      subject: `${user.simpleFullName || user.name} added a comment`,
-      ...rest,
-    });
+    // keeps attachment tokens redeemable if creation fails
+    const res = await client.$transaction(txClient =>
+      addComment({
+        modelName,
+        userId: auth.user.id,
+        workspaceUserId: workspaceUser.id,
+        client: txClient,
+        commentField: 'note',
+        trackingField: 'publicBody',
+        subject: `${user.simpleFullName || user.name} added a comment`,
+        ...rest,
+      }),
+    );
 
     const [comment, parentComment] = res;
 

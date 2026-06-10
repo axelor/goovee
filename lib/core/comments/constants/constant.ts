@@ -1,4 +1,8 @@
 export const MAX_FILE_SIZE = 20000000; // 20 MB
+
+/* Staged-upload purpose under which comment attachments are pre-uploaded
+ * (registered in lib/core/upload/staged-upload.ts) and redeemed at creation. */
+export const COMMENT_ATTACHMENT_PURPOSE = 'comments:attachment';
 export const COMMENT = 'Comment';
 export const COMMENTS = 'Comments';
 export const DISABLED_COMMENT_PLACEHOLDER =

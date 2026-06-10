@@ -1,21 +1,21 @@
 import type {QueryOptions} from '@goovee/orm';
-import fs from 'fs';
 import path from 'path';
-import {pipeline} from 'stream';
-import {promisify} from 'util';
 
 // ---- CORE IMPORTS ---- //
 import {ORDER_BY} from '@/constants';
 import {AOSMailMessage} from '@/goovee/.generated/models';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
+import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import type {ID} from '@/types';
-import {getFileSizeText} from '@/utils/files';
 import {sql} from '@/utils/template-string';
-import {getStoragePath} from '@/storage/index';
 
 // ---- LOCAL IMPORTS ---- //
-import {MAIL_MESSAGE_TYPE, SORT_TYPE} from '../constants';
+import {
+  COMMENT_ATTACHMENT_PURPOSE,
+  MAIL_MESSAGE_TYPE,
+  SORT_TYPE,
+} from '../constants';
 import type {
   AddCommentProps,
   Comment,
@@ -28,8 +28,6 @@ import type {
 import {CommentSchema, CommentsSchema} from '../utils';
 import {and} from '@/utils/orm';
 import {getTotal} from '@/utils/pagination';
-
-const pump = promisify(pipeline);
 
 function getSelectFields({
   showRepliesInMainThread,
@@ -303,56 +301,53 @@ type Attachment = {
   description: string | null;
 };
 
-async function upload({
+/**
+ * Redeem pre-staged upload claims into `meta_file` ids. A user-supplied title
+ * renames the stored file, keeping the staged file's extension.
+ */
+async function redeemAttachments({
   attachments,
+  owner,
   client,
 }: {
   attachments: CommentAttachment[];
+  owner: ID;
   client: Client;
 }): Promise<Attachment[]> {
-  if (!attachments.length) return [];
+  const redeemed: Attachment[] = [];
 
-  const getTimestampFilename = (name: string) => {
-    return `${new Date().getTime()}-${name}`;
-  };
-
-  const create = async ({file, title, description}: CommentAttachment) => {
-    const name = title || file.name;
-    const timestampFilename = getTimestampFilename(name);
-
-    await pump(
-      file.stream(),
-      fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
-    );
-
-    const metaFile = await client.aOSMetaFile.create({
-      data: {
-        fileName: name,
-        filePath: timestampFilename,
-        fileType: file.type,
-        fileSize: file.size,
-        sizeText: getFileSizeText(file.size),
-        description,
-      },
-      select: {id: true, description: true},
+  for (const {token, title, description} of attachments) {
+    const id = await redeemUpload({
+      token,
+      purpose: COMMENT_ATTACHMENT_PURPOSE,
+      owner,
+      client,
     });
 
-    return {
-      id: String(metaFile.id),
-      description: metaFile.description,
-    };
-  };
+    const metaFile = await client.aOSMetaFile.findOne({
+      where: {id},
+      select: {fileName: true},
+    });
+    if (metaFile) {
+      const fileName = title
+        ? `${title}${path.extname(metaFile.fileName ?? '')}`
+        : undefined;
+      if (fileName || description) {
+        await client.aOSMetaFile.update({
+          data: {
+            id,
+            version: metaFile.version,
+            ...(fileName && {fileName}),
+            ...(description && {description}),
+          },
+        });
+      }
+    }
 
-  const data = await Promise.all(
-    attachments?.map(({title, description, file}) =>
-      create({
-        title: title ? `${title}${path.extname(file.name)}` : file.name,
-        description,
-        file,
-      }),
-    ),
-  );
-  return data;
+    redeemed.push({id, description: description || null});
+  }
+
+  return redeemed;
 }
 
 export async function addComment(
@@ -389,10 +384,13 @@ export async function addComment(
     }
   }
 
-  let attachments: Attachment[] = [];
-  if (data?.attachments?.length) {
-    attachments = await upload({attachments: data.attachments, client});
-  }
+  const attachments: Attachment[] = data?.attachments?.length
+    ? await redeemAttachments({
+        attachments: data.attachments,
+        owner: userId,
+        client,
+      })
+    : [];
 
   const timestamp = new Date();
 
@@ -413,7 +411,7 @@ export async function addComment(
       author: {select: {id: workspaceUserId}},
       createdBy: {select: {id: workspaceUserId}},
       //relatedName: TODO: Add this later
-      ...(attachments?.length > 0 && {
+      ...(attachments.length > 0 && {
         mailMessageFileList: {
           create: attachments.map(attachment => ({
             description: attachment.description,

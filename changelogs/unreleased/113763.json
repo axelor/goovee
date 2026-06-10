@@ -1,0 +1,6 @@
+{
+  "title": "Upload comment attachments up front via staged uploads",
+  "type": "change",
+  "description": "Comment attachments upload at pick time with per-file progress and retry. Large files no longer hit the request size limit; the 20MB cap is enforced server-side while streaming. Files rejected at pick show an error toast. Covers ticketing, news, events, quotations and forum comments.",
+  "scope": ["core", "ticketing", "news", "events", "quotations", "forum"]
+}

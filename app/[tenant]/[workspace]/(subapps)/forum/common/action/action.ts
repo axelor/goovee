@@ -30,7 +30,6 @@ import {
   FetchCommentsPropsSchema,
   isCommentEnabled,
 } from '@/comments';
-import {zodParseFormData} from '@/utils/formdata';
 import {addComment, findComments} from '@/comments/orm';
 import {getStoragePath} from '@/storage/index';
 import {notifyUser} from '@/pwa/utils';
@@ -919,7 +918,7 @@ export async function fetchGroupsByMembers({
   });
 }
 
-export const createComment: CreateComment = async formData => {
+export const createComment: CreateComment = async props => {
   const session = await getSession();
   const user = session?.user;
   if (!user) {
@@ -931,10 +930,11 @@ export const createComment: CreateComment = async formData => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {workspaceURL, workspaceURI, ...rest} = zodParseFormData(
-    formData,
-    CreateCommentPropsSchema,
-  );
+  const parsed = CreateCommentPropsSchema.safeParse(props);
+  if (!parsed.success) {
+    return {error: true, message: await t('Invalid request')};
+  }
+  const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return {error: true, message: await t('Invalid tenant')};
@@ -999,16 +999,19 @@ export const createComment: CreateComment = async formData => {
   }
 
   try {
-    const [comment, parentComment] = await addComment({
-      modelName,
-      userId: user.id,
-      workspaceUserId: workspaceUser.id,
-      client,
-      commentField: 'note',
-      trackingField: 'publicBody',
-      subject: `${user.simpleFullName || user.name} added a comment`,
-      ...rest,
-    });
+    // keeps attachment tokens redeemable if creation fails
+    const [comment, parentComment] = await client.$transaction(txClient =>
+      addComment({
+        modelName,
+        userId: user.id,
+        workspaceUserId: workspaceUser.id,
+        client: txClient,
+        commentField: 'note',
+        trackingField: 'publicBody',
+        subject: `${user.simpleFullName || user.name} added a comment`,
+        ...rest,
+      }),
+    );
 
     if (comment) {
       const post = posts[0];

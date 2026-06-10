@@ -9,7 +9,6 @@ import {i18n} from '@/locale';
 import {ID} from '@/types';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
-import {packIntoFormData} from '@/utils/formdata';
 
 // ---- LOCAL IMPORTS ---- //
 import {SORT_TYPE} from '../constants';
@@ -112,9 +111,8 @@ export function useComments(props: UseCommentsProps) {
           parentId: parent,
           showRepliesInMainThread,
         };
-        const formData = packIntoFormData(createCommentProps);
 
-        const {error, message, data} = await createComment(formData);
+        const {error, message, data} = await createComment(createCommentProps);
         if (error) {
           toast({
             variant: 'destructive',

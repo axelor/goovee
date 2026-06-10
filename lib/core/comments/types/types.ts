@@ -9,6 +9,7 @@ import type {MAIL_MESSAGE_TYPE} from '../constants';
 import type {
   Comment,
   CommentData,
+  CreateCommentProps,
   FetchCommentsProps,
   Track,
 } from '../utils/validators';
@@ -33,7 +34,7 @@ export type TrackingField = 'body' | 'publicBody';
 export type CommentField = 'note' | 'body';
 
 export type CreateComment = (
-  formData: FormData,
+  props: CreateCommentProps,
 ) => ActionResponse<Cloned<[Comment, Comment | undefined]>>;
 
 export type AddCommentProps = {

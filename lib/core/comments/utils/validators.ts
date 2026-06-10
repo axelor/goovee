@@ -1,14 +1,15 @@
 import z from 'zod';
 
-import {MAX_FILE_SIZE, SORT_TYPE} from '../constants';
+import {uploadTokenSchema} from '@/lib/core/upload/validators';
+
+import {SORT_TYPE} from '../constants';
 
 const attachmentSchema = z.object({
   title: z.string(),
   description: z.string(),
-  file: z
-    .any()
-    .refine(file => file, 'File is required.')
-    .refine(file => file.size <= MAX_FILE_SIZE, `Max file size is 20MB.`),
+  /* Single-use claim token of a file pre-staged via the upload route; redeemed
+   * server-side when the comment is created. */
+  token: uploadTokenSchema,
 });
 
 export const formSchema = z

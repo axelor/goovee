@@ -4,6 +4,10 @@ import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import type {Client, GooveeClient} from '@/goovee/.generated/client';
+import {
+  COMMENT_ATTACHMENT_PURPOSE,
+  MAX_FILE_SIZE,
+} from '@/lib/core/comments/constants';
 import {getStoragePath} from '@/storage/index';
 import type {ID} from '@/types';
 
@@ -48,10 +52,13 @@ export interface UploadPolicy {
  * the optional `file` schema validates type/content.
  */
 export const UPLOAD_PURPOSES = {
-  // 'marketplace:bundle': {
-  //   maxBytes: 20 * 1024 * 1024,
-  //   file: z.file().mime(['application/zip'], {error: 'Bundle must be a zip'}),
-  // },
+  /* Comment attachments — shared by ticketing, news, events, quotations and
+   * forum comments. Any file type is accepted, as with the legacy inline
+   * upload. */
+  [COMMENT_ATTACHMENT_PURPOSE]: {
+    maxBytes: MAX_FILE_SIZE,
+    ttlMs: 60 * 60 * 1000,
+  },
 } satisfies Record<string, UploadPolicy>;
 
 export type UploadPurpose = keyof typeof UPLOAD_PURPOSES;
