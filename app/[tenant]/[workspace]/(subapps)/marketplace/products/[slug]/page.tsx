@@ -33,7 +33,7 @@ import {OverviewTab} from '../../common/ui/components/product/overview-tab';
 import {ReviewsTab} from '../../common/ui/components/reviews/reviews-tab';
 import {SupportTab} from '../../common/ui/components/product/support-tab';
 import {VersionsTab} from '../../common/ui/components/versions/versions-tab';
-import {ensureAuth} from '../../common/utils/auth-helper';
+import {canManageProducts, ensureAuth} from '../../common/utils/auth-helper';
 import {
   productPageParamsSchema,
   productSearchParamsSchema,
@@ -82,7 +82,12 @@ export default async function ProductPage(props: {
 
   /* Preview of an unpublished product is a logged-in, seller-only capability:
    * anyone requesting it without an account or publishing rights gets a 404. */
-  if (preview && (!auth.user || !auth.workspace.config.allowToPublish)) {
+  if (
+    preview &&
+    (!auth.user ||
+      !auth.workspace.config.allowToPublish ||
+      !canManageProducts({user: auth.user, subapp: auth.subapp}))
+  ) {
     notFound();
   }
 

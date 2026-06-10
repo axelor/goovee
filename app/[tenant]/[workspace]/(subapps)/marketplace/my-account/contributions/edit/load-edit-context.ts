@@ -8,7 +8,7 @@ import {
   findProductCategories,
   resolveNewListingCurrency,
 } from '../../../common/orm';
-import {ensureAuth} from '../../../common/utils/auth-helper';
+import {canManageProducts, ensureAuth} from '../../../common/utils/auth-helper';
 
 /**
  * Shared setup for the contributions edit routes: resolve the workspace, run the
@@ -40,7 +40,9 @@ export async function loadEditContext(params: {
   }
   if (error) notFound();
   /* Seller-only area — non-sellers can't reach the edit routes by URL either. */
-  if (!auth.workspace.config.allowToPublish) notFound();
+  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
+    notFound();
+  }
 
   const [categories, licenses, compatibilityVersions, newListingCurrency] =
     await Promise.all([

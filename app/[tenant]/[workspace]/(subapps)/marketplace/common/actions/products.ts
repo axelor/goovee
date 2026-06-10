@@ -27,7 +27,7 @@ import {
 } from '../orm';
 import {savePayloadSchema} from '../ui/components/product/product-edit/combined-validator';
 import {VERSIONS_PAGE_SIZE} from '../ui/components/versions/version-form/validator';
-import {ensureAuth} from '../utils/auth-helper';
+import {canManageProducts, ensureAuth} from '../utils/auth-helper';
 import {parseVersionNumber} from '../utils/version-number';
 
 const loadMyProductForEditSchema = z.object({
@@ -61,7 +61,7 @@ export async function loadMyProductForEdit(
     return {error: true, message};
   }
 
-  if (!auth.workspace.config.allowToPublish) {
+  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
@@ -179,7 +179,7 @@ export async function saveProductWithVersions(
   if (error) {
     return {error: true, message};
   }
-  if (!auth.workspace.config.allowToPublish) {
+  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),

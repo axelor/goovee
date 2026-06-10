@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
-import {ensureAuth} from '../common/utils/auth-helper';
+import {canManageProducts, ensureAuth} from '../common/utils/auth-helper';
 import {myAccountParamsSchema} from '../common/utils/validators';
 
 export default async function MyAccountPage(props: {
@@ -52,7 +52,8 @@ export default async function MyAccountPage(props: {
   }
   if (error) notFound();
 
-  const isSeller = auth.workspace.config.allowToPublish === true;
+  const isSeller =
+    auth.workspace.config.allowToPublish === true && canManageProducts(auth);
   const accountBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`;
 
   const [

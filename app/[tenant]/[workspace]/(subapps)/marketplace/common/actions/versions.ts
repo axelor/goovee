@@ -9,7 +9,7 @@ import {getTotal} from '@/utils/pagination';
 import {headers} from 'next/headers';
 import {z} from 'zod';
 import {findMyProductVersions, type MyProductVersion} from '../orm';
-import {ensureAuth} from '../utils/auth-helper';
+import {canManageProducts, ensureAuth} from '../utils/auth-helper';
 
 const loadProductVersionsSchema = z.object({
   productId: z.string().min(1),
@@ -44,7 +44,7 @@ export async function loadProductVersions(
     return {error: true, message};
   }
 
-  if (!auth.workspace.config.allowToPublish) {
+  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),

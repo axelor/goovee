@@ -1,5 +1,5 @@
 import {getSession} from '@/auth';
-import {SUBAPP_CODES} from '@/constants';
+import {ROLE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {PortalWorkspace, Subapp} from '@/orm/workspace';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
@@ -123,4 +123,21 @@ export async function ensureAuth<T extends boolean = false>(
       tenant,
     },
   };
+}
+
+/**
+ * Whether the caller may author/manage marketplace products. Restricted
+ * contacts are buyers only; the company partner itself, contact admins, and
+ * contacts with the `total` role keep full publisher access.
+ */
+export function canManageProducts({
+  user,
+  subapp,
+}: {
+  user: Pick<User, 'isContact'>;
+  subapp: Pick<Subapp, 'isContactAdmin' | 'role'>;
+}) {
+  return (
+    !user.isContact || !!subapp.isContactAdmin || subapp.role === ROLE.TOTAL
+  );
 }

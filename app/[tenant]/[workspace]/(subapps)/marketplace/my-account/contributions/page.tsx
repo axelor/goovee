@@ -29,7 +29,7 @@ import {Construction} from 'lucide-react';
 import {NoticeBanner} from '../../common/ui/components/shared/notice-banner';
 import {OverviewTab} from '../../common/ui/components/contributions/my-contributions-overview-tab';
 import {ProductsTab} from '../../common/ui/components/contributions/products-tab';
-import {ensureAuth} from '../../common/utils/auth-helper';
+import {canManageProducts, ensureAuth} from '../../common/utils/auth-helper';
 import {
   myContributionsParamsSchema,
   myContributionsSearchParamsSchema,
@@ -76,7 +76,9 @@ export default async function MyContributionsPage(props: {
 
   /* Contributions is a seller-only area; non-sellers can't reach it even by
    * typing the URL. */
-  if (!auth.workspace.config.allowToPublish) notFound();
+  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
+    notFound();
+  }
 
   const [categories, licenses, compatibilityVersions, newListingCurrency] =
     await Promise.all([
