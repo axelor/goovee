@@ -94,6 +94,7 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
   const context = {
     cart,
     workspaceURL,
+    mainPartnerId: auth.user.mainPartnerId,
   };
 
   return {
@@ -260,12 +261,12 @@ export async function checkout(
     return {error: true, message: authMessage};
   }
   const {client, config} = auth.tenant;
-  const mainPartnerId = auth.user.mainPartnerId;
 
   let paidAmount: number;
   let paymentContextId: string;
   let paymentContextVersion: number;
   let cart: ValidatedCart;
+  let mainPartnerId: string;
   try {
     const info = await getPaymentInfo({
       mode: parsed.data.payment.mode,
@@ -280,6 +281,16 @@ export async function checkout(
       return {error: true, message: await t('Payment context is empty.')};
     }
     cart = stashedCart;
+    const contextMainPartnerId = info.context.data?.mainPartnerId as
+      | string
+      | undefined;
+    if (!contextMainPartnerId) {
+      return {
+        error: true,
+        message: await t('Invalid context: buyer ID is missing.'),
+      };
+    }
+    mainPartnerId = contextMainPartnerId;
   } catch (e) {
     return {
       error: true,
