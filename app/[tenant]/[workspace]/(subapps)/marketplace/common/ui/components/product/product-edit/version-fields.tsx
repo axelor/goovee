@@ -11,6 +11,7 @@ import {
 import {Input} from '@/ui/components/input';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
+import {getFileSizeText} from '@/utils/files';
 import {useRef, type RefObject} from 'react';
 import {useFormContext, type FieldPath} from 'react-hook-form';
 import type {CompatibilityVersion} from '../../../../orm';
@@ -240,7 +241,13 @@ export function VersionFields({
         name={path('bundleToken')}
         render={() => (
           <FormItem>
-            <FormLabel>{i18n.t('Bundle file (.zip, up to 20 MB)')} *</FormLabel>
+            <FormLabel>
+              {i18n.t(
+                'Bundle file (.zip, up to {0})',
+                getFileSizeText(MAX_BUNDLE_SIZE),
+              )}{' '}
+              *
+            </FormLabel>
             <FormControl>
               <BundleDropzone
                 staged={staged}

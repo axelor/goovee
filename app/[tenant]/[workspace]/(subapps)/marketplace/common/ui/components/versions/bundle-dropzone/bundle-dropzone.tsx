@@ -2,6 +2,7 @@ import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
 import {Progress} from '@/ui/components/progress/progress';
 import {cn} from '@/utils/css';
+import {getFileSizeText} from '@/utils/files';
 import {CheckCircle2, FileArchive, Upload, X} from 'lucide-react';
 import {useRef, useState} from 'react';
 
@@ -66,7 +67,7 @@ export function BundleDropzone({
       return;
     }
     if (candidate.size > maxSize) {
-      onError(i18n.t('Bundle must be 20 MB or less'));
+      onError(i18n.t('Bundle must be {0} or less', getFileSizeText(maxSize)));
       return;
     }
     onFile(candidate);

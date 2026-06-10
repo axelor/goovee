@@ -10,6 +10,7 @@ import {
 import {Progress} from '@/ui/components/progress/progress';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
+import {getFileSizeText} from '@/utils/files';
 import {ChevronLeft, ChevronRight, Plus, Star, X} from 'lucide-react';
 import Image from 'next/image';
 import {useMemo, useRef, useState} from 'react';
@@ -382,9 +383,10 @@ export function ScreenshotsFormField({
       toast({
         variant: 'destructive',
         title: i18n.t(
-          '{0} image(s) skipped — unsupported type, over 5 MB, or past the {1}-image limit.',
+          '{0} image(s) skipped — unsupported type, over {2}, or past the {1}-image limit.',
           String(skipped),
           String(MAX_IMAGES),
+          getFileSizeText(MAX_IMAGE_SIZE),
         ),
       });
     }
@@ -400,9 +402,10 @@ export function ScreenshotsFormField({
             {i18n.t('Screenshots')}{' '}
             <span className="text-xs text-muted-foreground">
               {i18n.t(
-                '({0}/{1}, up to 5 MB each)',
+                '({0}/{1}, up to {2})',
                 String(images.length + inFlight.length),
                 String(MAX_IMAGES),
+                getFileSizeText(MAX_IMAGE_SIZE),
               )}
             </span>
           </FormLabel>
@@ -421,8 +424,9 @@ export function ScreenshotsFormField({
           <FormMessageSpace />
           <p className="text-xs text-muted-foreground">
             {i18n.t(
-              'Any image format. Max 5 MB per image, up to {0} per product. The first image is the cover.',
+              'Any image format. Max {1} per image, up to {0} per product. The first image is the cover.',
               String(MAX_IMAGES),
+              getFileSizeText(MAX_IMAGE_SIZE),
             )}
           </p>
         </FormItem>
