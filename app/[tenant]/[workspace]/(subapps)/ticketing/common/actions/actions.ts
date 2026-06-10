@@ -48,6 +48,7 @@ import {
   updateTicket,
 } from '../orm/tickets';
 import {ensureAuth} from '../utils/auth-helper';
+import {notifyTicketChange} from '../utils/notify';
 import {CreateTicketSchema, UpdateTicketSchema} from '../utils/validators';
 import {handleError} from './helpers';
 import type {ActionConfig, MutateProps} from './types';
@@ -160,19 +161,33 @@ export async function mutate(
          so we wrap in a transaction to keep them atomic. */
       const {user, subapp} = auth;
       const {client} = auth.tenant;
-      ticket = await client.$transaction(txClient =>
+      const {
+        ticket: created,
+        tracks,
+        contacts,
+      } = await client.$transaction(txClient =>
         createTicket({
           data: createData,
-          workspaceUserId: workspace.workspaceUser?.id,
           client: txClient,
-          backgroundClient: client,
           user,
           subapp,
           workspace,
-          tenantId,
-          workspaceURL,
         }),
       );
+      after(() =>
+        notifyTicketChange({
+          type: 'create',
+          ticket: created,
+          tracks,
+          contacts,
+          user,
+          workspaceUserId: workspace.workspaceUser?.id,
+          workspaceURL,
+          tenantId,
+          client,
+        }),
+      );
+      ticket = created;
     } else {
       const refinedSchema = UpdateTicketSchema.superRefine(
         async (data, ctx) => {
@@ -208,17 +223,32 @@ export async function mutate(
         const version = await findTicketVersion(updateData.id, client);
         updateData.version = version;
       }
-      ticket = await updateTicket({
+      const {
+        ticket: updated,
+        tracks,
+        contacts,
+      } = await updateTicket({
         data: updateData,
-        workspaceUserId: workspace.workspaceUser?.id,
         client: auth.tenant.client,
-        backgroundClient: auth.tenant.client,
         user: auth.user,
         subapp: auth.subapp,
         workspace,
         tenant: auth.tenant,
-        workspaceURL,
       });
+      after(() =>
+        notifyTicketChange({
+          type: 'update',
+          ticket: updated,
+          tracks,
+          contacts,
+          user: auth.user,
+          workspaceUserId: workspace.workspaceUser?.id,
+          workspaceURL,
+          tenantId,
+          client: auth.tenant.client,
+        }),
+      );
+      ticket = updated;
     }
 
     if (ticket.project?.id) {
@@ -287,18 +317,28 @@ export async function updateAssignment(
     const fromWS =
       workspace.config.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
 
-    await updateTicket({
+    const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
-      workspaceUserId: workspaceUser?.id,
       client: auth.tenant.client,
-      backgroundClient: auth.tenant.client,
       user: auth.user,
       subapp: auth.subapp,
       workspace,
       tenant: auth.tenant,
-      workspaceURL,
       fromWS,
     });
+    after(() =>
+      notifyTicketChange({
+        type: 'update',
+        ticket,
+        tracks,
+        contacts,
+        user: auth.user,
+        workspaceUserId: fromWS ? undefined : workspaceUser?.id,
+        workspaceURL,
+        tenantId,
+        client: auth.tenant.client,
+      }),
+    );
     return {success: true, data: true};
   } catch (e) {
     return handleError(e);
@@ -366,18 +406,28 @@ export async function closeTicket(
     const fromWS =
       workspace.config.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
 
-    await updateTicket({
+    const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
-      workspaceUserId: workspaceUser?.id,
       client,
-      backgroundClient: client,
       user: auth.user,
       subapp: auth.subapp,
       workspace,
       tenant: auth.tenant,
-      workspaceURL,
       fromWS,
     });
+    after(() =>
+      notifyTicketChange({
+        type: 'update',
+        ticket,
+        tracks,
+        contacts,
+        user: auth.user,
+        workspaceUserId: fromWS ? undefined : workspaceUser?.id,
+        workspaceURL,
+        tenantId,
+        client,
+      }),
+    );
 
     return {success: true, data: true};
   } catch (e) {
@@ -440,18 +490,28 @@ export async function cancelTicket(
     const fromWS =
       workspace.config.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
 
-    await updateTicket({
+    const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
-      workspaceUserId: workspaceUser?.id,
       client,
-      backgroundClient: client,
       user: auth.user,
       subapp: auth.subapp,
       workspace,
       tenant: auth.tenant,
-      workspaceURL,
       fromWS,
     });
+    after(() =>
+      notifyTicketChange({
+        type: 'update',
+        ticket,
+        tracks,
+        contacts,
+        user: auth.user,
+        workspaceUserId: fromWS ? undefined : workspaceUser?.id,
+        workspaceURL,
+        tenantId,
+        client,
+      }),
+    );
 
     return {success: true, data: true};
   } catch (e) {

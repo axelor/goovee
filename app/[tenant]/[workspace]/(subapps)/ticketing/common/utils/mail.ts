@@ -37,67 +37,80 @@ export async function sendCommentMail(props: {
 
   const note = sanitizeHtml(comment.note || '');
   const parentNote = sanitizeHtml(parentComment?.note || '');
+  const parentAuthor =
+    parentComment?.partner?.simpleFullName ||
+    parentComment?.partner?.name ||
+    parentComment?.createdBy?.fullName;
 
-  for (const partner of reciepients) {
-    const t = getTranslation.bind(null, {
-      locale: partner.localization?.code || DEFAULT_LOCALE,
-      tenant,
-    });
+  const results = await Promise.allSettled(
+    reciepients.map(async partner => {
+      const t = getTranslation.bind(null, {
+        locale: partner.localization?.code || DEFAULT_LOCALE,
+        tenant,
+      });
 
-    const subject = await t(
-      'New comment by {0}',
-      comment.partner?.simpleFullName || comment.partner?.name || '',
-    );
-    const title = subject;
+      const subject = await t(
+        'New comment by {0}',
+        comment.partner?.simpleFullName || comment.partner?.name || '',
+      );
+      const title = subject;
 
-    const content = html`<p style="margin: 0 0 8px 0;">
-        <strong>${await t('Comment left by')}:</strong>
-        <span style="color: #1e40af;"
-          >${comment.partner?.simpleFullName ?? comment.partner?.name}</span
-        >
-      </p>
-      ${parentComment
-        ? html`<div
-              style="border-left: 4px solid #1e40af;  margin: 12px 0;  border-radius: 4px;">
-              <div style="background-color: #ecfdf5; padding-left: 12px;">
-                <p
-                  style="margin: 0 0 4px 0; font-weight: bold; color: #0f172a;">
-                  ${parentComment.partner?.simpleFullName ||
-                  parentComment.partner?.name ||
-                  parentComment.createdBy?.fullName}
-                </p>
-                <p
-                  style="margin: 0; color: #374151; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
-                  ${parentNote}
-                </p>
+      const content = html`<p style="margin: 0 0 8px 0;">
+          <strong>${await t('Comment left by')}:</strong>
+          <span style="color: #1e40af;"
+            >${comment.partner?.simpleFullName ?? comment.partner?.name}</span
+          >
+        </p>
+        ${parentComment
+          ? html`<div
+                style="border-left: 4px solid #1e40af;  margin: 12px 0;  border-radius: 4px;">
+                <div style="background-color: #ecfdf5; padding-left: 12px;">
+                  <p
+                    style="margin: 0 0 4px 0; font-weight: bold; color: #0f172a;">
+                    ${parentAuthor}
+                  </p>
+                  <p
+                    style="margin: 0; color: #374151; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">
+                    ${parentNote}
+                  </p>
+                </div>
+                <div
+                  style="margin-left: 20px; padding-left: 12px; margin-top: 6px;">
+                  <p style="margin: 0; color: #111827;">${note}</p>
+                </div>
               </div>
-              <div
-                style="margin-left: 20px; padding-left: 12px; margin-top: 6px;">
-                <p style="margin: 0; color: #111827;">${note}</p>
-              </div>
-            </div>
             `
-        : html`<div
-              style="border-left: 4px solid #1e40af; padding-left: 12px; margin: 12px 0; background-color: #f9fafb;">
-              <p style="margin: 0; color: #111827;">${note}</p>
-            </div>`}
+          : html`<div
+                style="border-left: 4px solid #1e40af; padding-left: 12px; margin: 12px 0; background-color: #f9fafb;">
+                <p style="margin: 0; color: #111827;">${note}</p>
+              </div>`}
   `.trim();
 
-    const doc = await generateHTML({
-      projectName,
-      ticketName,
-      content,
-      ticketLink,
-      title,
-      t,
-    });
+      const doc = await generateHTML({
+        projectName,
+        ticketName,
+        content,
+        ticketLink,
+        title,
+        t,
+      });
 
-    await mailService.notify({
-      subject,
-      to: partner.emailAddress?.address,
-      html: doc,
-    });
-  }
+      await mailService.notify({
+        subject,
+        to: partner.emailAddress?.address,
+        html: doc,
+      });
+    }),
+  );
+
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      console.error(
+        `Failed to send comment mail to ${reciepients[index].emailAddress?.address}:`,
+        result.reason,
+      );
+    }
+  });
 }
 
 export async function sendTrackMail(props: {
@@ -126,61 +139,73 @@ export async function sendTrackMail(props: {
     return;
   }
 
-  for (const partner of reciepients) {
-    const t = getTranslation.bind(null, {
-      locale: partner.localization?.code || DEFAULT_LOCALE,
-      tenant,
-    });
+  const results = await Promise.allSettled(
+    reciepients.map(async partner => {
+      const t = getTranslation.bind(null, {
+        locale: partner.localization?.code || DEFAULT_LOCALE,
+        tenant,
+      });
 
-    const subject = await t(
-      type === 'create' ? 'Ticket Created by {0}' : 'Ticket Updated by {0}',
-      author,
-    );
-    const title = subject;
-    const content = html`<ul style="list-style: none; padding: 0; margin: 0;">
-        ${(
-          await Promise.all(
-            tracks.map(async ({title, oldValue, value}, index) => {
-              if (title === 'comment.note') return '';
-              const isLast = index === tracks.length - 1;
-              return html`<li
-                  style=" display: flex; align-items: center; padding: 12px 0; font-size: 14px; color: #4a5568; ${!isLast
-                    ? 'border-bottom: 1px solid #e2e8f0;'
-                    : ''}">
-                  <span style=" font-weight: 600; color: #2d3748; "
-                    >${await t(title)}</span
-                  >
-                  <span
-                    style=" color: #38a169; font-weight: 600; margin-left: auto; display: flex; align-items: center; ">
-                    ${oldValue
-                      ? html`<span
-                            style=" color: #e53e3e; text-decoration: line-through; margin-right: 6px; font-weight: 600; "
-                            >${await t(oldValue)}</span
-                          >&rArr;`
-                      : ''}
-                    ${await t(value)}
-                  </span>
-                </li>`;
-            }),
-          )
-        ).join('')}
-      </ul>`;
+      const subject =
+        type === 'create'
+          ? await t('Ticket Created by {0}', author)
+          : await t('Ticket Updated by {0}', author);
+      const title = subject;
+      const content = html`<ul style="list-style: none; padding: 0; margin: 0;">
+          ${(
+            await Promise.all(
+              tracks.map(async ({title, oldValue, value}, index) => {
+                if (title === 'comment.note') return '';
+                const isLast = index === tracks.length - 1;
+                const separatorStyle = isLast
+                  ? ''
+                  : 'border-bottom: 1px solid #e2e8f0;';
+                const oldValueHtml = oldValue
+                  ? html`<span
+                        style=" color: #e53e3e; text-decoration: line-through; margin-right: 6px; font-weight: 600; "
+                        >${await t(oldValue)}</span
+                      >&rArr;`
+                  : '';
+                return html`<li
+                    style=" display: flex; align-items: center; padding: 12px 0; font-size: 14px; color: #4a5568; ${separatorStyle}">
+                    <span style=" font-weight: 600; color: #2d3748; "
+                      >${await t(title)}</span
+                    >
+                    <span
+                      style=" color: #38a169; font-weight: 600; margin-left: auto; display: flex; align-items: center; ">
+                      ${oldValueHtml} ${await t(value)}
+                    </span>
+                  </li>`;
+              }),
+            )
+          ).join('')}
+        </ul>`;
 
-    const doc = await generateHTML({
-      title,
-      projectName,
-      ticketName,
-      ticketLink,
-      content,
-      t,
-    });
+      const doc = await generateHTML({
+        title,
+        projectName,
+        ticketName,
+        ticketLink,
+        content,
+        t,
+      });
 
-    await mailService.notify({
-      subject,
-      to: partner.emailAddress?.address,
-      html: doc,
-    });
-  }
+      await mailService.notify({
+        subject,
+        to: partner.emailAddress?.address,
+        html: doc,
+      });
+    }),
+  );
+
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      console.error(
+        `Failed to send track mail to ${reciepients[index].emailAddress?.address}:`,
+        result.reason,
+      );
+    }
+  });
 }
 
 async function generateHTML(body: {

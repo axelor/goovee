@@ -255,18 +255,26 @@ async function sendNotifications(data: {
     });
 
     await processBatch(subscribers, async ({user, entity}) => {
-      await Promise.all([
-        sendMail({user, tenantId, mail, entity, app}),
-        sendSystemNotification({
-          user,
-          tenantId,
-          mail,
-          entity,
-          app,
-          workspace,
-          client,
-        }),
-      ]);
+      try {
+        await Promise.all([
+          sendMail({user, tenantId, mail, entity, app}),
+          sendSystemNotification({
+            user,
+            tenantId,
+            mail,
+            entity,
+            app,
+            workspace,
+            client,
+          }),
+        ]);
+      } catch (err) {
+        console.error(
+          '[NOTIFICATIONS] Failed to notify subscriber',
+          user.email,
+          err,
+        );
+      }
     });
   } catch (err) {
     console.error(
