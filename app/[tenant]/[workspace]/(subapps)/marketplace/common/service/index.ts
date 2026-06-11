@@ -41,7 +41,7 @@ export async function createMarketplaceOrder({
     workspaceId: workspace.id,
     portalAppConfigId: workspace.config.id,
     currencyCodeISO: cart.currencyCodeISO,
-    invocingPartnerAddressId: invoicingAddressId,
+    invoicingPartnerAddressId: invoicingAddressId,
     items: cart.items.map(item => ({
       marketplaceProductId: item.productId,
       priceAti: item.priceAti,

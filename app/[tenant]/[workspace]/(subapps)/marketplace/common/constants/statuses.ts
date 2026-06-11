@@ -1,6 +1,6 @@
 export enum MARKETPLACE_VERSION_STATUS {
   DRAFT = 'draft',
-  IN_REVIEW = 'in_review',
+  IN_REVIEW = 'inReview',
   PUBLISHED = 'published',
   REJECTED = 'rejected',
   UNPUBLISHED = 'unpublished',

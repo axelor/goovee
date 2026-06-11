@@ -69,7 +69,7 @@ function versionToMeta(version: ExistingVersion): VersionMeta {
  * draft/published/unpublished); it's seeded to the value that means "no change"
  * for the version's real status, so an untouched row keeps its state:
  *   published → published, unpublished → unpublished, draft → draft,
- *   in_review → published (re-saving keeps it in review under the review policy),
+ *   inReview → published (re-saving keeps it in review under the review policy),
  *   rejected → draft (a rejected version edits down to a draft).
  * The real persisted status / bundle live in `VersionMeta`, not the row. */
 function versionToRow(version: ExistingVersion): VersionRowValues {
