@@ -35,8 +35,9 @@ customer and all of its contacts:
 
 - when a user **buys** a paid listing, everyone under the same customer (the
   customer and all its contacts) gets access to it;
-- when a user **publishes** a listing, everyone under that customer can manage
-  it.
+- when a user **publishes** a listing, everyone under that customer with
+  **full marketplace access** can manage it — a **Restricted** contact is a
+  buyer only (see [§2](#2-roles--personas)).
 
 Individual _audit_ — who created or last edited a listing, who wrote a review —
 is tracked at the **user** level (the actual person who logged in), while
@@ -46,12 +47,12 @@ _ownership_ is tracked at the **customer** level.
 
 ## 2. Roles & personas
 
-| Persona                     | Can do                                                                                                                                                                     | Notes                                                                                                                                                    |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Visitor (guest)**         | Browse, search, open any published listing, read reviews                                                                                                                   | No login required to look around.<br>Any action that changes data (buy, favourite, review, download a paid item) redirects to login first.               |
-| **Member / Buyer**          | Everything a visitor can, plus:<br>favourite, buy, download, write/edit a review, see their purchases & favourites                                                         | A logged-in **user** (a customer or one of its contacts).<br>Purchases belong to the **customer**, so they're shared with everyone under it.             |
-| **Contributor / Publisher** | Everything a member can, plus:<br>create listings, upload versions/bundles, manage the version lifecycle, see their contributions & revenue                                | Only when the workspace **allows publishing**.<br>The listing is published under the user's **customer**, so everyone under that customer can manage it. |
-| **Workspace admin**         | Configure the storefront:<br>branding, whether publishing is allowed, whether submissions need review, payment options, and the workspace default product used for pricing | Configured in AOS, not in the storefront UI.<br>See [§7](#7-workspace-configuration).                                                                    |
+| Persona                     | Can do                                                                                                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Visitor (guest)**         | Browse, search, open any published listing, read reviews                                                                                                                   | No login required to look around.<br>Any action that changes data (buy, favourite, review, download a paid item) redirects to login first.                                                                                                                                                                                                                      |
+| **Member / Buyer**          | Everything a visitor can, plus:<br>favourite, buy, download, write/edit a review, see their purchases & favourites                                                         | A logged-in **user** (a customer or one of its contacts).<br>Purchases belong to the **customer**, so they're shared with everyone under it.                                                                                                                                                                                                                    |
+| **Contributor / Publisher** | Everything a member can, plus:<br>create listings, upload versions/bundles, manage the version lifecycle, see their contributions & revenue                                | Only when the workspace **allows publishing**, and only with **full marketplace access**: the customer account itself, a **contact admin**, or a contact whose marketplace role is **Total**. A **Restricted** contact remains a buyer.<br>The listing is published under the user's **customer**, so every full-access user under that customer can manage it. |
+| **Workspace admin**         | Configure the storefront:<br>branding, whether publishing is allowed, whether submissions need review, payment options, and the workspace default product used for pricing | Configured in AOS, not in the storefront UI.<br>See [§7](#7-workspace-configuration).                                                                                                                                                                                                                                                                           |
 
 ---
 
@@ -75,6 +76,9 @@ _ownership_ is tracked at the **customer** level.
 - **Customer** — the top-level account that owns purchases and listings, shared
   by all of its contacts. Can log in directly.
 - **Contact** — an individual belonging to a customer, who can also log in.
+  Each contact has a marketplace access level — **Total** (full publisher
+  rights) or **Restricted** (buyer only) — set per app in the workspace's
+  **Members** administration; a **contact admin** always counts as Total.
 - **User** — whoever is currently logged in: a customer or one of its contacts.
   The actor recorded in audit fields (created-by, updated-by, review author).
 - **Publisher** — the **customer** a listing belongs to ("the author"), shown on
@@ -306,9 +310,13 @@ Every contributor operation requires the workspace to **allow publishing** —
 creating, editing, and unpublishing a listing or version, loading a listing to
 edit, opening the contributor area, and previewing an unpublished listing. When
 publishing is off, these are all refused ("Publishing is not allowed in this
-workspace"; the contributor area itself returns "not found"). Beyond that gate,
-every operation is scoped to the caller's own listings — a contributor can only
-act on listings they publish.
+workspace"; the contributor area itself returns "not found"). The same
+operations also require the caller to have **full marketplace access** — the
+customer itself, a contact admin, or a contact with the **Total** role; a
+**Restricted** contact is refused the same way, while buying, downloading and
+reviewing stay open to them. Beyond those gates, every operation is scoped to
+the caller's own listings — a contributor can only act on listings they
+publish.
 
 #### 4.9.1 Creating & editing a listing
 
@@ -432,7 +440,10 @@ State rules, exactly as enforced:
 - **Unpublish** is allowed only from **Published** or **In review**, and moves
   the version to **Unpublished**.
 - **Rejected** is a reviewer/admin decision made in the AOS (not a
-  storefront action).
+  storefront action). The reviewer must give a **reason**; the author sees the
+  **latest** reason when editing the rejected version, alongside what saving
+  will do next. Every rejection is kept as history in the AOS, but the
+  storefront surfaces only the most recent one.
 - **First publish date** is set the first time a version becomes Published
   and is **preserved** across later unpublish → re-publish cycles (the original
   release date sticks).
@@ -456,8 +467,10 @@ contributor section appears only when the workspace allows publishing.
   date and links to the order/invoice. Paginated.
 - **Favourites** — the user's saved listings (see [§4.4](#44-favourites)).
 - **My Contributions** — the contributor area, available **only when the
-  workspace allows publishing**. The hub omits this entry for non-publishers,
-  and the page returns "not found" if opened directly without that permission.
+  workspace allows publishing**, and only to users with **full marketplace
+  access** (a **Restricted** contact never sees it). The hub omits this entry
+  for non-publishers and Restricted contacts, and the page returns "not found"
+  if opened directly without either permission.
   It covers an **Overview**, the contributor's **listings** (any status, where
   versions are managed), and a **Revenue** tab that is not implemented yet
   (it shows "Coming soon").
@@ -614,18 +627,18 @@ Set by an admin in the AOS; each affects storefront behaviour:
 
 ## 8. Permissions summary
 
-| Action                                        | Guest | Member     | Publisher         | Notes                               |
-| --------------------------------------------- | ----- | ---------- | ----------------- | ----------------------------------- |
-| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                     |
-| Download free published version               | ✅    | ✅         | ✅                | no login required                   |
-| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                            |
-| Buy a paid listing                            | ❌    | ✅         | ✅                |                                     |
-| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                     |
-| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing |
-| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_            |
-| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_            |
-| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                  |
-| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_            |
+| Action                                        | Guest | Member     | Publisher         | Notes                                                                         |
+| --------------------------------------------- | ----- | ---------- | ----------------- | ----------------------------------------------------------------------------- |
+| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                                                               |
+| Download free published version               | ✅    | ✅         | ✅                | no login required                                                             |
+| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                                                                      |
+| Buy a paid listing                            | ❌    | ✅         | ✅                |                                                                               |
+| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                                                               |
+| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing                                           |
+| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access (not a Restricted contact) |
+| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
+| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                            |
+| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
 
 ---
 
@@ -639,7 +652,8 @@ Set by an admin in the AOS; each affects storefront behaviour:
   with no de-duplication per user, and is best-effort: under failure it can
   under-count. Treat it as a popularity signal, not an exact figure.
 - **Rejection is AOS only.** There is no storefront UI for a reviewer to
-  reject a submission; "Rejected" is set in the AOS.
+  reject a submission; "Rejected" is set in the AOS. The storefront shows the
+  author the **latest** rejection reason, but not the full rejection history.
 - **A free listing is never "owned."** Ownership records exist only for paid
   purchases, so free listings won't appear under My Purchases.
 - **No-payment checkout fails silently.** If online payment is off or no provider
