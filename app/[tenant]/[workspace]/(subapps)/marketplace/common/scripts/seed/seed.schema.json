@@ -55,7 +55,7 @@
           "description": "Upsert key. AOSMarketplaceAxelorVersion.name (e.g. 'v9.0.9')."
         },
         "title": {"type": "string", "minLength": 1},
-        "releasedOn": {"type": "string", "format": "date-time"}
+        "releaseDateTime": {"type": "string", "format": "date-time"}
       }
     },
     "License": {

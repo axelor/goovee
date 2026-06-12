@@ -27,7 +27,7 @@
     },
     {
       "type": "DateTime",
-      "name": "purchasedAt",
+      "name": "purchaseDateTime",
       "required": true
     },
     {

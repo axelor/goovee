@@ -112,11 +112,11 @@ slips through.
 
 ### CompatibilityVersion
 
-| Field        | Type                 | Required | Constraints                                                                                  |
-| ------------ | -------------------- | -------- | -------------------------------------------------------------------------------------------- |
-| `name`       | string               | ✅       | Pattern `^v\d+\.\d+\.\d+$`. Upsert key. Example: `"v9.0.9"`.                                 |
-| `title`      | string               | ✅       | Display label. Convention: `"Axelor 9.0.9"`.                                                 |
-| `releasedOn` | ISO date-time string | optional | Use realistic dates spread over the last 12 months so the "released on" sort is non-trivial. |
+| Field             | Type                 | Required | Constraints                                                                                  |
+| ----------------- | -------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `name`            | string               | ✅       | Pattern `^v\d+\.\d+\.\d+$`. Upsert key. Example: `"v9.0.9"`.                                 |
+| `title`           | string               | ✅       | Display label. Convention: `"Axelor 9.0.9"`.                                                 |
+| `releaseDateTime` | ISO date-time string | optional | Use realistic dates spread over the last 12 months so the "released on" sort is non-trivial. |
 
 ### Product
 
@@ -220,7 +220,7 @@ number.
 
 4. **`currentVersion` is auto-derived** by `refreshCurrentVersion` after upsert: it picks the published version with the **latest `releasedAt`**. So your `releasedAt` dates are also what determines which version the public-facing detail page treats as current. If you want a specific version to be "current," make sure its `releasedAt` is the most recent among published versions on that product.
 
-5. **Compatibility version `releasedOn`** (top-level array) should also follow a believable timeline (Axelor releases roughly every 2 weeks per minor line). Order isn't enforced across the array, but pick dates that match the implied release cadence — e.g. `v9.0.7` somewhere mid-2024 and `v9.0.9` mid-2025.
+5. **Compatibility version `releaseDateTime`** (top-level array) should also follow a believable timeline (Axelor releases roughly every 2 weeks per minor line). Order isn't enforced across the array, but pick dates that match the implied release cadence — e.g. `v9.0.7` somewhere mid-2024 and `v9.0.9` mid-2025.
 
 6. **Don't put `releasedAt` in the future.** Use historical dates so "Released X days ago" makes sense. Same for `submittedAt`.
 
@@ -230,7 +230,7 @@ number.
 
 The seeder calls `refreshCurrentVersion` after each product's versions
 are upserted. It picks the **newest published version** as
-`product.currentVersion` (newest by `dateOfApproval`, which the seeder
+`product.currentVersion` (newest by `approvalDateTime`, which the seeder
 sets to "now" at insert time — so the **last published version in the
 JSON array order wins**).
 

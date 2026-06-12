@@ -195,9 +195,9 @@ export async function ProductHeaderCard({
             </div>
 
             {/* Updated */}
-            {product.currentVersion?.dateOfPublish && (
+            {product.currentVersion?.publishDateTime && (
               <TooltipDate
-                date={product.currentVersion.dateOfPublish}
+                date={product.currentVersion.publishDateTime}
                 displayType="relative"
                 prefix={updatedLabel}
                 lowercase

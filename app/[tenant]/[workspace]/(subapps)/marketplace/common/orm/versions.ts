@@ -62,13 +62,13 @@ export async function findProductVersions({
     select: {
       id: true,
       ...versionNumberFields,
-      dateOfPublish: true,
+      publishDateTime: true,
       changelog: true,
       statusSelect: true,
       bundleFile: {id: true},
       compatibilitySet: {
         select: {title: true},
-        orderBy: {releasedOn: 'DESC'},
+        orderBy: {releaseDateTime: 'DESC'},
       },
     },
     orderBy: versionSortOrder,
@@ -116,7 +116,7 @@ export async function findMyProductVersions({
       ...versionNumberFields,
       changelog: true,
       statusSelect: true,
-      dateOfPublish: true,
+      publishDateTime: true,
       bundleFile: {id: true, fileName: true, sizeText: true},
       compatibilitySet: {
         select: {id: true, title: true, name: true},
@@ -126,7 +126,7 @@ export async function findMyProductVersions({
        * id DESC is newest-first and the consumer reads `rejectionList[0]`.
        * TODO: once goovee-orm#32 ships, ask for `take: 1` here instead. */
       rejectionList: {
-        select: {id: true, reason: true, dateOfRejection: true},
+        select: {id: true, reason: true, rejectionDateTime: true},
         orderBy: {id: 'DESC'},
       },
     },

@@ -11,15 +11,15 @@
     },
     {
       "type": "DateTime",
-      "name": "dateOfSubmission"
+      "name": "submissionDateTime"
     },
     {
       "type": "DateTime",
-      "name": "dateOfApproval"
+      "name": "approvalDateTime"
     },
     {
       "type": "DateTime",
-      "name": "dateOfPublish"
+      "name": "publishDateTime"
     },
     {
       "type": "Int",

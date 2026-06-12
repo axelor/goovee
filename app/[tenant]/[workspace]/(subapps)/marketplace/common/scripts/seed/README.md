@@ -88,7 +88,7 @@ Point the editor at the JSON Schema for autocomplete:
     {
       "name": "v9.0.9",
       "title": "Axelor 9.0.9",
-      "releasedOn": "2026-05-13T00:00:00Z",
+      "releaseDateTime": "2026-05-13T00:00:00Z",
     },
   ],
   "products": [

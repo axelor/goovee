@@ -55,10 +55,10 @@ export async function findPurchases({
       marketplaceProduct: {portalWorkspace: {id: workspaceId}},
       ...(purchaseIds?.length ? {id: {in: purchaseIds}} : {}),
     },
-    orderBy: {purchasedAt: 'DESC'},
+    orderBy: {purchaseDateTime: 'DESC'},
     select: {
       id: true,
-      purchasedAt: true,
+      purchaseDateTime: true,
       marketplaceProduct: {
         id: true,
         slug: true,
@@ -117,7 +117,7 @@ export async function recordPurchases(
           partner: {select: {id: partnerId}},
           marketplaceProduct: {select: {id: productId}},
           ...(invoiceId ? {invoice: {select: {id: invoiceId}}} : {}),
-          purchasedAt: now,
+          purchaseDateTime: now,
           priceWt: new BigDecimal(String(item.priceWt)),
           priceAti: new BigDecimal(String(item.priceAti)),
           taxRate: new BigDecimal(String(item.taxRate)),

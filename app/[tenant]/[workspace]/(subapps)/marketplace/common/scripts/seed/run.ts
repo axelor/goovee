@@ -250,14 +250,14 @@ async function main() {
       await refreshCurrentVersion(txClient, productId);
 
       /* Fallback for reviews that don't pin a `reviewedVersionNumber`:
-       * pick the published version with the latest `dateOfPublish`,
+       * pick the published version with the latest `publishDateTime`,
        * matching what `refreshCurrentVersion` chose for the product. */
       const latestPublishedId = [...versionByNumber.values()]
-        .filter(v => v.statusSelect === 'published' && v.dateOfPublish)
+        .filter(v => v.statusSelect === 'published' && v.publishDateTime)
         .sort(
           (a, b) =>
-            new Date(b.dateOfPublish!).getTime() -
-            new Date(a.dateOfPublish!).getTime(),
+            new Date(b.publishDateTime!).getTime() -
+            new Date(a.publishDateTime!).getTime(),
         )[0]?.id;
 
       for (const review of product.reviews ?? []) {

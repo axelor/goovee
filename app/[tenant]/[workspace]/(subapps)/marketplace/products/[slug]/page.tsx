@@ -362,9 +362,9 @@ export default async function ProductPage(props: {
                   <span className="text-sm text-muted-foreground">
                     {updatedLabel}
                   </span>
-                  {product.currentVersion?.dateOfPublish ? (
+                  {product.currentVersion?.publishDateTime ? (
                     <TooltipDate
-                      date={product.currentVersion.dateOfPublish}
+                      date={product.currentVersion.publishDateTime}
                       displayType="relative"
                       showTooltip={true}
                       className="font-semibold text-foreground"

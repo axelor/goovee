@@ -38,9 +38,9 @@ export function VersionCard({
             </h3>
             {isLatest && <Badge variant="success">{i18n.t('Latest')}</Badge>}
 
-            {version.dateOfPublish && (
+            {version.publishDateTime && (
               <TooltipDate
-                date={version.dateOfPublish}
+                date={version.publishDateTime}
                 prefix={i18n.t('Released')}
                 lowercase
                 className="text-xs text-muted-foreground"

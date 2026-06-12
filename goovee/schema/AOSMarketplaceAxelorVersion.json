@@ -15,7 +15,7 @@
     },
     {
       "type": "DateTime",
-      "name": "releasedOn"
+      "name": "releaseDateTime"
     },
     {
       "type": "Boolean",

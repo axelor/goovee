@@ -29,7 +29,7 @@ export const CompatibilityVersionSchema = z
         "Expected 'vMAJOR.MINOR.PATCH', e.g. 'v9.0.9'.",
       ),
     title: z.string().min(1),
-    releasedOn: z.iso.datetime().optional(),
+    releaseDateTime: z.iso.datetime().optional(),
   })
   .strict();
 export type CompatibilityVersionSeed = z.infer<

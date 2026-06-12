@@ -16,7 +16,7 @@
     },
     {
       "type": "DateTime",
-      "name": "dateOfRejection"
+      "name": "rejectionDateTime"
     }
   ]
 }

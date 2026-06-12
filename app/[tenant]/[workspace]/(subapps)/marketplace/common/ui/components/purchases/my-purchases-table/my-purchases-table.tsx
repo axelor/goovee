@@ -109,13 +109,13 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       ),
     },
     {
-      key: 'purchasedAt',
+      key: 'purchaseDateTime',
       label: i18n.t('Purchased on'),
       desktopClassName: 'w-[20%]',
       content: (purchase, {dateFormat}) => (
         <span className="text-sm text-muted-foreground whitespace-nowrap">
-          {purchase.purchasedAt
-            ? dateFormat.format(new Date(purchase.purchasedAt))
+          {purchase.purchaseDateTime
+            ? dateFormat.format(new Date(purchase.purchaseDateTime))
             : '—'}
         </span>
       ),

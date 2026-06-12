@@ -153,11 +153,11 @@ export async function findProduct({
     ...versionNumberFields,
     statusSelect: true,
     changelog: true,
-    dateOfPublish: true,
+    publishDateTime: true,
     bundleFile: {sizeText: true},
     compatibilitySet: {
       select: {title: true},
-      orderBy: {releasedOn: 'DESC'},
+      orderBy: {releaseDateTime: 'DESC'},
     },
   } as const;
 

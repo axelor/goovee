@@ -145,7 +145,9 @@ export async function upsertCompatibilityVersion(
   const payload = {
     name,
     title: data.title,
-    ...(data.releasedOn && {releasedOn: new Date(data.releasedOn)}),
+    ...(data.releaseDateTime && {
+      releaseDateTime: new Date(data.releaseDateTime),
+    }),
   };
   if (existing) {
     return client.aOSMarketplaceAxelorVersion.update({
@@ -409,10 +411,10 @@ export async function upsertVersion({
   /* Dates flow straight through from the seed file. validate.ts has
    * already enforced "draft → no dates" and "published → both dates,
    * ordered" before we get here, so the AOS values are always coherent. */
-  const dateOfSubmission = version.submittedAt
+  const submissionDateTime = version.submittedAt
     ? new Date(version.submittedAt)
     : null;
-  const dateOfPublish = version.releasedAt
+  const publishDateTime = version.releasedAt
     ? new Date(version.releasedAt)
     : null;
 
@@ -441,8 +443,8 @@ export async function upsertVersion({
     vPreRelease: parts.vPreRelease,
     changelog: version.changelog ?? null,
     statusSelect: version.status,
-    dateOfSubmission,
-    dateOfPublish,
+    submissionDateTime,
+    publishDateTime,
     bundleFile: {select: {id: bundleMetaId}},
     compatibilitySet: {select: compatIds},
   };
@@ -450,12 +452,12 @@ export async function upsertVersion({
   if (existing) {
     return client.aOSMarketplaceProductVersion.update({
       data: {...data, id: existing.id, version: existing.version},
-      select: {id: true, statusSelect: true, dateOfPublish: true},
+      select: {id: true, statusSelect: true, publishDateTime: true},
     });
   }
   return client.aOSMarketplaceProductVersion.create({
     data,
-    select: {id: true, statusSelect: true, dateOfPublish: true},
+    select: {id: true, statusSelect: true, publishDateTime: true},
   });
 }
 

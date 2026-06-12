@@ -38,72 +38,72 @@
     {
       "name": "v8.5.0",
       "title": "Axelor 8.5.0",
-      "releasedOn": "2024-01-15T09:00:00Z"
+      "releaseDateTime": "2024-01-15T09:00:00Z"
     },
     {
       "name": "v8.5.5",
       "title": "Axelor 8.5.5",
-      "releasedOn": "2024-05-20T10:00:00Z"
+      "releaseDateTime": "2024-05-20T10:00:00Z"
     },
     {
       "name": "v9.0.0",
       "title": "Axelor 9.0.0",
-      "releasedOn": "2024-09-01T08:30:00Z"
+      "releaseDateTime": "2024-09-01T08:30:00Z"
     },
     {
       "name": "v9.0.1",
       "title": "Axelor 9.0.1",
-      "releasedOn": "2024-10-15T11:00:00Z"
+      "releaseDateTime": "2024-10-15T11:00:00Z"
     },
     {
       "name": "v9.0.5",
       "title": "Axelor 9.0.5",
-      "releasedOn": "2025-01-10T14:00:00Z"
+      "releaseDateTime": "2025-01-10T14:00:00Z"
     },
     {
       "name": "v9.0.7",
       "title": "Axelor 9.0.7",
-      "releasedOn": "2025-03-05T12:00:00Z"
+      "releaseDateTime": "2025-03-05T12:00:00Z"
     },
     {
       "name": "v9.0.8",
       "title": "Axelor 9.0.8",
-      "releasedOn": "2025-04-12T09:00:00Z"
+      "releaseDateTime": "2025-04-12T09:00:00Z"
     },
     {
       "name": "v9.0.9",
       "title": "Axelor 9.0.9",
-      "releasedOn": "2025-05-10T15:00:00Z"
+      "releaseDateTime": "2025-05-10T15:00:00Z"
     },
     {
       "name": "v8.4.0",
       "title": "Axelor 8.4.0",
-      "releasedOn": "2024-01-15T10:00:00Z"
+      "releaseDateTime": "2024-01-15T10:00:00Z"
     },
     {
       "name": "v8.4.5",
       "title": "Axelor 8.4.5",
-      "releasedOn": "2024-02-20T14:30:00Z"
+      "releaseDateTime": "2024-02-20T14:30:00Z"
     },
     {
       "name": "v8.6.0",
       "title": "Axelor 8.6.0",
-      "releasedOn": "2024-04-10T09:00:00Z"
+      "releaseDateTime": "2024-04-10T09:00:00Z"
     },
     {
       "name": "v9.0.2",
       "title": "Axelor 9.0.2",
-      "releasedOn": "2024-10-05T11:15:00Z"
+      "releaseDateTime": "2024-10-05T11:15:00Z"
     },
     {
       "name": "v9.0.4",
       "title": "Axelor 9.0.4",
-      "releasedOn": "2024-11-18T16:45:00Z"
+      "releaseDateTime": "2024-11-18T16:45:00Z"
     },
     {
       "name": "v9.0.6",
       "title": "Axelor 9.0.6",
-      "releasedOn": "2025-01-12T13:20:00Z"
+      "releaseDateTime": "2025-01-12T13:20:00Z"
     }
   ],
   "licenses": [

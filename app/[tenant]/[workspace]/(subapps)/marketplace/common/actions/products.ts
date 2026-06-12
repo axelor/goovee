@@ -381,7 +381,7 @@ export async function saveProductWithVersions(
                 id: true,
                 version: true,
                 statusSelect: true,
-                dateOfPublish: true,
+                publishDateTime: true,
                 compatibilitySet: {select: {id: true}},
               },
             });
@@ -415,12 +415,12 @@ export async function saveProductWithVersions(
           const compatibilityIdsToRemove = existingCompatibilityIds.filter(
             id => !compatibilityRefs.find(({id: newId}) => newId === id),
           );
-          /* Stamp `dateOfPublish` only the first time it goes live. */
+          /* Stamp `publishDateTime` only the first time it goes live. */
           const transitioningToPublished =
             effectiveStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED &&
             currentVersion.statusSelect !==
               MARKETPLACE_VERSION_STATUS.PUBLISHED &&
-            !currentVersion.dateOfPublish;
+            !currentVersion.publishDateTime;
           await txClient.aOSMarketplaceProductVersion.update({
             select: {id: true},
             data: {
@@ -436,7 +436,7 @@ export async function saveProductWithVersions(
               vPreRelease: parts.vPreRelease,
               changelog: row.changelog || null,
               statusSelect: effectiveStatus,
-              ...(transitioningToPublished && {dateOfPublish: new Date()}),
+              ...(transitioningToPublished && {publishDateTime: new Date()}),
               ...(uploadedFileId && {
                 bundleFile: {select: {id: uploadedFileId}},
               }),
@@ -463,9 +463,9 @@ export async function saveProductWithVersions(
               bundleFile: {select: {id: uploadedFileId!}},
               compatibilitySet: {select: compatibilityRefs},
               marketplaceProduct: {select: {id: productId}},
-              dateOfSubmission: new Date(),
+              submissionDateTime: new Date(),
               ...(effectiveStatus === MARKETPLACE_VERSION_STATUS.PUBLISHED && {
-                dateOfPublish: new Date(),
+                publishDateTime: new Date(),
               }),
             },
           });

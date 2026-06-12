@@ -105,14 +105,14 @@ export async function getSalesStat(
       where: and<AOSMarketplaceProductPurchase>([
         notArchived,
         {marketplaceProduct: myProductsFilter},
-        {purchasedAt: lastMonth},
+        {purchaseDateTime: lastMonth},
       ]),
     }),
     client.aOSMarketplaceProductPurchase.count({
       where: and<AOSMarketplaceProductPurchase>([
         notArchived,
         {marketplaceProduct: myProductsFilter},
-        {purchasedAt: monthBefore},
+        {purchaseDateTime: monthBefore},
       ]),
     }),
   ]);
@@ -429,10 +429,10 @@ export async function getRecentActivity({
         notArchived,
         {marketplaceProduct: mine},
       ]),
-      orderBy: {purchasedAt: 'DESC'},
+      orderBy: {purchaseDateTime: 'DESC'},
       ...(take ? {take} : {}),
       select: {
-        purchasedAt: true,
+        purchaseDateTime: true,
         partner: activityActorSelect,
         marketplaceProduct: activityProductSelect,
       },
@@ -461,7 +461,7 @@ export async function getRecentActivity({
       kind: 'purchase' as const,
       actor: purchase.partner,
       marketplaceProduct: purchase.marketplaceProduct,
-      at: purchase.purchasedAt,
+      at: purchase.purchaseDateTime,
     })),
   ];
 
@@ -544,11 +544,11 @@ export async function getRevenueSummary({
           mainPartnerId,
         )(),
       },
-      {purchasedAt: {ge: windowStart}},
+      {purchaseDateTime: {ge: windowStart}},
     ]),
-    orderBy: {purchasedAt: 'DESC'},
+    orderBy: {purchaseDateTime: 'DESC'},
     select: {
-      purchasedAt: true,
+      purchaseDateTime: true,
       priceWt: true,
       currency: {codeISO: true},
     },
@@ -600,7 +600,7 @@ export async function getRevenueSummary({
     /* Convert at the sale date in the company timezone — the same as-of date
      * the checkout used (todayInTimezone), so the buyer→contributor rate is
      * the inverse of the rate the buyer was charged at. */
-    const asOf = dateInTimezone(purchase.purchasedAt, companyTimezone);
+    const asOf = dateInTimezone(purchase.purchaseDateTime, companyTimezone);
     let rate: number;
     try {
       rate = getExchangeRate(
@@ -614,7 +614,7 @@ export async function getRevenueSummary({
       continue;
     }
     const value = round(Number(purchase.priceWt) * rate, decimals);
-    const key = monthKey(purchase.purchasedAt);
+    const key = monthKey(purchase.purchaseDateTime);
     byMonth.set(key, (byMonth.get(key) ?? 0) + value);
   }
 
