@@ -56,30 +56,6 @@ export default async function MyAccountPage(props: {
     auth.workspace.config.allowToPublish === true && canManageProducts(auth);
   const accountBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`;
 
-  const [
-    marketplaceLabel,
-    myAccountLabel,
-    descLabel,
-    purchasesLabel,
-    purchasesDescLabel,
-    favoritesLabel,
-    favoritesDescLabel,
-    contributionsLabel,
-    contributionsDescLabel,
-    partnerProfileLabel,
-  ] = await Promise.all([
-    t('Marketplace'),
-    t('My account'),
-    t('Manage your purchases and, if you sell, your published products.'),
-    t('My purchases'),
-    t('Review the apps you have purchased.'),
-    t('Favorites'),
-    t('Your saved products.'),
-    t('My contributions'),
-    t('Manage your published products.'),
-    t('See partner profile'),
-  ]);
-
   const cards: Array<{
     href: string;
     icon: LucideIcon;
@@ -89,22 +65,22 @@ export default async function MyAccountPage(props: {
     {
       href: `${accountBase}/purchases`,
       icon: ShoppingBag,
-      title: purchasesLabel,
-      description: purchasesDescLabel,
+      title: await t('My purchases'),
+      description: await t('Review the apps you have purchased.'),
     },
     {
       href: `${accountBase}/favorites`,
       icon: Heart,
-      title: favoritesLabel,
-      description: favoritesDescLabel,
+      title: await t('Favorites'),
+      description: await t('Your saved products.'),
     },
     ...(isSeller
       ? [
           {
             href: `${accountBase}/contributions`,
             icon: Store,
-            title: contributionsLabel,
-            description: contributionsDescLabel,
+            title: await t('My contributions'),
+            description: await t('Manage your published products.'),
           },
         ]
       : []),
@@ -121,14 +97,14 @@ export default async function MyAccountPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
-                  {marketplaceLabel}
+                  {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="sm:truncate text-lg font-semibold">
-                {myAccountLabel}
+                {await t('My account')}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -140,14 +116,18 @@ export default async function MyAccountPage(props: {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              {myAccountLabel}
+              {await t('My account')}
             </h1>
-            <p className="text-muted-foreground text-sm">{descLabel}</p>
+            <p className="text-muted-foreground text-sm">
+              {await t(
+                'Manage your purchases and, if you sell, your published products.',
+              )}
+            </p>
           </div>
           <Button asChild variant="outline" className="rounded-full">
             <Link
               href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${auth.user.mainPartnerId}`}>
-              {partnerProfileLabel}
+              {await t('See partner profile')}
             </Link>
           </Button>
         </div>

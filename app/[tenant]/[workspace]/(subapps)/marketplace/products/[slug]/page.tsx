@@ -102,7 +102,6 @@ export default async function ProductPage(props: {
   if (!product) notFound();
 
   const marketplaceHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
-  const hubLabel = await t('Marketplace');
   // Category surfacing moved into the header card as multi-badges. The
   // breadcrumb no longer carries category because a product can belong
   // to multiple categories and there's no canonical "primary" one.
@@ -148,46 +147,6 @@ export default async function ProductPage(props: {
     paid: isPaid(product.price.ati),
   });
 
-  const [
-    overviewLabel,
-    versionsLabel,
-    reviewsLabel,
-    supportLabel,
-    detailsLabel,
-    versionLabel,
-    updatedLabel,
-    publishedLabel,
-    sizeLabel,
-    compatibilityLabel,
-    noCompatibleLabel,
-    categoryLabel,
-    licenseLabel,
-    aboutAuthorLabel,
-    authorLabel,
-    verifiedContributorLabel,
-    viewProfileLabel,
-    notAvailableLabel,
-  ] = await Promise.all([
-    t('Overview'),
-    t('Versions'),
-    t('Reviews ({0})', String(ratingCount)),
-    t('Support'),
-    t('Details'),
-    t('Version'),
-    t('Updated'),
-    t('Published'),
-    t('Size'),
-    t('Compatibility'),
-    t('No compatible versions specified'),
-    t('Category'),
-    t('License'),
-    t('About the author'),
-    t('Author'),
-    t('Verified contributor'),
-    t('View profile'),
-    t('N/A'),
-  ]);
-
   const previewStatus = product.currentVersion?.statusSelect ?? null;
   const previewStatusLabel =
     previewStatus && MARKETPLACE_VERSION_STATUS_LABELS[previewStatus]
@@ -215,7 +174,7 @@ export default async function ProductPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={marketplaceHref}>{hubLabel}</Link>
+                <Link href={marketplaceHref}>{await t('Marketplace')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -254,7 +213,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            {overviewLabel}
+            {await t('Overview')}
           </Link>
           <Link
             href={tabNavLink(ProductTab.Versions)}
@@ -265,7 +224,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            {versionsLabel} (
+            {await t('Versions')} (
             <Suspense fallback="...">
               <VersionCountBadge
                 productId={product.id}
@@ -284,7 +243,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            {reviewsLabel}
+            {await t('Reviews ({0})', String(ratingCount))}
           </Link>
           <Link
             href={tabNavLink(ProductTab.Support)}
@@ -295,7 +254,7 @@ export default async function ProductPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent',
             )}>
-            {supportLabel}
+            {await t('Support')}
           </Link>
         </div>
       </div>
@@ -345,22 +304,22 @@ export default async function ProductPage(props: {
             {/* Details Card */}
             <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-6">
               <h3 className="text-lg font-bold text-foreground">
-                {detailsLabel}
+                {await t('Details')}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    {versionLabel}
+                    {await t('Version')}
                   </span>
                   <span className="font-semibold text-foreground">
                     {product.currentVersion
                       ? formatVersionNumber(product.currentVersion)
-                      : notAvailableLabel}
+                      : await t('N/A')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    {updatedLabel}
+                    {await t('Updated')}
                   </span>
                   {product.currentVersion?.publishDateTime ? (
                     <TooltipDate
@@ -371,13 +330,13 @@ export default async function ProductPage(props: {
                     />
                   ) : (
                     <span className="font-semibold text-foreground">
-                      {notAvailableLabel}
+                      {await t('N/A')}
                     </span>
                   )}
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    {publishedLabel}
+                    {await t('Published')}
                   </span>
                   {product.createdOn ? (
                     <TooltipDate
@@ -388,14 +347,14 @@ export default async function ProductPage(props: {
                     />
                   ) : (
                     <span className="font-semibold text-foreground">
-                      {notAvailableLabel}
+                      {await t('N/A')}
                     </span>
                   )}
                 </div>
                 {product.currentVersion?.bundleFile?.sizeText && (
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      {sizeLabel}
+                      {await t('Size')}
                     </span>
                     <span className="font-semibold text-foreground">
                       {product.currentVersion.bundleFile.sizeText}
@@ -404,7 +363,7 @@ export default async function ProductPage(props: {
                 )}
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground block mb-2">
-                    {compatibilityLabel}
+                    {await t('Compatibility')}
                   </span>
                   {product.currentVersion?.compatibilitySet &&
                   product.currentVersion.compatibilitySet.length > 0 ? (
@@ -419,13 +378,13 @@ export default async function ProductPage(props: {
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      {noCompatibleLabel}
+                      {await t('No compatible versions specified')}
                     </p>
                   )}
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">
-                    {categoryLabel}
+                    {await t('Category')}
                   </span>
                   <p className="font-semibold text-foreground">
                     {product.categorySet?.length
@@ -438,7 +397,7 @@ export default async function ProductPage(props: {
                 </div>
                 <div className="border-t border-border pt-4">
                   <span className="text-sm text-muted-foreground">
-                    {licenseLabel}
+                    {await t('License')}
                   </span>
                   {product.license ? (
                     product.license.url ? (
@@ -466,7 +425,7 @@ export default async function ProductPage(props: {
             {product.publisher && (
               <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
                 <h3 className="text-lg font-bold text-foreground">
-                  {aboutAuthorLabel}
+                  {await t('About the author')}
                 </h3>
                 <div className="flex items-start gap-4">
                   <Avatar className="rounded-full h-12 w-12 flex-shrink-0">
@@ -476,7 +435,9 @@ export default async function ProductPage(props: {
                           ? `/api/tenant/${tenantId}/partner/image/${product.publisher.picture.id}`
                           : NO_IMAGE_URL
                       }
-                      alt={product.publisher.simpleFullName || authorLabel}
+                      alt={
+                        product.publisher.simpleFullName || (await t('Author'))
+                      }
                       size={48}
                     />
                   </Avatar>
@@ -485,7 +446,7 @@ export default async function ProductPage(props: {
                       {product.publisher.simpleFullName}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {verifiedContributorLabel}
+                      {await t('Verified contributor')}
                     </p>
                   </div>
                 </div>
@@ -498,7 +459,7 @@ export default async function ProductPage(props: {
                       className="w-full rounded-full">
                       <Link
                         href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${product.publisher.id}`}>
-                        {viewProfileLabel}
+                        {await t('View profile')}
                       </Link>
                     </Button>
                   )}

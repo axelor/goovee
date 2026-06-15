@@ -128,14 +128,6 @@ export default async function FavoritesPage(props: {
     return query;
   };
 
-  const [marketplaceLabel, myAccountLabel, favoritesLabel, favoritesDescLabel] =
-    await Promise.all([
-      t('Marketplace'),
-      t('My account'),
-      t('Favorites'),
-      t('Your saved products.'),
-    ]);
-
   return (
     <div className="min-h-screen container pb-6">
       {/* Breadcrumb */}
@@ -146,7 +138,7 @@ export default async function FavoritesPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={marketplaceBase}>{marketplaceLabel}</Link>
+                <Link href={marketplaceBase}>{await t('Marketplace')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -155,14 +147,14 @@ export default async function FavoritesPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link href={`${marketplaceBase}/my-account`}>
-                  {myAccountLabel}
+                  {await t('My account')}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="sm:truncate text-lg font-semibold">
-                {favoritesLabel}
+                {await t('Favorites')}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -173,9 +165,11 @@ export default async function FavoritesPage(props: {
       <div className="pb-6">
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {favoritesLabel}
+            {await t('Favorites')}
           </h1>
-          <p className="text-muted-foreground text-sm">{favoritesDescLabel}</p>
+          <p className="text-muted-foreground text-sm">
+            {await t('Your saved products.')}
+          </p>
         </div>
       </div>
 

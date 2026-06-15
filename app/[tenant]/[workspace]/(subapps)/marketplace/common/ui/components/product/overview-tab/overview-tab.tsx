@@ -12,19 +12,13 @@ interface OverviewTabProps {
 export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
   const images = (product.pictureList || []).filter(img => !!img.picture?.id);
 
-  const [screenshotsLabel, screenshotAlt, aboutLabel] = await Promise.all([
-    t('Screenshots'),
-    t('Product screenshot'),
-    t('About this plugin'),
-  ]);
-
   return (
     <div className="space-y-8">
       {/* Screenshots */}
       {images.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">
-            {screenshotsLabel}
+            {await t('Screenshots')}
           </h2>
           <ScreenshotGallery
             images={images
@@ -37,14 +31,16 @@ export async function OverviewTab({product, workspaceURI}: OverviewTabProps) {
                   fileId: img.picture!.id,
                 }),
               }))}
-            alt={screenshotAlt}
+            alt={await t('Product screenshot')}
           />
         </div>
       )}
 
       {/* About Section */}
       <div className="bg-card rounded-lg border border-border p-4 md:p-8 space-y-4">
-        <h2 className="text-xl font-bold text-foreground">{aboutLabel}</h2>
+        <h2 className="text-xl font-bold text-foreground">
+          {await t('About this plugin')}
+        </h2>
         <RichTextViewer
           content={product.longDescription || product.description || undefined}
         />

@@ -122,37 +122,13 @@ export default async function MyContributionsPage(props: {
     return `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions${queryStr}`;
   };
 
-  const [
-    marketplaceLabel,
-    myAccountLabel,
-    myContribLabel,
-    manageDescLabel,
-    overviewLabel,
-    productsLabel,
-    revenueLabel,
-    comingSoonTitle,
-    comingSoonDescription,
-  ] = await Promise.all([
-    t('Marketplace'),
-    t('My account'),
-    t('My contributions'),
-    t(
-      "Manage the plugins and apps you've published on the Axelor marketplace.",
-    ),
-    t('Overview'),
-    t('Products'),
-    t('Revenue'),
-    t('Coming soon'),
-    t(
-      'This section is still being built; what you see below is a preview of the layout.',
-    ),
-  ]);
-
   const comingSoonBanner = (
     <NoticeBanner
       icon={Construction}
-      title={comingSoonTitle}
-      description={comingSoonDescription}
+      title={await t('Coming soon')}
+      description={await t(
+        'This section is still being built; what you see below is a preview of the layout.',
+      )}
     />
   );
 
@@ -167,7 +143,7 @@ export default async function MyContributionsPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link href={`${workspaceURI}/${SUBAPP_CODES.marketplace}`}>
-                  {marketplaceLabel}
+                  {await t('Marketplace')}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -178,14 +154,14 @@ export default async function MyContributionsPage(props: {
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`}>
-                  {myAccountLabel}
+                  {await t('My account')}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="sm:truncate text-lg font-semibold">
-                {myContribLabel}
+                {await t('My contributions')}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -197,9 +173,13 @@ export default async function MyContributionsPage(props: {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              {myContribLabel}
+              {await t('My contributions')}
             </h1>
-            <p className="text-muted-foreground text-sm">{manageDescLabel}</p>
+            <p className="text-muted-foreground text-sm">
+              {await t(
+                "Manage the plugins and apps you've published on the Axelor marketplace.",
+              )}
+            </p>
           </div>
           {auth.workspace.config.allowToPublish && (
             <PublishNewButton
@@ -231,7 +211,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            {overviewLabel}
+            {await t('Overview')}
           </Link>
           <Link
             href={tabNavLink(MyContributionsTab.Products)}
@@ -241,7 +221,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            {productsLabel} (
+            {await t('Products')} (
             <Suspense fallback="...">
               <Await
                 promise={countMyProducts({
@@ -261,7 +241,7 @@ export default async function MyContributionsPage(props: {
                 ? 'text-primary border-primary'
                 : 'text-muted-foreground hover:text-foreground border-transparent'
             }`}>
-            {revenueLabel}
+            {await t('Revenue')}
           </Link>
         </div>
       </div>

@@ -60,16 +60,12 @@ export async function VersionsTab({
   const totalVersionCount = getTotal(versions);
   const totalVersionPages = Math.ceil(totalVersionCount / VERSIONS_PAGE_SIZE);
 
-  const [noVersionsLabel, previousLabel, nextLabel] = await Promise.all([
-    t('No versions available'),
-    t('Previous'),
-    t('Next'),
-  ]);
-
   if (totalVersionCount === 0) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">{noVersionsLabel}</p>
+        <p className="text-muted-foreground">
+          {await t('No versions available')}
+        </p>
       </div>
     );
   }
@@ -107,7 +103,7 @@ export async function VersionsTab({
                     ['pointer-events-none opacity-50']: versionPage <= 1,
                   })}>
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">{previousLabel}</span>
+                  <span className="sr-only">{await t('Previous')}</span>
                 </Link>
               </PaginationPrevious>
             </PaginationItem>
@@ -144,7 +140,7 @@ export async function VersionsTab({
                     ['pointer-events-none opacity-50']:
                       versionPage >= totalVersionPages,
                   })}>
-                  <span className="sr-only">{nextLabel}</span>
+                  <span className="sr-only">{await t('Next')}</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </PaginationNext>

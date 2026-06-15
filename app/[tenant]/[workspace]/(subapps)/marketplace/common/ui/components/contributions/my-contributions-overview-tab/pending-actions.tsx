@@ -18,21 +18,17 @@ export async function PendingActions({
 }) {
   const {versions, reviews} = await pending;
 
-  const [heading, noPendingLabel, inReviewLabel, draftLabel] =
-    await Promise.all([
-      t('Pending actions'),
-      t('Nothing needs your attention right now.'),
-      t('In review'),
-      t('Draft'),
-    ]);
-
   const isEmpty = versions.length === 0 && reviews.length === 0;
 
   return (
     <div className={`${CARD} space-y-4`}>
-      <h3 className="text-xl font-semibold text-foreground">{heading}</h3>
+      <h3 className="text-xl font-semibold text-foreground">
+        {await t('Pending actions')}
+      </h3>
       {isEmpty ? (
-        <p className="text-sm text-muted-foreground">{noPendingLabel}</p>
+        <p className="text-sm text-muted-foreground">
+          {await t('Nothing needs your attention right now.')}
+        </p>
       ) : (
         <div className="space-y-3">
           {versions.map((version, index) => {
@@ -56,7 +52,7 @@ export async function PendingActions({
                       {version.marketplaceProduct.name} {version.versionLabel}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {isReview ? inReviewLabel : draftLabel}
+                      {isReview ? t('In review') : t('Draft')}
                       {version.at && (
                         <>
                           {' · '}

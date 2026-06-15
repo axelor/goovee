@@ -59,23 +59,19 @@ export default async function CheckoutSuccessPage(props: {
   });
 
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
-  const [titleLabel, bodyLabel, downloadLabel, viewAllLabel, unavailableLabel] =
-    await Promise.all([
-      t('Purchase complete'),
-      t(
-        'Thanks for your purchase. Your products are now available to download.',
-      ),
-      t('Download'),
-      t('View all my purchases'),
-      t('Unavailable'),
-    ]);
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-2xl">
       <div className="rounded-lg border border-border bg-card p-6 text-center">
         <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-success" />
-        <h1 className="text-2xl font-semibold mb-2">{titleLabel}</h1>
-        <p className="text-muted-foreground mb-6">{bodyLabel}</p>
+        <h1 className="text-2xl font-semibold mb-2">
+          {await t('Purchase complete')}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {await t(
+            'Thanks for your purchase. Your products are now available to download.',
+          )}
+        </p>
 
         {recent.length > 0 && (
           <ul className="text-left divide-y divide-border rounded border border-border overflow-hidden mb-6">
@@ -116,12 +112,12 @@ export default async function CheckoutSuccessPage(props: {
                       <a
                         href={`${marketplaceBase}/api/products/${product.id}/versions/${version.id}/download`}>
                         <Download size={14} className="mr-1" />
-                        {downloadLabel}
+                        {t('Download')}
                       </a>
                     </Button>
                   ) : (
                     <span className="text-muted-foreground text-xs">
-                      {unavailableLabel}
+                      {t('Unavailable')}
                     </span>
                   )}
                 </li>
@@ -132,7 +128,7 @@ export default async function CheckoutSuccessPage(props: {
 
         <Button asChild>
           <Link href={`${marketplaceBase}/my-account/purchases`}>
-            {viewAllLabel}
+            {await t('View all my purchases')}
           </Link>
         </Button>
       </div>

@@ -26,16 +26,15 @@ export async function RecentActivity({
 }) {
   const items = await activity;
 
-  const [heading, noActivityLabel] = await Promise.all([
-    t('Recent activity'),
-    t('No activity yet.'),
-  ]);
-
   return (
     <div className={`${CARD} space-y-4`}>
-      <h3 className="text-xl font-semibold text-foreground">{heading}</h3>
+      <h3 className="text-xl font-semibold text-foreground">
+        {await t('Recent activity')}
+      </h3>
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{noActivityLabel}</p>
+        <p className="text-sm text-muted-foreground">
+          {await t('No activity yet.')}
+        </p>
       ) : (
         <div className="space-y-4">
           {items.map((item, index) => (

@@ -29,24 +29,6 @@ export default async function CartPage(props: {
 
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 
-  const [
-    cartLabel,
-    yourCartLabel,
-    emptyLabel,
-    browseLabel,
-    subtotalLabel,
-    proceedLabel,
-    removeLabel,
-  ] = await Promise.all([
-    t('Cart'),
-    t('Your cart'),
-    t('Your cart is empty.'),
-    t('Browse marketplace'),
-    t('Subtotal'),
-    t('Proceed to checkout'),
-    t('Remove'),
-  ]);
-
   return (
     <div className="container mx-auto px-4 py-6">
       <Breadcrumb className="mb-4">
@@ -58,22 +40,22 @@ export default async function CartPage(props: {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{cartLabel}</BreadcrumbPage>
+            <BreadcrumbPage>{await t('Cart')}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <h1 className="text-2xl font-semibold text-foreground mb-6">
-        {yourCartLabel}
+        {await t('Your cart')}
       </h1>
 
       <CartContent
         marketplaceBase={marketplaceBase}
-        emptyLabel={emptyLabel}
-        browseLabel={browseLabel}
-        subtotalLabel={subtotalLabel}
-        proceedLabel={proceedLabel}
-        removeLabel={removeLabel}
+        emptyLabel={await t('Your cart is empty.')}
+        browseLabel={await t('Browse marketplace')}
+        subtotalLabel={await t('Subtotal')}
+        proceedLabel={await t('Proceed to checkout')}
+        removeLabel={await t('Remove')}
         browseHref={marketplaceBase}
         checkoutHref={`${marketplaceBase}/cart/checkout`}
       />

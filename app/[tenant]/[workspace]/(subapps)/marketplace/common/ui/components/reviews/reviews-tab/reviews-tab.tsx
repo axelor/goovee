@@ -81,16 +81,6 @@ export async function ReviewsTab({
   const totalReviewCount = visibleReviewTotal + (myReview ? 1 : 0);
   const totalReviewPages = Math.ceil(visibleReviewTotal / REVIEWS_PAGE_SIZE);
 
-  const [noReviewsLabel, reviewCountLabel, previousLabel, nextLabel] =
-    await Promise.all([
-      t('No reviews yet'),
-      totalReviewCount === 1
-        ? t('1 review')
-        : t('{0} reviews', String(totalReviewCount)),
-      t('Previous'),
-      t('Next'),
-    ]);
-
   // Calculate rating distribution using aggregate
   const ratingAggregates = await client.aOSMarketplaceReview.aggregate({
     count: {id: true},
@@ -153,7 +143,7 @@ export async function ReviewsTab({
       <div className="space-y-6">
         {yourReviewCard}
         <div className="text-center py-12 bg-card rounded-lg border border-border">
-          <p className="text-muted-foreground">{noReviewsLabel}</p>
+          <p className="text-muted-foreground">{await t('No reviews yet')}</p>
         </div>
       </div>
     );
@@ -170,7 +160,11 @@ export async function ReviewsTab({
               {(Number(product.averageRating) || 0).toFixed(1)}
             </div>
             <Rating value={product.averageRating} showValue={false} size={16} />
-            <p className="text-sm text-muted-foreground">{reviewCountLabel}</p>
+            <p className="text-sm text-muted-foreground">
+              {totalReviewCount === 1
+                ? await t('1 review')
+                : await t('{0} reviews', String(totalReviewCount))}
+            </p>
           </div>
 
           {/* Right: Rating Breakdown */}
@@ -257,7 +251,7 @@ export async function ReviewsTab({
                     ['pointer-events-none opacity-50']: reviewPage <= 1,
                   })}>
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">{previousLabel}</span>
+                  <span className="sr-only">{await t('Previous')}</span>
                 </Link>
               </PaginationPrevious>
             </PaginationItem>
@@ -295,7 +289,7 @@ export async function ReviewsTab({
                     ['pointer-events-none opacity-50']:
                       reviewPage >= totalReviewPages,
                   })}>
-                  <span className="sr-only">{nextLabel}</span>
+                  <span className="sr-only">{await t('Next')}</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </PaginationNext>

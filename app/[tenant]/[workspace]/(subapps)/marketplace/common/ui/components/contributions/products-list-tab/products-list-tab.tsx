@@ -56,10 +56,6 @@ export async function ProductsListTab({
   totalPages = 1,
   paramName,
 }: ProductsListTabProps) {
-  const [previousLabel, nextLabel] = await Promise.all([
-    t('Previous'),
-    t('Next'),
-  ]);
   return (
     <div className="space-y-6">
       <MyProductsTable
@@ -96,7 +92,7 @@ export async function ProductsListTab({
                         [paramName]: Math.max(1, page - 1),
                       },
                     }}>
-                    <span className="sr-only">{previousLabel}</span>
+                    <span className="sr-only">{await t('Previous')}</span>
                     <ChevronLeft className="h-4 w-4" />
                   </Link>
                 </PaginationPrevious>
@@ -146,7 +142,7 @@ export async function ProductsListTab({
                         [paramName]: page + 1,
                       },
                     }}>
-                    <span className="sr-only">{nextLabel}</span>
+                    <span className="sr-only">{await t('Next')}</span>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </PaginationNext>

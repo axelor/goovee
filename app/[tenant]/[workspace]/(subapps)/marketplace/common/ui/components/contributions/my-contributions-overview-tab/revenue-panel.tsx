@@ -13,25 +13,23 @@ export async function RevenuePanel({
 }) {
   const {currency, monthly} = await revenue;
 
-  const [heading, revenueLabel, noRevenueLabel] = await Promise.all([
-    t('Revenue · last 12 months'),
-    t('Revenue'),
-    t('No sales yet.'),
-  ]);
-
   return (
     <div className={`${CARD} space-y-4`}>
-      <h3 className="text-xl font-semibold text-foreground">{heading}</h3>
+      <h3 className="text-xl font-semibold text-foreground">
+        {await t('Revenue · last 12 months')}
+      </h3>
       {currency?.codeISO ? (
         <RevenueChart
           data={monthly}
-          label={revenueLabel}
+          label={await t('Revenue')}
           currencyCode={currency.codeISO}
           currencyScale={currency.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE}
         />
       ) : (
         <div className="flex h-64 items-center justify-center">
-          <p className="text-sm text-muted-foreground">{noRevenueLabel}</p>
+          <p className="text-sm text-muted-foreground">
+            {await t('No sales yet.')}
+          </p>
         </div>
       )}
     </div>

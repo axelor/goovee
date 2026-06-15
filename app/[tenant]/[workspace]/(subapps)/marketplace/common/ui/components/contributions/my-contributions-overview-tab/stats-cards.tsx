@@ -138,20 +138,16 @@ export async function RevenueStatCard({
   revenue: Promise<RevenueSummary>;
 }) {
   const {lastMonth, currency, deltaPct, month, previousMonth} = await revenue;
-  const [label, baselineLabel] = await Promise.all([
-    t('Revenue'),
-    t('Baseline'),
-  ]);
   const {monthLabel, vsLabel} = await monthLabels(month, previousMonth);
   return (
     <StatCard
-      label={label}
+      label={await t('Revenue')}
       value={await formatMoney(lastMonth, currency)}
       monthLabel={monthLabel}
       delta={deltaPct}
       deltaText={deltaPct != null ? formatPct(deltaPct) : null}
       vsLabel={vsLabel}
-      baselineLabel={baselineLabel}
+      baselineLabel={await t('Baseline')}
       icon="💰"
       bgColor="bg-success/15"
     />
@@ -160,17 +156,16 @@ export async function RevenueStatCard({
 
 export async function SalesStatCard({sales}: {sales: Promise<SalesStat>}) {
   const {sales: value, salesDeltaPct, month, previousMonth} = await sales;
-  const [label, baselineLabel] = await Promise.all([t('Sales'), t('Baseline')]);
   const {monthLabel, vsLabel} = await monthLabels(month, previousMonth);
   return (
     <StatCard
-      label={label}
+      label={await t('Sales')}
       value={value.toLocaleString()}
       monthLabel={monthLabel}
       delta={salesDeltaPct}
       deltaText={salesDeltaPct != null ? formatPct(salesDeltaPct) : null}
       vsLabel={vsLabel}
-      baselineLabel={baselineLabel}
+      baselineLabel={await t('Baseline')}
       icon="🛍️"
       bgColor="bg-palette-amber-light"
     />
@@ -188,20 +183,16 @@ export async function InstallsStatCard({
     month,
     previousMonth,
   } = await installs;
-  const [label, baselineLabel] = await Promise.all([
-    t('Installs'),
-    t('Baseline'),
-  ]);
   const {monthLabel, vsLabel} = await monthLabels(month, previousMonth);
   return (
     <StatCard
-      label={label}
+      label={await t('Installs')}
       value={value.toLocaleString()}
       monthLabel={monthLabel}
       delta={installsDeltaPct}
       deltaText={installsDeltaPct != null ? formatPct(installsDeltaPct) : null}
       vsLabel={vsLabel}
-      baselineLabel={baselineLabel}
+      baselineLabel={await t('Baseline')}
       icon="📥"
       bgColor="bg-palette-blue-light"
     />
@@ -219,20 +210,16 @@ export async function AvgRatingStatCard({
     month,
     previousMonth,
   } = await avgRating;
-  const [label, baselineLabel] = await Promise.all([
-    t('Avg. rating'),
-    t('Baseline'),
-  ]);
   const {monthLabel, vsLabel} = await monthLabels(month, previousMonth);
   return (
     <StatCard
-      label={label}
+      label={await t('Avg. rating')}
       value={value ? value.toFixed(1) : '—'}
       monthLabel={monthLabel}
       delta={avgRatingDelta}
       deltaText={avgRatingDelta != null ? formatDelta(avgRatingDelta) : null}
       vsLabel={vsLabel}
-      baselineLabel={baselineLabel}
+      baselineLabel={await t('Baseline')}
       icon="⭐"
       bgColor="bg-palette-pink-light"
     />

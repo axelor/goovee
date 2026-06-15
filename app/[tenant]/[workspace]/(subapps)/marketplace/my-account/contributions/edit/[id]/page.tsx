@@ -68,11 +68,6 @@ export default async function EditProductPage(props: {
   if (!isNew && !product) redirect(returnHref);
   const cloned = product ? clone(product) : undefined;
 
-  const [marketplaceLabel, myAccountLabel, myContribLabel] = await Promise.all([
-    t('Marketplace'),
-    t('My account'),
-    t('My contributions'),
-  ]);
   const leafLabel = isNew
     ? defaultType === MARKETPLACE_TYPE.APP
       ? await t('Publish a new app')
@@ -90,7 +85,7 @@ export default async function EditProductPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={base}>{marketplaceLabel}</Link>
+                <Link href={base}>{await t('Marketplace')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -98,7 +93,7 @@ export default async function EditProductPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={`${base}/my-account`}>{myAccountLabel}</Link>
+                <Link href={`${base}/my-account`}>{await t('My account')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -107,7 +102,7 @@ export default async function EditProductPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link href={`${base}/my-account/contributions?tab=products`}>
-                  {myContribLabel}
+                  {await t('My contributions')}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>

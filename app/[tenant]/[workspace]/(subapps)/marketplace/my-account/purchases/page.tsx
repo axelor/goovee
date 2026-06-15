@@ -105,18 +105,6 @@ export default async function MyPurchasesPage(props: {
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
   const purchasesHref = `${marketplaceBase}/my-account/purchases`;
 
-  const [
-    marketplaceLabel,
-    myAccountLabel,
-    myPurchasesLabel,
-    myPurchasesDescLabel,
-  ] = await Promise.all([
-    t('Marketplace'),
-    t('My account'),
-    t('My purchases'),
-    t("Review and manage the apps you've purchased from the marketplace."),
-  ]);
-
   return (
     <div className="min-h-screen container pb-6">
       {/* Breadcrumb */}
@@ -127,7 +115,7 @@ export default async function MyPurchasesPage(props: {
               <BreadcrumbLink
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={marketplaceBase}>{marketplaceLabel}</Link>
+                <Link href={marketplaceBase}>{await t('Marketplace')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -136,14 +124,14 @@ export default async function MyPurchasesPage(props: {
                 asChild
                 className="text-foreground-muted cursor-pointer truncate text-md">
                 <Link href={`${marketplaceBase}/my-account`}>
-                  {myAccountLabel}
+                  {await t('My account')}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage className="sm:truncate text-lg font-semibold">
-                {myPurchasesLabel}
+                {await t('My purchases')}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -154,10 +142,12 @@ export default async function MyPurchasesPage(props: {
       <div className="pb-6">
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {myPurchasesLabel}
+            {await t('My purchases')}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {myPurchasesDescLabel}
+            {await t(
+              "Review and manage the apps you've purchased from the marketplace.",
+            )}
           </p>
         </div>
       </div>

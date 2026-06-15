@@ -55,20 +55,6 @@ export async function ProductHeaderCard({
   const {ati: priceAti} = product.price;
   const paid = priceAti > 0;
 
-  const [
-    byLabel,
-    updatedLabel,
-    downloadZipLabel,
-    documentationLabel,
-    priceFreeLabel,
-  ] = await Promise.all([
-    t('by'),
-    t('Updated'),
-    t('Download ZIP'),
-    t('Documentation'),
-    t('Free'),
-  ]);
-
   const typeLabel = product.marketplaceTypeSelect
     ? await tattr(product.marketplaceTypeSelect)
     : undefined;
@@ -79,7 +65,7 @@ export async function ProductHeaderCard({
         scale: priceScale,
         currency: product.price.currency.code,
       })
-    : priceFreeLabel;
+    : await t('Free');
 
   const installCountLabel = await t(
     '{0} installs',
@@ -168,7 +154,7 @@ export async function ProductHeaderCard({
           {/* Creator, Rating, Stats */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm pt-2">
             <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">{byLabel}</span>
+              <span className="text-muted-foreground">{await t('by')}</span>
               <span className="font-semibold text-foreground">
                 {product.publisher.simpleFullName ||
                   product.publisher.name ||
@@ -199,7 +185,7 @@ export async function ProductHeaderCard({
               <TooltipDate
                 date={product.currentVersion.publishDateTime}
                 displayType="relative"
-                prefix={updatedLabel}
+                prefix={await t('Updated')}
                 lowercase
               />
             )}
@@ -224,7 +210,7 @@ export async function ProductHeaderCard({
             paid={paid}
             priceAti={priceAti}
             priceScale={priceScale}
-            downloadZipLabel={downloadZipLabel}
+            downloadZipLabel={await t('Download ZIP')}
             preview={preview}
             canDownloadPromise={canDownloadPromise}
           />
@@ -232,7 +218,7 @@ export async function ProductHeaderCard({
           {product.documentationUrl && (
             <DocumentationButton
               url={product.documentationUrl}
-              label={documentationLabel}
+              label={await t('Documentation')}
             />
           )}
         </div>
