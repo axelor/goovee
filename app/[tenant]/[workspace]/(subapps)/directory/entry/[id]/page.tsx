@@ -119,7 +119,7 @@ async function Details({
           )}
           <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
             {emailAddress && (
-              <Link
+              <a
                 href={`mailto:${emailAddress.address}`}
                 className="text-sm text-primary hover:underline flex items-center gap-2">
                 <svg
@@ -136,10 +136,10 @@ async function Details({
                   />
                 </svg>
                 {emailAddress.address}
-              </Link>
+              </a>
             )}
             {fixedPhone && (
-              <Link
+              <a
                 href={`tel:${fixedPhone}`}
                 className="text-sm text-primary hover:underline flex items-center gap-2">
                 <svg
@@ -156,10 +156,10 @@ async function Details({
                   />
                 </svg>
                 {fixedPhone}
-              </Link>
+              </a>
             )}
             {mobilePhone && (
-              <Link
+              <a
                 href={`tel:${mobilePhone}`}
                 className="text-sm text-primary hover:underline flex items-center gap-2">
                 <svg
@@ -176,10 +176,10 @@ async function Details({
                   />
                 </svg>
                 {mobilePhone}
-              </Link>
+              </a>
             )}
             {webSite && (
-              <Link
+              <a
                 href={webSite}
                 target="_blank"
                 rel="noreferrer"
@@ -198,7 +198,7 @@ async function Details({
                   />
                 </svg>
                 {webSite}
-              </Link>
+              </a>
             )}
           </div>
         </div>
@@ -274,11 +274,11 @@ async function Contact({
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
-              <Link
+              <a
                 href={`mailto:${emailAddress.address}`}
                 className="text-primary hover:underline">
                 {emailAddress.address}
-              </Link>
+              </a>
             </div>
           )}
           {fixedPhone && (
@@ -296,11 +296,11 @@ async function Contact({
                   d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                 />
               </svg>
-              <Link
+              <a
                 href={`tel:${fixedPhone}`}
                 className="text-primary hover:underline">
                 {fixedPhone}
-              </Link>
+              </a>
             </div>
           )}
           {mobilePhone && (
@@ -318,25 +318,25 @@ async function Contact({
                   d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
                 />
               </svg>
-              <Link
+              <a
                 href={`tel:${mobilePhone}`}
                 className="text-primary hover:underline">
                 {mobilePhone}
-              </Link>
+              </a>
             </div>
           )}
         </div>
       </div>
       {linkedinLink && (
         <div className="border-t border-border px-5 py-3 bg-muted/50">
-          <Link
+          <a
             href={linkedinLink}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 text-sm text-primary hover:underline">
             <FaLinkedin className="h-5 w-5 text-[#0077b5]" />
             <span>{await t('LinkedIn Profile')}</span>
-          </Link>
+          </a>
         </div>
       )}
     </div>
