@@ -145,9 +145,10 @@ Each listing has a page (addressed by its slug) that exposes:
 
 **Preview mode:** a contributor in a publishing-enabled workspace can open their
 _unpublished_ listing in a preview that surfaces its current draft status; all
-actions are inert in preview. Preview is **seller-only**: a preview request from
-a guest, or in a workspace where publishing is off, falls back to the normal
-visit — the published listing, or "not found" when nothing is published.
+actions are inert in preview. Preview is **seller-only** — only a full-access
+seller in a publishing-enabled workspace can use it. Every other preview request
+(a guest, a Restricted contact, or any user when publishing is off) returns
+**"not found"**.
 
 ### 4.4 Favourites
 
