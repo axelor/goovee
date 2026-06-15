@@ -1,6 +1,8 @@
-import {auth} from '@/lib/auth';
-import {getSessionCookie} from 'better-auth/cookies';
 import {NextRequest, NextResponse} from 'next/server';
+
+// ---- CORE IMPORTS ---- //
+import {auth} from '@/lib/auth';
+import {getCookieCache, getSessionCookie} from 'better-auth/cookies';
 import {getBasePath} from '@/lib/core/path/base-path';
 
 export const TENANT_HEADER = 'x-tenant-id';
@@ -59,13 +61,33 @@ export default async function proxy(req: NextRequest) {
     if (!tenant) return notFound(req);
     const sessionCookie = getSessionCookie(req);
     if (sessionCookie) {
-      const session = await auth.api.getSession({
-        headers: req.headers,
-      });
-      const tenantMismatch =
-        session && session.user.tenantId && session.user.tenantId !== tenant;
+      /* Read the tenant id straight from the encrypted (JWE) session-data cookie
+       * instead of auth.api.getSession(). getSession runs the customSession
+       * enrichment query on every matched request — including every <Link>
+       * prefetch — while the proxy only needs the tenant id, which is immutable
+       * for a session and already present in the cookie. Fall back to a full
+       * getSession when the cookie cache is absent, expired, or undecodable. */
+      let sessionTenantId: string | null = null;
 
-      if (tenantMismatch)
+      try {
+        /* `strategy` must match session.cookieCache.strategy in lib/auth.ts;
+         * the secret, cookie name and `__Secure-` prefix are resolved by Better
+         * Auth from the env and request. */
+        const cached = await getCookieCache(req, {strategy: 'jwe'});
+        const cachedTenantId: unknown = cached?.session.tenantId;
+        if (typeof cachedTenantId === 'string') {
+          sessionTenantId = cachedTenantId;
+        }
+      } catch {
+        sessionTenantId = null;
+      }
+
+      if (!sessionTenantId) {
+        const session = await auth.api.getSession({headers: req.headers});
+        sessionTenantId = session?.user.tenantId ?? null;
+      }
+
+      if (sessionTenantId && sessionTenantId !== tenant)
         return notFound(req, {
           message:
             'You are already loggedin to a tenant. For accessing different tenant, you need to logout first.',
