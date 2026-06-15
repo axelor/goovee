@@ -32,6 +32,10 @@
     {
       "type": "DateTime",
       "name": "consumedAt"
+    },
+    {
+      "type": "DateTime",
+      "name": "reapedAt"
     }
   ]
 }

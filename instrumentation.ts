@@ -5,6 +5,10 @@ const RETRY_DELAYS_MS = [2_000, 5_000, 10_000, 30_000];
 export async function register() {
   if (process.env.NEXT_RUNTIME !== 'nodejs') return;
 
+  // Schedule the staged-upload reaper (non-blocking — just arms timers).
+  const {startStagedUploadReaper} = await import('@/lib/core/upload/startup');
+  startStagedUploadReaper();
+
   // Run after register() returns so it doesn't block server startup.
   // In multi-tenant mode, MultiTenantManager fetches tenant config via HTTP
   // on itself (/api/tenant/:id/config), which fails if called before the
