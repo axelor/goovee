@@ -13,11 +13,9 @@ import {
   saveReviewSchema,
 } from '../constants/review';
 import {
-  addRating,
   findExistingReview,
   findProductAccess,
-  removeRating,
-  replaceRating,
+  recomputeProductRating,
   withProductAccessFilter,
 } from '../orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
@@ -100,7 +98,6 @@ export async function saveReview(
     });
 
     let reviewId: string;
-    let previousRating: number | null;
     if (existing) {
       await client.aOSMarketplaceReview.update({
         select: {id: true},
@@ -113,7 +110,6 @@ export async function saveReview(
         },
       });
       reviewId = existing.id;
-      previousRating = existing.rating;
     } else {
       const created = await client.aOSMarketplaceReview.create({
         select: {id: true},
@@ -126,23 +122,13 @@ export async function saveReview(
         },
       });
       reviewId = created.id;
-      previousRating = null;
     }
 
-    // Rating aggregates are derived/telemetry; recompute them after the
-    // response is flushed so the save action returns immediately.
+    /* Rating aggregates are derived; recompute them from the review rows
+     * after the response is flushed so the save returns immediately. */
     after(async () => {
       try {
-        if (previousRating === null) {
-          await addRating(client, payload.productId, payload.rating);
-        } else {
-          await replaceRating(
-            client,
-            payload.productId,
-            previousRating,
-            payload.rating,
-          );
-        }
+        await recomputeProductRating(client, payload.productId);
       } catch (err) {
         console.error('marketplace: failed to update product rating', {
           productId: payload.productId,
@@ -196,11 +182,11 @@ export async function deleteReview(
       version: existing.version,
     });
 
-    // Rating aggregates are derived/telemetry; recompute them after the
-    // response is flushed so the save action returns immediately.
+    /* Rating aggregates are derived; recompute them from the review rows
+     * after the response is flushed so the delete returns immediately. */
     after(async () => {
       try {
-        await removeRating(client, productId, existing.rating);
+        await recomputeProductRating(client, productId);
       } catch (err) {
         console.error('marketplace: failed to update product rating', {
           productId,
