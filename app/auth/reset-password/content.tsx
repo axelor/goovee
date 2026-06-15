@@ -1,7 +1,6 @@
 'use client';
 
 import {useRouter, useSearchParams} from 'next/navigation';
-import Link from 'next/link';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -22,6 +21,7 @@ import {Button} from '@/ui/components/button';
 import {SEARCH_PARAMS} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {authClient} from '@/lib/auth-client';
+import {Link} from '@/ui/components/link';
 
 const formSchema = z.object({
   email: z.email().min(1, 'Email is required'),

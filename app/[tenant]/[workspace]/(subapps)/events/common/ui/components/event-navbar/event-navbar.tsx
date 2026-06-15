@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import Link from 'next/link';
 
 // ---- CORE IMPORTS ---- //
 import {Separator} from '@/ui/components/separator';
@@ -8,6 +7,7 @@ import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
 import {User} from '@/types';
 import {i18n} from '@/locale';
 import {useResponsive} from '@/ui/hooks';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENTS_NAVBAR_LINKS} from '@/subapps/events/common/constants';

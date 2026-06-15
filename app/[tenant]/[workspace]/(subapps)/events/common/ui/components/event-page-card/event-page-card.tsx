@@ -1,7 +1,6 @@
 'use client';
 import {authClient} from '@/lib/auth-client';
 import Image from 'next/image';
-import Link from 'next/link';
 
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -21,6 +20,7 @@ import {
 import {cn} from '@/utils/css';
 import {formatDateTime} from '@/lib/core/locale/formatters';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -142,6 +142,7 @@ export const EventPageCard = ({
         <CardFooter className="px-4 pb-4">
           {
             <Link
+              prefetch
               href={`${workspaceURI}/${SUBAPP_CODES.events}/${eventDetails?.slug}/register`}
               className="w-full">
               <Button

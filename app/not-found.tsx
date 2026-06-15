@@ -1,7 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
+
+// ---- CORE IMPORTS ---- //
+import {Link} from '@/ui/components/link';
 import {Button} from '@/ui/components';
 import {i18n} from '@/locale';
 

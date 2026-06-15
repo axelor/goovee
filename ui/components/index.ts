@@ -229,3 +229,4 @@ export {NavbarCategoryMenu} from './navbar-category-menu';
 export {AlertToast} from './alert-toast';
 export {AccordionMenu} from './accordion-menu';
 export {Spinner} from './spinner';
+export {Link} from './link';

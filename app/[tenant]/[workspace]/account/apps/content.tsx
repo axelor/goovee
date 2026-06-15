@@ -1,12 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_PAGE} from '@/constants';
 import {Icon} from '@/ui/components';
+import {Link} from '@/ui/components/link';
 
 export default function Content({subapps}: {subapps: any}) {
   const {workspaceURI} = useWorkspace();

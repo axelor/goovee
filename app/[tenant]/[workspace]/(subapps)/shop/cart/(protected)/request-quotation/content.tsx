@@ -3,7 +3,6 @@
 import {useState} from 'react';
 import type {Cloned} from '@/types/util';
 import {useRouter} from 'next/navigation';
-import Link from 'next/link';
 import {MdOutlineRefresh} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -15,6 +14,7 @@ import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
 import {SUBAPP_CODES} from '@/constants';
 import type {PortalWorkspace} from '@/orm/workspace';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {requestQuotation} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/actions/cart';

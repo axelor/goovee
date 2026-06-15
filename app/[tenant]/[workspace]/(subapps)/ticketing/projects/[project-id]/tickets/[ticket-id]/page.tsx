@@ -1,5 +1,4 @@
 import type {ID} from '@/types';
-import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
@@ -23,6 +22,7 @@ import {cn} from '@/utils/css';
 import {encodeFilter, getLoginURL} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {workspacePathname} from '@/utils/workspace';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import type {PortalAppConfig} from '@/orm/workspace';

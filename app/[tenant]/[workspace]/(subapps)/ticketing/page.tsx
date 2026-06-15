@@ -1,3 +1,5 @@
+import {ChevronLeft, ChevronRight} from 'lucide-react';
+
 // ---- CORE IMPORTS ---- //
 import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
@@ -14,8 +16,7 @@ import {
 } from '@/ui/components/pagination';
 import {cn} from '@/utils/css';
 import {workspacePathname} from '@/utils/workspace';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound, redirect} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';

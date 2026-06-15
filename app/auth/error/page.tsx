@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import {AlertCircle, ArrowLeft} from 'lucide-react';
 
 import {Button} from '@/ui/components/button';
@@ -9,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/ui/components/card';
+import {Link} from '@/ui/components/link';
 
 export default async function Page(props: {
   searchParams: Promise<{error: string; workspaceURI: string}>;

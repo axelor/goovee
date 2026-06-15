@@ -2,8 +2,6 @@
 
 import {useCallback, useEffect, useState} from 'react';
 import {usePathname, useRouter} from 'next/navigation';
-import Link from 'next/link';
-import {authClient} from '@/lib/auth-client';
 import {MdApps, MdNotificationsNone} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -25,6 +23,8 @@ import Cart from '@/app/[tenant]/[workspace]/cart';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {toWorkspaceURI} from '@/utils/workspace';
+import {Link} from '@/ui/components/link';
+import {authClient} from '@/lib/auth-client';
 
 function MobileSidebar({subapps, workspaces, workspace}: any) {
   const pathname = usePathname();

@@ -1,11 +1,11 @@
 'use client';
 
 import {z} from 'zod';
-import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import {MdOutlineVisibility, MdOutlineVisibilityOff} from 'react-icons/md';
+import {useState, use} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {SEARCH_PARAMS} from '@/constants';
@@ -22,8 +22,8 @@ import {
 import {Input} from '@/ui/components/input';
 import {Label} from '@/ui/components/label';
 import {Button} from '@/ui/components/button';
+import {Link} from '@/ui/components/link';
 
-import {useState, use} from 'react';
 import {authClient} from '@/lib/auth-client';
 import {PasswordSchema} from '@/utils/validators';
 

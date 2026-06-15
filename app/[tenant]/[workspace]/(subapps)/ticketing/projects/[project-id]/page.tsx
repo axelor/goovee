@@ -1,3 +1,16 @@
+import {notFound, redirect} from 'next/navigation';
+import {Suspense} from 'react';
+import {IconType} from 'react-icons';
+import {FaChevronRight} from 'react-icons/fa';
+import {
+  MdAdd,
+  MdAllInbox,
+  MdArrowForward,
+  MdCheckCircleOutline,
+  MdListAlt,
+  MdPending,
+} from 'react-icons/md';
+
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
@@ -14,19 +27,7 @@ import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {encodeFilter, getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
-import Link from 'next/link';
-import {notFound, redirect} from 'next/navigation';
-import {Suspense} from 'react';
-import {IconType} from 'react-icons';
-import {FaChevronRight} from 'react-icons/fa';
-import {
-  MdAdd,
-  MdAllInbox,
-  MdArrowForward,
-  MdCheckCircleOutline,
-  MdListAlt,
-  MdPending,
-} from 'react-icons/md';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {formatNumber} from '@/locale/server/formatters';

@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -9,6 +8,7 @@ import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
 import {Separator} from '@/ui/components/separator';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {Link} from '@/ui/components/link';
 
 export default function Navigation({
   showGoogleOauth,

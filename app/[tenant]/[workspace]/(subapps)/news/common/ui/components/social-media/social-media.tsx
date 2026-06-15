@@ -1,13 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-
 // ---- CORE IMPORTS ---- //
 import {Avatar, AvatarImage} from '@/ui/components/avatar';
 import {i18n} from '@/locale';
 import {Skeleton} from '@/ui/components';
 import {useEnvironment} from '@/environment';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {

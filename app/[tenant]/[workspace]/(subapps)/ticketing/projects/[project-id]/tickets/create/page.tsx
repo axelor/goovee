@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import {notFound, redirect} from 'next/navigation';
 import {FaChevronRight} from 'react-icons/fa';
 
@@ -8,6 +7,7 @@ import {t} from '@/locale/server';
 import {clone} from '@/utils';
 import {encodeFilter, getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {

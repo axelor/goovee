@@ -1,5 +1,4 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 
@@ -19,6 +18,7 @@ import {clone} from '@/utils';
 import {getPaginationButtons, getPages, getSkip} from '@/utils/pagination';
 import {workspacePathname} from '@/utils/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEntries, findMapConfig} from './common/orm';

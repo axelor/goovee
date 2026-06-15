@@ -2,7 +2,6 @@
 
 import {endOfDay, isPast, isToday} from 'date-fns';
 import type {Cloned} from '@/types/util';
-import Link from 'next/link';
 import {useEffect, useMemo, useState} from 'react';
 import {
   MdOutlineKeyboardArrowUp,
@@ -18,6 +17,7 @@ import {Checkbox, Pagination} from '@/ui/components';
 import {useResponsive, useSearchParams} from '@/ui/hooks';
 import {convertDateToISO8601} from '@/utils/date';
 import type {PageInfo} from '@/types';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {

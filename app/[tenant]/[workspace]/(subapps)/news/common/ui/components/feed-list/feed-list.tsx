@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {MdChevronRight} from 'react-icons/md';
-import Link from 'next/link';
 import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
@@ -12,6 +11,7 @@ import {formatRelativeTime} from '@/locale/formatters';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {i18n} from '@/lib/core/locale';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';

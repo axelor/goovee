@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 
 const navbarCategories = [
   {label: 'All Events'},

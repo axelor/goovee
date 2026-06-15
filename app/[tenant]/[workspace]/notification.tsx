@@ -1,9 +1,11 @@
 'use client';
+
+import {MdNotificationsNone} from 'react-icons/md';
+
+// ---- CORE IMPORTS ---- //
 import {usePushNotifications} from '@/pwa/push-context';
 import {useWorkspace} from './workspace-context';
-
-import Link from 'next/link';
-import {MdNotificationsNone} from 'react-icons/md';
+import {Link} from '@/ui/components/link';
 
 // ---- CORE IMPORTS ---- //
 import {Badge} from '@/ui/components';

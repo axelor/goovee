@@ -1,7 +1,6 @@
 'use client';
 
 import React, {useState} from 'react';
-import Link from 'next/link';
 import {useSearchParams} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import Image from 'next/image';
@@ -17,6 +16,7 @@ import {Button} from '@/ui/components/button';
 import {Separator} from '@/ui/components/separator';
 import {SEARCH_PARAMS} from '@/constants';
 import {useToast} from '@/ui/hooks';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {useEnvironment} from '@/lib/core/environment';

@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {FaLinkedin} from 'react-icons/fa';
 import {IoArrowBackOutline} from 'react-icons/io5';
@@ -11,6 +10,7 @@ import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
 import {getPartnerImageURL} from '@/utils/files';
 import {workspacePathname} from '@/utils/workspace';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {civility} from '../../common/constants';

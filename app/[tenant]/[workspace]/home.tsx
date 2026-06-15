@@ -1,9 +1,9 @@
 import {ArrowRight} from 'lucide-react';
 import type {Cloned} from '@/types/util';
-import Link from 'next/link';
 import {Suspense} from 'react';
 import Image from 'next/image';
 
+// ---- CORE IMPORTS ---- //
 import {
   DEFAULT_LOGO_URL,
   IMAGE_URL,
@@ -28,7 +28,9 @@ import {FileIcon} from '@/ui/components/file-icon';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {Link} from '@/ui/components/link';
 
+// ---- LOCAL IMPORTS ----//
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
 import {findEvents} from './(subapps)/events/common/orm/event';
 import {findRecentlyActivePosts} from './(subapps)/forum/common/orm/forum';

@@ -1,11 +1,8 @@
 'use client';
 
 import {useState} from 'react';
-import Link from 'next/link';
 import {usePathname, useRouter, useSearchParams} from 'next/navigation';
-import {authClient} from '@/lib/auth-client';
 import {MdOutlineAccountCircle} from 'react-icons/md';
-import {useSignOut} from '@/ui/hooks';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -28,6 +25,9 @@ import {
 import type {ID} from '@/types';
 import {getLoginURL} from '@/utils/url';
 import {getInitials} from '@/utils/names';
+import {Link} from '@/ui/components/link';
+import {authClient} from '@/lib/auth-client';
+import {useSignOut} from '@/ui/hooks';
 
 export function Account({
   baseURL = '',

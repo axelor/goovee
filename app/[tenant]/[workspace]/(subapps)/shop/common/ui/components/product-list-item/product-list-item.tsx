@@ -10,9 +10,7 @@ import {useResponsive} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {Category, ComputedProduct, ID} from '@/types';
-
-// ---- LOCAL IMPORTS ---- //
-import {Link} from '@/subapps/shop/common/ui/components';
+import {Link} from '@/ui/components/link';
 
 type ProductListItemProps = {
   product: ComputedProduct;

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 
 export const Logo = () => {
   return (

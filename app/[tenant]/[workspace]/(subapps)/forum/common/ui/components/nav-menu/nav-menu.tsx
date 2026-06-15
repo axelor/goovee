@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
@@ -9,6 +8,7 @@ import {Separator} from '@/ui/components/separator';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Skeleton} from '@/ui/components';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {MenuItem} from '@/subapps/forum/common/types/forum';

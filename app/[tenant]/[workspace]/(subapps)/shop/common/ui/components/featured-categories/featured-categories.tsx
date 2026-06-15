@@ -4,6 +4,7 @@ import {Fragment} from 'react';
 import {useRouter} from 'next/navigation';
 import {MdEast} from 'react-icons/md';
 
+// ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
@@ -11,9 +12,10 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {ComputedProduct} from '@/types';
 import type {Cloned} from '@/types/util';
 import type {PortalWorkspace} from '@/orm/workspace';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
-import {Link, ProductCard} from '@/subapps/shop/common/ui/components';
+import {ProductCard} from '@/subapps/shop/common/ui/components';
 import type {FeaturedCategory} from '@/subapps/shop/common/types';
 
 export function FeaturedCategories({

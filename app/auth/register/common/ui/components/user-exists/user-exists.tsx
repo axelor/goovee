@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-
 // ---- CORE IMPORTS ----//
 import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
+import {Link} from '@/ui/components/link';
 
 export function UserExists({workspaceURL}: {workspaceURL: string}) {
   return (

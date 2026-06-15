@@ -2,7 +2,6 @@
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import type {Cloned} from '@/types/util';
-import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
 import {authClient} from '@/lib/auth-client';
 import {LuChevronLeft} from 'react-icons/lu';
@@ -33,6 +32,7 @@ import {i18n} from '@/locale';
 import {SEARCH_PARAMS} from '@/constants';
 import type {Product, ComputedProduct} from '@/types';
 import type {PortalWorkspace} from '@/orm/workspace';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/actions/cart';
@@ -248,6 +248,16 @@ function CartSummary({
   const {data: session} = authClient.useSession();
   const authenticated = session?.user?.id;
 
+  // Opt-in prefetch: checkout is the deterministic funnel-forward step, so it's
+  // worth warming. Scoped to the cart page and only when the Checkout button is
+  // actually actionable — not part of the default-off list-link policy.
+  const checkoutURL = `${workspaceURI}/shop/cart/checkout`;
+  useEffect(() => {
+    if (authenticated && !hideCheckout && !noitem) {
+      router.prefetch(checkoutURL);
+    }
+  }, [authenticated, hideCheckout, noitem, checkoutURL, router]);
+
   return (
     <div className="col-span-12 xl:col-span-3 p-4 bg-card text-card-foreground rounded-lg">
       {workspace?.config?.displayPrices && (
@@ -275,7 +285,7 @@ function CartSummary({
             <Button
               className="w-full rounded-full mb-4"
               disabled={noitem}
-              onClick={() => router.push(`${workspaceURI}/shop/cart/checkout`)}>
+              onClick={() => router.push(checkoutURL)}>
               {i18n.t('Checkout')}
             </Button>
           )}
@@ -291,6 +301,7 @@ function CartSummary({
         </>
       ) : (
         <Link
+          prefetch
           className="no-underline text-inherit"
           href={`/auth/login?callbackurl=${encodeURIComponent(
             pathname,

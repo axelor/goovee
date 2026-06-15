@@ -1,11 +1,11 @@
-import Link from 'next/link';
-import type {Cloned} from '@/types/util';
 import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import type {PortalWorkspace} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {Link} from '@/ui/components/link';
+import type {Cloned} from '@/types/util';
 
 export default function Footer({
   workspace,

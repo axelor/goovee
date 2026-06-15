@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic';
 
-import Link from 'next/link';
 import {notFound} from 'next/navigation';
 import {MdAdd} from 'react-icons/md';
 import {Suspense} from 'react';
@@ -15,6 +14,7 @@ import {findWorkspace} from '@/orm/workspace';
 import type {User} from '@/types';
 import {manager} from '@/lib/core/tenant';
 import type {Client} from '@/goovee/.generated/client';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {

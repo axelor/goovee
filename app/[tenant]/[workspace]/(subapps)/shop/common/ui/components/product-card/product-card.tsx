@@ -10,9 +10,7 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {Category, ComputedProduct, ID} from '@/types';
-
-// ---- LOCAL IMPORTS ---- //
-import {Link} from '@/subapps/shop/common/ui/components';
+import {Link} from '@/ui/components/link';
 
 type ProductCardProps = {
   product: ComputedProduct;

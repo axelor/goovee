@@ -28,7 +28,7 @@ import {cn} from '@/utils/css';
 import {authClient} from '@/lib/auth-client';
 import {withBasePath} from '@/lib/core/path/base-path';
 
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 
 const formSchema = z
   .object({

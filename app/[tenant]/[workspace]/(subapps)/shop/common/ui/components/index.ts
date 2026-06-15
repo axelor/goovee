@@ -32,5 +32,4 @@ export {
   AddressSelectionSkeleton,
   CheckoutSkeleton,
 } from './skeleton';
-export {Link} from './link';
 export {OrderAlert} from './order-alert';

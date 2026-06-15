@@ -1,9 +1,10 @@
 'use client';
 
 import {useState} from 'react';
-import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {MdApps} from 'react-icons/md';
+
+// ---- CORE IMPORTS ---- //
 import {authClient} from '@/lib/auth-client';
 import {cn} from '@/utils/css';
 import {Icon} from '@/ui/components';
@@ -27,6 +28,7 @@ import {useWorkspace} from './workspace-context';
 import {useEnvironment} from '@/lib/core/environment';
 import {CHAT_TYPE} from '@/constants';
 import {toWorkspaceURI} from '@/utils/workspace';
+import {Link} from '@/ui/components/link';
 
 export function Sidebar({
   subapps,

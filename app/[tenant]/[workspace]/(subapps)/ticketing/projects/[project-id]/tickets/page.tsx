@@ -1,3 +1,9 @@
+import {notFound, redirect} from 'next/navigation';
+import {Suspense} from 'react';
+import {FaChevronRight} from 'react-icons/fa';
+import {MdAdd} from 'react-icons/md';
+import {ChevronLeft, ChevronRight} from 'lucide-react';
+
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
@@ -28,12 +34,7 @@ import {getPaginationButtons} from '@/utils/pagination';
 import {decodeFilter, getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import type {ID} from '@/types';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
-import Link from 'next/link';
-import {notFound, redirect} from 'next/navigation';
-import {Suspense} from 'react';
-import {FaChevronRight} from 'react-icons/fa';
-import {MdAdd} from 'react-icons/md';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {

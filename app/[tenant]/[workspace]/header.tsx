@@ -2,10 +2,8 @@
 
 import {Fragment} from 'react';
 import type {Cloned} from '@/types/util';
-import Link from 'next/link';
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
-import {authClient} from '@/lib/auth-client';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -31,6 +29,8 @@ import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {toWorkspaceURI} from '@/utils/workspace';
+import {Link} from '@/ui/components/link';
+import {authClient} from '@/lib/auth-client';
 
 function Logo({
   workspace,

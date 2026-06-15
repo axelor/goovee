@@ -6,13 +6,13 @@ import {Pagination} from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import {usePathname} from 'next/navigation';
-import Link from 'next/link';
 
 // ---- CORE IMPORTS ---- //
 import {Button} from '@/ui/components/button';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {Skeleton} from '@/ui/components';
+import {Link} from '@/ui/components/link';
 
 //---- LOCAL IMPORTS ---- //
 import type {RawNewsCategory} from '@/subapps/news/common/types';

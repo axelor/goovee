@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {MdKeyboardBackspace} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -11,6 +10,7 @@ import {i18n} from '@/locale';
 import {useSearchParams} from '@/ui/hooks';
 import {authClient} from '@/lib/auth-client';
 import type {Cloned} from '@/types/util';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {EventDateCard} from '@/subapps/events/common/ui/components';

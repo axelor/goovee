@@ -1,7 +1,6 @@
 'use client';
 
 import {useMemo, useState} from 'react';
-import Link from 'next/link';
 import {authClient} from '@/lib/auth-client';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {z} from 'zod';
@@ -42,6 +41,7 @@ import {Input} from '@/ui/components/input';
 import {SEARCH_PARAMS} from '@/constants';
 import {cn} from '@/utils/css';
 import {InnerHTML} from '@/ui/components/inner-html';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {subscribe} from '../actions';

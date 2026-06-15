@@ -1,7 +1,6 @@
 'use client';
 
 import React, {useCallback, useEffect, useState} from 'react';
-import Link from 'next/link';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -10,6 +9,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Button, Loader, Separator} from '@/ui/components';
 import {ADDRESS_TYPE} from '@/constants';
 import type {PartnerAddress} from '@/types';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {

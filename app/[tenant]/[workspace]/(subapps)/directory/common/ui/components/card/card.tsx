@@ -1,12 +1,10 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 import {NO_IMAGE_URL} from '@/constants';
 import {InnerHTML} from '@/ui/components';
-
+import {Link} from '@/ui/components/link';
 import {Cloned, Maybe} from '@/types/util';
 import type {Entry, ListEntry} from '../../../types';
-
 import {getPartnerImageURL} from '@/utils/files';
 import {Tenant} from '@/lib/core/tenant';
 import {cn} from '@/utils/css';

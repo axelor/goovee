@@ -1,12 +1,14 @@
 'use client';
 
+import {Bell} from 'lucide-react';
+import {useOptimistic, startTransition} from 'react';
+
+// ---- CORE IMPORTS ---- //
 import {usePushNotifications} from '@/pwa/push-context';
 import {i18n} from '@/locale';
 import {Button, Alert, AlertTitle, AlertDescription} from '@/ui/components';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {formatRelativeTime} from '@/locale/formatters';
-import {Bell} from 'lucide-react';
-import {useOptimistic, startTransition} from 'react';
 
 export function UnreadNotificationsList() {
   const {

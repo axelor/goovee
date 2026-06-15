@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {MdDeleteOutline, MdKeyboardArrowDown} from 'react-icons/md';
@@ -38,6 +37,7 @@ import {getPartnerImageURL} from '@/utils/files';
 import {SUBAPP_WITH_ROLES} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {authClient} from '@/lib/auth-client';
+import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import {Authorization, Role} from '../../common/types';
