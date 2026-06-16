@@ -151,13 +151,6 @@ export type Invoice = {
     code: string | null;
     numberOfDecimals: number | null;
   } | null;
-  portalTokenList:
-    | {
-        id: string;
-        version: number;
-        expiresOn: string | null;
-      }[]
-    | null;
   address: {
     id: string;
     version: number;
