@@ -141,3 +141,24 @@ export const GROUPS_ORDER_BY = {
 export const MAX_IMAGES_BEFORE_OVERLAY = 3;
 
 export const COMMENTS_PER_LOAD = 3;
+
+export const MAX_FILE_SIZE = 20000000; // 20 MB
+
+/* Max attachments per post. A post carries either images or documents (not
+ * both), so this caps whichever type is in use. Enforced client-side at pick
+ * time and server-side when the post is created. */
+export const MAX_FORUM_ATTACHMENTS = 10;
+
+/* Staged-upload purpose under which forum post attachments (images and documents) are pre-uploaded (registered in lib/core/upload/staged-upload.ts) and redeemed when the post is created. */
+export const FORUM_POST_ATTACHMENT_PURPOSE = 'forum:post:attachment';
+
+/* Document MIME types accepted as forum post attachments (alongside any
+ * image/*). Single source of truth: enforced client-side at pick time by the
+ * file picker and server-side by the upload purpose policy. */
+export const FORUM_ATTACHMENT_DOC_MIMES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+];

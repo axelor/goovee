@@ -20,12 +20,14 @@ import {
   DialogTitle,
 } from '@/ui/components';
 import {formatNumber} from '@/locale/formatters';
+import {useToast} from '@/ui/hooks/use-toast';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
   ALERTNATE_TEXT,
   CLICK_HERE_DRAG_DROP,
+  MAX_FORUM_ATTACHMENTS,
   OUT_OF,
   SUPPORTED_FILE_JPG_PNG,
   UPLOAD,
@@ -35,6 +37,7 @@ import {ImageViewer} from '@/subapps/forum/common/ui/components';
 interface ImageItem {
   file: File;
   altText: string;
+  uploadId?: string;
 }
 
 interface ImageUploaderProps {
@@ -54,29 +57,61 @@ export const ImageUploader = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  const handleImageUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const fileList = e.target.files;
-      if (fileList) {
-        const newImages = Array.from(fileList).map(file => ({
-          file,
-          altText: '',
-        }));
-        setImages(prev => [...prev, ...newImages]);
+  const {toast} = useToast();
+
+  /*
+   * Accept only images, and never more than MAX_FORUM_ATTACHMENTS in total:
+   * non-images are rejected with a toast, and any picked beyond the remaining
+   * room are dropped with a toast.
+   */
+  const addImageFiles = useCallback(
+    (fileList: FileList | null) => {
+      if (!fileList?.length) return;
+      const accepted: ImageItem[] = [];
+      Array.from(fileList).forEach(file => {
+        if (file.type.startsWith('image/')) {
+          accepted.push({file, altText: ''});
+        } else {
+          toast({
+            variant: 'destructive',
+            title: i18n.t('{0} could not be added', file.name),
+          });
+        }
+      });
+      if (!accepted.length) return;
+
+      const room = Math.max(0, MAX_FORUM_ATTACHMENTS - images.length);
+      const toAdd = accepted.slice(0, room);
+      if (toAdd.length < accepted.length) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t(
+            'You can add up to {0} files',
+            String(MAX_FORUM_ATTACHMENTS),
+          ),
+        });
       }
+      if (toAdd.length) setImages(prev => [...prev, ...toAdd]);
     },
-    [],
+    [images, toast],
   );
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const fileList = e.dataTransfer.files;
-    if (fileList) {
-      const newImages = Array.from(fileList).map(file => ({file, altText: ''}));
-      setImages(prev => [...prev, ...newImages]);
-    }
-    setIsDragging(false);
-  }, []);
+  const handleImageUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      addImageFiles(e.target.files);
+      e.target.value = '';
+    },
+    [addImageFiles],
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      addImageFiles(e.dataTransfer.files);
+      setIsDragging(false);
+    },
+    [addImageFiles],
+  );
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -102,7 +137,20 @@ export const ImageUploader = ({
   };
 
   const copyImage = (index: number) => {
-    setImages(prev => [...prev, {...images[index]}]);
+    if (images.length >= MAX_FORUM_ATTACHMENTS) {
+      toast({
+        variant: 'destructive',
+        title: i18n.t(
+          'You can add up to {0} files',
+          String(MAX_FORUM_ATTACHMENTS),
+        ),
+      });
+      return;
+    }
+    setImages(prev => [
+      ...prev,
+      {file: images[index].file, altText: images[index].altText},
+    ]);
   };
 
   useEffect(() => {

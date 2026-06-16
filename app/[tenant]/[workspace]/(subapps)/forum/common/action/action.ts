@@ -1,11 +1,7 @@
 'use server';
 
 import {z} from 'zod';
-import fs from 'fs';
 import {headers} from 'next/headers';
-import path from 'path';
-import {pipeline} from 'stream';
-import {promisify} from 'util';
 import {after} from 'next/server';
 import {revalidatePath} from 'next/cache';
 
@@ -18,9 +14,9 @@ import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {ID} from '@/types';
 import {PortalWorkspace} from '@/orm/workspace';
 import {getSession} from '@/auth';
-import {getFileSizeText} from '@/utils/files';
 import {manager} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
+import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import {TENANT_HEADER} from '@/proxy';
 import {filterPrivate} from '@/orm/filter';
 import {
@@ -31,7 +27,6 @@ import {
   isCommentEnabled,
 } from '@/comments';
 import {addComment, findComments} from '@/comments/orm';
-import {getStoragePath} from '@/storage/index';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -43,7 +38,11 @@ import {
   findMemberGroupById,
   findPosts,
 } from '@/subapps/forum/common/orm/forum';
-import {NOTIFICATION_VALUES} from '@/subapps/forum/common/constants';
+import {
+  FORUM_POST_ATTACHMENT_PURPOSE,
+  MAX_FORUM_ATTACHMENTS,
+  NOTIFICATION_VALUES,
+} from '@/subapps/forum/common/constants';
 import {sendEmailNotifications} from '@/subapps/forum/common/utils/mail';
 import {ContentType, MemberGroup} from '@/subapps/forum/common/types/forum';
 import {getArchivedFilter} from '@/subapps/forum/common/utils';
@@ -54,51 +53,43 @@ import {
   AddGroupNotificationSchema,
   GetSubscribersByGroupSchema,
   FindMediaSchema,
+  PostAttachmentSchema,
   type PinGroupInput,
   type ExitGroupInput,
   type JoinGroupInput,
   type AddGroupNotificationInput,
   type GetSubscribersByGroupInput,
   type FindMediaInput,
+  type PostAttachmentInput,
 } from '@/subapps/forum/common/validators';
 
-interface FileMeta {
-  fileName: string;
-  filePath: string;
-  id: string;
-}
+/**
+ * Redeem pre-staged upload claims into `meta_file` ids. Each token is verified
+ * (owner + purpose + freshness) and consumed in the caller's transaction; the
+ * per-file `title` is carried onto the post-attachment join record.
+ */
+async function redeemAttachments({
+  attachments,
+  owner,
+  client,
+}: {
+  attachments: PostAttachmentInput[];
+  owner: ID;
+  client: Client;
+}): Promise<{id: ID; title: string}[]> {
+  const redeemed: {id: ID; title: string}[] = [];
 
-interface AttachmentResponse {
-  title: string;
-  metaFile: FileMeta;
-}
-
-const pump = promisify(pipeline);
-
-function extractFileValues(formData: FormData) {
-  const values: Array<{title?: string; description?: string; file?: File}> = [];
-
-  for (const [key, value] of formData.entries()) {
-    const index = Number(key.match(/\[(\d+)\]/)?.[1]);
-
-    if (Number.isNaN(index)) {
-      continue;
-    }
-
-    if (!values[index]) {
-      values[index] = {};
-    }
-
-    const field = key.substring(key.lastIndexOf('[') + 1, key.lastIndexOf(']'));
-
-    if (field === 'title' || field === 'description') {
-      values[index][field] = value as string;
-    } else if (field === 'file') {
-      values[index][field] =
-        value instanceof File ? value : new File([value], 'filename');
-    }
+  for (const {token, title} of attachments) {
+    const id = await redeemUpload({
+      token,
+      purpose: FORUM_POST_ATTACHMENT_PURPOSE,
+      owner,
+      client,
+    });
+    redeemed.push({id, title});
   }
-  return values;
+
+  return redeemed;
 }
 
 export async function pinGroup({
@@ -496,14 +487,14 @@ export async function addPost({
   content,
   workspaceURL,
   workspaceURI,
-  formData,
+  attachments,
 }: {
   group: {id: string};
   title: string;
   content: string;
   workspaceURL: string;
   workspaceURI: string;
-  formData?: FormData;
+  attachments?: PostAttachmentInput[];
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -547,27 +538,25 @@ export async function addPost({
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  let attachmentListArray: {id: string; fileName: string; title: string}[] = [];
+  const parsedAttachments = z
+    .array(PostAttachmentSchema)
+    .max(MAX_FORUM_ATTACHMENTS)
+    .safeParse(attachments ?? []);
+  if (!parsedAttachments.success) {
+    return {error: true, message: await t('Invalid attachment')};
+  }
+
+  let attachmentListArray: {id: ID; title: string}[] = [];
 
   const timeStamp = new Date();
   try {
     const post = await client.$transaction(async txClient => {
-      if (formData) {
-        const attachmentResponse = await uploadAttachment(formData, txClient);
-
-        if (attachmentResponse.some(item => 'error' in item)) {
-          throw new Error(
-            await t('Something went wrong while attachment upload!'),
-          );
-        }
-
-        attachmentListArray = (attachmentResponse as AttachmentResponse[]).map(
-          ({title, metaFile}) => ({
-            id: metaFile.id,
-            fileName: metaFile.fileName,
-            title,
-          }),
-        );
+      if (parsedAttachments.data.length) {
+        attachmentListArray = await redeemAttachments({
+          attachments: parsedAttachments.data,
+          owner: user.id,
+          client: txClient,
+        });
       }
 
       return txClient.aOSPortalForumPost.create({
@@ -813,71 +802,6 @@ export async function fetchPosts({
     groupIDs,
     memberGroupIDs,
   }).then(clone);
-}
-
-async function uploadAttachment(
-  formData: FormData,
-  client: Client,
-): Promise<(AttachmentResponse | {error: string})[]> {
-  const values = extractFileValues(formData);
-
-  const getTimestampFilename = (name: string) =>
-    `${new Date().getTime()}-${name}`;
-
-  const create = async ({
-    file,
-    title,
-  }: {
-    file: File;
-    title: string;
-  }): Promise<AttachmentResponse> => {
-    const name = file.name;
-    const timestampFilename = getTimestampFilename(name);
-
-    try {
-      await pump(
-        file.stream(),
-        fs.createWriteStream(path.resolve(getStoragePath(), timestampFilename)),
-      );
-
-      const metaFile = await client.aOSMetaFile.create({
-        data: {
-          fileName: name,
-          filePath: timestampFilename,
-          fileType: file.type,
-          fileSize: String(file.size),
-          sizeText: getFileSizeText(file.size),
-        },
-        select: {
-          id: true,
-          fileName: true,
-          filePath: true,
-        },
-      });
-
-      return {
-        title,
-        metaFile: {
-          fileName: metaFile.fileName ?? '',
-          filePath: metaFile.filePath ?? '',
-          id: metaFile.id,
-        },
-      };
-    } catch (error) {
-      throw new Error('Failed to create meta file');
-    }
-  };
-
-  try {
-    const responses = await Promise.all(
-      values.map(({title, file}) => create({title: title ?? '', file: file!})),
-    );
-
-    return responses;
-  } catch (error) {
-    console.error('Error processing files:', error);
-    return [{error: 'Failed to upload attachments'}];
-  }
 }
 
 export async function fetchGroupsByMembers({
