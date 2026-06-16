@@ -8,6 +8,7 @@ import {and} from '@/utils/orm';
 import {
   getCompanyAccessFilter,
   getContactAccessFilter,
+  maskCompanyFieldsByAccess,
   maskEntryByAccess,
 } from './helper';
 import {ExpandRecursively} from '@/types/util';
@@ -55,23 +56,6 @@ export async function findEntry({id, client}: {id: ID; client: Client}) {
           isLinkedinInDirectory: true,
           linkedinLink: true,
         },
-      } as {
-        select: {
-          id: true;
-          firstName: true;
-          name: true;
-          titleSelect: true;
-          picture: {id: true};
-          isFunctionInDirectory: true;
-          jobTitleFunction: {name: true};
-          isEmailInDirectory: true;
-          emailAddress: {address: true};
-          isPhoneInDirectory: true;
-          fixedPhone: true;
-          mobilePhone: true;
-          isLinkedinInDirectory: true;
-          linkedinLink: true;
-        };
       },
     },
   });
@@ -125,5 +109,5 @@ export async function findEntries({
       mainAddress: {formattedFullName: true, longit: true, latit: true},
     },
   });
-  return entries.map(maskEntryByAccess);
+  return entries.map(maskCompanyFieldsByAccess);
 }
