@@ -1,0 +1,6 @@
+{
+  "title": "Reduce speculative <Link> prefetch load and cheapen the auth hot-path",
+  "type": "change",
+  "description": "Introduces an app-wide Link wrapper that defaults prefetch to off, so dynamic DB-hitting routes no longer fire a speculative RSC request per link in the viewport. Prefetch becomes an explicit opt-in for high-intent CTAs. Also lowers the per-request auth cost: the proxy reads the tenant id from the encrypted session cookie instead of running full session enrichment on every matched request.",
+  "scope": ["core"]
+}
