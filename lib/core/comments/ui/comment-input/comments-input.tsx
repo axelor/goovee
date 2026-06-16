@@ -27,7 +27,11 @@ import {cn} from '@/utils/css';
 import {getFileSizeText} from '@/utils/files';
 
 import type {CommentData, CreateProps} from '../../types';
-import {COMMENT_ATTACHMENT_PURPOSE, MAX_FILE_SIZE} from '../../constants';
+import {
+  COMMENT_ATTACHMENT_PURPOSE,
+  MAX_ATTACHMENTS,
+  MAX_FILE_SIZE,
+} from '../../constants';
 
 /*
  * Client-side form shape: each attachment row references its staged upload by
@@ -127,7 +131,18 @@ export function CommentInput({
   });
 
   const onDrop = (acceptedFiles: File[]) => {
-    acceptedFiles.forEach(file => {
+    const remaining = MAX_ATTACHMENTS - fields.length;
+    const accepted = acceptedFiles.slice(0, Math.max(0, remaining));
+    if (accepted.length < acceptedFiles.length) {
+      toast({
+        variant: 'destructive',
+        title: i18n.t(
+          'You can attach up to {0} files',
+          String(MAX_ATTACHMENTS),
+        ),
+      });
+    }
+    accepted.forEach(file => {
       const {ids} = upload(file, {purpose: COMMENT_ATTACHMENT_PURPOSE});
       append({
         title: '',
