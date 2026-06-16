@@ -1016,6 +1016,7 @@
   "You are signed in as {0}. Sign out to access via token.": "Vous êtes connecté en tant que {0}. Déconnectez-vous pour accéder via le token.",
   "You are trying to create an account for an existing company, please contact admin to invite you as a user": "Vous essayez de créer un compte pour une société déjà existante, veuillez contacter votre admin",
   "You can add up to {0} files": "Vous pouvez ajouter jusqu'à {0} fichiers",
+  "You can attach up to {0} files": "Vous pouvez joindre jusqu'à {0} fichiers",
   "You can only register up to {0} people": "Vous ne pouvez pas enregistrer plus de {0} people",
   "You do not have permission to comment": "Vous n'avez pas la permission de commenter",
   "You have been registered for an event!": "Vous avez été inscrit à un événement !",

@@ -1016,6 +1016,7 @@
   "You are signed in as {0}. Sign out to access via token.": "You are signed in as {0}. Sign out to access via token.",
   "You are trying to create an account for an existing company, please contact admin to invite you as a user": "You are trying to create an account for an existing company, please contact admin to invite you as a user",
   "You can add up to {0} files": "You can add up to {0} files",
+  "You can attach up to {0} files": "You can attach up to {0} files",
   "You can only register up to {0} people": "You can only register up to {0} people",
   "You do not have permission to comment": "You do not have permission to comment",
   "You have been registered for an event!": "You have been registered for an event!",

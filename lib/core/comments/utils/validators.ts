@@ -2,7 +2,7 @@ import z from 'zod';
 
 import {uploadTokenSchema} from '@/lib/core/upload/validators';
 
-import {SORT_TYPE} from '../constants';
+import {MAX_ATTACHMENTS, SORT_TYPE} from '../constants';
 
 const attachmentSchema = z.object({
   title: z.string(),
@@ -14,7 +14,9 @@ const attachmentSchema = z.object({
 
 export const formSchema = z
   .object({
-    attachments: z.array(attachmentSchema),
+    attachments: z.array(attachmentSchema).max(MAX_ATTACHMENTS, {
+      error: `A comment can have at most ${MAX_ATTACHMENTS} attachments`,
+    }),
     text: z.string().optional(),
   })
   .superRefine((data, ctx) => {
