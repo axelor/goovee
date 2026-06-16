@@ -1,7 +1,7 @@
 import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {AlertCircle, ExternalLink, FileText, User} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import type {SingleProduct} from '../../../../orm';
 
 interface SupportTabProps {

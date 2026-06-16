@@ -7,7 +7,7 @@ import {i18n} from '@/locale';
 import {Portal} from '@/ui/components';
 import {useResponsive} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {usePathname} from 'next/navigation';
 import {useEffect, useMemo, useState} from 'react';
 import {MARKETPLACE_LINKS} from '../../../../constants/marketplace-links';

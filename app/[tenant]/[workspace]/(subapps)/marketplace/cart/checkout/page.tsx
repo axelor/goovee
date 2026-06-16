@@ -11,7 +11,7 @@ import {
 import {clone} from '@/utils';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound, redirect} from 'next/navigation';
 import {CheckoutContent} from '../../common/ui/components/checkout/checkout-content';
 import {ensureAuth} from '../../common/utils/auth-helper';

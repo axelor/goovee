@@ -2,7 +2,7 @@
 
 import {Button} from '@/ui/components';
 import {ArrowRight, ShoppingCart} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
 import {useMarketplaceCart} from '../../../../hooks/use-marketplace-cart';
 

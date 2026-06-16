@@ -6,7 +6,7 @@ import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {CheckCircle2, Download} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound, redirect} from 'next/navigation';
 import {
   DEFAULT_GRADIENT,

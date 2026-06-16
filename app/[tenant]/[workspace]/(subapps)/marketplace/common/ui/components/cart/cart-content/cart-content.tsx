@@ -1,7 +1,7 @@
 'use client';
 
 import {Button} from '@/ui/components';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {useMarketplaceCart} from '../../../../hooks/use-marketplace-cart';
 import {CartItemCard} from '../cart-item-card';
 

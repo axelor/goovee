@@ -13,7 +13,7 @@ import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons} from '@/utils/pagination';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {
   ListMyProduct,
   type CompatibilityVersion,

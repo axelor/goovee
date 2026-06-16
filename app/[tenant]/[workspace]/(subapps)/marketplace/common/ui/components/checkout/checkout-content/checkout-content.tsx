@@ -10,7 +10,7 @@ import type {Cloned} from '@/types/util';
 import {Button} from '@/ui/components';
 import {Payments} from '@/ui/components/payment';
 import {useToast} from '@/ui/hooks';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
 import {
   checkout,

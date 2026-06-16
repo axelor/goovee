@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
 import {workspacePathname} from '@/utils/workspace';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';
 import {CartContent} from '../common/ui/components/cart/cart-content';
 import {ensureAuth} from '../common/utils/auth-helper';

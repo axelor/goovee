@@ -7,7 +7,7 @@ import {i18n} from '@/locale';
 import {Icon, Portal} from '@/ui/components';
 import {Sheet, SheetContent, SheetTitle} from '@/ui/components/sheet';
 import {cn} from '@/utils/css';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {usePathname} from 'next/navigation';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {MARKETPLACE_LINKS} from '../../../../constants/marketplace-links';

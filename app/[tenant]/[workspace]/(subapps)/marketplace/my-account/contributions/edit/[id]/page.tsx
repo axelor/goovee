@@ -10,7 +10,7 @@ import {
 } from '@/ui/components/breadcrumb';
 import {clone} from '@/utils';
 import {getTotal} from '@/utils/pagination';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {redirect} from 'next/navigation';
 import {MARKETPLACE_TYPE} from '../../../../common/constants/marketplace-types';
 import {

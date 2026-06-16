@@ -18,7 +18,7 @@ import {
   Store,
   type LucideIcon,
 } from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound, redirect} from 'next/navigation';
 import {canManageProducts, ensureAuth} from '../common/utils/auth-helper';
 import {myAccountParamsSchema} from '../common/utils/validators';

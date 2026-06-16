@@ -24,7 +24,7 @@ import {getPages, getPaginationButtons, getSkip} from '@/utils/pagination';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound, redirect} from 'next/navigation';
 import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
 import {findFavoriteProducts} from '../../common/orm';

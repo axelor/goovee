@@ -8,7 +8,7 @@ import {InnerHTML} from '@/ui/components/inner-html';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {Download, FileText, Heart} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {Suspense} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import type {SingleProduct} from '../../../../orm';

@@ -21,7 +21,7 @@ import {
   Download as DownloadIcon,
   ExternalLink,
 } from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {Fragment, useState, type ReactNode} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import type {MarketplacePurchase} from '../../../../orm';

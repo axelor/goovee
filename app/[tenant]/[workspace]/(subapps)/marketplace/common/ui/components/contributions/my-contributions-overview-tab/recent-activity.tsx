@@ -1,7 +1,7 @@
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import type {ActivityItem} from '../../../../orm';
 import {ProductTab} from '../../../../constants/tabs';
 import {PartnerAvatar} from '../../shared/partner-avatar';

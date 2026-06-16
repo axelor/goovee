@@ -1,7 +1,7 @@
 import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {Trash2} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import type {MarketplaceCartItem} from '../../../../hooks/use-marketplace-cart';
 import {ProductIcon} from '../../shared/product-icon';

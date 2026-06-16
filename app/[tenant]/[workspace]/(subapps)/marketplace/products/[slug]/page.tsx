@@ -16,7 +16,7 @@ import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {Eye} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound} from 'next/navigation';
 import {Suspense} from 'react';
 import {MARKETPLACE_VERSION_STATUS_LABELS} from '../../common/constants/statuses';

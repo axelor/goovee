@@ -17,7 +17,7 @@ import {Button} from '@/ui/components/button';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {Pencil, Trash2} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
 import {useOptimistic, useState, useTransition} from 'react';
 import {deleteReview, saveReview} from '../../../../actions';

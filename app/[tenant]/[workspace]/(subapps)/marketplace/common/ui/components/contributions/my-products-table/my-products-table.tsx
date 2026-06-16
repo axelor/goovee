@@ -16,7 +16,7 @@ import {
 import {useResponsive} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {ChevronDown, ChevronUp, ExternalLink, Eye} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {Fragment, useState, type ReactNode} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import {

@@ -1,7 +1,7 @@
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {Skeleton} from '@/ui/components/skeleton';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import type {PendingActions as PendingActionsData} from '../../../../orm';
 import {RECENT_REVIEW_WINDOW_DAYS} from '../../../../constants/review';
 import {MARKETPLACE_VERSION_STATUS} from '../../../../constants/statuses';

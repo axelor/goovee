@@ -12,7 +12,7 @@ import {
 import {clone} from '@/utils';
 import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
 import {MyContributionsTab} from '../../common/constants/tabs';

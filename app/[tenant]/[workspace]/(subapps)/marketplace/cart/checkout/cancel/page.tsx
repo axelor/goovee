@@ -3,7 +3,7 @@ import {t} from '@/locale/server';
 import {Button} from '@/ui/components';
 import {workspacePathname} from '@/utils/workspace';
 import {XCircle} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 
 export default async function CheckoutCancelPage(props: {
   params: Promise<{tenant: string; workspace: string}>;

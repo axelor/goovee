@@ -14,7 +14,7 @@ import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {
   findProductVersions,
   type ListProductVersion,

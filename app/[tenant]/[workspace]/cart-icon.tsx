@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {useState} from 'react';
 import {MdOutlineShoppingCart} from 'react-icons/md';
 
@@ -11,6 +10,7 @@ import {
   PopoverTriggerResponsive,
   PopoverContentResponsive,
 } from '@/ui/components';
+import {Link} from '@/ui/components/link';
 import {i18n} from '@/locale';
 import {RESPONSIVE_SIZES} from '@/constants';
 import {useResponsive} from '@/ui/hooks';

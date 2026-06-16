@@ -3,7 +3,7 @@ import {t, tattr} from '@/locale/server';
 import {formatNumber} from '@/locale/server/formatters';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {Download} from 'lucide-react';
-import Link from 'next/link';
+import {Link} from '@/ui/components/link';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import type {ListProduct} from '../../../../orm';
 import {isPaid} from '../../../../utils/price';
