@@ -1,0 +1,6 @@
+{
+  "title": "Type directory contact-detail masking to the fields each view selects",
+  "type": "fix",
+  "scope": ["directory"],
+  "description": "Directory access masking is constrained to the projected fields it reads instead of the full partner record, so it keeps compiling as the data model evolves. Masking behaviour and what each page shows are unchanged."
+}

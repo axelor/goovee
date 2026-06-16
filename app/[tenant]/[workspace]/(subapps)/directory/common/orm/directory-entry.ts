@@ -8,6 +8,7 @@ import {and} from '@/utils/orm';
 import {
   getCompanyAccessFilter,
   getContactAccessFilter,
+  maskAddressByAccess,
   maskEntryByAccess,
 } from './helper';
 import {ExpandRecursively} from '@/types/util';
@@ -125,5 +126,5 @@ export async function findEntries({
       mainAddress: {formattedFullName: true, longit: true, latit: true},
     },
   });
-  return entries.map(maskEntryByAccess);
+  return entries.map(maskAddressByAccess);
 }
