@@ -27,6 +27,12 @@
       "type": "String",
       "name": "sizeText",
       "column": "file_size_text"
+    },
+    {
+      "type": "Int",
+      "name": "storeType",
+      "column": "store_type",
+      "required": true
     }
   ]
 }

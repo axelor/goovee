@@ -9,6 +9,15 @@ import type {Client} from '@/goovee/.generated/client';
 import {getStoragePath} from '@/storage/index';
 import {getFileSizeText} from '@/utils/files';
 
+/*
+ * AOP MetaFile store backend (meta_file.store_type, NOT NULL since AOP 8.0).
+ * Goovee writes uploads to the local filesystem, so every meta_file row it
+ * creates uses the local store.
+ */
+export enum MetaFileStoreType {
+  LOCAL = 1,
+}
+
 export interface UploadedFile {
   id: string;
   fileName: string;
@@ -97,6 +106,7 @@ export async function createMetaFile(
       fileType,
       fileSize: String(size),
       sizeText: getFileSizeText(size),
+      storeType: MetaFileStoreType.LOCAL,
     },
     select: {id: true, fileName: true, filePath: true, sizeText: true},
   });

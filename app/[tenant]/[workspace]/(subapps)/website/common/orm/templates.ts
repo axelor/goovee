@@ -18,6 +18,7 @@ import type {
   AOSPortalCmsSite,
 } from '@/goovee/.generated/models';
 import type {Client} from '@/goovee/.generated/client';
+import {MetaFileStoreType} from '@/lib/core/upload/file';
 import {getFileSizeText} from '@/utils/files';
 import {xml} from '@/utils/template-string';
 import type {CreateArgs, SelectArg} from '@goovee/orm';
@@ -656,6 +657,7 @@ async function createMetaFile({
     fileType,
     fileSize: buffer.length.toString(),
     sizeText: getFileSizeText(buffer.length),
+    storeType: MetaFileStoreType.LOCAL,
   };
 
   const _metaFile = await client.aOSMetaFile.findOne({
