@@ -1,0 +1,6 @@
+{
+  "title": "Staged-upload concurrency is enforced globally across all files",
+  "type": "fix",
+  "scope": ["core"],
+  "description": "The upload concurrency limit now applies across every file the hook holds rather than per upload() call, and retries respect the same limit instead of starting immediately. A file whose upload fails to start no longer stays stuck."
+}
