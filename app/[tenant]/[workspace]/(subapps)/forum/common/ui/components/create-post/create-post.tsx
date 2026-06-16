@@ -1,11 +1,13 @@
 'use client';
 
-import React, {useRef, useState} from 'react';
+import {useRef, useState} from 'react';
 import Image from 'next/image';
 import {
+  MdClose,
   MdOutlineEdit,
   MdOutlineImage,
   MdOutlineUploadFile,
+  MdRefresh,
 } from 'react-icons/md';
 import {useRouter} from 'next/navigation';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -17,6 +19,7 @@ import {i18n} from '@/locale';
 import {
   Form,
   Button,
+  FileIcon,
   FormControl,
   FormField,
   FormItem,
@@ -31,24 +34,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components';
+import {Progress} from '@/ui/components/progress';
 import {useToast} from '@/ui/hooks/use-toast';
+import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {getFileSizeText} from '@/utils/files';
 
 // ---- LOCAL IMPORTS ---- //
 import {
   CHOOSE_GROUP,
   CONTENT,
   ENTER_TITLE,
+  FORUM_POST_ATTACHMENT_PURPOSE,
+  MAX_FILE_SIZE,
+  MAX_FORUM_ATTACHMENTS,
   PUBLISH,
   PUBLISHING,
   TITLE,
 } from '@/subapps/forum/common/constants';
-import {
-  FilePreviewer,
-  ImagePreviewer,
-} from '@/subapps/forum/common/ui/components';
+import {ImagePreviewer} from '@/subapps/forum/common/ui/components';
 import {addPost} from '@/subapps/forum/common/action/action';
 import {
   FileUploader,
@@ -56,15 +62,18 @@ import {
 } from '@/subapps/forum/common/ui/components';
 import {Group} from '@/subapps/forum/common/types/forum';
 
-interface FileDetails {
-  file?: File;
-  title?: string;
-  fileTitle?: string;
-}
-
+/* Each attachment carries the client-side `uploadId` of its staged upload; the
+ * single-use token is read from the upload state at submit. */
 interface ImageItem {
   file: File;
   altText: string;
+  uploadId?: string;
+}
+
+interface DocItem {
+  file: File;
+  title: string;
+  uploadId?: string;
 }
 
 interface CreatePostProps {
@@ -85,17 +94,24 @@ export const CreatePost = ({
   onClose,
 }: CreatePostProps) => {
   const [editorContent, setEditorContent] = useState<string>('');
-  const [attachments, setAttachments] = useState<{
-    images: ImageItem[];
-    file?: FileDetails;
-  }>({images: []});
+  const [images, setImages] = useState<ImageItem[]>([]);
+  const [documents, setDocuments] = useState<DocItem[]>([]);
   const [modalOpen, setModalOpen] = useState<ModalType>(ModalType.None);
   const [loading, setLoading] = useState(false);
 
   const {toast} = useToast();
-  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {tenant, workspaceURI, workspaceURL} = useWorkspace();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+
+  const {
+    uploads,
+    upload,
+    retry,
+    remove: removeUpload,
+    reset: resetUploads,
+    isUploading,
+  } = useStagedUpload({tenant});
 
   const formSchema = z.object({
     title: z.string().min(1, {message: i18n.t('Title is required')}),
@@ -117,43 +133,100 @@ export const CreatePost = ({
     setEditorContent(text);
   };
 
-  const handleImageUpload = (images: ImageItem[]) => {
-    setAttachments(prev => ({
-      ...prev,
-      images,
-    }));
+  /*
+   * Stage files picked since the last edit (those without an `uploadId`) and
+   * free the staged uploads of any that were removed. Oversized files are
+   * rejected at pick time with a toast — the server cap is the backstop.
+   */
+  const reconcile = <T extends {file: File; uploadId?: string}>(
+    prev: T[],
+    next: T[],
+  ): T[] => {
+    const capped =
+      next.length > MAX_FORUM_ATTACHMENTS
+        ? next.slice(0, MAX_FORUM_ATTACHMENTS)
+        : next;
+    if (capped.length < next.length) {
+      toast({
+        variant: 'destructive',
+        title: i18n.t(
+          'You can add up to {0} files',
+          String(MAX_FORUM_ATTACHMENTS),
+        ),
+      });
+    }
+
+    const staged = capped.flatMap(item => {
+      if (item.uploadId) return [item];
+      if (item.file.size > MAX_FILE_SIZE) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t(
+            '{0} exceeds the {1} limit',
+            item.file.name,
+            getFileSizeText(MAX_FILE_SIZE),
+          ),
+        });
+        return [];
+      }
+      const {ids} = upload(item.file, {purpose: FORUM_POST_ATTACHMENT_PURPOSE});
+      return [{...item, uploadId: ids[0]}];
+    });
+
+    const keptIds = new Set(staged.map(item => item.uploadId));
+    prev.forEach(item => {
+      if (item.uploadId && !keptIds.has(item.uploadId)) {
+        removeUpload(item.uploadId);
+      }
+    });
+
+    return staged;
   };
 
-  const handleFileUpload = (newFile: FileDetails) => {
-    setAttachments(prev => ({
-      ...prev,
-      title: newFile?.fileTitle || newFile?.file?.name,
-      file: newFile,
-    }));
+  const handleImageUpload = (newImages: ImageItem[]) => {
+    setImages(reconcile(images, newImages));
+  };
+
+  const handleFileUpload = (newDocs: DocItem[]) => {
+    setDocuments(reconcile(documents, newDocs));
+  };
+
+  const removeImage = (uploadId?: string) => {
+    if (uploadId) removeUpload(uploadId);
+    setImages(prev => prev.filter(item => item.uploadId !== uploadId));
+  };
+
+  const removeDocument = (uploadId?: string) => {
+    if (uploadId) removeUpload(uploadId);
+    setDocuments(prev => prev.filter(item => item.uploadId !== uploadId));
   };
 
   const handlePost = async (values: z.infer<typeof formSchema>) => {
-    setLoading(true);
-
-    const formData = new FormData();
-    if (attachments.images?.length) {
-      attachments.images.forEach((element, index) => {
-        formData.append(
-          `attachmentList[${index}][title]`,
-          element?.altText || '',
-        );
-        formData.append(`attachmentList[${index}][file]`, element.file);
-      });
-    } else if (attachments.file) {
-      formData.append(
-        `attachmentList[0][title]`,
-        attachments.file?.fileTitle || '',
-      );
-      formData.append(
-        `attachmentList[0][file]`,
-        attachments.file?.file ?? new Blob([]),
-      );
+    const attachments: {token: string; title: string}[] = [];
+    for (const {uploadId, altText} of images) {
+      const token = uploads.find(item => item.id === uploadId)?.token;
+      if (!token) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t('Remove or retry failed attachments'),
+        });
+        return;
+      }
+      attachments.push({token, title: altText});
     }
+    for (const {uploadId, title} of documents) {
+      const token = uploads.find(item => item.id === uploadId)?.token;
+      if (!token) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t('Remove or retry failed attachments'),
+        });
+        return;
+      }
+      attachments.push({token, title});
+    }
+
+    setLoading(true);
 
     const groupID = selectedGroup?.id || values.groupId;
 
@@ -164,7 +237,7 @@ export const CreatePost = ({
         content: editorContent,
         workspaceURL,
         workspaceURI,
-        formData,
+        attachments,
       });
 
       if (result.success) {
@@ -172,6 +245,9 @@ export const CreatePost = ({
           variant: 'success',
           title: i18n.t('Post added successfully.'),
         });
+        resetUploads();
+        setImages([]);
+        setDocuments([]);
         onClose();
         router.refresh();
       } else {
@@ -189,6 +265,29 @@ export const CreatePost = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderUploadStatus = (uploadId?: string) => {
+    const item = uploads.find(upload => upload.id === uploadId);
+    if (!item) return null;
+    if (item.status === 'queued' || item.status === 'uploading') {
+      return <Progress value={item.progress} className="h-1.5" />;
+    }
+    if (item.status === 'error' || item.status === 'aborted') {
+      return (
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-destructive line-clamp-1">
+            {item.error ? i18n.t(item.error) : i18n.t('Upload failed')}
+          </p>
+          <MdRefresh
+            title={i18n.t('Retry')}
+            className="size-5 cursor-pointer shrink-0"
+            onClick={() => uploadId && retry(uploadId)}
+          />
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -277,47 +376,90 @@ export const CreatePost = ({
               </div>
             </div>
             <div className="w-full mt-2">
-              <div className="flex gap-2 lg:gap-4 p-2 w-full">
-                {attachments.images.length > 0 ? (
-                  <div className="w-full flex flex-col gap-6">
-                    <div className="flex justify-end">
+              <div className="flex flex-col gap-3 p-2 w-full">
+                <div className="flex gap-4 items-center">
+                  {documents.length === 0 && (
+                    <MdOutlineImage
+                      className="w-6 h-6 cursor-pointer"
+                      onClick={() => handleOpen(ModalType.Image)}
+                    />
+                  )}
+                  {images.length === 0 && (
+                    <MdOutlineUploadFile
+                      className="w-6 h-6 cursor-pointer"
+                      onClick={() => handleOpen(ModalType.File)}
+                    />
+                  )}
+                </div>
+
+                {images.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        {i18n.t('Images')}
+                      </span>
                       <MdOutlineEdit
-                        className="w-6 h-6"
+                        className="w-5 h-5 cursor-pointer"
                         onClick={() => handleOpen(ModalType.Image)}
                       />
                     </div>
-                    <ImagePreviewer images={attachments.images} />
+                    <ImagePreviewer images={images} />
+                    {images.map(image => (
+                      <div key={image.uploadId} className="flex flex-col gap-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm line-clamp-1">
+                            {image.file.name} -{' '}
+                            {getFileSizeText(image.file.size)}
+                          </p>
+                          <MdClose
+                            className="w-5 h-5 text-destructive cursor-pointer shrink-0"
+                            onClick={() => removeImage(image.uploadId)}
+                          />
+                        </div>
+                        {renderUploadStatus(image.uploadId)}
+                      </div>
+                    ))}
                   </div>
-                ) : attachments?.file?.file ? (
-                  <div className="w-full flex flex-col gap-6">
-                    <div className="flex justify-end">
+                )}
+
+                {documents.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        {i18n.t('Documents')}
+                      </span>
                       <MdOutlineEdit
-                        className="w-6 h-6"
+                        className="w-5 h-5 cursor-pointer"
                         onClick={() => handleOpen(ModalType.File)}
                       />
                     </div>
-                    <FilePreviewer file={attachments.file.file} />
+                    {documents.map(doc => (
+                      <div key={doc.uploadId} className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 border rounded-md p-2">
+                          <FileIcon
+                            fileType={doc.file.type}
+                            className="h-6 w-6 shrink-0"
+                          />
+                          <p className="text-sm line-clamp-1 flex-1">
+                            {doc.title || doc.file.name} -{' '}
+                            {getFileSizeText(doc.file.size)}
+                          </p>
+                          <MdClose
+                            className="w-5 h-5 text-destructive cursor-pointer shrink-0"
+                            onClick={() => removeDocument(doc.uploadId)}
+                          />
+                        </div>
+                        {renderUploadStatus(doc.uploadId)}
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <>
-                    <div
-                      className="w-6 h-6"
-                      onClick={() => handleOpen(ModalType.Image)}>
-                      <MdOutlineImage className="w-full h-full cursor-pointer" />
-                    </div>
-                    <div
-                      className="w-6 h-6"
-                      onClick={() => handleOpen(ModalType.File)}>
-                      <MdOutlineUploadFile className="w-full h-full cursor-pointer " />
-                    </div>
-                  </>
                 )}
               </div>
               <Button
                 type="submit"
                 variant="success"
                 className="w-full mt-1 lg:mt-4"
-                disabled={loading}>
+                disabled={loading || isUploading}>
                 {loading ? i18n.t(PUBLISHING) : i18n.t(PUBLISH)}
               </Button>
             </div>
@@ -327,7 +469,7 @@ export const CreatePost = ({
 
       {modalOpen === ModalType.Image && (
         <ImageUploader
-          initialValue={attachments.images}
+          initialValue={images}
           open={modalOpen === ModalType.Image}
           onUpload={handleImageUpload}
           handleClose={handleClose}
@@ -337,7 +479,7 @@ export const CreatePost = ({
       {modalOpen === ModalType.File && (
         <FileUploader
           open={modalOpen === ModalType.File}
-          initialValue={attachments.file ?? {}}
+          initialValue={documents}
           onUpload={handleFileUpload}
           handleClose={handleClose}
         />

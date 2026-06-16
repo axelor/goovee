@@ -1,0 +1,6 @@
+{
+  "title": "Upload forum post attachments up front via staged uploads",
+  "type": "change",
+  "description": "Forum post images and documents now upload at pick time with per-file progress and retry, and multiple documents can be attached alongside images. The 20MB per-file cap is enforced server-side while streaming, so large files no longer hit the request size limit.",
+  "scope": ["forum"]
+}

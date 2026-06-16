@@ -8,6 +8,11 @@ import {
   COMMENT_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE,
 } from '@/lib/core/comments/constants';
+import {
+  FORUM_ATTACHMENT_DOC_MIMES,
+  FORUM_POST_ATTACHMENT_PURPOSE,
+  MAX_FILE_SIZE as FORUM_MAX_FILE_SIZE,
+} from '@/subapps/forum/common/constants';
 import {getStoragePath} from '@/storage/index';
 import type {ID} from '@/types';
 
@@ -47,6 +52,12 @@ export interface UploadPolicy {
 }
 
 /**
+ * Attachment claims are short-lived: the user is expected to submit shortly
+ * after picking, so unredeemed uploads become reapable within the hour.
+ */
+const ATTACHMENT_UPLOAD_TTL_MS = 60 * 60 * 1000; // 1h
+
+/**
  * Purpose → upload policy. Each feature registers its own `<app>:<kind>` entry;
  * `maxBytes` caps the upload (enforced as a streaming limit by the route) and
  * the optional `file` schema validates type/content.
@@ -57,7 +68,23 @@ export const UPLOAD_PURPOSES = {
    * upload. */
   [COMMENT_ATTACHMENT_PURPOSE]: {
     maxBytes: MAX_FILE_SIZE,
-    ttlMs: 60 * 60 * 1000,
+    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+  },
+  /* Forum post attachments — images and documents, staged on pick and redeemed
+   * when the post is created. Restricted to the types the pickers accepted (any
+   * image, plus pdf/doc/docx/xls/xlsx); the size cap is enforced server-side
+   * while streaming. */
+  [FORUM_POST_ATTACHMENT_PURPOSE]: {
+    maxBytes: FORUM_MAX_FILE_SIZE,
+    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+    file: z
+      .file()
+      .refine(
+        f =>
+          f.type.startsWith('image/') ||
+          FORUM_ATTACHMENT_DOC_MIMES.includes(f.type),
+        {error: 'Unsupported file type'},
+      ),
   },
 } satisfies Record<string, UploadPolicy>;
 

@@ -1,7 +1,19 @@
 import {z} from 'zod';
+
+// ---- CORE IMPORTS ---- //
 import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
+import {uploadTokenSchema} from '@/lib/core/upload/validators';
 
 const WorkspaceURISchema = z.string().min(1);
+
+/* A forum post attachment references its pre-staged file by single-use claim
+ * token (redeemed server-side when the post is created); `title` is the
+ * per-file caption/alt text stored on the join record. */
+export const PostAttachmentSchema = z.object({
+  token: uploadTokenSchema,
+  title: z.string(),
+});
+export type PostAttachmentInput = z.infer<typeof PostAttachmentSchema>;
 
 export const PinGroupSchema = z.object({
   isPin: z.boolean(),

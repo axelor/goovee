@@ -9,7 +9,6 @@ export {UploadPost} from './upload-post';
 export {CreatePost} from './create-post';
 export {ImageUploader} from './image-uploader';
 export {FileUploader} from './file-uploader';
-export {FileDesc} from './file-desc';
 export {Tabs} from './tabs';
 export {MediaContent} from './media-content';
 export {ThreadList, ThreadListSkeleton} from './thread-list';
