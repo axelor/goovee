@@ -12,7 +12,6 @@ import {clone} from '@/utils';
 import {ModelMap, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {ID} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
 import {getSession} from '@/auth';
 import {manager} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
@@ -40,7 +39,6 @@ import {
 } from '@/subapps/forum/common/orm/forum';
 import {
   FORUM_POST_ATTACHMENT_PURPOSE,
-  MAX_FORUM_ATTACHMENTS,
   NOTIFICATION_VALUES,
 } from '@/subapps/forum/common/constants';
 import {sendEmailNotifications} from '@/subapps/forum/common/utils/mail';
@@ -53,13 +51,18 @@ import {
   AddGroupNotificationSchema,
   GetSubscribersByGroupSchema,
   FindMediaSchema,
-  PostAttachmentSchema,
+  AddPostSchema,
+  FetchPostsSchema,
+  FetchGroupsByMembersSchema,
   type PinGroupInput,
   type ExitGroupInput,
   type JoinGroupInput,
   type AddGroupNotificationInput,
   type GetSubscribersByGroupInput,
   type FindMediaInput,
+  type AddPostInput,
+  type FetchPostsInput,
+  type FetchGroupsByMembersInput,
   type PostAttachmentInput,
 } from '@/subapps/forum/common/validators';
 
@@ -481,21 +484,14 @@ export async function addGroupNotification({
   }
 }
 
-export async function addPost({
-  group,
-  title,
-  content,
-  workspaceURL,
-  workspaceURI,
-  attachments,
-}: {
-  group: {id: string};
-  title: string;
-  content: string;
-  workspaceURL: string;
-  workspaceURI: string;
-  attachments?: PostAttachmentInput[];
-}) {
+export async function addPost(input: AddPostInput) {
+  const parsed = AddPostSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true, message: z.prettifyError(parsed.error)};
+  }
+  const {group, title, content, workspaceURL, workspaceURI} = parsed.data;
+  const attachments = parsed.data.attachments ?? [];
+
   const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
@@ -538,12 +534,10 @@ export async function addPost({
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const parsedAttachments = z
-    .array(PostAttachmentSchema)
-    .max(MAX_FORUM_ATTACHMENTS)
-    .safeParse(attachments ?? []);
-  if (!parsedAttachments.success) {
-    return {error: true, message: await t('Invalid attachment')};
+  const targetGroup = await findGroupById(group.id, workspace.id, client, user);
+
+  if (!targetGroup) {
+    return {error: true, message: await t('Invalid group')};
   }
 
   let attachmentListArray: {id: ID; title: string}[] = [];
@@ -551,9 +545,9 @@ export async function addPost({
   const timeStamp = new Date();
   try {
     const post = await client.$transaction(async txClient => {
-      if (parsedAttachments.data.length) {
+      if (attachments.length) {
         attachmentListArray = await redeemAttachments({
-          attachments: parsedAttachments.data,
+          attachments,
           owner: user.id,
           client: txClient,
         });
@@ -748,23 +742,21 @@ export async function findMedia({
     .then(clone);
 }
 
-export async function fetchPosts({
-  sort,
-  limit,
-  page,
-  search = '',
-  workspaceURL,
-  memberGroupIDs = [],
-  groupIDs = [],
-}: {
-  sort?: string | null;
-  limit?: number;
-  page?: string | number;
-  search?: string | undefined;
-  workspaceURL: string;
-  memberGroupIDs?: Array<string>;
-  groupIDs?: ID[];
-}) {
+export async function fetchPosts(input: FetchPostsInput) {
+  const parsed = FetchPostsSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true, message: z.prettifyError(parsed.error)};
+  }
+  const {
+    sort,
+    limit,
+    page,
+    search = '',
+    workspaceURL,
+    memberGroupIDs = [],
+    groupIDs = [],
+  } = parsed.data;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {
@@ -804,17 +796,13 @@ export async function fetchPosts({
   }).then(clone);
 }
 
-export async function fetchGroupsByMembers({
-  id,
-  searchKey,
-  orderBy,
-  workspaceID,
-}: {
-  id: ID;
-  searchKey?: string;
-  orderBy?: Record<string, unknown>;
-  workspaceID: PortalWorkspace['id'];
-}) {
+export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
+  const parsed = FetchGroupsByMembersSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true, message: z.prettifyError(parsed.error)};
+  }
+  const {id, searchKey, orderBy, workspaceID} = parsed.data;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
 
   const session = await getSession();
