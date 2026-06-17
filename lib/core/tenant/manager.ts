@@ -48,23 +48,6 @@ function getAOSAuth() {
   return {username, password, apiKey};
 }
 
-const tenants: {[key: string]: TenantConfig} = [DEFAULT_TENANT].reduce(
-  (acc, id) => ({
-    ...acc,
-    [id]: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-      aos: {
-        url: process.env.AOS_URL,
-        storage: getStoragePath(),
-        auth: getAOSAuth(),
-        webhookSecret: process.env.NOTIFICATION_WEBHOOK_SECRET,
-      },
-    },
-  }),
-  {},
-);
 
 export enum TenancyType {
   single = 'single',
@@ -182,55 +165,65 @@ export class MultiTenantManager implements TenantManager {
       return cached;
     }
 
+    if (id !== DEFAULT_TENANT) {
+      throw new Error('Error getting tenant');
+    }
+
     try {
-      const config: TenantConfig = tenants[id];
+      const config: TenantConfig = {
+        db: {
+          url: process.env.DATABASE_URL!,
+        },
+        aos: {
+          url: process.env.AOS_URL!,
+          storage: getStoragePath(),
+          auth: getAOSAuth(),
+          webhookSecret: process.env.NOTIFICATION_WEBHOOK_SECRET,
+        },
+      };
 
-      if (!config) {
-        throw new Error('Error getting tenant');
-      } else {
-        if (config.db.url) {
-          taint(
-            'Database URL is a server secret. Do not pass to Client Components.',
-            config.db.url,
-          );
-        }
-
-        if (config.aos.webhookSecret) {
-          taint(
-            'Webhook secret is a server secret. Do not pass to Client Components.',
-            config.aos.webhookSecret,
-          );
-        }
-
-        const client = createClient({
-          url: config?.db?.url,
-          features: {
-            normalization: {
-              lowerCase: true,
-              unaccent: true,
-            },
-          },
-        });
-
-        if (!client) {
-          throw new Error('Invalid configuration');
-        }
-
-        await client.$connect();
-        await client.$sync();
-        // Create unaccent extension for PostgreSQL if it doesn't exist
-        await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
-
-        const tenant = {
-          id,
-          config,
-          client,
-        };
-
-        this.cache.put(id, tenant);
-
-        return tenant;
+      if (config.db.url) {
+        taint(
+          'Database URL is a server secret. Do not pass to Client Components.',
+          config.db.url,
+        );
       }
+
+      if (config.aos.webhookSecret) {
+        taint(
+          'Webhook secret is a server secret. Do not pass to Client Components.',
+          config.aos.webhookSecret,
+        );
+      }
+
+      const client = createClient({
+        url: config?.db?.url,
+        features: {
+          normalization: {
+            lowerCase: true,
+            unaccent: true,
+          },
+        },
+      });
+
+      if (!client) {
+        throw new Error('Invalid configuration');
+      }
+
+      await client.$connect();
+      await client.$sync();
+      // Create unaccent extension for PostgreSQL if it doesn't exist
+      await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
+
+      const tenant = {
+        id,
+        config,
+        client,
+      };
+
+      this.cache.put(id, tenant);
+
+      return tenant;
     } catch (err) {
       throw new Error('Error getting tenant');
     }
