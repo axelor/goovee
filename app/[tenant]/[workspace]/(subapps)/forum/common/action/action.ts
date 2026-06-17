@@ -615,6 +615,10 @@ export async function addPost({
     if (!('error' in subscribers)) {
       const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${group.id}?searchid=${post.id}#post-${post.id}`;
 
+      const notificationRecievers = subscribers.filter(
+        sub => sub.member?.id !== user.id, // exclude the post author
+      );
+
       for (const reciever of subscribers) {
         const member = reciever.member;
         if (
@@ -656,7 +660,7 @@ export async function addPost({
               simpleFullName: post.author!.simpleFullName ?? '',
             },
             group: {name: post.forumGroup!.name ?? ''},
-            subscribers,
+            subscribers: notificationRecievers,
             link: postLink,
           }),
         );

@@ -1,0 +1,6 @@
+{
+  "title": "Stop emailing forum post authors about their own posts",
+  "type": "fix",
+  "description": "Forum post authors no longer receive an email notification for their own posts. Other group members are still notified based on their notification settings.",
+  "scope": ["forum"]
+}
