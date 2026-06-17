@@ -13,6 +13,10 @@ import {
   FORUM_POST_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE as FORUM_MAX_FILE_SIZE,
 } from '@/subapps/forum/common/constants';
+import {
+  PARTNER_PICTURE_MAX_FILE_SIZE,
+  PARTNER_PICTURE_PURPOSE,
+} from '@/app/[tenant]/[workspace]/account/common/constants';
 import {getStoragePath} from '@/storage/index';
 import type {ID} from '@/types';
 
@@ -85,6 +89,16 @@ export const UPLOAD_PURPOSES = {
           FORUM_ATTACHMENT_DOC_MIMES.includes(f.type),
         {error: 'Unsupported file type'},
       ),
+  },
+  /* Profile / company pictures — a single image staged on pick and redeemed
+   * when linked to the partner. Restricted to images; the size cap is enforced
+   * server-side while streaming. */
+  [PARTNER_PICTURE_PURPOSE]: {
+    maxBytes: PARTNER_PICTURE_MAX_FILE_SIZE,
+    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
+    file: z.file().refine(f => f.type.startsWith('image/'), {
+      error: 'Only images are allowed',
+    }),
   },
 } satisfies Record<string, UploadPolicy>;
 

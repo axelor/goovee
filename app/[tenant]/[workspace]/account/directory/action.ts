@@ -1,8 +1,4 @@
 'use server';
-import fs from 'fs';
-import path from 'path';
-import {pipeline, Readable} from 'stream';
-import {promisify} from 'util';
 import {getSession} from '@/lib/core/auth';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
@@ -13,13 +9,16 @@ import {
 } from '@/orm/partner';
 import {ActionResponse} from '@/types/action';
 import {headers} from 'next/headers';
-import {DirectorySettingsFormValues, directorySettingsSchema} from './schema';
+import {
+  DirectorySettingsFormValues,
+  directorySettingsSchema,
+  updateCompanyProfileImageSchema,
+  type UpdateCompanyProfileImageValues,
+} from './schema';
 import {findWorkspace} from '@/orm/workspace';
 import {manager} from '@/lib/core/tenant';
-import {getFileSizeText} from '@/utils/files';
-import {zodParseFormData} from '@/utils/formdata';
-import {z} from 'zod';
-import {clone} from '@/utils';
+import {redeemUpload} from '@/lib/core/upload/staged-upload';
+import {PARTNER_PICTURE_PURPOSE} from '../common/constants';
 
 export async function updateDirectorySettings({
   values,
@@ -118,27 +117,17 @@ export async function updateDirectorySettings({
   }
 }
 
-const pump = promisify(pipeline);
-
-const storage = process.env.DATA_STORAGE as string;
-
-if (!fs.existsSync(storage)) {
-  fs.mkdirSync(storage);
-}
-
 export async function updateCompanyProfileImage(
-  formData: FormData,
+  input: UpdateCompanyProfileImageValues,
 ): ActionResponse<{id: string} | null> {
-  const {workspaceURL, picture} = zodParseFormData(
-    formData,
-    z.object({
-      picture: z.instanceof(File).nullish(),
-      workspaceURL: z.string(),
-    }),
-  );
+  const {success, data: parsed} =
+    updateCompanyProfileImageSchema.safeParse(input);
 
-  if (!workspaceURL)
-    return {error: true, message: await t('Workspace URL is required')};
+  if (!success) {
+    return {error: true, message: await t('Invalid data')};
+  }
+
+  const {token, workspaceURL} = parsed;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -190,66 +179,50 @@ export async function updateCompanyProfileImage(
     return {error: true, message: await t('Company not found')};
   }
 
-  let uploadedPicture = null;
-
-  if (picture) {
-    try {
-      const fileName = `${new Date().getTime()}-${picture.name}`;
-
-      await pump(
-        Readable.fromWeb(picture.stream() as any),
-        fs.createWriteStream(path.resolve(storage, fileName)),
-      );
-
-      uploadedPicture = await client.aOSMetaFile
-        .create({
-          data: {
-            fileName: picture.name,
-            filePath: fileName,
-            fileType: picture.type,
-            fileSize: String(picture.size),
-            sizeText: getFileSizeText(picture.size),
-            description: '',
-          },
-          select: {id: true},
-        })
-        .then(clone);
-    } catch (err) {
-      return {
-        error: true,
-        message: await t('Error updating profile picture. Try again.'),
-      };
-    }
-  }
-
   try {
-    await updatePartner({
-      data: {
-        id: companyPartner.id,
-        version: companyPartner.version,
-        ...(uploadedPicture
-          ? {
-              picture: {
-                select: {
-                  id: uploadedPicture.id,
-                },
-              },
-            }
-          : {
-              picture: {select: {id: null}},
-            }),
-      },
-      client: client,
-    });
+    let uploadedId: string | null = null;
+
+    if (token) {
+      /* Redeem the staged upload and link it to the company partner in one
+       * transaction, so a failed link rolls the claim consumption back. */
+      uploadedId = await client.$transaction(async txClient => {
+        const metaFileId = await redeemUpload({
+          token,
+          purpose: PARTNER_PICTURE_PURPOSE,
+          owner: user.id,
+          client: txClient,
+        });
+
+        await updatePartner({
+          data: {
+            id: companyPartner.id,
+            version: companyPartner.version,
+            picture: {select: {id: metaFileId}},
+          },
+          client: txClient,
+        });
+
+        return metaFileId;
+      });
+    } else {
+      await updatePartner({
+        data: {
+          id: companyPartner.id,
+          version: companyPartner.version,
+          picture: {select: {id: null}},
+        },
+        client,
+      });
+    }
+
+    return {
+      success: true,
+      data: uploadedId ? {id: uploadedId} : null,
+    };
   } catch (err) {
     return {
       error: true,
       message: await t('Error updating profile picture. Try again.'),
     };
   }
-
-  return {
-    success: true,
-    data: uploadedPicture,
-  };
 }

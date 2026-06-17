@@ -49,9 +49,14 @@ import {
 // ---- LOCAL IMPORTS ---- //
 import {Title} from '../common/ui/components';
 import {update, updateProfileImage, generateOTPForUpdate} from './action';
-import {RoleLabel} from '../common/constants';
+import {
+  RoleLabel,
+  PARTNER_PICTURE_PURPOSE,
+  PARTNER_PICTURE_MAX_FILE_SIZE,
+} from '../common/constants';
 import {getLoginURL} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 
 const formSchema = z
   .object({
@@ -158,6 +163,7 @@ export default function Personal({
   const pathname = usePathname();
   const {toast} = useToast();
   const {tenant, workspaceURL, workspaceURI} = useWorkspace();
+  const {upload} = useStagedUpload({tenant});
   const signOut = useSignOut();
   const [confirmation, setConfirmation] = useState<any>(false);
   const [picture, setPicture] = useState<any>(pictureProp);
@@ -272,22 +278,26 @@ export default function Personal({
   const handleDeletePicture = async () => {
     closeConfirmation();
     setUpdatingPicture(true);
+    try {
+      const result = await updateProfileImage({token: null});
 
-    const formData = new FormData();
-    formData.append('picture', '');
-
-    const result = await updateProfileImage(formData);
-
-    if ('error' in result) {
-      toast({title: result.message, variant: 'destructive'});
-    } else {
+      if ('error' in result) {
+        toast({title: result.message, variant: 'destructive'});
+      } else {
+        toast({
+          title: i18n.t('Picture deleted successfully.'),
+          variant: 'success',
+        });
+        setPicture(null);
+      }
+    } catch (e) {
       toast({
-        title: i18n.t('Picture deleted successfully.'),
-        variant: 'success',
+        title: i18n.t('An unexpected error occurred'),
+        variant: 'destructive',
       });
-      setPicture(null);
+    } finally {
+      setUpdatingPicture(false);
     }
-    setUpdatingPicture(false);
   };
 
   const handleUpdatePicture = async (
@@ -297,23 +307,51 @@ export default function Personal({
 
     if (!file) return;
 
-    setUpdatingPicture(true);
-
-    const formData = new FormData();
-    formData.append('picture', file);
-
-    const result = await updateProfileImage(formData);
-
-    if ('error' in result) {
-      toast({title: result.message, variant: 'destructive'});
-    } else {
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: i18n.t('Picture updated successfully.'),
-        variant: 'success',
+        title: i18n.t('Only images are allowed.'),
+        variant: 'destructive',
       });
-      setPicture(result.data?.id);
+      return;
     }
-    setUpdatingPicture(false);
+
+    if (file.size > PARTNER_PICTURE_MAX_FILE_SIZE) {
+      toast({title: i18n.t('Image is too large.'), variant: 'destructive'});
+      return;
+    }
+
+    setUpdatingPicture(true);
+    try {
+      const {done} = upload(file, {purpose: PARTNER_PICTURE_PURPOSE});
+      const [staged] = await done;
+
+      if (!staged) {
+        toast({
+          title: i18n.t('Error updating profile picture. Try again.'),
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const result = await updateProfileImage({token: staged.token});
+
+      if ('error' in result) {
+        toast({title: result.message, variant: 'destructive'});
+      } else {
+        toast({
+          title: i18n.t('Picture updated successfully.'),
+          variant: 'success',
+        });
+        setPicture(result.data?.id);
+      }
+    } catch (e) {
+      toast({
+        title: i18n.t('An unexpected error occurred'),
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingPicture(false);
+    }
   };
 
   const isValidEmail = useMemo(() => {

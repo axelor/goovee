@@ -6,6 +6,16 @@ import {
   RoleSelectSchema,
   NotificationAppCodeSchema,
 } from '@/utils/validators';
+import {uploadTokenSchema} from '@/lib/core/upload/validators';
+
+/* -------- Profile picture -------- */
+/* `token` redeems a staged upload (image pre-uploaded on pick); a null/absent
+ * token clears the current picture. */
+export const UpdateProfileImageSchema = z.object({
+  token: uploadTokenSchema.nullish(),
+});
+
+export type UpdateProfileImage = z.infer<typeof UpdateProfileImageSchema>;
 
 /* -------- Personal -------- */
 export const UpdatePersonalSchema = z.object({
