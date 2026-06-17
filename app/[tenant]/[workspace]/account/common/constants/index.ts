@@ -64,3 +64,13 @@ export const RoleLabel = {
   [Role.user]: 'User',
   [Role.owner]: 'Owner',
 };
+
+/* Staged-upload purpose under which a partner's profile / company picture is
+ * pre-uploaded (registered in lib/core/upload/staged-upload.ts) and redeemed
+ * when linked to the partner. */
+export const PARTNER_PICTURE_PURPOSE = 'partner:picture';
+
+/* Maximum accepted size for a profile / company picture (15 MB) — comfortably
+ * covers modern phone photos while rejecting raw / oversized files. The cap is
+ * also enforced server-side as a streaming limit by the stage route. */
+export const PARTNER_PICTURE_MAX_FILE_SIZE = 15000000;

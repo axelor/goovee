@@ -24,7 +24,6 @@ import {
 } from '@/ui/components/form';
 import {useToast} from '@/ui/hooks';
 import {getPartnerImageURL} from '@/utils/files';
-import {packIntoFormData} from '@/utils/formdata';
 import {zodResolver} from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
@@ -37,6 +36,11 @@ import {
   directorySettingsSchema,
   type DirectorySettingsFormValues,
 } from './schema';
+import {
+  PARTNER_PICTURE_PURPOSE,
+  PARTNER_PICTURE_MAX_FILE_SIZE,
+} from '../common/constants';
+import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 
 export default function Form({
   partner,
@@ -50,6 +54,7 @@ export default function Form({
   const {toast} = useToast();
   const router = useRouter();
   const {workspaceURL, tenant} = useWorkspace();
+  const {upload} = useStagedUpload({tenant});
   const mainPartner = partner.mainPartner;
   const companyDataSource = isAdminContact
     ? mainPartner
@@ -123,8 +128,10 @@ export default function Form({
     closeConfirmation();
     try {
       setUpdatingPicture(true);
-      const formData = packIntoFormData({picture: null, workspaceURL});
-      const {error, message} = await updateCompanyProfileImage(formData);
+      const {error, message} = await updateCompanyProfileImage({
+        token: null,
+        workspaceURL,
+      });
 
       if (error) {
         toast({title: message, variant: 'destructive'});
@@ -152,11 +159,36 @@ export default function Form({
 
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: i18n.t('Only images are allowed.'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (file.size > PARTNER_PICTURE_MAX_FILE_SIZE) {
+      toast({title: i18n.t('Image is too large.'), variant: 'destructive'});
+      return;
+    }
+
     try {
       setUpdatingPicture(true);
-      const formData = packIntoFormData({picture: file, workspaceURL});
+      const {done} = upload(file, {purpose: PARTNER_PICTURE_PURPOSE});
+      const [staged] = await done;
 
-      const {error, message, data} = await updateCompanyProfileImage(formData);
+      if (!staged) {
+        toast({
+          title: i18n.t('Error updating profile picture. Try again.'),
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const {error, message, data} = await updateCompanyProfileImage({
+        token: staged.token,
+        workspaceURL,
+      });
 
       if (error) {
         toast({title: message, variant: 'destructive'});

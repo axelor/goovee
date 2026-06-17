@@ -1,0 +1,6 @@
+{
+  "title": "Upload account profile and company pictures up front via staged uploads",
+  "type": "change",
+  "description": "Account profile pictures and company pictures now upload at pick time, streamed server-side rather than sent through the form action. A 15MB image-only cap is enforced while streaming, so larger phone photos no longer hit the request size limit; non-image or oversized files show an error toast.",
+  "scope": ["core", "directory"]
+}

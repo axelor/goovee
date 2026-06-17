@@ -1,18 +1,14 @@
 'use server';
 
-import fs from 'fs';
-import path from 'path';
-import {pipeline} from 'stream';
-import {promisify} from 'util';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/lib/core/tenant';
 import {getSession} from '@/auth';
 import {TENANT_HEADER} from '@/proxy';
-import {getFileSizeText} from '@/utils/files';
 import {getTranslation, t} from '@/locale/server';
-import {clone, getPartnerId} from '@/utils';
+import {getPartnerId} from '@/utils';
+import {redeemUpload} from '@/lib/core/upload/staged-upload';
 import {
   PartnerTypeMap,
   findGooveeUserByEmail,
@@ -33,15 +29,10 @@ import {
 import {
   UpdatePersonalSchema,
   type UpdatePersonal,
+  UpdateProfileImageSchema,
+  type UpdateProfileImage,
 } from '../common/utils/validators';
-
-const pump = promisify(pipeline);
-
-const storage = process.env.DATA_STORAGE as string;
-
-if (!fs.existsSync(storage)) {
-  fs.mkdirSync(storage);
-}
+import {PARTNER_PICTURE_PURPOSE} from '../common/constants';
 
 function error(message: string) {
   return {
@@ -50,8 +41,14 @@ function error(message: string) {
   };
 }
 
-export async function updateProfileImage(formData: FormData) {
-  const file: any = formData.get('picture');
+export async function updateProfileImage(input: UpdateProfileImage) {
+  const validation = UpdateProfileImageSchema.safeParse(input);
+
+  if (!validation.success) {
+    return error(z.prettifyError(validation.error));
+  }
+
+  const {token} = validation.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -76,66 +73,49 @@ export async function updateProfileImage(formData: FormData) {
     return error(await t('Invalid partner'));
   }
 
-  let uploadedPicture = null;
-
-  if (file) {
-    try {
-      const fileName = `${new Date().getTime()}-${file.name}`;
-
-      await pump(
-        file.stream(),
-        fs.createWriteStream(path.resolve(storage, fileName)),
-      );
-
-      uploadedPicture = await client.aOSMetaFile
-        .create({
-          data: {
-            fileName: file.name,
-            filePath: fileName,
-            fileType: file.type,
-            fileSize: file.size,
-            sizeText: getFileSizeText(file.size),
-            description: '',
-          },
-          select: {id: true},
-        })
-        .then(clone);
-    } catch (err) {
-      return error(await t('Error updating profile picture. Try again.'));
-    }
-  }
-
   try {
-    const updatedPartner = await updatePartner({
-      data: {
-        id: partner.id,
-        version: partner.version,
-        ...(uploadedPicture
-          ? {
-              picture: {
-                select: {
-                  id: uploadedPicture.id,
-                },
-              },
-            }
-          : {
-              picture: {
-                select: {
-                  id: null,
-                },
-              },
-            }),
-      },
-      client,
-    });
+    let uploadedId: string | null = null;
+
+    if (token) {
+      /* Redeem the staged upload and link it to the partner in one
+       * transaction, so a failed link rolls the claim consumption back. */
+      uploadedId = await client.$transaction(async txClient => {
+        const metaFileId = await redeemUpload({
+          token,
+          purpose: PARTNER_PICTURE_PURPOSE,
+          owner: user.id,
+          client: txClient,
+        });
+
+        await updatePartner({
+          data: {
+            id: partner.id,
+            version: partner.version,
+            picture: {select: {id: metaFileId}},
+          },
+          client: txClient,
+        });
+
+        return metaFileId;
+      });
+    } else {
+      await updatePartner({
+        data: {
+          id: partner.id,
+          version: partner.version,
+          picture: {select: {id: null}},
+        },
+        client,
+      });
+    }
+
+    return {
+      success: true,
+      data: uploadedId ? {id: uploadedId} : null,
+    };
   } catch (err) {
     return error(await t('Error updating profile picture. Try again.'));
   }
-
-  return {
-    success: true,
-    data: uploadedPicture,
-  };
 }
 
 export async function fetchPersonalSettings() {
