@@ -1,9 +1,6 @@
 'use server';
 
-import fs from 'fs';
 import path from 'path';
-import {pipeline} from 'stream';
-import {promisify} from 'util';
 import {headers} from 'next/headers';
 import {revalidatePath} from 'next/cache';
 import {z} from 'zod';
@@ -15,61 +12,74 @@ import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {TENANT_HEADER} from '@/proxy';
-import {getFileSizeText} from '@/utils/files';
-import {getStoragePath} from '@/storage/index';
+import type {Client} from '@/goovee/.generated/client';
+import {redeemUpload} from '@/lib/core/upload/staged-upload';
+import type {ID} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
-import {ACTION} from '@/subapps/resources/common/constants';
-import {UploadSchema} from '../common/utils/validators';
+import {
+  ACTION,
+  RESOURCE_DMS_UPLOAD_PURPOSE,
+} from '@/subapps/resources/common/constants';
+import {UploadSchema, type UploadInput} from '../common/utils/validators';
 
-const pump = promisify(pipeline);
+/**
+ * Redeem each pre-staged upload claim into its `meta_file` id, then rename the
+ * stored file to the user-supplied title (keeping the staged file's extension)
+ * and apply the description. Runs in the caller's transaction so a later failure
+ * rolls the consume back and the tokens stay redeemable.
+ */
+async function redeemDmsFiles({
+  values,
+  owner,
+  client,
+}: {
+  values: UploadInput['values'];
+  owner: ID;
+  client: Client;
+}): Promise<{metaFileId: ID; fileName: string; description: string}[]> {
+  const redeemed: {metaFileId: ID; fileName: string; description: string}[] =
+    [];
 
-type FileFormValue = {
-  title: string;
-  description: string;
-  file: File;
-};
+  for (const {token, title, description} of values) {
+    const metaFileId = await redeemUpload({
+      token,
+      purpose: RESOURCE_DMS_UPLOAD_PURPOSE,
+      owner,
+      client,
+    });
 
-function extractFileValues(formData: FormData): FileFormValue[] {
-  const values: Partial<FileFormValue>[] = [];
-
-  for (const pair of (formData as any).entries()) {
-    const key = pair[0] as string;
-    const value = pair[1];
-
-    const index = Number(key.match(/\[(\d+)\]/)?.[1]);
-
-    if (Number.isNaN(index)) {
-      continue;
+    const metaFile = await client.aOSMetaFile.findOne({
+      where: {id: metaFileId},
+      select: {fileName: true, id: true, version: true},
+    });
+    if (!metaFile) {
+      throw new Error('Upload not redeemable');
     }
 
-    if (!values[index]) {
-      values[index] = {};
-    }
+    const fileName = `${title}${path.extname(metaFile.fileName ?? '')}`;
+    await client.aOSMetaFile.update({
+      data: {
+        id: metaFileId,
+        version: metaFile.version,
+        fileName,
+        ...(description && {description}),
+      },
+    });
 
-    const field = key.substring(key.lastIndexOf('[') + 1, key.lastIndexOf(']'));
-
-    if (field === 'title' || field === 'description') {
-      values[index][field] = value as string;
-    } else if (field === 'file') {
-      values[index].file =
-        value instanceof File ? value : new File([value], 'filename');
-    }
+    redeemed.push({metaFileId, fileName, description});
   }
 
-  return values as FileFormValue[];
+  return redeemed;
 }
 
-export async function upload(formData: FormData, workspaceURL: string) {
-  const parsed = UploadSchema.safeParse({
-    workspaceURL,
-    parent: formData.get('parent'),
-  });
+export async function upload(input: UploadInput) {
+  const parsed = UploadSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {parent: parentId} = parsed.data;
+  const {workspaceURL, parent: parentId, values} = parsed.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -154,72 +164,42 @@ export async function upload(formData: FormData, workspaceURL: string) {
     };
   }
 
-  const values = extractFileValues(formData);
-
-  const getTimestampFilename = (name: string) => {
-    return `${new Date().getTime()}-${name}`;
-  };
-
-  type FileEntry = {
-    name: string;
-    timestampFilename: string;
-    file: File;
-    description: string;
-  };
-
   try {
-    const fileEntries: FileEntry[] = await Promise.all(
-      values.map(async ({title, description, file}) => {
-        const titleWithExt = `${title}${path.extname(file.name)}`;
-        const name = titleWithExt || file.name;
-        const timestampFilename = getTimestampFilename(name);
-        await pump(
-          file.stream(),
-          fs.createWriteStream(
-            path.resolve(getStoragePath(), timestampFilename),
-          ),
-        );
-        return {name, timestampFilename, file, description};
-      }),
-    );
+    // redeem + create atomically: a failed create rolls the token consume back
+    await client.$transaction(async (txClient: Client) => {
+      const files = await redeemDmsFiles({
+        values,
+        owner: user.id,
+        client: txClient,
+      });
 
-    const timestamp = new Date();
-    await client.aOSDMSFile.createAll({
-      data: fileEntries.map(({name, timestampFilename, file, description}) => ({
-        fileName: name,
-        isDirectory: false,
-        parent: {select: {id: Number(parent.id)}},
-        createdOn: timestamp,
-        updatedOn: timestamp,
-        workspaceSet: {
-          select: [{url: workspaceURL}],
-        },
-        isPrivate,
-        permissionSelect,
-        ...(partnerSet?.length
-          ? {partnerSet: {select: partnerSet.map(({id}) => ({id}))}}
-          : {}),
-        ...(partnerCategorySet?.length
-          ? {
-              partnerCategorySet: {
-                select: partnerCategorySet.map(({id}) => ({id})),
-              },
-            }
-          : {}),
-        metaFile: {
-          create: {
-            fileName: name,
-            filePath: timestampFilename,
-            fileType: file.type,
-            fileSize: String(file.size),
-            sizeText: getFileSizeText(file.size),
-            description: description,
-            createdOn: timestamp,
-            updatedOn: timestamp,
+      const timestamp = new Date();
+      await txClient.aOSDMSFile.createAll({
+        data: files.map(({metaFileId, fileName}) => ({
+          fileName,
+          isDirectory: false,
+          parent: {select: {id: Number(parent.id)}},
+          createdOn: timestamp,
+          updatedOn: timestamp,
+          workspaceSet: {
+            select: [{url: workspaceURL}],
           },
-        },
-      })),
-      select: {id: true},
+          isPrivate,
+          permissionSelect,
+          ...(partnerSet?.length
+            ? {partnerSet: {select: partnerSet.map(({id}) => ({id}))}}
+            : {}),
+          ...(partnerCategorySet?.length
+            ? {
+                partnerCategorySet: {
+                  select: partnerCategorySet.map(({id}) => ({id})),
+                },
+              }
+            : {}),
+          metaFile: {select: {id: metaFileId}},
+        })),
+        select: {id: true},
+      });
     });
 
     revalidatePath(`${workspaceURL}/${SUBAPP_CODES.resources}/categories`);

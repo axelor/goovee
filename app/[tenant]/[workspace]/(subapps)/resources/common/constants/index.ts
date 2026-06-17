@@ -5,6 +5,16 @@ export const ACTION = {
 
 export type ActionType = (typeof ACTION)[keyof typeof ACTION];
 
+export const MAX_FILE_SIZE = 20000000; // 20 MB
+
+/* Max number of files that can be uploaded in a single resource submission. */
+export const MAX_RESOURCE_FILES = 10;
+
+/* Staged-upload purpose under which DMS resource files are pre-uploaded
+ * (registered in lib/core/upload/staged-upload.ts) and redeemed when the
+ * aOSDMSFile rows are created. */
+export const RESOURCE_DMS_UPLOAD_PURPOSE = 'resources:dms';
+
 export const COLORS = [
   {
     label: 'Red',
