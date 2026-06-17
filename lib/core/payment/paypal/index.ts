@@ -1,27 +1,21 @@
-import {experimental_taintUniqueValue} from 'react';
 import {Client, Environment} from '@paypal/paypal-server-sdk';
 
-const client = function () {
-  const clientId = process.env.PAYPAL_CLIENT_ID!;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
+import type {TenantConfig} from '@/tenant';
 
-  if (clientSecret) {
-    experimental_taintUniqueValue(
-      'PayPal secret key is a server secret. Do not pass to Client Components.',
-      process,
-      clientSecret,
-    );
+const client = function (config?: TenantConfig | null) {
+  const paypal = config?.payments?.paypal;
+
+  if (!paypal) {
+    throw new Error('PayPal is not configured');
   }
 
   return new Client({
     clientCredentialsAuthCredentials: {
-      oAuthClientId: clientId,
-      oAuthClientSecret: clientSecret,
+      oAuthClientId: paypal.clientId,
+      oAuthClientSecret: paypal.clientSecret,
     },
     environment:
-      process.env.PAYPAL_LIVE === 'true'
-        ? Environment.Production
-        : Environment.Sandbox,
+      paypal.live === true ? Environment.Production : Environment.Sandbox,
   });
 };
 

@@ -1,6 +1,8 @@
 // ---- CORE IMPORTS ---- //
 import {after} from 'next/server';
+import {DEFAULT_TENANT} from '@/constants';
 import {getTranslation} from '@/locale/server';
+import {tenantConfigProvider} from '@/tenant/config-provider';
 import NotificationManager, {NotificationType} from '@/notification';
 import {
   type MailConfig,
@@ -116,7 +118,10 @@ export async function generateOTP({
       throw new Error('Error creating otp');
     }
 
-    const mailService = NotificationManager.getService(NotificationType.mail);
+    const mailService = NotificationManager.getService(
+      NotificationType.mail,
+      await tenantConfigProvider.get(tenantId ?? DEFAULT_TENANT),
+    );
     if (!result?.otp) return;
 
     after(async () => {

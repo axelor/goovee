@@ -3,7 +3,7 @@ import type {ID} from '@/types';
 import axios from 'axios';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import {type Track} from '@/comments';
 import {ORDER_BY} from '@/constants';
 import type {AOSProjectTask} from '@/goovee/.generated/models';
@@ -355,7 +355,7 @@ export async function updateTicket({
           },
           fields: ['project'],
         },
-        {headers: getAOSAuthHeaders(aos.auth)},
+        {headers: getAOSHeaders(aos)},
       )
       .then(({data}) => data);
 

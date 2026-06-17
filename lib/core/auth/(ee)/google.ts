@@ -15,6 +15,10 @@ const google = {
   enabled: process.env.SHOW_GOOGLE_OAUTH === 'true',
   clientId: process.env.GOOGLE_CLIENT_ID as string,
   clientSecret,
+  /* Always show Google's account chooser: a user may sign in to different
+   * tenants with different accounts, and auto-selecting the last-used one
+   * would log them into the wrong tenant account. */
+  prompt: 'select_account',
 } satisfies GoogleOptions & {
   enabled?: boolean | undefined;
 };

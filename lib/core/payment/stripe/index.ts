@@ -1,16 +1,31 @@
 import 'server-only';
 
-import {experimental_taintUniqueValue} from 'react';
 import Stripe from 'stripe';
 
-const secret = process.env.STRIPE_CLIENT_SECRET;
+import type {TenantConfig} from '@/tenant';
 
-if (secret) {
-  experimental_taintUniqueValue(
-    'Stripe secret key is a server secret. Do not pass to Client Components.',
-    process,
-    secret,
-  );
+/* Clients are cached per secret so tenants sharing an account share a
+ * client, and the SDK's connection pooling is preserved. */
+const clients = new Map<string, Stripe>();
+
+export function getStripe(config?: TenantConfig | null): Stripe {
+  const secret = config?.payments?.stripe?.clientSecret;
+
+  if (!secret) {
+    throw new Error('Stripe is not configured');
+  }
+
+  let client = clients.get(secret);
+  if (!client) {
+    client = new Stripe(secret);
+    clients.set(secret, client);
+  }
+
+  return client;
 }
 
-export const stripe = new Stripe(secret as string);
+export function getStripeWebhookSecret(
+  config?: TenantConfig | null,
+): string | undefined {
+  return config?.payments?.stripe?.webhookSecret;
+}

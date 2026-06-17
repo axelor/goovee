@@ -1,26 +1,24 @@
-import {experimental_taintUniqueValue} from 'react';
 import type {ActionResponse} from '@/types/action';
 import webpush, {WebPushError} from 'web-push';
 import type {Client} from '@/goovee/.generated/client';
+import {tenantConfigProvider} from '@/tenant/config-provider';
+import type {TenantConfig} from '@/tenant';
 import type {NotificationDTO, NotificationPayload} from './types';
 
 async function sendNotification(
   subscription: webpush.PushSubscription,
   payload: NotificationPayload,
+  config: TenantConfig | null,
 ): ActionResponse<true> {
-  const publicKey = process.env.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT;
+  /* The subscription was created in the browser against the tenant's
+   * publicEnv key, so signing must use the same tenant's key pair. */
+  const publicKey = config?.publicEnv?.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY;
+  const privateKey = config?.webPush?.privateKey;
+  const subject = config?.webPush?.subject;
 
   if (!publicKey || !privateKey || !subject) {
     return {error: true, message: 'Missing VAPID keys'};
   }
-
-  experimental_taintUniqueValue(
-    'VAPID private key is a web push secret. Do not pass to Client Components.',
-    process,
-    privateKey,
-  );
 
   if (!subject.startsWith('mailto:') && !subject.startsWith('https://')) {
     return {
@@ -138,6 +136,8 @@ export async function notifyUser({
 
     if (!subscriptions?.length) return;
 
+    const tenantConfig = await tenantConfigProvider.get(tenantId);
+
     const pushPayload: NotificationPayload = {
       ...payload,
       title: pushTitle,
@@ -167,6 +167,7 @@ export async function notifyUser({
             },
           },
           pushPayload,
+          tenantConfig,
         );
 
         if (result.error) {

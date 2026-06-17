@@ -2,7 +2,7 @@ import axios from 'axios';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import {t} from '@/locale/server';
 import {PortalWorkspace} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
@@ -102,7 +102,7 @@ export async function createOrder({
   };
 
   const res = await axios.post(ws, payload, {
-    headers: getAOSAuthHeaders(aos.auth),
+    headers: getAOSHeaders(aos),
   });
 
   if (res?.data?.status === -1) {
@@ -208,7 +208,7 @@ export async function requestOrder({
     };
 
     const res = await axios.post(ws, payload, {
-      headers: getAOSAuthHeaders(aos.auth),
+      headers: getAOSHeaders(aos),
     });
 
     if (res?.data?.status === -1) {

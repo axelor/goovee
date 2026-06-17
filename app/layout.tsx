@@ -4,11 +4,14 @@
 export const dynamic = 'force-dynamic';
 
 import {Poppins as FontSans} from 'next/font/google';
+import {headers} from 'next/headers';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
 import {Environment, getPublicEnvironment} from '@/environment';
 import {findTheme} from '@/orm/theme';
+import {tenantConfigProvider} from '@/tenant/config-provider';
+import {TENANT_HEADER} from '@/proxy';
 import {Toaster} from '@/ui/components/toaster';
 
 // ---- LOCAL IMPORTS ---- //
@@ -75,7 +78,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [theme, env] = await Promise.all([findTheme(), getPublicEnvironment()]);
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  const tenantConfig = tenantId
+    ? await tenantConfigProvider.get(tenantId)
+    : null;
+
+  const [theme, env] = await Promise.all([
+    findTheme(),
+    getPublicEnvironment(tenantConfig),
+  ]);
 
   return (
     <Theme theme={theme}>

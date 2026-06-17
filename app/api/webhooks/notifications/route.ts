@@ -165,7 +165,10 @@ async function sendMail({
   entity: {id: string; route: string};
   app: App;
 }) {
-  const mailService = NotificationManager.getService(NotificationType.mail);
+  const mailService = NotificationManager.getService(
+    NotificationType.mail,
+    await manager.getConfig(tenantId),
+  );
 
   const html =
     mail?.body || (await notificationTemplate({user, tenantId, app, entity}));

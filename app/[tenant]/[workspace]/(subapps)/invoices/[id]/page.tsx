@@ -88,6 +88,7 @@ async function Invoice({
     ...(token ? {token} : {params: {where: invoicesWhereClause}}),
     client,
     workspaceURL,
+    tenantId,
   });
 
   if (!invoice) {

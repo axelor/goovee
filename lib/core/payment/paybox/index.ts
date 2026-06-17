@@ -1,10 +1,10 @@
-import {experimental_taintUniqueValue} from 'react';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {encodeFilter as encode} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {formatAmountForPaybox, hasKeys, join} from './utils';
 import {createHMAC} from './crypto';
 import {getPublicEnvironment} from '@/environment';
+import type {TenantConfig} from '@/tenant';
 
 const CurrencyCode: Record<string, number> = {
   EUR: 978,
@@ -18,6 +18,7 @@ export function getPaymentURL({
   contextId,
   currency,
   url,
+  config,
 }: {
   amount: string | number;
   email: string;
@@ -27,14 +28,21 @@ export function getPaymentURL({
     success: string;
     failure: string;
   };
+  config?: TenantConfig | null;
 }) {
+  const paybox = config?.payments?.paybox;
+
+  if (!paybox) {
+    throw new Error('Invalid configuration');
+  }
+
   const payload: any = {
-    PBX_RANG: process.env.PBX_RANG,
-    PBX_IDENTIFIANT: process.env.PBX_IDENTIFIANT,
-    PBX_SITE: process.env.PBX_SITE,
-    PBX_PAYBOX: process.env.PBX_PAYBOX,
-    PBX_BACKUP1: process.env.PBX_BACKUP1,
-    PBX_BACKUP2: process.env.PBX_BACKUP2,
+    PBX_RANG: paybox.rang,
+    PBX_IDENTIFIANT: paybox.identifiant,
+    PBX_SITE: paybox.site,
+    PBX_PAYBOX: paybox.paybox,
+    PBX_BACKUP1: paybox.backup1,
+    PBX_BACKUP2: paybox.backup2,
     PBX_DEVISE: CurrencyCode[currency] || DefaultCurrencyCode,
     PBX_TOTAL: formatAmountForPaybox(amount),
     PBX_PORTEUR: email,
@@ -44,22 +52,12 @@ export function getPaymentURL({
     PBX_ATTENTE: url?.success,
     PBX_REFUSE: url?.failure,
     PBX_ANNULE: url?.failure,
-    PBX_REPONDRE_A: `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}${withBasePath('/api/payment/paybox/validate')}`,
+    PBX_REPONDRE_A: `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath('/api/payment/paybox/validate')}`,
     PBX_RETOUR: 'reference:R;error:E;transaction:S;sign:K',
     PBX_TIME: new Date().toISOString(),
   };
 
-  const secret = process.env.PBX_SECRET!;
-
-  if (secret) {
-    experimental_taintUniqueValue(
-      'Paybox secret key is a server secret. Do not pass to Client Components.',
-      process,
-      secret,
-    );
-  }
-
-  const hmac = createHMAC(join(payload, false), secret);
+  const hmac = createHMAC(join(payload, false), paybox.secret);
 
   if (!hmac) {
     throw new Error('Error processing request');

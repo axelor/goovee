@@ -1,5 +1,5 @@
-import {experimental_taintUniqueValue} from 'react';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
+import type {TenantConfig} from '@/tenant';
 import {formatAmountForUp2pay, hasKeys, join} from './utils';
 import {createHMAC} from './crypto';
 import {CURRENCY_CODE, DEFAULT_BILLING_COUNTRY_CODE} from './constants';
@@ -16,6 +16,7 @@ export function getPaymentURL({
   billingInfo,
   name,
   reference,
+  config,
 }: {
   amount: string | number;
   email: string;
@@ -37,20 +38,23 @@ export function getPaymentURL({
   };
   name: string;
   reference: string;
+  config?: TenantConfig | null;
 }) {
-  const baseURL = process.env.UP2PAY_PAYBOX;
+  const up2pay = config?.payments?.up2pay;
 
-  if (!baseURL) {
+  if (!up2pay) {
     throw new Error('Invalid configuration');
   }
+
+  const baseURL = up2pay.paybox;
 
   const shoppingCart = `<?xml version="1.0" encoding="utf-8"?><shoppingcart><total><totalQuantity>1</totalQuantity></total></shoppingcart>`;
   const billing = `<?xml version="1.0" encoding="utf-8"?><Billing><Address><FirstName>${billingInfo?.firstName || ''}</FirstName><LastName>${billingInfo?.lastName || ''}</LastName><Address1>${billingInfo?.addressLine1 || ''}</Address1><ZipCode>${billingInfo?.zipCode || ''}</ZipCode><City>${billingInfo?.city || ''}</City><CountryCode>${billingInfo?.countryCode || DEFAULT_BILLING_COUNTRY_CODE}</CountryCode></Address></Billing>`;
 
   const payload = {
-    PBX_SITE: process.env.UP2PAY_SITE,
-    PBX_RANG: process.env.UP2PAY_RANG,
-    PBX_IDENTIFIANT: process.env.UP2PAY_IDENTIFIANT,
+    PBX_SITE: up2pay.site,
+    PBX_RANG: up2pay.rang,
+    PBX_IDENTIFIANT: up2pay.identifiant,
     PBX_TOTAL: formatAmountForUp2pay(amount),
     PBX_DEVISE: CURRENCY_CODE[currency] || defaultCurrencyCode,
     PBX_CMD: `${name}-${reference}~${contextId}~${tenantId}`,
@@ -89,17 +93,7 @@ export function getPaymentURL({
     throw new Error('Invalid configuration');
   }
 
-  const secret = process.env.UP2PAY_SECRET!;
-
-  if (secret) {
-    experimental_taintUniqueValue(
-      'Up2Pay secret key is a server secret. Do not pass to Client Components.',
-      process,
-      secret,
-    );
-  }
-
-  const hmac = createHMAC(join(payload, false), secret);
+  const hmac = createHMAC(join(payload, false), up2pay.secret);
 
   if (!hmac) {
     throw new Error('Error processing request');

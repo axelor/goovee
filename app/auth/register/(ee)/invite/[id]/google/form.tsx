@@ -35,10 +35,12 @@ export default function SignUp({
   email,
   inviteId,
   workspaceURL,
+  googleProviderId,
 }: {
   email: string;
   inviteId: string;
   workspaceURL?: string;
+  googleProviderId?: string;
 }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,8 +66,7 @@ export default function SignUp({
       return;
     }
 
-    await authClient.signIn.social({
-      provider: 'google',
+    const signUpOptions = {
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}${workspaceURL ? `&workspaceURI=${new URL(workspaceURL).pathname}` : ''}`,
@@ -77,6 +78,21 @@ export default function SignUp({
         inviteId,
         locale: l10n.getLocale(),
       },
+    };
+
+    /* Tenants with their own Google OAuth application sign up through the
+     * generic provider registered under google-<tenantId>. */
+    if (googleProviderId) {
+      await authClient.signIn.oauth2({
+        providerId: googleProviderId,
+        ...signUpOptions,
+      });
+      return;
+    }
+
+    await authClient.signIn.social({
+      provider: 'google',
+      ...signUpOptions,
     });
   };
 

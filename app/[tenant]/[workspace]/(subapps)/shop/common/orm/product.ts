@@ -3,7 +3,7 @@ import type {Cloned} from '@/types/util';
 import type {OrderByOptions} from '@goovee/orm';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import {clone, scale} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import {
@@ -769,7 +769,7 @@ export async function findProductsFromWS({
           partnerId: user?.id,
           companyId: workspace?.config?.company?.id,
         },
-        {headers: getAOSAuthHeaders(aos.auth)},
+        {headers: getAOSHeaders(aos)},
       )
       .then(({data}) => data);
 

@@ -5,7 +5,9 @@ import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
-import {stripe} from '@/payment/stripe';
+import {DEFAULT_TENANT} from '@/constants';
+import {getStripe, getStripeWebhookSecret} from '@/payment/stripe';
+import {tenantConfigProvider} from '@/tenant/config-provider';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
@@ -60,7 +62,24 @@ export async function POST(req: Request) {
   const body = await req.text();
   const $headers = await headers();
   const signature = $headers.get('Stripe-Signature');
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  /* The tenant id is read from the UNVERIFIED payload solely to select the
+   * tenant's webhook secret — the event is trusted only after constructEvent
+   * verifies the signature against that secret. Events without the metadata
+   * (other event types, intents created before the metadata existed) verify
+   * against the default tenant's secret, as they always did. */
+  let claimedTenantId: string | undefined;
+  try {
+    claimedTenantId = JSON.parse(body)?.data?.object?.metadata?.tenant_id;
+  } catch {
+    return new NextResponse('Invalid payload', {status: 400});
+  }
+
+  const tenantConfig = await tenantConfigProvider.get(
+    claimedTenantId ?? DEFAULT_TENANT,
+  );
+
+  const webhookSecret = getStripeWebhookSecret(tenantConfig);
 
   if (webhookSecret) {
     experimental_taintUniqueValue(
@@ -79,7 +98,11 @@ export async function POST(req: Request) {
       });
     }
 
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    event = getStripe(tenantConfig).webhooks.constructEvent(
+      body,
+      signature,
+      webhookSecret,
+    );
   } catch (err) {
     console.error(
       'Stripe webhook verification failed',
@@ -237,6 +260,7 @@ export async function POST(req: Request) {
                   client: txClient,
                   sourceId: invoice.id,
                   amountRemaining,
+                  tenantId,
                 });
               });
             } catch (err) {

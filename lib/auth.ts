@@ -12,7 +12,7 @@ import {APIError, getOAuthState} from 'better-auth/api';
 import {nextCookies} from 'better-auth/next-js';
 import {customSession} from 'better-auth/plugins';
 import google from './core/auth/(ee)/google';
-import keycloak from './core/auth/(ee)/keycloak';
+import oauthProviders from './core/auth/(ee)/oauth-providers';
 import credentials from './core/auth/credentials';
 import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
 import {
@@ -21,8 +21,6 @@ import {
   OAuthRegisterSchema,
 } from './core/auth/validation-utils';
 import {withBasePath} from '@/lib/core/path/base-path';
-
-const showKeycloakOauth = process.env.SHOW_KEYCLOAK_OAUTH === 'true';
 
 const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
@@ -59,9 +57,17 @@ const options = {
             }
             const {client, config} = tenant;
 
+            /* Per-tenant OAuth applications are registered under generic
+             * provider ids "<provider>-<tenantId>" — treat them like their
+             * global counterparts. */
+            const isGoogle =
+              ctx.params?.id === 'google' ||
+              ctx.params?.providerId?.startsWith('google-');
+            const isKeycloak = ctx.params?.providerId?.startsWith('keycloak');
+
             let partner = await findGooveeUserByEmail(user.email, client);
             if (!partner) {
-              if (ctx.params?.id === 'google' && data.requestSignUp) {
+              if (isGoogle && data.requestSignUp) {
                 const registrationData = {
                   ...data,
                   email: user.email,
@@ -122,7 +128,7 @@ const options = {
 
                 partner = await findGooveeUserByEmail(user.email, client);
               }
-              if (ctx.params?.providerId === 'keycloak') {
+              if (isKeycloak) {
                 const {
                   success,
                   data: keycloakData,
@@ -221,7 +227,7 @@ const options = {
       },
     },
   },
-  plugins: [credentials, ...(showKeycloakOauth && keycloak ? [keycloak] : [])],
+  plugins: [credentials, ...(oauthProviders ? [oauthProviders] : [])],
   socialProviders: {google},
 } satisfies BetterAuthOptions;
 

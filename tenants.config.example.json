@@ -1,0 +1,56 @@
+{
+  "$schema": "./tenants.config.schema.json",
+  "acme": {
+    "db": {
+      "url": "postgres://user:password@localhost:5432/goovee-acme"
+    },
+    "aos": {
+      "url": "https://erp.acme.example.com/axelor-erp",
+      "auth": {
+        "apiKey": "<api-key>"
+      },
+      "webhookSecret": "<secret>"
+    },
+    "payments": {
+      "stripe": {
+        "clientSecret": "<stripe-secret-key>",
+        "webhookSecret": "<stripe-webhook-secret>"
+      },
+      "paypal": {
+        "clientId": "<paypal-client-id>",
+        "clientSecret": "<paypal-client-secret>",
+        "live": false
+      }
+    },
+    "mail": {
+      "host": "smtp.acme.example.com",
+      "port": 587,
+      "user": "noreply@acme.example.com",
+      "password": "<smtp-password>",
+      "email": "noreply@acme.example.com"
+    },
+    "oauth": {
+      "google": {
+        "clientId": "<google-client-id>",
+        "clientSecret": "<google-client-secret>"
+      }
+    },
+    "publicEnv": {
+      "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": "<paypal-client-id>"
+    }
+  },
+  "beta": {
+    "db": {
+      "url": "postgres://user:password@localhost:5432/goovee-beta"
+    },
+    "aos": {
+      "url": "https://erp.shared.example.com/axelor-erp",
+      "aosTenantId": "beta",
+      "storage": "/storage/beta",
+      "auth": {
+        "username": "<username>",
+        "password": "<password>"
+      }
+    }
+  }
+}

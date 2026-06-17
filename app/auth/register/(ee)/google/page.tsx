@@ -38,5 +38,12 @@ export default async function Page(props: {
     return notFound();
   }
 
-  return <Form workspace={workspace} />;
+  return (
+    <Form
+      workspace={workspace}
+      googleProviderId={
+        tenant.config.oauth?.google ? `google-${tenantId}` : undefined
+      }
+    />
+  );
 }

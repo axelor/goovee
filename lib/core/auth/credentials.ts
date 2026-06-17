@@ -5,6 +5,7 @@ import {after} from 'next/server';
 import {z} from 'zod';
 
 import {compare, hash} from '@/auth/utils';
+import {getPublicEnvironment} from '@/environment';
 import {getTranslation} from '@/locale/server';
 import {register} from '@/lib/core/auth/orm';
 import {generateOTP as coreGenerateOTP} from '@/otp/actions';
@@ -133,8 +134,8 @@ const credentials = {
       async ctx => {
         const {email, password, tenantId, rememberMe} = ctx.body;
 
-        const tenant = await manager.getTenant(tenantId);
-        if (!tenant) {
+        const knownTenantIds = await manager.listTenantIds();
+        if (!knownTenantIds.includes(tenantId)) {
           throw new APIError('UNAUTHORIZED', {
             ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
             message: await getTranslation(
@@ -143,6 +144,8 @@ const credentials = {
             ),
           });
         }
+
+        const tenant = await manager.getTenant(tenantId);
         const {client} = tenant;
 
         const user = await findGooveeUserByEmail(email, client);
@@ -556,13 +559,14 @@ const credentials = {
 
         const user = await findGooveeUserByEmail(email, client);
 
-        const link = `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
+        const link = `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(
           `/auth/reset-password/${email}?${searchQuery}`,
         )}`;
 
         if (user) {
           const mailService = NotificationManager.getService(
             NotificationType.mail,
+            tenant.config,
           );
           after(async () => {
             try {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import {ID} from '@/types';
@@ -50,7 +50,7 @@ export async function createInvoice({
     };
 
     const {data} = await axios.post(ws, payload, {
-      headers: getAOSAuthHeaders(aos.auth),
+      headers: getAOSHeaders(aos),
     });
 
     if (data?.status === -1) {
@@ -120,7 +120,7 @@ export async function findProductsFromWS({
       partnerId,
     };
     const res = await axios
-      .post(ws, reqBody, {headers: getAOSAuthHeaders(aos.auth)})
+      .post(ws, reqBody, {headers: getAOSHeaders(aos)})
       .then(({data}) => data);
 
     if (res?.data?.status === -1) {

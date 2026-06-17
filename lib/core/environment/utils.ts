@@ -1,12 +1,6 @@
-export function getPublicEnvironment() {
-  const prefix = 'GOOVEE_PUBLIC_';
+import {getGlobalPublicEnv} from '@/tenant/config-provider';
+import type {PublicEnv, TenantConfig} from '@/tenant';
 
-  const variables = Object.entries(process.env)
-    .filter(([key]) => key.startsWith(prefix))
-    .reduce((acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {} as any);
-
-  return variables;
+export function getPublicEnvironment(config?: TenantConfig | null): PublicEnv {
+  return config?.publicEnv ?? getGlobalPublicEnv();
 }

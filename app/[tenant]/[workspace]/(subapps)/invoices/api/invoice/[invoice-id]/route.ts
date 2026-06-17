@@ -78,6 +78,7 @@ export async function GET(
     id: invoiceId,
     ...(token ? {token} : {params: {where: invoicesWhereClause}}),
     workspaceURL,
+    tenantId,
     client,
   });
 

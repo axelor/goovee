@@ -280,6 +280,7 @@ export async function update(data: UpdatePersonal) {
       await withMattermostEmailSync({
         oldEmail: partner.emailAddress!.address!,
         newEmail: email,
+        config: tenant.config,
       });
     } catch (err: any) {
       return {

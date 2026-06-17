@@ -26,7 +26,8 @@ export async function validatePaymentData({
   amount,
   client,
   token,
-}: InvoicePaymentInput & {client: Client}): Promise<
+  tenantId,
+}: InvoicePaymentInput & {client: Client; tenantId: string}): Promise<
   ActionResponse<{
     workspace: PortalWorkspace | Cloned<PortalWorkspace>;
     user: User | undefined;
@@ -79,6 +80,7 @@ export async function validatePaymentData({
     type: INVOICE.UNPAID,
     ...(token ? {token} : {params: {where: invoicesWhereClause}}),
     workspaceURL,
+    tenantId,
     client,
   });
   if (!$invoice) {

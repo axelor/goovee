@@ -24,14 +24,20 @@ import {manager} from '@/tenant';
 import {HubPispApiError} from '@/lib/core/payment/hubpisp/utils';
 
 export async function POST(
-  _request: Request,
+  request: Request,
   {params}: {params: Promise<{resourceId: string}>},
 ) {
   const {resourceId} = await params;
 
+  /* Tenants with their own Hub PISP account register the webhook URL with a
+   * ?tenant=<id> query so their credentials can be used before the tenant is
+   * known from the link data; without it the env-configured account is used. */
+  const tenantHint =
+    new URL(request.url).searchParams.get('tenant') ?? undefined;
+
   let linkData: PaymentLinkStatusResult;
   try {
-    linkData = await fetchPaymentLinkStatus(resourceId);
+    linkData = await fetchPaymentLinkStatus(resourceId, tenantHint);
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {
       console.warn('[HUBPISP][WEBHOOK] Payment link not yet available', {
@@ -144,7 +150,10 @@ export async function POST(
 
   let paymentRequest: PaymentRequestStatusResult;
   try {
-    paymentRequest = await fetchPaymentRequestStatus(paymentRequestResourceId);
+    paymentRequest = await fetchPaymentRequestStatus(
+      paymentRequestResourceId,
+      tenantId,
+    );
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {
       /**

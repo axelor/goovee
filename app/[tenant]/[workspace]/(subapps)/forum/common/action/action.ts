@@ -658,6 +658,7 @@ export async function addPost({
             group: {name: post.forumGroup!.name ?? ''},
             subscribers,
             link: postLink,
+            tenantId,
           }),
         );
       }
@@ -1011,6 +1012,7 @@ export const createComment: CreateComment = async props => {
                     group: post.forumGroup,
                     subscribers: [replySubscriber],
                     link: postLink,
+                    tenantId,
                   }),
                 );
               }
@@ -1066,6 +1068,7 @@ export const createComment: CreateComment = async props => {
                 group: post.forumGroup,
                 subscribers: notificationRecievers,
                 link: postLink,
+                tenantId,
               }),
             );
           }

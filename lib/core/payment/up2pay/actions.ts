@@ -1,5 +1,5 @@
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
-import type {Tenant} from '@/tenant';
+import {manager, type Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
 import {getPaymentURL} from '.';
@@ -60,6 +60,7 @@ export async function createUp2payOrder({
     currency,
     url,
     billingInfo,
+    config: await manager.getConfig(tenantId),
   });
 
   return {

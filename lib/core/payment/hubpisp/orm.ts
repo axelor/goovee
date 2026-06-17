@@ -23,11 +23,13 @@ export async function findPendingHubPispPayments({
   entityId,
   currencySymbol,
   scale,
+  tenantId,
 }: {
   client: Client;
   entityId: string;
   currencySymbol: string;
   scale: number;
+  tenantId: string;
 }): Promise<PendingHubPispContext[]> {
   if (!entityId) return [];
 
@@ -66,7 +68,7 @@ export async function findPendingHubPispPayments({
     if (!resourceId || !amount) continue;
 
     try {
-      const linkStatus = await fetchPaymentLinkStatus(resourceId);
+      const linkStatus = await fetchPaymentLinkStatus(resourceId, tenantId);
       const consentStatus = linkStatus?.consentStatus;
 
       if (consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {

@@ -27,10 +27,14 @@ export default function Content({
   canRegister,
   showGoogleOauth = true,
   showKeycloakOauth = true,
+  googleProviderId,
+  keycloakProviderId,
 }: {
   canRegister?: boolean;
   showGoogleOauth?: boolean;
   showKeycloakOauth?: boolean;
+  googleProviderId?: string;
+  keycloakProviderId?: string;
 }) {
   const [values, setValues] = useState({
     email: '',
@@ -111,6 +115,23 @@ export default function Content({
       });
       return;
     }
+
+    /* Tenants with their own Google OAuth application sign in through the
+     * generic provider registered under google-<tenantId>. */
+    if (googleProviderId) {
+      await authClient.signIn.oauth2({
+        providerId: googleProviderId,
+        callbackURL: redirection,
+        errorCallbackURL: withBasePath(
+          `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
+        ),
+        additionalData: {
+          tenantId,
+        },
+      });
+      return;
+    }
+
     await authClient.signIn.social({
       provider: 'google',
       callbackURL: redirection,
@@ -132,7 +153,7 @@ export default function Content({
       return;
     }
     await authClient.signIn.oauth2({
-      providerId: 'keycloak',
+      providerId: keycloakProviderId ?? 'keycloak',
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,

@@ -21,7 +21,7 @@ const BUNDLE_CACHE_TTL_MS = 60 * 1000;
  * bundle share a single load instead of each hitting the DB. */
 const bundleCache = new LRUCache<string, Promise<TranslationBundle>>(
   BUNDLE_CACHE_CAPACITY,
-  BUNDLE_CACHE_TTL_MS,
+  {ttlMs: BUNDLE_CACHE_TTL_MS},
 );
 
 const tcache: Record<string, Translations> = {};

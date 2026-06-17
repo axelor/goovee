@@ -75,7 +75,7 @@ export async function reconcilePaymentLinkStatus({
 
   let linkStatusResult: Awaited<ReturnType<typeof getPaymentLinkStatus>>;
   try {
-    linkStatusResult = await getPaymentLinkStatus(resourceId);
+    linkStatusResult = await getPaymentLinkStatus(resourceId, tenantId);
   } catch (err) {
     console.error(
       '[HUBPISP][RECONCILE_LINK] Failed to fetch payment link status',

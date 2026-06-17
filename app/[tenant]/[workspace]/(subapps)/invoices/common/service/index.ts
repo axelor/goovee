@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import type {ID} from '@/types';
@@ -41,7 +41,7 @@ export async function updateInvoice({
     const {data} = await axios.post(
       `${aos.url}/ws/portal/invoice/payment`,
       payload,
-      {headers: getAOSAuthHeaders(aos.auth)},
+      {headers: getAOSHeaders(aos)},
     );
     if (data?.status === -1) {
       return {

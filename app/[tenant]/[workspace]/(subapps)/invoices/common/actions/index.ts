@@ -6,6 +6,7 @@ import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
+import {getPublicEnvironment} from '@/environment';
 import {
   DEFAULT_CURRENCY_CODE,
   DEFAULT_CURRENCY_SCALE,
@@ -115,6 +116,7 @@ export async function paypalCreateOrder({
     invoice,
     amount,
     workspaceURL,
+    tenantId,
     client,
     token,
   });
@@ -153,6 +155,7 @@ export async function paypalCreateOrder({
   try {
     const response = await createPaypalOrder({
       client,
+      tenantId,
       amount: $amount,
       currency: currencyCode,
       context: {
@@ -280,6 +283,7 @@ export async function paypalCaptureOrder({
   try {
     const {amount, context} = await findPaypalOrder({
       id: orderID,
+      tenantId,
       client,
     });
 
@@ -299,6 +303,7 @@ export async function paypalCaptureOrder({
       id: invoice.id,
       ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -393,6 +398,7 @@ export async function createStripeCheckoutSession({
     invoice,
     amount,
     workspaceURL,
+    tenantId,
     client,
     token,
   });
@@ -574,6 +580,7 @@ export async function validateStripePayment({
     try {
       const order = await findStripeOrder({
         id: stripeSessionId,
+        tenantId,
         client,
       });
       invoice = order.context.data;
@@ -591,6 +598,7 @@ export async function validateStripePayment({
       id: invoice.id,
       ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -653,6 +661,7 @@ export async function validateStripePayment({
         id: $invoice.id,
         params: {where: invoicesWhereClause},
         workspaceURL,
+        tenantId,
         client: txClient,
       });
 
@@ -672,6 +681,7 @@ export async function validateStripePayment({
           client: txClient,
           sourceId: String(updatedInvoice.id),
           amountRemaining: updatedAmountRemaining,
+          tenantId,
         });
       }
     });
@@ -720,6 +730,7 @@ export async function createStripeBankTransferIntent({
     invoice,
     amount,
     workspaceURL,
+    tenantId,
     client,
     token,
   });
@@ -911,7 +922,7 @@ export async function cancelStripeBankTransferPaymentIntent({
 
     let context;
     try {
-      const paymentIntent = await findStripePaymentIntent(id);
+      const paymentIntent = await findStripePaymentIntent(id, tenantId);
       context = paymentIntent.metadata.context_id;
     } catch (err) {
       return {
@@ -940,6 +951,7 @@ export async function cancelStripeBankTransferPaymentIntent({
       id: data.id,
       ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -950,6 +962,7 @@ export async function cancelStripeBankTransferPaymentIntent({
     await cancelStripePaymentIntent({
       id,
       cancellationReason: STRIPE_CANCELLATION_REASONS.REQUESTED_BY_CUSTOMER,
+      tenantId,
       client,
     });
 
@@ -997,6 +1010,7 @@ export async function payboxCreateOrder({
     invoice,
     amount,
     workspaceURL,
+    tenantId,
     client,
     token,
   });
@@ -1037,6 +1051,7 @@ export async function payboxCreateOrder({
   try {
     const response = await createPayboxOrder({
       client,
+      tenantId,
       amount: $amount,
       currency: currencyCode,
       email: payerEmail,
@@ -1045,8 +1060,8 @@ export async function payboxCreateOrder({
         paymentModeId,
       },
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`))}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true${token ? `&token=${token}` : ''}`))}`,
+        success: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`))}`,
+        failure: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true${token ? `&token=${token}` : ''}`))}`,
       },
     });
 
@@ -1181,6 +1196,7 @@ export async function validatePayboxPayment({
       id: invoice.id,
       ...(token ? {token} : {params: {where: invoicesWhereClause}}),
       workspaceURL,
+      tenantId,
       client,
     });
 
@@ -1278,6 +1294,7 @@ export async function up2payCreateOrder({
     invoice,
     amount,
     workspaceURL,
+    tenantId,
     client,
     token,
   });
@@ -1351,7 +1368,7 @@ export async function up2payCreateOrder({
       },
       billingInfo,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
+        success: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(
           ensureLeadingSlash(
             `${uri}?status=${UP2PAY_REDIRECT_STATUS.SUCCESS}&type=${
               isPartialPayment
@@ -1360,8 +1377,8 @@ export async function up2payCreateOrder({
             }${token ? `&token=${token}` : ''}`,
           ),
         )}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}${token ? `&token=${token}` : ''}`))}`,
-        cancel: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}${token ? `&token=${token}` : ''}`))}`,
+        failure: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.REFUSED}${token ? `&token=${token}` : ''}`))}`,
+        cancel: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?status=${UP2PAY_REDIRECT_STATUS.CANCELLED}${token ? `&token=${token}` : ''}`))}`,
       },
     });
 
@@ -1412,6 +1429,7 @@ export async function initiatePispPayment({
     invoice,
     amount,
     workspaceURL,
+    tenantId,
     client,
     token,
   });
@@ -1455,7 +1473,7 @@ export async function initiatePispPayment({
     };
   }
 
-  const host = process.env.GOOVEE_PUBLIC_HOST;
+  const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST;
   const tokenSuffix = token ? `&token=${token}` : '';
 
   const successfulReportUrl = `${host}${withBasePath(ensureLeadingSlash(`${uri}?hubpisp_status=${HUBPISP_REDIRECT_STATUS.SUCCESS}${tokenSuffix}`))}`;

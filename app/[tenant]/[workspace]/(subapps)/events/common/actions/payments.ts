@@ -4,6 +4,7 @@ import {z} from 'zod';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
+import {getPublicEnvironment} from '@/environment';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {findGooveeUserByEmail} from '@/orm/partner';
@@ -227,6 +228,7 @@ export async function paypalCreateOrder(props: {
       amount: expectedAmount,
       currency: currencyCode,
       email: emailAddress,
+      tenantId,
       client,
       context: values,
     });
@@ -324,10 +326,11 @@ export async function payboxCreateOrder(props: {
       currency: currencyCode,
       email: emailAddress,
       context: values,
+      tenantId,
       client,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
+        success: `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
+        failure: `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
       },
     });
     return {success: true, order: response};

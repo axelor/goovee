@@ -74,6 +74,9 @@ export default async function Page(props: {
       email={invite?.emailAddress?.address}
       inviteId={invite.id}
       workspaceURL={invite.workspace?.url}
+      googleProviderId={
+        tenant.config.oauth?.google ? `google-${tenantId}` : undefined
+      }
     />
   );
 }

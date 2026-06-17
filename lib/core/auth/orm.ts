@@ -152,7 +152,10 @@ export async function registerByInvite({
       localizationId: localization?.id,
     });
 
-    const uri = toWorkspaceURI(workspace.url, process.env.GOOVEE_PUBLIC_HOST);
+    const uri = toWorkspaceURI(
+      workspace.url,
+      getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
+    );
 
     revalidatePath('/', 'layout');
 

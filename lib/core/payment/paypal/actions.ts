@@ -5,6 +5,7 @@ import {
 } from '@paypal/paypal-server-sdk';
 import PayPalClient from '.';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
+import {manager, type Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
 import {createPaymentContext, findPaymentContext} from '../common/orm';
@@ -15,19 +16,23 @@ export async function createPaypalOrder({
   email,
   currency = DEFAULT_CURRENCY_CODE,
   context,
+  tenantId,
   client,
 }: {
   amount: string | number;
   email: string;
   currency: string;
   context: any;
+  tenantId: Tenant['id'];
   client: Client;
 }) {
   if (!(amount && currency && email)) {
     throw new Error('Amount, currency and email is required');
   }
 
-  const ordersController = new OrdersController(PayPalClient());
+  const ordersController = new OrdersController(
+    PayPalClient(await manager.getConfig(tenantId)),
+  );
 
   const {id: contextId} = await createPaymentContext({
     context,
@@ -73,16 +78,20 @@ export async function createPaypalOrder({
 
 export async function findPaypalOrder({
   id,
+  tenantId,
   client,
 }: {
   id: string;
+  tenantId: Tenant['id'];
   client: Client;
 }): Promise<PaymentOrder> {
   if (!id) {
     throw new Error('Order id is required');
   }
 
-  const ordersController = new OrdersController(PayPalClient());
+  const ordersController = new OrdersController(
+    PayPalClient(await manager.getConfig(tenantId)),
+  );
 
   let result;
   try {
