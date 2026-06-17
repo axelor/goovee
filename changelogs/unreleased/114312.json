@@ -1,6 +1,0 @@
-{
-  "title": "Require the directory opt-in flag for any contact detail returned",
-  "type": "fix",
-  "scope": ["directory"],
-  "description": "Directory access masking now fails safe: a gated field (email, phone, website, address, or a contact's details) can only be returned when its directory opt-in flag is also selected, so it is always checked before display. Masking behaviour and what each page shows are unchanged."
-}

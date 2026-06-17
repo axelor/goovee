@@ -1,6 +1,0 @@
-{
-  "title": "Add AOS API key authentication for outbound webservice calls",
-  "type": "feature",
-  "description": "Outbound Next.js → AOS calls now support API key authentication (AOS 9 / AOP 8.0+). Set AOS_API_KEY in your environment to use the API-KEY header; falls back to Basic Auth when unset. Basic Auth is retained for incoming AOS webhook validation.",
-  "scope": ["core"]
-}

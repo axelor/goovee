@@ -1,6 +1,0 @@
-{
-  "title": "Implement HMAC-SHA256 signature verification for notification webhook",
-  "type": "security",
-  "description": "Replaced Basic authentication with HMAC-SHA256 signature-based authentication for notification webhooks. The shared secret is no longer transmitted over the network, improving security. Requires setting NOTIFICATION_WEBHOOK_SECRET environment variable and coordinating the secret with the Axelor backend.",
-  "scope": ["core"]
-}

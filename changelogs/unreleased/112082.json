@@ -1,6 +1,0 @@
-{
-  "title": "Add Zod input validation and improve type safety",
-  "type": "change",
-  "description": "Resources server actions now validate inputs with Zod schemas. Action signatures simplified: workspace objects replaced with workspaceURL string across ORM calls and components.",
-  "scope": ["resources"]
-}

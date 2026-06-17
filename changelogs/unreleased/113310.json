@@ -1,6 +1,0 @@
-{
-  "title": "Support base path for subpath deployment",
-  "type": "feature",
-  "scope": ["core"],
-  "description": "Goovee can now be deployed under any URL subpath (e.g. test.axelor.com/portal) by setting NEXT_PUBLIC_BASE_PATH at build time. All routing, API calls, payment callbacks, email links, push notifications, PWA manifest, service worker, and image/static asset URLs correctly include the configured base path. Authentication (better-auth) and client-side navigation are also base-path-aware. Note: when a base path is configured, three sets of external URLs must be updated to include the base path prefix — (1) workspace URLs stored in AOS (the portal looks up workspaces by matching on HOST+basePath, so a missing prefix causes all workspace lookups to fail); (2) OAuth callback URLs registered with identity providers (Google, Keycloak); (3) payment webhook URLs registered with payment providers."
-}

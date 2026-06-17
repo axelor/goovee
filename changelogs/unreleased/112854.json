@@ -1,6 +1,0 @@
-{
-  "title": "Strengthen type safety across resources ORM, actions, and UI components",
-  "type": "change",
-  "description": "Added shared types, tightened ORM and action signatures, and removed unsafe casts in the resources subapp.",
-  "scope": ["resources"]
-}

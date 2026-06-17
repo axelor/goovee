@@ -1,6 +1,0 @@
-{
-  "title": "Strengthen type safety across ORM, actions, and UI components in events",
-  "type": "change",
-  "description": "Events subapp ORM functions, server actions, utilities, and UI components are now fully typed.",
-  "scope": ["events"]
-}

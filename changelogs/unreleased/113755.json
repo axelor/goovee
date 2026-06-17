@@ -1,6 +1,0 @@
-{
-  "title": "Add pre-upload staged-upload mechanism",
-  "type": "feature",
-  "description": "Files can be uploaded before the record that will own them exists. Staging a file returns an opaque single-use token, redeemed when the owning record is saved to link the file server-side without trusting a client-supplied id. Uploads are scoped to the staging user and a declared purpose, size-limited per purpose (enforced while the body streams to disk), and abandoned uploads expire and are reaped.",
-  "scope": ["core"]
-}

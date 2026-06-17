@@ -1,6 +1,0 @@
-{
-  "title": "Upgrade @goovee/orm to 0.0.7",
-  "type": "change",
-  "scope": ["core"],
-  "description": "Upgraded @goovee/orm from 0.0.6 to 0.0.7, which fixes Date value handling in query filters. Invoice access-token expiry is now filtered directly in the query instead of in application code."
-}

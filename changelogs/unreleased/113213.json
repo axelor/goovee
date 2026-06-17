@@ -1,6 +1,0 @@
-{
-  "title": "Skip payment method dialog when only card payment is available",
-  "type": "fix",
-  "description": "When bank transfer is not configured for an app, clicking 'Pay with Stripe' no longer shows a single-option selection dialog. The card payment flow is now triggered directly.",
-  "scope": ["core"]
-}

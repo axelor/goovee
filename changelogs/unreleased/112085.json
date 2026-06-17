@@ -1,6 +1,0 @@
-{
-  "title": "Add Zod input validation and improve type safety in events",
-  "type": "change",
-  "description": "All events server actions now validate inputs with Zod schemas. ORM and action signatures simplified: workspace objects replaced with workspaceURL string, event objects replaced with eventId string. ORM-derived types replace any across events components and pages. Payment components are now generic over their action payload type so server action return types flow to onApprove without casts. formatNumber now returns string|null for nullable inputs.",
-  "scope": ["events", "core"]
-}

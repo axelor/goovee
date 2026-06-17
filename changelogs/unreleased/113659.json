@@ -1,6 +1,0 @@
-{
-  "title": "Add demo-data seeding script for directory company and contact profiles",
-  "type": "feature",
-  "description": "Adds a tenant-scoped script that lists a curated set of existing customer companies and their contacts in the directory. It updates only directory fields (listing flag, visibility toggles, company description, display name, and a demo LinkedIn link for contacts), skips any email with no matching or wrong-type partner, never creates records, and is idempotent and transactional. Run with `pnpm directory:seed` and tear down with `pnpm directory:reset`.",
-  "scope": ["directory"]
-}

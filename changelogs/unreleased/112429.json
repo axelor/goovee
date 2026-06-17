@@ -1,6 +1,0 @@
-{
-  "title": "Display hyperlink title as hover tooltip on portal home page",
-  "type": "feature",
-  "description": "Show the AOSPortalHyperlink.title field as a native tooltip on hover, and use it as the image alt for accessibility.",
-  "scope": ["core"]
-}

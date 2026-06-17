@@ -1,6 +1,0 @@
-{
-  "title": "Improve type safety in news subapp",
-  "type": "change",
-  "description": "Replaced any types with explicit TypeScript types across news components, pages, and utilities.",
-  "scope": ["news"]
-}

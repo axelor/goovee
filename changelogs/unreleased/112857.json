@@ -1,6 +1,0 @@
-{
-  "title": "Strengthen type safety and fix attrs LOB resolution in shop",
-  "type": "change",
-  "description": "Centralized shop types into common/types/index.ts, removed explicit any usages across the subapp, and fixed attrs not being awaited in findModelRecord and findModelRecords.",
-  "scope": ["shop"]
-}

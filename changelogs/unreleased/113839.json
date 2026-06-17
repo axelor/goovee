@@ -1,6 +1,0 @@
-{
-  "title": "Eliminate client-side fetch for public environment variables",
-  "type": "change",
-  "description": "GOOVEE_PUBLIC_* variables are now read server-side in the root layout and passed directly to the Environment provider as a prop. Removes the axios fetch to /api/config on every page load, the blank render gate while the request resolved, and the /api/config route itself. The runtime-injection guarantee is preserved: process.env is read at request time, not build time. The client-side environment store and getEnv() accessor were also removed: client code now reads public variables via useEnvironment() and server code reads process.env directly.",
-  "scope": ["core"]
-}

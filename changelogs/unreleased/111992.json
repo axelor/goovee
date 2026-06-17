@@ -1,6 +1,0 @@
-{
-  "title": "Upgrade Nodemailer to v8.0.6 with proper types and configuration handling",
-  "type": "change",
-  "scope": ["core"],
-  "description": "Upgraded Nodemailer from v6.9.16 to v8.0.6 with improved type safety, proper SMTPPool configuration support, and graceful email configuration handling. Removed all `any` types and implemented factory pattern for initialization."
-}

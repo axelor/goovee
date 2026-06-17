@@ -1,6 +1,0 @@
-{
-  "title": "Add Zod input validation and improve type safety in shop",
-  "type": "change",
-  "description": "Shop server actions now validate inputs with Zod schemas centralised in shop/common/validators.ts. findProduct and findAddress guard against invalid IDs. computeTotal cart parameter widened to a structural type.",
-  "scope": ["shop"]
-}

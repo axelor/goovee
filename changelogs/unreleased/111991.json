@@ -1,6 +1,0 @@
-{
-  "title": "Ensure data consistency with database transactions",
-  "type": "fix",
-  "description": "Multi-step write operations across ticketing, events, forum, invoices, resources, addresses, and authentication now run atomically — if any step fails, all changes are rolled back.",
-  "scope": ["core"]
-}

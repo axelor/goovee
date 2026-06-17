@@ -1,6 +1,0 @@
-{
-  "title": "Add React taint protection for sensitive credentials",
-  "type": "feature",
-  "scope": ["core"],
-  "description": "Implemented experimental React taint API to prevent accidental serialization of sensitive server-side secrets to Client Components."
-}

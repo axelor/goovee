@@ -1,6 +1,0 @@
-{
-  "title": "Serve translations from in-memory bundles with ETag revalidation",
-  "type": "change",
-  "description": "Server-side translations are now served from an in-memory per-tenant bundle cache instead of issuing one database query per translated key. Translation edits become visible within a minute plus a reload, instead of up to 24 hours, and unchanged translation bundles revalidate with a bodyless 304 response instead of a full re-download on every app boot.",
-  "scope": ["core"]
-}

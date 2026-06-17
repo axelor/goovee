@@ -1,6 +1,0 @@
-{
-  "title": "Add Zod input validation and improve type safety in invoices",
-  "type": "change",
-  "description": "Invoice server actions now validate inputs with Zod schemas centralised in invoices/common/validators.ts. Inline type definitions and manual presence checks replaced with typed schemas across all payment actions (PayPal, Stripe, Paybox, Up2Pay, HUB PISP).",
-  "scope": ["invoices"]
-}

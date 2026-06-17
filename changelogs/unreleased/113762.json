@@ -1,6 +1,0 @@
-{
-  "title": "Upload DMS resource files up front via staged uploads",
-  "type": "change",
-  "description": "Resource files now upload at pick time with per-file progress and retry, and are redeemed when the documents are created. The 20MB per-file cap is enforced server-side while streaming, and a validation failure no longer re-uploads the files. A file rejected at pick (e.g. over the size limit) shows an error toast.",
-  "scope": ["resources"]
-}

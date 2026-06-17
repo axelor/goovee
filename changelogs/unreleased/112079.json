@@ -1,6 +1,0 @@
-{
-  "title": "Validate ticket status belongs to project before update",
-  "type": "fix",
-  "description": "When updating a ticket's status (via closeTicket, cancelTicket, or direct status updates), the system now validates that the selected status actually belongs to the ticket's project. Previously, we would fetch the cancelled/done status globally without checking if it belonged to the project, unlike the UI which filters statuses by project. This ensures consistency and prevents setting invalid statuses.",
-  "scope": ["ticketing"]
-}

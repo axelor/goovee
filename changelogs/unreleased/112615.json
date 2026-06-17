@@ -1,6 +1,0 @@
-{
-  "title": "Allow partial date filters in ticket search",
-  "type": "feature",
-  "description": "Date filters now accept just 'from' or 'to' values. Previously both dates were required.",
-  "scope": ["ticketing"]
-}

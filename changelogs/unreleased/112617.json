@@ -1,6 +1,0 @@
-{
-  "title": "Strengthen type safety across invoices, orders, and quotations subapps",
-  "type": "change",
-  "description": "Remove any types across invoices, orders, and quotations. Add email guards in invoices, shop, and events payment actions to fail fast instead of passing undefined to payment providers.",
-  "scope": ["invoices", "orders", "quotations", "shop", "events"]
-}

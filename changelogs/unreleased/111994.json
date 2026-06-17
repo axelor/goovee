@@ -1,6 +1,0 @@
-{
-  "title": "Migrate auth operations to credentials plugin with rate limiting",
-  "type": "change",
-  "description": "Migrate email-based registration and password reset flows to use credentials plugin for centralized authentication with built-in rate limiting. This improves security by delegating credential management to a dedicated service and prevents brute-force attacks through automatic rate limiting.",
-  "scope": ["core"]
-}

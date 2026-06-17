@@ -1,6 +1,0 @@
-{
-  "title": "Optimize notification system with database-side filtering and type safety and input validation",
-  "type": "feature",
-  "description": "Replace N+1 query pattern in webhook notification handler with database-side filtering using relation joins. Single findSubscribers() call now handles recipient filtering at the database level for all notification types (events, news, resources, forum, ticketing) with privacy access control. Add Zod input validation and improve type safety throughout the notification system. Performance improvement: reduces query count from 1000+ to typically 1-2 per webhook in scenarios with many activated users but few subscribers.",
-  "scope": ["core"]
-}

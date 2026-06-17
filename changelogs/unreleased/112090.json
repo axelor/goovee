@@ -1,6 +1,0 @@
-{
-  "title": "Add Zod input validation to core payment SSE and website routes",
-  "type": "change",
-  "description": "Added Zod schema validation to payment SSE and website routes for improved type safety.",
-  "scope": ["core", "website"]
-}

@@ -1,6 +1,0 @@
-{
-  "title": "Migrate PayPal checkout to PayPal SDK v6 (react-paypal-js v9)",
-  "type": "change",
-  "description": "PayPal checkout now runs on the new PayPal JS SDK v6 via @paypal/react-paypal-js v9, replacing the legacy PayPalScriptProvider/PayPalButtons with PayPalProvider and PayPalOneTimePaymentButton.",
-  "scope": ["core"]
-}

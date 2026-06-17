@@ -1,6 +1,0 @@
-{
-  "title": "Add Zod input validation and improve type safety in forum",
-  "type": "change",
-  "description": "Forum server actions now validate inputs with Zod schemas centralised in forum/common/validators.ts. Inline type definitions replaced with typed schemas and manual presence checks removed.",
-  "scope": ["forum"]
-}

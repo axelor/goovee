@@ -1,6 +1,0 @@
-{
-  "title": "Fix payment context marked as processed even when order creation fails",
-  "type": "fix",
-  "description": "Payment context is now only marked as processed after order creation succeeds. If order creation fails, the context remains unprocessed, allowing the user to retry without data inconsistency.",
-  "scope": ["shop"]
-}

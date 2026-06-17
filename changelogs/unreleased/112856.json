@@ -1,6 +1,0 @@
-{
-  "title": "Strengthen type safety across forum subapp",
-  "type": "change",
-  "description": "Remove any types across forum components, ORM functions, and server actions. Add proper type annotations for posts, groups, attachments, and pagination throughout the forum subapp.",
-  "scope": ["forum"]
-}
