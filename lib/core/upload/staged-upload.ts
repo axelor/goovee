@@ -8,6 +8,17 @@ import {
   COMMENT_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE,
 } from '@/lib/core/comments/constants';
+import {getStoragePath} from '@/storage/index';
+import type {ID} from '@/types';
+import {
+  DEFAULT_RECORD_RETENTION_HOURS,
+  DEFAULT_TTL_MS,
+  HOUR_MS,
+  REAP_BATCH_LIMIT,
+} from './constants';
+import {createMetaFile} from './file';
+
+// ---- LOCAL IMPORTS ---- //
 import {
   FORUM_ATTACHMENT_DOC_MIMES,
   FORUM_POST_ATTACHMENT_PURPOSE,
@@ -17,16 +28,10 @@ import {
   PARTNER_PICTURE_MAX_FILE_SIZE,
   PARTNER_PICTURE_PURPOSE,
 } from '@/app/[tenant]/[workspace]/account/common/constants';
-import {getStoragePath} from '@/storage/index';
-import type {ID} from '@/types';
-
 import {
-  DEFAULT_RECORD_RETENTION_HOURS,
-  DEFAULT_TTL_MS,
-  HOUR_MS,
-  REAP_BATCH_LIMIT,
-} from './constants';
-import {createMetaFile} from './file';
+  MAX_FILE_SIZE as RESOURCE_MAX_FILE_SIZE,
+  RESOURCE_DMS_UPLOAD_PURPOSE,
+} from '@/subapps/resources/common/constants';
 
 /**
  * Generic, app-agnostic pre-upload mechanism. A file is *staged* before the
@@ -99,6 +104,13 @@ export const UPLOAD_PURPOSES = {
     file: z.file().refine(f => f.type.startsWith('image/'), {
       error: 'Only images are allowed',
     }),
+  },
+  /* DMS resource files — staged on pick and redeemed when the aOSDMSFile rows
+   * are created. Any file type is accepted; the size cap is enforced
+   * server-side while streaming. */
+  [RESOURCE_DMS_UPLOAD_PURPOSE]: {
+    maxBytes: RESOURCE_MAX_FILE_SIZE,
+    ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
   },
 } satisfies Record<string, UploadPolicy>;
 
