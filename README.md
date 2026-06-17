@@ -17,6 +17,19 @@ Goovee is a modern web portal built with Next.js for clients and partners, provi
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
+## Compatibility Matrix
+
+| Goovee Version      | Compatible Axelor-Portal                                   |
+| ------------------- | ---------------------------------------------------------- |
+| **v1.0.0 – v1.2.0** | 8.0.0 – 8.0.2, 8.3.0, 8.4.0, 8.5.0 – 8.5.1                 |
+| **v1.3.0**          | 8.0.0 – 8.0.2, 8.3.0 – 8.3.2, 8.4.0 – 8.4.2, 8.5.0 – 8.5.3 |
+| **v1.4.0 – v1.4.1** | 8.3.3 – 8.3.6, 8.4.3 – 8.4.6, 8.5.4 – 8.5.6                |
+| **v1.5.0 – v1.5.5** | 8.3.6, 8.4.6, 8.5.7+                                       |
+| **v1.6.0 – v1.6.2** | 8.5.11+                                                    |
+| **v1.6.3 – v1.6.5** | 8.5.13+                                                    |
+| **v1.7.0 – v1.7.2** | 8.5.17+                                                    |
+| **v1.8.0**          | 8.5.19+                                                    |
+
 ## Usage
 
 Here is the project structure:
