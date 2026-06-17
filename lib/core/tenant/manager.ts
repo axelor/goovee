@@ -48,7 +48,6 @@ function getAOSAuth() {
   return {username, password, apiKey};
 }
 
-
 export enum TenancyType {
   single = 'single',
   multi = 'multi',
