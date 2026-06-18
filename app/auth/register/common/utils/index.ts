@@ -1,6 +1,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
+import {getTenantConfigSync} from '@/tenant/config-provider';
 import {findWorkspaces} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {getPortalRoot} from '@/utils/workspace';
@@ -19,8 +20,10 @@ export function extractSearchParams({
   const tenantId =
     searchParams?.tenant && decodeURIComponent(searchParams.tenant);
 
+  const config = tenantId ? getTenantConfigSync(tenantId) : null;
+
   const workspaceURL = `${getPortalRoot(
-    getPublicEnvironment().GOOVEE_PUBLIC_HOST,
+    getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
   )}${workspaceURI || ''}`;
 
   return {

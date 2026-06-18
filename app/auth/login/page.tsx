@@ -2,7 +2,7 @@ import {notFound, redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {getPublicEnvironment} from '@/environment';
+import {Environment, getPublicEnvironment} from '@/environment';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -89,15 +89,22 @@ export default async function Page(props: {
 
   const showKeycloakOauth = Boolean(tenantOauth?.keycloak);
 
+  /* Outside the [tenant] segment, so the tenant's browser variables (host,
+   * Keycloak button label/image consumed by Content) come from here, keyed by
+   * the ?tenant= param. No tenant ⇒ an empty set, by design (no fallback). */
   return (
-    <Content
-      canRegister={canRegister}
-      showGoogleOauth={showGoogleOauth}
-      showKeycloakOauth={showKeycloakOauth}
-      googleProviderId={tenantOauth?.google ? `google-${tenantId}` : undefined}
-      keycloakProviderId={
-        tenantOauth?.keycloak ? `keycloak-${tenantId}` : undefined
-      }
-    />
+    <Environment value={tenantConfig?.publicEnv ?? {}}>
+      <Content
+        canRegister={canRegister}
+        showGoogleOauth={showGoogleOauth}
+        showKeycloakOauth={showKeycloakOauth}
+        googleProviderId={
+          tenantOauth?.google ? `google-${tenantId}` : undefined
+        }
+        keycloakProviderId={
+          tenantOauth?.keycloak ? `keycloak-${tenantId}` : undefined
+        }
+      />
+    </Environment>
   );
 }

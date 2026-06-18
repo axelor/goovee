@@ -32,23 +32,6 @@
         "betterAuthUrl": {
           "type": "string",
           "description": "Better Auth base URL (the BETTER_AUTH_URL equivalent)."
-        },
-        "publicEnv": {
-          "type": "object",
-          "description": "Browser-exposed variables for tenant-less pages (the bare / and /auth pages without a tenant).",
-          "additionalProperties": false,
-          "properties": {
-            "GOOVEE_PUBLIC_HOST": {"type": "string"},
-            "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": {"type": "string"},
-            "GOOVEE_PUBLIC_LINKEDIN_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_TWITTER_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_INSTAGRAM_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_WHATSAPP_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_MATTERMOST_HOST": {"type": "string"},
-            "GOOVEE_PUBLIC_VAPID_PUBLIC_KEY": {"type": "string"},
-            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL": {"type": "string"},
-            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE": {"type": "string"}
-          }
         }
       }
     },

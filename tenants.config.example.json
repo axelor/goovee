@@ -2,10 +2,7 @@
   "$schema": "./tenants.config.schema.json",
   "$global": {
     "betterAuthSecret": "<better-auth-secret>",
-    "betterAuthUrl": "https://portal.example.com",
-    "publicEnv": {
-      "GOOVEE_PUBLIC_LINKEDIN_URL": "https://www.linkedin.com/company/example"
-    }
+    "betterAuthUrl": "https://portal.example.com"
   },
   "acme": {
     "db": {

@@ -209,7 +209,6 @@ function buildGlobal(): GlobalConfig {
   return {
     betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
     betterAuthUrl: process.env.BETTER_AUTH_URL || undefined,
-    publicEnv: publicEnvFromEnv(),
   };
 }
 

@@ -45,9 +45,9 @@ export type TenantConfig = {
     };
     webhookSecret?: string;
   };
-  /* Every section below is optional: a missing section falls back to the
-   * process-level env vars, so partial configs and single-tenant
-   * deployments keep working unchanged. */
+  /* Every section below is optional. A section a tenant omits is simply off for
+   * that tenant — nothing is inherited from the env or another tenant (no
+   * fallback); every value a tenant uses lives in its own entry. */
   payments?: {
     paypal?: {
       clientId: string;
@@ -118,10 +118,9 @@ export type TenantConfig = {
   };
   /* Web-push signing identity. The browser-side public key lives in
    * publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY so subscribe and send share one
-   * source. A browser holds one push subscription per service-worker
-   * registration, so per-tenant key pairs only take effect once tenants run
-   * on their own domains; on a shared origin all tenants should share the
-   * deployment key pair. */
+   * source. The service worker registers per tenant (scope /<tenant>/), so each
+   * tenant holds its own push subscription even on a shared origin — per-tenant
+   * key pairs take effect without needing per-tenant domains. */
   webPush?: {
     privateKey: string;
     subject: string;
@@ -144,7 +143,4 @@ export type TenantClient = GooveeClient;
 export type GlobalConfig = {
   betterAuthSecret: string;
   betterAuthUrl?: string;
-  /* Browser-exposed variables for tenant-less pages (bare `/`, `/auth` without
-   * a tenant). Same key list as a tenant's publicEnv. */
-  publicEnv: PublicEnv;
 };

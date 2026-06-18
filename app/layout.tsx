@@ -1,21 +1,15 @@
-// GOOVEE_PUBLIC_* vars are read from process.env at request time (not build time).
-// force-dynamic ensures this layout is never statically rendered and cached at build,
-// which would freeze env values and break runtime injection across environments.
+/* The app resolves the tenant per request (path today, host later), so nothing
+ * is statically rendered and frozen at build. The per-tenant theme and browser
+ * variables now live in app/[tenant]/layout.tsx, not here. */
 export const dynamic = 'force-dynamic';
 
 import {Poppins as FontSans} from 'next/font/google';
-import {headers} from 'next/headers';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {Environment, getPublicEnvironment} from '@/environment';
-import {findTheme} from '@/orm/theme';
-import {tenantConfigProvider} from '@/tenant/config-provider';
-import {TENANT_HEADER} from '@/proxy';
 import {Toaster} from '@/ui/components/toaster';
 
 // ---- LOCAL IMPORTS ---- //
-import Theme from './theme';
 import Locale from './locale';
 import {
   APP_DESCRIPTION,
@@ -72,34 +66,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  const tenantConfig = tenantId
-    ? await tenantConfigProvider.get(tenantId)
-    : null;
-
-  const [theme, env] = await Promise.all([
-    findTheme(),
-    getPublicEnvironment(tenantConfig),
-  ]);
-
+  /* The root shell is tenant-agnostic: per-tenant theme and browser variables
+   * (Environment) are injected by app/[tenant]/layout.tsx, and the tenant-less
+   * auth pages set up their own (app/auth/layout.tsx + per-page Environment).
+   * Locale degrades to a same-origin relative locale fetch when no host is set. */
   return (
-    <Theme theme={theme}>
-      <html lang="en">
-        <head>
-          <meta name="mobile-web-app-capable" content="yes" />
-        </head>
-        <body className={fontSans.className}>
-          <Environment value={env}>
-            <Locale>{children}</Locale>
-            <Toaster />
-          </Environment>
-        </body>
-      </html>
-    </Theme>
+    <html lang="en">
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
+      <body className={fontSans.className}>
+        <Locale>{children}</Locale>
+        <Toaster />
+      </body>
+    </html>
   );
 }

@@ -37,7 +37,6 @@ type TenantConfigInput = Omit<TenantConfig, 'publicEnv'> & {
 type GlobalConfigInput = {
   betterAuthSecret?: string;
   betterAuthUrl?: string;
-  publicEnv?: PublicEnv;
 };
 
 function validatePublicEnvKeys(
@@ -89,12 +88,9 @@ function normalizeGlobalConfig(input: GlobalConfigInput): GlobalConfig {
     throw new Error('"$global".betterAuthSecret is required');
   }
 
-  validatePublicEnvKeys('"$global"', input.publicEnv);
-
   return {
     betterAuthSecret: input.betterAuthSecret,
     betterAuthUrl: input.betterAuthUrl,
-    publicEnv: input.publicEnv ?? {},
   };
 }
 
@@ -179,7 +175,7 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
        * this throws instead. */
       if (process.env.NEXT_PHASE === 'phase-production-build') {
         return {
-          global: {betterAuthSecret: 'build-time-placeholder', publicEnv: {}},
+          global: {betterAuthSecret: 'build-time-placeholder'},
           tenants: {},
         };
       }
@@ -260,10 +256,4 @@ export function getTenantConfigSync(id: string): TenantConfig | null {
 
 export function getGlobalConfigSync(): GlobalConfig {
   return provider.getGlobalSync();
-}
-
-/* Browser-exposed variables for contexts with no tenant (the root page, auth
- * pages without a tenant param) — the "$global" publicEnv. */
-export function getGlobalPublicEnv(): PublicEnv {
-  return provider.getGlobalSync().publicEnv;
 }

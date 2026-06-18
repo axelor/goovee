@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
+import {Environment} from '@/environment';
 import {findWorkspaceForRegistration} from '@/orm/workspace';
 import {manager} from '@/tenant';
 
@@ -38,12 +39,16 @@ export default async function Page(props: {
     return notFound();
   }
 
+  /* Outside the [tenant] segment: provide the tenant's browser variables (the
+   * host Form reads) here, sourced from the resolved tenant config. */
   return (
-    <Form
-      workspace={workspace}
-      googleProviderId={
-        tenant.config.oauth?.google ? `google-${tenantId}` : undefined
-      }
-    />
+    <Environment value={tenant.config.publicEnv}>
+      <Form
+        workspace={workspace}
+        googleProviderId={
+          tenant.config.oauth?.google ? `google-${tenantId}` : undefined
+        }
+      />
+    </Environment>
   );
 }
