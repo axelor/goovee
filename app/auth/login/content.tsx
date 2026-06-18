@@ -108,7 +108,7 @@ export default function Content({
   };
 
   const loginWithGoogle = async () => {
-    if (!tenantId) {
+    if (!tenantId || !googleProviderId) {
       toast({
         title: i18n.t('TenantId is required'),
         variant: 'destructive',
@@ -116,24 +116,10 @@ export default function Content({
       return;
     }
 
-    /* Tenants with their own Google OAuth application sign in through the
-     * generic provider registered under google-<tenantId>. */
-    if (googleProviderId) {
-      await authClient.signIn.oauth2({
-        providerId: googleProviderId,
-        callbackURL: redirection,
-        errorCallbackURL: withBasePath(
-          `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
-        ),
-        additionalData: {
-          tenantId,
-        },
-      });
-      return;
-    }
-
-    await authClient.signIn.social({
-      provider: 'google',
+    /* OAuth is per-tenant: sign in through the generic provider registered
+     * under google-<tenantId>. */
+    await authClient.signIn.oauth2({
+      providerId: googleProviderId,
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
@@ -145,7 +131,7 @@ export default function Content({
   };
 
   const loginWithKeycloak = async () => {
-    if (!tenantId) {
+    if (!tenantId || !keycloakProviderId) {
       toast({
         title: i18n.t('TenantId is required'),
         variant: 'destructive',
@@ -153,7 +139,7 @@ export default function Content({
       return;
     }
     await authClient.signIn.oauth2({
-      providerId: keycloakProviderId ?? 'keycloak',
+      providerId: keycloakProviderId,
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,

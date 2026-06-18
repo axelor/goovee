@@ -11,7 +11,6 @@ import {
 import {APIError, getOAuthState} from 'better-auth/api';
 import {nextCookies} from 'better-auth/next-js';
 import {customSession} from 'better-auth/plugins';
-import google from './core/auth/(ee)/google';
 import oauthProviders from './core/auth/(ee)/oauth-providers';
 import credentials from './core/auth/credentials';
 import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
@@ -57,13 +56,10 @@ const options = {
             }
             const {client, config} = tenant;
 
-            /* Per-tenant OAuth applications are registered under generic
-             * provider ids "<provider>-<tenantId>" — treat them like their
-             * global counterparts. */
-            const isGoogle =
-              ctx.params?.id === 'google' ||
-              ctx.params?.providerId?.startsWith('google-');
-            const isKeycloak = ctx.params?.providerId?.startsWith('keycloak');
+            /* OAuth applications are per-tenant, registered as generic
+             * providers under "<provider>-<tenantId>". */
+            const isGoogle = ctx.params?.providerId?.startsWith('google-');
+            const isKeycloak = ctx.params?.providerId?.startsWith('keycloak-');
 
             let partner = await findGooveeUserByEmail(user.email, client);
             if (!partner) {
@@ -228,7 +224,6 @@ const options = {
     },
   },
   plugins: [credentials, ...(oauthProviders ? [oauthProviders] : [])],
-  socialProviders: {google},
 } satisfies BetterAuthOptions;
 
 /* Deployment-wide auth settings come from the document's "$global" section

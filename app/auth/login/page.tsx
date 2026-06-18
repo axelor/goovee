@@ -80,17 +80,14 @@ export default async function Page(props: {
     }
   }
 
-  /* A tenant with its own OAuth application signs in through the generic
-   * provider registered under <provider>-<tenantId>; otherwise the global
-   * env-configured provider is offered. */
+  /* OAuth is per-tenant: a tenant offers a provider only when its own config
+   * declares it (registered as the generic provider <provider>-<tenantId>).
+   * There is no global env-configured app. */
   const tenantOauth = tenantConfig?.oauth;
 
-  const showGoogleOauth =
-    Boolean(tenantOauth?.google) || process.env.SHOW_GOOGLE_OAUTH === 'true';
+  const showGoogleOauth = Boolean(tenantOauth?.google);
 
-  const showKeycloakOauth =
-    Boolean(tenantOauth?.keycloak) ||
-    process.env.SHOW_KEYCLOAK_OAUTH === 'true';
+  const showKeycloakOauth = Boolean(tenantOauth?.keycloak);
 
   return (
     <Content

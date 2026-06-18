@@ -1,5 +1,4 @@
-import {experimental_taintUniqueValue} from 'react';
-import {genericOAuth, keycloak as keycloakProvider} from 'better-auth/plugins';
+import {genericOAuth} from 'better-auth/plugins';
 import type {GenericOAuthConfig} from 'better-auth/plugins';
 
 import {listTenantConfigsSync} from '@/tenant/config-provider';
@@ -9,24 +8,6 @@ const GOOGLE_DISCOVERY_URL =
 
 function buildConfigs(): GenericOAuthConfig[] {
   const configs: GenericOAuthConfig[] = [];
-
-  if (process.env.SHOW_KEYCLOAK_OAUTH === 'true') {
-    const clientSecret = process.env.KEYCLOAK_SECRET as string;
-
-    experimental_taintUniqueValue(
-      'Keycloak Client Secret is an authentication secret. Do not pass to Client Components.',
-      process,
-      clientSecret,
-    );
-
-    configs.push(
-      keycloakProvider({
-        clientId: process.env.KEYCLOAK_ID as string,
-        clientSecret,
-        issuer: process.env.KEYCLOAK_ISSUER as string,
-      }),
-    );
-  }
 
   /* Tenants bring their own OAuth applications: each is registered under the
    * provider id <provider>-<tenantId>, and the matching redirect URI
