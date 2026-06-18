@@ -22,7 +22,6 @@ import {
   APP_TEMPLATE_TITLE,
   DEFAULT_APP_TEMPLATE_TITLE,
 } from '@/constants';
-import {SerwistProvider} from '@/pwa/serwist';
 import {withBasePath} from '@/lib/core/path/base-path';
 import './globals.css';
 import 'swiper/css';
@@ -96,13 +95,7 @@ export default async function RootLayout({
         </head>
         <body className={fontSans.className}>
           <Environment value={env}>
-            <Locale>
-              <SerwistProvider
-                swUrl={withBasePath('/sw.js')}
-                options={{scope: withBasePath('/')}}>
-                {children}
-              </SerwistProvider>
-            </Locale>
+            <Locale>{children}</Locale>
             <Toaster />
           </Environment>
         </body>
