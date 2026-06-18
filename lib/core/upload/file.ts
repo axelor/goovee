@@ -6,7 +6,6 @@ import type {ReadableStream as WebReadableStream} from 'stream/web';
 
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
-import {getStoragePath} from '@/storage/index';
 import {getFileSizeText} from '@/utils/files';
 
 /*
@@ -46,7 +45,11 @@ class CapExceededError extends Error {}
  */
 export async function writeToStorage(
   stream: ReadableStream<Uint8Array>,
-  {fileName, maxBytes}: {fileName: string; maxBytes: number},
+  {
+    fileName,
+    maxBytes,
+    storagePath,
+  }: {fileName: string; maxBytes: number; storagePath: string},
 ): Promise<WrittenFile | null> {
   /*
    * Sanitize the on-disk name: strip any directory component (path-traversal
@@ -55,7 +58,7 @@ export async function writeToStorage(
    */
   const safeName = path.basename(fileName).replace(/[^\w.-]+/g, '_') || 'file';
   const timestampFilename = `${Date.now()}-${safeName}`;
-  const absolute = path.resolve(getStoragePath(), timestampFilename);
+  const absolute = path.resolve(storagePath, timestampFilename);
 
   let size = 0;
   try {

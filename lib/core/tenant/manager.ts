@@ -2,6 +2,7 @@
 
 import {DEFAULT_TENANT} from '@/constants';
 import {createClient} from '@/goovee/.generated/client';
+import {ensureStorageDir} from '@/storage/index';
 import {LRUCache} from './lru';
 import {tenantConfigProvider} from './config-provider';
 import type {Tenant, TenantConfig} from './types';
@@ -43,6 +44,10 @@ async function connectTenant(
   await client.$sync();
   // Create unaccent extension for PostgreSQL if it doesn't exist
   await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
+
+  /* Storage is per-tenant config now; make sure the directory exists before any
+   * upload writes to it (replaces the old getStoragePath side effect). */
+  ensureStorageDir(config.aos.storage);
 
   return {id, config, client};
 }

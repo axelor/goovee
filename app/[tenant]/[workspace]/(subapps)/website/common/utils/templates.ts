@@ -373,7 +373,7 @@ export async function resetFields(client: GooveeClient) {
   });
 }
 
-export async function seedContents(client: GooveeClient) {
+export async function seedContents(client: GooveeClient, storagePath: string) {
   const _schemas = metas.map(demo => demo.schema);
   if (!validateSchemas(_schemas)) {
     throw new Error('\x1b[31m✖ Invalid schema.\x1b[0m');
@@ -386,6 +386,7 @@ export async function seedContents(client: GooveeClient) {
         schema: formatSchema(schema),
         demos: demos,
         fileCache,
+        storagePath,
       });
     });
   });
