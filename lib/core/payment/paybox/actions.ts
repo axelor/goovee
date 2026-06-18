@@ -49,6 +49,7 @@ export async function createPayboxOrder({
       currency,
       url,
       config: await manager.getConfig(tenantId),
+      tenant: tenantId,
     }),
   };
 }

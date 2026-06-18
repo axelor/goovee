@@ -105,6 +105,7 @@ function buildEnvPayments(): NonNullable<TenantConfig['payments']> {
       identifiant: process.env.UP2PAY_IDENTIFIANT,
       secret: process.env.UP2PAY_SECRET,
       paybox: process.env.UP2PAY_PAYBOX,
+      legacyForwardUrl: process.env.UP2PAY_LEGACY_FORWARD_URL || undefined,
     };
   }
 

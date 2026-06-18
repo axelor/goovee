@@ -19,6 +19,7 @@ export function getPaymentURL({
   currency,
   url,
   config,
+  tenant,
 }: {
   amount: string | number;
   email: string;
@@ -29,6 +30,7 @@ export function getPaymentURL({
     failure: string;
   };
   config?: TenantConfig | null;
+  tenant: string;
 }) {
   const paybox = config?.payments?.paybox;
 
@@ -52,7 +54,7 @@ export function getPaymentURL({
     PBX_ATTENTE: url?.success,
     PBX_REFUSE: url?.failure,
     PBX_ANNULE: url?.failure,
-    PBX_REPONDRE_A: `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath('/api/payment/paybox/validate')}`,
+    PBX_REPONDRE_A: `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath(`/api/tenant/${tenant}/payment/paybox/validate`)}`,
     PBX_RETOUR: 'reference:R;error:E;transaction:S;sign:K',
     PBX_TIME: new Date().toISOString(),
   };

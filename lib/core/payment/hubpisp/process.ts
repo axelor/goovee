@@ -51,6 +51,7 @@ export async function applyTransactionStatus({
         client,
       });
       notifyPaymentUpdate(
+        tenantId,
         paymentContext.data.source,
         paymentContext.data.id,
         paymentContext.id,
@@ -70,6 +71,7 @@ export async function applyTransactionStatus({
         client,
       });
       notifyPaymentUpdate(
+        tenantId,
         paymentContext.data.source,
         paymentContext.data.id,
         paymentContext.id,
@@ -170,5 +172,5 @@ export async function processAcscPayment({
     client,
   });
 
-  notifyPaymentUpdate(source, entityId, paymentContext.id);
+  notifyPaymentUpdate(tenantId, source, entityId, paymentContext.id);
 }

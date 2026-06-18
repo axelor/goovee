@@ -5,7 +5,6 @@ import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
-import {DEFAULT_TENANT} from '@/constants';
 import {getStripe, getStripeWebhookSecret} from '@/payment/stripe';
 import {tenantConfigProvider} from '@/tenant/config-provider';
 import {
@@ -58,26 +57,21 @@ async function handleWebhookPaymentFailure({
   });
 }
 
-export async function POST(req: Request) {
+export async function POST(
+  req: Request,
+  props: {params: Promise<{tenant: string}>},
+) {
+  const {tenant: tenantId} = await props.params;
+
   const body = await req.text();
   const $headers = await headers();
   const signature = $headers.get('Stripe-Signature');
 
-  /* The tenant id is read from the UNVERIFIED payload solely to select the
-   * tenant's webhook secret — the event is trusted only after constructEvent
-   * verifies the signature against that secret. Events without the metadata
-   * (other event types, intents created before the metadata existed) verify
-   * against the default tenant's secret, as they always did. */
-  let claimedTenantId: string | undefined;
-  try {
-    claimedTenantId = JSON.parse(body)?.data?.object?.metadata?.tenant_id;
-  } catch {
-    return new NextResponse('Invalid payload', {status: 400});
-  }
-
-  const tenantConfig = await tenantConfigProvider.get(
-    claimedTenantId ?? DEFAULT_TENANT,
-  );
+  /* The tenant comes from the path (the webhook URL is registered per tenant),
+   * so its webhook secret is selected without reading the untrusted payload.
+   * The event is still trusted only after constructEvent verifies the signature
+   * against that secret. */
+  const tenantConfig = await tenantConfigProvider.get(tenantId);
 
   const webhookSecret = getStripeWebhookSecret(tenantConfig);
 
@@ -123,9 +117,8 @@ export async function POST(req: Request) {
         });
 
         const contextId = paymentIntent.metadata.context_id;
-        const tenantId = paymentIntent.metadata.tenant_id;
 
-        if (!contextId || !tenantId) {
+        if (!contextId) {
           console.error('Missing payment metadata', {
             eventId: event.id,
             metadata: paymentIntent.metadata,
@@ -277,7 +270,7 @@ export async function POST(req: Request) {
               });
             }
 
-            notifyPaymentUpdate(source, sourceId, paymentContext.id);
+            notifyPaymentUpdate(tenantId, source, sourceId, paymentContext.id);
             if (paymentContext.payer) {
               after(() =>
                 notifyInvoicePaymentSuccess({
@@ -308,9 +301,8 @@ export async function POST(req: Request) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
         const contextId = paymentIntent.metadata.context_id;
-        const tenantId = paymentIntent.metadata.tenant_id;
 
-        if (!contextId || !tenantId) {
+        if (!contextId) {
           console.error('[PARTIAL_PAYMENT] Missing payment metadata', {
             eventId: event.id,
             metadata: paymentIntent.metadata,
@@ -353,6 +345,7 @@ export async function POST(req: Request) {
 
         try {
           notifyPaymentUpdate(
+            tenantId,
             source,
             sourceId,
             paymentContext.id,

@@ -73,6 +73,9 @@ export type TenantConfig = {
       identifiant: string;
       secret: string;
       paybox: string;
+      /* Where to forward Up2Pay IPNs this tenant cannot attribute to a Goovee
+       * payment (legacy-ERP invoices, unknown context). Omit to not forward. */
+      legacyForwardUrl?: string;
     };
     hubpisp?: {
       tokenUrl: string;

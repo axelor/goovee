@@ -24,20 +24,17 @@ import {manager} from '@/tenant';
 import {HubPispApiError} from '@/lib/core/payment/hubpisp/utils';
 
 export async function POST(
-  request: Request,
-  {params}: {params: Promise<{resourceId: string}>},
+  _request: Request,
+  {params}: {params: Promise<{tenant: string; resourceId: string}>},
 ) {
-  const {resourceId} = await params;
+  const {tenant: tenantId, resourceId} = await params;
 
-  /* Tenants with their own Hub PISP account register the webhook URL with a
-   * ?tenant=<id> query so their credentials can be used before the tenant is
-   * known from the link data; without it the env-configured account is used. */
-  const tenantHint =
-    new URL(request.url).searchParams.get('tenant') ?? undefined;
-
+  /* The tenant is authoritative from the path (the webhook URL is registered
+   * per tenant), so its Hub PISP credentials drive the first fetch, before the
+   * tenant could otherwise be known from the link data. */
   let linkData: PaymentLinkStatusResult;
   try {
-    linkData = await fetchPaymentLinkStatus(resourceId, tenantHint);
+    linkData = await fetchPaymentLinkStatus(resourceId, tenantId);
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {
       console.warn('[HUBPISP][WEBHOOK] Payment link not yet available', {
@@ -69,10 +66,12 @@ export async function POST(
     return new NextResponse('Bad Request', {status: 400});
   }
 
+  /* Only the context id is taken from endToEnd now; the tenant comes from the
+   * authoritative path param. A mismatch surfaces as "context not found" when
+   * the id is looked up in the path tenant's database. */
   const contextId = endToEnd.slice(0, separatorIndex);
-  const tenantId = endToEnd.slice(separatorIndex + 1);
 
-  if (!contextId || !tenantId) {
+  if (!contextId) {
     console.error('[HUBPISP][WEBHOOK] Failed to parse endToEnd', {endToEnd});
     return new NextResponse('Bad Request', {status: 400});
   }
