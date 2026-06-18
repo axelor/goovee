@@ -126,10 +126,25 @@ export type TenantConfig = {
     privateKey: string;
     subject: string;
   };
-  /* Browser-exposed variables for this tenant. The provider merges tenant
-   * overrides over the env-derived values at load time, so this is always
-   * complete — consumers never read process.env. */
+  /* Per-tenant operational toggles. Optional — each falls back to a built-in
+   * code default when omitted. A fixed code default is not a cross-tenant
+   * "fallback": no value is inherited from another tenant or from the env. */
+  includeLanguage?: boolean;
+  uploadRecordRetentionHours?: number;
+  /* Browser-exposed variables for this tenant. Declared in full in the tenant's
+   * document entry (no env fill) — consumers never read process.env. */
   publicEnv: PublicEnv;
 };
 
 export type TenantClient = GooveeClient;
+
+/* Deployment-wide settings, bound to the single origin / process and therefore
+ * shared by every tenant. They live in the document's reserved "$global"
+ * section, never inside a tenant entry. */
+export type GlobalConfig = {
+  betterAuthSecret: string;
+  betterAuthUrl?: string;
+  /* Browser-exposed variables for tenant-less pages (bare `/`, `/auth` without
+   * a tenant). Same key list as a tenant's publicEnv. */
+  publicEnv: PublicEnv;
+};

@@ -3,9 +3,13 @@
 import fs from 'fs';
 import {experimental_taintUniqueValue} from 'react';
 
-import {DEFAULT_TENANT} from '@/constants';
-import {getStoragePath} from '@/storage/index';
-import {PUBLIC_ENV_KEYS, type PublicEnv, type TenantConfig} from './types';
+import {
+  PUBLIC_ENV_KEYS,
+  type GlobalConfig,
+  type PublicEnv,
+  type PublicEnvKey,
+  type TenantConfig,
+} from './types';
 
 /* The taint API only exists in React's `react-server` build that Next.js
  * loads in Server Components / Route Handlers. CLI scripts (seeders,
@@ -23,206 +27,30 @@ export interface TenantConfigProvider {
   list(): Promise<string[]>;
 }
 
-/* Config entries may omit aos.storage, publicEnv and the settings sections;
- * the provider fills them from the process env at load time so consumers
- * only ever read TenantConfig. */
-type TenantConfigInput = Omit<TenantConfig, 'aos' | 'publicEnv'> & {
-  aos: Omit<TenantConfig['aos'], 'storage'> & {storage?: string};
+/* Document shapes. A tenant entry is a full TenantConfig with publicEnv
+ * optional (defaults to {}); nothing else is filled in — there is no env
+ * fallback, so every value a tenant uses must be present in its entry. */
+type TenantConfigInput = Omit<TenantConfig, 'publicEnv'> & {
   publicEnv?: PublicEnv;
 };
 
-function getAOSAuth() {
-  const apiKey = process.env.AOS_API_KEY;
-  const username = process.env.BASIC_AUTH_USERNAME;
-  const password = process.env.BASIC_AUTH_PASSWORD;
-
-  if (!apiKey && (!username || !password)) {
-    throw new Error(
-      'AOS auth not configured: set AOS_API_KEY or BASIC_AUTH_USERNAME/BASIC_AUTH_PASSWORD',
-    );
-  }
-
-  return {username, password, apiKey};
-}
-
-function buildEnvPublicEnv(): PublicEnv {
-  const publicEnv: PublicEnv = {};
-  for (const key of PUBLIC_ENV_KEYS) {
-    const value = process.env[key];
-    if (value) {
-      publicEnv[key] = value;
-    }
-  }
-  return publicEnv;
-}
-
-function buildEnvPayments(): NonNullable<TenantConfig['payments']> {
-  const payments: NonNullable<TenantConfig['payments']> = {};
-
-  if (process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET) {
-    payments.paypal = {
-      clientId: process.env.PAYPAL_CLIENT_ID,
-      clientSecret: process.env.PAYPAL_CLIENT_SECRET,
-      live: process.env.PAYPAL_LIVE === 'true',
-    };
-  }
-
-  if (process.env.STRIPE_CLIENT_SECRET) {
-    payments.stripe = {
-      clientSecret: process.env.STRIPE_CLIENT_SECRET,
-      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || undefined,
-    };
-  }
-
-  if (
-    process.env.PBX_SITE &&
-    process.env.PBX_RANG &&
-    process.env.PBX_IDENTIFIANT &&
-    process.env.PBX_SECRET &&
-    process.env.PBX_PAYBOX
-  ) {
-    payments.paybox = {
-      site: process.env.PBX_SITE,
-      rang: process.env.PBX_RANG,
-      identifiant: process.env.PBX_IDENTIFIANT,
-      secret: process.env.PBX_SECRET,
-      paybox: process.env.PBX_PAYBOX,
-      backup1: process.env.PBX_BACKUP1 || undefined,
-      backup2: process.env.PBX_BACKUP2 || undefined,
-    };
-  }
-
-  if (
-    process.env.UP2PAY_SITE &&
-    process.env.UP2PAY_RANG &&
-    process.env.UP2PAY_IDENTIFIANT &&
-    process.env.UP2PAY_SECRET &&
-    process.env.UP2PAY_PAYBOX
-  ) {
-    payments.up2pay = {
-      site: process.env.UP2PAY_SITE,
-      rang: process.env.UP2PAY_RANG,
-      identifiant: process.env.UP2PAY_IDENTIFIANT,
-      secret: process.env.UP2PAY_SECRET,
-      paybox: process.env.UP2PAY_PAYBOX,
-      legacyForwardUrl: process.env.UP2PAY_LEGACY_FORWARD_URL || undefined,
-    };
-  }
-
-  if (
-    process.env.HUBPISP_TOKEN_URL &&
-    process.env.HUBPISP_API_URL &&
-    process.env.HUBPISP_CLIENT_ID &&
-    process.env.HUBPISP_CLIENT_SECRET &&
-    process.env.HUBPISP_CERT_FINGERPRINT &&
-    process.env.HUBPISP_BENEFICIARY_NAME &&
-    process.env.HUBPISP_IBAN
-  ) {
-    payments.hubpisp = {
-      tokenUrl: process.env.HUBPISP_TOKEN_URL,
-      apiUrl: process.env.HUBPISP_API_URL,
-      clientId: process.env.HUBPISP_CLIENT_ID,
-      clientSecret: process.env.HUBPISP_CLIENT_SECRET,
-      certFingerprint: process.env.HUBPISP_CERT_FINGERPRINT,
-      beneficiaryName: process.env.HUBPISP_BENEFICIARY_NAME,
-      iban: process.env.HUBPISP_IBAN,
-      bic: process.env.HUBPISP_BIC || undefined,
-    };
-  }
-
-  return payments;
-}
-
-function buildEnvMail(): TenantConfig['mail'] {
-  if (
-    !(
-      process.env.MAIL_HOST &&
-      process.env.MAIL_PORT &&
-      process.env.MAIL_USER &&
-      process.env.MAIL_PASSWORD
-    )
-  ) {
-    return undefined;
-  }
-
-  return {
-    host: process.env.MAIL_HOST,
-    port: Number(process.env.MAIL_PORT),
-    secure: process.env.MAIL_SECURE === 'true',
-    user: process.env.MAIL_USER,
-    password: process.env.MAIL_PASSWORD,
-    email: process.env.MAIL_EMAIL || undefined,
-  };
-}
-
-function buildEnvWebPush(): TenantConfig['webPush'] {
-  if (!(process.env.VAPID_PRIVATE_KEY && process.env.VAPID_SUBJECT)) {
-    return undefined;
-  }
-
-  return {
-    privateKey: process.env.VAPID_PRIVATE_KEY,
-    subject: process.env.VAPID_SUBJECT,
-  };
-}
-
-function buildEnvMattermost(): TenantConfig['mattermost'] {
-  if (
-    !process.env.MATTERMOST_TOKEN &&
-    process.env.CREATE_MATTERMOST_USERS !== 'true'
-  ) {
-    return undefined;
-  }
-
-  return {
-    token: process.env.MATTERMOST_TOKEN || undefined,
-    createUsers: process.env.CREATE_MATTERMOST_USERS === 'true',
-  };
-}
-
-type EnvSections = {
-  payments: NonNullable<TenantConfig['payments']>;
-  mail: TenantConfig['mail'];
-  mattermost: TenantConfig['mattermost'];
-  webPush: TenantConfig['webPush'];
-  publicEnv: PublicEnv;
+type GlobalConfigInput = {
+  betterAuthSecret?: string;
+  betterAuthUrl?: string;
+  publicEnv?: PublicEnv;
 };
 
-let envSectionsCache: EnvSections | undefined;
-
-function getEnvSections(): EnvSections {
-  if (!envSectionsCache) {
-    envSectionsCache = {
-      payments: buildEnvPayments(),
-      mail: buildEnvMail(),
-      mattermost: buildEnvMattermost(),
-      webPush: buildEnvWebPush(),
-      publicEnv: buildEnvPublicEnv(),
-    };
+function validatePublicEnvKeys(
+  context: string,
+  publicEnv: PublicEnv | undefined,
+) {
+  for (const key of Object.keys(publicEnv ?? {})) {
+    if (!PUBLIC_ENV_KEYS.includes(key as PublicEnvKey)) {
+      throw new Error(
+        `${context}: unsupported publicEnv key "${key}" — supported keys: ${PUBLIC_ENV_KEYS.join(', ')}`,
+      );
+    }
   }
-  return envSectionsCache;
-}
-
-function buildDefaultTenantConfig(): TenantConfig {
-  const env = getEnvSections();
-
-  return {
-    db: {
-      url: process.env.DATABASE_URL!,
-    },
-    aos: {
-      url: process.env.AOS_URL!,
-      aosTenantId: process.env.AOS_TENANT_ID || undefined,
-      storage: getStoragePath(),
-      auth: getAOSAuth(),
-      webhookSecret: process.env.NOTIFICATION_WEBHOOK_SECRET,
-    },
-    payments: env.payments,
-    mail: env.mail,
-    mattermost: env.mattermost,
-    webPush: env.webPush,
-    publicEnv: env.publicEnv,
-  };
 }
 
 function normalizeTenantConfig(
@@ -235,6 +63,9 @@ function normalizeTenantConfig(
   if (!input?.aos?.url) {
     throw new Error(`Tenant "${id}": aos.url is required`);
   }
+  if (!input?.aos?.storage) {
+    throw new Error(`Tenant "${id}": aos.storage is required`);
+  }
 
   const auth = input.aos.auth;
   if (!auth?.apiKey && !(auth?.username && auth?.password)) {
@@ -243,35 +74,31 @@ function normalizeTenantConfig(
     );
   }
 
-  for (const key of Object.keys(input.publicEnv ?? {})) {
-    if (!PUBLIC_ENV_KEYS.includes(key as (typeof PUBLIC_ENV_KEYS)[number])) {
-      throw new Error(
-        `Tenant "${id}": unsupported publicEnv key "${key}" — supported keys: ${PUBLIC_ENV_KEYS.join(', ')}`,
-      );
-    }
-  }
+  validatePublicEnvKeys(`Tenant "${id}"`, input.publicEnv);
 
-  /* Sections a tenant omits are filled from the process env, so consumers
-   * read TenantConfig only and partial documents keep working. */
-  const env = getEnvSections();
-
+  /* No env merge — the entry is the config, verbatim. publicEnv is the only
+   * field allowed to be omitted (an empty browser-variable set). */
   return {
     ...input,
-    aos: {
-      ...input.aos,
-      storage: input.aos.storage ?? getStoragePath(),
-    },
-    payments: {...env.payments, ...input.payments},
-    mail: input.mail ?? env.mail,
-    mattermost: input.mattermost
-      ? {...env.mattermost, ...input.mattermost}
-      : env.mattermost,
-    webPush: input.webPush ?? env.webPush,
-    publicEnv: {...env.publicEnv, ...input.publicEnv},
+    publicEnv: input.publicEnv ?? {},
   };
 }
 
-function taintConfig(config: TenantConfig) {
+function normalizeGlobalConfig(input: GlobalConfigInput): GlobalConfig {
+  if (!input?.betterAuthSecret) {
+    throw new Error('"$global".betterAuthSecret is required');
+  }
+
+  validatePublicEnvKeys('"$global"', input.publicEnv);
+
+  return {
+    betterAuthSecret: input.betterAuthSecret,
+    betterAuthUrl: input.betterAuthUrl,
+    publicEnv: input.publicEnv ?? {},
+  };
+}
+
+function taintTenantConfig(config: TenantConfig) {
   const secrets: Array<[string, string | undefined]> = [
     ['Database URL', config.db.url],
     ['AOS API key', config.aos.auth.apiKey],
@@ -300,58 +127,111 @@ function taintConfig(config: TenantConfig) {
   }
 }
 
-/* Sources tenant config from a JSON document — TENANTS_CONFIG_FILE (path) or
- * TENANTS_CONFIG (inline), shape {"<tenantId>": TenantConfig, ...} — when
- * multi-tenancy is enabled. Without a document (or in single-tenant mode) it
- * synthesizes the single DEFAULT_TENANT entry from the classic env vars, so
- * existing deployments keep working unchanged. A registry-DB provider can
- * replace this behind the same interface later.
+function taintGlobalConfig(global: GlobalConfig) {
+  taint(
+    'Better Auth secret is a server secret. Do not pass to Client Components.',
+    global.betterAuthSecret,
+  );
+}
+
+type LoadedConfig = {
+  global: GlobalConfig;
+  tenants: Record<string, TenantConfig>;
+};
+
+/* Sources all configuration from a single JSON document — TENANTS_CONFIG_FILE
+ * (path) or TENANTS_CONFIG (inline). Shape:
+ *
+ *   { "$global": GlobalConfig, "<tenantId>": TenantConfig, ... }
+ *
+ * It is the one and only configuration mechanism: single-tenant is just a
+ * one-entry document. Nothing is read from the process env for tenant- or
+ * deployment-scoped settings, and no value is inherited between sections
+ * (no fallback) — every value a tenant uses lives in its own entry, and the
+ * deployment-wide values live in "$global". A registry-DB provider can replace
+ * this behind the same interface later.
  *
  * Loading is synchronous (readFileSync at first access) so config is also
  * available to module-init consumers — the better-auth instance needs the
- * per-tenant OAuth entries before any request is served. */
-class EnvTenantConfigProvider implements TenantConfigProvider {
-  private tenants: Record<string, TenantConfig> | undefined;
+ * "$global" secret and the per-tenant OAuth entries before any request. */
+class DocumentTenantConfigProvider implements TenantConfigProvider {
+  private loaded: LoadedConfig | undefined;
 
-  private load(): Record<string, TenantConfig> {
-    if (!this.tenants) {
-      this.tenants = this.read();
+  private load(): LoadedConfig {
+    if (!this.loaded) {
+      this.loaded = this.read();
     }
-    return this.tenants;
+    return this.loaded;
   }
 
-  private read(): Record<string, TenantConfig> {
-    if (process.env.MULTI_TENANCY === 'true') {
-      const file = process.env.TENANTS_CONFIG_FILE;
-      const source = file
-        ? fs.readFileSync(file, 'utf8')
-        : process.env.TENANTS_CONFIG;
+  private read(): LoadedConfig {
+    const file = process.env.TENANTS_CONFIG_FILE;
+    const source = file
+      ? fs.readFileSync(file, 'utf8')
+      : process.env.TENANTS_CONFIG;
 
-      if (source) {
-        const parsed: Record<string, TenantConfigInput> = JSON.parse(source);
-        const tenants: Record<string, TenantConfig> = {};
-        for (const [id, input] of Object.entries(parsed)) {
-          // The document may reference tenants.config.schema.json.
-          if (id === '$schema') continue;
-          const config = normalizeTenantConfig(id, input);
-          taintConfig(config);
-          tenants[id] = config;
-        }
-        return tenants;
+    if (!source) {
+      /* `next build` evaluates module-init code (the better-auth instance, the
+       * OAuth provider list) with no runtime config present — env is absent
+       * during an image build, and so is the document. Return a minimal
+       * placeholder so the build can analyse routes; real configuration is
+       * required at runtime and for CLI scripts, where NEXT_PHASE is unset and
+       * this throws instead. */
+      if (process.env.NEXT_PHASE === 'phase-production-build') {
+        return {
+          global: {betterAuthSecret: 'build-time-placeholder', publicEnv: {}},
+          tenants: {},
+        };
       }
+      throw new Error(
+        'No tenant configuration found: set TENANTS_CONFIG_FILE (path, ' +
+          'preferred) or TENANTS_CONFIG (inline JSON). See ' +
+          'tenants.config.example.json.',
+      );
     }
 
-    const config = buildDefaultTenantConfig();
-    taintConfig(config);
-    return {[DEFAULT_TENANT]: config};
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = JSON.parse(source);
+    } catch (err) {
+      throw new Error('Tenant configuration is not valid JSON', {cause: err});
+    }
+
+    const globalInput = parsed['$global'] as GlobalConfigInput | undefined;
+    if (!globalInput) {
+      throw new Error(
+        'Tenant configuration is missing the required "$global" section',
+      );
+    }
+    const global = normalizeGlobalConfig(globalInput);
+    taintGlobalConfig(global);
+
+    const tenants: Record<string, TenantConfig> = {};
+    for (const [id, input] of Object.entries(parsed)) {
+      // Reserved keys: $schema (editor hint) and $global (handled above).
+      if (id === '$schema' || id === '$global') continue;
+      const config = normalizeTenantConfig(id, input as TenantConfigInput);
+      taintTenantConfig(config);
+      tenants[id] = config;
+    }
+
+    if (Object.keys(tenants).length === 0) {
+      throw new Error('Tenant configuration has no tenant entries');
+    }
+
+    return {global, tenants};
   }
 
   getSync(id: string): TenantConfig | null {
-    return this.load()[id] ?? null;
+    return this.load().tenants[id] ?? null;
   }
 
   listConfigsSync(): Array<[string, TenantConfig]> {
-    return Object.entries(this.load());
+    return Object.entries(this.load().tenants);
+  }
+
+  getGlobalSync(): GlobalConfig {
+    return this.load().global;
   }
 
   async get(id: string): Promise<TenantConfig | null> {
@@ -359,17 +239,17 @@ class EnvTenantConfigProvider implements TenantConfigProvider {
   }
 
   async list(): Promise<string[]> {
-    return Object.keys(this.load());
+    return Object.keys(this.load().tenants);
   }
 }
 
-const provider = new EnvTenantConfigProvider();
+const provider = new DocumentTenantConfigProvider();
 
 export const tenantConfigProvider: TenantConfigProvider = provider;
 
-/* Synchronous access for module-init consumers (better-auth OAuth entries).
- * Only the env/file provider can serve these; a future async registry
- * provider would need init-time prefetching instead. */
+/* Synchronous access for module-init consumers (the better-auth instance reads
+ * the "$global" secret and the per-tenant OAuth entries at construction). A
+ * future async registry provider would need init-time prefetching instead. */
 export function listTenantConfigsSync(): Array<[string, TenantConfig]> {
   return provider.listConfigsSync();
 }
@@ -378,9 +258,12 @@ export function getTenantConfigSync(id: string): TenantConfig | null {
   return provider.getSync(id);
 }
 
-/* Browser-exposed variables for contexts with no tenant (the root page,
- * auth pages without a tenant param). Built from the same static key list
- * as tenant publicEnv. */
+export function getGlobalConfigSync(): GlobalConfig {
+  return provider.getGlobalSync();
+}
+
+/* Browser-exposed variables for contexts with no tenant (the root page, auth
+ * pages without a tenant param) — the "$global" publicEnv. */
 export function getGlobalPublicEnv(): PublicEnv {
-  return getEnvSections().publicEnv;
+  return provider.getGlobalSync().publicEnv;
 }
