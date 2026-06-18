@@ -1,11 +1,19 @@
 {
   "$schema": "./tenants.config.schema.json",
+  "$global": {
+    "betterAuthSecret": "<better-auth-secret>",
+    "betterAuthUrl": "https://portal.example.com",
+    "publicEnv": {
+      "GOOVEE_PUBLIC_LINKEDIN_URL": "https://www.linkedin.com/company/example"
+    }
+  },
   "acme": {
     "db": {
       "url": "postgres://user:password@localhost:5432/goovee-acme"
     },
     "aos": {
       "url": "https://erp.acme.example.com/axelor-erp",
+      "storage": "/storage/acme",
       "auth": {
         "apiKey": "<api-key>"
       },
@@ -35,7 +43,10 @@
         "clientSecret": "<google-client-secret>"
       }
     },
+    "includeLanguage": true,
+    "uploadRecordRetentionHours": 168,
     "publicEnv": {
+      "GOOVEE_PUBLIC_HOST": "https://acme.example.com",
       "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": "<paypal-client-id>"
     }
   },
@@ -51,6 +62,19 @@
         "username": "<username>",
         "password": "<password>"
       }
+    },
+    "payments": {
+      "up2pay": {
+        "site": "<site>",
+        "rang": "<rang>",
+        "identifiant": "<identifiant>",
+        "secret": "<secret>",
+        "paybox": "<host>",
+        "legacyForwardUrl": "https://legacy-erp.beta.example.com/ipn"
+      }
+    },
+    "publicEnv": {
+      "GOOVEE_PUBLIC_HOST": "https://beta.example.com"
     }
   }
 }

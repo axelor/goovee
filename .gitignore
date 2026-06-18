@@ -29,6 +29,10 @@ yarn-error.log*
 .env*.local
 .env
 
+# tenant configuration document — holds db/auth/payment secrets, never commit
+# (the *.config.example.json / *.config.schema.json files are safe to track)
+/tenants.config.json
+
 # vercel
 .vercel
 
