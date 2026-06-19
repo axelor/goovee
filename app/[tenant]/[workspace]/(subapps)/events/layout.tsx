@@ -5,7 +5,8 @@ import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
-import {findWorkspace, findSubappAccess} from '@/orm/workspace';
+import {requireSubappAccess} from '@/lib/core/workspace/subapp-access';
+import {findWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
@@ -30,20 +31,20 @@ export default async function Layout(props: {
 
   const session = await getSession();
   const user = session?.user;
-  const {workspaceURL} = workspacePathname(params);
+  const {workspaceURL, workspaceURI} = workspacePathname(params);
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
   const {client} = tenant;
 
-  const subapp = await findSubappAccess({
+  await requireSubappAccess({
     code: SUBAPP_CODES.events,
-    user: session?.user,
     url: workspaceURL,
+    user: session?.user,
     client,
+    workspaceURI,
+    tenantId,
   });
-
-  if (!subapp) return notFound();
 
   const workspace = await findWorkspace({
     user: session?.user,

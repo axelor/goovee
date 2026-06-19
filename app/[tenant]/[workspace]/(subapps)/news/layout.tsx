@@ -4,10 +4,10 @@ import {notFound} from 'next/navigation';
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
 import {manager} from '@/tenant';
-import {findSubappAccess} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {findWorkspace} from '@/orm/workspace';
+import {requireSubappAccess} from '@/lib/core/workspace/subapp-access';
 import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
@@ -29,7 +29,7 @@ export default async function Layout(props: {
 
   const session = await getSession();
   const user = session?.user;
-  const {workspaceURL} = workspacePathname(params);
+  const {workspaceURL, workspaceURI} = workspacePathname(params);
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
@@ -45,14 +45,14 @@ export default async function Layout(props: {
     return notFound();
   }
 
-  const subapp = await findSubappAccess({
+  await requireSubappAccess({
     code: SUBAPP_CODES.news,
-    user,
     url: workspaceURL,
+    user,
     client,
+    workspaceURI,
+    tenantId,
   });
-
-  if (!subapp) return notFound();
 
   const allCategories = await findCategories({
     showAllCategories: true,

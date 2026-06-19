@@ -1,9 +1,9 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {notFound} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
 import {t} from '@/lib/core/locale/server';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/ui/components/pagination';
 import {clone} from '@/utils';
 import {getPaginationButtons, getPages, getSkip} from '@/utils/pagination';
+import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
@@ -41,8 +42,20 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-  const {error, auth} = await ensureAuth(workspaceURL, tenant);
-  if (error) notFound();
+  const result = await ensureAuth(workspaceURL, tenant);
+  if (result.error) {
+    if (result.forceLogin) {
+      redirect(
+        getLoginURL({
+          callbackurl: workspaceURI,
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    notFound();
+  }
+  const {auth} = result;
 
   const {workspace} = auth;
   const {client} = auth.tenant;

@@ -26,11 +26,13 @@ export const ensureAuth = cache(async function ensureAuth(
   | {
       error: true;
       message: string;
+      forceLogin?: boolean;
       auth?: never;
     }
   | {
       error: false;
       message?: never;
+      forceLogin?: never;
       auth: AuthProps;
     }
 > {
@@ -64,6 +66,7 @@ export const ensureAuth = cache(async function ensureAuth(
   if (!subapp) {
     return {
       error: true,
+      forceLogin: !user,
       message: await t('Unauthorized'),
     };
   }

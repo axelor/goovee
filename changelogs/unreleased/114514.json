@@ -1,0 +1,6 @@
+{
+  "title": "Guests are redirected to login instead of 404 for unavailable subapps",
+  "type": "fix",
+  "scope": ["core"],
+  "description": "When a guest opened a real subapp route that was not available in the guest workspace configuration, the subapp entry gate returned a 404 instead of redirecting to login. A new requireSubappAccess helper now centralizes the decision: an unavailable subapp redirects guests to the login page and still returns 404 for authenticated users without access. Applied to the shop, forum, orders, quotations, events, news, resources, invoices and directory entry points. Authenticated-user behaviour and invalid URLs (which match no route) are unchanged. The directory subapp keeps its own auth helper and stays viewable by guests when it is part of the guest configuration."
+}

@@ -3,13 +3,14 @@ import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {findWorkspace, findSubapp} from '@/orm/workspace';
+import {findWorkspace} from '@/orm/workspace';
+import {requireSubappAccess} from '@/lib/core/workspace/subapp-access';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES, DEFAULT_LIMIT} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {TableSkeleton} from '@/ui/components/table';
-import {PartnerKey} from '@/types';
+import {PartnerKey, User} from '@/types';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
@@ -41,15 +42,9 @@ async function Invoices({
 
   const session = await getSession();
 
-  if (!session) return notFound();
+  const user = session?.user as User;
 
-  const user = session?.user;
-
-  if (!user) {
-    return notFound();
-  }
-
-  const {workspaceURL} = workspacePathname(params);
+  const {workspaceURL, workspaceURI} = workspacePathname(params);
 
   const workspace = await findWorkspace({
     url: workspaceURL,
@@ -59,16 +54,14 @@ async function Invoices({
 
   if (!workspace) return notFound();
 
-  const app = await findSubapp({
+  const app = await requireSubappAccess({
     code: SUBAPP_CODES.invoices,
     url: workspace.url,
-    user: user,
+    user,
     client,
+    workspaceURI,
+    tenantId,
   });
-
-  if (!app?.isInstalled) {
-    return notFound();
-  }
 
   const {role, isContactAdmin} = app;
 
