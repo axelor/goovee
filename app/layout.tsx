@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     default: DEFAULT_APP_TEMPLATE_TITLE,
   },
   description: APP_DESCRIPTION,
-  manifest: withBasePath('/manifest'),
+  manifest: withBasePath('/manifest.webmanifest'),
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

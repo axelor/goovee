@@ -17,8 +17,10 @@ export const config = {
      * 3. /_static (inside /public)
      * 4. all root files inside /public (e.g. /favicon.ico)
      * 5. all files inside /public/images website locales and pwa
+     * 6. the per-tenant web manifest (public, but fetched with same-origin
+     *    cookies, so it must not run the session/parking logic)
      */
-    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|images/|website/|pwa/|locales/).*)',
+    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|[\\w-]+/manifest\\.webmanifest|images/|website/|pwa/|locales/).*)',
   ],
 };
 

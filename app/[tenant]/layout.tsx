@@ -4,6 +4,7 @@
 export const dynamic = 'force-dynamic';
 
 import React from 'react';
+import type {Metadata} from 'next';
 
 import {Environment, getPublicEnvironment} from '@/environment';
 import {findTheme} from '@/orm/theme';
@@ -13,6 +14,15 @@ import {tenantConfigProvider} from '@/tenant/config-provider';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 import Theme from '@/app/theme';
+
+/* Point the manifest link at this tenant's manifest so an installed PWA starts
+ * inside the tenant's service-worker scope; overrides the root manifest. */
+export async function generateMetadata(props: {
+  params: Promise<{tenant: string}>;
+}): Promise<Metadata> {
+  const {tenant} = await props.params;
+  return {manifest: withBasePath(`/${tenant}/manifest.webmanifest`)};
+}
 
 export default async function TenantLayout(props: {
   params: Promise<{tenant: string}>;
