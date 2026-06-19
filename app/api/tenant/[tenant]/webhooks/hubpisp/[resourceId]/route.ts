@@ -14,6 +14,7 @@ import {HUBPISP_CONSENT_STATUS} from '@/lib/core/payment/hubpisp/constants';
 import {fetchPaymentRequestStatus} from '@/lib/core/payment/hubpisp/paymentRequest';
 import {pollPaymentRequestStatus} from '@/lib/core/payment/hubpisp/poll';
 import {applyTransactionStatus} from '@/lib/core/payment/hubpisp/process';
+import {getHubPispSettings} from '@/lib/core/payment/hubpisp/settings';
 import type {
   PaymentLinkStatusResult,
   PaymentRequestStatusResult,
@@ -30,8 +31,27 @@ export async function POST(
   const {tenant: tenantId, resourceId} = await params;
 
   /* The tenant is authoritative from the path (the webhook URL is registered
-   * per tenant), so its Hub PISP credentials drive the first fetch, before the
-   * tenant could otherwise be known from the link data. */
+   * per tenant). Resolve it up front so a tenant that does not run Hub PISP is
+   * rejected with a 4xx — a permanent condition the gateway must not retry —
+   * instead of the "not configured" error below surfacing as a 500. */
+  const tenant = await manager.getTenant(tenantId);
+  if (!tenant) {
+    console.error('[HUBPISP][WEBHOOK] Tenant not found', {tenantId});
+    return new NextResponse('Bad Request', {status: 400});
+  }
+  const {client, config} = tenant;
+
+  const {apiUrl, certFingerprint} = getHubPispSettings(config);
+  if (!(apiUrl && certFingerprint)) {
+    console.warn('[HUBPISP][WEBHOOK] Tenant has no Hub PISP config', {
+      tenantId,
+    });
+    return new NextResponse('Hub PISP is not configured for this tenant', {
+      status: 400,
+    });
+  }
+
+  /* The tenant's Hub PISP credentials drive the first fetch. */
   let linkData: PaymentLinkStatusResult;
   try {
     linkData = await fetchPaymentLinkStatus(resourceId, tenantId);
@@ -75,13 +95,6 @@ export async function POST(
     console.error('[HUBPISP][WEBHOOK] Failed to parse endToEnd', {endToEnd});
     return new NextResponse('Bad Request', {status: 400});
   }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    console.error('[HUBPISP][WEBHOOK] Tenant not found', {tenantId});
-    return new NextResponse('Bad Request', {status: 400});
-  }
-  const {client, config} = tenant;
 
   const paymentContext = await findPaymentContext({
     id: contextId,
