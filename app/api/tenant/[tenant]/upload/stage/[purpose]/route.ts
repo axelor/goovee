@@ -40,6 +40,11 @@ export async function POST(
     return new NextResponse('Unauthorized', {status: 401});
   }
 
+  // Guard cross-tenant access: /api/* bypasses the proxy that switches sessions.
+  if (session.user.tenantId !== tenantId) {
+    return new NextResponse('Forbidden', {status: 403});
+  }
+
   // purpose is in the path, so we know the size limit before reading the body
   const policy = getUploadPolicy(purpose);
   if (!policy) {
