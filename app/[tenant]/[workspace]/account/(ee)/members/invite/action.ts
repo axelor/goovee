@@ -238,10 +238,14 @@ export async function sendInvites({
     };
   }
 
+  /* Pin the (guarded non-null) tenant config: TS does not carry the earlier
+   * `if (!tenant) return` narrowing into this closure. */
+  const tenantConfig = tenant.config;
+
   function sendMail({email, link, subject}: any) {
     const mailService = NotificationManager.getService(
       NotificationType.mail,
-      tenant.config,
+      tenantConfig,
     );
 
     after(async () => {

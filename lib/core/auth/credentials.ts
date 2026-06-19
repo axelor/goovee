@@ -146,6 +146,15 @@ const credentials = {
         }
 
         const tenant = await manager.getTenant(tenantId);
+        if (!tenant) {
+          throw new APIError('UNAUTHORIZED', {
+            ...ERROR_CODES.INVALID_EMAIL_OR_PASSWORD,
+            message: await getTranslation(
+              {tenant: tenantId},
+              'Invalid email or password',
+            ),
+          });
+        }
         const {client} = tenant;
 
         const user = await findGooveeUserByEmail(email, client);

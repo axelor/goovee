@@ -16,9 +16,11 @@ export enum TenancyType {
 
 interface TenantManager {
   getType(): TenancyType;
-  getTenant(id?: Tenant['id']): Promise<Tenant>;
-  getConfig(id?: Tenant['id']): Promise<Tenant['config']>;
-  getClient(id?: Tenant['id']): Promise<Tenant['client']>;
+  /* Resolves to null for an unknown (or missing) tenant id — callers guard with
+   * `if (!tenant)` and return a 4xx. A genuine connection failure still throws. */
+  getTenant(id?: Tenant['id']): Promise<Tenant | null>;
+  getConfig(id?: Tenant['id']): Promise<Tenant['config'] | undefined>;
+  getClient(id?: Tenant['id']): Promise<Tenant['client'] | undefined>;
   listTenantIds(): Promise<string[]>;
 }
 
@@ -110,9 +112,9 @@ export class MultiTenantManager implements TenantManager {
     return TenancyType.multi;
   }
 
-  async getTenant(id: Tenant['id']) {
+  async getTenant(id: Tenant['id']): Promise<Tenant | null> {
     if (!id) {
-      throw new Error('Tenant id is required');
+      return null;
     }
 
     const cached = this.cache.get(id);
@@ -121,36 +123,31 @@ export class MultiTenantManager implements TenantManager {
       return cached;
     }
 
+    const config = await tenantConfigProvider.get(id);
+
+    if (!config) {
+      /* Unknown tenant is not an error: callers guard with `if (!tenant)` and
+       * return a 4xx. Throwing here would turn attacker-controllable path
+       * values into 500s. A genuine connection failure below still throws. */
+      return null;
+    }
+
     try {
-      const config = await tenantConfigProvider.get(id);
-
-      if (!config) {
-        throw new Error(`Unknown tenant: ${id}`);
-      }
-
       const tenant = await connectTenant(id, config);
 
       this.cache.put(id, tenant);
 
       return tenant;
     } catch (err) {
-      throw new Error('Error getting tenant', {cause: err});
+      throw new Error(`Error connecting tenant "${id}"`, {cause: err});
     }
   }
 
   async getConfig(id: Tenant['id']) {
-    if (!id) {
-      throw new Error('Tenant id is required');
-    }
-
     return this.getTenant(id).then(tenant => tenant?.config);
   }
 
   async getClient(id: Tenant['id']) {
-    if (!id) {
-      throw new Error('Tenant id is required');
-    }
-
     return this.getTenant(id).then(tenant => tenant?.client);
   }
 

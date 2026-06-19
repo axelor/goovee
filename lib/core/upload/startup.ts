@@ -48,7 +48,9 @@ async function forEachTenant(
 
   for (const tenantId of tenantIds) {
     try {
-      const {client, config} = await manager.getTenant(tenantId);
+      const tenant = await manager.getTenant(tenantId);
+      if (!tenant) continue;
+      const {client, config} = tenant;
       await task(tenantId, client, config);
     } catch (error) {
       console.error(

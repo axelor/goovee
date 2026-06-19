@@ -36,6 +36,10 @@ export default async function Page(props: {
 
   const tenant = await manager.getTenant(tenantId);
 
+  if (!tenant) {
+    return notFound();
+  }
+
   const {client} = tenant;
 
   const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
