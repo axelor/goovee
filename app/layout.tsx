@@ -7,6 +7,7 @@ import {Poppins as FontSans} from 'next/font/google';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
+import {LegacyServiceWorkerCleanup} from '@/pwa/legacy-sw-cleanup';
 import {Toaster} from '@/ui/components/toaster';
 
 // ---- LOCAL IMPORTS ---- //
@@ -83,6 +84,7 @@ export default function RootLayout({
       <body className={fontSans.className}>
         <Locale>{children}</Locale>
         <Toaster />
+        <LegacyServiceWorkerCleanup />
       </body>
     </html>
   );
