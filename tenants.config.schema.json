@@ -66,7 +66,7 @@
             },
             "storage": {
               "type": "string",
-              "description": "This tenant's file-storage directory (created on first connect). Back it with a mounted volume so uploads survive."
+              "description": "The AOS instance's data.upload.dir base path (created on first connect; back it with a mounted volume so uploads survive). When aosTenantId is set (topology B), goovee reads and writes files under <storage>/<aosTenantId> to match AOP's per-tenant subdirectory; a dedicated instance (topology A) uses this path as-is."
             },
             "auth": {
               "type": "object",

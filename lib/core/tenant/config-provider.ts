@@ -1,6 +1,7 @@
 'server only';
 
 import fs from 'fs';
+import path from 'path';
 import {experimental_taintUniqueValue} from 'react';
 
 import {
@@ -75,10 +76,25 @@ function normalizeTenantConfig(
 
   validatePublicEnvKeys(`Tenant "${id}"`, input.publicEnv);
 
-  /* No env merge — the entry is the config, verbatim. publicEnv is the only
-   * field allowed to be omitted (an empty browser-variable set). */
+  /* Bake the per-tenant storage root once, mirroring AOP's
+   * FileSystemStore.getRootPath(): a tenant on a shared multi-tenant AOS keeps
+   * its files under <data.upload.dir>/<aosTenantId>, while a dedicated instance
+   * (or the AOP "default" tenant) uses <data.upload.dir> as-is. aos.storage in
+   * the document is therefore the AOS data.upload.dir base; goovee reads and
+   * writes the AOS filesystem directly, so every storage consumer can use
+   * config.aos.storage verbatim without re-deriving the tenant subdirectory. */
+  const {aosTenantId} = input.aos;
+  const storage =
+    aosTenantId && aosTenantId !== 'default'
+      ? path.join(input.aos.storage, aosTenantId)
+      : input.aos.storage;
+
+  /* No env merge — the entry is the config, verbatim (aside from the storage
+   * root derived above). publicEnv is the only field allowed to be omitted (an
+   * empty browser-variable set). */
   return {
     ...input,
+    aos: {...input.aos, storage},
     publicEnv: input.publicEnv ?? {},
   };
 }
