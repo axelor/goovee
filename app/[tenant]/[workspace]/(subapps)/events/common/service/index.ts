@@ -1,7 +1,5 @@
-import axios from 'axios';
-
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import {ID} from '@/types';
@@ -34,8 +32,6 @@ export async function createInvoice({
     return error(await t('Invoice creation failed. Webservice not available.'));
   }
 
-  const ws = `${aos.url}/ws/portal/invoice/eventInvoice`;
-
   try {
     const partnerWorkspaceId = workspace?.workspacePermissionConfig?.id;
     if (!partnerWorkspaceId) {
@@ -49,16 +45,15 @@ export async function createInvoice({
       paymentModeId,
     };
 
-    const {data} = await axios.post(ws, payload, {
-      headers: getAOSAuthHeaders(aos.auth),
-    });
+    const data = await aosClient(aos).request<
+      {status?: number; message?: string} & Record<string, unknown>
+    >('ws/portal/invoice/eventInvoice', {body: payload});
 
     if (data?.status === -1) {
       return error(
-        await t(
-          data?.message ||
-            'Unable to create the invoice. Please try again later.',
-        ),
+        data?.message
+          ? await t(data.message)
+          : await t('Unable to create the invoice. Please try again later.'),
       );
     }
 
@@ -73,6 +68,22 @@ export async function createInvoice({
   }
 }
 
+/* The event pricing the ws/portal/event/price endpoint returns for the current
+ * partner: the headline price plus a per-facility breakdown and the currency. */
+type EventFacilityPricing = {
+  id: string | number;
+  priceWT?: string;
+  priceATI?: string;
+};
+
+type EventPriceWS = {
+  priceWT?: string;
+  priceATI?: string;
+  currencyId?: string | number | null;
+  currencyCode?: string | null;
+  facilityPricingList?: EventFacilityPricing[];
+};
+
 export async function findProductsFromWS({
   workspaceURL,
   client,
@@ -83,13 +94,13 @@ export async function findProductsFromWS({
   eventId: string;
   client: Client;
   config: TenantConfig;
-}) {
+}): Promise<EventPriceWS | null> {
   if (!workspaceURL && eventId) {
     return null;
   }
 
   if (!config?.aos?.url) {
-    return [];
+    return null;
   }
 
   const session = await getSession();
@@ -102,14 +113,9 @@ export async function findProductsFromWS({
   });
 
   if (!workspace) {
-    return {
-      error: true,
-      message: await t('Invalid workspace'),
-    };
+    return null;
   }
   const {aos} = config;
-
-  const ws = `${aos.url}/ws/portal/event/price`;
 
   const partnerId = user?.id;
 
@@ -119,9 +125,9 @@ export async function findProductsFromWS({
       partnerWorkspaceId: workspace.id,
       partnerId,
     };
-    const res = await axios
-      .post(ws, reqBody, {headers: getAOSAuthHeaders(aos.auth)})
-      .then(({data}) => data);
+    const res = await aosClient(aos).request<{
+      data?: EventPriceWS & {status?: number};
+    }>('ws/portal/event/price', {body: reqBody});
 
     if (res?.data?.status === -1) {
       console.log('Error:', res);

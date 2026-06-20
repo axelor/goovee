@@ -1,0 +1,6 @@
+{
+  "title": "Introduce a common AOS REST client and fix ticket version-mismatch detection",
+  "type": "change",
+  "description": "Centralized every AOS REST call behind a single per-instance client, so authentication, the base URL, the response envelope and error handling live in one place; the events, invoices, shop, product, ticketing and website calls now go through it. A ticket update edited from two places at once now reports the version mismatch regardless of the AOS platform version or the AOS user's role, so the refresh prompt is shown again.",
+  "scope": ["ticketing", "shop", "events", "invoices", "website", "core"]
+}

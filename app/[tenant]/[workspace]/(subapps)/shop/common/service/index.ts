@@ -1,14 +1,14 @@
-import axios from 'axios';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import {t} from '@/locale/server';
 import {PortalWorkspace} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
+import type {SuccessResponse} from '@/types/action';
 import type {CartInput, CartItemInput} from '@/subapps/shop/common/validators';
 import {computeTotal} from '@/utils/cart';
 import {TENANT_HEADER} from '@/proxy';
@@ -35,9 +35,8 @@ export async function createOrder({
   client: Client;
   config: Tenant['config'];
   paymentModeId?: string;
-}) {
+}): Promise<SuccessResponse<string>> {
   const {aos} = config;
-  const ws = `${aos.url}/ws/portal/orders/order`;
 
   const computedProducts = await Promise.all(
     cart.items.map((i: CartItemInput) =>
@@ -101,19 +100,21 @@ export async function createOrder({
     paymentModeId,
   };
 
-  const res = await axios.post(ws, payload, {
-    headers: getAOSAuthHeaders(aos.auth),
-  });
+  const res = await aosClient(aos).request<{
+    status?: number;
+    message?: string;
+    data?: string;
+  }>('ws/portal/orders/order', {body: payload});
 
-  if (res?.data?.status === -1) {
+  if (res?.status === -1) {
     throw new Error(
-      res?.data?.message
-        ? await t(res.data.message)
+      res?.message
+        ? await t(res.message)
         : await t('Order creation failed. Please try again.'),
     );
   }
 
-  return res?.data;
+  return {success: true, data: res.data ?? ''};
 }
 
 export async function requestOrder({
@@ -139,8 +140,6 @@ export async function requestOrder({
 
   const {aos} = tenant.config;
   const {client} = tenant;
-
-  const ws = `${aos.url}/ws/portal/orders/${type}`;
 
   const session = await getSession();
   const user = session?.user;
@@ -207,15 +206,15 @@ export async function requestOrder({
       deliveryPartnerAddressId: deliveryAddress,
     };
 
-    const res = await axios.post(ws, payload, {
-      headers: getAOSAuthHeaders(aos.auth),
-    });
+    const res = await aosClient(aos).request<
+      {status?: number} & Record<string, unknown>
+    >(`ws/portal/orders/${type}`, {body: payload});
 
-    if (res?.data?.status === -1) {
+    if (res?.status === -1) {
       return null;
     }
 
-    return res?.data;
+    return res;
   } catch (err) {
     console.error(err);
     return null;
