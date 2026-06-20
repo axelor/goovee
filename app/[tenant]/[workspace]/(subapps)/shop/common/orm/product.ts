@@ -1,9 +1,8 @@
-import axios from 'axios';
 import type {Cloned} from '@/types/util';
 import type {OrderByOptions} from '@goovee/orm';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import {clone, scale} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import {
@@ -758,20 +757,17 @@ export async function findProductsFromWS({
 
   const {aos} = config;
 
-  const ws = `${aos.url}/ws/aos/product/price`;
-
   try {
-    const res = await axios
-      .post(
-        ws,
-        {
-          productList,
-          partnerId: user?.id,
-          companyId: workspace?.config?.company?.id,
-        },
-        {headers: getAOSAuthHeaders(aos.auth)},
-      )
-      .then(({data}) => data);
+    const res = await aosClient(aos).request<{
+      object?: WSObject[];
+      data?: {status?: number};
+    }>('ws/aos/product/price', {
+      body: {
+        productList,
+        partnerId: user?.id,
+        companyId: workspace?.config?.company?.id,
+      },
+    });
 
     if (res?.data?.status === -1) {
       return [];

@@ -247,9 +247,10 @@ export async function findEvent({
     eventId: event.id,
   });
 
-  const displayWt: string = productsFromWS?.priceWT || defaultPrice?.toString();
+  const displayWt: string =
+    productsFromWS?.priceWT || defaultPrice?.toString() || '';
   const displayAti: string =
-    productsFromWS?.priceATI || defaultPrice?.toString();
+    productsFromWS?.priceATI || defaultPrice?.toString() || '';
 
   const currencySymbol = saleCurrency?.symbol || DEFAULT_CURRENCY_SYMBOL;
   const scale = saleCurrency?.numberOfDecimals || DEFAULT_CURRENCY_SCALE;

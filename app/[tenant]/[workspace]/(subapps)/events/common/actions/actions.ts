@@ -255,7 +255,7 @@ export async function register(
         workspace,
         config,
         registrationId: registration.id,
-        currencyCode: $event.currency?.code,
+        currencyCode: $event.currency?.code ?? '',
         paymentModeId,
       });
 

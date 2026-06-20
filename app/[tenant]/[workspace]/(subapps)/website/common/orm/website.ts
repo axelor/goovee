@@ -1,7 +1,5 @@
-import axios from 'axios';
-
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import {filterPrivate} from '@/orm/filter';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
@@ -1023,25 +1021,16 @@ async function findModelRecords({
   const aos = config?.aos;
 
   if (!aos?.url) return [];
-  const res = await axios
-    .post(
-      `${aos.url}/ws/rest/${modelName}/search`,
-      {
-        data: {
-          _domain: 'self.id in :ids',
-          _domainContext: {ids},
-        },
-      },
-      {headers: getAOSAuthHeaders(aos.auth)},
-    )
-    .then(res => res?.data)
-    .catch(() => console.log('Error with trying to fetch model fields'));
 
-  if (res?.status !== 0 || !res.data) {
-    return [];
-  }
-
-  return res.data;
+  return aosClient(aos)
+    .search(modelName, {
+      data: {_domain: 'self.id in :ids', _domainContext: {ids}},
+    })
+    .then(({records}) => records)
+    .catch(() => {
+      console.log('Error with trying to fetch model fields');
+      return [];
+    });
 }
 
 export async function canEditWiki({
