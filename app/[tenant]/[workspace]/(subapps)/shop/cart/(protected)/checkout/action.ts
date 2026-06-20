@@ -28,6 +28,7 @@ import {
   formatNumber,
 } from '@/subapps/shop/common/utils/order';
 import {createOrder} from '@/subapps/shop/common/service';
+import type {ActionResponse} from '@/types/action';
 import {
   CartOrderSchema,
   PayboxCreateOrderSchema,
@@ -44,7 +45,7 @@ import {
 export async function paypalCaptureOrder({
   orderId,
   workspaceURL,
-}: PaypalCaptureOrderInput) {
+}: PaypalCaptureOrderInput): ActionResponse<string> {
   const session = await getSession();
 
   if (!session) {
@@ -485,7 +486,7 @@ export async function createStripeCheckoutSession({
 export async function validateStripePayment({
   stripeSessionId,
   workspaceURL,
-}: ValidateStripePaymentInput) {
+}: ValidateStripePaymentInput): ActionResponse<string> {
   const session = await getSession();
   if (!session) {
     return {
@@ -792,7 +793,7 @@ export async function payboxCreateOrder({
 export async function validatePayboxPayment({
   params,
   workspaceURL,
-}: ValidatePayboxPaymentInput) {
+}: ValidatePayboxPaymentInput): ActionResponse<string> {
   const session = await getSession();
 
   if (!session) {
