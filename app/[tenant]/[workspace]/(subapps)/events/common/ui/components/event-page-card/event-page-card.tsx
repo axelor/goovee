@@ -1,4 +1,5 @@
 'use client';
+import {Suspense, use} from 'react';
 import {authClient} from '@/lib/auth-client';
 import Image from 'next/image';
 
@@ -17,6 +18,8 @@ import {
   CardTitle,
   InnerHTML,
 } from '@/ui/components';
+import {Skeleton} from '@/ui/components/skeleton';
+import type {EventDefaultPrice} from '@/subapps/events/common/orm/event';
 import {cn} from '@/utils/css';
 import {formatDateTime} from '@/lib/core/locale/formatters';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -38,14 +41,10 @@ import type {EventPageCardProps} from './types';
 export const EventPageCard = ({
   eventDetails,
   workspace,
+  pricePromise,
 }: EventPageCardProps) => {
-  const {
-    formattedDefaultPriceAti,
-    formattedDefaultPrice,
-    defaultPrice,
-    eventAllowRegistration,
-    registrationDeadlineDateTime,
-  } = eventDetails || {};
+  const {defaultPrice, eventAllowRegistration, registrationDeadlineDateTime} =
+    eventDetails || {};
   const {workspaceURI} = useWorkspace();
   const {data: session} = authClient.useSession();
   const user = session?.user;
@@ -114,16 +113,9 @@ export const EventPageCard = ({
             </p>
           )}
           {defaultPrice ? (
-            <div className="flex flex-col gap-2 font-semibold">
-              <p className="text-xl text-black">
-                {i18n.t('Price (incl. tax)')}:{' '}
-                <span className="text-success">{formattedDefaultPriceAti}</span>
-              </p>
-              <p className="text-sm text-black flex gap-2">
-                {i18n.t('Price (excl. tax)')}:{' '}
-                <span className="text-success">{formattedDefaultPrice}</span>
-              </p>
-            </div>
+            <Suspense fallback={<PriceSkeleton />}>
+              <DefaultPriceView pricePromise={pricePromise} />
+            </Suspense>
           ) : null}
           {eventAllowRegistration && registrationDeadlineDateTime && (
             <p>
@@ -158,3 +150,33 @@ export const EventPageCard = ({
     </Card>
   );
 };
+
+function DefaultPriceView({
+  pricePromise,
+}: {
+  pricePromise?: Promise<EventDefaultPrice>;
+}) {
+  if (!pricePromise) return null;
+  const {formattedDefaultPrice, formattedDefaultPriceAti} = use(pricePromise);
+  return (
+    <div className="flex flex-col gap-2 font-semibold">
+      <p className="text-xl text-black">
+        {i18n.t('Price (incl. tax)')}:{' '}
+        <span className="text-success">{formattedDefaultPriceAti}</span>
+      </p>
+      <p className="text-sm text-black flex gap-2">
+        {i18n.t('Price (excl. tax)')}:{' '}
+        <span className="text-success">{formattedDefaultPrice}</span>
+      </p>
+    </div>
+  );
+}
+
+function PriceSkeleton() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Skeleton className="h-6 w-40" />
+      <Skeleton className="h-5 w-32" />
+    </div>
+  );
+}

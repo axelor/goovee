@@ -1,4 +1,5 @@
 // ---- CORE IMPORTS ---- //
+import {cache} from 'react';
 import {ALLOW_ALL_REGISTRATION, ALLOW_AOS_ONLY_REGISTRATION} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {AOSPortalAppConfig} from '@/goovee/.generated/models';
@@ -625,6 +626,14 @@ export async function findWorkspace({
     workspacePermissionConfig: workspaceConfig.workspacePermissionConfig,
   };
 }
+
+export const getWorkspace = cache(
+  (
+    url: string,
+    user: Pick<User, 'id' | 'isContact' | 'mainPartnerId'> | undefined,
+    client: Client,
+  ) => findWorkspace({url, user, client}),
+);
 
 export async function findOpenWorkspaces({
   url,

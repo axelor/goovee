@@ -2,10 +2,13 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/lib/core/tenant/manager';
-import {findEvent} from '@/subapps/events/common/orm/event';
+import {
+  findEventDefaultPrice,
+  findEventForDetail,
+} from '@/subapps/events/common/orm/event';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {findWorkspace} from '@/orm/workspace';
+import {getWorkspace} from '@/orm/workspace';
 import {getSession} from '@/auth';
 
 // ---- LOCAL IMPORTS ---- //
@@ -26,27 +29,35 @@ export default async function Page(props: {
 
   const {workspaceURL} = workspacePathname(params);
 
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    client,
-  }).then(clone);
+  const [workspace, eventDetails] = await Promise.all([
+    getWorkspace(workspaceURL, session?.user, client).then(clone),
+    findEventForDetail({slug, workspaceURL, client, user}).then(clone),
+  ]);
 
   if (!workspace) {
     return notFound();
   }
 
-  const eventDetails = await findEvent({
-    slug,
-    workspaceURL,
-    client,
-    config,
-    user,
-  }).then(clone);
-
   if (!eventDetails) {
     return notFound();
   }
 
-  return <EventDetails eventDetails={eventDetails} workspace={workspace} />;
+  const pricePromise = eventDetails.defaultPrice
+    ? findEventDefaultPrice({
+        eventId: eventDetails.id,
+        workspaceURL,
+        config,
+        client,
+        defaultPrice: eventDetails.defaultPrice,
+        saleCurrency: eventDetails.eventProduct?.saleCurrency,
+      })
+    : undefined;
+
+  return (
+    <EventDetails
+      eventDetails={eventDetails}
+      workspace={workspace}
+      pricePromise={pricePromise}
+    />
+  );
 }

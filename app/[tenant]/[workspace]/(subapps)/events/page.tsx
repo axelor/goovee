@@ -4,7 +4,7 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ----//
 import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {getWorkspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {Card} from '@/ui/components/card';
@@ -21,7 +21,7 @@ import {
   LIMIT,
 } from '@/subapps/events/common/constants';
 import {findEvents} from '@/subapps/events/common/orm/event';
-import {findEventCategories} from '@/subapps/events/common/orm/event-category';
+import {getEventCategories} from '@/subapps/events/common/orm/event-category';
 import type {PageInfo} from '@/types';
 import type {ListEvent, Category} from '@/subapps/events/common/types';
 import {
@@ -64,11 +64,7 @@ export default async function Page(props: {
   if (!tenant) return notFound();
   const {client} = tenant;
 
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  }).then(clone);
+  const workspace = await getWorkspace(workspaceURL, user, client).then(clone);
 
   if (!workspace) {
     return notFound();
@@ -124,11 +120,11 @@ async function Categories({
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   categoryIds: string[];
 }) {
-  const categories: Cloned<Category>[] = await findEventCategories({
-    workspaceURL: workspace.url,
-    client,
+  const categories: Cloned<Category>[] = await getEventCategories(
+    workspace.url,
     user,
-  }).then(clone);
+    client,
+  ).then(clone);
 
   return (
     <EventCategoryList

@@ -1,2 +1,2 @@
 export {EventPageCard} from './event-page-card';
-export type {EventPageCardProps} from './types';
+export type {EventPageCardProps, RegistrationFormProps} from './types';

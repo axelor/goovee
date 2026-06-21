@@ -31,6 +31,7 @@ import {and} from '@/utils/orm';
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_STATUS, EVENT_TYPE} from '@/subapps/events/common/constants';
 import {findProductsFromWS} from '@/subapps/events/common/service';
+import {findAccessibleEventCategoryIds} from '@/subapps/events/common/orm/event-category';
 import {
   findSelectionItems,
   modelFieldSelect,
@@ -134,6 +135,32 @@ const buildEventTypeFilters = ({
   }
 };
 
+function buildEventAccessWhere({
+  id,
+  slug,
+  workspaceURL,
+  privateFilter,
+}: {
+  id?: ID;
+  slug?: string;
+  workspaceURL: string;
+  privateFilter: Awaited<ReturnType<typeof filterPrivate>>;
+}) {
+  return and<AOSPortalEvent>([
+    id && {id},
+    slug ? {slug} : {slug: {ne: null}},
+    privateFilter,
+    {OR: [{archived: false}, {archived: null}]},
+    {
+      statusSelect: EVENT_STATUS.PUBLISHED,
+      eventCategorySet: and<AOSPortalEventCategory>([
+        {workspace: {url: workspaceURL}},
+        privateFilter,
+      ]),
+    },
+  ]);
+}
+
 export type FullEvent = ExpandRecursively<
   NonNullable<Awaited<ReturnType<typeof findEvent>>>
 >;
@@ -156,21 +183,9 @@ export async function findEvent({
   if (!((slug || id) && workspaceURL)) return null;
 
   const privateFilter = await filterPrivate({user, client});
-  const event = await client.aOSPortalEvent
+  const eventQuery = client.aOSPortalEvent
     .findOne({
-      where: and<AOSPortalEvent>([
-        id && {id},
-        slug ? {slug} : {slug: {ne: null}},
-        privateFilter,
-        {OR: [{archived: false}, {archived: null}]},
-        {
-          statusSelect: EVENT_STATUS.PUBLISHED,
-          eventCategorySet: and<AOSPortalEventCategory>([
-            {workspace: {url: workspaceURL}},
-            privateFilter,
-          ]),
-        },
-      ]),
+      where: buildEventAccessWhere({id, slug, workspaceURL, privateFilter}),
       select: {
         id: true,
         eventTitle: true,
@@ -235,6 +250,8 @@ export async function findEvent({
         : false;
       return {...event, isRegistered};
     });
+
+  const event = await eventQuery;
 
   if (!event) return null;
   const {eventProduct, defaultPrice} = event;
@@ -348,6 +365,163 @@ export async function findEvent({
   };
 }
 
+export async function findEventImage({
+  id,
+  slug,
+  workspaceURL,
+  client,
+  user,
+}: {
+  id?: ID;
+  slug?: string;
+  workspaceURL: string;
+  client: Client;
+  user?: User;
+}) {
+  if (!((slug || id) && workspaceURL)) return null;
+
+  const privateFilter = await filterPrivate({user, client});
+  return client.aOSPortalEvent.findOne({
+    where: buildEventAccessWhere({id, slug, workspaceURL, privateFilter}),
+    select: {eventImage: {id: true}},
+  });
+}
+
+export async function findEventIdForAccess({
+  id,
+  slug,
+  workspaceURL,
+  client,
+  user,
+}: {
+  id?: ID;
+  slug?: string;
+  workspaceURL: string;
+  client: Client;
+  user?: User;
+}) {
+  if (!((slug || id) && workspaceURL)) return null;
+
+  const privateFilter = await filterPrivate({user, client});
+  return client.aOSPortalEvent.findOne({
+    where: buildEventAccessWhere({id, slug, workspaceURL, privateFilter}),
+    select: {id: true},
+  });
+}
+
+export async function findEventForDetail({
+  slug,
+  workspaceURL,
+  client,
+  user,
+}: {
+  slug?: string;
+  workspaceURL: string;
+  client: Client;
+  user?: User;
+}) {
+  if (!(slug && workspaceURL)) return null;
+
+  const privateFilter = await filterPrivate({user, client});
+  const event = await client.aOSPortalEvent.findOne({
+    where: buildEventAccessWhere({slug, workspaceURL, privateFilter}),
+    select: {
+      id: true,
+      eventTitle: true,
+      eventCategorySet: {select: {id: true, name: true, color: true}},
+      eventImage: {id: true},
+      eventDescription: true,
+      eventPlace: true,
+      eventStartDateTime: true,
+      eventEndDateTime: true,
+      eventAllDay: true,
+      eventAllowRegistration: true,
+      registrationDeadlineDateTime: true,
+      eventProduct: {
+        saleCurrency: {code: true, symbol: true, numberOfDecimals: true},
+      },
+      registrationList: {
+        select: {
+          participantList: {
+            where: {...(user?.email ? {emailAddress: user?.email} : {})},
+            select: {emailAddress: true},
+          },
+        },
+      },
+      slug: true,
+      defaultPrice: true,
+      isPublic: true,
+      isHidden: true,
+      isLoginNotNeeded: true,
+      isPrivate: true,
+      maxParticipantPerRegistration: true,
+      workspace: {url: true},
+    },
+  });
+
+  if (!event) return null;
+
+  const isRegistered = user?.email
+    ? Boolean(
+        event.registrationList?.find(r => (r.participantList?.length ?? 0) > 0),
+      )
+    : false;
+
+  return {...event, isRegistered, defaultPrice: event.defaultPrice?.toString()};
+}
+
+export type EventDetailData = NonNullable<
+  Awaited<ReturnType<typeof findEventForDetail>>
+>;
+
+export type EventDefaultPrice = {
+  formattedDefaultPrice: string | null;
+  formattedDefaultPriceAti: string | null;
+};
+
+export async function findEventDefaultPrice({
+  eventId,
+  workspaceURL,
+  config,
+  client,
+  defaultPrice,
+  saleCurrency,
+}: {
+  eventId: ID;
+  workspaceURL: string;
+  config: TenantConfig;
+  client: Client;
+  defaultPrice?: string | null;
+  saleCurrency?: {
+    symbol?: string | null;
+    numberOfDecimals?: number | null;
+  } | null;
+}): Promise<EventDefaultPrice> {
+  const productsFromWS = await findProductsFromWS({
+    workspaceURL,
+    config,
+    client,
+    eventId,
+  });
+
+  const displayWt = productsFromWS?.priceWT || defaultPrice;
+  const displayAti = productsFromWS?.priceATI || defaultPrice;
+
+  const currencySymbol = saleCurrency?.symbol || DEFAULT_CURRENCY_SYMBOL;
+  const scale = saleCurrency?.numberOfDecimals || DEFAULT_CURRENCY_SCALE;
+
+  const [formattedDefaultPrice, formattedDefaultPriceAti] = await Promise.all([
+    formatNumber(displayWt, {currency: currencySymbol, scale, type: 'DECIMAL'}),
+    formatNumber(displayAti, {
+      currency: currencySymbol,
+      scale,
+      type: 'DECIMAL',
+    }),
+  ]);
+
+  return {formattedDefaultPrice, formattedDefaultPriceAti};
+}
+
 export async function findEvents({
   ids,
   search,
@@ -438,15 +612,41 @@ export async function findEvents({
   const currentDateTime = dayjs().toISOString();
   const todayStartTime = dayjs().startOf(DAY).toISOString();
   const privateFilter = await filterPrivate({user, client});
+
+  const accessibleCategoryIds = await findAccessibleEventCategoryIds({
+    workspaceURL,
+    categoryids,
+    privateFilter,
+    client,
+  });
+
+  if (!accessibleCategoryIds.length) {
+    return {events: [], pageInfo: emptyPageInfo};
+  }
+
+  const regListClause = onlyRegisteredEvent
+    ? {registrationList: {participantList: {emailAddress: user?.email}}}
+    : {
+        OR: [
+          {isHidden: false},
+          {isHidden: null},
+          ...(user?.email
+            ? [
+                {
+                  registrationList: {
+                    participantList: {emailAddress: user?.email},
+                  },
+                },
+              ]
+            : []),
+        ],
+      };
+
   const whereClause = and<AOSPortalEvent>([
     {
       statusSelect: EVENT_STATUS.PUBLISHED,
       slug: {ne: null},
-      eventCategorySet: and<AOSPortalEventCategory>([
-        {workspace: {url: workspaceURL}},
-        categoryids?.length && {id: {in: categoryids}},
-        privateFilter,
-      ]),
+      eventCategorySet: {id: {in: accessibleCategoryIds}},
     },
     privateFilter,
     ids?.length && {id: {in: ids}},
@@ -455,23 +655,7 @@ export async function findEvents({
     buildDateFilters({eventStartDateTimeCriteria, year, startDate, endDate}),
     eventType &&
       buildEventTypeFilters({eventType, todayStartTime, currentDateTime}),
-    onlyRegisteredEvent
-      ? {registrationList: {participantList: {emailAddress: user?.email}}}
-      : {
-          OR: [
-            {isHidden: false},
-            {isHidden: null},
-            ...(user?.email
-              ? [
-                  {
-                    registrationList: {
-                      participantList: {emailAddress: user?.email},
-                    },
-                  },
-                ]
-              : []),
-          ],
-        },
+    regListClause,
   ]);
 
   const skip = limit ? getSkip(limit, page) : undefined;

@@ -5,11 +5,11 @@ import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
-import {findWorkspace, findSubappAccess} from '@/orm/workspace';
+import {getWorkspace, findSubappAccess} from '@/orm/workspace';
 import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
-import {findEventCategories} from '@/subapps/events/common/orm/event-category';
+import {getEventCategories} from '@/subapps/events/common/orm/event-category';
 import {
   EventNavbar,
   MobileMenuCategory,
@@ -45,21 +45,19 @@ export default async function Layout(props: {
 
   if (!subapp) return notFound();
 
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
+  const workspace = await getWorkspace(
+    workspaceURL,
+    session?.user,
     client,
-  }).then(clone);
+  ).then(clone);
 
   if (!workspace) {
     return notFound();
   }
 
-  const categories = await findEventCategories({
-    workspaceURL: workspace.url,
-    client,
-    user,
-  }).then(clone);
+  const categories = await getEventCategories(workspace.url, user, client).then(
+    clone,
+  );
 
   return (
     <>

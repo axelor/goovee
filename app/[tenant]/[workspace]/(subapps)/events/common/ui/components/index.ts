@@ -22,7 +22,10 @@ export {EventDateCard} from './event-date-card';
 export type {EventDateCardProps} from './event-date-card';
 
 export {EventPageCard} from './event-page-card';
-export type {EventPageCardProps} from './event-page-card';
+export type {
+  EventPageCardProps,
+  RegistrationFormProps,
+} from './event-page-card';
 
 export {CommentsSection} from './comments-section';
 export type {Comment} from './comments-section';

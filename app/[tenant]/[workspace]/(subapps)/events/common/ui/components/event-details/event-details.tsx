@@ -11,14 +11,19 @@ import {
   EventPageCard,
   CommentsSection,
 } from '@/subapps/events/common/ui/components';
-import type {FullEvent} from '@/subapps/events/common/orm/event';
+import type {
+  EventDefaultPrice,
+  EventDetailData,
+} from '@/subapps/events/common/orm/event';
 
 export function EventDetails({
   eventDetails,
   workspace,
+  pricePromise,
 }: {
-  eventDetails: Cloned<FullEvent>;
+  eventDetails: Cloned<EventDetailData>;
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  pricePromise?: Promise<EventDefaultPrice>;
 }) {
   const eventId = eventDetails.id;
 
@@ -28,7 +33,11 @@ export function EventDetails({
   });
   return (
     <div className="container mx-auto flex flex-col gap-6 pt-6 pb-24 lg:pb-6">
-      <EventPageCard eventDetails={eventDetails} workspace={workspace} />
+      <EventPageCard
+        eventDetails={eventDetails}
+        workspace={workspace}
+        pricePromise={pricePromise}
+      />
       {enableComment && (
         <CommentsSection eventId={eventId} slug={eventDetails.slug} />
       )}

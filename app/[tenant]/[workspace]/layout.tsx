@@ -6,7 +6,7 @@ import {notFound, redirect} from 'next/navigation';
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
-import {findWorkspace, findWorkspaces, findSubapps} from '@/orm/workspace';
+import {getWorkspace, findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
@@ -45,11 +45,7 @@ export async function generateMetadata(props: {
   if (!tenant) return null;
   const {client} = tenant;
 
-  const $workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
+  const $workspace = await getWorkspace(workspaceURL, user, client);
 
   if (!$workspace?.name) {
     return null;
@@ -88,11 +84,7 @@ export default async function Layout(props: {
   }
   const {client} = tenant;
 
-  const $workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  }).then(clone);
+  const $workspace = await getWorkspace(workspaceURL, user, client).then(clone);
 
   if (!$workspace) {
     return user

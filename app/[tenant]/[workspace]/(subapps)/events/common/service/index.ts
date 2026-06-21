@@ -7,7 +7,7 @@ import type {TenantConfig} from '@/tenant';
 import {ID} from '@/types';
 import {PortalWorkspace} from '@/orm/workspace';
 import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {getWorkspace} from '@/orm/workspace';
 import {ActionResponse} from '@/types/action';
 import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
@@ -95,11 +95,7 @@ export async function findProductsFromWS({
   const session = await getSession();
   const user = session?.user;
 
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    user,
-    client,
-  });
+  const workspace = await getWorkspace(workspaceURL, user, client);
 
   if (!workspace) {
     return {

@@ -7,7 +7,7 @@ import {manager} from '@/tenant';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
-import {findEvent} from '@/subapps/events/common/orm/event';
+import {findEventImage} from '@/subapps/events/common/orm/event';
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +25,7 @@ export async function GET(
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return new NextResponse('Bad Request', {status: 400});
-  const {client, config} = tenant;
+  const {client} = tenant;
 
   const session = await getSession();
   const user = session?.user;
@@ -50,11 +50,10 @@ export async function GET(
     return new NextResponse('Unauthorized', {status: 401});
   }
 
-  const event = await findEvent({
+  const event = await findEventImage({
     slug,
     workspaceURL,
     client,
-    config,
     user,
   });
 

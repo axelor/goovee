@@ -31,7 +31,7 @@ import {
   EventPayments,
   CompanyAddressField,
 } from '@/subapps/events/common/ui/components';
-import type {EventPageCardProps} from '@/subapps/events/common/ui/components';
+import type {RegistrationFormProps} from '@/subapps/events/common/ui/components';
 import {
   isValidParticipant,
   register,
@@ -51,7 +51,7 @@ export const RegistrationForm = ({
   metaFields = [],
   workspace,
   user,
-}: EventPageCardProps) => {
+}: RegistrationFormProps) => {
   const {
     defaultPrice = 0,
     formattedDefaultPrice = null,
