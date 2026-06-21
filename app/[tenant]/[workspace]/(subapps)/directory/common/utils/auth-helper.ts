@@ -1,7 +1,8 @@
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {classifySubappAccess} from '@/lib/core/workspace/subapp-access';
+import {findWorkspace} from '@/orm/workspace';
 import {manager, type Tenant} from '@/tenant';
 import {User} from '@/types';
 import {Subapp, PortalWorkspace} from '@/orm/workspace';
@@ -27,12 +28,14 @@ export const ensureAuth = cache(async function ensureAuth(
       error: true;
       message: string;
       forceLogin?: boolean;
+      unauthorized?: boolean;
       auth?: never;
     }
   | {
       error: false;
       message?: never;
       forceLogin?: never;
+      unauthorized?: never;
       auth: AuthProps;
     }
 > {
@@ -56,20 +59,35 @@ export const ensureAuth = cache(async function ensureAuth(
   }
   const {client} = tenant;
 
-  const subapp = await findSubappAccess({
+  const access = await classifySubappAccess({
     code: SUBAPP_CODES.directory,
     user,
     url: workspaceURL,
     client,
   });
 
-  if (!subapp) {
+  if (!access.ok) {
+    if (access.reason === 'login') {
+      return {
+        error: true,
+        forceLogin: true,
+        message: await t('Unauthorized'),
+      };
+    }
+    if (access.reason === 'unauthorized') {
+      return {
+        error: true,
+        unauthorized: true,
+        message: await t('Unauthorized'),
+      };
+    }
     return {
       error: true,
-      forceLogin: !user,
       message: await t('Unauthorized'),
     };
   }
+
+  const subapp = access.subapp;
 
   const workspace = await findWorkspace({
     user,

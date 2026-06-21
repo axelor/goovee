@@ -1,6 +1,6 @@
 import 'server-only';
 
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {findSubappAccess, type Subapp} from '@/orm/workspace';
@@ -9,19 +9,31 @@ import {SEARCH_PARAMS} from '@/constants';
 import type {User} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
 
-/**
- * Resolves the current subapp for the request and enforces access.
- *
- * - Available  -> returns the Subapp.
- * - Unavailable & guest      -> redirect to the login page.
- * - Unavailable & authenticated -> 404 (notFound).
- *
- * `redirect` and `notFound` throw, so the returned `Subapp` is always defined
- * for callers that reach the return value.
- */
+export type SubappDenial = 'login' | 'unauthorized' | 'notFound';
+
+export async function classifySubappAccess(params: {
+  code: string;
+  url: string;
+  user: User | undefined;
+  client: Client;
+}): Promise<{ok: true; subapp: Subapp} | {ok: false; reason: SubappDenial}> {
+  const {code, url, user, client} = params;
+
+  const subapp = await findSubappAccess({code, url, user, client});
+  if (subapp) return {ok: true, subapp};
+
+  const app = await client.aOSPortalApp.findOne({
+    where: {code},
+    select: {isInstalled: true},
+  });
+  if (!app?.isInstalled) return {ok: false, reason: 'notFound'};
+
+  return {ok: false, reason: user ? 'unauthorized' : 'login'};
+}
+
 export async function requireSubappAccess(params: {
   code: string;
-  url: string; // workspaceURL
+  url: string;
   user: User | undefined;
   client: Client;
   workspaceURI: string;
@@ -29,20 +41,20 @@ export async function requireSubappAccess(params: {
 }): Promise<Subapp> {
   const {code, url, user, client, workspaceURI, tenantId} = params;
 
-  const subapp = await findSubappAccess({code, url, user, client});
+  const res = await classifySubappAccess({code, url, user, client});
+  if (res.ok) return res.subapp;
 
-  if (!subapp) {
-    if (!user) {
-      redirect(
-        getLoginURL({
-          callbackurl: workspaceURI,
-          workspaceURI,
-          [SEARCH_PARAMS.TENANT_ID]: tenantId,
-        }),
-      );
-    }
-    notFound();
+  if (res.reason === 'login') {
+    redirect(
+      getLoginURL({
+        callbackurl: workspaceURI,
+        workspaceURI,
+        [SEARCH_PARAMS.TENANT_ID]: tenantId,
+      }),
+    );
   }
-
-  return subapp;
+  if (res.reason === 'unauthorized') {
+    unauthorized();
+  }
+  notFound();
 }

@@ -1,4 +1,4 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 import {MdAdd} from 'react-icons/md';
@@ -80,7 +80,12 @@ export default async function Page(props: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {
+    error,
+    auth,
+    forceLogin,
+    unauthorized: isUnauthorized,
+  } = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -90,7 +95,7 @@ export default async function Page(props: {
       }),
     );
   }
-
+  if (isUnauthorized) unauthorized();
   if (error) notFound();
   const {workspace, user, subapp} = auth;
   const {client} = auth.tenant;

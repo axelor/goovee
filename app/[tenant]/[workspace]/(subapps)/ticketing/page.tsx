@@ -17,7 +17,7 @@ import {
 import {cn} from '@/utils/css';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
@@ -37,7 +37,12 @@ export default async function Page(props: {
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const {limit = 8, page = 1} = searchParams;
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
+  const {
+    error,
+    auth,
+    forceLogin,
+    unauthorized: isUnauthorized,
+  } = await ensureAuth(workspaceURL, tenant);
   if (forceLogin) {
     redirect(
       getLoginURL({
@@ -47,6 +52,7 @@ export default async function Page(props: {
       }),
     );
   }
+  if (isUnauthorized) unauthorized();
   if (error) notFound();
 
   const {workspace, user, subapp} = auth;

@@ -1,10 +1,11 @@
 import Image from 'next/image';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {FaLinkedin} from 'react-icons/fa';
 import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {NO_IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {getLoginURL} from '@/utils/url';
 import {t, tattr} from '@/lib/core/locale/server';
 import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
@@ -26,8 +27,21 @@ export default async function Page(props: {
   const params = await props.params;
   const {id} = params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-  const {error, auth} = await ensureAuth(workspaceURL, tenant);
-  if (error) notFound();
+  const result = await ensureAuth(workspaceURL, tenant);
+  if (result.error) {
+    if (result.forceLogin) {
+      redirect(
+        getLoginURL({
+          callbackurl: workspaceURI,
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    if (result.unauthorized) unauthorized();
+    notFound();
+  }
+  const {auth} = result;
 
   const {client} = auth.tenant;
 

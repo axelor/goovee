@@ -1,5 +1,5 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
@@ -53,6 +53,7 @@ export default async function Page(props: {
         }),
       );
     }
+    if (result.unauthorized) unauthorized();
     notFound();
   }
   const {auth} = result;
