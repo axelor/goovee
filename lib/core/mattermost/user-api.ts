@@ -138,7 +138,7 @@ async function createMattermostUser(
     return {
       success: false,
       error: error,
-      message: error.response?.data?.message || error.message,
+      message: error.message,
     };
   }
 }
