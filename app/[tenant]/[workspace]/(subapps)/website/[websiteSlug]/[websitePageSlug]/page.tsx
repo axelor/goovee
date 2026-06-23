@@ -76,7 +76,7 @@ export default async function Page(props: {
   if (!tenant) {
     return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
   }
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const [canUserEditWiki, websitePage] = await Promise.all([
     canEditWiki({userId: user?.id, client}),
@@ -99,6 +99,7 @@ export default async function Page(props: {
     contentLinesChunk = populateLinesByChunk({
       contentLines: websitePage?.contentLines,
       client,
+      config,
       chunkSize: 5,
     });
   }

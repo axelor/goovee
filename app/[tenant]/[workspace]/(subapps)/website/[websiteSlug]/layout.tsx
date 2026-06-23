@@ -84,7 +84,7 @@ export default async function Layout(props: {
   if (!tenant) {
     return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
   }
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const website = await findWebsiteBySlug({
     websiteSlug,
@@ -92,6 +92,7 @@ export default async function Layout(props: {
     workspaceURI,
     user,
     client,
+    config,
     mountTypes: layoutMountTypes,
   });
 

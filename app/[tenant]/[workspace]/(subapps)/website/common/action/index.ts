@@ -53,7 +53,7 @@ export async function getLocaleRedirectionURL(
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const subapp = await findSubappAccess({
     code: SUBAPP_CODES.website,
@@ -74,6 +74,7 @@ export async function getLocaleRedirectionURL(
     workspaceURI,
     user,
     client,
+    config,
   });
 
   if (!website) {
