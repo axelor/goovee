@@ -30,7 +30,7 @@ export default async function Layout(props: {
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const website = await findWebsiteBySlug({
     websiteSlug,
@@ -38,6 +38,7 @@ export default async function Layout(props: {
     workspaceURI,
     user,
     client,
+    config,
   });
 
   if (!website) {

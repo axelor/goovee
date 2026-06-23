@@ -199,6 +199,7 @@ export async function findWebsiteBySlug({
   workspaceURI,
   user,
   client,
+  config,
   mountTypes,
   path,
 }: {
@@ -207,6 +208,7 @@ export async function findWebsiteBySlug({
   workspaceURI: string;
   user?: User;
   client: Client;
+  config: TenantConfig;
   mountTypes?: LayoutMountType[];
   /** @param mounTypes should be an array of single mountType for path to work
    * ex: mountTypes:[ "header" ]
@@ -308,6 +310,7 @@ export async function findWebsiteBySlug({
       modelName: CONTENT_MODEL,
       modelField: CONTENT_MODEL_ATTRS,
       client,
+      config,
       path,
       modelFieldCache,
       modelRecordCache,
@@ -322,6 +325,7 @@ export async function findWebsiteBySlug({
       modelName: CONTENT_MODEL,
       modelField: CONTENT_MODEL_ATTRS,
       client,
+      config,
       path,
       modelFieldCache,
       modelRecordCache,
@@ -524,11 +528,13 @@ async function getRelationalFieldTypeData({
   value,
   modelRecordCache,
   client,
+  config,
 }: {
   field: {targetModel?: string};
   value: any;
   modelRecordCache: Cache;
   client: Client;
+  config: TenantConfig;
 }) {
   const targetModel = field?.targetModel;
 
@@ -562,6 +568,7 @@ async function getRelationalFieldTypeData({
 
     let records = await findModelRecords({
       client,
+      config,
       modelName: targetModel,
       ids: uncachedIds,
     });
@@ -596,6 +603,7 @@ async function getCustomRelationalFieldTypeData({
   jsonModelCache,
   jsonModelRecordCache,
   client,
+  config,
   path,
 }: {
   field: {targetJsonModel?: {name?: string}};
@@ -605,6 +613,7 @@ async function getCustomRelationalFieldTypeData({
   jsonModelCache: Cache;
   jsonModelRecordCache: Cache;
   client: Client;
+  config: TenantConfig;
   path?: string[];
 }) {
   const pathFieldName = path?.[0];
@@ -685,6 +694,7 @@ async function getCustomRelationalFieldTypeData({
                 modelField: JSON_MODEL_ATTRS,
                 jsonModelName: targetJsonModelName,
                 client,
+                config,
                 modelFieldCache,
                 modelRecordCache,
                 jsonModelCache,
@@ -796,6 +806,7 @@ const populateAttributes = async ({
   jsonModelName,
   modelField,
   client,
+  config,
   modelFieldCache,
   modelRecordCache,
   jsonModelCache,
@@ -807,6 +818,7 @@ const populateAttributes = async ({
   jsonModelName?: string;
   modelField: string;
   client: Client;
+  config: TenantConfig;
   modelFieldCache: Cache;
   modelRecordCache: Cache;
   jsonModelCache: Cache;
@@ -870,6 +882,7 @@ const populateAttributes = async ({
       jsonModelCache,
       jsonModelRecordCache,
       client,
+      config,
       path: path?.[1] ? path.slice(1) : undefined,
     });
 
@@ -883,6 +896,7 @@ export async function populateContent({
   line,
   path,
   client,
+  config,
   modelFieldCache = new Cache(),
   modelRecordCache = new Cache(),
   jsonModelCache = new Cache(),
@@ -894,6 +908,7 @@ export async function populateContent({
    */
   path?: string[];
   client: Client;
+  config: TenantConfig;
   modelFieldCache?: Cache;
   modelRecordCache?: Cache;
   jsonModelCache?: Cache;
@@ -910,6 +925,7 @@ export async function populateContent({
         modelName: CONTENT_MODEL,
         modelField: CONTENT_MODEL_ATTRS,
         client,
+        config,
         modelFieldCache,
         modelRecordCache,
         jsonModelCache,
@@ -923,6 +939,7 @@ export async function populateContent({
 export function populateLinesByChunk({
   contentLines,
   client,
+  config,
   path,
   chunkSize,
 }: {
@@ -933,6 +950,7 @@ export function populateLinesByChunk({
   chunkSize?: number;
   contentLines: ContentLine[];
   client: Client;
+  config: TenantConfig;
 }): Promise<ReplacedContentLine[]>[] {
   const jsonModelCache = new Cache();
   const jsonModelRecordCache = new Cache();
@@ -953,6 +971,7 @@ export function populateLinesByChunk({
           populateContent({
             line,
             client,
+            config,
             path,
             modelFieldCache,
             modelRecordCache,
@@ -986,7 +1005,7 @@ async function findModelRecords({
   ids,
 }: {
   client: Client;
-  config?: TenantConfig;
+  config: TenantConfig;
   modelName: string;
   ids: string[];
 }) {
