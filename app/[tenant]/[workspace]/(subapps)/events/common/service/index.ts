@@ -126,10 +126,12 @@ export async function findProductsFromWS({
       partnerId,
     };
     const res = await aosClient(aos).request<{
-      data?: EventPriceWS & {status?: number};
+      status?: number;
+      message?: string;
+      data?: EventPriceWS;
     }>('ws/portal/event/price', {body: reqBody});
 
-    if (res?.data?.status === -1) {
+    if (res?.status === -1) {
       console.log('Error:', res);
       return null;
     }
