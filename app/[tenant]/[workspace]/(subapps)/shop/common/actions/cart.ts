@@ -43,7 +43,7 @@ export async function findProduct({
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return null;
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const categories = await findCategories({
     workspace,
@@ -60,6 +60,7 @@ export async function findProduct({
     workspace,
     user,
     client,
+    config,
     categoryids,
   }).then(clone);
 }

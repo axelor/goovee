@@ -43,7 +43,7 @@ export async function generateMetadata(props: {
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return null;
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const workspace = await findWorkspace({
     user: user,
@@ -72,7 +72,8 @@ export async function generateMetadata(props: {
     workspace,
     user,
     client,
-    categoryids: $category.id,
+    config,
+    categoryids: [$category.id],
   });
 
   if (!computedProduct?.product) {
@@ -114,7 +115,7 @@ async function Product({
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const workspace = await findWorkspace({
     user,
@@ -143,7 +144,8 @@ async function Product({
     workspace,
     user,
     client,
-    categoryids: $category.id,
+    config,
+    categoryids: [$category.id],
   });
 
   if (!computedProduct) redirect(`${workspaceURI}/shop`);

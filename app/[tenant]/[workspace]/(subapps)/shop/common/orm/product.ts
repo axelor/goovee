@@ -223,7 +223,7 @@ export async function findProducts({
   workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
   user?: User;
   client: Client;
-  config?: TenantConfig;
+  config: TenantConfig;
   associateWorkspace?: boolean;
 }) {
   if (!(workspace && workspace.config && client)) return [];
@@ -613,7 +613,7 @@ export async function findProduct({
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   user?: User;
   client: Client;
-  config?: TenantConfig;
+  config: TenantConfig;
   categoryids?: (string | number)[];
 }) {
   if (!id) {
@@ -646,7 +646,7 @@ export async function findProductBySlug({
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   user?: User;
   client: Client;
-  config?: TenantConfig;
+  config: TenantConfig;
   categoryids?: (string | number)[];
 }) {
   if (!slug) {
@@ -698,7 +698,7 @@ export async function findProductsFromWS({
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   user?: User;
   productList: Array<{productId: Product['id']}>;
-  config?: TenantConfig;
+  config: TenantConfig;
 }): Promise<WSObject[]> {
   if (!workspace?.config?.company?.id && user && productList && config) {
     return [];

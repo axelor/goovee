@@ -8,6 +8,7 @@ import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {findWorkspace} from '@/orm/workspace';
 import {manager} from '@/tenant';
+import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
 import type {PortalWorkspace} from '@/orm/workspace';
@@ -58,10 +59,12 @@ async function Carousel({workspace}: any) {
 
 async function Featured({
   client,
+  config,
   user,
   workspace,
 }: {
   client: Client;
+  config: TenantConfig;
   user: User | undefined;
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
 }) {
@@ -78,6 +81,7 @@ async function Featured({
         workspace: workspace!,
         user,
         client,
+        config,
         categoryids: [category.id],
       }).then(clone);
 
@@ -110,7 +114,7 @@ async function Shop({params}: {params: {tenant: string; workspace: string}}) {
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const workspace = await findWorkspace({
     user,
@@ -134,7 +138,12 @@ async function Shop({params}: {params: {tenant: string; workspace: string}}) {
       </Suspense>
       <div className="container flex flex-col gap-6 mx-auto px-2 mb-4">
         <Suspense fallback={<FeaturedCategoriesSkeleton />}>
-          <Featured workspace={workspace} user={user} client={client} />
+          <Featured
+            workspace={workspace}
+            user={user}
+            client={client}
+            config={config}
+          />
         </Suspense>
       </div>
     </div>

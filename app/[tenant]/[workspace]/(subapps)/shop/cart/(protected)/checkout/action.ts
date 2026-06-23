@@ -114,7 +114,7 @@ async function createOrder({
   try {
     const computedProducts = await Promise.all(
       cart.items.map((i: any) =>
-        findProduct({id: i.product, workspace, user, client}),
+        findProduct({id: i.product, workspace, user, client, config}),
       ),
     );
 
