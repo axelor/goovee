@@ -66,7 +66,7 @@ export async function GET(
   if (!tenant) {
     return new NextResponse('Invalid tenant', {status: 401});
   }
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const workspace = await findWorkspace({
     user,
@@ -106,6 +106,7 @@ export async function GET(
     const line = await populateContent({
       line: websitePage.contentLines[0],
       client,
+      config,
       path: stringToPath(path),
     });
     attrs = line?.content?.attrs;
@@ -116,6 +117,7 @@ export async function GET(
       workspaceURI,
       user,
       client,
+      config,
       mountTypes: [mountType],
       path: stringToPath(path),
     });
