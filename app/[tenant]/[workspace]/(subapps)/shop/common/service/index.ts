@@ -41,7 +41,7 @@ export async function createOrder({
 
   const computedProducts = await Promise.all(
     cart.items.map((i: CartItemInput) =>
-      findProduct({id: i.product, workspace, user, client}),
+      findProduct({id: i.product, workspace, user, client, config}),
     ),
   );
 
@@ -138,7 +138,7 @@ export async function requestOrder({
   if (!tenant?.config?.aos?.url) return null;
 
   const {aos} = tenant.config;
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const ws = `${aos.url}/ws/portal/orders/${type}`;
 
@@ -151,7 +151,7 @@ export async function requestOrder({
     const computedProducts = (
       await Promise.all(
         cart.items.map(i =>
-          findProduct({id: i.product, workspace, user, client}),
+          findProduct({id: i.product, workspace, user, client, config}),
         ),
       )
     ).filter(Boolean);

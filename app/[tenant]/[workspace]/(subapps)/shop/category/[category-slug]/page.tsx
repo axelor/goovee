@@ -41,7 +41,7 @@ async function Category({
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
-  const {client} = tenant;
+  const {client, config} = tenant;
 
   const workspace = await findWorkspace({
     user,
@@ -104,6 +104,7 @@ async function Category({
     workspace,
     user,
     client,
+    config,
   });
 
   const parentcategories = $cats.filter(c => !c.parent);
