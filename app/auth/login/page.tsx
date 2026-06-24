@@ -46,9 +46,9 @@ export default async function Page(props: {
 
   const host = getPublicEnvironment(tenantConfig).GOOVEE_PUBLIC_HOST!;
 
-  /* With multiSession a browser can hold sessions for several tenants, so
-   * only bounce when the active session already belongs to the requested
-   * tenant — otherwise render the form to add a session for it. */
+  /* A session belongs to a single tenant. Bounce away from the login form only
+   * when the active session already satisfies the request — no specific tenant
+   * was asked for, or the session's tenant matches it; otherwise render the form. */
   const sessionMatchesTenant =
     session?.user && (!tenantId || session.user.tenantId === tenantId);
 

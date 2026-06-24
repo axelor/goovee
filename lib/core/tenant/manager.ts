@@ -47,8 +47,8 @@ async function connectTenant(
   // Create unaccent extension for PostgreSQL if it doesn't exist
   await client.$raw('CREATE EXTENSION IF NOT EXISTS unaccent');
 
-  /* Storage is per-tenant config now; make sure the directory exists before any
-   * upload writes to it (replaces the old getStoragePath side effect). */
+  /* Storage is per-tenant config; make sure the directory exists before any
+   * upload writes to it. */
   ensureStorageDir(config.aos.storage);
 
   return {id, config, client};

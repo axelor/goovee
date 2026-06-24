@@ -1,6 +1,7 @@
 /* The app resolves the tenant per request (path today, host later), so nothing
- * is statically rendered and frozen at build. The per-tenant theme and browser
- * variables now live in app/[tenant]/layout.tsx, not here. */
+ * is statically rendered and frozen at build. This root layout is a
+ * tenant-agnostic shell; the per-tenant theme and browser variables are applied
+ * in app/[tenant]/layout.tsx. */
 export const dynamic = 'force-dynamic';
 
 import {Poppins as FontSans} from 'next/font/google';

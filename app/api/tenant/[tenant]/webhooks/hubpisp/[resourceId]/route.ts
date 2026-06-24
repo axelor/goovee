@@ -86,7 +86,7 @@ export async function POST(
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  /* Only the context id is taken from endToEnd now; the tenant comes from the
+  /* Only the context id is taken from endToEnd; the tenant comes from the
    * authoritative path param. A mismatch surfaces as "context not found" when
    * the id is looked up in the path tenant's database. */
   const contextId = endToEnd.slice(0, separatorIndex);
