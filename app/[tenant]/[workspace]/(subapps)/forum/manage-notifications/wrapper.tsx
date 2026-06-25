@@ -12,12 +12,14 @@ export async function MembersNoticationsWrapper({
   userId,
   group,
   workspaceID,
+  workspaceURL,
   sortBy,
 }: {
   userId: ID;
   group: string;
   sortBy: string;
   workspaceID: PortalWorkspace['id'];
+  workspaceURL: string;
 }) {
   const groupMembers = (await fetchGroupsByMembers({
     id: userId,
@@ -28,6 +30,7 @@ export async function MembersNoticationsWrapper({
       },
     },
     workspaceID,
+    workspaceURL,
   }).then(clone)) as MemberGroup[];
 
   return (

@@ -65,6 +65,7 @@ export default async function Page(props: {
             group={group}
             sortBy={sortBy}
             workspaceID={access.workspace.id}
+            workspaceURL={workspaceURL}
           />
         </Suspense>
       </NotificationHeader>

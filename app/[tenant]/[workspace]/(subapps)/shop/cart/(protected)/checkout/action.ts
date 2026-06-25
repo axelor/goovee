@@ -4,15 +4,15 @@ import {z} from 'zod';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {getWorkspaceConfig} from '@/orm/workspace';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder, findStripeOrder} from '@/payment/stripe/actions';
-import {manager} from '@/tenant';
 import {PaymentOption} from '@/types';
 import {computeTotal} from '@/utils/cart';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
@@ -46,15 +46,6 @@ export async function paypalCaptureOrder({
   orderId,
   workspaceURL,
 }: PaypalCaptureOrderInput): ActionResponse<string> {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedPaypalCapture = PaypalCaptureOrderSchema.safeParse({
     orderId,
     workspaceURL,
@@ -62,8 +53,6 @@ export async function paypalCaptureOrder({
   if (!parsedPaypalCapture.success) {
     return {error: true, message: z.prettifyError(parsedPaypalCapture.error)};
   }
-
-  const user = session?.user;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -74,36 +63,25 @@ export async function paypalCaptureOrder({
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user, tenant, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
+  const workspace = {...access.workspace, config};
 
   if (!workspace?.config?.confirmOrder) {
     return {
@@ -203,15 +181,6 @@ export async function paypalCaptureOrder({
 }
 
 export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedCartOrder = CartOrderSchema.safeParse({cart, workspaceURL});
   if (!parsedCartOrder.success) {
     return {error: true, message: z.prettifyError(parsedCartOrder.error)};
@@ -226,38 +195,25 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
     };
   }
 
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
+  const workspace = {...access.workspace, config};
 
   if (!workspace?.config?.confirmOrder) {
     return {
@@ -338,14 +294,6 @@ export async function createStripeCheckoutSession({
   cart,
   workspaceURL,
 }: CartOrderInput) {
-  const session = await getSession();
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedCartOrder = CartOrderSchema.safeParse({cart, workspaceURL});
   if (!parsedCartOrder.success) {
     return {error: true, message: z.prettifyError(parsedCartOrder.error)};
@@ -360,38 +308,25 @@ export async function createStripeCheckoutSession({
     };
   }
 
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
+  const workspace = {...access.workspace, config};
 
   if (!workspace?.config?.confirmOrder) {
     return {
@@ -487,14 +422,6 @@ export async function validateStripePayment({
   stripeSessionId,
   workspaceURL,
 }: ValidateStripePaymentInput): ActionResponse<string> {
-  const session = await getSession();
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedStripeValidation = ValidateStripePaymentSchema.safeParse({
     stripeSessionId,
     workspaceURL,
@@ -506,8 +433,6 @@ export async function validateStripePayment({
     };
   }
 
-  const user = session?.user;
-
   const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
@@ -517,36 +442,25 @@ export async function validateStripePayment({
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user, tenant, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
+  const workspace = {...access.workspace, config};
 
   if (!workspace?.config?.confirmOrder) {
     return {
@@ -652,15 +566,6 @@ export async function payboxCreateOrder({
   workspaceURL,
   uri,
 }: PayboxCreateOrderInput) {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedPayboxCreate = PayboxCreateOrderSchema.safeParse({
     cart,
     workspaceURL,
@@ -679,38 +584,25 @@ export async function payboxCreateOrder({
     };
   }
 
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
+  const workspace = {...access.workspace, config};
 
   if (!workspace?.config?.confirmOrder) {
     return {
@@ -794,15 +686,6 @@ export async function validatePayboxPayment({
   params,
   workspaceURL,
 }: ValidatePayboxPaymentInput): ActionResponse<string> {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedPayboxValidation = ValidatePayboxPaymentSchema.safeParse({
     params,
     workspaceURL,
@@ -814,8 +697,6 @@ export async function validatePayboxPayment({
     };
   }
 
-  const user = session?.user;
-
   const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
@@ -825,36 +706,25 @@ export async function validatePayboxPayment({
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user, tenant, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
+  const workspace = {...access.workspace, config};
 
   if (!workspace?.config?.confirmOrder) {
     return {

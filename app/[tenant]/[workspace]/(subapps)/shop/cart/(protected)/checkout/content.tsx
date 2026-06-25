@@ -257,7 +257,7 @@ export default function Content({
   );
 
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const {cart} = useCart();
   const [computedProducts, setComputedProducts] = useState<
     (ComputedProduct | null)[]
@@ -290,6 +290,7 @@ export default function Content({
             findProduct({
               id: String(i.product),
               workspace: workspace,
+              workspaceURL,
             }),
           ),
         )
@@ -302,7 +303,7 @@ export default function Content({
       }
     };
     init();
-  }, [cart, computedProducts, workspace, userId, tenant]);
+  }, [cart, computedProducts, workspace, userId, tenant, workspaceURL]);
 
   const $cart = useMemo(
     () => ({

@@ -3,10 +3,10 @@
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {clone} from '@/utils';
 import {TENANT_HEADER} from '@/proxy';
-import {manager} from '@/tenant';
+import {SUBAPP_CODES} from '@/constants';
 import type {Product} from '@/types';
 import type {PortalWorkspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
@@ -22,28 +22,33 @@ import {CartSchema, type CartInput} from '@/subapps/shop/common/validators';
 export async function findProduct({
   id,
   workspace,
+  workspaceURL,
 }: {
   id: Product['id'];
   workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspaceURL: string;
 }) {
   if (!IdSchema.safeParse(id).success) return null;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return null;
-  }
 
   if (!workspace) {
     return null;
   }
 
-  const session = await getSession();
-  const user = session?.user;
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return null;
+  }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client, config} = tenant;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) return null;
+
+  const {user, client} = access;
+  const {config} = access.tenant;
 
   const categories = await findCategories({
     workspace,
@@ -66,11 +71,24 @@ export async function findProduct({
 export async function requestQuotation({
   cart,
   workspace,
+  workspaceURL,
 }: {
   cart: CartInput;
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspaceURL: string;
 }) {
   if (!CartSchema.safeParse(cart).success) return null;
+
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) return null;
+
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) return null;
 
   return requestOrder({
     cart,

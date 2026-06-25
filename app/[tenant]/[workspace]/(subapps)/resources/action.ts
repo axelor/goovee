@@ -3,10 +3,10 @@
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {manager} from '@/tenant';
+import {SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
 import {TENANT_HEADER} from '@/proxy';
-import {getSession} from '@/auth';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {filterPrivate} from '@/orm/filter';
 
 // ---- LOCAL IMPORTS ---- //
@@ -26,12 +26,15 @@ export async function findDmsFiles({
 
   if (!tenantId) return [];
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return [];
-  const {client} = tenant;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.resources,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) return [];
 
-  const session = await getSession();
-  const user = session?.user;
+  const {user, client} = access;
 
   return client.aOSDMSFile
     .find({

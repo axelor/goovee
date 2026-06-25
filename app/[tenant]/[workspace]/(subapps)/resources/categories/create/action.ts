@@ -5,12 +5,11 @@ import {headers} from 'next/headers';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import {manager} from '@/tenant';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
@@ -41,47 +40,17 @@ export async function create(formData: FormData, workspaceURL: string) {
     };
   }
 
-  const session = await getSession();
-
-  const user = session?.user;
-
-  if (!user) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.resources,
-    user,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
-
-  if (!subapp) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return {
-      error: true,
-      message: await t('Invalid workspace'),
-    };
-  }
+  const {user, client} = access;
 
   const parent = await fetchFile({
     id: parentId,
