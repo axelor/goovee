@@ -46,7 +46,12 @@ export async function GET(
   }
   const workspace = {...access.workspace, config};
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.ticketing, workspace})) {
+  if (
+    !isCommentEnabled({
+      subapp: SUBAPP_CODES.ticketing,
+      config: workspace.config,
+    })
+  ) {
     return new NextResponse('Forbidden', {status: 403});
   }
 

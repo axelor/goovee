@@ -780,7 +780,7 @@ export async function CommentsWrapper({
 
   const enableComment = isCommentEnabled({
     subapp: SUBAPP_CODES.news,
-    workspace,
+    config: workspace.config,
   });
   const isDisabled = !user ? true : false;
 

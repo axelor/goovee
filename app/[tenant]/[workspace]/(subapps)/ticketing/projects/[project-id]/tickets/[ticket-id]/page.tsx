@@ -228,7 +228,10 @@ export default async function Page(props: {
         </>
       </TicketDetailsProvider>
 
-      {isCommentEnabled({subapp: SUBAPP_CODES.ticketing, workspace}) && (
+      {isCommentEnabled({
+        subapp: SUBAPP_CODES.ticketing,
+        config: workspace.config,
+      }) && (
         <div className="rounded-md border bg-card p-4 mt-5">
           <h4 className="text-xl font-semibold border-b">
             {await t('Comments')}

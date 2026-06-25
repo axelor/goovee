@@ -40,7 +40,7 @@ export const ThreadFooter = ({
 
   const enableComment = isCommentEnabled({
     subapp: SUBAPP_CODES.forum,
-    workspace: workspace,
+    config: workspace.config,
   });
 
   if (!post) return <div />;

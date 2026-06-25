@@ -1033,7 +1033,12 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await t('Workspace user is missing')};
   }
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.ticketing, workspace})) {
+  if (
+    !isCommentEnabled({
+      subapp: SUBAPP_CODES.ticketing,
+      config: workspace.config,
+    })
+  ) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -1233,7 +1238,12 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('Workspace user is missing')};
   }
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.ticketing, workspace})) {
+  if (
+    !isCommentEnabled({
+      subapp: SUBAPP_CODES.ticketing,
+      config: workspace.config,
+    })
+  ) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 

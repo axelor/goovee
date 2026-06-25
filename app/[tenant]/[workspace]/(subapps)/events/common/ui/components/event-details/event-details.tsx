@@ -24,7 +24,7 @@ export function EventDetails({
 
   const enableComment = isCommentEnabled({
     subapp: SUBAPP_CODES.events,
-    workspace,
+    config: workspace.config,
   });
   return (
     <div className="container mx-auto flex flex-col gap-6 pt-6 pb-24 lg:pb-6">
