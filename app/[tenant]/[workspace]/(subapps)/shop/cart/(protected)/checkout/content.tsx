@@ -352,7 +352,7 @@ export default function Content({
               {confirmOrder ? (
                 <>
                   <ShopPayments
-                    workspace={workspace}
+                    config={workspace.config}
                     orderSubapp={orderSubapp}
                   />
                 </>
