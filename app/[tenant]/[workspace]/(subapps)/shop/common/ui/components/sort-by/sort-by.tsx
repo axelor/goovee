@@ -14,9 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/ui/components';
-import type {PortalAppConfig} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {SORT_BY_OPTIONS} from '@/subapps/shop/common/constants';
 import type {SortOption} from '@/subapps/shop/common/types';
 import styles from './sort-by.module.scss';
@@ -31,7 +31,7 @@ export function SortBy({
   onChange: (opts: {value: string}) => void;
   options?: SortOption[];
   value?: string;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
   className?: string;
 }) {
   const options =
@@ -75,7 +75,7 @@ export function MobileSortBy({
   onChange,
   active,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
   onChange: ({value}: {value: string}) => void;
   active?: string | null;
 }) {

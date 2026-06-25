@@ -15,8 +15,8 @@ import {findGooveeUserByEmail} from '@/orm/partner';
 import {
   findDefaultPartnerWorkspaceConfig,
   findWorkspace,
-  getWorkspaceConfig,
 } from '@/orm/workspace';
+import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
 import {withMattermostSync} from '@/lib/core/mattermost';
 import {RESET_PASSWORD} from '@/constants';
@@ -398,7 +398,7 @@ const credentials = {
           });
         }
 
-        const config = await getWorkspaceConfig(workspace.config.id, client);
+        const config = await getAuthConfig(workspace.config.id, client);
         if (!config) {
           throw new APIError('BAD_REQUEST', {
             ...ERROR_CODES.BAD_REQUEST,

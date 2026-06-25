@@ -27,7 +27,7 @@ import {useForm} from 'react-hook-form';
 import {ZodIssueCode} from 'zod';
 
 // ---- LOCAL IMPORT ---- //
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../orm/config';
 import type {MutateProps, MutateResponse} from '../../../actions';
 import {mutate} from '../../../actions';
 import {FIELDS} from '../../../constants';
@@ -47,7 +47,7 @@ type TicketFormProps = {
   submitFormWithAction?: (
     action: (data?: MutateResponse) => Promise<void>,
   ) => Promise<void>;
-  formFields: PortalAppConfig['ticketingFormFieldSet'];
+  formFields: TicketingConfig['ticketingFormFieldSet'];
 };
 export function TicketForm(props: TicketFormProps) {
   const {

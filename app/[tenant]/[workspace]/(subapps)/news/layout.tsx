@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ----//
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
@@ -36,7 +36,7 @@ export default async function Layout(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getNewsConfig(access.workspace.config.id, client);
   const allCategories = config
     ? await findCategories({
         showAllCategories: true,

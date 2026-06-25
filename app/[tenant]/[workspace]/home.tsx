@@ -14,7 +14,7 @@ import {
 import {parseCommentContent} from '@/lib/core/comments';
 import {t} from '@/lib/core/locale/server';
 import type {User, OverlayColor} from '@/types';
-import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 import {BigNewsCard} from '@/ui/components/big-news-card';
 import {Card, CardContent, CardHeader, CardTitle} from '@/ui/components/card';
@@ -31,6 +31,7 @@ import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ----//
+import type {ShellConfig} from './orm/config';
 import {EVENT_TYPE} from './(subapps)/events/common/constants';
 import {findEvents} from './(subapps)/events/common/orm/event';
 import {findRecentlyActivePosts} from './(subapps)/forum/common/orm/forum';
@@ -50,7 +51,7 @@ export async function Home({
   client: Client;
   user: User | undefined;
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
   workspaceURI: string;
   apps: any[];
 }) {
@@ -470,7 +471,7 @@ async function HyperlinkCard({
   config,
   workspaceURI,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
   workspaceURI: string;
 }) {
   const hyperlinkList = config.hyperlinkList;

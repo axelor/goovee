@@ -26,12 +26,13 @@ import {computeTotal} from '@/utils/cart';
 import {getProductImageURL} from '@/utils/files';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {type PortalAppConfig, type Subapp} from '@/orm/workspace';
+import {type Subapp} from '@/orm/workspace';
 import {formatNumber} from '@/locale/formatters';
 import {calculateAdvanceAmount} from '@/utils/payment';
 import type {ComputedProduct} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {findProduct} from '@/subapps/shop/common/actions/cart';
 import {AddressSelection} from '@/subapps/shop/common/ui/components/address-selection';
 import {SHIPPING_TYPE} from '@/subapps/shop/common/constants/index';
@@ -91,7 +92,7 @@ function Total({
 }: {
   cart: CheckoutCart;
   shippingType: string;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
 }) {
   const {
     total,
@@ -244,7 +245,7 @@ export default function Content({
   orderSubapp,
   tenant,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
   orderSubapp?: Subapp | null;
   tenant: string;
 }) {

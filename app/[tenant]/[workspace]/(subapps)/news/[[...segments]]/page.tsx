@@ -4,7 +4,7 @@ import {Suspense} from 'react';
 // ---- CORE IMPORTS ----//
 import {clone} from '@/utils';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
@@ -54,7 +54,7 @@ export default async function Page(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getNewsConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const {segments} = params;

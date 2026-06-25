@@ -5,7 +5,7 @@ import {Suspense} from 'react';
 import {User} from '@/types';
 import {clone} from '@/utils';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
@@ -81,7 +81,7 @@ async function ForumGroup({
   const {client} = access.tenant;
   const userId = user?.id as string;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getForumConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const enableComment = isCommentEnabled({

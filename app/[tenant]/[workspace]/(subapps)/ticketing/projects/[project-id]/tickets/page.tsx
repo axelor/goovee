@@ -8,8 +8,8 @@ import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
-import {getWorkspaceConfig} from '@/orm/workspace';
-import type {PortalAppConfig} from '@/orm/workspace';
+import {getTicketingConfig} from '../../../common/orm/config';
+import type {TicketingConfig} from '../../../common/orm/config';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {getCurrentPath} from '@/utils/current-path';
 import {
@@ -111,7 +111,7 @@ export default async function Page(props: {
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getTicketingConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const project = await findProject({
@@ -301,7 +301,7 @@ async function AsyncFilter({
   searchParams: SearchParams;
   projectId: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   const [contacts, statuses, priorities, company, clientPartner, categories] =
     await Promise.all([

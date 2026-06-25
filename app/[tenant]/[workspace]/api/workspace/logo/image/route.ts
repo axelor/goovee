@@ -1,10 +1,11 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 import {getSession} from '@/auth';
-import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
+import {findWorkspace} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/tenant';
+import {getShellConfig} from '../../../../orm/config';
 
 export async function GET(
   request: NextRequest,
@@ -30,7 +31,7 @@ export async function GET(
     return new NextResponse('Invalid workspace', {status: 401});
   }
 
-  const config = await getWorkspaceConfig(workspace.config.id, client);
+  const config = await getShellConfig(workspace.config.id, client);
   if (!config) {
     return new NextResponse('Invalid workspace', {status: 401});
   }

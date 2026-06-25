@@ -2,7 +2,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -52,7 +52,7 @@ export default async function Page(props: {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getEventsConfig(
     access.workspace.config.id,
     client,
   );

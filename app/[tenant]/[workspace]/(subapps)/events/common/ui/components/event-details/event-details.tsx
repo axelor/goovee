@@ -1,7 +1,7 @@
 'use client';
 
 // ---- CORE IMPORTS ---- //
-import {PortalAppConfig} from '@/orm/workspace';
+import {EventsConfig} from '@/subapps/events/common/orm/config';
 import type {Cloned} from '@/types/util';
 import {isCommentEnabled} from '@/comments';
 import {SUBAPP_CODES} from '@/constants';
@@ -18,7 +18,7 @@ export function EventDetails({
   config,
 }: {
   eventDetails: Cloned<FullEvent>;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: EventsConfig | Cloned<EventsConfig>;
 }) {
   const eventId = eventDetails.id;
 

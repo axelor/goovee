@@ -6,12 +6,7 @@ import {notFound, redirect} from 'next/navigation';
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
-import {
-  findWorkspace,
-  findWorkspaces,
-  findSubapps,
-  getWorkspaceConfig,
-} from '@/orm/workspace';
+import {findWorkspace, findWorkspaces, findSubapps} from '@/orm/workspace';
 import {DEFAULT_THEME_OPTIONS} from '@/constants/theme';
 import {NAVIGATION, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
@@ -19,6 +14,7 @@ import {getBasePath} from '@/lib/core/path/base-path';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
+import {getShellConfig} from './orm/config';
 import Workspace from './workspace-context';
 import CartContext from './cart-context';
 import Header from './header';
@@ -111,7 +107,7 @@ export default async function Layout(props: {
         );
   }
 
-  const config = await getWorkspaceConfig($workspace.config.id, client);
+  const config = await getShellConfig($workspace.config.id, client);
 
   if (!config) {
     return user

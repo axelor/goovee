@@ -19,9 +19,9 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
 import type {ComputedProduct, Product, Category, PageInfo} from '@/types';
-import type {PortalAppConfig} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {MobileSortBy, SortBy, ProductCard, ProductListItem} from '..';
 import styles from './product-list.module.scss';
 
@@ -53,7 +53,7 @@ export function ProductList({
   categories?: Category[];
   category?: Category;
   pageInfo?: PageInfo;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
   productPath?: string;
   defaultSort?: string;
   hidePriceAndPurchase: boolean;

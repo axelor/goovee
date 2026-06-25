@@ -12,7 +12,7 @@ import {
   SUBAPP_CODES,
 } from '@/constants';
 import {i18n} from '@/lib/core/locale';
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {EventsConfig} from '@/subapps/events/common/orm/config';
 import {HeroSearch, Search} from '@/ui/components';
 import type {OverlayColor} from '@/types';
 import {useToast} from '@/ui/hooks';
@@ -25,7 +25,7 @@ import {SearchItem} from '@/subapps/events/common/ui/components';
 export const Hero = ({
   config,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: EventsConfig | Cloned<EventsConfig>;
 }) => {
   const {workspaceURI, workspaceURL} = useWorkspace();
   const router = useRouter();

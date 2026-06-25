@@ -7,7 +7,6 @@ import {headers} from 'next/headers';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {accessMessage} from '@/lib/core/access/denial';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
@@ -28,6 +27,7 @@ import {
   formatNumber,
 } from '@/subapps/shop/common/utils/order';
 import {createOrder} from '@/subapps/shop/common/service';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import type {ActionResponse} from '@/types/action';
 import {
   CartOrderSchema,
@@ -75,7 +75,7 @@ export async function paypalCaptureOrder({
   const {user, tenant} = access;
   const {client} = tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,
@@ -210,7 +210,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,
@@ -325,7 +325,7 @@ export async function createStripeCheckoutSession({
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,
@@ -461,7 +461,7 @@ export async function validateStripePayment({
   const {user, tenant} = access;
   const {client} = tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,
@@ -606,7 +606,7 @@ export async function payboxCreateOrder({
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,
@@ -730,7 +730,7 @@ export async function validatePayboxPayment({
   const {user, tenant} = access;
   const {client} = tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,

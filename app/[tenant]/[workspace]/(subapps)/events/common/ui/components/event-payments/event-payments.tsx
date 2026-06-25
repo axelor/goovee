@@ -7,7 +7,7 @@ import type {UseFormReturn} from 'react-hook-form';
 
 // ---- CORE IMPORTS ---- //
 import {PaymentOption} from '@/types';
-import {PortalAppConfig} from '@/orm/workspace';
+import {EventsConfig} from '@/subapps/events/common/orm/config';
 import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
@@ -37,7 +37,7 @@ export function EventPayments({
   metaFieldsFacilities,
   additionalFieldSet,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: EventsConfig | Cloned<EventsConfig>;
   event: Pick<
     Cloned<FullEvent>,
     'id' | 'displayAti' | 'facilityList' | 'priceScale'

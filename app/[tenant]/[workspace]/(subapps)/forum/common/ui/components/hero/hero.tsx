@@ -16,10 +16,10 @@ import {
   SUBAPP_CODES,
   URL_PARAMS,
 } from '@/constants';
-import {PortalAppConfig} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ForumConfig} from '@/subapps/forum/common/orm/config';
 import {Group, SearchResult} from '@/subapps/forum/common/types/forum';
 import {SearchItem} from '@/subapps/forum/common/ui/components';
 import {fetchPosts} from '@/subapps/forum/common/action/action';
@@ -29,7 +29,7 @@ export function Hero({
   config,
 }: {
   selectedGroup: Group | null;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ForumConfig | Cloned<ForumConfig>;
 }) {
   const [forceClose, setForceClose] = useState(false);
   const [_searchValue, setSearchValue] = useState<string>('');

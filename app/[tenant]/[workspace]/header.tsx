@@ -19,7 +19,8 @@ import {i18n} from '@/locale';
 import {DEFAULT_LOGO_URL, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Icon} from '@/ui/components';
-import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
+import type {ShellConfig} from './orm/config';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
@@ -37,7 +38,7 @@ function Logo({
   config,
 }: {
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const {workspaceURI} = useWorkspace();
   const logoId = workspace.logo?.id || config.company?.logo?.id;
@@ -75,7 +76,7 @@ export default function Header({
   isTopNavigation?: boolean;
   workspaces: {id: string; name: string | null; url: string | null}[];
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
   showCart?: boolean | null;
 }) {
   const router = useRouter();

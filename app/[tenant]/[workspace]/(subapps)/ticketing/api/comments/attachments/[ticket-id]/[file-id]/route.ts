@@ -8,7 +8,7 @@ import {isCommentEnabled} from '@/comments';
 import {findTicketAccess} from '../../../../../common/orm/tickets';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessStatus} from '@/lib/core/access/denial';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getTicketingConfig} from '../../../../../common/orm/config';
 import {SUBAPP_CODES} from '@/constants';
 
 export async function GET(
@@ -40,7 +40,7 @@ export async function GET(
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getTicketingConfig(access.workspace.config.id, client);
   if (!config) {
     return new NextResponse('Not found', {status: 404});
   }

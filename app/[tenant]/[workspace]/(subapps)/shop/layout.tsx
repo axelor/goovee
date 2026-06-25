@@ -2,7 +2,6 @@ import React from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
@@ -11,6 +10,7 @@ import type {Category} from '@/types';
 // ---- LOCAL IMPORTS ---- //
 import MobileMenuCategory from './mobile-menu-category';
 import {findCategories} from './common/orm/categories';
+import {getShopConfig} from './common/orm/config';
 
 export default async function Layout(props: {
   params: Promise<{
@@ -39,7 +39,7 @@ export default async function Layout(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   const categories = config
     ? await findCategories({
         workspace: access.workspace,

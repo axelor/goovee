@@ -6,7 +6,6 @@ import {clone} from '@/utils';
 import {getSession} from '@/auth';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {ensureTokenAuth} from '@/lib/core/access/ensure-token-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -18,6 +17,7 @@ import {getWhereClauseForEntity} from '@/utils/filters';
 import Content from './content';
 import {SignOutBanner} from './sign-out-banner';
 import {TokenInvalid} from './token-invalid';
+import {getInvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {InvoiceSkeleton} from '@/subapps/invoices/common/ui/components';
 
@@ -54,7 +54,7 @@ async function Invoice({
     });
     if (!invoice) return <TokenInvalid />;
 
-    const config = await getWorkspaceConfig(
+    const config = await getInvoicesConfig(
       access.workspace.config.id,
       access.tenant.client,
     );
@@ -113,7 +113,7 @@ async function Invoice({
   });
   if (!invoice) notFound();
 
-  const config = await getWorkspaceConfig(
+  const config = await getInvoicesConfig(
     access.workspace.config.id,
     access.tenant.client,
   );

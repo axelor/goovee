@@ -4,12 +4,13 @@ import type {Cloned} from '@/types/util';
 // ---- CORE IMPORTS ----//
 import type {Client} from '@/goovee/.generated/client';
 import {getSession} from '@/auth';
-import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {User} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import {
   CategoriesSkeleton,
   Hero,
@@ -93,7 +94,7 @@ export async function Homepage({
   client,
 }: {
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: NewsConfig | Cloned<NewsConfig>;
   client: Client;
 }) {
   const session = await getSession();

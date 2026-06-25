@@ -4,7 +4,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessStatus} from '@/lib/core/access/denial';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -42,7 +42,7 @@ export async function GET(
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getNewsConfig(access.workspace.config.id, client);
   if (!config) {
     return new NextResponse('Invalid workspace', {status: 401});
   }

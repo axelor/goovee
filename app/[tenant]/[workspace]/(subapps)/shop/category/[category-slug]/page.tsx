@@ -3,7 +3,6 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- ///
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -18,6 +17,7 @@ import {
   ProductListSkeleton,
 } from '@/subapps/shop/common/ui/components';
 import {findProducts} from '@/subapps/shop/common/orm/product';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {SORT_BY_OPTIONS} from '@/subapps/shop/common/constants';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
@@ -66,7 +66,7 @@ async function Category({
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getShopConfig(
     access.workspace.config.id,
     client,
   );

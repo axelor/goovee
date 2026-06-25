@@ -3,7 +3,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {findSubappAccess, getWorkspaceConfig} from '@/orm/workspace';
+import {findSubappAccess} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
@@ -13,6 +13,7 @@ import {getCurrentPath} from '@/utils/current-path';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {CheckoutSkeleton} from '@/subapps/shop/common/ui/components';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 async function Checkout({
@@ -51,7 +52,7 @@ async function Checkout({
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   if (!config?.confirmOrder) {

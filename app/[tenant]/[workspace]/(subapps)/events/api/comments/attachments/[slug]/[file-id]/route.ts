@@ -6,7 +6,7 @@ import {isCommentEnabled} from '@/comments';
 import {SUBAPP_CODES} from '@/constants';
 import {accessStatus} from '@/lib/core/access/denial';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -43,7 +43,7 @@ export async function GET(
 
   /* WorkspaceLight carries config as {id} only; fetch the heavy config so the
      shared isCommentEnabled helper can read the comment flags. */
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getEventsConfig(access.workspace.config.id, client);
   if (!config) {
     return new NextResponse('Forbidden', {status: 403});
   }

@@ -5,7 +5,6 @@ import type {Cloned} from '@/types/util';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {type PortalAppConfig} from '@/orm/workspace';
 import {Container, NavView, TableList, AlertToast} from '@/ui/components';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -21,6 +20,7 @@ import {
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import {Columns, UnpaidColumns} from '@/subapps/invoices/common/ui/components';
+import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import type {InvoiceListItem} from '@/subapps/invoices/common/types/invoices';
 
 export default function Content({
@@ -31,7 +31,7 @@ export default function Content({
 }: {
   invoices: InvoiceListItem[];
   pageInfo?: PageInfo;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoiceType: string;
 }) {
   const router = useRouter();

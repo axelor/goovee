@@ -27,8 +27,8 @@ import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
-import type {PortalAppConfig} from '@/orm/workspace';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../../common/orm/config';
+import {getTicketingConfig} from '../../../../common/orm/config';
 import {createComment, fetchComments} from '../../../../common/actions';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
 import {
@@ -107,7 +107,7 @@ export default async function Page(props: {
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getTicketingConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const [ticket, statuses, categories, priorities, contacts] =
@@ -284,8 +284,8 @@ async function ChildTickets({
   contacts: ContactPartner[];
   userId: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
-  formFields: PortalAppConfig['ticketingFormFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
+  formFields: TicketingConfig['ticketingFormFieldSet'];
 }) {
   if (!projectId) return;
 
@@ -325,7 +325,7 @@ async function ParentTicket({
   projectId?: ID;
   ticketId: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   if (!projectId) return;
   const [childIds, ticket] = await Promise.all([
@@ -359,7 +359,7 @@ async function RelatedTickets({
   ticketId: ID;
   projectId?: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   if (!projectId) return;
   const [linkTypes, links] = await Promise.all([

@@ -21,7 +21,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getTicketingConfig} from './common/orm/config';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
 
@@ -69,7 +69,7 @@ export default async function Page(props: {
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getTicketingConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const projects = await findProjectsWithTaskCount({

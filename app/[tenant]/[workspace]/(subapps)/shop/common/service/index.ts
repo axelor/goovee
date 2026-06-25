@@ -3,7 +3,7 @@ import {headers} from 'next/headers';
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
 import {t} from '@/locale/server';
-import {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import {WorkspaceLight} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
@@ -19,6 +19,7 @@ import {calculateAdvanceAmount} from '@/utils/payment';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct} from '@/subapps/shop/common/orm/product';
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {formatNumber} from '@/subapps/shop/common/utils/order';
 
 export async function createOrder({
@@ -32,7 +33,7 @@ export async function createOrder({
 }: {
   cart: CartInput;
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
-  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user: NonNullable<User>;
   client: Client;
   config: Tenant['config'];
@@ -138,7 +139,7 @@ export async function requestOrder({
 }: {
   cart: CartInput;
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
-  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   type?: 'quotation' | 'order';
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);

@@ -17,13 +17,14 @@ import {
   isAdminContact,
   isPartner,
 } from '@/orm/partner';
-import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
+import {findWorkspace} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
 import {SEARCH_PARAMS} from '@/constants';
 import {getPartnerId} from '@/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import {getAccountConfig} from '../../../common/orm/config';
 import {inviteTemplate} from '../../../common/constants/template';
 import {
   findInviteForEmail,
@@ -157,7 +158,7 @@ export async function sendInvites({
     return error(await t('Bad request'));
   }
 
-  const config = await getWorkspaceConfig(workspace.config.id, client);
+  const config = await getAccountConfig(workspace.config.id, client);
 
   if (!config) {
     return error(await t('Bad request'));
