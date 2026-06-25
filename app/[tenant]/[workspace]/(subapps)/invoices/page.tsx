@@ -66,8 +66,6 @@ async function Invoices({
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
-
   const {role, isContactAdmin} = access.subapp;
 
   const invoicesWhereClause = getWhereClauseForEntity({
@@ -98,7 +96,7 @@ async function Invoices({
     <Content
       invoiceType={invoiceType}
       invoices={clone(invoices) as InvoiceListItem[]}
-      workspace={workspace}
+      config={clone(config)}
       pageInfo={pageInfo}
     />
   );

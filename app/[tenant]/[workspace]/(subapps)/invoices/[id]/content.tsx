@@ -7,7 +7,7 @@ import {useRouter} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {Separator, Container, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
-import {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {formatDate} from '@/lib/core/locale/formatters';
 import {useToast} from '@/ui/hooks';
@@ -24,14 +24,14 @@ import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoi
 
 interface ContentProps {
   invoice: Cloned<InvoiceType>;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   workspaceURI: string;
   token?: string;
 }
 
 export default function Content({
   invoice,
-  workspace,
+  config,
   workspaceURI,
   token,
 }: ContentProps) {
@@ -111,7 +111,7 @@ export default function Content({
             invoice={invoice}
             invoiceType={invoiceType}
             isUnpaid={isUnpaid}
-            workspace={workspace as PortalWorkspace}
+            config={config}
             workspaceURI={workspaceURI}
             token={token}
             onPaymentUpdate={handlePaymentUpdate}

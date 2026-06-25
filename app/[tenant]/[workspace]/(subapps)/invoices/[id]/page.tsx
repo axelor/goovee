@@ -63,7 +63,7 @@ async function Invoice({
     return (
       <Content
         invoice={clone(invoice)}
-        workspace={clone({...access.workspace, config})}
+        config={clone(config)}
         workspaceURI={workspaceURI}
         token={access.token}
       />
@@ -122,7 +122,7 @@ async function Invoice({
   return (
     <Content
       invoice={clone(invoice)}
-      workspace={clone({...access.workspace, config})}
+      config={clone(config)}
       workspaceURI={workspaceURI}
     />
   );
