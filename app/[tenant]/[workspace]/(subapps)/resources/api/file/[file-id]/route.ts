@@ -31,7 +31,7 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {client} = access;
+  const {client} = access.tenant;
   const storage = access.tenant.config.aos.storage;
 
   const file = await fetchFile({

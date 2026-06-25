@@ -76,7 +76,8 @@ async function ForumGroup({
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const userId = user?.id as string;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);

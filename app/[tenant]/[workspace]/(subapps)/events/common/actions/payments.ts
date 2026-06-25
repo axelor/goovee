@@ -52,7 +52,8 @@ export async function createStripeCheckoutSession(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(
@@ -181,7 +182,8 @@ export async function paypalCreateOrder(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(
@@ -296,7 +298,8 @@ export async function payboxCreateOrder(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(

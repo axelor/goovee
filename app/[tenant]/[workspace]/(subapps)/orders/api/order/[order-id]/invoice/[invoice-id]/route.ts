@@ -38,7 +38,7 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {client} = access;
+  const {client} = access.tenant;
 
   const orderWhereClause = getWhereClauseForEntity({
     user: access.user,

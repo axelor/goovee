@@ -50,7 +50,8 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, subapp} = access;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
@@ -173,7 +174,8 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, subapp} = access;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};

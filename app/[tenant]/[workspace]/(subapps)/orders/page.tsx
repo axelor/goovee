@@ -61,7 +61,8 @@ async function Orders({
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const {role, isContactAdmin} = access.subapp;
 

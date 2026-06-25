@@ -39,7 +39,7 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {client} = access;
+  const {client} = access.tenant;
 
   /* WorkspaceLight carries config as {id} only; fetch the heavy config and
      bridge it so the shared isCommentEnabled helper can read the comment flags. */

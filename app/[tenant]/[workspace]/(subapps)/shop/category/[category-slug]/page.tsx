@@ -62,7 +62,8 @@ async function Category({
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(

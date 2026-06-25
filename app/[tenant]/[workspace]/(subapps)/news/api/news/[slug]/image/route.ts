@@ -39,7 +39,8 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {

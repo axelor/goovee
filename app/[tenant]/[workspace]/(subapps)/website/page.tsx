@@ -48,7 +48,8 @@ export default async function Page(props: {
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   let locale = user?.locale;
 

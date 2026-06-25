@@ -36,7 +36,7 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {client} = access;
+  const {client} = access.tenant;
 
   const {posts} = await findPosts({
     whereClause: {id: postId},

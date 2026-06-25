@@ -49,14 +49,14 @@ async function Invoice({
     const invoice = await findInvoice({
       id,
       token: access.token,
-      client: access.client,
+      client: access.tenant.client,
       workspaceURL,
     });
     if (!invoice) return <TokenInvalid />;
 
     const config = await getWorkspaceConfig(
       access.workspace.config.id,
-      access.client,
+      access.tenant.client,
     );
     if (!config) notFound();
 
@@ -108,14 +108,14 @@ async function Invoice({
   const invoice = await findInvoice({
     id,
     params: {where: invoicesWhereClause},
-    client: access.client,
+    client: access.tenant.client,
     workspaceURL,
   });
   if (!invoice) notFound();
 
   const config = await getWorkspaceConfig(
     access.workspace.config.id,
-    access.client,
+    access.tenant.client,
   );
   if (!config) notFound();
 

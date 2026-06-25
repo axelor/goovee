@@ -44,7 +44,7 @@ export async function searchEntries(
   });
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
-  const {client} = access;
+  const {client} = access.tenant;
   try {
     const entries = await findEntries({
       search,

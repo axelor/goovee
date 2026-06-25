@@ -58,7 +58,8 @@ export default async function Page(props: {
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const parent = await fetchFile({
     id,

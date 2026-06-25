@@ -109,7 +109,8 @@ export async function getAllEvents(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   try {
     const {events, pageInfo} = await findEvents({
@@ -151,7 +152,8 @@ export async function register(
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(
@@ -339,7 +341,7 @@ export async function fetchContacts(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {client} = access;
+  const {client} = access.tenant;
 
   try {
     const data = await findContacts({search, workspaceURL, client}).then(clone);
@@ -376,7 +378,7 @@ export async function isValidParticipant(props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {client} = access;
+  const {client} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
@@ -437,7 +439,8 @@ export const createComment: CreateComment = async props => {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(
@@ -561,7 +564,8 @@ export const fetchComments: FetchComments = async props => {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(
@@ -633,7 +637,8 @@ export const fetchEvent = async (props: {
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const event = await findEvent({

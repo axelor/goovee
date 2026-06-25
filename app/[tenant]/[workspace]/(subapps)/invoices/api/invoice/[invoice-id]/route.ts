@@ -44,7 +44,7 @@ export async function GET(
         status: accessStatus(access.reason),
       });
     }
-    client = access.client;
+    client = access.tenant.client;
     storage = access.tenant.config.aos.storage;
     invoice = await findInvoice({
       id: invoiceId,
@@ -65,7 +65,7 @@ export async function GET(
         status: accessStatus(access.reason),
       });
     }
-    client = access.client;
+    client = access.tenant.client;
     storage = access.tenant.config.aos.storage;
     const invoicesWhereClause = getWhereClauseForEntity({
       user: access.user,

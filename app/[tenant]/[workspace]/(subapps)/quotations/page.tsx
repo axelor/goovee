@@ -57,7 +57,8 @@ async function Quotations({
     unauthorized();
   }
 
-  const {user, client, subapp} = access;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
 
   const {limit, page} = searchParams;
 

@@ -60,7 +60,8 @@ export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -100,7 +101,8 @@ export async function findRecommendedNews({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -146,7 +148,8 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -265,7 +268,8 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {

@@ -3,7 +3,6 @@ import 'server-only';
 // ---- CORE IMPORTS ---- //
 import {manager, type Tenant} from '@/tenant';
 import {resolveGuestWorkspace, type WorkspaceLight} from '@/orm/workspace';
-import type {Client} from '@/goovee/.generated/client';
 import type {AccessReason} from './ensure-auth';
 
 /**
@@ -28,7 +27,6 @@ export type TokenAccessResult =
       ok: true;
       workspace: WorkspaceLight;
       tenant: Tenant;
-      client: Client;
       token: string;
     }
   | {
@@ -56,5 +54,5 @@ export async function ensureTokenAuth({
     return {ok: false, reason: 'workspace-not-found'};
   }
 
-  return {ok: true, workspace, tenant, client, token};
+  return {ok: true, workspace, tenant, token};
 }

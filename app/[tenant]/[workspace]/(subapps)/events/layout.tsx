@@ -35,7 +35,8 @@ export default async function Layout(props: {
      resolves and otherwise passes children through untouched. */
   if (!access.ok) return <>{children}</>;
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const categories = await findEventCategories({
     workspaceURL: access.workspace.url,

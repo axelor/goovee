@@ -66,7 +66,8 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const config = access.tenant.config;
 
   let attrs;

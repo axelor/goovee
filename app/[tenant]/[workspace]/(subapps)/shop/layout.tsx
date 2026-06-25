@@ -36,7 +36,8 @@ export default async function Layout(props: {
      resolves and otherwise passes children through untouched. */
   if (!access.ok) return <div className="mb-20 lg:mb-4">{children}</div>;
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   const categories = config

@@ -31,7 +31,7 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {client} = access;
+  const {client} = access.tenant;
 
   const group = await findGroupById(
     groupId,

@@ -55,7 +55,7 @@ export default async function Page(props: {
     unauthorized();
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
 
   const [entry, config] = await Promise.all([
     findEntry({id, client}),
