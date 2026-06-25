@@ -229,7 +229,7 @@ async function Product({
     <ProductView
       hidePriceAndPurchase={hidePriceAndPurchase}
       product={clone(computedProduct)}
-      workspace={workspace}
+      config={workspace.config}
       breadcrumbs={breadcrumbs}
       categories={parentcategories}
       metaFields={metaFieldsValues}

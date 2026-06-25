@@ -22,7 +22,7 @@ import {getProductImageURL} from '@/utils/files';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import type {Category, ComputedProduct} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import type {ModelField} from '@/orm/model-fields';
 
 // ---- LOCAL IMPORTS ---- //
@@ -30,7 +30,7 @@ import {ProductMetaFieldView} from '@/subapps/shop/common/ui/components/product-
 
 export function ProductView({
   product: computedProduct,
-  workspace,
+  config,
   breadcrumbs,
   categories,
   metaFields,
@@ -39,7 +39,7 @@ export function ProductView({
   hidePriceAndPurchase: boolean;
   categories?: Category[];
   product: ComputedProduct;
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   breadcrumbs: Array<{id: string | number; name: string}>;
   metaFields: Array<ModelField & {value: unknown}>;
 }) {
@@ -152,14 +152,14 @@ export function ProductView({
                 </p>
               )}
               {errorMessage &&
-                workspace?.config?.displayPrices &&
+                config.displayPrices &&
                 !hidePriceAndPurchase && (
                   <p className="text-base font-semibold mt-0 mb-0 text-destructive">
                     {i18n.t('Price may be incorrect')}
                   </p>
                 )}
             </div>
-            {workspace?.config?.displayPrices && !hidePriceAndPurchase && (
+            {config.displayPrices && !hidePriceAndPurchase && (
               <>
                 <p className="text-xl font-semibold mb-2">
                   {price.displayPrimary}
