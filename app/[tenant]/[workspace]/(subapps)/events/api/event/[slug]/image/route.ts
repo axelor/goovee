@@ -1,12 +1,13 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {getSession} from '@/auth';
+// ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import {manager} from '@/tenant';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {accessStatus} from '@/lib/core/access/denial';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
+// ---- LOCAL IMPORTS ---- //
 import {findEvent} from '@/subapps/events/common/orm/event';
 
 export async function GET(
@@ -20,42 +21,28 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL} = workspacePathname(params);
-  const {slug, tenant: tenantId} = params;
+  const {workspaceURL, tenant} = workspacePathname(params);
+  const {slug} = params;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return new NextResponse('Bad Request', {status: 400});
-  const {client, config} = tenant;
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const app = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.events,
-    user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-  if (!app?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access;
 
   const event = await findEvent({
     slug,
     workspaceURL,
     client,
-    config,
-    user,
+    config: access.tenant.config,
+    user: access.user,
   });
 
   if (!event?.eventImage?.id) {
@@ -65,8 +52,8 @@ export async function GET(
   const file = await findFile({
     id: event.eventImage.id,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

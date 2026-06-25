@@ -1,14 +1,17 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {getSession} from '@/auth';
+// ---- CORE IMPORTS ---- //
 import {isFileOfRecord} from '@/comments/orm';
 import {SUBAPP_CODES} from '@/constants';
 import {isCommentEnabled} from '@/lib/core/comments';
-import {manager} from '@/tenant';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
+import {clone} from '@/utils';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
+// ---- LOCAL IMPORTS ---- //
 import {findNews} from '../../../../../common/orm/news';
 
 export async function GET(
@@ -23,40 +26,32 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
   const {'news-id': newsId, 'file-id': fileId} = params;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return new NextResponse('Bad Request', {status: 400});
-  }
-  const {client} = tenant;
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.news,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {user, client} = access;
+
+  /* WorkspaceLight carries config as {id} only, so fetch the heavy config and
+     bridge it onto the workspace for isCommentEnabled and findNews. */
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Forbidden', {status: 403});
+  }
+  const workspace = clone({...access.workspace, config});
 
   if (!isCommentEnabled({subapp: SUBAPP_CODES.news, workspace})) {
     return new NextResponse('Forbidden', {status: 403});
-  }
-
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.news,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!app?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
   }
 
   const {news} = await findNews({
@@ -75,8 +70,8 @@ export async function GET(
   const file = await findFile({
     id: fileId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

@@ -2,13 +2,12 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {accessStatus} from '@/lib/core/access/denial';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey} from '@/types';
-import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {findOrder} from '@/subapps/orders/common/orm/orders';
@@ -24,40 +23,26 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
   const {'order-id': orderId} = params;
 
-  const session = await getSession();
-  if (!session?.user) {
-    return new NextResponse('Unauthorized', {status: 401});
-  }
-
-  const user = session.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return new NextResponse('Bad Request', {status: 400});
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.orders,
-    user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: false,
   });
-
-  if (!subapp?.isInstalled) {
-    return new NextResponse('Access denied', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access;
 
   const orderWhereClause = getWhereClauseForEntity({
-    user,
-    role: subapp.role,
-    isContactAdmin: subapp.isContactAdmin,
+    user: access.user,
+    role: access.subapp.role,
+    isContactAdmin: access.subapp.isContactAdmin,
     partnerKey: PartnerKey.CLIENT_PARTNER,
   });
 
@@ -78,8 +63,8 @@ export async function GET(
   }
 
   const file = await findFile({
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
     id: reportId,
     meta: true,
   });

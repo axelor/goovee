@@ -2,15 +2,14 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {findFile, streamFile} from '@/utils/download';
-import {manager} from '@/tenant';
 import {filterPrivate} from '@/orm/filter';
-import {getSession} from '@/lib/core/auth';
 import {and} from '@/utils/orm';
 import type {AOSProduct} from '@/goovee/.generated/models';
 import {findModelFields} from '@/orm/model-fields';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {accessStatus} from '@/lib/core/access/denial';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -32,39 +31,21 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {'product-id': productId, 'file-id': fileId, tenant: tenantId} = params;
-  const {workspaceURL} = workspacePathname(params);
+  const {'product-id': productId, 'file-id': fileId} = params;
+  const {workspaceURL, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-
-  if (!tenant) {
-    return new NextResponse('Bad request', {status: 400});
-  }
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.shop,
-    user: session?.user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-
-  if (!subapp?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access;
 
   const metaFields = await findModelFields({
     modelName: BASE_PRODUCT_MODEL,
@@ -79,7 +60,7 @@ export async function GET(
   const product = await client.aOSProduct.findOne({
     where: {
       ...and<AOSProduct>([
-        await filterPrivate({user, client}),
+        await filterPrivate({user: access.user, client}),
         {id: productId},
       ]),
     },
@@ -119,8 +100,8 @@ export async function GET(
   const file = await findFile({
     id: fileId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {
