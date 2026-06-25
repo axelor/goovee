@@ -104,7 +104,7 @@ export async function findLatestDMSFileByName({
         relatedModel,
         parent: {relatedModel},
         fileName: {like: `%${name}%`},
-        ...(skipUserCheck ? {} : await filterPrivate({client, user})),
+        ...(skipUserCheck ? {} : filterPrivate({user})),
       },
       select: {
         metaFile: {

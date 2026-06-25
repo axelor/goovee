@@ -59,10 +59,7 @@ export async function GET(
 
   const product = await client.aOSProduct.findOne({
     where: {
-      ...and<AOSProduct>([
-        await filterPrivate({user: access.user, client}),
-        {id: productId},
-      ]),
+      ...and<AOSProduct>([filterPrivate({user: access.user}), {id: productId}]),
     },
     select: {
       productAttrs: true,

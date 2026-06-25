@@ -40,7 +40,7 @@ export async function findGroups({
       workspace: {
         url: workspaceURL,
       },
-      AND: [await filterPrivate({user, client}), getArchivedFilter({archived})],
+      AND: [filterPrivate({user}), getArchivedFilter({archived})],
     },
     select: {
       name: true,
@@ -76,7 +76,7 @@ export async function findGroupsByMembers({
     },
     forumGroup: {
       workspace: {id: workspaceID},
-      AND: [await filterPrivate({user, client}), getArchivedFilter({archived})],
+      AND: [filterPrivate({user}), getArchivedFilter({archived})],
       ...(searchKey ? {name: {like: `%${searchKey}%`}} : {}),
     },
   };
@@ -210,7 +210,7 @@ export async function findPosts({
       },
       ...(groupIDs.length ? {id: {in: groupIDs}} : {}),
       ...(whereClause.forumGroup as object | undefined),
-      AND: [await filterPrivate({client, user}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     ...(search
       ? {
@@ -346,7 +346,7 @@ export async function findGroupById(
       workspace: {
         id: workspaceID,
       },
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     select: {
       name: true,
@@ -393,10 +393,7 @@ export async function findMemberGroupById({
           id: workspaceID,
         },
         id: groupID,
-        AND: [
-          await filterPrivate({user, client}),
-          getArchivedFilter({archived}),
-        ],
+        AND: [filterPrivate({user}), getArchivedFilter({archived})],
       },
     },
     select: {

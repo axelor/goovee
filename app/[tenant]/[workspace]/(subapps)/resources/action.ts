@@ -50,10 +50,9 @@ export async function findDmsFiles({
         workspaceSet: {
           url: workspaceURL,
         },
-        ...(await filterPrivate({
+        ...filterPrivate({
           user,
-          client,
-        })),
+        }),
       },
       select: {
         fileName: true,

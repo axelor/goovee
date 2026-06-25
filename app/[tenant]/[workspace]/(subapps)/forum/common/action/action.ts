@@ -617,10 +617,7 @@ export async function findMedia({
           ? {
               forumGroup: {
                 id,
-                AND: [
-                  await filterPrivate({user, client}),
-                  getArchivedFilter({archived}),
-                ],
+                AND: [filterPrivate({user}), getArchivedFilter({archived})],
               },
             }
           : {}),
@@ -1061,7 +1058,7 @@ export const getSubscribersByGroup = async ({
       where: {
         forumGroup: {
           id: groupID,
-          ...(await filterPrivate({user, client})),
+          ...filterPrivate({user}),
           workspace: {id: workspace.id},
         },
       },

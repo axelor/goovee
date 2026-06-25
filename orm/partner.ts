@@ -34,6 +34,7 @@ const partnerFields = {
   linkedinLink: true,
   mainPartner: {
     id: true,
+    partnerCategory: {id: true},
     simpleFullName: true,
     isInDirectory: true,
     isEmailInDirectory: true,
