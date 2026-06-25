@@ -2,7 +2,7 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {PriceVisibilityConfig} from '@/orm/workspace';
 import {getPartnerId} from '@/utils';
 
 export async function shouldHidePricesAndPurchase({
@@ -11,7 +11,7 @@ export async function shouldHidePricesAndPurchase({
   client,
 }: {
   user: User | undefined;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: PriceVisibilityConfig | Cloned<PriceVisibilityConfig>;
   client: Client;
 }) {
   const {hidePriceForEmptyPricelist} = config || {};
