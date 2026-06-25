@@ -183,6 +183,50 @@ export type PortalAppConfig = Payload<
   {select: typeof portalAppConfigFields}
 >;
 
+/* Reusable select fragments for the config concerns shared across sub-apps.
+   A per-app config select spreads the fragments it needs, so the shared
+   consumer — <Payments>, isCommentEnabled, shouldHidePricesAndPurchase —
+   accepts the app's narrow config without depending on the full
+   PortalAppConfig. */
+export const paymentConfigSelect = {
+  allowOnlinePaymentForEcommerce: true,
+  paymentOptionSet: {
+    select: {
+      name: true,
+      typeSelect: true,
+      transferTypeSelect: true,
+      paymentMode: {
+        id: true,
+      },
+    },
+  },
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type PaymentConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof paymentConfigSelect}
+>;
+
+export const commentConfigSelect = {
+  enableComment: true,
+  enableEventComment: true,
+  enableNewsComment: true,
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type CommentConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof commentConfigSelect}
+>;
+
+export const priceVisibilityConfigSelect = {
+  hidePriceForEmptyPricelist: true,
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type PriceVisibilityConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof priceVisibilityConfigSelect}
+>;
+
 export type App = {
   id: string;
   version: number;

@@ -3,7 +3,7 @@
 // ---- CORE IMPPRTS ---- //
 import {PaymentOption} from '@/types';
 import type {Cloned} from '@/types/util';
-import {PortalAppConfig} from '@/orm/workspace';
+import {PaymentConfig} from '@/orm/workspace';
 import {ActionResponse, SuccessResponse} from '@/types/action';
 import {Paybox, Paypal, Stripe, Up2pay, HubPISP} from '@/ui/components/payment';
 import {isPaymentOptionAvailable} from '@/utils/payment';
@@ -30,7 +30,7 @@ export function Payments<TData>({
   onCreateBankTransferIntent,
   sse,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: PaymentConfig | Cloned<PaymentConfig>;
   disabled?: boolean;
   onValidate: (paymentOption?: PaymentOption) => Promise<boolean>;
   onPaypalCreatedOrder: () => Promise<any>;
