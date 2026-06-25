@@ -1,14 +1,17 @@
 import Image from 'next/image';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {FaLinkedin} from 'react-icons/fa';
 import {IoArrowBackOutline} from 'react-icons/io5';
 
 // ---- CORE IMPORTS ---- //
-import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {NO_IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {t, tattr} from '@/lib/core/locale/server';
 import {Avatar, AvatarImage, RichTextViewer} from '@/ui/components';
 import {clone} from '@/utils';
+import {getCurrentPath} from '@/utils/current-path';
 import {getPartnerImageURL} from '@/utils/files';
+import {getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
@@ -17,7 +20,6 @@ import {civility} from '../../common/constants';
 import {findEntry, findMapConfig} from '../../common/orm';
 import type {Entry} from '../../common/types';
 import {Map} from '../../common/ui/components/map';
-import {ensureAuth} from '../../common/utils/auth-helper';
 
 import '@/ui/components/rich-text-editor/rich-text-editor.css';
 export default async function Page(props: {
@@ -26,10 +28,34 @@ export default async function Page(props: {
   const params = await props.params;
   const {id} = params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-  const {error, auth} = await ensureAuth(workspaceURL, tenant);
-  if (error) notFound();
 
-  const {client} = auth.tenant;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.directory,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: true,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {client} = access;
 
   const [entry, config] = await Promise.all([
     findEntry({id, client}),

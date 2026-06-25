@@ -1,7 +1,7 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 
 // ---- CORE IMPORTS ---- //
-import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
 import {t} from '@/locale/server';
 import {HeroSearch} from '@/ui/components';
@@ -17,8 +17,11 @@ import {
 import {cn} from '@/utils/css';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
 
@@ -26,7 +29,6 @@ import {getPages, getSkip} from '@/utils/pagination';
 import {formatNumber} from '@/locale/server/formatters';
 import {findProjectsWithTaskCount} from './common/orm/projects';
 import {getPaginationButtons} from '@/utils/pagination';
-import {ensureAuth} from './common/utils/auth-helper';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -37,20 +39,39 @@ export default async function Page(props: {
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const {limit = 8, page = 1} = searchParams;
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}`,
-        workspaceURI,
-        tenant,
-      }),
-    );
-  }
-  if (error) notFound();
 
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {user, subapp, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = {...access.workspace, config};
 
   const projects = await findProjectsWithTaskCount({
     take: +limit,

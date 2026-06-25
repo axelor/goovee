@@ -4,6 +4,9 @@ import {headers} from 'next/headers';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
+import {SUBAPP_CODES} from '@/constants';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {t} from '@/lib/core/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import type {Cloned} from '@/types/util';
@@ -12,7 +15,6 @@ import {clone} from '@/utils';
 // ---- LOCAL IMPORTS ---- //
 import {findEntries} from '../orm';
 import type {ListEntry} from '../types';
-import {ensureAuth} from '../utils/auth-helper';
 import {
   type SearchEntriesInput,
   SearchEntriesSchema,
@@ -34,9 +36,15 @@ export async function searchEntries(
       message: await t('TenantId is required'),
     };
   }
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error) return {error: true, message};
-  const {client} = auth.tenant;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.directory,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
+  const {client} = access;
   try {
     const entries = await findEntries({
       search,

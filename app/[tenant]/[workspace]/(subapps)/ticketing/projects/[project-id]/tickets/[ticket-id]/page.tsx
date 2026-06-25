@@ -1,13 +1,14 @@
 import type {ID} from '@/types';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
 import {Comments, isCommentEnabled, SORT_TYPE} from '@/comments';
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,12 +21,14 @@ import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {encodeFilter, getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import type {PortalAppConfig} from '@/orm/workspace';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {createComment, fetchComments} from '../../../../common/actions';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
 import {
@@ -55,7 +58,6 @@ import {
   ParentTicketList,
   RelatedTicketList,
 } from '../../../../common/ui/components/ticket-list';
-import {ensureAuth} from '../../../../common/utils/auth-helper';
 import type {EncodedTicketFilter} from '../../../../common/utils/validators';
 import {
   ChildTicketsHeader,
@@ -72,26 +74,42 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURI, workspaceURL} = workspacePathname(params);
+  const {workspaceURI, workspaceURL, tenant} = workspacePathname(params);
   const projectId = params['project-id'];
   const ticketId = params['ticket-id'];
 
-  const {tenant: tenantId} = params;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  if (error) notFound();
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = {...access.workspace, config};
 
   const [ticket, statuses, categories, priorities, contacts] =
     await Promise.all([

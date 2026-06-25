@@ -1,14 +1,17 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 import {MdAdd} from 'react-icons/md';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 
 // ---- CORE IMPORTS ---- //
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import type {PortalAppConfig} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getCurrentPath} from '@/utils/current-path';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -57,7 +60,6 @@ import type {SearchParams} from '../../../common/types/search-param';
 import {TicketList} from '../../../common/ui/components/ticket-list';
 import {ClientFilter} from './client-filter';
 import {getPages, getSkip} from '@/utils/pagination';
-import {ensureAuth} from '../../../common/utils/auth-helper';
 import {getOrderBy, getWhere} from '../../../common/utils/search-param';
 import Search from '../search';
 
@@ -80,20 +82,38 @@ export default async function Page(props: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets?${new URLSearchParams(searchParams).toString()}`,
-        workspaceURI,
-        tenant,
-      }),
-    );
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  if (error) notFound();
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = {...access.workspace, config};
 
   const project = await findProject({projectId, client, user, workspace});
 
