@@ -101,11 +101,13 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
-
   return (
     <>
-      <Hero workspace={workspace} workspaceURI={workspaceURI} />
+      <Hero
+        config={clone(config)}
+        workspaceURI={workspaceURI}
+        workspaceURL={access.workspace.url}
+      />
       <main className="container p-4 mx-auto space-y-6">
         <Suspense fallback={<CategoriesSkeleton />}>
           <LatestCategories
