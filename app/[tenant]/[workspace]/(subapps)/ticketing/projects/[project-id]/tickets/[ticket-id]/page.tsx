@@ -110,11 +110,16 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = {...access.workspace, config};
-
   const [ticket, statuses, categories, priorities, contacts] =
     await Promise.all([
-      findTicket({ticketId, projectId, client, user, subapp, workspace}),
+      findTicket({
+        ticketId,
+        projectId,
+        client,
+        user,
+        subapp,
+        workspace: access.workspace,
+      }),
       findTicketStatuses(projectId, client),
       findTicketCategories(projectId, client),
       findTicketPriorities(projectId, client),
@@ -176,30 +181,30 @@ export default async function Page(props: {
             categories={categories}
             priorities={priorities}
             contacts={contacts}
-            formFields={clone(workspace.config.ticketingFormFieldSet)}
-            showCancel={workspace.config.isDisplayCancelBtn}
-            showClose={workspace.config.isDisplayCloseBtn}
-            showAssignment={workspace.config.isDisplayAssignmentBtn}
+            formFields={clone(config.ticketingFormFieldSet)}
+            showCancel={config.isDisplayCancelBtn}
+            showClose={config.isDisplayCloseBtn}
+            showAssignment={config.isDisplayAssignmentBtn}
           />
 
           <div
             className={cn('space-y-4 rounded-md border bg-card p-4 mt-5', {
               ['hidden']:
-                !workspace.config.isDisplayTicketParent &&
-                !workspace.config.isDisplayChildTicket &&
-                !workspace.config.isDisplayRelatedTicket,
+                !config.isDisplayTicketParent &&
+                !config.isDisplayChildTicket &&
+                !config.isDisplayRelatedTicket,
             })}>
-            {workspace.config.isDisplayTicketParent && (
+            {config.isDisplayTicketParent && (
               <Suspense fallback={<Skeleton className="h-[160px]" />}>
                 <ParentTicket
                   ticketId={ticket.id}
                   projectId={ticket.project?.id}
                   client={client}
-                  fields={workspace.config.ticketingFieldSet}
+                  fields={config.ticketingFieldSet}
                 />
               </Suspense>
             )}
-            {workspace.config.isDisplayChildTicket && (
+            {config.isDisplayChildTicket && (
               <Suspense fallback={<Skeleton className="h-[160px]" />}>
                 <ChildTickets
                   projectId={ticket.project?.id}
@@ -209,18 +214,18 @@ export default async function Page(props: {
                   contacts={contacts}
                   userId={user.id}
                   client={client}
-                  fields={workspace.config.ticketingFieldSet}
-                  formFields={workspace.config.ticketingFormFieldSet}
+                  fields={config.ticketingFieldSet}
+                  formFields={config.ticketingFormFieldSet}
                 />
               </Suspense>
             )}
-            {workspace.config.isDisplayRelatedTicket && (
+            {config.isDisplayRelatedTicket && (
               <Suspense fallback={<Skeleton className="h-[160px]" />}>
                 <RelatedTickets
                   ticketId={ticket.id}
                   projectId={ticket.project?.id}
                   client={client}
-                  fields={workspace.config.ticketingFieldSet}
+                  fields={config.ticketingFieldSet}
                 />
               </Suspense>
             )}
@@ -230,7 +235,7 @@ export default async function Page(props: {
 
       {isCommentEnabled({
         subapp: SUBAPP_CODES.ticketing,
-        config: workspace.config,
+        config,
       }) && (
         <div className="rounded-md border bg-card p-4 mt-5">
           <h4 className="text-xl font-semibold border-b">

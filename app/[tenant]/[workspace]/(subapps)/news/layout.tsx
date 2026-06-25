@@ -40,7 +40,7 @@ export default async function Layout(props: {
   const allCategories = config
     ? await findCategories({
         showAllCategories: true,
-        workspace: clone({...access.workspace, config}),
+        workspace: access.workspace,
         client,
         user,
       }).then(clone)

@@ -99,10 +99,8 @@ export async function mutate(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-
   const allowedFields = new Set(
-    workspace.config.ticketingFormFieldSet
+    workspaceConfig.ticketingFormFieldSet
       ?.map(f => f.name)
       .filter(
         (name): name is string => !!name && UPDATABLE_FIELDS.includes(name),
@@ -162,8 +160,8 @@ export async function mutate(
           }
 
           if (
-            !workspace.config.isDisplayChildTicket &&
-            !workspace.config.isDisplayTicketParent &&
+            !workspaceConfig.isDisplayChildTicket &&
+            !workspaceConfig.isDisplayTicketParent &&
             data.parentId
           ) {
             ctx.addIssue({
@@ -188,7 +186,7 @@ export async function mutate(
           client: txClient,
           user,
           subapp,
-          workspace,
+          workspace: access.workspace,
         }),
       );
       after(() =>
@@ -198,7 +196,7 @@ export async function mutate(
           tracks,
           contacts,
           user,
-          workspaceUserId: workspace.workspaceUser?.id,
+          workspaceUserId: access.workspace.workspaceUser?.id,
           workspaceURL,
           tenantId,
           client,
@@ -248,7 +246,7 @@ export async function mutate(
         client,
         user: access.user,
         subapp: access.subapp,
-        workspace,
+        workspace: access.workspace,
         tenant: access.tenant,
       });
       after(() =>
@@ -258,7 +256,7 @@ export async function mutate(
           tracks,
           contacts,
           user: access.user,
-          workspaceUserId: workspace.workspaceUser?.id,
+          workspaceUserId: access.workspace.workspaceUser?.id,
           workspaceURL,
           tenantId,
           client,
@@ -324,10 +322,9 @@ export async function updateAssignment(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
 
-  if (!workspace.config.isDisplayAssignmentBtn) {
+  if (!workspaceConfig.isDisplayAssignmentBtn) {
     return {
       error: true,
       message: await t('Updating AssignedTo is not allowed'),
@@ -347,14 +344,14 @@ export async function updateAssignment(
     }
 
     const fromWS =
-      workspace.config.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
+      workspaceConfig.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
 
     const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
       tenant: access.tenant,
       fromWS,
     });
@@ -419,10 +416,9 @@ export async function closeTicket(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
 
-  if (!workspace.config.isDisplayCloseBtn) {
+  if (!workspaceConfig.isDisplayCloseBtn) {
     return {
       error: true,
       message: await t('Closing ticket not allowed'),
@@ -451,14 +447,14 @@ export async function closeTicket(
     }
 
     const fromWS =
-      workspace.config.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
+      workspaceConfig.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
 
     const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
       tenant: access.tenant,
       fromWS,
     });
@@ -519,10 +515,9 @@ export async function cancelTicket(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
 
-  if (!workspace.config.isDisplayCancelBtn) {
+  if (!workspaceConfig.isDisplayCancelBtn) {
     return {
       error: true,
       message: await t('Cancelling ticket not allowed'),
@@ -550,14 +545,14 @@ export async function cancelTicket(
     }
 
     const fromWS =
-      workspace.config.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
+      workspaceConfig.ticketStatusChangeMethod === STATUS_CHANGE_METHOD.WS;
 
     const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
       tenant: access.tenant,
       fromWS,
     });
@@ -621,8 +616,7 @@ export async function createRelatedLink(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-  if (!workspace.config.isDisplayRelatedTicket) {
+  if (!workspaceConfig.isDisplayRelatedTicket) {
     return {error: true, message: await t('Related tickets are not enabled')};
   }
 
@@ -636,7 +630,7 @@ export async function createRelatedLink(
         client: txClient,
         user,
         subapp,
-        workspace,
+        workspace: access.workspace,
       }),
     );
     return {success: true, data: true};
@@ -685,10 +679,9 @@ export async function createChildLink(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
   if (
-    !workspace.config.isDisplayChildTicket &&
-    !workspace.config.isDisplayTicketParent
+    !workspaceConfig.isDisplayChildTicket &&
+    !workspaceConfig.isDisplayTicketParent
   ) {
     return {error: true, message: await t('Parent child relation not enabled')};
   }
@@ -698,7 +691,7 @@ export async function createChildLink(
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
     });
 
     return {success: true, data: true};
@@ -742,10 +735,9 @@ export async function createParentLink(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
   if (
-    !workspace.config.isDisplayChildTicket &&
-    !workspace.config.isDisplayTicketParent
+    !workspaceConfig.isDisplayChildTicket &&
+    !workspaceConfig.isDisplayTicketParent
   ) {
     return {error: true, message: await t('Parent child relation not enabled')};
   }
@@ -756,7 +748,7 @@ export async function createParentLink(
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
     });
     return {success: true, data: true};
   } catch (e) {
@@ -804,10 +796,9 @@ export async function deleteChildLink(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
   if (
-    !workspace.config.isDisplayChildTicket &&
-    !workspace.config.isDisplayTicketParent
+    !workspaceConfig.isDisplayChildTicket &&
+    !workspaceConfig.isDisplayTicketParent
   ) {
     return {error: true, message: await t('Parent child relation not enabled')};
   }
@@ -818,7 +809,7 @@ export async function deleteChildLink(
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
     });
     return {success: true, data: true};
   } catch (e) {
@@ -866,10 +857,9 @@ export async function deleteParentLink(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
   if (
-    !workspace.config.isDisplayChildTicket &&
-    !workspace.config.isDisplayTicketParent
+    !workspaceConfig.isDisplayChildTicket &&
+    !workspaceConfig.isDisplayTicketParent
   ) {
     return {error: true, message: await t('Parent child relation not enabled')};
   }
@@ -880,7 +870,7 @@ export async function deleteParentLink(
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
     });
     return {success: true, data: true};
   } catch (e) {
@@ -927,8 +917,7 @@ export async function deleteRelatedLink(
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-  if (!workspace.config.isDisplayRelatedTicket) {
+  if (!workspaceConfig.isDisplayRelatedTicket) {
     return {error: true, message: await t('Related tickets are not enabled')};
   }
 
@@ -938,7 +927,7 @@ export async function deleteRelatedLink(
       client,
       user: access.user,
       subapp: access.subapp,
-      workspace,
+      workspace: access.workspace,
     });
 
     return {success: true, data: count};
@@ -1025,9 +1014,7 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
 
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
@@ -1036,7 +1023,7 @@ export const createComment: CreateComment = async props => {
   if (
     !isCommentEnabled({
       subapp: SUBAPP_CODES.ticketing,
-      config: workspace.config,
+      config: workspaceConfig,
     })
   ) {
     return {error: true, message: await t('Comments are not enabled')};
@@ -1052,7 +1039,7 @@ export const createComment: CreateComment = async props => {
     client,
     user,
     subapp,
-    workspace,
+    workspace: access.workspace,
     select: {
       name: true,
       project: {id: true, name: true},
@@ -1230,9 +1217,7 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const workspace = {...access.workspace, config: workspaceConfig};
-
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
 
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
@@ -1241,7 +1226,7 @@ export const fetchComments: FetchComments = async props => {
   if (
     !isCommentEnabled({
       subapp: SUBAPP_CODES.ticketing,
-      config: workspace.config,
+      config: workspaceConfig,
     })
   ) {
     return {error: true, message: await t('Comments are not enabled')};
@@ -1257,7 +1242,7 @@ export const fetchComments: FetchComments = async props => {
     client,
     user: access.user,
     subapp: access.subapp,
-    workspace,
+    workspace: access.workspace,
   });
 
   if (!ticket) {

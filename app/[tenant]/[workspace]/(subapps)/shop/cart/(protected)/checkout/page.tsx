@@ -54,9 +54,7 @@ async function Checkout({
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     redirect(`${workspaceURI}/shop/cart`);
   }
 
@@ -69,18 +67,14 @@ async function Checkout({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
   if (hidePriceAndPurchase) notFound();
 
   return (
-    <Content
-      config={workspace.config}
-      orderSubapp={orderSubapp}
-      tenant={tenant}
-    />
+    <Content config={clone(config)} orderSubapp={orderSubapp} tenant={tenant} />
   );
 }
 

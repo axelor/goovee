@@ -60,10 +60,8 @@ export async function generateMetadata(props: {
   );
   if (!workspaceConfig) return null;
 
-  const workspace = clone({...access.workspace, config: workspaceConfig});
-
   const categories = await findCategories({
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   }).then(clone);
@@ -77,8 +75,8 @@ export async function generateMetadata(props: {
 
   const computedProduct = await findProductBySlug({
     slug: productSlug,
-    workspace,
-    workspaceConfig: workspace.config,
+    workspace: access.workspace,
+    workspaceConfig,
     user,
     client,
     config,
@@ -153,10 +151,8 @@ async function Product({
   );
   if (!workspaceConfig) return notFound();
 
-  const workspace = clone({...access.workspace, config: workspaceConfig});
-
   const categories = await findCategories({
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   }).then(clone);
@@ -170,8 +166,8 @@ async function Product({
 
   const computedProduct = await findProductBySlug({
     slug: productSlug,
-    workspace,
-    workspaceConfig: workspace.config,
+    workspace: access.workspace,
+    workspaceConfig,
     user,
     client,
     config,
@@ -223,7 +219,7 @@ async function Product({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config: workspaceConfig,
     client,
   });
 
@@ -231,7 +227,7 @@ async function Product({
     <ProductView
       hidePriceAndPurchase={hidePriceAndPurchase}
       product={clone(computedProduct)}
-      config={workspace.config}
+      config={clone(workspaceConfig)}
       breadcrumbs={breadcrumbs}
       categories={parentcategories}
       metaFields={metaFieldsValues}

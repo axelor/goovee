@@ -44,12 +44,11 @@ export async function GET(
   if (!config) {
     return new NextResponse('Not found', {status: 404});
   }
-  const workspace = {...access.workspace, config};
 
   if (
     !isCommentEnabled({
       subapp: SUBAPP_CODES.ticketing,
-      config: workspace.config,
+      config,
     })
   ) {
     return new NextResponse('Forbidden', {status: 403});
@@ -59,7 +58,7 @@ export async function GET(
     client,
     user,
     subapp,
-    workspace,
+    workspace: access.workspace,
     recordId: ticketId,
   });
   if (!ticket) {

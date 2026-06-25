@@ -70,9 +70,12 @@ export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
 
-  const {news} = await findNews({workspace, client, user}).then(clone);
+  const {news} = await findNews({
+    workspace: access.workspace,
+    client,
+    user,
+  }).then(clone);
 
   return news;
 }
@@ -111,10 +114,9 @@ export async function findRecommendedNews({
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
 
   const {news} = await findNews({
-    workspace,
+    workspace: access.workspace,
     client,
     limit: DEFAULT_NEWS_ASIDE_LIMIT,
     orderBy: {
@@ -155,16 +157,13 @@ export const createComment: CreateComment = async props => {
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config};
 
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
   }
 
-  if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.news, config: workspace.config})
-  ) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, config})) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -175,7 +174,7 @@ export const createComment: CreateComment = async props => {
 
   const {news} = await findNews({
     id: rest.recordId,
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   });
@@ -277,11 +276,8 @@ export const fetchComments: FetchComments = async props => {
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config};
 
-  if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.news, config: workspace.config})
-  ) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, config})) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -292,7 +288,7 @@ export const fetchComments: FetchComments = async props => {
 
   const {news} = await findNews({
     id: rest.recordId,
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   });

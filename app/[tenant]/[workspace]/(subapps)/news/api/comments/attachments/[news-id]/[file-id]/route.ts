@@ -7,7 +7,6 @@ import {isCommentEnabled} from '@/lib/core/comments';
 import {accessStatus} from '@/lib/core/access/denial';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {getWorkspaceConfig} from '@/orm/workspace';
-import {clone} from '@/utils';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -43,23 +42,18 @@ export async function GET(
   const {user} = access;
   const {client} = access.tenant;
 
-  /* WorkspaceLight carries config as {id} only, so fetch the heavy config and
-     bridge it onto the workspace for isCommentEnabled and findNews. */
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
     return new NextResponse('Forbidden', {status: 403});
   }
-  const workspace = clone({...access.workspace, config});
 
-  if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.news, config: workspace.config})
-  ) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, config})) {
     return new NextResponse('Forbidden', {status: 403});
   }
 
   const {news} = await findNews({
     id: newsId,
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   });

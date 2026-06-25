@@ -76,8 +76,6 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = {...access.workspace, config};
-
   const {page = 1, limit = ITEMS_PER_PAGE, sort, city, zip} = searchParams;
 
   const partners = await findEntries({
@@ -90,7 +88,7 @@ export default async function Page(props: {
   });
 
   const pages = getPages(partners, limit);
-  const imageURL = workspace.config?.directoryHeroBgImage?.id
+  const imageURL = config?.directoryHeroBgImage?.id
     ? withBasePath(
         `${workspaceURI}/${SUBAPP_CODES.directory}/api/hero/background`,
       )
@@ -99,11 +97,10 @@ export default async function Page(props: {
   return (
     <>
       <Hero
-        title={workspace.config?.directoryHeroTitle}
-        description={workspace.config?.directoryHeroDescription}
+        title={config?.directoryHeroTitle}
+        description={config?.directoryHeroDescription}
         background={
-          workspace.config
-            ?.directoryHeroOverlayColorSelect as OverlayColor | null
+          config?.directoryHeroOverlayColorSelect as OverlayColor | null
         }
         image={imageURL}
       />

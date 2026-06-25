@@ -45,17 +45,14 @@ export async function GET(
   if (!config) {
     return new NextResponse('Not found', {status: 404});
   }
-  const workspace = {...access.workspace, config};
 
-  if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.forum, config: workspace.config})
-  ) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.forum, config})) {
     return new NextResponse('Forbidden', {status: 403});
   }
 
   const {posts = []} = await findPosts({
     whereClause: {id: postId},
-    workspaceID: workspace.id,
+    workspaceID: access.workspace.id,
     client,
     user,
   });

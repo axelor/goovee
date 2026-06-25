@@ -72,10 +72,8 @@ async function Category({
   );
   if (!workspaceConfig) return notFound();
 
-  const workspace = clone({...access.workspace, config: workspaceConfig});
-
   const categories = await findCategories({
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   }).then(clone);
@@ -111,7 +109,7 @@ async function Category({
   const breadcrumbs = $category ? getbreadcrumbs($category) : [];
 
   const availableSortByOptions = SORT_BY_OPTIONS.filter(
-    o => workspace?.config && (workspace?.config?.[o.value] as boolean),
+    o => workspaceConfig && (workspaceConfig?.[o.value] as boolean),
   );
 
   const defaultSort = availableSortByOptions?.[0]?.value;
@@ -122,8 +120,8 @@ async function Category({
     page,
     limit: limit ? Number(limit) : DEFAULT_LIMIT,
     categoryids,
-    workspace,
-    workspaceConfig: workspace.config,
+    workspace: access.workspace,
+    workspaceConfig,
     user,
     client,
     config,
@@ -133,7 +131,7 @@ async function Category({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config: workspaceConfig,
     client,
   });
 
@@ -147,7 +145,7 @@ async function Category({
       categories={parentcategories}
       pageInfo={pageInfo}
       hidePriceAndPurchase={hidePriceAndPurchase}
-      config={workspace.config}
+      config={clone(workspaceConfig)}
       productPath={`${workspaceURI}/shop/category/${$category.slug}/product/`}
       defaultSort={defaultSort}
     />

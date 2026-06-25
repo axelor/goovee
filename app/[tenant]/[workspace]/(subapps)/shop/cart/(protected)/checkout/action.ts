@@ -82,16 +82,14 @@ export async function paypalCaptureOrder({
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -99,7 +97,7 @@ export async function paypalCaptureOrder({
   }
 
   const allowPaypal = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paypal,
   );
 
@@ -112,7 +110,7 @@ export async function paypalCaptureOrder({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
@@ -132,13 +130,13 @@ export async function paypalCaptureOrder({
 
     const {total} = computeTotal({
       cart,
-      config: workspace.config,
+      config,
       formatNumber,
     });
 
     const expectedAmount = computeExpectedAmount({
       total,
-      config: workspace.config,
+      config,
     });
 
     if (Number(amount) !== Number(expectedAmount)) {
@@ -149,15 +147,15 @@ export async function paypalCaptureOrder({
     }
 
     const paymentModeId = getPaymentModeId(
-      workspace?.config?.paymentOptionSet,
+      config?.paymentOptionSet,
       PaymentOption.paypal,
     );
 
     try {
       const res = await createOrder({
         cart,
-        workspace,
-        workspaceConfig: workspace.config,
+        workspace: access.workspace,
+        workspaceConfig: config,
         user,
         client,
         config: tenant.config,
@@ -219,16 +217,14 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -236,7 +232,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   }
 
   const allowPaypal = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paypal,
   );
 
@@ -249,7 +245,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
@@ -261,13 +257,13 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   }
   const {total, currency} = computeTotal({
     cart,
-    config: workspace.config,
+    config,
     formatNumber,
   });
 
   const expectedAmount = computeExpectedAmount({
     total,
-    config: workspace.config,
+    config,
   });
 
   const payer = await findGooveeUserByEmail(user?.email, client);
@@ -336,16 +332,14 @@ export async function createStripeCheckoutSession({
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -353,7 +347,7 @@ export async function createStripeCheckoutSession({
   }
 
   const allowStripe = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.stripe,
   );
 
@@ -366,7 +360,7 @@ export async function createStripeCheckoutSession({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
@@ -379,13 +373,13 @@ export async function createStripeCheckoutSession({
 
   const {total, currency} = computeTotal({
     cart,
-    config: workspace.config,
+    config,
     formatNumber,
   });
 
   const expectedAmount = computeExpectedAmount({
     total,
-    config: workspace.config,
+    config,
   });
 
   const payer = await findGooveeUserByEmail(user.email, client);
@@ -474,16 +468,14 @@ export async function validateStripePayment({
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -491,7 +483,7 @@ export async function validateStripePayment({
   }
 
   const allowStripe = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.stripe,
   );
   if (!allowStripe) {
@@ -503,7 +495,7 @@ export async function validateStripePayment({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
@@ -533,13 +525,13 @@ export async function validateStripePayment({
 
   const {total} = computeTotal({
     cart,
-    config: workspace.config,
+    config,
     formatNumber,
   });
 
   const expectedAmount = computeExpectedAmount({
     total,
-    config: workspace.config,
+    config,
   });
 
   if (Number(paidAmount) !== Number(expectedAmount)) {
@@ -550,15 +542,15 @@ export async function validateStripePayment({
   }
 
   const paymentModeId = getPaymentModeId(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.stripe,
   );
 
   try {
     const res = await createOrder({
       cart,
-      workspace,
-      workspaceConfig: workspace.config,
+      workspace: access.workspace,
+      workspaceConfig: config,
       user,
       client,
       config: tenant.config,
@@ -621,16 +613,14 @@ export async function payboxCreateOrder({
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -638,7 +628,7 @@ export async function payboxCreateOrder({
   }
 
   const allowPaybox = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paybox,
   );
   if (!allowPaybox) {
@@ -650,7 +640,7 @@ export async function payboxCreateOrder({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
@@ -662,13 +652,13 @@ export async function payboxCreateOrder({
   }
   const {total, currency} = computeTotal({
     cart,
-    config: workspace.config,
+    config,
     formatNumber,
   });
 
   const expectedAmount = computeExpectedAmount({
     total,
-    config: workspace.config,
+    config,
   });
 
   const payer = await findGooveeUserByEmail(user?.email, client);
@@ -747,16 +737,14 @@ export async function validatePayboxPayment({
       message: await t('Invalid workspace'),
     };
   }
-  const workspace = {...access.workspace, config};
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -764,7 +752,7 @@ export async function validatePayboxPayment({
   }
 
   const allowPaybox = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paybox,
   );
   if (!allowPaybox) {
@@ -776,7 +764,7 @@ export async function validatePayboxPayment({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
@@ -803,13 +791,13 @@ export async function validatePayboxPayment({
 
   const {total} = computeTotal({
     cart,
-    config: workspace.config,
+    config,
     formatNumber,
   });
 
   const expectedAmount = computeExpectedAmount({
     total,
-    config: workspace.config,
+    config,
   });
 
   if (Number(paidAmount) !== Number(expectedAmount)) {
@@ -820,15 +808,15 @@ export async function validatePayboxPayment({
   }
 
   const paymentModeId = getPaymentModeId(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paybox,
   );
 
   try {
     const res = await createOrder({
       cart,
-      workspace,
-      workspaceConfig: workspace.config,
+      workspace: access.workspace,
+      workspaceConfig: config,
       user,
       client,
       config: tenant.config,

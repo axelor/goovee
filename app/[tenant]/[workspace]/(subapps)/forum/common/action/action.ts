@@ -753,16 +753,13 @@ export const createComment: CreateComment = async props => {
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config};
 
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
   }
 
-  if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.forum, config: workspace.config})
-  ) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.forum, config})) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -773,7 +770,7 @@ export const createComment: CreateComment = async props => {
 
   const {posts} = await findPosts({
     whereClause: {id: rest.recordId},
-    workspaceID: workspace.id,
+    workspaceID: access.workspace.id,
     client,
     user,
   });
@@ -784,7 +781,7 @@ export const createComment: CreateComment = async props => {
 
   const memberGroups = (await findGroupsByMembers({
     id: user.id,
-    workspaceID: workspace.id!,
+    workspaceID: access.workspace.id!,
     client,
     user,
   })) as MemberGroup[];
@@ -989,11 +986,8 @@ export const fetchComments: FetchComments = async props => {
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config};
 
-  if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.forum, config: workspace.config})
-  ) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.forum, config})) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -1004,7 +998,7 @@ export const fetchComments: FetchComments = async props => {
 
   const {posts} = await findPosts({
     whereClause: {id: rest.recordId},
-    workspaceID: workspace.id,
+    workspaceID: access.workspace.id,
     client,
     user,
   });

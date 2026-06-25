@@ -114,9 +114,12 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = {...access.workspace, config};
-
-  const project = await findProject({projectId, client, user, workspace});
+  const project = await findProject({
+    projectId,
+    client,
+    user,
+    workspace: access.workspace,
+  });
 
   if (!project) notFound();
 
@@ -131,9 +134,7 @@ export default async function Page(props: {
     subapp,
   }).then(clone);
 
-  const allowedFields = new Set(
-    workspace.config.ticketingFieldSet?.map(f => f.name),
-  );
+  const allowedFields = new Set(config.ticketingFieldSet?.map(f => f.name));
 
   const hasFilter = FILTER_FIELDS.some(field => allowedFields.has(field));
 
@@ -200,7 +201,7 @@ export default async function Page(props: {
               searchParams={searchParams}
               projectId={projectId}
               client={client}
-              fields={workspace.config.ticketingFieldSet}
+              fields={config.ticketingFieldSet}
             />
           </Suspense>
         )}
@@ -208,7 +209,7 @@ export default async function Page(props: {
       <div>
         <TicketList
           tickets={tickets}
-          fields={clone(workspace.config.ticketingFieldSet)}
+          fields={clone(config.ticketingFieldSet)}
         />
         {pages > 1 && (
           <TablePagination
