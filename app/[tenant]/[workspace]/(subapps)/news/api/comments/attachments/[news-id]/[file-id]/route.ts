@@ -51,7 +51,9 @@ export async function GET(
   }
   const workspace = clone({...access.workspace, config});
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, workspace})) {
+  if (
+    !isCommentEnabled({subapp: SUBAPP_CODES.news, config: workspace.config})
+  ) {
     return new NextResponse('Forbidden', {status: 403});
   }
 

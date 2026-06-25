@@ -57,7 +57,7 @@ const Content = ({
 
   const enableComment = isCommentEnabled({
     subapp: SUBAPP_CODES.quotations,
-    workspace,
+    config: workspace.config,
   });
 
   const hideDiscount = saleOrderLineList?.every(

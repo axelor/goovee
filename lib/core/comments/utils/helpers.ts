@@ -1,7 +1,7 @@
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import type {Cloned} from '@/types/util';
-import {PortalWorkspace} from '@/orm/workspace';
+import {PortalAppConfig} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import type {TrackObject} from '../types';
@@ -9,20 +9,20 @@ import {TrackObjectSchema} from './validators';
 
 export const isCommentEnabled = ({
   subapp,
-  workspace,
+  config,
 }: {
   subapp: SUBAPP_CODES;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
 }) => {
-  const config: Partial<Record<SUBAPP_CODES, boolean>> = {
-    [SUBAPP_CODES.events]: workspace.config?.enableEventComment ?? false,
-    [SUBAPP_CODES.news]: workspace.config?.enableNewsComment ?? false,
+  const commentBySubapp: Partial<Record<SUBAPP_CODES, boolean>> = {
+    [SUBAPP_CODES.events]: config.enableEventComment ?? false,
+    [SUBAPP_CODES.news]: config.enableNewsComment ?? false,
   };
 
-  if (Object.keys(config).includes(subapp)) {
-    return !!(workspace.config?.enableComment && config[subapp]);
+  if (Object.keys(commentBySubapp).includes(subapp)) {
+    return !!(config.enableComment && commentBySubapp[subapp]);
   }
-  return !!workspace.config?.enableComment;
+  return !!config.enableComment;
 };
 
 export const parseCommentContent = (
