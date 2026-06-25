@@ -1,14 +1,14 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {findWorkspace, findSubapp} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {workspacePathname} from '@/utils/workspace';
-import {getSession} from '@/auth';
-import {DEFAULT_LIMIT, SUBAPP_CODES} from '@/constants';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {DEFAULT_LIMIT, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
-import {PartnerKey, User} from '@/types';
+import {PartnerKey} from '@/types';
 import {TableSkeleton} from '@/ui/components/table';
 import {getWhereClauseForEntity} from '@/utils/filters';
 
@@ -25,7 +25,6 @@ async function Orders({
   params: {tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {tenant: tenantId} = params;
   const {limit, page, type} = searchParams;
 
   const orderType = (type ?? ORDER.ONGOING) as OrderType;
@@ -34,39 +33,37 @@ async function Orders({
     return notFound();
   }
 
-  const session = await getSession();
-  const user = session?.user as User;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  if (!user) {
-    return notFound();
-  }
-
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    client,
-  }).then(clone);
-
-  if (!workspace) return notFound();
-
-  const app = await findSubapp({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.orders,
-    url: workspace.url,
-    user: session?.user,
-    client,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
   });
 
-  if (!app?.isInstalled) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  const {role, isContactAdmin} = app;
+  const {user, client} = access;
+
+  const {role, isContactAdmin} = access.subapp;
 
   const where = getWhereClauseForEntity({
     user,

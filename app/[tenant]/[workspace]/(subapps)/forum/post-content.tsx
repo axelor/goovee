@@ -22,7 +22,7 @@ export async function PostsContent({
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   groupIDs: string[];
   memberGroupIDs: string[];
-  user: User;
+  user: User | null;
   client: Client;
 }) {
   const {sort, limit, search, searchid} = searchParams;
@@ -35,7 +35,7 @@ export async function PostsContent({
     workspaceID: workspace?.id!,
     groupIDs,
     client,
-    user,
+    user: user ?? undefined,
     memberGroupIDs,
   }).then(clone);
 

@@ -1,13 +1,15 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {manager} from '@/tenant';
-import {findWorkspace} from '@/orm/workspace';
-import {User} from '@/types';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {User} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {FORUM_CONTENT, GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
@@ -33,26 +35,43 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
 
-  const session = await getSession();
-  const user = session?.user as User;
-  const userId = user?.id as string;
   const type = searchParams?.type || FORUM_CONTENT.POSTS;
 
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.forum,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user, client} = access;
+  const userId = user?.id as string;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = clone({...access.workspace, config});
 
   const groups = await findGroups({
     workspaceURL: workspace.url,
@@ -112,7 +131,7 @@ export default async function Page(props: {
                 workspace={workspace}
                 groupIDs={groupIDs}
                 memberGroupIDs={memberGroupIDs}
-                user={user}
+                user={user ?? null}
                 client={client}
               />
             )}

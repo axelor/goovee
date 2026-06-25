@@ -1,8 +1,9 @@
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
@@ -16,6 +17,7 @@ import {
 } from '@/subapps/website/common/orm/website';
 import {clone} from '@/utils';
 import {Suspense} from 'react';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Plugins, Template} from '../client-wrapper';
 import {Metadata} from 'next';
 
@@ -28,15 +30,21 @@ export async function generateMetadata(props: {
   }>;
 }): Promise<Metadata | null> {
   const params = await props.params;
-  const {workspaceURL} = workspacePathname(params);
-  const {tenant: tenantId, websiteSlug, websitePageSlug} = params;
+  const {workspaceURL, tenant} = workspacePathname(params);
+  const {websiteSlug, websitePageSlug} = params;
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.website,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
+  if (!access.ok) {
+    return null;
+  }
+
+  const {user, client} = access;
 
   const websitePage = await findWebsitePageSeoBySlug({
     websiteSlug,
@@ -66,17 +74,37 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-  const {tenant: tenantId, websiteSlug, websitePageSlug} = params;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
+  const {websiteSlug, websitePageSlug} = params;
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.website,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
-  const {client, config} = tenant;
+
+  const {user, client} = access;
+  const {config} = access.tenant;
 
   const [canUserEditWiki, websitePage] = await Promise.all([
     canEditWiki({userId: user?.id, client}),

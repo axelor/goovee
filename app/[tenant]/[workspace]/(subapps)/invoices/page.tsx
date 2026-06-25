@@ -1,16 +1,17 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findWorkspace, findSubapp} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {SUBAPP_CODES, DEFAULT_LIMIT} from '@/constants';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES, DEFAULT_LIMIT} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {TableSkeleton} from '@/ui/components/table';
 import {PartnerKey} from '@/types';
-import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -28,49 +29,45 @@ async function Invoices({
   };
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {tenant: tenantId} = params;
-  const tenant = await manager.getTenant(tenantId);
-
-  if (!tenant) {
-    return notFound();
-  }
-
-  const {client} = tenant;
   const {limit, page, type} = searchParams;
   const invoiceType = type ?? INVOICE.UNPAID;
 
-  const session = await getSession();
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  if (!session) return notFound();
-
-  const user = session?.user;
-
-  if (!user) {
-    return notFound();
-  }
-
-  const {workspaceURL} = workspacePathname(params);
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    user,
-    client,
-  }).then(clone);
-
-  if (!workspace) return notFound();
-
-  const app = await findSubapp({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.invoices,
-    url: workspace.url,
-    user: user,
-    client,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
   });
 
-  if (!app?.isInstalled) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  const {role, isContactAdmin} = app;
+  const {user, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = clone({...access.workspace, config});
+
+  const {role, isContactAdmin} = access.subapp;
 
   const invoicesWhereClause = getWhereClauseForEntity({
     user,

@@ -27,7 +27,7 @@ export async function GroupPostsContent({
   searchParams: {[key: string]: string | undefined};
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   memberGroupIDs: string[];
-  user: User;
+  user: User | null;
   client: Client;
 }) {
   const {sort, limit, search, searchid} = searchParams;
@@ -41,7 +41,7 @@ export async function GroupPostsContent({
     search,
     ids: searchid ? [searchid] : undefined,
     client,
-    user,
+    user: user ?? undefined,
     memberGroupIDs,
   }).then(clone);
 

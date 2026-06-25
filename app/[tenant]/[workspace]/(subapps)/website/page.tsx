@@ -1,12 +1,13 @@
 import {headers} from 'next/headers';
-import {redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import Link from 'next/link';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {workspacePathname} from '@/utils/workspace';
-import {SUBAPP_CODES} from '@/constants';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {findAllMainWebsites} from '@/subapps/website/common/orm/website';
@@ -18,13 +19,36 @@ export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
   const params = await props.params;
-  const {tenant: tenantId} = params;
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const session = await getSession();
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.website,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  const user = session?.user;
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {user, client} = access;
 
   let locale = user?.locale;
 
@@ -36,10 +60,6 @@ export default async function Page(props: {
       locale = inverseTransformLocale(acceptLanguageLocale);
     }
   }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return <NotFound homePageUrl={workspaceURI} />;
-  const {client} = tenant;
 
   const mainWebsites = await findAllMainWebsites({
     workspaceURL,
