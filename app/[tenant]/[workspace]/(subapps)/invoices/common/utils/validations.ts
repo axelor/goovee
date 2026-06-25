@@ -1,12 +1,15 @@
 //---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import type {Cloned} from '@/types/util';
-import {getSession} from '@/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureTokenAuth} from '@/lib/core/access/ensure-token-auth';
+import {accessMessage} from '@/lib/core/access/denial';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey, User} from '@/types';
 import {PortalWorkspace} from '@/orm/workspace';
+import type {Tenant} from '@/tenant';
 import type {ActionResponse} from '@/types/action';
 import type {Client} from '@/goovee/.generated/client';
 
@@ -20,64 +23,121 @@ import {
 } from '@/subapps/invoices/common/constants/invoices';
 import {extractAmount} from '@/subapps/invoices/common/utils/invoices';
 
-export async function validatePaymentData({
+/* The fusion that scopes an invoice query: a token restricts the lookup to the
+   invoice that owns the token, a session restricts it to the partner's own
+   invoices. Each action spreads this into its findInvoice WHERE. */
+export type InvoiceFilter = {token: string} | {params: {where: object}};
+
+/**
+ * Resolves access for an invoice payment request. The token path goes through
+ * ensureTokenAuth (no user, no sub-app — authorization is the token fused into
+ * the invoice query); the session path goes through ensureAuth and scopes the
+ * query to the partner's invoices. Returns the tenant so callers keep using
+ * tenant.client / tenant.config exactly as before.
+ */
+export async function resolveInvoicePaymentAccess({
   workspaceURL,
+  tenantId,
+  token,
+}: {
+  workspaceURL: string;
+  tenantId: string;
+  token?: string;
+}): Promise<
+  ActionResponse<{
+    tenant: Tenant;
+    workspace: PortalWorkspace;
+    user: User | undefined;
+    invoiceFilter: InvoiceFilter;
+  }>
+> {
+  if (token) {
+    const access = await ensureTokenAuth({url: workspaceURL, tenantId, token});
+    if (!access.ok) {
+      return {error: true, message: await accessMessage(access.reason)};
+    }
+    const config = await getWorkspaceConfig(
+      access.workspace.config.id,
+      access.client,
+    );
+    if (!config) {
+      return {error: true, message: await t('Invalid workspace')};
+    }
+    return {
+      success: true,
+      data: {
+        tenant: access.tenant,
+        workspace: {...access.workspace, config},
+        user: undefined,
+        invoiceFilter: {token},
+      },
+    };
+  }
+
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.invoices,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const config = await getWorkspaceConfig(
+    access.workspace.config.id,
+    access.client,
+  );
+  if (!config) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+  const invoicesWhereClause = getWhereClauseForEntity({
+    user: access.user,
+    role: access.subapp.role,
+    isContactAdmin: access.subapp.isContactAdmin,
+    partnerKey: PartnerKey.PARTNER,
+  });
+  return {
+    success: true,
+    data: {
+      tenant: access.tenant,
+      workspace: {...access.workspace, config},
+      user: access.user,
+      invoiceFilter: {params: {where: invoicesWhereClause}},
+    },
+  };
+}
+
+/**
+ * Validates the unpaid invoice and the requested amount against the workspace's
+ * payment configuration. Access must already be resolved by the caller via
+ * resolveInvoicePaymentAccess, which provides the workspace and the invoice
+ * filter — this only enforces payment policy.
+ */
+export async function validatePaymentData({
+  workspace,
+  client,
   invoice,
   amount,
-  client,
-  token,
-}: InvoicePaymentInput & {client: Client}): Promise<
+  invoiceFilter,
+  workspaceURL,
+}: {
+  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  client: Client;
+  invoice: InvoicePaymentInput['invoice'];
+  amount: string;
+  invoiceFilter: InvoiceFilter;
+  workspaceURL: string;
+}): Promise<
   ActionResponse<{
-    workspace: PortalWorkspace | Cloned<PortalWorkspace>;
-    user: User | undefined;
     $amount: string | number;
     $invoice: Invoice;
     isPartialPayment: boolean;
   }>
 > {
-  let user: User | undefined;
-  if (!token) {
-    const session = await getSession();
-    user = session?.user;
-    if (!user) {
-      return {error: true, message: await t('Unauthorized')};
-    }
-  }
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    client,
-    user,
-  });
-  if (!workspace) {
-    return {error: true, message: await t('Invalid workspace')};
-  }
-
-  let invoicesWhereClause = {};
-  if (!token) {
-    const subapp = await findSubappAccess({
-      code: SUBAPP_CODES.invoices,
-      user: user!,
-      url: workspace.url,
-      client,
-    });
-    if (!subapp) {
-      return {error: true, message: await t('Unauthorized app access')};
-    }
-
-    const {role, isContactAdmin} = subapp;
-    invoicesWhereClause = getWhereClauseForEntity({
-      user: user!,
-      role,
-      isContactAdmin,
-      partnerKey: PartnerKey.PARTNER,
-    });
-  }
-
   const $invoice = await findInvoice({
     id: invoice.id,
     type: INVOICE.UNPAID,
-    ...(token ? {token} : {params: {where: invoicesWhereClause}}),
+    ...invoiceFilter,
     workspaceURL,
     client,
   });
@@ -124,8 +184,6 @@ export async function validatePaymentData({
   return {
     success: true,
     data: {
-      workspace,
-      user,
       $amount,
       $invoice,
       isPartialPayment: $amount < remainingAmount,
