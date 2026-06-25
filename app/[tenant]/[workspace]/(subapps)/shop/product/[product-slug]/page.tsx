@@ -67,6 +67,7 @@ export async function generateMetadata(props: {
   const computedProduct = await findProductBySlug({
     slug: productSlug,
     workspace,
+    workspaceConfig: workspace.config,
     user,
     client,
     config,
@@ -140,6 +141,7 @@ async function Product({
   const computedProduct = await findProductBySlug({
     slug: productSlug,
     workspace,
+    workspaceConfig: workspace.config,
     user,
     client,
     config,
@@ -174,7 +176,7 @@ async function Product({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 

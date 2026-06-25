@@ -26,7 +26,7 @@ import {computeTotal} from '@/utils/cart';
 import {getProductImageURL} from '@/utils/files';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {type PortalWorkspace, type Subapp} from '@/orm/workspace';
+import {type PortalAppConfig, type Subapp} from '@/orm/workspace';
 import {formatNumber} from '@/locale/formatters';
 import {calculateAdvanceAmount} from '@/utils/payment';
 import type {ComputedProduct} from '@/types';
@@ -87,21 +87,21 @@ function Summary({cart}: {cart: CheckoutCart}) {
 function Total({
   cart,
   shippingType,
-  workspace,
+  config,
 }: {
   cart: CheckoutCart;
   shippingType: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
 }) {
   const {
     total,
     displayTotal,
     scale: {currency: currencyScale},
     currency: {symbol: currencySymbol},
-  } = computeTotal({cart, workspace});
+  } = computeTotal({cart, config});
 
-  const payInAdvance = workspace.config?.payInAdvance ?? false;
-  const advancePaymentPercentage = workspace.config?.advancePaymentPercentage;
+  const payInAdvance = config?.payInAdvance ?? false;
+  const advancePaymentPercentage = config?.advancePaymentPercentage;
 
   const shipping = Number(
     scale(SHIPPING_TYPE_COST[shippingType], currencyScale),
@@ -240,11 +240,11 @@ function Title({
 }
 
 export default function Content({
-  workspace,
+  config,
   orderSubapp,
   tenant,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   orderSubapp?: Subapp | null;
   tenant: string;
 }) {
@@ -265,7 +265,7 @@ export default function Content({
   const [loading, setLoading] = useState(true);
   const [confirmationDialog, setConfirmationDialog] = useState(false);
 
-  const confirmOrder = workspace?.config?.confirmOrder;
+  const confirmOrder = config?.confirmOrder;
 
   const closeConfirmation = () => {
     setConfirmationDialog(false);
@@ -289,7 +289,6 @@ export default function Content({
           cart.items.map((i: {product: string | number}) =>
             findProduct({
               id: String(i.product),
-              workspace: workspace,
               workspaceURL,
             }),
           ),
@@ -303,7 +302,7 @@ export default function Content({
       }
     };
     init();
-  }, [cart, computedProducts, workspace, userId, tenant, workspaceURL]);
+  }, [cart, computedProducts, userId, tenant, workspaceURL]);
 
   const $cart = useMemo(
     () => ({
@@ -343,18 +342,11 @@ export default function Content({
         <div className="col-span-12 xl:col-span-3">
           <div className="flex flex-col gap-6">
             <Summary cart={$cart} />
-            <Total
-              cart={$cart}
-              shippingType={shippingType}
-              workspace={workspace}
-            />
+            <Total cart={$cart} shippingType={shippingType} config={config} />
             <div className="flex flex-col gap-2">
               {confirmOrder ? (
                 <>
-                  <ShopPayments
-                    config={workspace.config}
-                    orderSubapp={orderSubapp}
-                  />
+                  <ShopPayments config={config} orderSubapp={orderSubapp} />
                 </>
               ) : null}
             </div>

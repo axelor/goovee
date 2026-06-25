@@ -2,19 +2,19 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import {getPartnerId} from '@/utils';
 
 export async function shouldHidePricesAndPurchase({
   user,
-  workspace,
+  config,
   client,
 }: {
   user: User | undefined;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   client: Client;
 }) {
-  const {hidePriceForEmptyPricelist} = workspace.config || {};
+  const {hidePriceForEmptyPricelist} = config || {};
   if (hidePriceForEmptyPricelist) {
     if (!user) return true;
     const mainPartner = await client.aOSPartner.findOne({

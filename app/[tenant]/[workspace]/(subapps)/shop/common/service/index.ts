@@ -3,7 +3,7 @@ import {headers} from 'next/headers';
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
 import {t} from '@/locale/server';
-import {PortalWorkspace} from '@/orm/workspace';
+import {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
@@ -24,13 +24,15 @@ import {formatNumber} from '@/subapps/shop/common/utils/order';
 export async function createOrder({
   cart,
   workspace,
+  workspaceConfig,
   user,
   client,
   config,
   paymentModeId,
 }: {
   cart: CartInput;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
   user: NonNullable<User>;
   client: Client;
   config: Tenant['config'];
@@ -40,7 +42,14 @@ export async function createOrder({
 
   const computedProducts = await Promise.all(
     cart.items.map((i: CartItemInput) =>
-      findProduct({id: i.product, workspace, user, client, config}),
+      findProduct({
+        id: i.product,
+        workspace,
+        workspaceConfig,
+        user,
+        client,
+        config,
+      }),
     ),
   );
 
@@ -55,15 +64,19 @@ export async function createOrder({
     })),
   };
 
-  const {total} = computeTotal({cart: $cart, workspace, formatNumber});
+  const {total} = computeTotal({
+    cart: $cart,
+    config: workspaceConfig,
+    formatNumber,
+  });
 
   const {id, isContact, mainPartnerId} = user;
   const partnerId = isContact && mainPartnerId ? mainPartnerId : id;
   const contactId = isContact && mainPartnerId ? id : undefined;
 
   const {invoicingAddress, deliveryAddress} = cart;
-  const payInAdvance = workspace.config?.payInAdvance;
-  const advancePaymentPercentage = workspace.config?.advancePaymentPercentage;
+  const payInAdvance = workspaceConfig?.payInAdvance;
+  const advancePaymentPercentage = workspaceConfig?.advancePaymentPercentage;
 
   const paidAmount =
     payInAdvance && Number(advancePaymentPercentage) > 0
@@ -74,7 +87,7 @@ export async function createOrder({
         }).toString()
       : Number(total).toString();
 
-  const isAtiPricing = workspace?.config?.mainPrice === MAIN_PRICE.ATI;
+  const isAtiPricing = workspaceConfig?.mainPrice === MAIN_PRICE.ATI;
 
   const payload = {
     partnerId,
@@ -120,10 +133,12 @@ export async function createOrder({
 export async function requestOrder({
   cart,
   workspace,
+  workspaceConfig,
   type = 'order',
 }: {
   cart: CartInput;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
   type?: 'quotation' | 'order';
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
@@ -144,13 +159,20 @@ export async function requestOrder({
   const session = await getSession();
   const user = session?.user;
 
-  if (!(session && workspace && workspace.config)) return null;
+  if (!(session && workspace && workspaceConfig)) return null;
 
   try {
     const computedProducts = (
       await Promise.all(
         cart.items.map(i =>
-          findProduct({id: i.product, workspace, user, client, config}),
+          findProduct({
+            id: i.product,
+            workspace,
+            workspaceConfig,
+            user,
+            client,
+            config,
+          }),
         ),
       )
     ).filter(Boolean);
@@ -168,7 +190,11 @@ export async function requestOrder({
       ],
     };
 
-    const {total} = computeTotal({cart: $cart, workspace, formatNumber});
+    const {total} = computeTotal({
+      cart: $cart,
+      config: workspaceConfig,
+      formatNumber,
+    });
 
     let partnerId, contactId;
 
@@ -182,7 +208,7 @@ export async function requestOrder({
       }
     }
     const {invoicingAddress, deliveryAddress} = cart;
-    const isAtiPricing = workspace?.config?.mainPrice === MAIN_PRICE.ATI;
+    const isAtiPricing = workspaceConfig?.mainPrice === MAIN_PRICE.ATI;
 
     const payload = {
       partnerId,

@@ -8,12 +8,12 @@ import {
   MAIN_PRICE,
 } from '@/constants';
 import type {ComputedProduct} from '@/types';
-import type {PortalAppConfig, PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import {formatNumber} from '@/locale/formatters';
 
 export function computeTotal({
   cart,
-  workspace,
+  config,
   formatNumber: formatNumberProp = formatNumber,
 }: {
   cart: {
@@ -22,13 +22,13 @@ export function computeTotal({
       computedProduct?: ComputedProduct;
     }>;
   };
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config?: PortalAppConfig | Cloned<PortalAppConfig>;
   formatNumber?: typeof formatNumber;
 }) {
   let mainPrice: PortalAppConfig['mainPrice'] = MAIN_PRICE.ATI;
 
-  if (workspace?.config?.mainPrice) {
-    mainPrice = workspace?.config?.mainPrice;
+  if (config?.mainPrice) {
+    mainPrice = config?.mainPrice;
   }
 
   const {subtotal, tax} = cart?.items?.reduce(

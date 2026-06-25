@@ -69,14 +69,18 @@ async function Checkout({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
   if (hidePriceAndPurchase) notFound();
 
   return (
-    <Content workspace={workspace} orderSubapp={orderSubapp} tenant={tenant} />
+    <Content
+      config={workspace.config}
+      orderSubapp={orderSubapp}
+      tenant={tenant}
+    />
   );
 }
 

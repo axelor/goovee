@@ -66,12 +66,10 @@ export default async function Page(props: {
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
   if (hidePriceAndPurchase) notFound();
-  return (
-    <Content workspace={workspace} quotationSubapp={Boolean(quotationSubapp)} />
-  );
+  return <Content quotationSubapp={Boolean(quotationSubapp)} />;
 }

@@ -58,12 +58,12 @@ async function CartView({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
   if (hidePriceAndPurchase) notFound();
-  return <Content workspace={workspace} tenant={tenant} />;
+  return <Content config={workspace.config} tenant={tenant} />;
 }
 
 export default async function Cart(props: {

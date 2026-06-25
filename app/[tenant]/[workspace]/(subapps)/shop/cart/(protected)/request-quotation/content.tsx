@@ -1,7 +1,6 @@
 'use client';
 
 import {useState} from 'react';
-import type {Cloned} from '@/types/util';
 import {useRouter} from 'next/navigation';
 import {MdOutlineRefresh} from 'react-icons/md';
 
@@ -13,7 +12,6 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
 import {SUBAPP_CODES} from '@/constants';
-import type {PortalWorkspace} from '@/orm/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -21,10 +19,8 @@ import {requestQuotation} from '@/app/[tenant]/[workspace]/(subapps)/shop/common
 import {AddressSelection} from '../../../common/ui/components/address-selection';
 
 export default function Content({
-  workspace,
   quotationSubapp,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   quotationSubapp?: boolean;
 }) {
   const [requestingQuotation, setRequestingQuotation] = useState(false);
@@ -53,7 +49,7 @@ export default function Content({
 
     setRequestingQuotation(true);
 
-    const res = await requestQuotation({cart, workspace, workspaceURL});
+    const res = await requestQuotation({cart, workspaceURL});
 
     if (res?.data) {
       toast({
