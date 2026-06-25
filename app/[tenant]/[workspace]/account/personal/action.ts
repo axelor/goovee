@@ -19,7 +19,7 @@ import {UserType} from '@/auth/types';
 import {generateOTP} from '@/otp/actions';
 import {findOne, isValid, markUsed} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
-import {findWorkspace} from '@/orm/workspace';
+import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
 import {withMattermostEmailSync} from '@/lib/core/mattermost';
 import {z} from 'zod';
 import {
@@ -390,7 +390,13 @@ export async function generateOTPForUpdate(data: EmailUpdateOTP) {
     return error(await t('Bad request'));
   }
 
-  if (!workspace?.config?.otpTemplateList?.length) {
+  const config = await getWorkspaceConfig(workspace.config.id, client);
+
+  if (!config) {
+    return error(await t('Bad request'));
+  }
+
+  if (!config.otpTemplateList?.length) {
     return generateOTP({
       email,
       scope: Scope.EmailUpdate,
@@ -398,7 +404,6 @@ export async function generateOTPForUpdate(data: EmailUpdateOTP) {
       client,
     });
   } else {
-    const {config} = workspace;
     const {otpTemplateList} = config;
 
     const localization =

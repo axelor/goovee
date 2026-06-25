@@ -1,5 +1,5 @@
 import {getSession} from '@/lib/core/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse} from 'next/server';
@@ -28,11 +28,16 @@ export async function GET(
     return new NextResponse('Invalid workspace', {status: 401});
   }
 
-  if (!workspace.config?.isHomepageDisplay) {
+  const config = await getWorkspaceConfig(workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Invalid workspace', {status: 401});
+  }
+
+  if (!config.isHomepageDisplay) {
     return new NextResponse('Unauthorized', {status: 401});
   }
 
-  const bgImageId = workspace.config?.homepageHeroBgImage?.id;
+  const bgImageId = config.homepageHeroBgImage?.id;
 
   if (!bgImageId) {
     return new NextResponse('Image not found', {status: 404});

@@ -25,8 +25,20 @@ import {Notification} from './notification';
 import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
+import type {Subapp, PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {Cloned} from '@/types/util';
 
-function MobileSidebar({subapps, workspaces, workspace}: any) {
+type WorkspaceListItem = {id: string; name: string | null; url: string | null};
+
+function MobileSidebar({
+  subapps,
+  workspaces,
+  config,
+}: {
+  subapps: Subapp[];
+  workspaces?: WorkspaceListItem[];
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
+}) {
   const pathname = usePathname();
   const {data: session} = authClient.useSession();
   const [open, setOpen] = useState(false);
@@ -37,7 +49,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
   const env = useEnvironment();
   const router = useRouter();
 
-  const redirect = (value: any) => {
+  const redirect = (value: string) => {
     router.push(value);
   };
 
@@ -49,9 +61,9 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
   }, [pathname, closeSidebar]);
 
   const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
-  const displayContact = workspace?.config?.isDisplayContact;
-  const contactEmail = workspace?.config?.contactEmailAddress?.address;
-  const showHome = workspace?.config?.isHomepageDisplay;
+  const displayContact = config?.isDisplayContact;
+  const contactEmail = config?.contactEmailAddress?.address;
+  const showHome = config?.isHomepageDisplay;
 
   return (
     <>
@@ -61,7 +73,7 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
           side="left"
           className="bg-white overflow-auto flex flex-col">
           {user && Boolean(workspaces?.length) ? (
-            workspaces.length === 1 ? (
+            workspaces?.length === 1 ? (
               <Link href={workspaceURI}>
                 <p className="px-6 py-2">
                   {workspaces[0]?.name || workspaces[0]?.url}
@@ -73,11 +85,11 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  {workspaces.map((workspace: any) => (
+                  {workspaces?.map((workspace: WorkspaceListItem) => (
                     <SelectItem
                       key={workspace.url}
                       value={toWorkspaceURI(
-                        workspace.url,
+                        workspace.url ?? '',
                         env.GOOVEE_PUBLIC_HOST,
                       )}>
                       {workspace.name || workspace.url}
@@ -90,17 +102,19 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
 
           {showHome && <App href={workspaceURI} icon="home" name="app-home" />}
           {subapps
-            ?.filter((app: any) => app.isInstalled)
+            ?.filter((app: Subapp) => app.isInstalled)
             .sort(
-              (app1: any, app2: any) =>
-                app1.orderForMySpaceMenu - app2.orderForMySpaceMenu,
+              (app1: Subapp, app2: Subapp) =>
+                (app1.orderForMySpaceMenu ?? 0) -
+                (app2.orderForMySpaceMenu ?? 0),
             )
             .reverse()
-            ?.map(({code, name, icon, color, background}: any) => {
+            ?.map((app: Subapp) => {
+              const {code, name, icon, color} = app;
               const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
               const isExternalChat =
                 code === SUBAPP_CODES.chat &&
-                workspace?.config?.chatDisplayTypeSelect === CHAT_TYPE.external;
+                config?.chatDisplayTypeSelect === CHAT_TYPE.external;
 
               return (
                 <App
@@ -110,9 +124,9 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
                       ? mattermostUrl
                       : `${workspaceURI}/${code}${page}`
                   }
-                  icon={icon}
-                  color={color}
-                  name={name}
+                  icon={icon ?? ''}
+                  color={color ?? undefined}
+                  name={name ?? ''}
                   isExternal={isExternalChat}
                 />
               );
@@ -128,11 +142,11 @@ function MobileSidebar({subapps, workspaces, workspace}: any) {
           <div className="flex flex-grow flex-col justify-end">
             {displayContact && (
               <div className="flex flex-col gap-1 mt-4 pt-8 px-6 py-2">
-                <p className="font-medium">{workspace?.config?.contactName}</p>
+                <p className="font-medium">{config?.contactName}</p>
                 <p>
                   <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
                 </p>
-                <p>{workspace?.config?.contactPhone}</p>
+                <p>{config?.contactPhone}</p>
               </div>
             )}
           </div>
@@ -166,7 +180,18 @@ function App(props: {
   );
 }
 
-export function MobileMenu({subapps, workspaces, workspace, showCart}: any) {
+export function MobileMenu({
+  subapps,
+  workspaces,
+  showCart,
+  config,
+}: {
+  subapps: Subapp[];
+  workspaces?: WorkspaceListItem[];
+  workspace?: WorkspaceLight | Cloned<WorkspaceLight>;
+  showCart?: boolean | null;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
+}) {
   const router = useRouter();
   const redirect = () => router.push('/notifications');
 
@@ -188,7 +213,7 @@ export function MobileMenu({subapps, workspaces, workspace, showCart}: any) {
         <MobileSidebar
           subapps={subapps}
           workspaces={workspaces}
-          workspace={workspace}
+          config={config}
         />
         {/** Render Subapp Menu using Portal */}
         <div id="subapp-menu" className="hidden" />
