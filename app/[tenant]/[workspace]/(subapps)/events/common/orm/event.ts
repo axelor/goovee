@@ -22,7 +22,7 @@ import {filterPrivate} from '@/orm/filter';
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
 import type {ID, PageInfo, User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import {getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import {formatDateToISOString, formatToTwoDigits} from '@/utils/date';
@@ -545,7 +545,7 @@ export async function findEventConfig({
 }: {
   id: ID;
   client: Client;
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
 }): Promise<EventConfig | null> {
   if (!id) return null;
 

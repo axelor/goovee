@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import type {ID} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import {WorkspaceLight} from '@/orm/workspace';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
@@ -18,7 +18,7 @@ export async function MembersNoticationsWrapper({
   userId: ID;
   group: string;
   sortBy: string;
-  workspaceID: PortalWorkspace['id'];
+  workspaceID: WorkspaceLight['id'];
   workspaceURL: string;
 }) {
   const groupMembers = (await fetchGroupsByMembers({

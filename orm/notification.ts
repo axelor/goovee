@@ -10,7 +10,7 @@ import type {
 } from '@goovee/orm';
 import {SUBAPP_CODES} from '@/constants';
 import type {User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import type {NotificationAppCode} from '@/utils/validators';
 import {findSubappAccess} from './workspace';
 import {filterPartnersByRecordAccess, filterPrivate} from './filter';
@@ -18,7 +18,7 @@ import {filterPartnersByRecordAccess, filterPrivate} from './filter';
 type Params = {
   code: NotificationAppCode;
   user: User;
-  url: PortalWorkspace['url'];
+  url: WorkspaceLight['url'];
   client: Client;
 };
 
