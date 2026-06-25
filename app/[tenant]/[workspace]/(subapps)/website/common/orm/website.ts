@@ -4,7 +4,7 @@ import {filterPrivate} from '@/orm/filter';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {ID, MainWebsite, User, Website, WebsitePage} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {findModelFields} from '@/orm/model-fields';
 import {SUBAPP_CODES} from '@/constants';
@@ -35,7 +35,7 @@ export async function findAllMainWebsites({
   client,
   locale,
 }: {
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   user?: User;
   client: Client;
   locale?: string | null;
@@ -102,7 +102,7 @@ export async function findAllWebsites({
   user,
   client,
 }: {
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   user?: User;
   client: Client;
 }) {
@@ -169,7 +169,7 @@ export async function findWebsiteSeoBySlug({
   client,
 }: {
   websiteSlug: Website['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   user?: User;
   client: Client;
 }) {
@@ -202,7 +202,7 @@ export async function findWebsiteBySlug({
   path,
 }: {
   websiteSlug: Website['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   workspaceURI: string;
   user?: User;
   client: Client;
@@ -352,7 +352,7 @@ export async function findAllWebsitePages({
   client,
 }: {
   websiteSlug: Website['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   user?: User;
   client: Client;
 }) {
@@ -387,7 +387,7 @@ export async function findWebsitePageSeoBySlug({
 }: {
   websiteSlug: Website['slug'];
   websitePageSlug: WebsitePage['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   user?: User;
   client: Client;
 }) {
@@ -427,7 +427,7 @@ export async function findWebsitePageBySlug({
 }: {
   websiteSlug: Website['slug'];
   websitePageSlug: WebsitePage['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   user?: User;
   client: Client;
   contentId?: string;
@@ -483,7 +483,7 @@ export async function findAllMainWebsiteLanguages({
   client,
 }: {
   mainWebsiteId: MainWebsite['id'] | undefined;
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
   user?: User;
   client: Client;
 }) {
