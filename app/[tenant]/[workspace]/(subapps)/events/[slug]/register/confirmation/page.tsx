@@ -1,11 +1,13 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -16,26 +18,44 @@ export default async function Page(props: {
   params: Promise<{slug: string; tenant: string; workspace: string}>;
 }) {
   const params = await props.params;
-  const {slug, tenant: tenantId} = params;
+  const {slug} = params;
 
-  const session = await getSession();
-  const user = session?.user;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client, config} = tenant;
-
-  const workspace = await findWorkspace({
-    user: session?.user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.events,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user, client} = access;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return notFound();
 
   const eventDetails = await findEvent({
     slug,
@@ -50,7 +70,7 @@ export default async function Page(props: {
   }
 
   const allowGuestEventRegistration =
-    workspace.config?.allowGuestEventRegistration;
+    workspaceConfig.allowGuestEventRegistration;
   const eventAllowRegistration = eventDetails?.eventAllowRegistration;
 
   const allowGuests =

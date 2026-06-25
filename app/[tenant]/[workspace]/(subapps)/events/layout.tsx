@@ -1,12 +1,8 @@
-import {notFound} from 'next/navigation';
-
-// ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+// ---- CORE IMPORTS ----//
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {workspacePathname} from '@/utils/workspace';
-import {SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
-import {findWorkspace, findSubappAccess} from '@/orm/workspace';
-import {manager} from '@/tenant';
+import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEventCategories} from '@/subapps/events/common/orm/event-category';
@@ -26,37 +22,23 @@ export default async function Layout(props: {
 
   const {children} = props;
 
-  const {tenant: tenantId} = params;
+  const {workspaceURL, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.events,
-    user: session?.user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
 
-  if (!subapp) return notFound();
+  /* Access is gated per-page; the layout renders chrome only when access
+     resolves and otherwise passes children through untouched. */
+  if (!access.ok) return <>{children}</>;
 
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    client,
-  }).then(clone);
-
-  if (!workspace) {
-    return notFound();
-  }
+  const {user, client} = access;
 
   const categories = await findEventCategories({
-    workspaceURL: workspace.url,
+    workspaceURL: access.workspace.url,
     client,
     user,
   }).then(clone);

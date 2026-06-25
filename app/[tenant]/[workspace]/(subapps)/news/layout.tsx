@@ -1,14 +1,9 @@
-import {notFound} from 'next/navigation';
-
 // ---- CORE IMPORTS ----//
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {getSession} from '@/auth';
-import {manager} from '@/tenant';
-import {findSubappAccess} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
-import {findWorkspace} from '@/orm/workspace';
-import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import MobileMenuCategory from '@/subapps/news/mobile-menu-category';
@@ -25,41 +20,30 @@ export default async function Layout(props: {
 
   const {children} = props;
 
-  const {tenant: tenantId} = params;
+  const {workspaceURL, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  }).then(clone);
-
-  if (!workspace) {
-    return notFound();
-  }
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.news,
-    user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
 
-  if (!subapp) return notFound();
+  /* Access is gated per-page; the layout renders chrome only when access
+     resolves and otherwise passes children through untouched. */
+  if (!access.ok) return <div className="mb-4 md:mb-10 h-full">{children}</div>;
 
-  const allCategories = await findCategories({
-    showAllCategories: true,
-    workspace,
-    client,
-    user,
-  }).then(clone);
+  const {user, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const allCategories = config
+    ? await findCategories({
+        showAllCategories: true,
+        workspace: clone({...access.workspace, config}),
+        client,
+        user,
+      }).then(clone)
+    : [];
 
   return (
     <div className="mb-4 md:mb-10 h-full">

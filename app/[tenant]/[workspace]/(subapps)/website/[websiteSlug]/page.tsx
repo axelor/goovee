@@ -1,11 +1,12 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {Website} from '@/types';
-import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -22,15 +23,38 @@ export default async function Layout(props: {
   }>;
 }) {
   const params = await props.params;
-  const session = await getSession();
-  const user = session?.user;
 
-  const {tenant: tenantId, websiteSlug} = params;
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
+  const {websiteSlug} = params;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client, config} = tenant;
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.website,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: true,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {user, client} = access;
+  const {config} = access.tenant;
 
   const website = await findWebsiteBySlug({
     websiteSlug,

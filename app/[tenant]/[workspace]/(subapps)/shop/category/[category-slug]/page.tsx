@@ -1,14 +1,15 @@
 import {Suspense} from 'react';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- ///
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {getSession} from '@/auth';
-import {DEFAULT_LIMIT} from '@/constants';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {DEFAULT_LIMIT, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {Category} from '@/types';
-import {manager} from '@/tenant';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 // ---- LOCAL IMPORTS ---- //
@@ -29,29 +30,48 @@ async function Category({
   params: {tenant: string; workspace: string; 'category-slug': string};
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {tenant: tenantId} = params;
   const {search, limit, page, sort} = searchParams;
 
   const categorySlug = params['category-slug'];
 
-  const session = await getSession();
-  const user = session?.user;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client, config} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user, client} = access;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return notFound();
+
+  const workspace = clone({...access.workspace, config: workspaceConfig});
 
   const categories = await findCategories({
     workspace,

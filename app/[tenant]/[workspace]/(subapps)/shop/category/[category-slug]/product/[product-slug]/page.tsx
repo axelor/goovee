@@ -1,13 +1,15 @@
 import {Suspense} from 'react';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone, htmlToNormalString} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {Category} from '@/types';
 import {findModelFields} from '@/orm/model-fields';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
@@ -40,22 +42,24 @@ export async function generateMetadata(props: {
   const categorySlug = params['category-slug'];
   const productSlug = params['product-slug'];
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client, config} = tenant;
-
-  const workspace = await findWorkspace({
-    user: user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) return null;
 
-  if (!workspace) {
-    return null;
-  }
+  const {user, client} = access;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return null;
+
+  const workspace = clone({...access.workspace, config: workspaceConfig});
 
   const categories = await findCategories({
     workspace,
@@ -101,34 +105,52 @@ async function Product({
     'category-slug': string;
   };
 }) {
-  const {tenant: tenantId} = params;
-
   const categorySlug = params['category-slug'];
-
-  const session = await getSession();
-  const user = session?.user;
 
   const productSlug = params['product-slug'];
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   if (!(productSlug && categorySlug)) {
     return redirect(`${workspaceURI}/shop`);
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client, config} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user, client} = access;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return notFound();
+
+  const workspace = clone({...access.workspace, config: workspaceConfig});
 
   const categories = await findCategories({
     workspace,

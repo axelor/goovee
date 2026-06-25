@@ -1,18 +1,19 @@
 export const dynamic = 'force-dynamic';
 
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {MdAdd} from 'react-icons/md';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {Button} from '@/ui/components/button';
 import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
-import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {User} from '@/types';
-import {manager} from '@/lib/core/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import {Link} from '@/ui/components/link';
 
@@ -85,28 +86,37 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
   const searchParams = await props.searchParams;
-  const {tenant: tenantId} = params;
   const {id} = searchParams;
 
-  const session = await getSession();
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const user = session?.user;
-
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.resources,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user, client} = access;
 
   let file;
 
