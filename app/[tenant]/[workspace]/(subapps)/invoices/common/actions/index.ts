@@ -112,11 +112,11 @@ export async function paypalCreateOrder({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
-    workspace,
+    config,
     client,
     invoice,
     amount,
@@ -128,7 +128,7 @@ export async function paypalCreateOrder({
   }
   const {$amount, $invoice} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
   const allowPaypal = isPaymentOptionAvailable(
     paymentOptions,
     PaymentOption.paypal,
@@ -206,24 +206,24 @@ export async function paypalCaptureOrder({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, invoiceFilter} = access.data;
-  const {client, config} = tenant;
+  const {tenant, config, invoiceFilter} = access.data;
+  const {client} = tenant;
 
-  if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+  if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
     return {
       error: true,
       message: await t('Payment not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+  if (!config.allowOnlinePaymentForInvoices) {
     return {
       error: true,
       message: await t('Online payment is not available'),
     };
   }
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
   if (!paymentOptions?.length) {
     return {
       error: true,
@@ -282,9 +282,9 @@ export async function paypalCaptureOrder({
     );
 
     const isPartialPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
     const isTotalPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
     if (isTotalPayment && purchaseAmount !== remainingAmount) {
       return {
@@ -299,7 +299,7 @@ export async function paypalCaptureOrder({
     }
 
     const updatedInvoice = await updateInvoice({
-      config,
+      config: tenant.config,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
       paymentModeId: context?.data?.paymentModeId,
@@ -356,11 +356,11 @@ export async function createStripeCheckoutSession({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
-    workspace,
+    config,
     client,
     invoice,
     amount,
@@ -372,7 +372,7 @@ export async function createStripeCheckoutSession({
   }
   const {$amount, $invoice, isPartialPayment} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowStripe = isPaymentOptionAvailable(
     paymentOptions,
@@ -467,25 +467,25 @@ export async function validateStripePayment({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, invoiceFilter} = access.data;
-  const {client, config} = tenant;
+  const {tenant, config, invoiceFilter} = access.data;
+  const {client} = tenant;
 
   try {
-    if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+    if (!config.allowOnlinePaymentForInvoices) {
       return {
         error: true,
         message: await t('Online payment is not available'),
       };
     }
 
-    if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+    if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
       return {
         error: true,
         message: await t('Invoice payment not allowed'),
       };
     }
 
-    const paymentOptions = workspace?.config?.paymentOptionSet;
+    const paymentOptions = config.paymentOptionSet;
     if (!paymentOptions?.length) {
       return {
         error: true,
@@ -540,9 +540,9 @@ export async function validateStripePayment({
     );
 
     const isPartialPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
     const isTotalPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
     if (isTotalPayment && purchaseAmount !== remainingAmount) {
       return {
@@ -557,7 +557,7 @@ export async function validateStripePayment({
     }
 
     const result = await updateInvoice({
-      config,
+      config: tenant.config,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
       paymentModeId: context?.data?.paymentModeId,
@@ -652,11 +652,11 @@ export async function createStripeBankTransferIntent({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
-    workspace,
+    config,
     client,
     invoice,
     amount,
@@ -668,7 +668,7 @@ export async function createStripeBankTransferIntent({
   }
   const {$amount, $invoice} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowStripe = isPaymentOptionAvailable(
     paymentOptions,
@@ -780,25 +780,25 @@ export async function cancelStripeBankTransferPaymentIntent({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, invoiceFilter} = access.data;
+  const {tenant, config, invoiceFilter} = access.data;
   const {client} = tenant;
 
   try {
-    if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+    if (!config.allowOnlinePaymentForInvoices) {
       return {
         error: true,
         message: await t('Online payment is not available'),
       };
     }
 
-    if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+    if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
       return {
         error: true,
         message: await t('Invoice payment not allowed'),
       };
     }
 
-    const paymentOptions = workspace?.config?.paymentOptionSet;
+    const paymentOptions = config.paymentOptionSet;
     if (!paymentOptions?.length) {
       return {
         error: true,
@@ -903,11 +903,11 @@ export async function payboxCreateOrder({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
-    workspace,
+    config,
     client,
     invoice,
     amount,
@@ -919,7 +919,7 @@ export async function payboxCreateOrder({
   }
   const {$amount, $invoice, isPartialPayment} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowPaybox = isPaymentOptionAvailable(
     paymentOptions,
@@ -1001,25 +1001,25 @@ export async function validatePayboxPayment({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, invoiceFilter} = access.data;
-  const {client, config} = tenant;
+  const {tenant, config, invoiceFilter} = access.data;
+  const {client} = tenant;
 
   try {
-    if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+    if (!config.allowOnlinePaymentForInvoices) {
       return {
         error: true,
         message: await t('Online payment is not available'),
       };
     }
 
-    if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+    if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
       return {
         error: true,
         message: await t('Invoice payment not allowed'),
       };
     }
 
-    const paymentOptions = workspace?.config?.paymentOptionSet;
+    const paymentOptions = config.paymentOptionSet;
     if (!paymentOptions?.length) {
       return {
         error: true,
@@ -1073,9 +1073,9 @@ export async function validatePayboxPayment({
     );
 
     const isPartialPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
     const isTotalPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
     if (isTotalPayment && purchaseAmount !== remainingAmount) {
       return {
@@ -1090,7 +1090,7 @@ export async function validatePayboxPayment({
     }
 
     const result = await updateInvoice({
-      config,
+      config: tenant.config,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
       paymentModeId: context?.data?.paymentModeId,
@@ -1153,11 +1153,11 @@ export async function up2payCreateOrder({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
-    workspace,
+    config,
     client,
     invoice,
     amount,
@@ -1170,7 +1170,7 @@ export async function up2payCreateOrder({
   }
   const {$amount, $invoice, isPartialPayment} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowUp2pay = isPaymentOptionAvailable(
     paymentOptions,
@@ -1292,11 +1292,11 @@ export async function initiatePispPayment({
   if (access.error) {
     return access;
   }
-  const {tenant, workspace, user, invoiceFilter} = access.data;
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
-    workspace,
+    config,
     client,
     invoice,
     amount,
@@ -1310,7 +1310,7 @@ export async function initiatePispPayment({
 
   const {$amount, $invoice} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowHubPisp = isPaymentOptionAvailable(
     paymentOptions,
