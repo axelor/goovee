@@ -1345,36 +1345,10 @@ export async function findSubappAccess({
  *
  * resolveWorkspaceApp answers, in ONE scoped query per user type, "what is
  * this workspace and can this user reach <code>?". It returns the workspace
- * WITHOUT its heavy config payload — only configRef ({id, updatedOn}) — plus
+ * WITHOUT its heavy config payload — only config ({id}) — plus
  * the user's accessible apps and the requested sub-app (apps.find(code)).
  * Pages that render config-driven UI fetch it on demand via getWorkspaceConfig.
  * ----------------------------------------------------------------------- */
-
-export type WorkspaceLight = {
-  id: string;
-  name: string | null;
-  version: number;
-  workspaceUser: {id: string; version: number} | null;
-  theme: {
-    id: string;
-    version: number;
-    name: string | null;
-    css: string | null;
-  } | null;
-  url: string;
-  logo: {id: string; version: number} | null;
-  navigationSelect: string;
-  apps: Subapp[];
-  configRef: {id: string; updatedOn: Date | null} | null;
-  workspacePermissionConfig: {id: string};
-};
-
-export type WorkspaceApp = {
-  workspace: WorkspaceLight | null;
-  subapp: Subapp | null;
-};
-
-const NO_WORKSPACE_APP: WorkspaceApp = {workspace: null, subapp: null};
 
 /* AOSPortalWorkspace identity columns surfaced in WorkspaceLight, read either
    at the query root (guest) or through the workspace relation (partner /
@@ -1393,14 +1367,16 @@ type WorkspaceRow = Payload<
   {select: typeof workspaceFields}
 >;
 
-const configRefFields = {id: true, updatedOn: true} as const;
-
+/* Assembles the light workspace shape: workspace identity, the user's
+   accessible apps, a config reference ({id} only — the heavy payload is
+   fetched on demand), and the permission config id. WorkspaceLight is derived
+   from this assembler so the returned shape and its type stay in lock-step. */
 const toWorkspaceLight = (
   ws: WorkspaceRow,
   apps: Subapp[],
-  configRef: {id: string; updatedOn: Date | null} | null,
+  config: {id: string},
   permissionConfigId: string,
-): WorkspaceLight => ({
+) => ({
   id: ws.id,
   name: ws.name,
   version: ws.version,
@@ -1410,9 +1386,18 @@ const toWorkspaceLight = (
   logo: ws.workspaceLogo,
   navigationSelect: ws.navigationSelect || 'leftSide',
   apps,
-  configRef,
+  config,
   workspacePermissionConfig: {id: permissionConfigId},
 });
+
+export type WorkspaceLight = ReturnType<typeof toWorkspaceLight>;
+
+export type WorkspaceApp = {
+  workspace: WorkspaceLight | null;
+  subapp: Subapp | null;
+};
+
+const NO_WORKSPACE_APP: WorkspaceApp = {workspace: null, subapp: null};
 
 /* Installed apps of the workspace — the accessible set for guests/partners. */
 const installedApps = (apps: Subapp[] | null | undefined): Subapp[] =>
@@ -1432,7 +1417,7 @@ async function resolveGuestWorkspaceApp({
     select: {
       ...workspaceFields,
       defaultGuestWorkspace: {
-        portalAppConfig: configRefFields,
+        portalAppConfig: {id: true},
         apps: {select: appSelectFields},
       },
     },
@@ -1441,13 +1426,11 @@ async function resolveGuestWorkspaceApp({
   const guest = workspace?.defaultGuestWorkspace;
   if (!workspace || !guest) return NO_WORKSPACE_APP;
 
+  const configRef = guest.portalAppConfig;
+  if (!configRef) return NO_WORKSPACE_APP;
+
   const apps = installedApps(guest.apps as Subapp[]);
-  const light = toWorkspaceLight(
-    workspace,
-    apps,
-    guest.portalAppConfig ?? null,
-    guest.id,
-  );
+  const light = toWorkspaceLight(workspace, apps, configRef, guest.id);
   return {
     workspace: light,
     subapp: apps.find(app => app.code === code) ?? null,
@@ -1471,7 +1454,7 @@ async function resolvePartnerWorkspaceApp({
       partnerWorkspaceSet: {
         where: {workspace: {url}},
         select: {
-          portalAppConfig: configRefFields,
+          portalAppConfig: {id: true},
           apps: {select: appSelectFields},
           workspace: workspaceFields,
         },
@@ -1482,11 +1465,14 @@ async function resolvePartnerWorkspaceApp({
   const partnerWorkspace = partner?.partnerWorkspaceSet?.[0];
   if (!partnerWorkspace?.workspace) return NO_WORKSPACE_APP;
 
+  const configRef = partnerWorkspace.portalAppConfig;
+  if (!configRef) return NO_WORKSPACE_APP;
+
   const apps = installedApps(partnerWorkspace.apps as Subapp[]);
   const light = toWorkspaceLight(
     partnerWorkspace.workspace,
     apps,
-    partnerWorkspace.portalAppConfig ?? null,
+    configRef,
     partnerWorkspace.id,
   );
   return {
@@ -1515,7 +1501,7 @@ async function resolveContactWorkspaceApp({
         partnerWorkspaceSet: {
           where: {workspace: {url}},
           select: {
-            portalAppConfig: configRefFields,
+            portalAppConfig: {id: true},
             apps: {select: appSelectFields},
             workspace: workspaceFields,
           },
@@ -1556,10 +1542,13 @@ async function resolveContactWorkspaceApp({
       }));
   }
 
+  const configRef = partnerWorkspace.portalAppConfig;
+  if (!configRef) return NO_WORKSPACE_APP;
+
   const light = toWorkspaceLight(
     partnerWorkspace.workspace,
     apps,
-    partnerWorkspace.portalAppConfig ?? null,
+    configRef,
     partnerWorkspace.id,
   );
   return {
