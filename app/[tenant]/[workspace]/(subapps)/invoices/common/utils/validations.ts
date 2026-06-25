@@ -5,10 +5,10 @@ import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {ensureTokenAuth} from '@/lib/core/access/ensure-token-auth';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getWorkspaceConfig} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey, User} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
 import type {Tenant} from '@/tenant';
 import type {ActionResponse} from '@/types/action';
 import type {Client} from '@/goovee/.generated/client';
@@ -46,7 +46,7 @@ export async function resolveInvoicePaymentAccess({
 }): Promise<
   ActionResponse<{
     tenant: Tenant;
-    workspace: PortalWorkspace;
+    config: PortalAppConfig;
     user: User | undefined;
     invoiceFilter: InvoiceFilter;
   }>
@@ -67,7 +67,7 @@ export async function resolveInvoicePaymentAccess({
       success: true,
       data: {
         tenant: access.tenant,
-        workspace: {...access.workspace, config},
+        config,
         user: undefined,
         invoiceFilter: {token},
       },
@@ -100,7 +100,7 @@ export async function resolveInvoicePaymentAccess({
     success: true,
     data: {
       tenant: access.tenant,
-      workspace: {...access.workspace, config},
+      config,
       user: access.user,
       invoiceFilter: {params: {where: invoicesWhereClause}},
     },
@@ -110,18 +110,18 @@ export async function resolveInvoicePaymentAccess({
 /**
  * Validates the unpaid invoice and the requested amount against the workspace's
  * payment configuration. Access must already be resolved by the caller via
- * resolveInvoicePaymentAccess, which provides the workspace and the invoice
+ * resolveInvoicePaymentAccess, which provides the config and the invoice
  * filter — this only enforces payment policy.
  */
 export async function validatePaymentData({
-  workspace,
+  config,
   client,
   invoice,
   amount,
   invoiceFilter,
   workspaceURL,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   client: Client;
   invoice: InvoicePaymentInput['invoice'];
   amount: string;
@@ -145,7 +145,7 @@ export async function validatePaymentData({
     return {error: true, message: await t('Invalid invoice')};
   }
 
-  if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+  if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
     return {error: true, message: await t('Payment not allowed')};
   }
 
@@ -153,9 +153,8 @@ export async function validatePaymentData({
   const remainingAmount = extractAmount($invoice?.amountRemaining?.value);
 
   const isPartialPayment =
-    workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
-  const isTotalPayment =
-    workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
+    config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
+  const isTotalPayment = config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
   if (isTotalPayment && $amount !== remainingAmount) {
     return {
@@ -169,11 +168,11 @@ export async function validatePaymentData({
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+  if (!config.allowOnlinePaymentForInvoices) {
     return {error: true, message: await t('Online payment is not available')};
   }
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
   if (!paymentOptions?.length) {
     return {
       error: true,
