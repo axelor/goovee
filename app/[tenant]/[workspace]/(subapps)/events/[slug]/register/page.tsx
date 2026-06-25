@@ -69,10 +69,10 @@ export default async function Page(props: {
 
   const eventDetails = await findEvent({
     slug,
-    workspaceURL,
     client,
     config,
     user,
+    workspace: access.workspace,
   }).then(clone);
 
   if (!eventDetails) {

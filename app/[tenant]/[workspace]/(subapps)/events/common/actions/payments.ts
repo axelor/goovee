@@ -94,9 +94,10 @@ export async function createStripeCheckoutSession(props: {
 
   const $event = await findEvent({
     id: eventId,
+    user,
     client,
     config,
-    workspaceURL,
+    workspace: access.workspace,
   });
 
   if (!$event) {
@@ -224,9 +225,10 @@ export async function paypalCreateOrder(props: {
 
   const $event = await findEvent({
     id: eventId,
+    user,
     client,
     config,
-    workspaceURL,
+    workspace: access.workspace,
   });
 
   if (!$event) {
@@ -337,9 +339,10 @@ export async function payboxCreateOrder(props: {
 
   const $event = await findEvent({
     id: eventId,
+    user,
     client,
     config,
-    workspaceURL,
+    workspace: access.workspace,
   });
 
   if (!$event) {

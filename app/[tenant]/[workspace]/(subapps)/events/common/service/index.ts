@@ -4,10 +4,7 @@ import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import {ID} from '@/types';
 import {WorkspaceLight} from '@/orm/workspace';
-import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
 import {ActionResponse} from '@/types/action';
-import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
@@ -85,17 +82,17 @@ type EventPriceWS = {
 };
 
 export async function findProductsFromWS({
-  workspaceURL,
-  client,
-  config,
   eventId,
+  config,
+  partnerWorkspaceId,
+  partnerId,
 }: {
-  workspaceURL: string;
   eventId: string;
-  client: Client;
   config: TenantConfig;
+  partnerWorkspaceId: string;
+  partnerId?: string;
 }): Promise<EventPriceWS | null> {
-  if (!workspaceURL && eventId) {
+  if (!eventId || !partnerWorkspaceId) {
     return null;
   }
 
@@ -103,26 +100,12 @@ export async function findProductsFromWS({
     return null;
   }
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    user,
-    client,
-  });
-
-  if (!workspace) {
-    return null;
-  }
   const {aos} = config;
-
-  const partnerId = user?.id;
 
   try {
     const reqBody = {
       eventId,
-      partnerWorkspaceId: workspace.id,
+      partnerWorkspaceId,
       partnerId,
     };
     const res = await aosClient(aos).request<{

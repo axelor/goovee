@@ -58,7 +58,7 @@ const openRecordFilters = [
 
 /* Complementary to filterPartnersByRecordAccess — see note above. */
 export const filterPrivate = async (
-  {user, client}: {user?: User; client: Client},
+  {user, client}: {user?: User | null; client: Client},
   config: {
     privateOnly?: boolean;
   } = {},
