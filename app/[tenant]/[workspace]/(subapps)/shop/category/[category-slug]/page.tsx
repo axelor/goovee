@@ -146,7 +146,7 @@ async function Category({
       categories={parentcategories}
       pageInfo={pageInfo}
       hidePriceAndPurchase={hidePriceAndPurchase}
-      workspace={workspace}
+      config={workspace.config}
       productPath={`${workspaceURI}/shop/category/${$category.slug}/product/`}
       defaultSort={defaultSort}
     />

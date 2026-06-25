@@ -11,7 +11,7 @@ import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {ComputedProduct} from '@/types';
 import type {Cloned} from '@/types/util';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -20,11 +20,11 @@ import type {FeaturedCategory} from '@/subapps/shop/common/types';
 
 export function FeaturedCategories({
   categories,
-  workspace,
+  config,
   hidePriceAndPurchase,
 }: {
   categories: FeaturedCategory[];
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   hidePriceAndPurchase: boolean;
 }) {
   const router = useRouter();
@@ -79,7 +79,7 @@ export function FeaturedCategories({
                   name: category.name ?? '',
                   slug: category.slug ?? '',
                 }}
-                displayPrices={Boolean(workspace?.config?.displayPrices)}
+                displayPrices={Boolean(config.displayPrices)}
               />
             );
           })}

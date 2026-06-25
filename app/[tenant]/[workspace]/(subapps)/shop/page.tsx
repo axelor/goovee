@@ -104,7 +104,7 @@ async function Featured({
   return (
     <FeaturedCategories
       categories={featuredCategories}
-      workspace={workspace}
+      config={workspace.config}
       hidePriceAndPurchase={hidePriceAndPurchase}
     />
   );
