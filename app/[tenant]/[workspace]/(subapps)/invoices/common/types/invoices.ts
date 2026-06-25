@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import type {Cloned} from '@/types/util';
-import {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import type {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 import {BankAccountType} from '@/lib/core/payment/stripe/types';
 import {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants';
@@ -181,7 +181,7 @@ export type InvoiceProps = {
 export type TotalProps = {
   invoice: Cloned<Invoice>;
   isUnpaid?: boolean;
-  workspace: PortalWorkspace;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   invoiceType: string;
   workspaceURI: string;
   token?: string;
