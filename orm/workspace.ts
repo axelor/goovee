@@ -374,73 +374,6 @@ export async function findContactWorkspaceConfig({
   };
 }
 
-type IntermediateWorkspaceConfig = Promise<{
-  config: PortalAppConfig;
-  apps: App[] | null;
-  workspacePermissionConfig: {id: string};
-} | null>;
-
-export async function findPartnerWorkspaceConfig({
-  url,
-  partnerId,
-  client,
-}: {
-  url: string;
-  partnerId?: ID;
-  client: Client;
-}): IntermediateWorkspaceConfig {
-  if (!(url && partnerId)) return null;
-
-  const res = await client.aOSPartner.findOne({
-    where: {
-      id: partnerId,
-    },
-    select: {
-      partnerWorkspaceSet: {
-        where: {
-          workspace: {
-            url,
-          },
-        },
-        select: {
-          portalAppConfig: portalAppConfigFields,
-          apps: {
-            select: {
-              background: true,
-              orderForMySpaceMenu: true,
-              showInMySpace: true,
-              code: true,
-              showInTopMenu: true,
-              color: true,
-              icon: true,
-              isInstalled: true,
-              name: true,
-              orderForTopMenu: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!res?.partnerWorkspaceSet?.length) {
-    return null;
-  }
-
-  const partnerWorkspaceConfig = res.partnerWorkspaceSet[0];
-
-  if (!partnerWorkspaceConfig) return null;
-
-  const portalAppConfig = partnerWorkspaceConfig?.portalAppConfig;
-  if (!portalAppConfig) return null;
-
-  return {
-    config: portalAppConfig,
-    apps: partnerWorkspaceConfig?.apps,
-    workspacePermissionConfig: {id: partnerWorkspaceConfig.id},
-  };
-}
-
 export async function findDefaultPartnerWorkspaceConfig({
   url,
   client,
@@ -505,76 +438,6 @@ export async function findDefaultPartnerWorkspace({
   return res?.defaultWorkspace;
 }
 
-export async function findDefaultGuestWorkspaceConfig({
-  url,
-  client,
-}: {
-  url: string;
-  client: Client;
-}): IntermediateWorkspaceConfig {
-  if (!url) return null;
-
-  const workspace = await client.aOSPortalWorkspace.findOne({
-    where: {
-      url: {
-        like: url,
-      },
-    },
-    select: {
-      defaultGuestWorkspace: {
-        apps: {
-          select: {
-            background: true,
-            orderForMySpaceMenu: true,
-            showInMySpace: true,
-            code: true,
-            showInTopMenu: true,
-            color: true,
-            icon: true,
-            isInstalled: true,
-            name: true,
-            orderForTopMenu: true,
-          },
-        },
-        portalAppConfig: portalAppConfigFields,
-      },
-    },
-  });
-
-  const defaultGuestWorkspaceConfig = workspace?.defaultGuestWorkspace;
-
-  if (!defaultGuestWorkspaceConfig) return null;
-  const portalAppConfig = defaultGuestWorkspaceConfig?.portalAppConfig;
-  if (!portalAppConfig) return null;
-
-  return {
-    config: portalAppConfig,
-    apps: defaultGuestWorkspaceConfig.apps,
-    workspacePermissionConfig: {id: defaultGuestWorkspaceConfig.id},
-  };
-}
-
-export type PortalWorkspace = {
-  id: string;
-  name: string | null;
-  version: number;
-  workspaceUser: {id: string; version: number} | null;
-  theme: {
-    id: string;
-    version: number;
-    name: string | null;
-    css: string | null;
-  } | null;
-  url: string;
-  logo: {id: string; version: number} | null;
-  navigationSelect: string;
-  config: PortalAppConfig;
-  apps: App[];
-  workspacePermissionConfig: {
-    id: string;
-  };
-};
-
 export async function findWorkspace({
   url = '',
   user,
@@ -583,75 +446,15 @@ export async function findWorkspace({
   url?: string;
   user?: Pick<User, 'id' | 'isContact' | 'mainPartnerId'>;
   client: Client;
-}): Promise<PortalWorkspace | null> {
+}): Promise<WorkspaceLight | null> {
   if (!url) return null;
 
-  const workspace = await client.aOSPortalWorkspace.findOne({
-    where: {
-      url: {
-        like: url,
-      },
-    },
-    select: {
-      name: true,
-      url: true,
-      defaultTheme: {name: true, css: true},
-      navigationSelect: true,
-      user: {id: true},
-      workspaceLogo: {
-        id: true,
-      },
-    },
-  });
-
-  if (!workspace) return null;
-
-  let workspaceConfig: {
-    config: PortalAppConfig;
-    apps: App[] | null;
-    workspacePermissionConfig: {id: string};
-  } | null;
-
-  if (user) {
-    const partnerId = getPartnerId(user);
-
-    workspaceConfig = await findPartnerWorkspaceConfig({
-      partnerId,
-      url,
-      client,
-    });
-  } else {
-    workspaceConfig = await findDefaultGuestWorkspaceConfig({
-      url,
-      client,
-    });
-  }
-
-  if (!workspaceConfig) return null;
-
-  const {
-    id,
-    name,
-    version,
-    defaultTheme: theme,
-    navigationSelect,
-    user: workspaceUser,
-    workspaceLogo: logo,
-  } = workspace;
-
-  return {
-    id,
-    name,
-    version,
-    workspaceUser,
-    theme,
-    url,
-    logo,
-    navigationSelect: navigationSelect || 'leftSide',
-    config: workspaceConfig.config,
-    apps: workspaceConfig.apps || [],
-    workspacePermissionConfig: workspaceConfig.workspacePermissionConfig,
-  };
+  /* Workspace-level resolution (no sub-app) reuses the same scoped query as
+     ensureAuth's resolveWorkspaceApp. The heavy config is fetched on demand by
+     callers via getWorkspaceConfig(workspace.config.id, client); the sub-app
+     slot of the result is unused here. */
+  const {workspace} = await resolveWorkspaceApp({code: '', url, user, client});
+  return workspace;
 }
 
 export async function findOpenWorkspaces({
@@ -854,7 +657,7 @@ export async function findWorkspaceForRegistration({
   url,
   client,
 }: {
-  url: PortalWorkspace['url'];
+  url: WorkspaceLight['url'];
   client: Client;
 }) {
   if (!url) {
@@ -923,7 +726,7 @@ export async function canRegisterForWorkspace({
   url,
   client,
 }: {
-  url: PortalWorkspace['url'];
+  url: WorkspaceLight['url'];
   client: Client;
 }): Promise<boolean> {
   if (!url) {

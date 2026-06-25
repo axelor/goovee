@@ -29,17 +29,21 @@ import {useEnvironment} from '@/lib/core/environment';
 import {CHAT_TYPE} from '@/constants';
 import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
+import type {Subapp, PortalAppConfig} from '@/orm/workspace';
+import type {Cloned} from '@/types/util';
+
+type WorkspaceListItem = {id: string; name: string | null; url: string | null};
 
 export function Sidebar({
   subapps,
   workspaces,
   showHome,
-  workspace,
+  config,
 }: {
-  subapps: any;
-  workspaces?: any;
-  showHome: boolean | null | undefined;
-  workspace?: any;
+  subapps: Subapp[];
+  workspaces?: WorkspaceListItem[];
+  showHome: boolean | null;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
 }) {
   const {data: session} = authClient.useSession();
   const [collapsed, setCollapsed] = useState(false);
@@ -53,7 +57,7 @@ export function Sidebar({
 
   const toggle = () => setCollapsed(c => !c);
 
-  const redirect = (value: any) => {
+  const redirect = (value: string) => {
     router.push(value);
   };
 
@@ -74,7 +78,7 @@ export function Sidebar({
           onClick={toggle}
         />
         {Boolean(workspaces?.length) && !collapsed ? (
-          workspaces.length === 1 ? (
+          workspaces?.length === 1 ? (
             <Link href={workspaceURI}>
               <p>{workspaces[0]?.name || workspaces[0]?.url}</p>
             </Link>
@@ -84,11 +88,11 @@ export function Sidebar({
                 <SelectValue placeholder="" />
               </SelectTrigger>
               <SelectContent>
-                {workspaces.map((workspace: any) => (
+                {workspaces?.map((workspace: WorkspaceListItem) => (
                   <SelectItem
                     key={workspace.url}
                     value={toWorkspaceURI(
-                      workspace.url,
+                      workspace.url ?? '',
                       env.GOOVEE_PUBLIC_HOST,
                     )}>
                     {workspace.name || workspace.url}
@@ -110,18 +114,19 @@ export function Sidebar({
             />
           )}
           {subapps
-            ?.filter((app: any) => app.isInstalled)
+            ?.filter((app: Subapp) => app.isInstalled)
             .sort(
-              (app1: any, app2: any) =>
-                app1.orderForMySpaceMenu - app2.orderForMySpaceMenu,
+              (app1: Subapp, app2: Subapp) =>
+                (app1.orderForMySpaceMenu ?? 0) -
+                (app2.orderForMySpaceMenu ?? 0),
             )
             .reverse()
-            ?.map(({code, name, icon, color, background}: any) => {
+            ?.map((app: Subapp) => {
+              const {code, name, icon, color} = app;
               const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
-              const portalAppConfig = workspace?.config;
               const isExternalChat =
                 code === SUBAPP_CODES.chat &&
-                portalAppConfig?.chatDisplayTypeSelect === CHAT_TYPE.external;
+                config?.chatDisplayTypeSelect === CHAT_TYPE.external;
 
               return (
                 <App
@@ -131,10 +136,10 @@ export function Sidebar({
                       : `${workspaceURI}/${code}${page}`
                   }
                   key={code}
-                  icon={icon}
-                  color={color}
+                  icon={icon ?? ''}
+                  color={color ?? undefined}
                   collapsed={collapsed}
-                  name={name}
+                  name={name ?? ''}
                   isExternal={isExternalChat}
                 />
               );

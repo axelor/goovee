@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 import {getSession} from '@/lib/core/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/tenant';
@@ -30,8 +30,12 @@ export async function GET(
     return new NextResponse('Invalid workspace', {status: 401});
   }
 
-  const logoId = workspace.config?.hyperlinkList?.find(item => item.id === id)
-    ?.logo?.id;
+  const config = await getWorkspaceConfig(workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Invalid workspace', {status: 401});
+  }
+
+  const logoId = config.hyperlinkList?.find(item => item.id === id)?.logo?.id;
 
   if (!logoId) {
     return new NextResponse('Logo not found', {status: 404});

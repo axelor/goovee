@@ -2,18 +2,18 @@ import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
 import type {Cloned} from '@/types/util';
 
 export default function Footer({
-  workspace,
+  config,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
 }) {
-  const displayContact = workspace?.config?.isDisplayContact;
-  const contactEmail = workspace?.config?.contactEmailAddress?.address;
+  const displayContact = config.isDisplayContact;
+  const contactEmail = config.contactEmailAddress?.address;
 
   return (
     <>
@@ -21,11 +21,11 @@ export default function Footer({
         <div className="px-4">
           {displayContact && (
             <div className="flex flex-col gap-0.5 items-start text-xs">
-              <p className="font-medium">{workspace?.config?.contactName}</p>
+              <p className="font-medium">{config.contactName}</p>
               <p>
                 <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
               </p>
-              <p>{workspace?.config?.contactPhone}</p>
+              <p>{config.contactPhone}</p>
             </div>
           )}
         </div>

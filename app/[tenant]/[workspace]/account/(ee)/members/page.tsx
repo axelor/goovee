@@ -3,7 +3,7 @@ import {notFound} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
-import {findWorkspace} from '@/orm/workspace';
+import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
@@ -38,6 +38,12 @@ export default async function Page(props: {
     return notFound();
   }
 
+  const config = await getWorkspaceConfig(workspace.config.id, client);
+
+  if (!config) {
+    return notFound();
+  }
+
   const partnerId = (user?.isContact ? user.mainPartnerId : user.id)!;
 
   const invites = await findInvites({
@@ -65,7 +71,7 @@ export default async function Page(props: {
         members={$members}
         invites={invites}
         availableApps={availableApps || []}
-        canInviteMembers={workspace?.config?.canInviteMembers}
+        canInviteMembers={config.canInviteMembers}
       />
     </div>
   );

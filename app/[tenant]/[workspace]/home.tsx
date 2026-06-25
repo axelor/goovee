@@ -14,7 +14,7 @@ import {
 import {parseCommentContent} from '@/lib/core/comments';
 import {t} from '@/lib/core/locale/server';
 import type {User, OverlayColor} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 import {BigNewsCard} from '@/ui/components/big-news-card';
 import {Card, CardContent, CardHeader, CardTitle} from '@/ui/components/card';
@@ -43,65 +43,62 @@ export async function Home({
   client,
   user,
   workspace,
+  config,
   workspaceURI,
   apps,
 }: {
   client: Client;
   user: User | undefined;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   workspaceURI: string;
   apps: any[];
 }) {
-  const imageURL = workspace.config?.homepageHeroBgImage?.id
+  const imageURL = config.homepageHeroBgImage?.id
     ? withBasePath(`${workspaceURI}/api/home/hero/background`)
     : withBasePath(IMAGE_URL);
 
-  const logoId = workspace.logo?.id || workspace.config?.company?.logo?.id;
+  const logoId = workspace.logo?.id || config.company?.logo?.id;
   const logoURL = logoId
     ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
     : withBasePath(DEFAULT_LOGO_URL);
 
   const showNews =
-    workspace.config?.isHomepageDisplayNews &&
+    config.isHomepageDisplayNews &&
     apps.some(app => app.code === SUBAPP_CODES.news && app.isInstalled);
 
   const showEvents =
-    workspace.config?.isHomepageDisplayEvents &&
+    config.isHomepageDisplayEvents &&
     apps.some(app => app.code === SUBAPP_CODES.events && app.isInstalled);
 
   const showForum =
-    workspace.config?.isHomepageDisplayMessage &&
+    config.isHomepageDisplayMessage &&
     apps.some(app => app.code === SUBAPP_CODES.forum && app.isInstalled);
 
   const showResources =
-    workspace.config?.isHomepageDisplayResources &&
+    config.isHomepageDisplayResources &&
     apps.some(app => app.code === SUBAPP_CODES.resources && app.isInstalled);
 
   const hasContents = showEvents || showForum || showResources;
 
   const showHyperlinks =
-    workspace.config?.isHomepageDisplayHyperlinks &&
-    (workspace.config?.hyperlinkList?.length ?? 0) > 0;
+    config.isHomepageDisplayHyperlinks &&
+    (config.hyperlinkList?.length ?? 0) > 0;
 
   return (
     <div>
       <HeroSearch
-        title={workspace.config?.homepageHeroTitle || (await t('app-home'))}
+        title={config.homepageHeroTitle || (await t('app-home'))}
         description={
-          workspace.config?.homepageHeroDescription ||
+          config.homepageHeroDescription ||
           (await t(
             'Mi eget leo viverra cras pharetra enim viverra. Ac at non pretium etiam viverra. Ac at non pretium etiam',
           ))
         }
         background={
-          (workspace.config?.homepageHeroOverlayColorSelect ||
-            'default') as OverlayColor
+          (config.homepageHeroOverlayColorSelect || 'default') as OverlayColor
         }
-        blendMode={
-          workspace.config?.homepageHeroOverlayColorSelect
-            ? 'overlay'
-            : 'normal'
-        }
+        blendMode={config.homepageHeroOverlayColorSelect ? 'overlay' : 'normal'}
         groupImg={logoURL}
         groupImgClassName="object-contain"
         groupClassName="w-24 aspect-[2/1] mb-2"
@@ -181,10 +178,7 @@ export async function Home({
               <h2 className="font-semibold text-xl">
                 {await t('Useful links')}
               </h2>
-              <HyperlinkCard
-                workspace={workspace}
-                workspaceURI={workspaceURI}
-              />
+              <HyperlinkCard config={config} workspaceURI={workspaceURI} />
             </aside>
           )}
         </div>
@@ -201,7 +195,7 @@ async function LatestNews({
   user,
   workspaceURI,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;
@@ -257,7 +251,7 @@ async function EventsCard({
   user,
   workspaceURI,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;
@@ -322,7 +316,7 @@ async function ForumCard({
   user,
   workspaceURI,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;
@@ -401,7 +395,7 @@ async function ResourcesCard({
   user,
   workspaceURI,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;
@@ -473,13 +467,13 @@ async function ResourcesCard({
 }
 
 async function HyperlinkCard({
-  workspace,
+  config,
   workspaceURI,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   workspaceURI: string;
 }) {
-  const hyperlinkList = workspace?.config?.hyperlinkList;
+  const hyperlinkList = config.hyperlinkList;
 
   if (!hyperlinkList?.length) return null;
 

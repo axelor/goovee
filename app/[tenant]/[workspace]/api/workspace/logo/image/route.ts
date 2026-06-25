@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/tenant';
@@ -30,7 +30,12 @@ export async function GET(
     return new NextResponse('Invalid workspace', {status: 401});
   }
 
-  const logoId = workspace.logo?.id || workspace.config?.company?.logo?.id;
+  const config = await getWorkspaceConfig(workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Invalid workspace', {status: 401});
+  }
+
+  const logoId = workspace.logo?.id || config.company?.logo?.id;
   if (!logoId) {
     return new NextResponse('Logo not available', {status: 404});
   }

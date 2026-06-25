@@ -19,7 +19,7 @@ import {i18n} from '@/locale';
 import {DEFAULT_LOGO_URL, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Icon} from '@/ui/components';
-import {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
@@ -34,11 +34,13 @@ import {authClient} from '@/lib/auth-client';
 
 function Logo({
   workspace,
+  config,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
 }) {
   const {workspaceURI} = useWorkspace();
-  const logoId = workspace.logo?.id || workspace.config?.company?.logo?.id;
+  const logoId = workspace.logo?.id || config.company?.logo?.id;
   const logoURL = logoId
     ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
     : withBasePath(DEFAULT_LOGO_URL);
@@ -66,12 +68,14 @@ export default function Header({
   isTopNavigation = false,
   workspaces,
   workspace,
+  config,
   showCart,
 }: {
   subapps: any;
   isTopNavigation?: boolean;
   workspaces: {id: string; name: string | null; url: string | null}[];
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   showCart?: boolean | null;
 }) {
   const router = useRouter();
@@ -95,7 +99,7 @@ export default function Header({
 
   const shouldDisplayIcons = visible && !loading;
   const showCartIcon = showCart && shouldDisplayIcons;
-  const isFixedHeader = workspace?.config?.isFixedHeader;
+  const isFixedHeader = config.isFixedHeader;
 
   return (
     <div className={cn(isFixedHeader && 'sticky top-0 z-50', 'bg-background')}>
@@ -103,7 +107,7 @@ export default function Header({
         className={cn(
           'min-h-16 bg-background text-foreground px-6 py-2 flex items-center border-b border-border border-solid',
         )}>
-        <Logo workspace={workspace} />
+        <Logo workspace={workspace} config={config} />
 
         <div className="grow" />
         {isLarge && (
@@ -119,11 +123,9 @@ export default function Header({
                 .map(({name, icon, code, color}: any) => {
                   const page =
                     SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
-                  const portalAppConfig = workspace?.config;
                   const isExternalChat =
                     code === SUBAPP_CODES.chat &&
-                    portalAppConfig?.chatDisplayTypeSelect ===
-                      CHAT_TYPE.external;
+                    config.chatDisplayTypeSelect === CHAT_TYPE.external;
 
                   return (
                     <Link
