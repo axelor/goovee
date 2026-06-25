@@ -39,10 +39,10 @@ export async function GET(
 
   const event = await findEvent({
     slug,
-    workspaceURL,
     client,
     config: access.tenant.config,
     user: access.user,
+    workspace: access.workspace,
   });
 
   if (!event?.eventImage?.id) {

@@ -7,6 +7,8 @@ import {generateIcs} from './index';
 import {formatDate} from '@/lib/core/locale/server/formatters';
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
+import type {WorkspaceLight} from '@/orm/workspace';
+import type {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
 import type {Participant} from '@/subapps/events/common/actions/validators';
@@ -158,19 +160,19 @@ export async function mailTemplate({
 export const generateRegistrationMailAction = async ({
   eventId,
   participants,
-  workspaceURL,
   client,
   config,
+  workspace,
 }: {
   participants: Participant[];
   eventId: string;
-  workspaceURL: string;
   client: Client;
   config: TenantConfig;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
 }) => {
-  if (![eventId, participants?.length, workspaceURL].every(Boolean)) {
+  if (![eventId, participants?.length, workspace.url].every(Boolean)) {
     console.error(
-      'Missing required parameters: eventId, participants, or workspaceURL.',
+      'Missing required parameters: eventId, participants, or workspace.',
     );
     return;
   }
@@ -180,10 +182,10 @@ export const generateRegistrationMailAction = async ({
 
   const event = await findEvent({
     id: eventId,
-    workspaceURL,
     client,
     config,
     user,
+    workspace,
   });
 
   if (!event) {

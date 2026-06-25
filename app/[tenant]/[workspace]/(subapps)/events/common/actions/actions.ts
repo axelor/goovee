@@ -201,10 +201,10 @@ export async function register(
 
   const $event = await findEvent({
     id: eventId,
-    workspaceURL,
     user,
     client,
     config,
+    workspace: access.workspace,
   });
 
   if (!$event) return error(await t('Event not found!'));
@@ -309,9 +309,9 @@ export async function register(
     generateRegistrationMailAction({
       eventId,
       participants,
-      workspaceURL,
       client,
       config,
+      workspace: access.workspace,
     }),
   );
 
@@ -467,10 +467,10 @@ export const createComment: CreateComment = async props => {
 
   const event = await findEvent({
     id: rest.recordId,
-    workspaceURL,
     client,
     config,
     user,
+    workspace: access.workspace,
   });
   if (!event) {
     return {error: true, message: await t('Record not found')};
@@ -588,10 +588,10 @@ export const fetchComments: FetchComments = async props => {
 
   const event = await findEvent({
     id: rest.recordId,
-    workspaceURL,
     client,
     config,
     user,
+    workspace: access.workspace,
   });
   if (!event) {
     return {error: true, message: await t('Record not found')};
@@ -643,10 +643,10 @@ export const fetchEvent = async (props: {
 
   const event = await findEvent({
     slug,
-    workspaceURL,
     client,
     config,
     user,
+    workspace: access.workspace,
   });
   if (!event) return error(await t('Record not found'));
 

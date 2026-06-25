@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import type {ExpandRecursively} from '@/types/util';
+import type {Cloned, ExpandRecursively} from '@/types/util';
 import {
   DATE_FORMATS,
   DAY,
@@ -141,19 +141,19 @@ export type FullEvent = ExpandRecursively<
 export async function findEvent({
   id,
   slug,
-  workspaceURL,
   config,
   client,
   user,
+  workspace,
 }: {
   id?: ID;
   slug?: string;
-  workspaceURL: string;
   config: TenantConfig;
   client: Client;
-  user?: User;
+  user: User | null | undefined;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
 }) {
-  if (!((slug || id) && workspaceURL)) return null;
+  if (!((slug || id) && workspace.url)) return null;
 
   const privateFilter = await filterPrivate({user, client});
   const event = await client.aOSPortalEvent
@@ -166,7 +166,7 @@ export async function findEvent({
         {
           statusSelect: EVENT_STATUS.PUBLISHED,
           eventCategorySet: and<AOSPortalEventCategory>([
-            {workspace: {url: workspaceURL}},
+            {workspace: {url: workspace.url}},
             privateFilter,
           ]),
         },
@@ -241,10 +241,10 @@ export async function findEvent({
   const {saleCurrency} = eventProduct || {};
 
   const productsFromWS = await findProductsFromWS({
-    workspaceURL,
-    config,
-    client,
     eventId: event.id,
+    config,
+    partnerWorkspaceId: workspace.id,
+    partnerId: user?.id,
   });
 
   const displayWt: string =
@@ -318,7 +318,7 @@ export async function findEvent({
     };
   });
 
-  const eventLink = `${workspaceURL}/${SUBAPP_CODES.events}/${event.slug}`;
+  const eventLink = `${workspace.url}/${SUBAPP_CODES.events}/${event.slug}`;
 
   const additionalFieldSet = (await Promise.all(
     (event.additionalFieldSet ?? []).map(async field => {
@@ -377,7 +377,7 @@ export async function findEvents({
   selectedDates?: (Date | string)[];
   workspaceURL: string;
   client: Client;
-  user?: User;
+  user: User | null | undefined;
   onlyRegisteredEvent?: boolean;
   eventType?: string;
   orderBy?: Record<string, string>;
