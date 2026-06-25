@@ -11,7 +11,7 @@ import {clone, getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import {formatNumber} from '@/locale/server/formatters';
 import type {Partner} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import {buildPendingStripeBankTransferIntents} from '@/lib/core/payment/stripe/service';
 import {findPendingHubPispPayments} from '@/lib/core/payment/hubpisp/orm';
 import {findPendingStripeBankTransfers} from '@/lib/core/payment/stripe/orm';
@@ -41,7 +41,7 @@ export const findInvoices = async ({
   };
   type?: string;
   client: Client;
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
 }) => {
   const {page = DEFAULT_PAGE, limit, where = {}} = params;
   const {id: partnerId} = where.partner || {};
@@ -124,7 +124,7 @@ export const findInvoice = async ({
     };
   };
   client: Client;
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: WorkspaceLight['url'];
 }): Promise<Invoice | null> => {
   if (!workspaceURL) return null;
 

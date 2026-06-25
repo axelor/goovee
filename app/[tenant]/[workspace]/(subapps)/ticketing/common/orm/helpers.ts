@@ -2,7 +2,7 @@ import {ROLE} from '@/constants';
 import type {AOSProject, AOSProjectTask} from '@/goovee/.generated/models';
 import type {Entity, OrderByArg, WhereOptions} from '@goovee/orm';
 import type {User} from '@/types';
-import type {Subapp, PortalWorkspace} from '@/orm/workspace';
+import type {Subapp, WorkspaceLight} from '@/orm/workspace';
 import {TYPE_SELECT} from '../constants';
 import {and} from '@/utils/orm';
 
@@ -15,7 +15,7 @@ export type QueryProps<T extends Entity> = {
 
 export type UserCtx = Pick<User, 'id' | 'isContact' | 'simpleFullName'>;
 export type SubappCtx = Pick<Subapp, 'isContactAdmin' | 'role'>;
-export type WorkspaceCtx = Pick<PortalWorkspace, 'id'>;
+export type WorkspaceCtx = Pick<WorkspaceLight, 'id'>;
 
 export function getProjectAccessFilter({
   user,

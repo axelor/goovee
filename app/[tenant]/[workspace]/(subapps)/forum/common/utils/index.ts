@@ -1,7 +1,7 @@
 import {findGooveeUserByEmail} from '@/orm/partner';
 import type {Client} from '@/goovee/.generated/client';
 import {ID, User} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import {WorkspaceLight} from '@/orm/workspace';
 import {getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import {DEFAULT_PAGE} from '@/constants';
@@ -82,7 +82,7 @@ export async function getPopularQuery({
 }: {
   page?: string | number;
   limit?: number;
-  workspaceID: PortalWorkspace['id'];
+  workspaceID: WorkspaceLight['id'];
   groupIDs?: ID[];
   ids?: Array<Post['id']> | undefined;
   search?: string | undefined;
