@@ -83,11 +83,12 @@ export async function getPispAccessToken(
 ): Promise<string> {
   const {clientId, clientSecret, tokenUrl} = settings;
 
-  if (!(clientId && clientSecret && tokenUrl)) {
+  if (!(clientId && clientSecret && tokenUrl && settings.certsDir)) {
     console.error('[HUBPISP][AUTH] Missing credentials', {
       hasClientId: !!clientId,
       hasClientSecret: !!clientSecret,
       hasTokenUrl: !!tokenUrl,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP credentials are not configured');
   }

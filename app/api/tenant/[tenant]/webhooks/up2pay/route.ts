@@ -110,6 +110,19 @@ export async function GET(
   // Goovee refs are formatted as: name-reference~contextId~tenantId
   const refParts = ref.split('~');
   const contextId = refParts.length >= 3 ? refParts.at(-2)! : null;
+  const refTenantId = refParts.length >= 3 ? refParts.at(-1)! : null;
+
+  /* The signing cert is shared across tenants and contextIds are per-tenant
+   * sequences, so a signed IPN replayed to another tenant could match an
+   * unrelated context. Require the ref's tenant to match the path tenant. */
+  if (refTenantId && refTenantId !== tenantId) {
+    console.error('[UP2PAY][WEBHOOK] Ref tenant does not match path tenant', {
+      refTenantId,
+      tenantId,
+      ref,
+    });
+    return new NextResponse('Bad Request', {status: 400});
+  }
 
   if (!contextId) {
     // Ref does not match Goovee format — likely a legacy invoice, forward to legacy ERP.

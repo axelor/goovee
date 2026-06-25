@@ -170,7 +170,8 @@
                 "clientSecret",
                 "certFingerprint",
                 "beneficiaryName",
-                "iban"
+                "iban",
+                "certsDir"
               ],
               "additionalProperties": false,
               "properties": {
@@ -184,7 +185,7 @@
                 "bic": {"type": "string"},
                 "certsDir": {
                   "type": "string",
-                  "description": "Directory holding this tenant's mTLS files client.crt and private-key.pem; defaults to certs/hubpisp."
+                  "description": "Required. Directory holding this tenant's mTLS client.crt and private-key.pem. Must be distinct per HUB PISP tenant — the certificate is the tenant's bank identity, so there is no shared default. Uniqueness is enforced at config load, not by this schema."
                 }
               }
             }

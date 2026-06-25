@@ -24,10 +24,11 @@ export async function fetchPaymentRequestStatus(
   const settings = await resolveHubPispSettings(tenantId);
   const {apiUrl: baseUrl, certFingerprint: keyId} = settings;
 
-  if (!(baseUrl && keyId)) {
+  if (!(baseUrl && keyId && settings.certsDir)) {
     console.error('[HUBPISP][REQUEST_STATUS] Missing config', {
       hasBaseUrl: !!baseUrl,
       hasKeyId: !!keyId,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP is not configured');
   }

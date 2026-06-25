@@ -74,6 +74,14 @@ function normalizeTenantConfig(
     );
   }
 
+  /* A HUB PISP tenant loads its mTLS client certificate (client.crt + private-key.pem) from certsDir — that certificate is the tenant's enrolled bank identity, so there is no sensible shared default. Require it explicitly rather than falling back to a directory another tenant might also use. */
+  if (input.payments?.hubpisp && !input.payments.hubpisp.certsDir) {
+    throw new Error(
+      `Tenant "${id}": payments.hubpisp.certsDir is required (path to this ` +
+        `tenant's mTLS client.crt and private-key.pem)`,
+    );
+  }
+
   validatePublicEnvKeys(`Tenant "${id}"`, input.publicEnv);
 
   /* Bake the per-tenant storage root once, mirroring AOP's
@@ -97,6 +105,33 @@ function normalizeTenantConfig(
     aos: {...input.aos, storage},
     publicEnv: input.publicEnv ?? {},
   };
+}
+
+/* Cross-tenant invariant. A HUB PISP tenant authenticates to BPCE with an mTLS
+ * client certificate loaded from its certsDir (client.crt + private-key.pem) —
+ * that certificate IS the tenant's enrolled bank identity, so two tenants must
+ * never resolve to the same certsDir or they would transact as the same bank
+ * client. certsDir is required per tenant (see normalizeTenantConfig), so this
+ * only has to reject two tenants that point at the same directory. Paths are
+ * resolved to absolute so equivalent specs (relative vs absolute, trailing
+ * slash) compare equal. Runs across the whole tenant set, so it lives here
+ * rather than in the per-tenant normalizeTenantConfig. */
+function validateHubPispCertIsolation(tenants: Record<string, TenantConfig>) {
+  const byCertsDir = new Map<string, string>(); // resolved certsDir -> tenant id
+  for (const [id, config] of Object.entries(tenants)) {
+    const configured = config.payments?.hubpisp?.certsDir;
+    if (!configured) continue;
+    const certsDir = path.resolve(configured);
+    const owner = byCertsDir.get(certsDir);
+    if (owner) {
+      throw new Error(
+        `Tenants "${owner}" and "${id}" share the same HUB PISP certsDir ` +
+          `("${certsDir}"). Each HUB PISP tenant needs its own mTLS client ` +
+          `certificate — set a distinct payments.hubpisp.certsDir per tenant.`,
+      );
+    }
+    byCertsDir.set(certsDir, id);
+  }
 }
 
 function normalizeGlobalConfig(input: GlobalConfigInput): GlobalConfig {
@@ -230,6 +265,8 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
     if (Object.keys(tenants).length === 0) {
       throw new Error('Tenant configuration has no tenant entries');
     }
+
+    validateHubPispCertIsolation(tenants);
 
     return {global, tenants};
   }

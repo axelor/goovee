@@ -1,5 +1,3 @@
-import path from 'path';
-
 import {DEFAULT_TENANT} from '@/constants';
 import {tenantConfigProvider} from '@/tenant/config-provider';
 import type {TenantConfig} from '@/tenant';
@@ -13,7 +11,7 @@ export type HubPispSettings = {
   beneficiaryName?: string;
   iban?: string;
   bic?: string;
-  certsDir: string;
+  certsDir?: string;
 };
 
 export function getHubPispSettings(
@@ -30,7 +28,7 @@ export function getHubPispSettings(
     beneficiaryName: hubpisp?.beneficiaryName,
     iban: hubpisp?.iban,
     bic: hubpisp?.bic,
-    certsDir: hubpisp?.certsDir ?? path.join(process.cwd(), 'certs', 'hubpisp'),
+    certsDir: hubpisp?.certsDir,
   };
 }
 

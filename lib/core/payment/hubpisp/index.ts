@@ -51,12 +51,13 @@ export async function createPaymentLink(
     bic: bicFi,
   } = settings;
 
-  if (!(baseUrl && keyId && beneficiaryName && iban)) {
+  if (!(baseUrl && keyId && beneficiaryName && iban && settings.certsDir)) {
     console.error('[HUBPISP][CREATE_LINK] Missing config', {
       hasBaseUrl: !!baseUrl,
       hasKeyId: !!keyId,
       hasBeneficiaryName: !!beneficiaryName,
       hasIban: !!iban,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP is not configured');
   }
@@ -154,10 +155,11 @@ export async function fetchPaymentLinkStatus(
   const settings = await resolveHubPispSettings(tenantId);
   const {apiUrl: baseUrl, certFingerprint: keyId} = settings;
 
-  if (!(baseUrl && keyId)) {
+  if (!(baseUrl && keyId && settings.certsDir)) {
     console.error('[HUBPISP][LINK_STATUS] Missing config', {
       hasBaseUrl: !!baseUrl,
       hasKeyId: !!keyId,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP is not configured');
   }
