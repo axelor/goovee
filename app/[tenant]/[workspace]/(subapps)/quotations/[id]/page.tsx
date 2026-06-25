@@ -11,6 +11,7 @@ import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
+import {isCommentEnabled} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -63,7 +64,10 @@ async function Quotation({params: paramsProm}: PageProps) {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
+  const enableComment = isCommentEnabled({
+    subapp: SUBAPP_CODES.quotations,
+    config,
+  });
 
   const {role, isContactAdmin} = subapp;
 
@@ -97,7 +101,7 @@ async function Quotation({params: paramsProm}: PageProps) {
   return (
     <Content
       quotation={clone(quotation) as QuotationDetail}
-      workspace={workspace}
+      enableComment={enableComment}
       orderSubapp={Boolean(orderSubapp)}
     />
   );
