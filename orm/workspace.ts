@@ -1403,15 +1403,17 @@ const NO_WORKSPACE_APP: WorkspaceApp = {workspace: null, subapp: null};
 const installedApps = (apps: Subapp[] | null | undefined): Subapp[] =>
   (apps ?? []).filter(app => app.isInstalled);
 
-async function resolveGuestWorkspaceApp({
-  code,
+/* Resolves a workspace for a visitor with no identity (a guest, or a holder of
+   a capability token) from its default guest configuration. Returns the light
+   workspace — its installed apps and a config reference — or null when the
+   workspace, its guest workspace, or that guest's config is absent. */
+export async function resolveGuestWorkspace({
   url,
   client,
 }: {
-  code: string;
   url: string;
   client: Client;
-}): Promise<WorkspaceApp> {
+}): Promise<WorkspaceLight | null> {
   const workspace = await client.aOSPortalWorkspace.findOne({
     where: {url: {like: url}},
     select: {
@@ -1424,16 +1426,30 @@ async function resolveGuestWorkspaceApp({
   });
 
   const guest = workspace?.defaultGuestWorkspace;
-  if (!workspace || !guest) return NO_WORKSPACE_APP;
+  if (!workspace || !guest) return null;
 
   const configRef = guest.portalAppConfig;
-  if (!configRef) return NO_WORKSPACE_APP;
+  if (!configRef) return null;
 
   const apps = installedApps(guest.apps as Subapp[]);
-  const light = toWorkspaceLight(workspace, apps, configRef, guest.id);
+  return toWorkspaceLight(workspace, apps, configRef, guest.id);
+}
+
+async function resolveGuestWorkspaceApp({
+  code,
+  url,
+  client,
+}: {
+  code: string;
+  url: string;
+  client: Client;
+}): Promise<WorkspaceApp> {
+  const workspace = await resolveGuestWorkspace({url, client});
+  if (!workspace) return NO_WORKSPACE_APP;
+
   return {
-    workspace: light,
-    subapp: apps.find(app => app.code === code) ?? null,
+    workspace,
+    subapp: workspace.apps.find(app => app.code === code) ?? null,
   };
 }
 
