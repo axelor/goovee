@@ -1,10 +1,34 @@
 // ---- CORE IMPORTS ---- //
-import {ALLOW_ALL_REGISTRATION, ALLOW_AOS_ONLY_REGISTRATION} from '@/constants';
+import {
+  ALLOW_ALL_REGISTRATION,
+  ALLOW_AOS_ONLY_REGISTRATION,
+  ROLE,
+} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
+import type {AOSPortalApp} from '@/goovee/.generated/models';
 import {AOSPortalAppConfig} from '@/goovee/.generated/models';
 import {ID, Partner, User} from '@/types';
 import {clone, getPartnerId} from '@/utils';
-import {Payload, SelectOptions} from '@goovee/orm';
+import {and} from '@/utils/orm';
+import {Payload, SelectOptions, WhereOptions} from '@goovee/orm';
+
+/**
+ * Reusable SELECT fragment for the AOSPortalApp columns surfaced as a
+ * workspace sub-app. The ORM always returns id and version for a relation
+ * select, so the resulting App / Subapp type carries those too.
+ */
+export const appSelectFields = {
+  background: true,
+  orderForMySpaceMenu: true,
+  showInMySpace: true,
+  code: true,
+  showInTopMenu: true,
+  color: true,
+  icon: true,
+  isInstalled: true,
+  name: true,
+  orderForTopMenu: true,
+} as const satisfies SelectOptions<AOSPortalApp>;
 
 export const portalAppConfigFields = {
   name: true,
@@ -1032,6 +1056,270 @@ export async function findSubapp({
   return subapps.find(app => app.code === code);
 }
 
+/* ----------------------------------------------------------------------- *
+ * Sub-app access resolution
+ *
+ * A sub-app is shown when it is allowed in the workspace — i.e. one of the
+ * workspace's apps — not merely because the app is installed. The rule is:
+ *  - guest / partner   -> allowed when the app is one of the workspace's apps
+ *  - contact (admin)   -> allowed when the app is one of the workspace's apps;
+ *                         the per-app permission list is ignored
+ *  - contact (other)   -> allowed when the app is one of the workspace's apps
+ *                         AND the contact has a permission row for that code
+ *
+ * resolveSubappAccess returns a stable shape so callers never need a second
+ * query: subapp is null when the code is not one of this workspace's apps, or,
+ * for a restricted contact, when the contact has no permission row for it;
+ * installed reflects whether such an app row was found (the query reads the
+ * workspace's installed apps); accessible folds in the per-user rule above.
+ * ----------------------------------------------------------------------- */
+
+type SubappAccessUser = Pick<User, 'id' | 'isContact' | 'mainPartnerId'>;
+
+export type SubappAccess = {
+  subapp: Subapp | null;
+  installed: boolean;
+  accessible: boolean;
+};
+
+const NO_SUBAPP_ACCESS: SubappAccess = {
+  subapp: null,
+  installed: false,
+  accessible: false,
+};
+
+/**
+ * WHERE fragment matching an app by its code, optionally requiring it to be
+ * installed. Used to narrow an app relation select to AT MOST the single
+ * matching app.
+ */
+export function getInstalledAppFilter({
+  code,
+  installedOnly,
+}: {
+  code: string;
+  installedOnly?: boolean;
+}): WhereOptions<AOSPortalApp> {
+  return installedOnly ? {code, isInstalled: true} : {code};
+}
+
+/**
+ * Composes the app-relation WHERE used when reading the partner or guest
+ * workspace apps for an access check. It matches by code within the
+ * workspace's own apps relation — so the app must be allowed in the workspace
+ * — and restricts to installed apps. A code that is not one of the workspace's
+ * apps collapses to no row. Optional extra conditional clauses fold in via
+ * and().
+ */
+export function withSubappAccess({code}: {code: string}) {
+  return function (where?: WhereOptions<AOSPortalApp>) {
+    const installedFilter = getInstalledAppFilter({code, installedOnly: true});
+    const composed = and<AOSPortalApp>([where, installedFilter]);
+    return composed ?? installedFilter;
+  };
+}
+
+/* Narrows the raw roleSelect string to the Subapp role union. */
+const normalizeRole = (roleSelect?: string | null): Subapp['role'] =>
+  roleSelect === ROLE.TOTAL ? 'total' : 'restricted';
+
+/**
+ * Builds the stable access shape for guests, partners and contact admins: the
+ * code-within-workspace match already happened in the query, so an app row
+ * here means the app is allowed in the workspace and thus accessible.
+ */
+const subappToAccess = (
+  app: Subapp | null | undefined,
+  extra?: {isContactAdmin?: boolean},
+): SubappAccess => {
+  if (!app) return NO_SUBAPP_ACCESS;
+  const installed = Boolean(app.isInstalled);
+  const subapp: Subapp = {
+    ...app,
+    ...(extra?.isContactAdmin ? {isContactAdmin: true} : {}),
+  };
+  return {subapp, installed, accessible: installed};
+};
+
+async function resolveGuestSubappAccess({
+  code,
+  url,
+  client,
+}: {
+  code: string;
+  url: string;
+  client: Client;
+}): Promise<SubappAccess> {
+  const workspace = await client.aOSPortalWorkspace.findOne({
+    where: {url: {like: url}},
+    select: {
+      defaultGuestWorkspace: {
+        apps: {
+          where: withSubappAccess({code})(),
+          select: appSelectFields,
+        },
+      },
+    },
+  });
+
+  const app = workspace?.defaultGuestWorkspace?.apps?.[0] ?? null;
+  return subappToAccess(app);
+}
+
+async function resolvePartnerSubappAccess({
+  code,
+  url,
+  partnerId,
+  client,
+}: {
+  code: string;
+  url: string;
+  partnerId: ID;
+  client: Client;
+}): Promise<SubappAccess> {
+  const partner = await client.aOSPartner.findOne({
+    where: {id: partnerId},
+    select: {
+      partnerWorkspaceSet: {
+        where: {workspace: {url}},
+        select: {
+          apps: {
+            where: withSubappAccess({code})(),
+            select: appSelectFields,
+          },
+        },
+      },
+    },
+  });
+
+  const app = partner?.partnerWorkspaceSet?.[0]?.apps?.[0] ?? null;
+  return subappToAccess(app);
+}
+
+async function resolveContactSubappAccess({
+  code,
+  url,
+  contactId,
+  partnerId,
+  client,
+}: {
+  code: string;
+  url: string;
+  contactId: ID;
+  partnerId: ID;
+  client: Client;
+}): Promise<SubappAccess> {
+  /*
+   * One query rooted at the contact: the partner workspace apps (the install
+   * source of truth) are reached through mainPartner.partnerWorkspaceSet, while
+   * isAdmin and the per-app permission row come from the contact's own
+   * contactWorkspaceConfigSet. Both relations are filtered by the app code so
+   * each yields at most the single relevant row.
+   */
+  const contact = await client.aOSPartner.findOne({
+    where: {id: contactId},
+    select: {
+      mainPartner: {
+        partnerWorkspaceSet: {
+          where: {workspace: {url}},
+          select: {
+            apps: {
+              where: withSubappAccess({code})(),
+              select: appSelectFields,
+            },
+          },
+        },
+      },
+      contactWorkspaceConfigSet: {
+        where: {portalWorkspace: {url}, partner: {id: partnerId}},
+        select: {
+          isAdmin: true,
+          contactAppPermissionList: {
+            where: {app: {code}},
+            select: {
+              roleSelect: true,
+              app: {code: true},
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const partnerApp =
+    contact?.mainPartner?.partnerWorkspaceSet?.[0]?.apps?.[0] ?? null;
+
+  /* Code is not one of this workspace's apps at all. */
+  if (!partnerApp) return NO_SUBAPP_ACCESS;
+
+  const config = contact?.contactWorkspaceConfigSet?.[0];
+
+  /* Admins see every app allowed in the workspace; the permission list is
+     ignored. */
+  if (config?.isAdmin) {
+    return subappToAccess(partnerApp, {isContactAdmin: true});
+  }
+
+  const permission = config?.contactAppPermissionList?.find(
+    item => item.app?.code === code,
+  );
+
+  /*
+   * A restricted contact only sees the app when there is a permission row for
+   * the code. The app is already allowed in the workspace (the partner-app
+   * relation matched), so a missing permission row means no sub-app for this
+   * contact specifically. installed stays true so callers can tell an
+   * unauthorized contact apart from an app that is not part of the workspace.
+   */
+  if (!permission) return {subapp: null, installed: true, accessible: false};
+
+  return {
+    subapp: {
+      ...partnerApp,
+      role: normalizeRole(permission.roleSelect),
+    },
+    installed: true,
+    accessible: true,
+  };
+}
+
+export async function resolveSubappAccess({
+  code,
+  url,
+  user,
+  client,
+}: {
+  code: string;
+  url: string;
+  user?: SubappAccessUser;
+  client: Client;
+}): Promise<SubappAccess> {
+  if (!(code && url)) return NO_SUBAPP_ACCESS;
+
+  if (!user) {
+    return resolveGuestSubappAccess({code, url, client});
+  }
+
+  if (!user.isContact) {
+    return resolvePartnerSubappAccess({
+      code,
+      url,
+      partnerId: getPartnerId(user),
+      client,
+    });
+  }
+
+  if (!user.mainPartnerId) return NO_SUBAPP_ACCESS;
+
+  return resolveContactSubappAccess({
+    code,
+    url,
+    contactId: user.id,
+    partnerId: user.mainPartnerId,
+    client,
+  });
+}
+
 export async function findSubappAccess({
   code,
   user,
@@ -1039,15 +1327,11 @@ export async function findSubappAccess({
   client,
 }: {
   code: string;
-  user: any;
+  user?: SubappAccessUser;
   url: string;
   client: Client;
 }): Promise<Subapp | null> {
-  if (!(code && url)) return null;
+  const result = await resolveSubappAccess({code, url, user, client});
 
-  const subapp = await findSubapp({code, url, user, client});
-
-  if (!subapp?.isInstalled) return null;
-
-  return subapp;
+  return result.accessible ? result.subapp : null;
 }
