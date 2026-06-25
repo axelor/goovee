@@ -15,7 +15,7 @@ import {
   OUT_OF_STOCK_TYPE,
 } from '@/constants';
 import type {Product, Currency, ComputedProduct, User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {AOSProduct} from '@/goovee/.generated/models';
@@ -92,10 +92,10 @@ function getPageInfo({
 }
 
 const getProductFields = ({
-  workspace,
+  config,
   shouldHidePrices,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   shouldHidePrices: boolean;
 }) =>
   ({
@@ -143,7 +143,7 @@ const getProductFields = ({
       accountManagementList: {
         where: {
           company: {
-            id: workspace?.config?.company?.id,
+            id: config?.company?.id,
           },
         },
         select: {
@@ -180,7 +180,7 @@ const getWhereClause = async ({
   categoryids?: (string | number)[];
   associateWorkspace?: boolean;
   client: Client;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
   user?: User;
   archived?: boolean;
 }) => {
@@ -258,6 +258,7 @@ export async function findProducts({
   page = DEFAULT_PAGE,
   limit,
   workspace,
+  workspaceConfig,
   user,
   client,
   config,
@@ -270,13 +271,14 @@ export async function findProducts({
   categoryids?: (string | number)[];
   page?: string | number;
   limit?: string | number;
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace?: WorkspaceLight | Cloned<WorkspaceLight>;
+  config: TenantConfig;
+  workspaceConfig?: PortalAppConfig | Cloned<PortalAppConfig>;
   user?: User;
   client: Client;
-  config: TenantConfig;
   associateWorkspace?: boolean;
 }) {
-  if (!(workspace && workspace.config && client))
+  if (!(workspace && workspaceConfig && client))
     return {products: [], pageInfo: getPageInfo({count: 0, limit, page})};
 
   const orderBy = getSortOrder(sort);
@@ -287,14 +289,14 @@ export async function findProducts({
     defaultStockLocation,
     noMoreStockSelect,
     outOfStockQty,
-  } = workspace.config || {};
+  } = workspaceConfig || {};
 
   const fromWS = priceAfterLogin === 'fromWS';
   const outOfStockAction =
     noMoreStockSelect ?? OUT_OF_STOCK_TYPE.HIDE_PRODUCT_CANNOT_BUY;
 
   const hidePrices = await (async () => {
-    const {hidePriceForEmptyPricelist} = workspace.config || {};
+    const {hidePriceForEmptyPricelist} = workspaceConfig || {};
     if (!hidePriceForEmptyPricelist) return false;
     if (!user) return true;
     const mainPartner = await client.aOSPartner.findOne({
@@ -304,7 +306,7 @@ export async function findProducts({
     return !mainPartner?.salePartnerPriceList?.id;
   })();
   const productFields = getProductFields({
-    workspace,
+    config: workspaceConfig,
     shouldHidePrices: hidePrices,
   });
 
@@ -329,6 +331,7 @@ export async function findProducts({
       ? await findProductsFromStockLocation({
           client,
           workspace,
+          workspaceConfig,
           categoryids,
           associateWorkspace,
           user,
@@ -445,7 +448,7 @@ export async function findProducts({
     wsProduct?: WSProduct;
     errorMessage?: string;
   }): Promise<ComputedProduct> => {
-    const companyId = workspace?.config?.company?.id;
+    const companyId = workspaceConfig?.company?.id;
     const productcompany = companyId
       ? product?.productCompanyList?.find(
           c => c.company && Number(c.company.id) === Number(companyId),
@@ -519,7 +522,7 @@ export async function findProducts({
 
       let ati, wt, displayAti, displayWt;
 
-      const {mainPrice, displayTwoPrices} = workspace.config ?? {};
+      const {mainPrice, displayTwoPrices} = workspaceConfig ?? {};
 
       const currencySymbol = getCurrency().symbol;
       const unitScale = getScale().unit;
@@ -616,7 +619,7 @@ export async function findProducts({
   if (fromWS) {
     const productsFromWS = await findProductsFromWS({
       productList: $products.map(p => ({productId: p.id})),
-      workspace,
+      workspaceConfig,
       user,
       config,
     });
@@ -651,13 +654,15 @@ export async function findProducts({
 export async function findProduct({
   id,
   workspace,
+  workspaceConfig,
   user,
   client,
   config,
   categoryids,
 }: {
   id: Product['id'];
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
   user?: User;
   client: Client;
   config: TenantConfig;
@@ -674,6 +679,7 @@ export async function findProduct({
   return findProducts({
     ids: [id],
     workspace,
+    workspaceConfig,
     user,
     client,
     config,
@@ -684,13 +690,15 @@ export async function findProduct({
 export async function findProductBySlug({
   slug,
   workspace,
+  workspaceConfig,
   user,
   client,
   config,
   categoryids,
 }: {
   slug: Product['slug'];
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
   user?: User;
   client: Client;
   config: TenantConfig;
@@ -707,6 +715,7 @@ export async function findProductBySlug({
   return findProducts({
     slugs: [slug],
     workspace,
+    workspaceConfig,
     user,
     client,
     config,
@@ -737,17 +746,17 @@ function isProductError(obj: WSObject): obj is WSError {
 }
 
 export async function findProductsFromWS({
-  workspace,
+  workspaceConfig,
   user,
   productList,
   config,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
   user?: User;
   productList: Array<{productId: Product['id']}>;
   config: TenantConfig;
 }): Promise<WSObject[]> {
-  if (!workspace?.config?.company?.id && user && productList && config) {
+  if (!workspaceConfig?.company?.id && user && productList && config) {
     return [];
   }
 
@@ -765,7 +774,7 @@ export async function findProductsFromWS({
       body: {
         productList,
         partnerId: user?.id,
-        companyId: workspace?.config?.company?.id,
+        companyId: workspaceConfig?.company?.id,
       },
     });
 
@@ -782,6 +791,7 @@ export async function findProductsFromWS({
 export async function findProductsFromStockLocation({
   client,
   workspace,
+  workspaceConfig,
   categoryids,
   associateWorkspace,
   user,
@@ -790,14 +800,15 @@ export async function findProductsFromStockLocation({
   client: Client;
   categoryids?: (string | number)[];
   associateWorkspace?: boolean;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
   user?: User;
   outOfStockQty: number | null | undefined;
 }): Promise<string[]> {
-  if (!workspace?.config?.defaultStockLocation || !client) return [];
+  if (!workspaceConfig?.defaultStockLocation || !client) return [];
 
   try {
-    const {defaultStockLocation} = workspace.config;
+    const {defaultStockLocation} = workspaceConfig;
 
     const filters = {
       AND: [

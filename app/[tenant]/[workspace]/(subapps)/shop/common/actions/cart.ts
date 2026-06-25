@@ -7,9 +7,8 @@ import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {clone} from '@/utils';
 import {TENANT_HEADER} from '@/proxy';
 import {SUBAPP_CODES} from '@/constants';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import type {Product} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
-import type {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct as $findProduct} from '@/subapps/shop/common/orm/product';
@@ -21,18 +20,12 @@ import {CartSchema, type CartInput} from '@/subapps/shop/common/validators';
 
 export async function findProduct({
   id,
-  workspace,
   workspaceURL,
 }: {
   id: Product['id'];
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
   workspaceURL: string;
 }) {
   if (!IdSchema.safeParse(id).success) return null;
-
-  if (!workspace) {
-    return null;
-  }
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
@@ -51,8 +44,14 @@ export async function findProduct({
   const {client} = access.tenant;
   const {config} = access.tenant;
 
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return null;
+
   const categories = await findCategories({
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   });
@@ -61,7 +60,8 @@ export async function findProduct({
 
   return await $findProduct({
     id,
-    workspace,
+    workspace: access.workspace,
+    workspaceConfig,
     user,
     client,
     config,
@@ -71,11 +71,9 @@ export async function findProduct({
 
 export async function requestQuotation({
   cart,
-  workspace,
   workspaceURL,
 }: {
   cart: CartInput;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
   workspaceURL: string;
 }) {
   if (!CartSchema.safeParse(cart).success) return null;
@@ -91,9 +89,18 @@ export async function requestQuotation({
   });
   if (!access.ok) return null;
 
+  const {client} = access.tenant;
+
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return null;
+
   return requestOrder({
     cart,
-    workspace,
+    workspace: access.workspace,
+    workspaceConfig,
     type: 'quotation',
   });
 }

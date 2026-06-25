@@ -112,7 +112,7 @@ export async function paypalCaptureOrder({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
@@ -132,11 +132,14 @@ export async function paypalCaptureOrder({
 
     const {total} = computeTotal({
       cart,
-      workspace,
+      config: workspace.config,
       formatNumber,
     });
 
-    const expectedAmount = computeExpectedAmount({total, workspace});
+    const expectedAmount = computeExpectedAmount({
+      total,
+      config: workspace.config,
+    });
 
     if (Number(amount) !== Number(expectedAmount)) {
       return {
@@ -154,6 +157,7 @@ export async function paypalCaptureOrder({
       const res = await createOrder({
         cart,
         workspace,
+        workspaceConfig: workspace.config,
         user,
         client,
         config: tenant.config,
@@ -245,7 +249,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
@@ -257,11 +261,14 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   }
   const {total, currency} = computeTotal({
     cart,
-    workspace,
+    config: workspace.config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config: workspace.config,
+  });
 
   const payer = await findGooveeUserByEmail(user?.email, client);
   const payerEmail = payer?.emailAddress?.address;
@@ -359,7 +366,7 @@ export async function createStripeCheckoutSession({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
@@ -372,11 +379,14 @@ export async function createStripeCheckoutSession({
 
   const {total, currency} = computeTotal({
     cart,
-    workspace,
+    config: workspace.config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config: workspace.config,
+  });
 
   const payer = await findGooveeUserByEmail(user.email, client);
   const payerEmail = payer?.emailAddress?.address;
@@ -493,7 +503,7 @@ export async function validateStripePayment({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
@@ -523,11 +533,14 @@ export async function validateStripePayment({
 
   const {total} = computeTotal({
     cart,
-    workspace,
+    config: workspace.config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config: workspace.config,
+  });
 
   if (Number(paidAmount) !== Number(expectedAmount)) {
     return {
@@ -545,6 +558,7 @@ export async function validateStripePayment({
     const res = await createOrder({
       cart,
       workspace,
+      workspaceConfig: workspace.config,
       user,
       client,
       config: tenant.config,
@@ -636,7 +650,7 @@ export async function payboxCreateOrder({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
@@ -648,11 +662,14 @@ export async function payboxCreateOrder({
   }
   const {total, currency} = computeTotal({
     cart,
-    workspace,
+    config: workspace.config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config: workspace.config,
+  });
 
   const payer = await findGooveeUserByEmail(user?.email, client);
   const payerEmail = payer?.emailAddress?.address;
@@ -759,7 +776,7 @@ export async function validatePayboxPayment({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 
@@ -786,11 +803,14 @@ export async function validatePayboxPayment({
 
   const {total} = computeTotal({
     cart,
-    workspace,
+    config: workspace.config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config: workspace.config,
+  });
 
   if (Number(paidAmount) !== Number(expectedAmount)) {
     return {
@@ -808,6 +828,7 @@ export async function validatePayboxPayment({
     const res = await createOrder({
       cart,
       workspace,
+      workspaceConfig: workspace.config,
       user,
       client,
       config: tenant.config,

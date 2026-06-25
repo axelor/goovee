@@ -133,7 +133,7 @@ export default async function Layout(props: {
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace: $workspace,
+    config: $workspace.config,
     client,
   });
 

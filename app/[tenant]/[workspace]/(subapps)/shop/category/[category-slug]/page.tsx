@@ -123,6 +123,7 @@ async function Category({
     limit: limit ? Number(limit) : DEFAULT_LIMIT,
     categoryids,
     workspace,
+    workspaceConfig: workspace.config,
     user,
     client,
     config,
@@ -132,7 +133,7 @@ async function Category({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspace.config,
     client,
   });
 

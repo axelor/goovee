@@ -13,7 +13,7 @@ import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {User, Category, ComputedProduct} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
@@ -40,7 +40,7 @@ async function Categories({
 }: {
   client: Client;
   user: User | undefined;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
 }) {
   const categories = await findCategories({
     workspace,
@@ -54,11 +54,11 @@ async function Categories({
 }
 
 async function Carousel({
-  workspace,
+  config,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
 }) {
-  const carouselList = workspace?.config?.carouselList;
+  const carouselList = config?.carouselList;
 
   return <HomeCarousel images={carouselList} />;
 }
@@ -66,13 +66,15 @@ async function Carousel({
 async function Featured({
   client,
   config,
+  workspaceConfig,
   user,
   workspace,
 }: {
   client: Client;
   config: TenantConfig;
+  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
   user: User | undefined;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
 }) {
   const featuredCategories = (await findFeaturedCategories({
     workspace: workspace!,
@@ -85,6 +87,7 @@ async function Featured({
       const res = await findProducts({
         ids: category.productList.map(p => p.id),
         workspace: workspace!,
+        workspaceConfig,
         user,
         client,
         config,
@@ -97,14 +100,14 @@ async function Featured({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspaceConfig,
     client,
   });
 
   return (
     <FeaturedCategories
       categories={featuredCategories}
-      config={workspace.config}
+      config={workspaceConfig}
       hidePriceAndPurchase={hidePriceAndPurchase}
     />
   );
@@ -159,12 +162,13 @@ async function Shop({params}: {params: {tenant: string; workspace: string}}) {
         </Suspense>
       </div>
       <Suspense fallback={<CarouselSkeleton />}>
-        <Carousel workspace={workspace} />
+        <Carousel config={workspace.config} />
       </Suspense>
       <div className="container flex flex-col gap-6 mx-auto px-2 mb-4">
         <Suspense fallback={<FeaturedCategoriesSkeleton />}>
           <Featured
             workspace={workspace}
+            workspaceConfig={workspace.config}
             user={user}
             client={client}
             config={config}
