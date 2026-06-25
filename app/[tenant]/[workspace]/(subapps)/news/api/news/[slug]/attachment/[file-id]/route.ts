@@ -1,7 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
-import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessStatus} from '@/lib/core/access/denial';
@@ -45,12 +44,10 @@ export async function GET(
     return new NextResponse('Invalid workspace', {status: 404});
   }
 
-  const workspace = clone({...access.workspace, config});
-
   const attachmentBelongsToNews = await isAttachmentOfNews({
     slug,
     fileId,
-    workspace,
+    workspace: access.workspace,
     client,
     user: access.user,
   });

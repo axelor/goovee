@@ -61,7 +61,6 @@ export async function createStripeCheckoutSession(props: {
     client,
   );
   if (!workspaceConfig) return error(await t('Invalid workspace'));
-  const workspace = {...access.workspace, config: workspaceConfig};
 
   const validationRes = await validateRegistration({
     eventId,
@@ -76,11 +75,11 @@ export async function createStripeCheckoutSession(props: {
     return validationRes;
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!workspaceConfig?.allowOnlinePaymentForEcommerce) {
     return error(await t('Online payment is not available'));
   }
 
-  const paymentOptionSet = workspace?.config?.paymentOptionSet;
+  const paymentOptionSet = workspaceConfig?.paymentOptionSet;
   if (!paymentOptionSet?.length) {
     return error(await t('Payment options are not configured'));
   }
@@ -191,7 +190,6 @@ export async function paypalCreateOrder(props: {
     client,
   );
   if (!workspaceConfig) return error(await t('Invalid workspace'));
-  const workspace = {...access.workspace, config: workspaceConfig};
 
   const validationRes = await validateRegistration({
     eventId,
@@ -206,11 +204,11 @@ export async function paypalCreateOrder(props: {
     return validationRes;
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!workspaceConfig?.allowOnlinePaymentForEcommerce) {
     return error(await t('Online payment is not available'));
   }
 
-  const paymentOptionSet = workspace?.config?.paymentOptionSet;
+  const paymentOptionSet = workspaceConfig?.paymentOptionSet;
   if (!paymentOptionSet?.length) {
     return error(await t('Payment options are not configured.'));
   }
@@ -307,7 +305,6 @@ export async function payboxCreateOrder(props: {
     client,
   );
   if (!workspaceConfig) return error(await t('Invalid workspace'));
-  const workspace = {...access.workspace, config: workspaceConfig};
 
   const validationRes = await validateRegistration({
     eventId,
@@ -321,11 +318,11 @@ export async function payboxCreateOrder(props: {
     return validationRes;
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!workspaceConfig?.allowOnlinePaymentForEcommerce) {
     return error(await t('Online payment is not available'));
   }
 
-  const paymentOptionSet = workspace?.config?.paymentOptionSet;
+  const paymentOptionSet = workspaceConfig?.paymentOptionSet;
   if (!paymentOptionSet?.length) {
     return error(await t('Payment options are not configured.'));
   }

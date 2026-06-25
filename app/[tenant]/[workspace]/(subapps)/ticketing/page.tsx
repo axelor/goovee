@@ -72,15 +72,13 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = {...access.workspace, config};
-
   const projects = await findProjectsWithTaskCount({
     take: +limit,
     skip: getSkip(limit, page),
     client,
     user,
     subapp,
-    workspace,
+    workspace: access.workspace,
   });
 
   const pages = getPages(projects, limit);
@@ -91,7 +89,7 @@ export default async function Page(props: {
     <h3>{await t('No projects found')}</h3>;
   }
 
-  const imageURL = workspace.config.ticketHeroBgImage?.id
+  const imageURL = config.ticketHeroBgImage?.id
     ? withBasePath(
         `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/hero/background`,
       )
@@ -100,20 +98,17 @@ export default async function Page(props: {
   return (
     <>
       <HeroSearch
-        title={workspace.config.ticketHeroTitle || (await t('app-ticketing'))}
+        title={config.ticketHeroTitle || (await t('app-ticketing'))}
         description={
-          workspace.config.ticketHeroDescription ||
+          config.ticketHeroDescription ||
           (await t(
             'Mi eget leo viverra cras pharetra enim viverra. Ac at non pretium etiam viverra. Ac at non pretium etiam',
           ))
         }
         background={
-          (workspace.config.ticketHeroOverlayColorSelect as OverlayColor) ||
-          'default'
+          (config.ticketHeroOverlayColorSelect as OverlayColor) || 'default'
         }
-        blendMode={
-          workspace.config.ticketHeroOverlayColorSelect ? 'overlay' : 'normal'
-        }
+        blendMode={config.ticketHeroOverlayColorSelect ? 'overlay' : 'normal'}
         image={imageURL}
       />
       <div className="container py-6 space-y-6">

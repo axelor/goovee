@@ -46,11 +46,10 @@ export async function GET(
   if (!config) {
     return new NextResponse('Invalid workspace', {status: 401});
   }
-  const workspace = {...access.workspace, config};
 
   const imageId = await findNewsImageBySlug({
     slug,
-    workspace,
+    workspace: access.workspace,
     client,
     user,
     isFullView,

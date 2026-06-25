@@ -41,17 +41,14 @@ export async function GET(
   }
   const {client} = access.tenant;
 
-  /* WorkspaceLight carries config as {id} only; fetch the heavy config and
-     bridge it so the shared isCommentEnabled helper can read the comment flags. */
+  /* WorkspaceLight carries config as {id} only; fetch the heavy config so the
+     shared isCommentEnabled helper can read the comment flags. */
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
     return new NextResponse('Forbidden', {status: 403});
   }
-  const workspace = {...access.workspace, config};
 
-  if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.events, config: workspace.config})
-  ) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.events, config})) {
     return new NextResponse('Forbidden', {status: 403});
   }
 

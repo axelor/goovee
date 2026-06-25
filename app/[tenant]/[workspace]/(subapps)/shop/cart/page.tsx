@@ -54,16 +54,14 @@ async function CartView({
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
-
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 
   if (hidePriceAndPurchase) notFound();
-  return <Content config={workspace.config} tenant={tenant} />;
+  return <Content config={clone(config)} tenant={tenant} />;
 }
 
 export default async function Cart(props: {

@@ -3,7 +3,6 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {findSubappAccess, getWorkspaceConfig} from '@/orm/workspace';
-import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
@@ -51,9 +50,7 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
-
-  if (!workspace?.config?.requestQuotation) {
+  if (!config?.requestQuotation) {
     redirect(`${workspaceURI}/shop/cart`);
   }
 
@@ -66,7 +63,7 @@ export default async function Page(props: {
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    config: workspace.config,
+    config,
     client,
   });
 

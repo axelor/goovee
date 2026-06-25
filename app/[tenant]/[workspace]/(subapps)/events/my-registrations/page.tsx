@@ -93,7 +93,7 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
+  const workspace = clone(access.workspace);
 
   return (
     <main className="w-full">

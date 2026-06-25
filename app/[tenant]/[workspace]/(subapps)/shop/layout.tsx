@@ -42,7 +42,7 @@ export default async function Layout(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   const categories = config
     ? await findCategories({
-        workspace: clone({...access.workspace, config}),
+        workspace: access.workspace,
         client,
         user,
       }).then(clone)

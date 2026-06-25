@@ -161,7 +161,6 @@ export async function register(
     client,
   );
   if (!workspaceConfig) return error(await t('Invalid workspace'));
-  const workspace = {...access.workspace, config: workspaceConfig};
 
   let paidAmount: number,
     values: RegistrationValues,
@@ -255,13 +254,13 @@ export async function register(
      Errors are logged but do not fail the registration. */
   if (paidAmount > 0) {
     const paymentModeId = getPaymentModeId(
-      workspace?.config?.paymentOptionSet,
+      workspaceConfig?.paymentOptionSet,
       paymentMode!,
     );
 
     after(async () => {
       const res = await createInvoice({
-        workspace,
+        workspace: access.workspace,
         config,
         registrationId: registration.id,
         currencyCode: $event.currency?.code ?? '',
@@ -385,7 +384,6 @@ export async function isValidParticipant(props: {
     client,
   );
   if (!workspaceConfig) return error(await t('Invalid workspace'));
-  const workspace = {...access.workspace, config: workspaceConfig};
 
   const event = await findEventConfig({
     id: eventId,
@@ -401,9 +399,9 @@ export async function isValidParticipant(props: {
     if (
       !isEventPrivate(event) &&
       !isEventPublic(event) &&
-      workspace.config?.nonPublicEmailNotFoundMessage?.trim()
+      workspaceConfig?.nonPublicEmailNotFoundMessage?.trim()
     ) {
-      return error(await tattr(workspace.config.nonPublicEmailNotFoundMessage));
+      return error(await tattr(workspaceConfig.nonPublicEmailNotFoundMessage));
     }
     return error(await t('This email can not be registered to this event'));
   }
@@ -450,15 +448,14 @@ export const createComment: CreateComment = async props => {
   if (!workspaceConfig) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config: workspaceConfig};
 
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
   }
 
   if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.events, config: workspace.config})
+    !isCommentEnabled({subapp: SUBAPP_CODES.events, config: workspaceConfig})
   ) {
     return {error: true, message: await t('Comments are not enabled')};
   }
@@ -577,10 +574,9 @@ export const fetchComments: FetchComments = async props => {
   if (!workspaceConfig) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config: workspaceConfig};
 
   if (
-    !isCommentEnabled({subapp: SUBAPP_CODES.events, config: workspace.config})
+    !isCommentEnabled({subapp: SUBAPP_CODES.events, config: workspaceConfig})
   ) {
     return {error: true, message: await t('Comments are not enabled')};
   }

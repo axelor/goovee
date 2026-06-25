@@ -45,7 +45,7 @@ export async function GET(
 
   const imageId = await findCategoryImageBySlug({
     slug,
-    workspace: {...access.workspace, config},
+    workspace: access.workspace,
     client,
     user: access.user,
   });

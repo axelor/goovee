@@ -152,23 +152,25 @@ async function Shop({params}: {params: {tenant: string; workspace: string}}) {
   );
   if (!workspaceConfig) return notFound();
 
-  const workspace = clone({...access.workspace, config: workspaceConfig});
-
   return (
     <div>
       <div className="relative">
         <Suspense fallback={<CategoriesSkeleton />}>
-          <Categories workspace={workspace} user={user} client={client} />
+          <Categories
+            workspace={access.workspace}
+            user={user}
+            client={client}
+          />
         </Suspense>
       </div>
       <Suspense fallback={<CarouselSkeleton />}>
-        <Carousel config={workspace.config} />
+        <Carousel config={workspaceConfig} />
       </Suspense>
       <div className="container flex flex-col gap-6 mx-auto px-2 mb-4">
         <Suspense fallback={<FeaturedCategoriesSkeleton />}>
           <Featured
-            workspace={workspace}
-            workspaceConfig={workspace.config}
+            workspace={access.workspace}
+            workspaceConfig={workspaceConfig}
             user={user}
             client={client}
             config={config}

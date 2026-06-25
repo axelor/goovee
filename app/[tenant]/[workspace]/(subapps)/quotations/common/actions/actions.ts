@@ -56,9 +56,8 @@ export const createComment: CreateComment = async props => {
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config};
 
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
   }
@@ -66,7 +65,7 @@ export const createComment: CreateComment = async props => {
   if (
     !isCommentEnabled({
       subapp: SUBAPP_CODES.quotations,
-      config: workspace.config,
+      config,
     })
   ) {
     return {error: true, message: await t('Comments are not enabled')};
@@ -185,12 +184,11 @@ export const fetchComments: FetchComments = async props => {
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
-  const workspace = {...access.workspace, config};
 
   if (
     !isCommentEnabled({
       subapp: SUBAPP_CODES.quotations,
-      config: workspace.config,
+      config,
     })
   ) {
     return {error: true, message: await t('Comments are not enabled')};
