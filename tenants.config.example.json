@@ -25,6 +25,17 @@
         "clientId": "<paypal-client-id>",
         "clientSecret": "<paypal-client-secret>",
         "live": false
+      },
+      "hubpisp": {
+        "tokenUrl": "https://oauth.bpce.example.com/token",
+        "apiUrl": "https://api.bpce.example.com",
+        "clientId": "<hubpisp-client-id>",
+        "clientSecret": "<hubpisp-client-secret>",
+        "certFingerprint": "<acme-cert-sha256-fingerprint>",
+        "beneficiaryName": "<beneficiary-name>",
+        "iban": "<iban>",
+        "bic": "<bic>",
+        "certsDir": "certs/hubpisp/acme"
       }
     },
     "mail": {
@@ -68,6 +79,26 @@
         "secret": "<secret>",
         "paybox": "<host>",
         "legacyForwardUrl": "https://legacy-erp.beta.example.com/ipn"
+      },
+      "paybox": {
+        "site": "<site>",
+        "rang": "<rang>",
+        "identifiant": "<identifiant>",
+        "secret": "<secret>",
+        "paybox": "<paybox-payment-page-url>",
+        "backup1": "<paybox-backup1-url>",
+        "backup2": "<paybox-backup2-url>"
+      },
+      "hubpisp": {
+        "tokenUrl": "https://oauth.bpce.example.com/token",
+        "apiUrl": "https://api.bpce.example.com",
+        "clientId": "<hubpisp-client-id>",
+        "clientSecret": "<hubpisp-client-secret>",
+        "certFingerprint": "<beta-cert-sha256-fingerprint>",
+        "beneficiaryName": "<beneficiary-name>",
+        "iban": "<iban>",
+        "bic": "<bic>",
+        "certsDir": "certs/hubpisp/beta"
       }
     },
     "publicEnv": {
