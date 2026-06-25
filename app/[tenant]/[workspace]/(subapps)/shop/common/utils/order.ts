@@ -1,7 +1,9 @@
 // ---- CORE IMPORTS ---- //
-import {PortalAppConfig} from '@/orm/workspace';
 import {calculateAdvanceAmount} from '@/utils/payment';
 import type {Cloned} from '@/types/util';
+
+// ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 
 export const formatNumber = (n: number | string) => n;
 
@@ -10,7 +12,7 @@ export function computeExpectedAmount({
   config,
 }: {
   total: number | string;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
 }): string {
   const payInAdvance = config?.payInAdvance;
   const advancePaymentPercentage = config?.advancePaymentPercentage;

@@ -2,11 +2,12 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
+import {findWorkspace} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
+import {getAccountConfig} from '../../../common/orm/config';
 import {findAvailableSubapps} from '../../../common/orm/members';
 import Form from './form';
 
@@ -37,7 +38,7 @@ export default async function Page(props: {
     return notFound();
   }
 
-  const config = await getWorkspaceConfig(workspace.config.id, client);
+  const config = await getAccountConfig(workspace.config.id, client);
 
   if (!config?.canInviteMembers) {
     return notFound();

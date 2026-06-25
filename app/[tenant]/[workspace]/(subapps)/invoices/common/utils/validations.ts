@@ -4,8 +4,6 @@ import type {Cloned} from '@/types/util';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {ensureTokenAuth} from '@/lib/core/access/ensure-token-auth';
 import {accessMessage} from '@/lib/core/access/denial';
-import {getWorkspaceConfig} from '@/orm/workspace';
-import type {PortalAppConfig} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {PartnerKey, User} from '@/types';
@@ -16,6 +14,10 @@ import type {Client} from '@/goovee/.generated/client';
 // ---- LOCAL IMPORTS ---- //
 import type {InvoicePaymentInput} from '@/subapps/invoices/common/validators';
 import type {Invoice} from '@/subapps/invoices/common/types/invoices';
+import {
+  getInvoicesConfig,
+  type InvoicesConfig,
+} from '@/subapps/invoices/common/orm/config';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {
   INVOICE,
@@ -46,7 +48,7 @@ export async function resolveInvoicePaymentAccess({
 }): Promise<
   ActionResponse<{
     tenant: Tenant;
-    config: PortalAppConfig;
+    config: InvoicesConfig;
     user: User | undefined;
     invoiceFilter: InvoiceFilter;
   }>
@@ -56,7 +58,7 @@ export async function resolveInvoicePaymentAccess({
     if (!access.ok) {
       return {error: true, message: await accessMessage(access.reason)};
     }
-    const config = await getWorkspaceConfig(
+    const config = await getInvoicesConfig(
       access.workspace.config.id,
       access.tenant.client,
     );
@@ -83,7 +85,7 @@ export async function resolveInvoicePaymentAccess({
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
-  const config = await getWorkspaceConfig(
+  const config = await getInvoicesConfig(
     access.workspace.config.id,
     access.tenant.client,
   );
@@ -121,7 +123,7 @@ export async function validatePaymentData({
   invoiceFilter,
   workspaceURL,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: InvoicesConfig | Cloned<InvoicesConfig>;
   client: Client;
   invoice: InvoicePaymentInput['invoice'];
   amount: string;

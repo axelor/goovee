@@ -2,7 +2,6 @@ import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -12,6 +11,7 @@ import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {CartSkeleton} from '@/subapps/shop/common/ui/components';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {notFound, redirect, unauthorized} from 'next/navigation';
 
@@ -51,7 +51,7 @@ async function CartView({
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getShopConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({

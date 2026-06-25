@@ -4,7 +4,7 @@ import {FaChevronRight} from 'react-icons/fa';
 // ---- CORE IMPORTS ---- //
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getTicketingConfig} from '../../../../common/orm/config';
 import {t} from '@/locale/server';
 import {clone} from '@/utils';
 import {getCurrentPath} from '@/utils/current-path';
@@ -78,7 +78,7 @@ export default async function Page(props: {
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getTicketingConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   if (parentId) {

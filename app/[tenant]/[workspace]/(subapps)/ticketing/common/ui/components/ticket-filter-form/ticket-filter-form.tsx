@@ -1,5 +1,5 @@
 import {i18n} from '@/locale';
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../orm/config';
 import type {Cloned} from '@/types/util';
 import {
   Checkbox,
@@ -67,7 +67,7 @@ export type FilterFormProps = {
   categories: Cloned<Category>[];
   company?: Cloned<Company> | null;
   clientPartner?: Cloned<ClientPartner> | null;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 };
 
 type TicketFilterFormProps = FilterFormProps & {

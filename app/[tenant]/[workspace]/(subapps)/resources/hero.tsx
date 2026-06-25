@@ -11,10 +11,10 @@ import {
   IMAGE_URL,
   SUBAPP_CODES,
 } from '@/constants';
-import type {PortalAppConfig} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ResourcesConfig} from '@/subapps/resources/common/orm/config';
 import Search from './search';
 
 export const Hero = ({
@@ -22,7 +22,7 @@ export const Hero = ({
   workspaceURI,
   workspaceURL,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ResourcesConfig | Cloned<ResourcesConfig>;
   workspaceURI: string;
   workspaceURL: string;
 }) => {

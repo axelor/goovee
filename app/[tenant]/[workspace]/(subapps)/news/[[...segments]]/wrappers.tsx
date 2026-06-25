@@ -5,13 +5,14 @@ import type {Cloned} from '@/types/util';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import type {User} from '@/types';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import type {NewsItem} from '@/subapps/news/common/types';
 import {
   findCategories,
@@ -607,7 +608,7 @@ export async function NewsInfoWrapper({
   config,
 }: {
   news: NewsItem;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: NewsConfig | Cloned<NewsConfig>;
 }) {
   const {
     title,
@@ -638,7 +639,7 @@ export async function NewsInfoWrapper({
 export async function SocialMediaWrapper({
   config,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: NewsConfig | Cloned<NewsConfig>;
 }) {
   const enableSocialMediaSharing = config.enableSocialMediaSharing;
   const availableSocials = config.socialMediaSelect;
@@ -771,7 +772,7 @@ export async function CommentsWrapper({
   news,
   workspaceURI,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: NewsConfig | Cloned<NewsConfig>;
   user?: User;
   news: NewsItem;
   workspaceURI: string;

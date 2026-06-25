@@ -6,7 +6,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {isCommentEnabled} from '@/lib/core/comments';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessStatus} from '@/lib/core/access/denial';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getQuotationsConfig} from '../../../../../common/orm/config';
 import {PartnerKey} from '@/types';
 import {findFile, streamFile} from '@/utils/download';
 import {getWhereClauseForEntity} from '@/utils/filters';
@@ -44,7 +44,7 @@ export async function GET(
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getQuotationsConfig(access.workspace.config.id, client);
   if (!config) {
     return new NextResponse('Not found', {status: 404});
   }

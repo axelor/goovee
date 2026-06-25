@@ -5,12 +5,13 @@ import {Suspense} from 'react';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
 import {CommentsSkeleton} from '@/lib/core/comments';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import {
   FeedListSkeleton,
   NewsInfoSkeleton,
@@ -41,7 +42,7 @@ export async function ArticleNews({
   slug,
 }: {
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: NewsConfig | Cloned<NewsConfig>;
   segments: string[];
   client: Client;
   tenantId: string;

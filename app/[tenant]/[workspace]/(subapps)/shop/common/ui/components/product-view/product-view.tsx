@@ -22,10 +22,10 @@ import {getProductImageURL} from '@/utils/files';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import type {Category, ComputedProduct} from '@/types';
-import type {PortalAppConfig} from '@/orm/workspace';
 import type {ModelField} from '@/orm/model-fields';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {ProductMetaFieldView} from '@/subapps/shop/common/ui/components/product-meta-field-view';
 
 export function ProductView({
@@ -39,7 +39,7 @@ export function ProductView({
   hidePriceAndPurchase: boolean;
   categories?: Category[];
   product: ComputedProduct;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
   breadcrumbs: Array<{id: string | number; name: string}>;
   metaFields: Array<ModelField & {value: unknown}>;
 }) {

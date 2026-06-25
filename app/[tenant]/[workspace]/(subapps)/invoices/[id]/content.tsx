@@ -7,7 +7,6 @@ import {useRouter} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {Separator, Container, Chip} from '@/ui/components';
 import {i18n} from '@/locale';
-import type {PortalAppConfig} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {formatDate} from '@/lib/core/locale/formatters';
 import {useToast} from '@/ui/hooks';
@@ -20,11 +19,12 @@ import {withBasePath} from '@/lib/core/path/base-path';
 // ---- LOCAL IMPORTS ---- //
 import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
 import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
+import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
 
 interface ContentProps {
   invoice: Cloned<InvoiceType>;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: InvoicesConfig | Cloned<InvoicesConfig>;
   workspaceURI: string;
   token?: string;
 }

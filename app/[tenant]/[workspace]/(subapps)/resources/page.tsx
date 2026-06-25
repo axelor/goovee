@@ -4,7 +4,6 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
@@ -14,6 +13,7 @@ import type {User} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
 
 // ---- LOCAL IMPORTS ---- //
+import {getResourcesConfig} from '@/subapps/resources/common/orm/config';
 import {
   fetchLatestFiles,
   fetchLatestFolders,
@@ -98,7 +98,7 @@ export default async function Page(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getResourcesConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   return (

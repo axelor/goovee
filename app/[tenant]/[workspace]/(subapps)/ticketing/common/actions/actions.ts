@@ -25,7 +25,7 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessMessage} from '@/lib/core/access/denial';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getTicketingConfig} from '../orm/config';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -90,7 +90,7 @@ export async function mutate(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -313,7 +313,7 @@ export async function updateAssignment(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -407,7 +407,7 @@ export async function closeTicket(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -506,7 +506,7 @@ export async function cancelTicket(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -607,7 +607,7 @@ export async function createRelatedLink(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -670,7 +670,7 @@ export async function createChildLink(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -726,7 +726,7 @@ export async function createParentLink(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -787,7 +787,7 @@ export async function deleteChildLink(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -848,7 +848,7 @@ export async function deleteParentLink(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -908,7 +908,7 @@ export async function deleteRelatedLink(
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -1005,7 +1005,7 @@ export const createComment: CreateComment = async props => {
 
   const {user, subapp} = access;
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );
@@ -1208,7 +1208,7 @@ export const fetchComments: FetchComments = async props => {
   }
 
   const {client} = access.tenant;
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getTicketingConfig(
     access.workspace.config.id,
     client,
   );

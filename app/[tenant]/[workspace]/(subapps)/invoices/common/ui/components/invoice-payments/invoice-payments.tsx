@@ -10,7 +10,6 @@ import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import type {PortalAppConfig} from '@/orm/workspace';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 import {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 
@@ -26,6 +25,7 @@ import {
   validatePayboxPayment,
   validateStripePayment,
 } from '@/subapps/invoices/common/actions';
+import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import {Invoice} from '@/subapps/invoices/common/types/invoices';
 import {INVOICE_PAYMENT_OPTIONS} from '@/subapps/invoices/common/constants/invoices';
 import {SUBAPP_CODES} from '@/constants';
@@ -41,7 +41,7 @@ export function InvoicePayments({
   token,
   onPaymentUpdate,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoice: Cloned<Invoice>;
   amount: string;
   paymentType: INVOICE_PAYMENT_OPTIONS | null;

@@ -31,10 +31,10 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {SEARCH_PARAMS} from '@/constants';
 import type {Product, ComputedProduct} from '@/types';
-import type {PortalAppConfig} from '@/orm/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {findProduct} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/actions/cart';
 import type {
   EnrichedCartItem,
@@ -205,7 +205,7 @@ function CartItems({
   cart: EnrichedCart;
   disabled?: boolean;
   onRemove: (product: Product) => Promise<void>;
-  config?: PortalAppConfig | Cloned<PortalAppConfig>;
+  config?: ShopConfig | Cloned<ShopConfig>;
 }) {
   const handleRemove =
     (product: Product) => (event: React.MouseEvent<HTMLElement>) => {
@@ -238,7 +238,7 @@ function CartSummary({
   onRequestQuotation: () => void;
   hideRequestQuotation?: boolean;
   hideCheckout?: boolean;
-  config?: PortalAppConfig | Cloned<PortalAppConfig>;
+  config?: ShopConfig | Cloned<ShopConfig>;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -330,7 +330,7 @@ export default function Content({
   config,
   tenant,
 }: {
-  config?: PortalAppConfig | Cloned<PortalAppConfig>;
+  config?: ShopConfig | Cloned<ShopConfig>;
   tenant: string;
 }) {
   const {data: session} = authClient.useSession();

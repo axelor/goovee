@@ -19,7 +19,7 @@ import {UserType} from '@/auth/types';
 import {generateOTP} from '@/otp/actions';
 import {findOne, isValid, markUsed} from '@/otp/orm';
 import {Scope} from '@/otp/constants';
-import {findWorkspace, getWorkspaceConfig} from '@/orm/workspace';
+import {findWorkspace} from '@/orm/workspace';
 import {withMattermostEmailSync} from '@/lib/core/mattermost';
 import {z} from 'zod';
 import {
@@ -33,6 +33,7 @@ import {
   type UpdateProfileImage,
 } from '../common/utils/validators';
 import {PARTNER_PICTURE_PURPOSE} from '../common/constants';
+import {getAccountConfig} from '../common/orm/config';
 
 function error(message: string) {
   return {
@@ -390,7 +391,7 @@ export async function generateOTPForUpdate(data: EmailUpdateOTP) {
     return error(await t('Bad request'));
   }
 
-  const config = await getWorkspaceConfig(workspace.config.id, client);
+  const config = await getAccountConfig(workspace.config.id, client);
 
   if (!config) {
     return error(await t('Bad request'));

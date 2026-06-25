@@ -11,7 +11,7 @@ import {
 } from '@/subapps/events/common/utils';
 import {User} from '@/types';
 import {type Participant} from './validators';
-import {PortalAppConfig} from '@/orm/workspace';
+import {EventsConfig} from '@/subapps/events/common/orm/config';
 import {ActionResponse} from '@/types/action';
 import {findEventConfig} from '../orm/event';
 import {
@@ -39,7 +39,7 @@ export async function validateRegistration({
   eventId: string;
   values: RegistrationValues;
   workspaceURL: string;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: EventsConfig | Cloned<EventsConfig>;
   user?: User;
   client: Client;
 }): ActionResponse<{participants: Participant[]}> {

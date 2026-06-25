@@ -3,7 +3,7 @@ import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -70,7 +70,7 @@ export default async function Page(props: {
   const {client} = access.tenant;
   const userId = user?.id as string;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getForumConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const enableComment = isCommentEnabled({

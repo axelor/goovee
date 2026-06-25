@@ -8,7 +8,7 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {TENANT_HEADER} from '@/proxy';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getQuotationsConfig} from '../orm/config';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessMessage} from '@/lib/core/access/denial';
 import {clone} from '@/utils';
@@ -52,7 +52,7 @@ export const createComment: CreateComment = async props => {
 
   const {user, subapp} = access;
   const {client} = access.tenant;
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getQuotationsConfig(access.workspace.config.id, client);
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
@@ -180,7 +180,7 @@ export const fetchComments: FetchComments = async props => {
 
   const {user, subapp} = access;
   const {client} = access.tenant;
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getQuotationsConfig(access.workspace.config.id, client);
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }

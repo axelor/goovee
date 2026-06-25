@@ -5,7 +5,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import {clone} from '@/utils';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {workspacePathname} from '@/utils/workspace';
-import {findSubappAccess, getWorkspaceConfig} from '@/orm/workspace';
+import {findSubappAccess} from '@/orm/workspace';
 import {PartnerKey} from '@/types';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
@@ -18,6 +18,7 @@ import Content from './content';
 import {findQuotation} from '@/subapps/quotations/common/orm/quotations';
 import {QuotationSkeleton} from '@/subapps/quotations/common/ui/components';
 import type {QuotationDetail} from '@/subapps/quotations/common/types/quotations';
+import {getQuotationsConfig} from '@/subapps/quotations/common/orm/config';
 
 type PageProps = {
   params: Promise<{
@@ -61,7 +62,7 @@ async function Quotation({params: paramsProm}: PageProps) {
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getQuotationsConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const enableComment = isCommentEnabled({

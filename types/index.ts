@@ -1,4 +1,4 @@
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {MainPriceConfig} from '@/orm/workspace';
 
 export type ID = string;
 export type Version = number;
@@ -157,7 +157,7 @@ export type ComputedProduct = {
     displayWt?: string;
     displayPrimary?: string;
     displaySecondary?: string;
-    mainPrice?: PortalAppConfig['mainPrice'];
+    mainPrice?: MainPriceConfig['mainPrice'];
     displayTwoPrices?: boolean;
   };
   currency: Currency;

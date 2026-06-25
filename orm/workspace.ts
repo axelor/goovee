@@ -1,5 +1,4 @@
 // ---- CORE IMPORTS ---- //
-import {cache} from 'react';
 import {
   ALLOW_ALL_REGISTRATION,
   ALLOW_AOS_ONLY_REGISTRATION,
@@ -34,160 +33,10 @@ export const appSelectFields = {
   orderForTopMenu: true,
 } as const satisfies SelectOptions<AOSPortalApp>;
 
-export const portalAppConfigFields = {
-  name: true,
-  company: {
-    id: true,
-    name: true,
-    logo: {
-      id: true,
-    },
-  },
-  byNewest: true,
-  byFeature: true,
-  byAToZ: true,
-  byZToA: true,
-  byLessExpensive: true,
-  byMostExpensive: true,
-  displayPrices: true,
-  mainPrice: true,
-  displayTwoPrices: true,
-  hidePriceForEmptyPricelist: true,
-  confirmOrder: true,
-  requestQuotation: true,
-  priceAfterLogin: true,
-  paymentOptionSet: {
-    select: {
-      name: true,
-      typeSelect: true,
-      paymentMode: {
-        id: true,
-      },
-      transferTypeSelect: true,
-    },
-  },
-  ticketStatusChangeMethod: true,
-  ticketHeroTitle: true,
-  ticketHeroBgImage: {
-    id: true,
-    fileName: true,
-  },
-  ticketHeroDescription: true,
-  ticketHeroOverlayColorSelect: true,
-  forumHeroTitle: true,
-  forumHeroDescription: true,
-  forumHeroOverlayColorSelect: true,
-  forumHeroBgImage: {id: true},
-  eventHeroTitle: true,
-  eventHeroDescription: true,
-  eventHeroOverlayColorSelect: true,
-  eventHeroBgImage: {id: true},
-  newsHeroTitle: true,
-  newsHeroDescription: true,
-  newsHeroOverlayColorSelect: true,
-  newsHeroBgImage: {id: true},
-  resourcesHeroTitle: true,
-  resourcesHeroDescription: true,
-  resourcesHeroOverlayColorSelect: true,
-  resourcesHeroBgImage: {id: true},
-  allowOnlinePaymentForEcommerce: true,
-  carouselList: {
-    select: {
-      title: true,
-      subTitle: true,
-      href: true,
-      image: {id: true},
-    },
-  },
-  hyperlinkList: {
-    select: {
-      title: true,
-      link: true,
-      logo: {id: true},
-    },
-  },
-  allowGuestEventRegistration: true,
-  enableRecommendedNews: true,
-  enableSocialMediaSharing: true,
-  enableComment: true,
-  enableNewsComment: true,
-  enableEventComment: true,
-  socialMediaSelect: true,
-  canInviteMembers: true,
-  isExistingContactsOnly: true,
-  invitationTemplateList: {
-    select: {
-      localization: {code: true},
-      template: {name: true, subject: true, content: true, language: true},
-    },
-  },
-  otpTemplateList: {
-    select: {
-      localization: {code: true},
-      template: {name: true, subject: true, content: true, language: true},
-    },
-  },
-  noMoreStockSelect: true,
-  outOfStockQty: true,
-  defaultStockLocation: {id: true},
-  directoryHeroTitle: true,
-  directoryHeroBgImage: {
-    id: true,
-    fileName: true,
-  },
-  directoryHeroDescription: true,
-  directoryHeroOverlayColorSelect: true,
-  nonPublicEmailNotFoundMessage: true,
-  canPayInvoice: true,
-  allowOnlinePaymentForInvoices: true,
-  isShowAllTickets: true,
-  isShowMyTickets: true,
-  isShowManagedTicket: true,
-  isShowCreatedTicket: true,
-  isShowResolvedTicket: true,
-  ticketingFieldSet: {select: {name: true}},
-  ticketingFormFieldSet: {select: {name: true}},
-  isDisplayChildTicket: true,
-  isDisplayRelatedTicket: true,
-  isDisplayTicketParent: true,
-  isDisplayAssignmentBtn: true,
-  isDisplayCancelBtn: true,
-  isDisplayCloseBtn: true,
-  isShowPublicationAuthor: true,
-  isShowPublicationDate: true,
-  isShowPublicationTime: true,
-  isDisplayContact: true,
-  contactEmailAddress: {address: true},
-  contactName: true,
-  contactPhone: true,
-  isCompanyOrAddressRequired: true,
-  payInAdvance: true,
-  advancePaymentPercentage: true,
-  isHomepageDisplay: true,
-  isHomepageDisplayNews: true,
-  isHomepageDisplayEvents: true,
-  isHomepageDisplayMessage: true,
-  isHomepageDisplayResources: true,
-  isHomepageDisplayHyperlinks: true,
-  homepageHeroTitle: true,
-  homepageHeroDescription: true,
-  homepageHeroOverlayColorSelect: true,
-  homepageHeroBgImage: {id: true},
-  isFixedHeader: true,
-  chatDisplayTypeSelect: true,
-  termsOfUseAcceptanceText: true,
-} as const satisfies SelectOptions<AOSPortalAppConfig>;
-
-export type PortalAppConfig = Payload<
-  AOSPortalAppConfig,
-  {select: typeof portalAppConfigFields}
->;
-
 /* Reusable select fragments for the config concerns shared across sub-apps.
    A per-app config select spreads the fragments it needs, so the shared
    consumer — <Payments>, isCommentEnabled, shouldHidePricesAndPurchase —
-   accepts the app's narrow config without depending on the full
-   PortalAppConfig. */
+   accepts the app's narrow config rather than every config field. */
 export const paymentConfigSelect = {
   allowOnlinePaymentForEcommerce: true,
   paymentOptionSet: {
@@ -225,6 +74,29 @@ export const priceVisibilityConfigSelect = {
 export type PriceVisibilityConfig = Payload<
   AOSPortalAppConfig,
   {select: typeof priceVisibilityConfigSelect}
+>;
+
+export const mainPriceConfigSelect = {
+  mainPrice: true,
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type MainPriceConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof mainPriceConfigSelect}
+>;
+
+export const otpTemplateConfigSelect = {
+  otpTemplateList: {
+    select: {
+      localization: {code: true},
+      template: {name: true, subject: true, content: true, language: true},
+    },
+  },
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type OtpTemplateConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof otpTemplateConfigSelect}
 >;
 
 export type App = {
@@ -449,7 +321,7 @@ export async function findDefaultPartnerWorkspaceConfig({
             orderForTopMenu: true,
           },
         },
-        portalAppConfig: portalAppConfigFields,
+        portalAppConfig: otpTemplateConfigSelect,
       },
     },
   });
@@ -495,7 +367,7 @@ export async function findWorkspace({
 
   /* Workspace-level resolution (no sub-app) reuses the same scoped query as
      ensureAuth's resolveWorkspaceApp. The heavy config is fetched on demand by
-     callers via getWorkspaceConfig(workspace.config.id, client); the sub-app
+     callers via their per-app config getter (e.g. getShopConfig); the sub-app
      slot of the result is unused here. */
   const {workspace} = await resolveWorkspaceApp({code: '', url, user, client});
   return workspace;
@@ -1194,7 +1066,7 @@ export async function findSubappAccess({
  * this workspace and can this user reach <code>?". It returns the workspace
  * WITHOUT its heavy config payload — only config ({id}) — plus
  * the user's accessible apps and the requested sub-app (apps.find(code)).
- * Pages that render config-driven UI fetch it on demand via getWorkspaceConfig.
+ * Pages that render config-driven UI fetch it on demand via their per-app config getter.
  * ----------------------------------------------------------------------- */
 
 /* AOSPortalWorkspace identity columns surfaced in WorkspaceLight, read either
@@ -1456,20 +1328,3 @@ export async function resolveWorkspaceApp({
     client,
   });
 }
-
-/**
- * Fetches the heavy PortalAppConfig payload on demand. Memoized per request
- * (React cache) so multiple consumers in one render share a single read; it is
- * not cached across requests, so it stays fresh — config.updatedOn does not
- * track edits to connected relations, so a longer-lived cache could go stale.
- */
-export const getWorkspaceConfig = cache(
-  async (configId: string, client: Client): Promise<PortalAppConfig | null> => {
-    if (!configId) return null;
-
-    return client.aOSPortalAppConfig.findOne({
-      where: {id: configId},
-      select: portalAppConfigFields,
-    });
-  },
-);

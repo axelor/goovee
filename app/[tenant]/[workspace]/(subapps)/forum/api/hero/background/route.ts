@@ -4,7 +4,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessStatus} from '@/lib/core/access/denial';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -28,7 +28,7 @@ export async function GET(
   }
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getForumConfig(access.workspace.config.id, client);
   const bgImageId = config?.forumHeroBgImage?.id;
 
   if (!bgImageId) {

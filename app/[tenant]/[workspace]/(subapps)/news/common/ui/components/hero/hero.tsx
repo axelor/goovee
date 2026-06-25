@@ -14,11 +14,11 @@ import {
 } from '@/constants';
 import {HeroSearch, Search} from '@/ui/components';
 import type {OverlayColor} from '@/types';
-import {PortalAppConfig} from '@/orm/workspace';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import {SearchItem} from '@/subapps/news/common/ui/components';
 import {findSearchNews} from '@/subapps/news/common/actions/action';
 
@@ -28,11 +28,7 @@ async function findNews({workspaceURL}: {workspaceURL: string}) {
     .catch(() => []);
 }
 
-export function Hero({
-  config,
-}: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
-}) {
+export function Hero({config}: {config: NewsConfig | Cloned<NewsConfig>}) {
   const router = useRouter();
 
   const {workspaceURL, workspaceURI} = useWorkspace();

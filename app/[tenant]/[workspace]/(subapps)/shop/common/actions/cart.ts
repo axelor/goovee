@@ -7,11 +7,11 @@ import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {clone} from '@/utils';
 import {TENANT_HEADER} from '@/proxy';
 import {SUBAPP_CODES} from '@/constants';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import type {Product} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct as $findProduct} from '@/subapps/shop/common/orm/product';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
 import {requestOrder} from '@/subapps/shop/common/service';
@@ -44,7 +44,7 @@ export async function findProduct({
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getShopConfig(
     access.workspace.config.id,
     client,
   );
@@ -91,7 +91,7 @@ export async function requestQuotation({
 
   const {client} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getShopConfig(
     access.workspace.config.id,
     client,
   );

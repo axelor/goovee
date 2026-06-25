@@ -8,7 +8,7 @@ import {
   MAIN_PRICE,
 } from '@/constants';
 import type {ComputedProduct} from '@/types';
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {MainPriceConfig} from '@/orm/workspace';
 import {formatNumber} from '@/locale/formatters';
 
 export function computeTotal({
@@ -22,10 +22,10 @@ export function computeTotal({
       computedProduct?: ComputedProduct;
     }>;
   };
-  config?: PortalAppConfig | Cloned<PortalAppConfig>;
+  config?: MainPriceConfig | Cloned<MainPriceConfig>;
   formatNumber?: typeof formatNumber;
 }) {
-  let mainPrice: PortalAppConfig['mainPrice'] = MAIN_PRICE.ATI;
+  let mainPrice: MainPriceConfig['mainPrice'] = MAIN_PRICE.ATI;
 
   if (config?.mainPrice) {
     mainPrice = config?.mainPrice;

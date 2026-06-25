@@ -9,7 +9,7 @@ import {clone} from '@/utils';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {ModelMap, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
@@ -63,7 +63,7 @@ export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getNewsConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,
@@ -107,7 +107,7 @@ export async function findRecommendedNews({
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getNewsConfig(access.workspace.config.id, client);
   if (!config) {
     return {
       error: true,
@@ -153,7 +153,7 @@ export const createComment: CreateComment = async props => {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getNewsConfig(access.workspace.config.id, client);
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
@@ -272,7 +272,7 @@ export const fetchComments: FetchComments = async props => {
   const {user} = access;
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getNewsConfig(access.workspace.config.id, client);
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }

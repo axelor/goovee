@@ -15,7 +15,7 @@ import {isPaymentOptionAvailable} from '@/utils/payment';
 import {TENANT_HEADER} from '@/proxy';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
 import {accessMessage} from '@/lib/core/access/denial';
-import {getWorkspaceConfig} from '@/orm/workspace';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {scale} from '@/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {ensureLeadingSlash} from '@/utils/url';
@@ -56,7 +56,7 @@ export async function createStripeCheckoutSession(props: {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getEventsConfig(
     access.workspace.config.id,
     client,
   );
@@ -186,7 +186,7 @@ export async function paypalCreateOrder(props: {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getEventsConfig(
     access.workspace.config.id,
     client,
   );
@@ -302,7 +302,7 @@ export async function payboxCreateOrder(props: {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getEventsConfig(
     access.workspace.config.id,
     client,
   );

@@ -7,7 +7,6 @@ import {IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
 import {t} from '@/lib/core/locale/server';
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {
   Pagination,
   PaginationContent,
@@ -25,6 +24,7 @@ import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
+import {getDirectoryConfig} from './common/orm/config';
 import {findEntries, findMapConfig} from './common/orm';
 import type {ListEntry, SearchParams} from './common/types';
 import {Card} from './common/ui/components/card';
@@ -73,7 +73,7 @@ export default async function Page(props: {
 
   const {client} = access.tenant;
 
-  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const config = await getDirectoryConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
   const {page = 1, limit = ITEMS_PER_PAGE, sort, city, zip} = searchParams;

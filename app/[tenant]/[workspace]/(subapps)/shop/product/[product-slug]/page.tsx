@@ -4,7 +4,6 @@ import {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone, htmlToNormalString} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -19,6 +18,7 @@ import {
   ProductViewSkeleton,
 } from '@/subapps/shop/common/ui/components';
 import {findProductBySlug} from '@/subapps/shop/common/orm/product';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
@@ -52,7 +52,7 @@ export async function generateMetadata(props: {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getShopConfig(
     access.workspace.config.id,
     client,
   );
@@ -127,7 +127,7 @@ async function Product({
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getShopConfig(
     access.workspace.config.id,
     client,
   );

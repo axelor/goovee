@@ -7,13 +7,15 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {Button} from '@/ui/components/button';
 import {i18n} from '@/locale';
-import type {PortalAppConfig} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
+
+// ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 
 export function HomeCarousel({
   images,
 }: {
-  images: NonNullable<PortalAppConfig['carouselList']> | null | undefined;
+  images: NonNullable<ShopConfig['carouselList']> | null | undefined;
 }) {
   const {workspaceURI} = useWorkspace();
 

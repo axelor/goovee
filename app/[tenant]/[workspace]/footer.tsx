@@ -2,15 +2,15 @@ import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import type {PortalAppConfig} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
+import type {ShellConfig} from './orm/config';
 import {Link} from '@/ui/components/link';
 import type {Cloned} from '@/types/util';
 
 export default function Footer({
   config,
 }: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const displayContact = config.isDisplayContact;
   const contactEmail = config.contactEmailAddress?.address;

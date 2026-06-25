@@ -4,7 +4,6 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {getWorkspaceConfig} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -13,10 +12,11 @@ import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {User, Category, ComputedProduct} from '@/types';
-import type {PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {WorkspaceLight} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
+import {getShopConfig, type ShopConfig} from '@/subapps/shop/common/orm/config';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {
   findCategories,
@@ -53,11 +53,7 @@ async function Categories({
   return <ProductCategories categories={parentcategories} />;
 }
 
-async function Carousel({
-  config,
-}: {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
-}) {
+async function Carousel({config}: {config: ShopConfig | Cloned<ShopConfig>}) {
   const carouselList = config?.carouselList;
 
   return <HomeCarousel images={carouselList} />;
@@ -72,7 +68,7 @@ async function Featured({
 }: {
   client: Client;
   config: TenantConfig;
-  workspaceConfig: PortalAppConfig | Cloned<PortalAppConfig>;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user: User | undefined;
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
 }) {
@@ -146,7 +142,7 @@ async function Shop({params}: {params: {tenant: string; workspace: string}}) {
   const {client} = access.tenant;
   const {config} = access.tenant;
 
-  const workspaceConfig = await getWorkspaceConfig(
+  const workspaceConfig = await getShopConfig(
     access.workspace.config.id,
     client,
   );

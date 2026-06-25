@@ -29,7 +29,8 @@ import {useEnvironment} from '@/lib/core/environment';
 import {CHAT_TYPE} from '@/constants';
 import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import type {Subapp, PortalAppConfig} from '@/orm/workspace';
+import type {Subapp} from '@/orm/workspace';
+import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
 
 type WorkspaceListItem = {id: string; name: string | null; url: string | null};
@@ -43,7 +44,7 @@ export function Sidebar({
   subapps: Subapp[];
   workspaces?: WorkspaceListItem[];
   showHome: boolean | null;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const {data: session} = authClient.useSession();
   const [collapsed, setCollapsed] = useState(false);

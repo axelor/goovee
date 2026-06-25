@@ -11,7 +11,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {i18n} from '@/locale';
 import type {SuccessResponse} from '@/types/action';
-import {PortalAppConfig, Subapp} from '@/orm/workspace';
+import {Subapp} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
@@ -23,10 +23,11 @@ import {
   payboxCreateOrder,
   validatePayboxPayment,
 } from '@/subapps/shop/cart/(protected)/checkout/action';
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {ORDER_SUCCESS_PARAM} from '@/subapps/shop/common/constants';
 
 type ShopPaymentsProps = {
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShopConfig | Cloned<ShopConfig>;
   orderSubapp?: Subapp | null;
 };
 

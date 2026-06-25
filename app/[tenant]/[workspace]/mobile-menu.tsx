@@ -25,7 +25,8 @@ import {Notification} from './notification';
 import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
-import type {Subapp, PortalAppConfig, WorkspaceLight} from '@/orm/workspace';
+import type {Subapp, WorkspaceLight} from '@/orm/workspace';
+import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
 
 type WorkspaceListItem = {id: string; name: string | null; url: string | null};
@@ -37,7 +38,7 @@ function MobileSidebar({
 }: {
   subapps: Subapp[];
   workspaces?: WorkspaceListItem[];
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const pathname = usePathname();
   const {data: session} = authClient.useSession();
@@ -190,7 +191,7 @@ export function MobileMenu({
   workspaces?: WorkspaceListItem[];
   workspace?: WorkspaceLight | Cloned<WorkspaceLight>;
   showCart?: boolean | null;
-  config: PortalAppConfig | Cloned<PortalAppConfig>;
+  config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const router = useRouter();
   const redirect = () => router.push('/notifications');
