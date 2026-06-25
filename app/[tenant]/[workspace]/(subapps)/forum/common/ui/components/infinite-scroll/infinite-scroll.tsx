@@ -1,7 +1,6 @@
 'use client';
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {Cloned} from '@/types/util';
 import {useInView} from 'react-intersection-observer';
 import {useParams} from 'next/navigation';
 
@@ -11,7 +10,6 @@ import {useSearchParams} from '@/ui/hooks';
 import {DEFAULT_LIMIT} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
-import {PortalWorkspace} from '@/orm/workspace';
 import {PageInfo} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -24,7 +22,7 @@ interface InfiniteScrollProps {
   pageInfo: PageInfo;
   memberGroupIDs: string[];
   selectedGroupId: string | null;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  enableComment: boolean;
 }
 
 export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
@@ -32,7 +30,7 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   pageInfo,
   memberGroupIDs,
   selectedGroupId,
-  workspace,
+  enableComment,
 }) => {
   const {count} = pageInfo;
   const [posts, setPosts] = useState<PostWithMembership[]>(initialPosts);
@@ -122,7 +120,7 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
           key={post.id}
           post={post}
           showHeader={!params.id}
-          workspace={workspace}
+          enableComment={enableComment}
         />
       ))}
 

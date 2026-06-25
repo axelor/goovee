@@ -9,6 +9,7 @@ import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {isCommentEnabled} from '@/comments';
 import {User} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -72,7 +73,12 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
+  const enableComment = isCommentEnabled({
+    subapp: SUBAPP_CODES.forum,
+    config,
+  });
+
+  const workspace = clone(access.workspace);
 
   const groups = await findGroups({
     workspaceURL: workspace.url,
@@ -110,7 +116,7 @@ export default async function Page(props: {
   return (
     <div className="flex flex-col h-full flex-1">
       <div className="hidden lg:block">{/* <NavMenu items={MENU} /> */}</div>
-      <Hero selectedGroup={null} workspace={workspace} />
+      <Hero selectedGroup={null} config={clone(config)} />
       <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
         <GroupControls
           memberGroups={memberGroups}
@@ -130,6 +136,7 @@ export default async function Page(props: {
               <PostsContent
                 searchParams={searchParams}
                 workspace={workspace}
+                enableComment={enableComment}
                 groupIDs={groupIDs}
                 memberGroupIDs={memberGroupIDs}
                 user={user ?? null}
