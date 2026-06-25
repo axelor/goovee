@@ -142,7 +142,7 @@ export function InvoicePayments({
   return (
     <Payments
       disabled={!Number(amount)}
-      workspace={workspace}
+      config={workspace.config}
       onValidate={async () => {
         const isValid = await handleInvoiceValidation();
 

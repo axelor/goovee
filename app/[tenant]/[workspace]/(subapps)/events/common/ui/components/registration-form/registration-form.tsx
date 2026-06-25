@@ -49,7 +49,7 @@ import {
 export const RegistrationForm = ({
   eventDetails,
   metaFields = [],
-  workspace,
+  config,
   user,
 }: EventPageCardProps) => {
   const {
@@ -75,7 +75,7 @@ export const RegistrationForm = ({
 
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
 
   const {searchParams} = useSearchParams();
@@ -88,8 +88,7 @@ export const RegistrationForm = ({
   const canPay = defaultPrice || facilityList?.length;
   const eventPrice = defaultPrice ? Number(displayAti ?? 0) : 0;
 
-  const isCompanyOrAddressRequired =
-    workspace.config?.isCompanyOrAddressRequired;
+  const isCompanyOrAddressRequired = config.isCompanyOrAddressRequired;
 
   const [facilitiesCustomFields, requiredFacilitiesCustomFields] =
     useMemo(() => {
@@ -151,7 +150,7 @@ export const RegistrationForm = ({
         required: true,
         customComponent: getEmailFieldComponent({
           eventId,
-          workspaceURL: workspace.url,
+          workspaceURL,
         }),
       },
       {
@@ -190,7 +189,7 @@ export const RegistrationForm = ({
       user,
       isCompanyOrAddressRequired,
       eventId,
-      workspace.url,
+      workspaceURL,
       facilityList,
       eventPrice,
       formattedDefaultPriceAti,
@@ -383,7 +382,7 @@ export const RegistrationForm = ({
       const {error, message} = await register({
         eventId,
         values: result,
-        workspaceURL: workspace.url,
+        workspaceURL,
       });
 
       if (error) {
@@ -504,7 +503,7 @@ export const RegistrationForm = ({
                   form: UseFormReturn<Record<string, unknown>>;
                 }) => (
                   <EventPayments
-                    workspace={workspace}
+                    config={config}
                     event={{
                       id: eventId,
                       displayAti: String(eventPrice),
