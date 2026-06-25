@@ -88,11 +88,11 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
+  const workspace = clone(access.workspace);
 
   return (
     <main className="w-full">
-      <Hero workspace={workspace} />
+      <Hero config={clone(config)} />
       <div className="py-6 container mx-auto grid grid-cols-1 lg:grid-cols-[24rem_1fr] gap-4 lg:gap-6 mb-16">
         <Card className="p-4 border-none shadow-none flex flex-col gap-2 md:flex-row lg:flex-col h-fit rounded-2xl">
           <EventCalendar

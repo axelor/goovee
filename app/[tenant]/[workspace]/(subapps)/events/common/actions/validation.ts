@@ -11,7 +11,7 @@ import {
 } from '@/subapps/events/common/utils';
 import {User} from '@/types';
 import {type Participant} from './validators';
-import {PortalWorkspace} from '@/orm/workspace';
+import {PortalAppConfig} from '@/orm/workspace';
 import {ActionResponse} from '@/types/action';
 import {findEventConfig} from '../orm/event';
 import {
@@ -32,18 +32,18 @@ export async function validateRegistration({
   eventId,
   values,
   workspaceURL,
-  workspace,
+  config,
   user,
   client,
 }: {
   eventId: string;
   values: RegistrationValues;
   workspaceURL: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   user?: User;
   client: Client;
 }): ActionResponse<{participants: Participant[]}> {
-  if (!workspace.config?.allowGuestEventRegistration && !user) {
+  if (!config.allowGuestEventRegistration && !user) {
     return error(
       await t(
         'Guest registration is not allowed for this workspace, Please login',
@@ -51,8 +51,7 @@ export async function validateRegistration({
     );
   }
 
-  const isCompanyOrAddressRequired =
-    workspace?.config?.isCompanyOrAddressRequired;
+  const isCompanyOrAddressRequired = config.isCompanyOrAddressRequired;
   if (isCompanyOrAddressRequired && !values.company?.trim()) {
     return error(
       await t('Company/Address is required. Please enter a valid value.'),
@@ -142,11 +141,9 @@ export async function validateRegistration({
       if (
         !isEventPrivate(event) &&
         !isEventPublic(event) &&
-        workspace.config?.nonPublicEmailNotFoundMessage?.trim()
+        config.nonPublicEmailNotFoundMessage?.trim()
       ) {
-        return error(
-          await tattr(workspace.config.nonPublicEmailNotFoundMessage),
-        );
+        return error(await tattr(config.nonPublicEmailNotFoundMessage));
       }
       return error(
         await t('one or more email can not be registered to this event'),

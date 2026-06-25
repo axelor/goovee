@@ -189,7 +189,7 @@ export async function register(
     eventId,
     values,
     workspaceURL,
-    workspace,
+    config: workspaceConfig,
     user,
     client,
   });
