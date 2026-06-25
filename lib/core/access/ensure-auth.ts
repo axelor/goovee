@@ -9,7 +9,6 @@ import {
   type WorkspaceLight,
 } from '@/orm/workspace';
 import type {User} from '@/types';
-import type {Client} from '@/goovee/.generated/client';
 
 /**
  * Why access was denied, in navigation-neutral terms. The caller maps each to
@@ -35,7 +34,6 @@ export type AccessResult<TAllowGuest extends boolean = false> =
       subapp: Subapp;
       workspace: WorkspaceLight;
       tenant: Tenant;
-      client: Client;
     }
   | {
       ok: false;
@@ -86,7 +84,6 @@ export async function ensureAuth<TAllowGuest extends boolean = false>({
       subapp,
       workspace,
       tenant,
-      client,
     };
   }
 

@@ -50,7 +50,8 @@ export async function generateMetadata(props: {
   });
   if (!access.ok) return null;
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(
@@ -141,7 +142,8 @@ async function Product({
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const workspaceConfig = await getWorkspaceConfig(

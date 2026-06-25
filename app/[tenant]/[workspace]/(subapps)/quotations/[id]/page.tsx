@@ -57,7 +57,8 @@ async function Quotation({params: paramsProm}: PageProps) {
     unauthorized();
   }
 
-  const {user, client, subapp} = access;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();

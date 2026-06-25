@@ -50,7 +50,8 @@ export async function create(formData: FormData, workspaceURL: string) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const parent = await fetchFile({
     id: parentId,

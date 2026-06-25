@@ -89,7 +89,7 @@ export async function mutate(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -314,7 +314,7 @@ export async function updateAssignment(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -409,7 +409,7 @@ export async function closeTicket(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -509,7 +509,7 @@ export async function cancelTicket(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -611,7 +611,7 @@ export async function createRelatedLink(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -675,7 +675,7 @@ export async function createChildLink(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -732,7 +732,7 @@ export async function createParentLink(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -794,7 +794,7 @@ export async function deleteChildLink(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -856,7 +856,7 @@ export async function deleteParentLink(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -917,7 +917,7 @@ export async function deleteRelatedLink(
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -982,7 +982,7 @@ export async function searchTickets({
     search,
     projectId,
     excludeList,
-    client: access.client,
+    client: access.tenant.client,
     user: access.user,
     subapp: access.subapp,
     workspace: access.workspace,
@@ -1014,7 +1014,8 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, subapp} = access;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,
@@ -1214,7 +1215,7 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
   const workspaceConfig = await getWorkspaceConfig(
     access.workspace.config.id,
     client,

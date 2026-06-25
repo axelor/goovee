@@ -34,7 +34,8 @@ export async function findDmsFiles({
   });
   if (!access.ok) return [];
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   return client.aOSDMSFile
     .find({

@@ -40,7 +40,8 @@ export async function GET(
       status: accessStatus(access.reason),
     });
   }
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   /* WorkspaceLight carries config as {id} only, so fetch the heavy config and
      bridge it onto the workspace for isCommentEnabled and findNews. */

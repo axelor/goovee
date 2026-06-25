@@ -53,7 +53,8 @@ export default async function Layout(props: {
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const website = await findWebsiteBySlug({

@@ -72,7 +72,8 @@ export async function paypalCaptureOrder({
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const {user, tenant, client} = access;
+  const {user, tenant} = access;
+  const {client} = tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -204,7 +205,8 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -317,7 +319,8 @@ export async function createStripeCheckoutSession({
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -451,7 +454,8 @@ export async function validateStripePayment({
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const {user, tenant, client} = access;
+  const {user, tenant} = access;
+  const {client} = tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -593,7 +597,8 @@ export async function payboxCreateOrder({
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -715,7 +720,8 @@ export async function validatePayboxPayment({
   if (!access.ok)
     return {error: true, message: await accessMessage(access.reason)};
 
-  const {user, tenant, client} = access;
+  const {user, tenant} = access;
+  const {client} = tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {

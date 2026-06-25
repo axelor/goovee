@@ -71,7 +71,7 @@ export default async function Page(props: {
     unauthorized();
   }
 
-  const {client} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();

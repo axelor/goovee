@@ -44,7 +44,8 @@ export async function generateMetadata(props: {
     return null;
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const websitePage = await findWebsitePageSeoBySlug({
     websiteSlug,
@@ -103,7 +104,8 @@ export default async function Page(props: {
     unauthorized();
   }
 
-  const {user, client} = access;
+  const {user} = access;
+  const {client} = access.tenant;
   const {config} = access.tenant;
 
   const [canUserEditWiki, websitePage] = await Promise.all([

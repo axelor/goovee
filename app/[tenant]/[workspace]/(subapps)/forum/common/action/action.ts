@@ -132,7 +132,8 @@ export async function pinGroup({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, workspace} = access;
+  const {user, workspace} = access;
+  const {client} = access.tenant;
 
   const memberGroup = await findMemberGroupById({
     id,
@@ -215,7 +216,8 @@ export async function exitGroup({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, workspace} = access;
+  const {user, workspace} = access;
+  const {client} = access.tenant;
 
   const memberGroup = await findMemberGroupById({
     id,
@@ -288,7 +290,8 @@ export async function joinGroup({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, workspace} = access;
+  const {user, workspace} = access;
+  const {client} = access.tenant;
 
   const group = await findGroupById(groupID, workspace.id, client, user);
 
@@ -369,7 +372,8 @@ export async function addGroupNotification({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, workspace} = access;
+  const {user, workspace} = access;
+  const {client} = access.tenant;
 
   const memberGroup = await findMemberGroupById({
     id,
@@ -436,7 +440,8 @@ export async function addPost(input: AddPostInput) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, workspace} = access;
+  const {user, workspace} = access;
+  const {client} = access.tenant;
 
   const targetGroup = await findGroupById(group.id, workspace.id, client, user);
 
@@ -602,7 +607,8 @@ export async function findMedia({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   return await client.aOSPortalForumPost
     .find({
@@ -667,7 +673,8 @@ export async function fetchPosts(input: FetchPostsInput) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, workspace} = access;
+  const {user, workspace} = access;
+  const {client} = access.tenant;
 
   return await findPosts({
     sort,
@@ -712,7 +719,7 @@ export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
     searchKey,
     orderBy,
     workspaceID,
-    client: access.client,
+    client: access.tenant.client,
     user: access.user,
   });
 }
@@ -739,7 +746,8 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -972,7 +980,8 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user} = access;
+  const {user} = access;
+  const {client} = access.tenant;
 
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) {
@@ -1046,7 +1055,8 @@ export const getSubscribersByGroup = async ({
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const {client, user, workspace} = access;
+  const {user, workspace} = access;
+  const {client} = access.tenant;
 
   try {
     const result = await client.aOSPortalForumGroupMember.find({

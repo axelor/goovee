@@ -34,7 +34,7 @@ export async function findDefaultInvoicing({
   if (!access.ok) return null;
 
   const userId = getPartnerId(access.user);
-  return findDefaultInvoicingAddress(userId, access.client).then(clone);
+  return findDefaultInvoicingAddress(userId, access.tenant.client).then(clone);
 }
 
 export async function findDefaultDelivery({
@@ -54,7 +54,7 @@ export async function findDefaultDelivery({
   if (!access.ok) return null;
 
   const userId = getPartnerId(access.user);
-  return findDefaultDeliveryAddress(userId, access.client).then(clone);
+  return findDefaultDeliveryAddress(userId, access.tenant.client).then(clone);
 }
 
 export async function findAddress({
@@ -81,7 +81,7 @@ export async function findAddress({
   return findPartnerAddress({
     partnerId: userId,
     addressId: id,
-    client: access.client,
+    client: access.tenant.client,
   }).then(clone);
 }
 
@@ -102,7 +102,7 @@ export async function fetchDeliveryAddresses({
   if (!access.ok) return null;
 
   const userId = getPartnerId(access.user);
-  return findDeliveryAddresses(userId, access.client).then(clone);
+  return findDeliveryAddresses(userId, access.tenant.client).then(clone);
 }
 
 export async function fetchInvoicingAddresses({
@@ -122,5 +122,5 @@ export async function fetchInvoicingAddresses({
   if (!access.ok) return null;
 
   const userId = getPartnerId(access.user);
-  return findInvoicingAddresses(userId, access.client).then(clone);
+  return findInvoicingAddresses(userId, access.tenant.client).then(clone);
 }

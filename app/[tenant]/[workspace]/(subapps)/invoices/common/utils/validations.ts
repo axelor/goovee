@@ -58,7 +58,7 @@ export async function resolveInvoicePaymentAccess({
     }
     const config = await getWorkspaceConfig(
       access.workspace.config.id,
-      access.client,
+      access.tenant.client,
     );
     if (!config) {
       return {error: true, message: await t('Invalid workspace')};
@@ -85,7 +85,7 @@ export async function resolveInvoicePaymentAccess({
   }
   const config = await getWorkspaceConfig(
     access.workspace.config.id,
-    access.client,
+    access.tenant.client,
   );
   if (!config) {
     return {error: true, message: await t('Invalid workspace')};
