@@ -57,15 +57,19 @@ export default async function Page(props: {
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
-
   const {segments} = params;
   const homepage = !segments;
 
   const {page = DEFAULT_PAGE} = searchParams;
 
   if (homepage) {
-    return <Homepage workspace={workspace} client={client} />;
+    return (
+      <Homepage
+        workspace={clone(access.workspace)}
+        config={clone(config)}
+        client={client}
+      />
+    );
   }
 
   const slug = segments?.at(-1) || '';
@@ -75,11 +79,12 @@ export default async function Page(props: {
     return (
       <Suspense fallback={<ArticleSkeleton />}>
         <ArticleNews
-          workspace={workspace}
+          workspace={clone(access.workspace)}
+          config={clone(config)}
           segments={segments}
           client={client}
           tenantId={tenant}
-          workspaceURL={workspace.url}
+          workspaceURL={access.workspace.url}
           workspaceURI={workspaceURI}
           user={user}
           slug={slug}
@@ -90,7 +95,7 @@ export default async function Page(props: {
 
   return (
     <CategoryNews
-      workspace={workspace}
+      workspace={clone(access.workspace)}
       client={client}
       page={Number(page)}
       segments={segments}
