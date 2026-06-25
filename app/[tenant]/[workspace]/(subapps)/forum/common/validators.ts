@@ -130,6 +130,7 @@ export const FetchGroupsByMembersSchema = z.object({
     })
     .optional(),
   workspaceID: IdSchema,
+  workspaceURL: z.string(),
 });
 export type FetchGroupsByMembersInput = z.input<
   typeof FetchGroupsByMembersSchema

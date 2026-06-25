@@ -6,11 +6,10 @@ import {revalidatePath} from 'next/cache';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
-import {manager} from '@/tenant';
 import {t} from '@/locale/server';
-import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
 import type {Client} from '@/goovee/.generated/client';
 import {redeemUpload} from '@/lib/core/upload/staged-upload';
@@ -90,47 +89,17 @@ export async function upload(input: UploadInput) {
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const session = await getSession();
-
-  const user = session?.user;
-
-  if (!user) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.resources,
-    user,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
-
-  if (!subapp) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return {
-      error: true,
-      message: await t('Invalid workspace'),
-    };
-  }
+  const {user} = access;
+  const {client} = access.tenant;
 
   const parent = await fetchFile({
     id: parentId,
