@@ -1,11 +1,15 @@
 // ---- CORE IMPORTS ---- //
+import {cache} from 'react';
 import {
   ALLOW_ALL_REGISTRATION,
   ALLOW_AOS_ONLY_REGISTRATION,
   ROLE,
 } from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import type {AOSPortalApp} from '@/goovee/.generated/models';
+import type {
+  AOSPortalApp,
+  AOSPortalWorkspace,
+} from '@/goovee/.generated/models';
 import {AOSPortalAppConfig} from '@/goovee/.generated/models';
 import {ID, Partner, User} from '@/types';
 import {clone, getPartnerId} from '@/utils';
@@ -1335,3 +1339,285 @@ export async function findSubappAccess({
 
   return result.accessible ? result.subapp : null;
 }
+
+/* ----------------------------------------------------------------------- *
+ * Unified workspace + sub-app resolution (single query, no heavy config)
+ *
+ * resolveWorkspaceApp answers, in ONE scoped query per user type, "what is
+ * this workspace and can this user reach <code>?". It returns the workspace
+ * WITHOUT its heavy config payload — only configRef ({id, updatedOn}) — plus
+ * the user's accessible apps and the requested sub-app (apps.find(code)).
+ * Pages that render config-driven UI fetch it on demand via getWorkspaceConfig.
+ * ----------------------------------------------------------------------- */
+
+export type WorkspaceLight = {
+  id: string;
+  name: string | null;
+  version: number;
+  workspaceUser: {id: string; version: number} | null;
+  theme: {
+    id: string;
+    version: number;
+    name: string | null;
+    css: string | null;
+  } | null;
+  url: string;
+  logo: {id: string; version: number} | null;
+  navigationSelect: string;
+  apps: Subapp[];
+  configRef: {id: string; updatedOn: Date | null} | null;
+  workspacePermissionConfig: {id: string};
+};
+
+export type WorkspaceApp = {
+  workspace: WorkspaceLight | null;
+  subapp: Subapp | null;
+};
+
+const NO_WORKSPACE_APP: WorkspaceApp = {workspace: null, subapp: null};
+
+/* AOSPortalWorkspace identity columns surfaced in WorkspaceLight, read either
+   at the query root (guest) or through the workspace relation (partner /
+   contact). */
+const workspaceFields = {
+  name: true,
+  url: true,
+  defaultTheme: {name: true, css: true},
+  navigationSelect: true,
+  user: {id: true},
+  workspaceLogo: {id: true},
+} as const satisfies SelectOptions<AOSPortalWorkspace>;
+
+type WorkspaceRow = Payload<
+  AOSPortalWorkspace,
+  {select: typeof workspaceFields}
+>;
+
+const configRefFields = {id: true, updatedOn: true} as const;
+
+const toWorkspaceLight = (
+  ws: WorkspaceRow,
+  apps: Subapp[],
+  configRef: {id: string; updatedOn: Date | null} | null,
+  permissionConfigId: string,
+): WorkspaceLight => ({
+  id: ws.id,
+  name: ws.name,
+  version: ws.version,
+  workspaceUser: ws.user,
+  theme: ws.defaultTheme,
+  url: ws.url ?? '',
+  logo: ws.workspaceLogo,
+  navigationSelect: ws.navigationSelect || 'leftSide',
+  apps,
+  configRef,
+  workspacePermissionConfig: {id: permissionConfigId},
+});
+
+/* Installed apps of the workspace — the accessible set for guests/partners. */
+const installedApps = (apps: Subapp[] | null | undefined): Subapp[] =>
+  (apps ?? []).filter(app => app.isInstalled);
+
+async function resolveGuestWorkspaceApp({
+  code,
+  url,
+  client,
+}: {
+  code: string;
+  url: string;
+  client: Client;
+}): Promise<WorkspaceApp> {
+  const workspace = await client.aOSPortalWorkspace.findOne({
+    where: {url: {like: url}},
+    select: {
+      ...workspaceFields,
+      defaultGuestWorkspace: {
+        portalAppConfig: configRefFields,
+        apps: {select: appSelectFields},
+      },
+    },
+  });
+
+  const guest = workspace?.defaultGuestWorkspace;
+  if (!workspace || !guest) return NO_WORKSPACE_APP;
+
+  const apps = installedApps(guest.apps as Subapp[]);
+  const light = toWorkspaceLight(
+    workspace,
+    apps,
+    guest.portalAppConfig ?? null,
+    guest.id,
+  );
+  return {
+    workspace: light,
+    subapp: apps.find(app => app.code === code) ?? null,
+  };
+}
+
+async function resolvePartnerWorkspaceApp({
+  code,
+  url,
+  partnerId,
+  client,
+}: {
+  code: string;
+  url: string;
+  partnerId: ID;
+  client: Client;
+}): Promise<WorkspaceApp> {
+  const partner = await client.aOSPartner.findOne({
+    where: {id: partnerId},
+    select: {
+      partnerWorkspaceSet: {
+        where: {workspace: {url}},
+        select: {
+          portalAppConfig: configRefFields,
+          apps: {select: appSelectFields},
+          workspace: workspaceFields,
+        },
+      },
+    },
+  });
+
+  const partnerWorkspace = partner?.partnerWorkspaceSet?.[0];
+  if (!partnerWorkspace?.workspace) return NO_WORKSPACE_APP;
+
+  const apps = installedApps(partnerWorkspace.apps as Subapp[]);
+  const light = toWorkspaceLight(
+    partnerWorkspace.workspace,
+    apps,
+    partnerWorkspace.portalAppConfig ?? null,
+    partnerWorkspace.id,
+  );
+  return {
+    workspace: light,
+    subapp: apps.find(app => app.code === code) ?? null,
+  };
+}
+
+async function resolveContactWorkspaceApp({
+  code,
+  url,
+  contactId,
+  partnerId,
+  client,
+}: {
+  code: string;
+  url: string;
+  contactId: ID;
+  partnerId: ID;
+  client: Client;
+}): Promise<WorkspaceApp> {
+  const contact = await client.aOSPartner.findOne({
+    where: {id: contactId},
+    select: {
+      mainPartner: {
+        partnerWorkspaceSet: {
+          where: {workspace: {url}},
+          select: {
+            portalAppConfig: configRefFields,
+            apps: {select: appSelectFields},
+            workspace: workspaceFields,
+          },
+        },
+      },
+      contactWorkspaceConfigSet: {
+        where: {portalWorkspace: {url}, partner: {id: partnerId}},
+        select: {
+          isAdmin: true,
+          contactAppPermissionList: {
+            select: {roleSelect: true, app: {code: true}},
+          },
+        },
+      },
+    },
+  });
+
+  const partnerWorkspace = contact?.mainPartner?.partnerWorkspaceSet?.[0];
+  if (!partnerWorkspace?.workspace) return NO_WORKSPACE_APP;
+
+  const partnerApps = installedApps(partnerWorkspace.apps as Subapp[]);
+  const config = contact?.contactWorkspaceConfigSet?.[0];
+
+  /* Admins see every installed app of the workspace; everyone else sees only
+     the apps they have a permission row for, carrying that row's role. */
+  let apps: Subapp[];
+  if (config?.isAdmin) {
+    apps = partnerApps.map(app => ({...app, isContactAdmin: true}));
+  } else {
+    const permissions = config?.contactAppPermissionList ?? [];
+    apps = partnerApps
+      .filter(app => permissions.some(item => item.app?.code === app.code))
+      .map(app => ({
+        ...app,
+        role: normalizeRole(
+          permissions.find(item => item.app?.code === app.code)?.roleSelect,
+        ),
+      }));
+  }
+
+  const light = toWorkspaceLight(
+    partnerWorkspace.workspace,
+    apps,
+    partnerWorkspace.portalAppConfig ?? null,
+    partnerWorkspace.id,
+  );
+  return {
+    workspace: light,
+    subapp: apps.find(app => app.code === code) ?? null,
+  };
+}
+
+export async function resolveWorkspaceApp({
+  code,
+  url,
+  user,
+  client,
+}: {
+  code: string;
+  url: string;
+  user?: SubappAccessUser;
+  client: Client;
+}): Promise<WorkspaceApp> {
+  if (!url) return NO_WORKSPACE_APP;
+
+  if (!user) {
+    return resolveGuestWorkspaceApp({code, url, client});
+  }
+
+  if (!user.isContact) {
+    return resolvePartnerWorkspaceApp({
+      code,
+      url,
+      partnerId: getPartnerId(user),
+      client,
+    });
+  }
+
+  if (!user.mainPartnerId) return NO_WORKSPACE_APP;
+
+  return resolveContactWorkspaceApp({
+    code,
+    url,
+    contactId: user.id,
+    partnerId: user.mainPartnerId,
+    client,
+  });
+}
+
+/**
+ * Fetches the heavy PortalAppConfig payload on demand. Memoized per request
+ * (React cache) so multiple consumers in one render share a single read; it is
+ * not cached across requests, so it stays fresh — config.updatedOn does not
+ * track edits to connected relations, so a longer-lived cache could go stale.
+ */
+export const getWorkspaceConfig = cache(
+  async (configId: string, client: Client): Promise<PortalAppConfig | null> => {
+    if (!configId) return null;
+
+    return client.aOSPortalAppConfig.findOne({
+      where: {id: configId},
+      select: portalAppConfigFields,
+    });
+  },
+);
