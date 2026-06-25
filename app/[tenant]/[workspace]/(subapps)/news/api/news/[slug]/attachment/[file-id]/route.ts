@@ -1,12 +1,15 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {getSession} from '@/auth';
+// ---- CORE IMPORTS ---- //
+import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
-import {manager} from '@/tenant';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {accessStatus} from '@/lib/core/access/denial';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
+// ---- LOCAL IMPORTS ---- //
 import {isAttachmentOfNews} from '@/subapps/news/common/orm/news';
 
 export async function GET(
@@ -21,44 +24,35 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
   const {slug, 'file-id': fileId} = params;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return new NextResponse('Bad Request', {status: 400});
-  }
-  const {client} = tenant;
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const app = await findSubappAccess({
+  const access = await ensureAuth({
     code: SUBAPP_CODES.news,
-    user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-  if (!app?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Invalid workspace', {status: 404});
+  }
+
+  const workspace = clone({...access.workspace, config});
 
   const attachmentBelongsToNews = await isAttachmentOfNews({
     slug,
     fileId,
     workspace,
     client,
-    user,
+    user: access.user,
   });
 
   if (!attachmentBelongsToNews) {
@@ -68,8 +62,8 @@ export async function GET(
   const file = await findFile({
     id: fileId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {
