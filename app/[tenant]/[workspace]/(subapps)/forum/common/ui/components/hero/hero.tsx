@@ -16,7 +16,7 @@ import {
   SUBAPP_CODES,
   URL_PARAMS,
 } from '@/constants';
-import {PortalWorkspace} from '@/orm/workspace';
+import {PortalAppConfig} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
@@ -26,17 +26,17 @@ import {fetchPosts} from '@/subapps/forum/common/action/action';
 
 export function Hero({
   selectedGroup,
-  workspace,
+  config,
 }: {
   selectedGroup: Group | null;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace> | null;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
 }) {
   const [forceClose, setForceClose] = useState(false);
   const [_searchValue, setSearchValue] = useState<string>('');
   const {workspaceURI, workspaceURL} = useWorkspace();
   const {update} = useSearchParams();
 
-  const imageURL = workspace?.config?.forumHeroBgImage?.id
+  const imageURL = config.forumHeroBgImage?.id
     ? withBasePath(`${workspaceURI}/${SUBAPP_CODES.forum}/api/hero/background`)
     : withBasePath(IMAGE_URL);
 
@@ -112,11 +112,11 @@ export function Hero({
     <HeroSearch
       title={
         selectedGroup?.name ??
-        (workspace?.config?.forumHeroTitle || i18n.t(BANNER_TITLES.forum))
+        (config.forumHeroTitle || i18n.t(BANNER_TITLES.forum))
       }
       description={
         selectedGroup?.description ??
-        (workspace?.config?.forumHeroDescription || i18n.t(BANNER_DESCRIPTION))
+        (config.forumHeroDescription || i18n.t(BANNER_DESCRIPTION))
       }
       image={imageURL}
       groupImg={
@@ -126,12 +126,9 @@ export function Hero({
         )
       }
       background={
-        (workspace?.config?.forumHeroOverlayColorSelect ||
-          'default') as OverlayColor
+        (config.forumHeroOverlayColorSelect || 'default') as OverlayColor
       }
-      blendMode={
-        workspace?.config?.forumHeroOverlayColorSelect ? 'overlay' : 'normal'
-      }
+      blendMode={config.forumHeroOverlayColorSelect ? 'overlay' : 'normal'}
       renderSearch={!selectedGroup && renderSearch}
     />
   );

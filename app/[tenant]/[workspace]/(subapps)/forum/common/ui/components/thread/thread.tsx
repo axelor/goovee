@@ -1,7 +1,6 @@
 'use client';
 
 import {useEffect, useCallback} from 'react';
-import type {Cloned} from '@/types/util';
 import {
   ThreadBody,
   ThreadFooter,
@@ -9,7 +8,6 @@ import {
 } from '@/subapps/forum/common/ui/components';
 import type {PostWithMembership} from '@/subapps/forum/common/types/forum';
 import {Skeleton} from '@/ui/components';
-import {PortalWorkspace} from '@/orm/workspace';
 
 interface ThreadProps {
   post?: PostWithMembership;
@@ -17,7 +15,7 @@ interface ThreadProps {
   showCommentsByDefault?: boolean;
   hideCloseComments?: boolean;
   usePopUpStyles?: boolean;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  enableComment: boolean;
 }
 
 export const Thread = ({
@@ -26,7 +24,7 @@ export const Thread = ({
   showCommentsByDefault = false,
   hideCloseComments = false,
   usePopUpStyles = false,
-  workspace,
+  enableComment,
 }: ThreadProps) => {
   const forumGroup = post?.forumGroup;
 
@@ -65,14 +63,14 @@ export const Thread = ({
       <ThreadBody
         post={post}
         usePopUpStyles={usePopUpStyles}
-        workspace={workspace}
+        enableComment={enableComment}
       />
       <ThreadFooter
         post={post}
         usePopUpStyles={usePopUpStyles}
         hideCloseComments={hideCloseComments}
         showCommentsByDefault={showCommentsByDefault}
-        workspace={workspace}
+        enableComment={enableComment}
       />
     </div>
   );

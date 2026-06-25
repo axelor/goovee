@@ -10,6 +10,7 @@ import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {isCommentEnabled} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -83,7 +84,12 @@ async function ForumGroup({
   const config = await getWorkspaceConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const workspace = clone({...access.workspace, config});
+  const enableComment = isCommentEnabled({
+    subapp: SUBAPP_CODES.forum,
+    config,
+  });
+
+  const workspace = clone(access.workspace);
 
   const groupId = params.id as string;
 
@@ -98,7 +104,7 @@ async function ForumGroup({
       ? await findGroupsByMembers({
           id: userId,
           orderBy: GROUPS_ORDER_BY,
-          workspaceID: workspace?.id,
+          workspaceID: workspace.id,
           client,
           user,
         })
@@ -115,7 +121,7 @@ async function ForumGroup({
 
   const selectedGroup = (await findGroupById(
     groupId,
-    workspace?.id!,
+    workspace.id,
     client,
     user,
   ).then(clone)) as Group | null;
@@ -131,7 +137,7 @@ async function ForumGroup({
       <div className="hidden lg:block">
         <NavMenu items={MENU} />
       </div>
-      <Hero selectedGroup={selectedGroup} workspace={workspace} />
+      <Hero selectedGroup={selectedGroup} config={clone(config)} />
       <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-[17.563rem_1fr] gap-5">
         <GroupControls
           memberGroups={memberGroups}
@@ -155,6 +161,7 @@ async function ForumGroup({
                 client={client}
                 user={user ?? null}
                 workspace={workspace}
+                enableComment={enableComment}
               />
             )}
           </Suspense>

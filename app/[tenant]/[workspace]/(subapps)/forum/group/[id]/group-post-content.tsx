@@ -3,7 +3,7 @@ import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
 import {DEFAULT_LIMIT} from '@/constants';
 import {User} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import {WorkspaceLight} from '@/orm/workspace';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
@@ -15,6 +15,7 @@ export async function GroupPostsContent({
   params,
   searchParams,
   workspace,
+  enableComment,
   memberGroupIDs,
   user,
   client,
@@ -25,7 +26,8 @@ export async function GroupPostsContent({
     workspace: string;
   };
   searchParams: {[key: string]: string | undefined};
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  enableComment: boolean;
   memberGroupIDs: string[];
   user: User | null;
   client: Client;
@@ -35,7 +37,7 @@ export async function GroupPostsContent({
 
   const {posts, pageInfo} = await findPostsByGroupId({
     id: groupId,
-    workspaceID: workspace?.id as string,
+    workspaceID: workspace.id,
     sort,
     limit: limit ? Number(limit) : DEFAULT_LIMIT,
     search,
@@ -52,7 +54,7 @@ export async function GroupPostsContent({
         posts={posts as PostWithMembership[]}
         memberGroupIDs={memberGroupIDs}
         selectedGroupId={groupId}
-        workspace={workspace}
+        enableComment={enableComment}
       />
     </div>
   );
