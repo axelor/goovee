@@ -166,14 +166,13 @@ const getProductFields = ({
     slug: true,
   }) as const;
 
-const getWhereClause = async ({
+const getWhereClause = ({
   ids,
   slugs,
   search,
   categoryids,
   associateWorkspace,
   workspace,
-  client,
   user,
   archived,
 }: {
@@ -182,7 +181,6 @@ const getWhereClause = async ({
   search?: string;
   categoryids?: (string | number)[];
   associateWorkspace?: boolean;
-  client: Client;
   workspace: WorkspaceLight | Cloned<WorkspaceLight>;
   user?: User;
   archived?: boolean;
@@ -226,7 +224,7 @@ const getWhereClause = async ({
         }
       : {}),
     AND: [
-      await filterPrivate({client, user}),
+      filterPrivate({user}),
       archived ? {archived: true} : {OR: [{archived: false}, {archived: null}]},
     ],
   };
@@ -313,14 +311,13 @@ export async function findProducts({
     shouldHidePrices: hidePrices,
   });
 
-  const $filters = await getWhereClause({
+  const $filters = getWhereClause({
     ids,
     slugs,
     search,
     categoryids,
     associateWorkspace,
     workspace,
-    client,
     user,
   });
 
@@ -830,7 +827,7 @@ export async function findProductsFromStockLocation({
                   portalWorkspace: {id: workspace.id},
                 }
               : {}),
-            ...(await filterPrivate({client, user})),
+            ...filterPrivate({user}),
           },
         },
         {

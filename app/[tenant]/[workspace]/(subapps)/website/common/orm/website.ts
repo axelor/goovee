@@ -50,7 +50,7 @@ export async function findAllMainWebsites({
         url: workspaceURL,
       },
       defaultWebsite: {
-        ...(await filterPrivate({client, user})),
+        ...filterPrivate({user}),
       },
       AND: [{OR: [{archived: false}, {archived: null}]}],
     },
@@ -70,7 +70,7 @@ export async function findAllMainWebsites({
               }
             : {}),
           website: {
-            ...(await filterPrivate({client, user})),
+            ...filterPrivate({user}),
           },
         },
         select: {
@@ -117,10 +117,7 @@ export async function findAllWebsites({
           url: workspaceURL,
         },
       },
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       slug: true,
@@ -181,10 +178,7 @@ export async function findWebsiteSeoBySlug({
     where: {
       slug: websiteSlug,
       mainWebsite: {workspaceSet: {url: workspaceURL}},
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {name: true},
   });
@@ -226,10 +220,7 @@ export async function findWebsiteBySlug({
     where: {
       slug: websiteSlug,
       mainWebsite: {workspaceSet: {url: workspaceURL}},
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       name: true,
@@ -269,7 +260,7 @@ export async function findWebsiteBySlug({
             id: website.menu.id,
           },
           page: {
-            ...(await filterPrivate({client, user})),
+            ...filterPrivate({user}),
           },
         },
         select: {
@@ -365,10 +356,7 @@ export async function findAllWebsitePages({
       website: {
         slug: websiteSlug,
       },
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       slug: true,
@@ -407,10 +395,7 @@ export async function findWebsitePageSeoBySlug({
           },
         },
       },
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {seoTitle: true, seoDescription: true, seoKeyword: true},
   });
@@ -449,10 +434,7 @@ export async function findWebsitePageBySlug({
         },
       },
       ...(contentId && {contentLines: {content: {id: contentId}}}),
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       isWiki: true,
@@ -504,7 +486,7 @@ export async function findAllMainWebsiteLanguages({
         languageList: {
           where: {
             website: {
-              ...(await filterPrivate({client, user})),
+              ...filterPrivate({user}),
             },
           },
           select: {

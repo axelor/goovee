@@ -25,7 +25,7 @@ export async function GET(
   const product = await client.aOSProduct.findOne({
     where: {
       ...and<AOSProduct>([
-        await filterPrivate({user, client}),
+        filterPrivate({user}),
         {
           OR: [
             {picture: {id}},

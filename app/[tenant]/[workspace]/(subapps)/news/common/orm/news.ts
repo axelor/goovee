@@ -75,7 +75,7 @@ export async function findNonArchivedNewsCategories({
           id: workspace.id,
         },
 
-        ...(await filterPrivate({client, user})),
+        ...filterPrivate({user}),
       },
       select: {
         parentCategory: {
@@ -211,7 +211,7 @@ export async function findNews({
     },
     ...(params?.where || {}),
     AND: [
-      await filterPrivate({user, client}),
+      filterPrivate({user}),
       getArchivedFilter({archived}),
       ...(params?.where?.AND || []),
     ],
@@ -289,7 +289,7 @@ export async function findNewsImageBySlug({
     where: {
       slug,
       categorySet: {workspace: {id: workspace.id}},
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     select: {image: {id: true}, thumbnailImage: {id: true}},
   });
@@ -317,7 +317,7 @@ export async function findCategoryImageBySlug({
     where: {
       slug,
       workspace: {id: workspace.id},
-      ...(await filterPrivate({user, client})),
+      ...filterPrivate({user}),
     },
     select: {
       image: {id: true},
@@ -348,7 +348,7 @@ export async function isAttachmentOfNews({
       slug,
       attachmentList: {metaFile: {id: fileId}},
       categorySet: {workspace: {id: workspace.id}},
-      ...(await filterPrivate({user, client})),
+      ...filterPrivate({user}),
     },
     select: {id: true},
   });
@@ -382,7 +382,7 @@ export async function findCategories({
       workspace: {
         id: workspace.id,
       },
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
       ...(category
         ? {
             parentCategory: {
@@ -440,7 +440,7 @@ export async function findCategoryTitleBySlugName({
       workspace: {
         id: workspace.id,
       },
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     select: {
       name: true,
@@ -858,10 +858,7 @@ export async function findNewsRelatedNews({
                   }
                 : {}),
             },
-            AND: [
-              await filterPrivate({user, client}),
-              getArchivedFilter({archived: false}),
-            ],
+            AND: [filterPrivate({user}), getArchivedFilter({archived: false})],
           },
           select: {
             title: true,

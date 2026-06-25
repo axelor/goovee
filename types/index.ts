@@ -39,6 +39,7 @@ export type User = {
   isContact: boolean | null;
   simpleFullName: string | null;
   mainPartnerId: string | undefined;
+  partnerCategoryId: string | undefined;
   tenantId: string | null | undefined;
   locale: string | null | undefined;
   image: string | null | undefined;

@@ -155,7 +155,7 @@ export async function findEvent({
 }) {
   if (!((slug || id) && workspace.url)) return null;
 
-  const privateFilter = await filterPrivate({user, client});
+  const privateFilter = filterPrivate({user});
   const event = await client.aOSPortalEvent
     .findOne({
       where: and<AOSPortalEvent>([
@@ -438,7 +438,7 @@ export async function findEvents({
   );
   const currentDateTime = dayjs().toISOString();
   const todayStartTime = dayjs().startOf(DAY).toISOString();
-  const privateFilter = await filterPrivate({user, client});
+  const privateFilter = filterPrivate({user});
   const whereClause = and<AOSPortalEvent>([
     {
       statusSelect: EVENT_STATUS.PUBLISHED,
