@@ -23,6 +23,9 @@ import {
 } from '@/comments';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {accessMessage} from '@/lib/core/access/denial';
+import {getWorkspaceConfig} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -46,7 +49,6 @@ import {
   findTicketVersion,
   updateTicket,
 } from '../orm/tickets';
-import {ensureAuth} from '../utils/auth-helper';
 import {notifyTicketChange} from '../utils/notify';
 import {CreateTicketSchema, UpdateTicketSchema} from '../utils/validators';
 import {handleError} from './helpers';
@@ -76,11 +78,28 @@ export async function mutate(
 
   const {force} = config || {};
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
 
   const allowedFields = new Set(
     workspace.config.ticketingFormFieldSet
@@ -158,13 +177,12 @@ export async function mutate(
       const createData = await refinedSchema.parseAsync(action.data);
       /* createTicket does create + update (to set fullName from generated id),
          so we wrap in a transaction to keep them atomic. */
-      const {user, subapp} = auth;
-      const {client} = auth.tenant;
+      const {user, subapp} = access;
       const {
         ticket: created,
         tracks,
         contacts,
-      } = await client.$transaction(txClient =>
+      } = await access.tenant.client.$transaction(txClient =>
         createTicket({
           data: createData,
           client: txClient,
@@ -218,7 +236,6 @@ export async function mutate(
 
       const updateData = await refinedSchema.parseAsync(action.data);
       if (force) {
-        const {client} = auth.tenant;
         const version = await findTicketVersion(updateData.id, client);
         updateData.version = version;
       }
@@ -228,11 +245,11 @@ export async function mutate(
         contacts,
       } = await updateTicket({
         data: updateData,
-        client: auth.tenant.client,
-        user: auth.user,
-        subapp: auth.subapp,
+        client,
+        user: access.user,
+        subapp: access.subapp,
         workspace,
-        tenant: auth.tenant,
+        tenant: access.tenant,
       });
       after(() =>
         notifyTicketChange({
@@ -240,11 +257,11 @@ export async function mutate(
           ticket: updated,
           tracks,
           contacts,
-          user: auth.user,
+          user: access.user,
           workspaceUserId: workspace.workspaceUser?.id,
           workspaceURL,
           tenantId,
-          client: auth.tenant.client,
+          client,
         }),
       );
       ticket = updated;
@@ -286,11 +303,28 @@ export async function updateAssignment(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   const {workspaceUser} = workspace;
 
   if (!workspace.config.isDisplayAssignmentBtn) {
@@ -308,7 +342,6 @@ export async function updateAssignment(
     });
 
     if (force) {
-      const {client} = auth.tenant;
       const version = await findTicketVersion(updateData.id, client);
       updateData.version = version;
     }
@@ -318,11 +351,11 @@ export async function updateAssignment(
 
     const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
-      client: auth.tenant.client,
-      user: auth.user,
-      subapp: auth.subapp,
+      client,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
-      tenant: auth.tenant,
+      tenant: access.tenant,
       fromWS,
     });
     after(() =>
@@ -331,11 +364,11 @@ export async function updateAssignment(
         ticket,
         tracks,
         contacts,
-        user: auth.user,
+        user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
         workspaceURL,
         tenantId,
-        client: auth.tenant.client,
+        client,
       }),
     );
     return {success: true, data: true};
@@ -365,11 +398,28 @@ export async function closeTicket(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   const {workspaceUser} = workspace;
 
   if (!workspace.config.isDisplayCloseBtn) {
@@ -378,8 +428,6 @@ export async function closeTicket(
       message: await t('Closing ticket not allowed'),
     };
   }
-
-  const {client} = auth.tenant;
 
   try {
     const status = await findTicketDoneStatus(client);
@@ -408,10 +456,10 @@ export async function closeTicket(
     const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
       client,
-      user: auth.user,
-      subapp: auth.subapp,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
-      tenant: auth.tenant,
+      tenant: access.tenant,
       fromWS,
     });
     after(() =>
@@ -420,7 +468,7 @@ export async function closeTicket(
         ticket,
         tracks,
         contacts,
-        user: auth.user,
+        user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
         workspaceURL,
         tenantId,
@@ -450,11 +498,28 @@ export async function cancelTicket(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   const {workspaceUser} = workspace;
 
   if (!workspace.config.isDisplayCancelBtn) {
@@ -463,8 +528,6 @@ export async function cancelTicket(
       message: await t('Cancelling ticket not allowed'),
     };
   }
-
-  const {client} = auth.tenant;
 
   try {
     const status = await findTicketCancelledStatus(client);
@@ -492,10 +555,10 @@ export async function cancelTicket(
     const {ticket, tracks, contacts} = await updateTicket({
       data: updateData,
       client,
-      user: auth.user,
-      subapp: auth.subapp,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
-      tenant: auth.tenant,
+      tenant: access.tenant,
       fromWS,
     });
     after(() =>
@@ -504,7 +567,7 @@ export async function cancelTicket(
         ticket,
         tracks,
         contacts,
-        user: auth.user,
+        user: access.user,
         workspaceUserId: fromWS ? undefined : workspaceUser?.id,
         workspaceURL,
         tenantId,
@@ -537,11 +600,28 @@ export async function createRelatedLink(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   if (!workspace.config.isDisplayRelatedTicket) {
     return {error: true, message: await t('Related tickets are not enabled')};
   }
@@ -549,9 +629,8 @@ export async function createRelatedLink(
   try {
     /* createRelatedTicketLink creates two link records + back-reference update,
        so we wrap in a transaction to keep them atomic. */
-    const {client} = auth.tenant;
-    const {user, subapp} = auth;
-    await client.$transaction(txClient =>
+    const {user, subapp} = access;
+    await access.tenant.client.$transaction(txClient =>
       createRelatedTicketLink({
         data,
         client: txClient,
@@ -585,11 +664,28 @@ export async function createChildLink(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -599,9 +695,9 @@ export async function createChildLink(
   try {
     await createChildTicketLink({
       data,
-      client: auth.tenant.client,
-      user: auth.user,
-      subapp: auth.subapp,
+      client,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
     });
 
@@ -625,11 +721,28 @@ export async function createParentLink(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -640,9 +753,9 @@ export async function createParentLink(
   try {
     await createParentTicketLink({
       data,
-      client: auth.tenant.client,
-      user: auth.user,
-      subapp: auth.subapp,
+      client,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
     });
     return {success: true, data: true};
@@ -670,11 +783,28 @@ export async function deleteChildLink(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -685,9 +815,9 @@ export async function deleteChildLink(
   try {
     await deleteChildTicketLink({
       data,
-      client: auth.tenant.client,
-      user: auth.user,
-      subapp: auth.subapp,
+      client,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
     });
     return {success: true, data: true};
@@ -715,11 +845,28 @@ export async function deleteParentLink(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   if (
     !workspace.config.isDisplayChildTicket &&
     !workspace.config.isDisplayTicketParent
@@ -730,9 +877,9 @@ export async function deleteParentLink(
   try {
     await deleteParentTicketLink({
       data,
-      client: auth.tenant.client,
-      user: auth.user,
-      subapp: auth.subapp,
+      client,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
     });
     return {success: true, data: true};
@@ -759,11 +906,28 @@ export async function deleteRelatedLink(
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const {workspace} = auth;
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
   if (!workspace.config.isDisplayRelatedTicket) {
     return {error: true, message: await t('Related tickets are not enabled')};
   }
@@ -771,9 +935,9 @@ export async function deleteRelatedLink(
   try {
     const count = await deleteRelatedTicketLink({
       data,
-      client: auth.tenant.client,
-      user: auth.user,
-      subapp: auth.subapp,
+      client,
+      user: access.user,
+      subapp: access.subapp,
       workspace,
     });
 
@@ -803,20 +967,25 @@ export async function searchTickets({
     };
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) {
-    return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
   const tickets = await findTicketsBySearch({
     search,
     projectId,
     excludeList,
-    client: auth.tenant.client,
-    user: auth.user,
-    subapp: auth.subapp,
-    workspace: auth.workspace,
+    client: access.client,
+    user: access.user,
+    subapp: access.subapp,
+    workspace: access.workspace,
   });
 
   return {success: true, data: clone(tickets)};
@@ -834,12 +1003,28 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) {
-    return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-  const {workspace, user, subapp} = auth;
+
+  const {client, user, subapp} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
 
   const {workspaceUser} = workspace;
 
@@ -856,7 +1041,6 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await t('Invalid model type')};
   }
 
-  const {client} = auth.tenant;
   const ticket = await findTicketAccess({
     recordId: rest.recordId,
     client,
@@ -877,10 +1061,10 @@ export const createComment: CreateComment = async props => {
 
   try {
     // keeps attachment tokens redeemable if creation fails
-    const res = await client.$transaction(txClient =>
+    const res = await access.tenant.client.$transaction(txClient =>
       addComment({
         modelName,
-        userId: auth.user.id,
+        userId: user.id,
         workspaceUserId: workspaceUser.id,
         client: txClient,
         commentField: 'note',
@@ -1019,12 +1203,28 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
 
-  if (error) {
-    return {error: true, message};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-  const {workspace} = auth;
+
+  const {client} = access;
+  const workspaceConfig = await getWorkspaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+
+  if (!workspaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
+
+  const workspace = {...access.workspace, config: workspaceConfig};
 
   const {workspaceUser} = workspace;
 
@@ -1041,13 +1241,12 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('Invalid model type')};
   }
 
-  const {client} = auth.tenant;
   const ticket = await findTicketAccess({
     recordId: rest.recordId,
     client,
-    user: auth.user,
-    subapp: auth.subapp,
-    workspace: auth.workspace,
+    user: access.user,
+    subapp: access.subapp,
+    workspace,
   });
 
   if (!ticket) {

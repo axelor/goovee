@@ -1,4 +1,4 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {IconType} from 'react-icons';
 import {FaChevronRight} from 'react-icons/fa';
@@ -12,7 +12,10 @@ import {
 } from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {getWorkspaceConfig} from '@/orm/workspace';
+import {getCurrentPath} from '@/utils/current-path';
 import {t} from '@/locale/server';
 import {
   Breadcrumb,
@@ -53,7 +56,6 @@ import {
 import type {SearchParams} from '../../common/types/search-param';
 import {Swipe} from '@/ui/components/swipe';
 import {TicketList} from '../../common/ui/components/ticket-list';
-import {ensureAuth} from '../../common/utils/auth-helper';
 import {getSkip} from '@/utils/pagination';
 import {getOrderBy} from '../../common/utils/search-param';
 import type {EncodedTicketFilter} from '../../common/utils/validators';
@@ -71,20 +73,38 @@ export default async function Page(props0: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}?${new URLSearchParams(searchParams).toString()}`,
-        workspaceURI,
-        tenant,
-      }),
-    );
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  if (error) notFound();
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp, client} = access;
+
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = {...access.workspace, config};
 
   const [project, tickets, statuses] = await Promise.all([
     findProject({projectId, client, user, workspace}),

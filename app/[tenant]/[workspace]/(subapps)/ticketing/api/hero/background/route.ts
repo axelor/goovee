@@ -1,7 +1,12 @@
+import {NextRequest, NextResponse} from 'next/server';
+
+// ---- CORE IMPORTS ---- //
+import {SUBAPP_CODES} from '@/constants';
+import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {accessStatus} from '@/lib/core/access/denial';
+import {getWorkspaceConfig} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
-import {NextRequest, NextResponse} from 'next/server';
-import {ensureAuth} from '../../../common/utils/auth-helper';
 
 export async function GET(
   request: NextRequest,
@@ -10,13 +15,21 @@ export async function GET(
   const params = await props.params;
   const {workspaceURL, tenant} = workspacePathname(params);
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenant);
-  if (error) {
-    return new NextResponse('Unauthorized', {status: 401});
+  const access = await ensureAuth({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access;
 
-  const {workspace} = auth;
-  const bgImageId = workspace.config.ticketHeroBgImage?.id;
+  const config = await getWorkspaceConfig(access.workspace.config.id, client);
+  const bgImageId = config?.ticketHeroBgImage?.id;
 
   if (!bgImageId) {
     return new NextResponse('Image not found', {status: 404});
@@ -25,8 +38,8 @@ export async function GET(
   const file = await findFile({
     id: bgImageId,
     meta: true,
-    client: auth.tenant.client,
-    storage: auth.tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {
