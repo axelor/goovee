@@ -7,7 +7,7 @@ import type {UseFormReturn} from 'react-hook-form';
 
 // ---- CORE IMPORTS ---- //
 import {PaymentOption} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import {PortalAppConfig} from '@/orm/workspace';
 import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
@@ -30,14 +30,14 @@ import {URL_PARAMS} from '@/subapps/events/common/constants';
 import type {SuccessResponse} from '@/types/action';
 import type {Registration} from '@/subapps/events/common/types';
 export function EventPayments({
-  workspace,
+  config,
   event,
   form,
   metaFields,
   metaFieldsFacilities,
   additionalFieldSet,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: PortalAppConfig | Cloned<PortalAppConfig>;
   event: Pick<
     Cloned<FullEvent>,
     'id' | 'displayAti' | 'facilityList' | 'priceScale'
@@ -47,14 +47,12 @@ export function EventPayments({
   metaFieldsFacilities: ModelField[];
   additionalFieldSet: ModelField[] | null | undefined;
 }) {
-  const workspaceURL = workspace?.url;
-
   const isValid =
     form.formState.isValid && !Object.keys(form.formState.errors || {}).length;
 
   const {toast} = useToast();
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
 
   const redirectToEvents = useCallback(
     async (result: SuccessResponse<Registration>) => {
@@ -118,7 +116,7 @@ export function EventPayments({
   return (
     <>
       <Payments
-        workspace={workspace}
+        config={config}
         disabled={!isValid}
         onValidate={async () => {
           return await handleFormValidation({

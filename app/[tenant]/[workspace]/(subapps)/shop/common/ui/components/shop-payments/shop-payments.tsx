@@ -52,7 +52,7 @@ export function ShopPayments({workspace, orderSubapp}: ShopPaymentsProps) {
   return (
     <>
       <Payments
-        workspace={workspace}
+        config={workspace.config}
         onValidate={async () => {
           if (noAddress) {
             toast({

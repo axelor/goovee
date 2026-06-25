@@ -67,8 +67,6 @@ export default async function Page(props: {
   );
   if (!workspaceConfig) return notFound();
 
-  const workspace = clone({...access.workspace, config: workspaceConfig});
-
   const eventDetails = await findEvent({
     slug,
     workspaceURL,
@@ -82,7 +80,7 @@ export default async function Page(props: {
   }
 
   const allowGuestEventRegistration =
-    workspace.config?.allowGuestEventRegistration;
+    workspaceConfig.allowGuestEventRegistration;
   const eventAllowRegistration = eventDetails?.eventAllowRegistration;
 
   const allowGuests =
@@ -111,7 +109,7 @@ export default async function Page(props: {
         <RegistrationForm
           eventDetails={eventDetails}
           metaFields={metaFields}
-          workspace={workspace}
+          config={clone(workspaceConfig)}
           user={partner}
         />
       </div>

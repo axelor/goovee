@@ -35,10 +35,7 @@ import {
 import styles from './style.module.css';
 import type {EventPageCardProps} from './types';
 
-export const EventPageCard = ({
-  eventDetails,
-  workspace,
-}: EventPageCardProps) => {
+export const EventPageCard = ({eventDetails, config}: EventPageCardProps) => {
   const {
     formattedDefaultPriceAti,
     formattedDefaultPrice,
@@ -50,8 +47,7 @@ export const EventPageCard = ({
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
-  const allowGuestEventRegistration =
-    workspace.config?.allowGuestEventRegistration;
+  const allowGuestEventRegistration = config.allowGuestEventRegistration;
 
   const allowGuests =
     allowGuestEventRegistration && !isLoginNeededForRegistration(eventDetails);
