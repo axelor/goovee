@@ -67,7 +67,7 @@ export async function createStripeCheckoutSession(props: {
     eventId,
     values,
     workspaceURL,
-    workspace,
+    config: workspaceConfig,
     user,
     client,
   });
@@ -197,7 +197,7 @@ export async function paypalCreateOrder(props: {
     eventId,
     values,
     workspaceURL,
-    workspace,
+    config: workspaceConfig,
     user,
     client,
   });
@@ -313,7 +313,7 @@ export async function payboxCreateOrder(props: {
     eventId,
     values,
     workspaceURL,
-    workspace,
+    config: workspaceConfig,
     user,
     client,
   });
