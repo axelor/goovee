@@ -1,8 +1,5 @@
-import {getTranslation, t, tattr} from '@/locale/server';
+import {t, tattr} from '@/locale/server';
 import type {Cloned} from '@/types/util';
-import {getSession} from '@/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 
 // ---- LOCAL IMPORTS ---- //
@@ -12,13 +9,11 @@ import {
   isEventPublic,
   isLoginNeededForRegistration,
 } from '@/subapps/events/common/utils';
-import {SUBAPP_CODES} from '@/constants';
 import {User} from '@/types';
 import {type Participant} from './validators';
-import {PortalWorkspace, Subapp} from '@/orm/workspace';
+import {PortalWorkspace} from '@/orm/workspace';
 import {ActionResponse} from '@/types/action';
 import {findEventConfig} from '../orm/event';
-import type {EventConfig} from '@/subapps/events/common/types';
 import {
   getParticipantsFromValues,
   getTotalRegisteredParticipants,
@@ -28,118 +23,26 @@ import {
 import {hasRegistrationEnded} from '../utils';
 import {type RegistrationValues} from './validators';
 
-type ValidationResult = {
-  error: null | boolean;
-  message?: string;
-};
-
-export async function validate(validators: Function[]) {
-  for (const validator of validators) {
-    if (typeof validator !== 'function') {
-      throw new Error('Validator is not a function');
-    }
-
-    const result = await validator();
-    if (result?.error) {
-      return result;
-    }
-  }
-  return {error: null};
-}
-
-export async function withAuth(
-  {
-    tenantId,
-  }: {
-    tenantId: Tenant['id'];
-  } = {tenantId: ''},
-): Promise<ValidationResult> {
-  const session = await getSession();
-  if (!session?.user?.id) {
-    return {
-      error: true,
-      message: await getTranslation({tenant: tenantId}, 'Unauthorized'),
-    };
-  }
-  return {error: null};
-}
-
-export function withSubapp(code: string, url: string, client: Client) {
-  return async function () {
-    const session = await getSession();
-    const user = session?.user;
-
-    const subapp = await findSubappAccess({code, user, url, client});
-
-    if (!subapp) {
-      return error(await t('Unauthorized'));
-    }
-
-    return {error: null};
-  };
-}
-
-export function withWorkspace(
-  url: string,
-  client: Client,
-  config?: {checkAuth?: boolean},
-) {
-  return async function (): Promise<ValidationResult> {
-    if (config?.checkAuth) {
-      const result = await withAuth();
-      if (result?.error) return result;
-      return {error: null};
-    }
-
-    const session = await getSession();
-    const user = session?.user;
-
-    const workspace = await findWorkspace({user, url, client});
-
-    if (!workspace) {
-      return {
-        error: true,
-        message: await t('Invalid workspace'),
-      };
-    }
-
-    return {error: null};
-  };
-}
-
+/**
+ * Validates the registration request against the event's rules. Access is
+ * gated by the calling action via ensureAuth; this only enforces registration
+ * policy, so the caller passes the resolved workspace and user in.
+ */
 export async function validateRegistration({
   eventId,
   values,
   workspaceURL,
+  workspace,
+  user,
   client,
 }: {
   eventId: string;
   values: RegistrationValues;
   workspaceURL: string;
-  client: Client;
-}): ActionResponse<{
   workspace: PortalWorkspace | Cloned<PortalWorkspace>;
-  event: EventConfig;
-  participants: Participant[];
   user?: User;
-  subapp: Subapp;
-}> {
-  const session = await getSession();
-  const user = session?.user;
-
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-  if (!workspace) return error(await t('Invalid workspace'));
-
-  const subapp = await findSubappAccess({
-    code: SUBAPP_CODES.events,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!subapp) {
-    return {error: true, message: await t('Unauthorized Access')};
-  }
-
+  client: Client;
+}): ActionResponse<{participants: Participant[]}> {
   if (!workspace.config?.allowGuestEventRegistration && !user) {
     return error(
       await t(
@@ -259,13 +162,7 @@ export async function validateRegistration({
 
     return {
       success: true,
-      data: {
-        workspace,
-        event,
-        participants,
-        user,
-        subapp,
-      },
+      data: {participants},
     };
   } catch (err) {
     console.error(err);
