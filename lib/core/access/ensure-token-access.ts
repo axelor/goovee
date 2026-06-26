@@ -49,7 +49,7 @@ export async function ensureTokenAccess({
   }
   const {client} = tenant;
 
-  const workspace = await findGuestWorkspace({url, client});
+  const workspace = await findGuestWorkspace(url, client);
   if (!workspace) {
     return {ok: false, reason: 'workspace-not-found'};
   }
