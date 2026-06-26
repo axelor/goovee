@@ -5,7 +5,7 @@ import type {Cloned} from '@/types/util';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
 import {getSession} from '@/auth';
 import type {User} from '@/types';
@@ -79,7 +79,7 @@ export async function CategorySliderWrapper({
   client,
   user,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
 }) {
@@ -106,7 +106,7 @@ export async function NavMenuWrapper({
   client,
   user,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }) {
@@ -125,7 +125,7 @@ export async function HomePageHeaderNewsWrapper({
   client,
   navigatingPathFrom,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   navigatingPathFrom: string;
 }) {
@@ -156,7 +156,7 @@ export async function FeaturedHomePageNewsWrapper({
   workspace,
   client,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
 }) {
   const session = await getSession();
@@ -185,7 +185,7 @@ export async function HomePageAsideNewsWrapper({
   workspace,
   client,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
 }) {
   const session = await getSession();
@@ -211,7 +211,7 @@ export async function HomePageFooterNewsWrapper({
   workspace,
   client,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
 }) {
   const session = await getSession();
@@ -240,7 +240,7 @@ export async function SubCategorySliderWrapper({
   slug,
   title,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
   slug: string;
@@ -276,7 +276,7 @@ export async function CategoryPageHeaderNewsWrapper({
   slug,
   page,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   navigatingPathFrom: string;
   slug: string;
@@ -315,7 +315,7 @@ export async function CategoryNewsGridLayoutWrapper({
   navigatingPathFrom,
   page,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
   navigatingPathFrom: string;
@@ -376,7 +376,7 @@ export async function CategoryFeaturedNewsWrapper({
   slug,
   navigatingPathFrom,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
   navigatingPathFrom: string;
@@ -411,7 +411,7 @@ export async function CategoryAsideNewsWrapper({
   navigatingPathFrom,
   page,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
   navigatingPathFrom: string;
@@ -453,7 +453,7 @@ export async function CategoryFooterNewsWrapper({
   navigatingPathFrom,
   page,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
   navigatingPathFrom: string;
@@ -495,7 +495,7 @@ export async function CategoryBottomFeedNewsWrapper({
   navigatingPathFrom,
   page,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
   navigatingPathFrom: string;
@@ -536,7 +536,7 @@ export async function PaginationWrapper({
   slug,
   page,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
   page: number;
@@ -569,7 +569,7 @@ export async function BreadcrumbsWrapper({
   newsTitle,
   user,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   segments: string[];
   newsTitle: string;
@@ -662,7 +662,7 @@ export async function AttachmentListWrapper({
   client,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
 }) {
@@ -698,7 +698,7 @@ export async function RelatedNewsWrapper({
   slug,
   navigatingPathFrom,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug: string;
   navigatingPathFrom: string;

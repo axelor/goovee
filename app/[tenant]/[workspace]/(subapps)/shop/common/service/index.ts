@@ -3,7 +3,7 @@ import {headers} from 'next/headers';
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
 import {t} from '@/locale/server';
-import {WorkspaceLight} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
@@ -32,7 +32,7 @@ export async function createOrder({
   paymentModeId,
 }: {
   cart: CartInput;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user: NonNullable<User>;
   client: Client;
@@ -138,7 +138,7 @@ export async function requestOrder({
   type = 'order',
 }: {
   cart: CartInput;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   type?: 'quotation' | 'order';
 }) {

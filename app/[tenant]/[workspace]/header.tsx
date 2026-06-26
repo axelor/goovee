@@ -19,7 +19,7 @@ import {i18n} from '@/locale';
 import {DEFAULT_LOGO_URL, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Icon} from '@/ui/components';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
@@ -37,7 +37,7 @@ function Logo({
   workspace,
   config,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {
   const {workspaceURI} = useWorkspace();
@@ -75,7 +75,7 @@ export default function Header({
   subapps: any;
   isTopNavigation?: boolean;
   workspaces: {id: string; name: string | null; url: string | null}[];
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
   showCart?: boolean | null;
 }) {

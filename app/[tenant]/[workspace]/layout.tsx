@@ -15,7 +15,7 @@ import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {getShellConfig} from './orm/config';
-import Workspace from './workspace-context';
+import WorkspaceProvider from './workspace-context';
 import CartContext from './cart-context';
 import Header from './header';
 import Sidebar from './sidebar';
@@ -162,7 +162,7 @@ export default async function Layout(props: {
   const showCart = !hidePriceAndPurchase && shopSubapp?.isInstalled;
 
   return (
-    <Workspace
+    <WorkspaceProvider
       id={$workspace.id}
       workspace={workspace}
       tenant={tenantId}
@@ -200,6 +200,6 @@ export default async function Layout(props: {
           />
         </div>
       </CartContext>
-    </Workspace>
+    </WorkspaceProvider>
   );
 }

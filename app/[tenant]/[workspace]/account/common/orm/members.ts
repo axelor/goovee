@@ -5,14 +5,14 @@ import {isAdminContact, isPartner} from '@/orm/partner';
 import {findSubapps, findWorkspaceMembers} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 import type {Partner} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 
 export async function findAvailableSubapps({
   url,
   client,
 }: {
-  url: WorkspaceLight['url'];
+  url: Workspace['url'];
   client: Client;
 }) {
   if (!url) {
@@ -53,7 +53,7 @@ export async function findMembers({
   client,
   partnerId,
 }: {
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
   client: Client;
   partnerId: Partner['id'];
 }) {

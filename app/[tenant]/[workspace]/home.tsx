@@ -14,7 +14,7 @@ import {
 import {parseCommentContent} from '@/lib/core/comments';
 import {t} from '@/lib/core/locale/server';
 import type {User, OverlayColor} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 import {BigNewsCard} from '@/ui/components/big-news-card';
 import {Card, CardContent, CardHeader, CardTitle} from '@/ui/components/card';
@@ -50,7 +50,7 @@ export async function Home({
 }: {
   client: Client;
   user: User | undefined;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
   workspaceURI: string;
   apps: any[];
@@ -196,7 +196,7 @@ async function LatestNews({
   user,
   workspaceURI,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;
@@ -252,7 +252,7 @@ async function EventsCard({
   user,
   workspaceURI,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;
@@ -317,7 +317,7 @@ async function ForumCard({
   user,
   workspaceURI,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;
@@ -396,7 +396,7 @@ async function ResourcesCard({
   user,
   workspaceURI,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
   workspaceURI: string;

@@ -30,7 +30,7 @@ import {withBasePath} from '@/lib/core/path/base-path';
 import {toWorkspaceURI} from '@/utils/workspace';
 import {type Tenant, type TenantConfig} from '../tenant';
 import type {Partner} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {hash} from './utils';
 import {getPublicEnvironment} from '../environment/utils';
 import {withMattermostSync} from '../mattermost/user-api';
@@ -587,7 +587,7 @@ async function findActiveAdminContactForWorkspace({
   tenantId,
   client,
 }: {
-  url: WorkspaceLight['url'];
+  url: Workspace['url'];
   partnerId: Partner['id'];
   tenantId: Tenant['id'];
   client: Client;

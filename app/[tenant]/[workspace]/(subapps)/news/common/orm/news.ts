@@ -4,7 +4,7 @@ import type {Cloned} from '@/types/util';
 import {clone, getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import type {User} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {ORDER_BY} from '@/constants';
 import {filterPrivate} from '@/orm/filter';
 
@@ -62,7 +62,7 @@ export async function findNonArchivedNewsCategories({
   user,
   client,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
 }) {
@@ -160,7 +160,7 @@ export async function findNews({
   page?: string | number;
   limit?: number;
   slug?: string | null;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   categoryIds?: (string | number)[];
   client: Client;
   user?: User;
@@ -275,7 +275,7 @@ export async function findNewsImageBySlug({
   isFullView = false,
 }: {
   slug: string;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   archived?: boolean;
@@ -307,7 +307,7 @@ export async function findCategoryImageBySlug({
   user,
 }: {
   slug: string;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }): Promise<string | undefined> {
@@ -337,7 +337,7 @@ export async function isAttachmentOfNews({
 }: {
   slug: string;
   fileId: string;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }): Promise<boolean> {
@@ -368,7 +368,7 @@ export async function findCategories({
   category?: string | null;
   showAllCategories?: boolean;
   slug?: string | null;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   archived?: boolean;
@@ -427,7 +427,7 @@ export async function findCategoryTitleBySlugName({
   user,
 }: {
   slug: string;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   archived?: boolean;
   user?: User;
@@ -467,7 +467,7 @@ export async function findNewsByCategory({
   page?: string | number;
   limit?: number;
   slug?: string;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   params?: NewsQueryParams;
@@ -524,7 +524,7 @@ export async function findHomePageHeaderNews({
   user,
   limit = HEADER_NEWS_LIMIT,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   limit?: number;
@@ -549,7 +549,7 @@ export async function findHomePageFeaturedNews({
   client,
   user,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }) {
@@ -573,7 +573,7 @@ export async function findHomePageAsideNews({
   client,
   user,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }) {
@@ -593,7 +593,7 @@ export async function findHomePageFooterNews({
   client,
   user,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }) {
@@ -614,7 +614,7 @@ export async function findCategoryPageHeaderNews({
   user,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -637,7 +637,7 @@ export async function findCategoryPageFeaturedNews({
   user,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -665,7 +665,7 @@ export async function findCategoryAsideNews({
   slug,
   page = DEFAULT_PAGE,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -696,7 +696,7 @@ export async function findCategoryFooterNews({
   slug,
   page = DEFAULT_PAGE,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -727,7 +727,7 @@ export async function findCategoryBottomFeedNews({
   slug,
   page = DEFAULT_PAGE,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -760,7 +760,7 @@ export async function findNewsCount({
   user,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;
@@ -778,7 +778,7 @@ export async function findNewsAttachments({
   user,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;
@@ -818,7 +818,7 @@ export async function findNewsRelatedNews({
   user,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;
@@ -898,7 +898,7 @@ export async function findNewsByCategoryCount({
   user,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;

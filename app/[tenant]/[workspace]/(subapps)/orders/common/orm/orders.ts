@@ -11,7 +11,7 @@ import {getSkip} from '@/utils/pagination';
 import {and} from '@/utils/orm';
 import {formatNumber} from '@/locale/server/formatters';
 import type {Partner} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {ID} from '@/types';
 import type {WhereOptions} from '@goovee/orm';
 import type {AOSOrder} from '@/goovee/.generated/models/AOSOrder';
@@ -47,7 +47,7 @@ export const findOrders = async ({
     page?: string | number;
   };
   client: Client;
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
 }) => {
   const {page = DEFAULT_PAGE, limit, where = {}} = params;
   const {id: clientPartnerId} = where.clientPartner || {};
@@ -144,7 +144,7 @@ export async function findOrder({
 }: {
   id: ID;
   client: Client;
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
   params?: {where?: WhereOptions<AOSOrder>};
   invoicesParams?: {where?: WhereOptions<AOSInvoice>};
 }) {

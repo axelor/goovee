@@ -3,7 +3,7 @@ import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
 import {DEFAULT_LIMIT} from '@/constants';
 import {User} from '@/types';
-import {WorkspaceLight} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
@@ -26,7 +26,7 @@ export async function GroupPostsContent({
     workspace: string;
   };
   searchParams: {[key: string]: string | undefined};
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   enableComment: boolean;
   memberGroupIDs: string[];
   user: User | null;

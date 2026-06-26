@@ -6,7 +6,7 @@ import {ID, User} from '@/types';
 import type {PageInfo} from '@/types';
 import {clone, getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
-import {WorkspaceLight} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {filterPrivate} from '@/orm/filter';
 
 // ---- LOCAL IMPORTS ---- //
@@ -28,7 +28,7 @@ export async function findGroups({
   user,
   archived = false,
 }: {
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
   client: Client;
   user?: User;
   archived?: boolean;
@@ -63,7 +63,7 @@ export async function findGroupsByMembers({
   id: ID | null;
   searchKey?: string;
   orderBy?: Record<string, unknown>;
-  workspaceID: WorkspaceLight['id'];
+  workspaceID: Workspace['id'];
   client: Client;
   user?: User;
   archived?: boolean;
@@ -152,7 +152,7 @@ export async function findPosts({
   search?: string | undefined;
   ids?: Array<Post['id']> | undefined;
   whereClause?: Record<string, unknown>;
-  workspaceID: WorkspaceLight['id'];
+  workspaceID: Workspace['id'];
   groupIDs?: ID[];
   client: Client;
   user?: User;
@@ -410,7 +410,7 @@ export async function findRecentlyActivePosts({
   user,
   limit = 3,
 }: {
-  workspaceID: WorkspaceLight['id'];
+  workspaceID: Workspace['id'];
   client: Client;
   user?: User;
   limit?: number;

@@ -25,7 +25,7 @@ import {Notification} from './notification';
 import {toWorkspaceURI} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
-import type {Subapp, WorkspaceLight} from '@/orm/workspace';
+import type {Subapp, Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import type {Cloned} from '@/types/util';
 
@@ -189,7 +189,7 @@ export function MobileMenu({
 }: {
   subapps: Subapp[];
   workspaces?: WorkspaceListItem[];
-  workspace?: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace?: Workspace | Cloned<Workspace>;
   showCart?: boolean | null;
   config: ShellConfig | Cloned<ShellConfig>;
 }) {

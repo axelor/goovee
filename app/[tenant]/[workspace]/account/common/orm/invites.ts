@@ -4,7 +4,7 @@ import type {Cloned} from '@/types/util';
 import {findEmailAddress, isAdminContact, isPartner} from '@/orm/partner';
 import {clone} from '@/utils';
 import type {Partner} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {InviteAppsConfig, Role} from '../types';
@@ -109,7 +109,7 @@ export async function findInvites({
   client,
   partnerId,
 }: {
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
   client: Client;
   partnerId: Partner['id'];
 }) {
@@ -172,7 +172,7 @@ export async function findInviteForEmail({
   workspaceURL,
 }: {
   email: string;
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
   client: Client;
   partnerId: Partner['id'];
 }) {
@@ -210,7 +210,7 @@ export async function createInvite({
   apps,
   partnerId,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   role: Role;
   email: string;

@@ -5,7 +5,7 @@ import {Suspense} from 'react';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
 import {CommentsSkeleton} from '@/lib/core/comments';
@@ -41,7 +41,7 @@ export async function ArticleNews({
   user,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   config: NewsConfig | Cloned<NewsConfig>;
   segments: string[];
   client: Client;
