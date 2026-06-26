@@ -13,7 +13,7 @@ import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
 import {isPaymentOptionAvailable} from '@/utils/payment';
 import {TENANT_HEADER} from '@/proxy';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {scale} from '@/utils';
@@ -43,7 +43,7 @@ export async function createStripeCheckoutSession(props: {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -173,7 +173,7 @@ export async function paypalCreateOrder(props: {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -289,7 +289,7 @@ export async function payboxCreateOrder(props: {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,

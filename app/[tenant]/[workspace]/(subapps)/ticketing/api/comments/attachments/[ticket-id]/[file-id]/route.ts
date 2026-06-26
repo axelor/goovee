@@ -6,7 +6,7 @@ import {workspacePathname} from '@/utils/workspace';
 import {isCommentEnabled} from '@/comments';
 
 import {findTicketAccess} from '../../../../../common/orm/tickets';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {getTicketingConfig} from '../../../../../common/orm/config';
 import {SUBAPP_CODES} from '@/constants';
@@ -26,7 +26,7 @@ export async function GET(
   const {workspaceURL, tenant} = workspacePathname(params);
   const {'ticket-id': ticketId, 'file-id': fileId} = params;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId: tenant,

@@ -3,7 +3,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
@@ -32,7 +32,7 @@ export default async function Page(props: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
     url: workspaceURL,
     tenantId: tenant,

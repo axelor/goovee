@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
@@ -25,7 +25,7 @@ export async function GET(
   const {workspaceURL, tenant} = workspacePathname(params);
   const {slug} = params;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.news,
     url: workspaceURL,
     tenantId: tenant,

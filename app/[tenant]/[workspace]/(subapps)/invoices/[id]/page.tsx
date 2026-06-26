@@ -4,8 +4,8 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {ensureTokenAuth} from '@/lib/core/access/ensure-token-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -35,11 +35,11 @@ async function Invoice({
   const token = searchParams.token;
   const {workspaceURL, workspaceURI} = workspacePathname(params);
 
-  /* Token path: a capability scoped to one invoice. ensureTokenAuth only
+  /* Token path: a capability scoped to one invoice. ensureTokenAccess only
      establishes the workspace; the token is fused into findInvoice below, which
      is what actually authorizes this invoice. */
   if (token) {
-    const access = await ensureTokenAuth({
+    const access = await ensureTokenAccess({
       url: workspaceURL,
       tenantId: tenant,
       token,
@@ -72,7 +72,7 @@ async function Invoice({
 
   /* Session path: the visitor must be a logged-in user with access to the
      invoices app, and only sees invoices their partner owns. */
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.invoices,
     url: workspaceURL,
     tenantId: tenant,

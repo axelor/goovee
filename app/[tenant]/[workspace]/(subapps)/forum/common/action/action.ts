@@ -11,7 +11,7 @@ import {DEFAULT_LOCALE} from '@/locale/contants';
 import {clone} from '@/utils';
 import {ModelMap, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {ID} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
@@ -122,7 +122,7 @@ export async function pinGroup({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -206,7 +206,7 @@ export async function exitGroup({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -280,7 +280,7 @@ export async function joinGroup({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -362,7 +362,7 @@ export async function addGroupNotification({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -430,7 +430,7 @@ export async function addPost(input: AddPostInput) {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -597,7 +597,7 @@ export async function findMedia({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -660,7 +660,7 @@ export async function fetchPosts(input: FetchPostsInput) {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -701,7 +701,7 @@ export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -733,7 +733,7 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -966,7 +966,7 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
@@ -1040,7 +1040,7 @@ export const getSubscribersByGroup = async ({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,

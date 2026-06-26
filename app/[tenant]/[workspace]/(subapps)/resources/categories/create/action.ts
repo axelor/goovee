@@ -7,7 +7,7 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
@@ -40,7 +40,7 @@ export async function create(formData: FormData, workspaceURL: string) {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
     url: workspaceURL,
     tenantId,

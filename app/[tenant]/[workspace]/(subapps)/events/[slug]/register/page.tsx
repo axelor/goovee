@@ -1,7 +1,7 @@
 import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
@@ -31,7 +31,7 @@ export default async function Page(props: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId: tenant,

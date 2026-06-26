@@ -6,7 +6,7 @@ import {Suspense} from 'react';
 import {IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
 import {t} from '@/lib/core/locale/server';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
   Pagination,
   PaginationContent,
@@ -45,7 +45,7 @@ export default async function Page(props: {
   const params = await props.params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
     url: workspaceURL,
     tenantId: tenant,

@@ -9,7 +9,7 @@ import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {TENANT_HEADER} from '@/proxy';
 import {getQuotationsConfig} from '../orm/config';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {clone} from '@/utils';
 import {addComment, findComments} from '@/comments/orm';
@@ -40,7 +40,7 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
     url: workspaceURL,
     tenantId,
@@ -168,7 +168,7 @@ export const fetchComments: FetchComments = async props => {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
     url: workspaceURL,
     tenantId,

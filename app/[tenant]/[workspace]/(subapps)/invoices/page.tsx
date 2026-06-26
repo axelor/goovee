@@ -2,7 +2,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -34,7 +34,7 @@ async function Invoices({
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.invoices,
     url: workspaceURL,
     tenantId: tenant,

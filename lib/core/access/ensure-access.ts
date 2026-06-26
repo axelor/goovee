@@ -45,7 +45,7 @@ export type AccessResult<TAllowGuest extends boolean = false> =
  * the app actually exist, so a guest is never bounced to login for something
  * that does not exist (the caller turns those reasons into a 404 instead).
  */
-export async function ensureAuth<TAllowGuest extends boolean = false>({
+export async function ensureAccess<TAllowGuest extends boolean = false>({
   code,
   url,
   tenantId,

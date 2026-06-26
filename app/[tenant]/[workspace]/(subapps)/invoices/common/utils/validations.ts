@@ -1,8 +1,8 @@
 //---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import type {Cloned} from '@/types/util';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {ensureTokenAuth} from '@/lib/core/access/ensure-token-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {SUBAPP_CODES} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
@@ -32,8 +32,8 @@ export type InvoiceFilter = {token: string} | {params: {where: object}};
 
 /**
  * Resolves access for an invoice payment request. The token path goes through
- * ensureTokenAuth (no user, no sub-app — authorization is the token fused into
- * the invoice query); the session path goes through ensureAuth and scopes the
+ * ensureTokenAccess (no user, no sub-app — authorization is the token fused into
+ * the invoice query); the session path goes through ensureAccess and scopes the
  * query to the partner's invoices. Returns the tenant so callers keep using
  * tenant.client / tenant.config exactly as before.
  */
@@ -54,7 +54,11 @@ export async function resolveInvoicePaymentAccess({
   }>
 > {
   if (token) {
-    const access = await ensureTokenAuth({url: workspaceURL, tenantId, token});
+    const access = await ensureTokenAccess({
+      url: workspaceURL,
+      tenantId,
+      token,
+    });
     if (!access.ok) {
       return {error: true, message: await accessMessage(access.reason)};
     }
@@ -76,7 +80,7 @@ export async function resolveInvoicePaymentAccess({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.invoices,
     url: workspaceURL,
     tenantId,

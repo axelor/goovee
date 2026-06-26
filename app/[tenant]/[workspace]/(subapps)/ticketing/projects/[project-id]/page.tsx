@@ -13,7 +13,7 @@ import {
 
 // ---- CORE IMPORTS ---- //
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getTicketingConfig} from '../../common/orm/config';
 import {getCurrentPath} from '@/utils/current-path';
 import {t} from '@/locale/server';
@@ -73,7 +73,7 @@ export default async function Page(props0: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId: tenant,

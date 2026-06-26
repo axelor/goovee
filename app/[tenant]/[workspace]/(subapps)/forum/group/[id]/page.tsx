@@ -4,7 +4,7 @@ import {Suspense} from 'react';
 // ---- CORE IMPORTS ---- //
 import {User} from '@/types';
 import {clone} from '@/utils';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -51,7 +51,7 @@ async function ForumGroup({
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId: tenant,

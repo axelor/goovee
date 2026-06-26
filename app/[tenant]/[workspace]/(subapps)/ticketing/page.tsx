@@ -20,7 +20,7 @@ import {Link} from '@/ui/components/link';
 import {notFound, redirect, unauthorized} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getTicketingConfig} from './common/orm/config';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
@@ -40,7 +40,7 @@ export default async function Page(props: {
 
   const {limit = 8, page = 1} = searchParams;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId: tenant,

@@ -1,7 +1,7 @@
 import React from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
@@ -25,7 +25,7 @@ export default async function Layout(props: {
 
   const {workspaceURL, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId: tenant,

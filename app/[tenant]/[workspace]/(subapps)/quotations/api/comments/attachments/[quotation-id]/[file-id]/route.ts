@@ -4,7 +4,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {isFileOfRecord} from '@/comments/orm';
 import {SUBAPP_CODES} from '@/constants';
 import {isCommentEnabled} from '@/lib/core/comments';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {getQuotationsConfig} from '../../../../../common/orm/config';
 import {PartnerKey} from '@/types';
@@ -30,7 +30,7 @@ export async function GET(
   const {workspaceURL, tenant} = workspacePathname(params);
   const {'quotation-id': quotationId, 'file-id': fileId} = params;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
     url: workspaceURL,
     tenantId: tenant,

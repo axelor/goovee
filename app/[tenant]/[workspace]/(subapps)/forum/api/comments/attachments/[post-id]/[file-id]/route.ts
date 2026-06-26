@@ -3,7 +3,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {isFileOfRecord} from '@/comments/orm';
 import {SUBAPP_CODES} from '@/constants';
 import {isCommentEnabled} from '@/lib/core/comments';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
@@ -27,7 +27,7 @@ export async function GET(
   const {workspaceURL, tenant} = workspacePathname(params);
   const {'post-id': postId, 'file-id': fileId} = params;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId: tenant,

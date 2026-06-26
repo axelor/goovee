@@ -3,11 +3,11 @@ import 'server-only';
 // ---- CORE IMPORTS ---- //
 import {manager, type Tenant} from '@/tenant';
 import {findGuestWorkspace, type Workspace} from '@/orm/workspace';
-import type {AccessReason} from './ensure-auth';
+import type {AccessReason} from './ensure-access';
 
 /**
  * Establishes the workspace context for a capability-token request — one that
- * carries a token instead of a session. Unlike ensureAuth it resolves no user
+ * carries a token instead of a session. Unlike ensureAccess it resolves no user
  * and no sub-app: a token is a capability, not an identity, so there is no
  * sub-app role to read and the gate cannot key off one. It only confirms the
  * workspace exists (resolved from its default guest config, the same shape a
@@ -34,7 +34,7 @@ export type TokenAccessResult =
       reason: Extract<AccessReason, 'workspace-not-found'>;
     };
 
-export async function ensureTokenAuth({
+export async function ensureTokenAccess({
   url,
   tenantId,
   token,

@@ -8,7 +8,7 @@ import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder, findStripeOrder} from '@/payment/stripe/actions';
@@ -63,7 +63,7 @@ export async function paypalCaptureOrder({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -198,7 +198,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -313,7 +313,7 @@ export async function createStripeCheckoutSession({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -449,7 +449,7 @@ export async function validateStripePayment({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -594,7 +594,7 @@ export async function payboxCreateOrder({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -718,7 +718,7 @@ export async function validatePayboxPayment({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,

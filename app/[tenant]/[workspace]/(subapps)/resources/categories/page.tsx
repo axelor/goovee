@@ -11,7 +11,7 @@ import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {clone} from '@/utils';
 import {t} from '@/locale/server';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {User} from '@/types';
 import type {Client} from '@/goovee/.generated/client';
@@ -90,7 +90,7 @@ export default async function Page(props: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
     url: workspaceURL,
     tenantId: tenant,

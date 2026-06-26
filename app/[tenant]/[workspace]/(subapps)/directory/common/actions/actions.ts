@@ -6,7 +6,7 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import {accessMessage} from '@/lib/core/access/denial';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/lib/core/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import type {Cloned} from '@/types/util';
@@ -36,7 +36,7 @@ export async function searchEntries(
       message: await t('TenantId is required'),
     };
   }
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.directory,
     url: workspaceURL,
     tenantId,

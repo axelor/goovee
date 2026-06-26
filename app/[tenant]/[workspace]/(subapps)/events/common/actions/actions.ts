@@ -18,7 +18,7 @@ import {t, tattr, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {TENANT_HEADER} from '@/proxy';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {ID, PaymentOption} from '@/types';
 import {ActionResponse} from '@/types/action';
@@ -100,7 +100,7 @@ export async function getAllEvents(props: {
     return error(await t('Tenant ID is missing!'));
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -143,7 +143,7 @@ export async function register(
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('Tenant ID is missing!'));
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -331,7 +331,7 @@ export async function fetchContacts(props: {
     return error(await t('Bad request'));
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -368,7 +368,7 @@ export async function isValidParticipant(props: {
     return error(await t('Email is required'));
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -428,7 +428,7 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -554,7 +554,7 @@ export const fetchComments: FetchComments = async props => {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
@@ -628,7 +628,7 @@ export const fetchEvent = async (props: {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('Tenant ID is missing!'));
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId,
