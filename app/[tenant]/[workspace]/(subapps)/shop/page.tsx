@@ -54,9 +54,7 @@ async function Categories({
 }
 
 async function Carousel({config}: {config: ShopConfig | Cloned<ShopConfig>}) {
-  const carouselList = config?.carouselList;
-
-  return <HomeCarousel images={carouselList} />;
+  return <HomeCarousel images={clone(config?.carouselList)} />;
 }
 
 async function Featured({
@@ -103,7 +101,7 @@ async function Featured({
   return (
     <FeaturedCategories
       categories={featuredCategories}
-      config={workspaceConfig}
+      config={clone(workspaceConfig)}
       hidePriceAndPurchase={hidePriceAndPurchase}
     />
   );

@@ -75,7 +75,11 @@ async function Checkout({
   if (hidePriceAndPurchase) notFound();
 
   return (
-    <Content config={clone(config)} orderSubapp={orderSubapp} tenant={tenant} />
+    <Content
+      config={clone(config)}
+      orderSubapp={clone(orderSubapp)}
+      tenant={tenant}
+    />
   );
 }
 
