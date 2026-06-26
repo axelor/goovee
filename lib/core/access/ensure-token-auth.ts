@@ -2,7 +2,7 @@ import 'server-only';
 
 // ---- CORE IMPORTS ---- //
 import {manager, type Tenant} from '@/tenant';
-import {resolveGuestWorkspace, type Workspace} from '@/orm/workspace';
+import {findGuestWorkspace, type Workspace} from '@/orm/workspace';
 import type {AccessReason} from './ensure-auth';
 
 /**
@@ -49,7 +49,7 @@ export async function ensureTokenAuth({
   }
   const {client} = tenant;
 
-  const workspace = await resolveGuestWorkspace({url, client});
+  const workspace = await findGuestWorkspace({url, client});
   if (!workspace) {
     return {ok: false, reason: 'workspace-not-found'};
   }
