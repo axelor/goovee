@@ -1,12 +1,11 @@
 import type {ReactNode} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {SUBAPP_CODES} from '@/constants';
 import {Website} from '@/types';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {NotFound} from '@/subapps/website/common/components/blocks/not-found';
@@ -33,15 +32,20 @@ export async function generateMetadata(props: {
   }>;
 }): Promise<Metadata | null> {
   const params = await props.params;
-  const {workspaceURL} = workspacePathname(params);
-  const {tenant: tenantId, websiteSlug} = params;
+  const {websiteSlug} = params;
+  const {workspaceURL, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.website,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
+  if (!access.ok) return null;
+
+  const {user} = access;
+  const {client} = access.tenant;
 
   const website = await findWebsiteSeoBySlug({
     websiteSlug,
@@ -74,17 +78,25 @@ export default async function Layout(props: {
 
   const {children} = props;
 
-  const session = await getSession();
-  const user = session?.user;
+  const {websiteSlug} = params;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {tenant: tenantId, websiteSlug} = params;
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.website,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return <NotFound homePageUrl={`${workspaceURI}/${SUBAPP_CODES.website}`} />;
-  }
-  const {client, config} = tenant;
+  /* Gate only to skip this layout's website queries for a visitor the page will
+     deny; on denial pass children through untouched and let the page issue the
+     actual redirect / unauthorized / notFound (same as the events/news/shop
+     layouts — a layout must not redirect, as it does not re-run on client-side
+     navigation between sibling pages). */
+  if (!access.ok) return <>{children}</>;
+
+  const {user} = access;
+  const {client, config} = access.tenant;
 
   const website = await findWebsiteBySlug({
     websiteSlug,
