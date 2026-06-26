@@ -1,0 +1,6 @@
+{
+  "title": "Centralize sub-app access checks and speed up sub-app pages",
+  "type": "change",
+  "description": "Access to each sub-app is now verified by a single consistent check wherever the sub-app is opened, replacing the separate checks each area used before. Sub-app pages also load faster: the information needed to show them is gathered more efficiently and reused while a page is built instead of being fetched repeatedly, and each area now loads only the settings it needs. None of this changes what users can access, see, or pay — the portal simply does less redundant work and responds more quickly.",
+  "scope": ["core"]
+}
