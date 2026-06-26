@@ -3,7 +3,7 @@ import React from 'react';
 import {MdHistory, MdWeb} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
 import {clone} from '@/utils';
@@ -36,7 +36,7 @@ export default async function Page(props: {
   const {id} = params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
     url: workspaceURL,
     tenantId: tenant,

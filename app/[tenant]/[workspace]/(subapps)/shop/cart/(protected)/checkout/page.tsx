@@ -2,7 +2,7 @@ import {Suspense} from 'react';
 import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findSubappAccess} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
@@ -23,7 +23,7 @@ async function Checkout({
 }) {
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId: tenant,

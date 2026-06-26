@@ -25,7 +25,7 @@ import {type RegistrationValues} from './validators';
 
 /**
  * Validates the registration request against the event's rules. Access is
- * gated by the calling action via ensureAuth; this only enforces registration
+ * gated by the calling action via ensureAccess; this only enforces registration
  * policy, so the caller passes the resolved workspace and user in.
  */
 export async function validateRegistration({

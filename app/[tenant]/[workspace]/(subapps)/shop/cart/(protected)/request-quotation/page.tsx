@@ -1,7 +1,7 @@
 import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {findSubappAccess} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -19,7 +19,7 @@ export default async function Page(props: {
   const params = await props.params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId: tenant,

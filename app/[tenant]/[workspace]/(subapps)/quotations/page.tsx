@@ -3,7 +3,7 @@ import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {workspacePathname} from '@/utils/workspace';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
 import {
   DEFAULT_LIMIT,
@@ -31,7 +31,7 @@ async function Quotations({
 }) {
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.quotations,
     url: workspaceURL,
     tenantId: tenant,

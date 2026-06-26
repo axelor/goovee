@@ -6,7 +6,7 @@ import {headers} from 'next/headers';
 import {SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
 import {TENANT_HEADER} from '@/proxy';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {filterPrivate} from '@/orm/filter';
 
 // ---- LOCAL IMPORTS ---- //
@@ -26,7 +26,7 @@ export async function findDmsFiles({
 
   if (!tenantId) return [];
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
     url: workspaceURL,
     tenantId,

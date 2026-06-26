@@ -3,7 +3,7 @@
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
 import {TENANT_HEADER} from '@/proxy';
 import {SUBAPP_CODES} from '@/constants';
@@ -32,7 +32,7 @@ export async function findProduct({
     return null;
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -81,7 +81,7 @@ export async function requestQuotation({
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,

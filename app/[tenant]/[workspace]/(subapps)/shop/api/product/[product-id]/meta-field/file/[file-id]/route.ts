@@ -8,7 +8,7 @@ import type {AOSProduct} from '@/goovee/.generated/models';
 import {findModelFields} from '@/orm/model-fields';
 import {workspacePathname} from '@/utils/workspace';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 
 // ---- LOCAL IMPORTS ---- //
@@ -34,7 +34,7 @@ export async function GET(
   const {'product-id': productId, 'file-id': fileId} = params;
   const {workspaceURL, tenant} = workspacePathname(params);
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId: tenant,

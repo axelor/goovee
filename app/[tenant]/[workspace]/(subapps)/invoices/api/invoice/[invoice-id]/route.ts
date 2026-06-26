@@ -2,8 +2,8 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {RELATED_MODELS, SUBAPP_CODES} from '@/constants';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
-import {ensureTokenAuth} from '@/lib/core/access/ensure-token-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {findLatestDMSFileByName, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
@@ -37,8 +37,12 @@ export async function GET(
 
   if (token) {
     /* Token path: the token is fused into findInvoice, which is what authorizes
-       this specific invoice; ensureTokenAuth only resolves the workspace. */
-    const access = await ensureTokenAuth({url: workspaceURL, tenantId, token});
+       this specific invoice; ensureTokenAccess only resolves the workspace. */
+    const access = await ensureTokenAccess({
+      url: workspaceURL,
+      tenantId,
+      token,
+    });
     if (!access.ok) {
       return new NextResponse('Not found', {
         status: accessStatus(access.reason),
@@ -54,7 +58,7 @@ export async function GET(
     });
     fileAccess = {skipUserCheck: true};
   } else {
-    const access = await ensureAuth({
+    const access = await ensureAccess({
       code: SUBAPP_CODES.invoices,
       url: workspaceURL,
       tenantId,

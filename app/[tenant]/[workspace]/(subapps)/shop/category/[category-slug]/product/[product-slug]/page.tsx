@@ -3,7 +3,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone, htmlToNormalString} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
@@ -42,7 +42,7 @@ export async function generateMetadata(props: {
   const categorySlug = params['category-slug'];
   const productSlug = params['product-slug'];
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -115,7 +115,7 @@ async function Product({
     return redirect(`${workspaceURI}/shop`);
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId: tenant,

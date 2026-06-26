@@ -32,6 +32,12 @@ export const appSelectFields = {
   orderForTopMenu: true,
 } as const satisfies SelectOptions<AOSPortalApp>;
 
+export type App = Payload<AOSPortalApp, {select: typeof appSelectFields}>;
+
+export type Subapp = App & {
+  role?: 'restricted' | 'total';
+  isContactAdmin?: boolean;
+};
 /* Reusable select fragments for the config concerns shared across sub-apps.
    A per-app config select spreads the fragments it needs, so the shared
    consumer — <Payments>, isCommentEnabled, shouldHidePricesAndPurchase —
@@ -97,21 +103,6 @@ export type OtpTemplateConfig = Payload<
   AOSPortalAppConfig,
   {select: typeof otpTemplateConfigSelect}
 >;
-
-export type App = {
-  id: string;
-  version: number;
-  name: string | null;
-  code: string | null;
-  color: string | null;
-  background: string | null;
-  icon: string | null;
-  isInstalled: boolean | null;
-  orderForMySpaceMenu: number | null;
-  orderForTopMenu: number | null;
-  showInMySpace: boolean | null;
-  showInTopMenu: boolean | null;
-};
 
 export type AppWithRole = App & {role: string | null};
 
@@ -252,18 +243,7 @@ export async function findContactWorkspaceConfig({
           contactAppPermissionList: {
             select: {
               roleSelect: true,
-              app: {
-                background: true,
-                orderForMySpaceMenu: true,
-                showInMySpace: true,
-                code: true,
-                showInTopMenu: true,
-                color: true,
-                icon: true,
-                isInstalled: true,
-                name: true,
-                orderForTopMenu: true,
-              },
+              app: appSelectFields,
             },
           },
         },
@@ -306,20 +286,7 @@ export async function findDefaultPartnerWorkspaceConfig({
     },
     select: {
       defaultPartnerWorkspace: {
-        apps: {
-          select: {
-            background: true,
-            orderForMySpaceMenu: true,
-            showInMySpace: true,
-            code: true,
-            showInTopMenu: true,
-            color: true,
-            icon: true,
-            isInstalled: true,
-            name: true,
-            orderForTopMenu: true,
-          },
-        },
+        apps: {select: appSelectFields},
         portalAppConfig: otpTemplateConfigSelect,
       },
     },
@@ -409,20 +376,7 @@ export async function findOpenWorkspaces({
         url: true,
         allowRegistrationSelect: true,
         defaultGuestWorkspace: {
-          apps: {
-            select: {
-              background: true,
-              orderForMySpaceMenu: true,
-              showInMySpace: true,
-              code: true,
-              showInTopMenu: true,
-              color: true,
-              icon: true,
-              isInstalled: true,
-              name: true,
-              orderForTopMenu: true,
-            },
-          },
+          apps: {select: appSelectFields},
         },
       },
       orderBy: {updatedOn: 'DESC'},
@@ -622,20 +576,7 @@ export async function findWorkspaceForRegistration({
           url: true,
           allowRegistrationSelect: true,
           defaultGuestWorkspace: {
-            apps: {
-              select: {
-                background: true,
-                orderForMySpaceMenu: true,
-                showInMySpace: true,
-                code: true,
-                showInTopMenu: true,
-                color: true,
-                icon: true,
-                isInstalled: true,
-                name: true,
-                orderForTopMenu: true,
-              },
-            },
+            apps: {select: appSelectFields},
             portalAppConfig: {
               termsOfUseAcceptanceText: true,
             },
@@ -706,23 +647,6 @@ export async function findWorkspaces({
   return [];
 }
 
-export type Subapp = {
-  id: string;
-  version: number;
-  name: string | null;
-  code: string | null;
-  color: string | null;
-  background: string | null;
-  icon: string | null;
-  isInstalled: boolean | null;
-  orderForMySpaceMenu: number | null;
-  orderForTopMenu: number | null;
-  showInMySpace: boolean | null;
-  showInTopMenu: boolean | null;
-  role?: 'restricted' | 'total';
-  isContactAdmin?: boolean;
-};
-
 export async function findWorkspaceApps({
   url,
   user,
@@ -756,10 +680,8 @@ export async function findSubapps({
   return apps;
 }
 
-/* User identity needed to resolve a workspace and its accessible apps. */
 type WorkspaceUser = Pick<User, 'id' | 'isContact' | 'mainPartnerId'>;
 
-/* Narrows the raw roleSelect string to the Subapp role union. */
 const normalizeRole = (roleSelect?: string | null): Subapp['role'] =>
   roleSelect === ROLE.TOTAL ? 'total' : 'restricted';
 
@@ -778,20 +700,6 @@ export async function findSubappAccess({
   return workspace?.apps.find(app => app.code === code) ?? null;
 }
 
-/* ----------------------------------------------------------------------- *
- * Workspace resolution (single query, no heavy config)
- *
- * findWorkspace answers, in ONE scoped query per user type, "what is this
- * workspace and which of its apps can this user reach?". It returns the
- * workspace WITHOUT its heavy config payload — only config ({id}) — plus the
- * user's accessible apps (each carrying its role for contacts). Pages that
- * render config-driven UI fetch the config on demand via their per-app config
- * getter; a sub-app reachability check is just apps.find(code) on the result.
- * ----------------------------------------------------------------------- */
-
-/* AOSPortalWorkspace identity columns surfaced in Workspace, read either
-   at the query root (guest) or through the workspace relation (partner /
-   contact). */
 const workspaceFields = {
   name: true,
   url: true,
@@ -806,10 +714,6 @@ type WorkspaceRow = Payload<
   {select: typeof workspaceFields}
 >;
 
-/* Assembles the light workspace shape: workspace identity, the user's
-   accessible apps, a config reference ({id} only — the heavy payload is
-   fetched on demand), and the permission config id. Workspace is derived
-   from this assembler so the returned shape and its type stay in lock-step. */
 const toWorkspace = (
   ws: WorkspaceRow,
   apps: Subapp[],
@@ -831,14 +735,9 @@ const toWorkspace = (
 
 export type Workspace = ReturnType<typeof toWorkspace>;
 
-/* Installed apps of the workspace — the accessible set for guests/partners. */
 const installedApps = (apps: Subapp[] | null | undefined): Subapp[] =>
   (apps ?? []).filter(app => app.isInstalled);
 
-/* Resolves a workspace for a visitor with no identity (a guest, or a holder of
-   a capability token) from its default guest configuration. Returns the light
-   workspace — its installed apps and a config reference — or null when the
-   workspace, its guest workspace, or that guest's config is absent. */
 export async function findGuestWorkspace({
   url,
   client,
@@ -863,7 +762,7 @@ export async function findGuestWorkspace({
   const configRef = guest.portalAppConfig;
   if (!configRef) return null;
 
-  const apps = installedApps(guest.apps as Subapp[]);
+  const apps = installedApps(guest.apps);
   return toWorkspace(workspace, apps, configRef, guest.id);
 }
 
@@ -896,7 +795,7 @@ async function findPartnerWorkspace({
   const configRef = partnerWorkspace.portalAppConfig;
   if (!configRef) return null;
 
-  const apps = installedApps(partnerWorkspace.apps as Subapp[]);
+  const apps = installedApps(partnerWorkspace.apps);
   return toWorkspace(
     partnerWorkspace.workspace,
     apps,
@@ -944,7 +843,7 @@ async function findContactWorkspace({
   const partnerWorkspace = contact?.mainPartner?.partnerWorkspaceSet?.[0];
   if (!partnerWorkspace?.workspace) return null;
 
-  const partnerApps = installedApps(partnerWorkspace.apps as Subapp[]);
+  const partnerApps = installedApps(partnerWorkspace.apps);
   const config = contact?.contactWorkspaceConfigSet?.[0];
 
   /* Admins see every installed app of the workspace; everyone else sees only

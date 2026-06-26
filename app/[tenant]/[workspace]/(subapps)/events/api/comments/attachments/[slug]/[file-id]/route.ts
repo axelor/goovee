@@ -5,7 +5,7 @@ import {isFileOfRecord} from '@/comments/orm';
 import {isCommentEnabled} from '@/comments';
 import {SUBAPP_CODES} from '@/constants';
 import {accessStatus} from '@/lib/core/access/denial';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
@@ -28,7 +28,7 @@ export async function GET(
   const {workspaceURL, tenant} = workspacePathname(params);
   const {slug, 'file-id': fileId} = params;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
     url: workspaceURL,
     tenantId: tenant,

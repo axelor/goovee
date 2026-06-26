@@ -3,7 +3,7 @@
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {TENANT_HEADER} from '@/proxy';
 import {
   findDefaultDeliveryAddress,
@@ -25,7 +25,7 @@ export async function findDefaultInvoicing({
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -45,7 +45,7 @@ export async function findDefaultDelivery({
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -69,7 +69,7 @@ export async function findAddress({
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -93,7 +93,7 @@ export async function fetchDeliveryAddresses({
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,
@@ -113,7 +113,7 @@ export async function fetchInvoicingAddresses({
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.shop,
     url: workspaceURL,
     tenantId,

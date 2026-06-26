@@ -10,7 +10,7 @@ import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {ModelMap, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {getNewsConfig} from '@/subapps/news/common/orm/config';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
 import {addComment, findComments} from '@/comments/orm';
@@ -50,7 +50,7 @@ export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.news,
     url: workspaceURL,
     tenantId,
@@ -94,7 +94,7 @@ export async function findRecommendedNews({
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.news,
     url: workspaceURL,
     tenantId,
@@ -140,7 +140,7 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.news,
     url: workspaceURL,
     tenantId,
@@ -259,7 +259,7 @@ export const fetchComments: FetchComments = async props => {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.news,
     url: workspaceURL,
     tenantId,

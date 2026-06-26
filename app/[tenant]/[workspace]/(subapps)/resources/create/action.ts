@@ -8,7 +8,7 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
 import type {Client} from '@/goovee/.generated/client';
@@ -89,7 +89,7 @@ export async function upload(input: UploadInput) {
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
     url: workspaceURL,
     tenantId,

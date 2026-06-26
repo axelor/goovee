@@ -23,7 +23,7 @@ import {
 } from '@/comments';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getTicketingConfig} from '../orm/config';
 
@@ -78,7 +78,7 @@ export async function mutate(
 
   const {force} = config || {};
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -301,7 +301,7 @@ export async function updateAssignment(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -395,7 +395,7 @@ export async function closeTicket(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -494,7 +494,7 @@ export async function cancelTicket(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -595,7 +595,7 @@ export async function createRelatedLink(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -658,7 +658,7 @@ export async function createChildLink(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -714,7 +714,7 @@ export async function createParentLink(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -775,7 +775,7 @@ export async function deleteChildLink(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -836,7 +836,7 @@ export async function deleteParentLink(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -896,7 +896,7 @@ export async function deleteRelatedLink(
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -956,7 +956,7 @@ export async function searchTickets({
     };
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -992,7 +992,7 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,
@@ -1196,7 +1196,7 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('TenantId is required')};
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.ticketing,
     url: workspaceURL,
     tenantId,

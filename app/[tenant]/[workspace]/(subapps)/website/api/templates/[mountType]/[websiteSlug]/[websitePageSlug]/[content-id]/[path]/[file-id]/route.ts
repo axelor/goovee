@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {SUBAPP_CODES} from '@/constants';
-import {ensureAuth} from '@/lib/core/access/ensure-auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
 import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse} from 'next/server';
@@ -55,7 +55,7 @@ export async function GET(
     });
   }
 
-  const access = await ensureAuth({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.website,
     url: workspaceURL,
     tenantId: tenant,

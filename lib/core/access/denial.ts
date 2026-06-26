@@ -2,7 +2,7 @@ import 'server-only';
 
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
-import type {AccessReason} from './ensure-auth';
+import type {AccessReason} from './ensure-access';
 
 /**
  * Maps a navigation-neutral access reason to an HTTP status for route
