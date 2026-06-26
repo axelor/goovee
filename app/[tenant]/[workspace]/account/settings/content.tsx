@@ -18,7 +18,7 @@ import {
   Button,
   Separator,
 } from '@/ui/components';
-import {WorkspaceLight} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {useToast} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
@@ -28,7 +28,7 @@ import {removeWorkpace} from '@/app/[tenant]/[workspace]/account/settings/action
 export default function Content({
   workspace,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
 }) {
   const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
 

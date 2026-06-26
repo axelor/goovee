@@ -362,7 +362,7 @@ export async function findWorkspace({
   url?: string;
   user?: Pick<User, 'id' | 'isContact' | 'mainPartnerId'>;
   client: Client;
-}): Promise<WorkspaceLight | null> {
+}): Promise<Workspace | null> {
   if (!url) return null;
 
   /* Workspace-level resolution (no sub-app) reuses the same scoped query as
@@ -573,7 +573,7 @@ export async function findWorkspaceForRegistration({
   url,
   client,
 }: {
-  url: WorkspaceLight['url'];
+  url: Workspace['url'];
   client: Client;
 }) {
   if (!url) {
@@ -642,7 +642,7 @@ export async function canRegisterForWorkspace({
   url,
   client,
 }: {
-  url: WorkspaceLight['url'];
+  url: Workspace['url'];
   client: Client;
 }): Promise<boolean> {
   if (!url) {
@@ -1069,7 +1069,7 @@ export async function findSubappAccess({
  * Pages that render config-driven UI fetch it on demand via their per-app config getter.
  * ----------------------------------------------------------------------- */
 
-/* AOSPortalWorkspace identity columns surfaced in WorkspaceLight, read either
+/* AOSPortalWorkspace identity columns surfaced in Workspace, read either
    at the query root (guest) or through the workspace relation (partner /
    contact). */
 const workspaceFields = {
@@ -1088,9 +1088,9 @@ type WorkspaceRow = Payload<
 
 /* Assembles the light workspace shape: workspace identity, the user's
    accessible apps, a config reference ({id} only — the heavy payload is
-   fetched on demand), and the permission config id. WorkspaceLight is derived
+   fetched on demand), and the permission config id. Workspace is derived
    from this assembler so the returned shape and its type stay in lock-step. */
-const toWorkspaceLight = (
+const toWorkspace = (
   ws: WorkspaceRow,
   apps: Subapp[],
   config: {id: string},
@@ -1109,10 +1109,10 @@ const toWorkspaceLight = (
   workspacePermissionConfig: {id: permissionConfigId},
 });
 
-export type WorkspaceLight = ReturnType<typeof toWorkspaceLight>;
+export type Workspace = ReturnType<typeof toWorkspace>;
 
 export type WorkspaceApp = {
-  workspace: WorkspaceLight | null;
+  workspace: Workspace | null;
   subapp: Subapp | null;
 };
 
@@ -1132,7 +1132,7 @@ export async function resolveGuestWorkspace({
 }: {
   url: string;
   client: Client;
-}): Promise<WorkspaceLight | null> {
+}): Promise<Workspace | null> {
   const workspace = await client.aOSPortalWorkspace.findOne({
     where: {url: {like: url}},
     select: {
@@ -1151,7 +1151,7 @@ export async function resolveGuestWorkspace({
   if (!configRef) return null;
 
   const apps = installedApps(guest.apps as Subapp[]);
-  return toWorkspaceLight(workspace, apps, configRef, guest.id);
+  return toWorkspace(workspace, apps, configRef, guest.id);
 }
 
 async function resolveGuestWorkspaceApp({
@@ -1204,7 +1204,7 @@ async function resolvePartnerWorkspaceApp({
   if (!configRef) return NO_WORKSPACE_APP;
 
   const apps = installedApps(partnerWorkspace.apps as Subapp[]);
-  const light = toWorkspaceLight(
+  const light = toWorkspace(
     partnerWorkspace.workspace,
     apps,
     configRef,
@@ -1280,7 +1280,7 @@ async function resolveContactWorkspaceApp({
   const configRef = partnerWorkspace.portalAppConfig;
   if (!configRef) return NO_WORKSPACE_APP;
 
-  const light = toWorkspaceLight(
+  const light = toWorkspace(
     partnerWorkspace.workspace,
     apps,
     configRef,

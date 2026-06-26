@@ -12,7 +12,7 @@ import {
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {RESPONSIVE_SIZES, SUBAPP_CODES, URL_PARAMS} from '@/constants';
 import {i18n} from '@/locale';
-import {WorkspaceLight} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {Checkbox, Pagination} from '@/ui/components';
 import {useResponsive, useSearchParams} from '@/ui/hooks';
 import {convertDateToISO8601} from '@/utils/date';
@@ -49,7 +49,7 @@ export const EventCalendar = ({
   tabs,
 }: {
   dateOfEvent: string;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   onlyRegisteredEvent?: boolean;
   tabs: {id: string; title: string; label: string}[];
 }) => {

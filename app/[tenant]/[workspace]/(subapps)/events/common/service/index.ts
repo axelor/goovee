@@ -3,7 +3,7 @@ import {aosClient} from '@/service';
 import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import {ID} from '@/types';
-import {WorkspaceLight} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
 
@@ -17,7 +17,7 @@ export async function createInvoice({
   currencyCode,
   paymentModeId,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   config: TenantConfig;
   registrationId: ID;
   currencyCode: string;

@@ -12,7 +12,7 @@ import {getCurrentPath} from '@/utils/current-path';
 import {Card} from '@/ui/components/card';
 import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {User} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 
 // ---- LOCAL IMPORTS ---- //
@@ -137,7 +137,7 @@ async function Categories({
 }: {
   user?: User;
   client: Client;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   categoryIds: string[];
 }) {
   const categories: Cloned<Category>[] = await findEventCategories({
@@ -167,7 +167,7 @@ async function EventList({
   categoryIds: string[];
   page: string | number;
   user?: User;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   type: string;
 }) {

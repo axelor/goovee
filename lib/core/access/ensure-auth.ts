@@ -6,7 +6,7 @@ import {manager, type Tenant} from '@/tenant';
 import {
   resolveWorkspaceApp,
   type Subapp,
-  type WorkspaceLight,
+  type Workspace,
 } from '@/orm/workspace';
 import type {User} from '@/types';
 
@@ -32,7 +32,7 @@ export type AccessResult<TAllowGuest extends boolean = false> =
       ok: true;
       user: GuestUser<TAllowGuest>;
       subapp: Subapp;
-      workspace: WorkspaceLight;
+      workspace: Workspace;
       tenant: Tenant;
     }
   | {

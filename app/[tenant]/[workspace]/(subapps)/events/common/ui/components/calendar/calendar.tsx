@@ -19,7 +19,7 @@ import {
 import {useToast} from '@/ui/hooks/use-toast';
 import {dateIsExist} from '@/utils/date';
 import {i18n} from '@/locale';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
@@ -153,7 +153,7 @@ export function Calendar({
   ...props
 }: CalendarProps & {
   date: Date | undefined;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   onlyRegisteredEvent: boolean;
 }) {
   const [eventDates, setEventDates] = React.useState<Date[]>([]);

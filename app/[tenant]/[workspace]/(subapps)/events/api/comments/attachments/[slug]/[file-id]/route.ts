@@ -41,7 +41,7 @@ export async function GET(
   }
   const {client} = access.tenant;
 
-  /* WorkspaceLight carries config as {id} only; fetch the heavy config so the
+  /* Workspace carries config as {id} only; fetch the heavy config so the
      shared isCommentEnabled helper can read the comment flags. */
   const config = await getEventsConfig(access.workspace.config.id, client);
   if (!config) {

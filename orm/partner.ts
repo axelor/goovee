@@ -12,7 +12,7 @@ import type {Client} from '@/goovee/.generated/client';
 import {USER_CREATED_FROM} from '@/constants';
 import {clone} from '@/utils';
 import {ID, Localization} from '@/types';
-import {WorkspaceLight} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {
   findContactWorkspaceConfig,
   findDefaultPartnerWorkspaceConfig,
@@ -146,7 +146,7 @@ export async function isAdminContact({
   workspaceURL,
   client,
 }: {
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
   client: Client;
 }) {
   const session = await getSession();

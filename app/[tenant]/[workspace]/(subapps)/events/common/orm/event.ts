@@ -22,7 +22,7 @@ import {filterPrivate} from '@/orm/filter';
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
 import type {ID, PageInfo, User} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import {formatDateToISOString, formatToTwoDigits} from '@/utils/date';
@@ -151,7 +151,7 @@ export async function findEvent({
   config: TenantConfig;
   client: Client;
   user: User | null | undefined;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
 }) {
   if (!((slug || id) && workspace.url)) return null;
 
@@ -545,7 +545,7 @@ export async function findEventConfig({
 }: {
   id: ID;
   client: Client;
-  workspaceURL: WorkspaceLight['url'];
+  workspaceURL: Workspace['url'];
 }): Promise<EventConfig | null> {
   if (!id) return null;
 

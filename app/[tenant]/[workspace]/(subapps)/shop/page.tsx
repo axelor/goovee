@@ -12,7 +12,7 @@ import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {User, Category, ComputedProduct} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
@@ -40,7 +40,7 @@ async function Categories({
 }: {
   client: Client;
   user: User | undefined;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
 }) {
   const categories = await findCategories({
     workspace,
@@ -70,7 +70,7 @@ async function Featured({
   config: TenantConfig;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user: User | undefined;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
 }) {
   const featuredCategories = (await findFeaturedCategories({
     workspace: workspace!,

@@ -6,7 +6,7 @@ import {Suspense} from 'react';
 import {getSession} from '@/auth';
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
@@ -39,7 +39,7 @@ async function CategoryGrid({
 }: {
   segments: string[];
   page: number;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   slug?: string;
 }) {
@@ -114,7 +114,7 @@ export async function CategoryNews({
   page,
   slug,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   segments?: string[];
   page?: number;

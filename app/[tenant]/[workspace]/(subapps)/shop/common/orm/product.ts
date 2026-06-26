@@ -15,7 +15,7 @@ import {
   OUT_OF_STOCK_TYPE,
 } from '@/constants';
 import type {Product, Currency, ComputedProduct, User} from '@/types';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {AOSProduct} from '@/goovee/.generated/models';
@@ -181,7 +181,7 @@ const getWhereClause = ({
   search?: string;
   categoryids?: (string | number)[];
   associateWorkspace?: boolean;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   user?: User;
   archived?: boolean;
 }) => {
@@ -272,7 +272,7 @@ export async function findProducts({
   categoryids?: (string | number)[];
   page?: string | number;
   limit?: string | number;
-  workspace?: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace?: Workspace | Cloned<Workspace>;
   config: TenantConfig;
   workspaceConfig?: ShopConfig | Cloned<ShopConfig>;
   user?: User;
@@ -661,7 +661,7 @@ export async function findProduct({
   categoryids,
 }: {
   id: Product['id'];
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user?: User;
   client: Client;
@@ -697,7 +697,7 @@ export async function findProductBySlug({
   categoryids,
 }: {
   slug: Product['slug'];
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user?: User;
   client: Client;
@@ -800,7 +800,7 @@ export async function findProductsFromStockLocation({
   client: Client;
   categoryids?: (string | number)[];
   associateWorkspace?: boolean;
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user?: User;
   outOfStockQty: number | null | undefined;

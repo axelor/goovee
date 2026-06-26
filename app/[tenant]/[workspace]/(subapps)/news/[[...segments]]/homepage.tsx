@@ -4,7 +4,7 @@ import type {Cloned} from '@/types/util';
 // ---- CORE IMPORTS ----//
 import type {Client} from '@/goovee/.generated/client';
 import {getSession} from '@/auth';
-import type {WorkspaceLight} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {User} from '@/types';
@@ -39,7 +39,7 @@ async function HomePageNewsFeed({
   client,
   user,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
 }) {
@@ -93,7 +93,7 @@ export async function Homepage({
   config,
   client,
 }: {
-  workspace: WorkspaceLight | Cloned<WorkspaceLight>;
+  workspace: Workspace | Cloned<Workspace>;
   config: NewsConfig | Cloned<NewsConfig>;
   client: Client;
 }) {
