@@ -1,3 +1,5 @@
+import {cache} from 'react';
+
 // ---- CORE IMPORTS ---- //
 import {
   ALLOW_ALL_REGISTRATION,
@@ -336,25 +338,16 @@ export async function findWorkspace({
      fetched on demand by callers via their per-app config getter (e.g.
      getShopConfig); a sub-app check is just apps.find(code) on the result. */
   if (!user) {
-    return findGuestWorkspace({url, client});
+    return findGuestWorkspace(url, client);
   }
 
   if (!user.isContact) {
-    return findPartnerWorkspace({
-      url,
-      partnerId: getPartnerId(user),
-      client,
-    });
+    return findPartnerWorkspace(url, getPartnerId(user), client);
   }
 
   if (!user.mainPartnerId) return null;
 
-  return findContactWorkspace({
-    url,
-    contactId: user.id,
-    partnerId: user.mainPartnerId,
-    client,
-  });
+  return findContactWorkspace(url, user.id, user.mainPartnerId, client);
 }
 
 export async function findOpenWorkspaces({
@@ -738,87 +731,39 @@ export type Workspace = ReturnType<typeof toWorkspace>;
 const installedApps = (apps: Subapp[] | null | undefined): Subapp[] =>
   (apps ?? []).filter(app => app.isInstalled);
 
-export async function findGuestWorkspace({
-  url,
-  client,
-}: {
-  url: string;
-  client: Client;
-}): Promise<Workspace | null> {
-  const workspace = await client.aOSPortalWorkspace.findOne({
-    where: {url: {like: url}},
-    select: {
-      ...workspaceFields,
-      defaultGuestWorkspace: {
-        portalAppConfig: {id: true},
-        apps: {select: appSelectFields},
-      },
-    },
-  });
-
-  const guest = workspace?.defaultGuestWorkspace;
-  if (!workspace || !guest) return null;
-
-  const configRef = guest.portalAppConfig;
-  if (!configRef) return null;
-
-  const apps = installedApps(guest.apps);
-  return toWorkspace(workspace, apps, configRef, guest.id);
-}
-
-async function findPartnerWorkspace({
-  url,
-  partnerId,
-  client,
-}: {
-  url: string;
-  partnerId: ID;
-  client: Client;
-}): Promise<Workspace | null> {
-  const partner = await client.aOSPartner.findOne({
-    where: {id: partnerId},
-    select: {
-      partnerWorkspaceSet: {
-        where: {workspace: {url}},
-        select: {
+export const findGuestWorkspace = cache(
+  async (url: string, client: Client): Promise<Workspace | null> => {
+    const workspace = await client.aOSPortalWorkspace.findOne({
+      where: {url: {like: url}},
+      select: {
+        ...workspaceFields,
+        defaultGuestWorkspace: {
           portalAppConfig: {id: true},
           apps: {select: appSelectFields},
-          workspace: workspaceFields,
         },
       },
-    },
-  });
+    });
 
-  const partnerWorkspace = partner?.partnerWorkspaceSet?.[0];
-  if (!partnerWorkspace?.workspace) return null;
+    const guest = workspace?.defaultGuestWorkspace;
+    if (!workspace || !guest) return null;
 
-  const configRef = partnerWorkspace.portalAppConfig;
-  if (!configRef) return null;
+    const configRef = guest.portalAppConfig;
+    if (!configRef) return null;
 
-  const apps = installedApps(partnerWorkspace.apps);
-  return toWorkspace(
-    partnerWorkspace.workspace,
-    apps,
-    configRef,
-    partnerWorkspace.id,
-  );
-}
+    const apps = installedApps(guest.apps);
+    return toWorkspace(workspace, apps, configRef, guest.id);
+  },
+);
 
-async function findContactWorkspace({
-  url,
-  contactId,
-  partnerId,
-  client,
-}: {
-  url: string;
-  contactId: ID;
-  partnerId: ID;
-  client: Client;
-}): Promise<Workspace | null> {
-  const contact = await client.aOSPartner.findOne({
-    where: {id: contactId},
-    select: {
-      mainPartner: {
+const findPartnerWorkspace = cache(
+  async (
+    url: string,
+    partnerId: ID,
+    client: Client,
+  ): Promise<Workspace | null> => {
+    const partner = await client.aOSPartner.findOne({
+      where: {id: partnerId},
+      select: {
         partnerWorkspaceSet: {
           where: {workspace: {url}},
           select: {
@@ -828,48 +773,87 @@ async function findContactWorkspace({
           },
         },
       },
-      contactWorkspaceConfigSet: {
-        where: {portalWorkspace: {url}, partner: {id: partnerId}},
-        select: {
-          isAdmin: true,
-          contactAppPermissionList: {
-            select: {roleSelect: true, app: {code: true}},
+    });
+
+    const partnerWorkspace = partner?.partnerWorkspaceSet?.[0];
+    if (!partnerWorkspace?.workspace) return null;
+
+    const configRef = partnerWorkspace.portalAppConfig;
+    if (!configRef) return null;
+
+    const apps = installedApps(partnerWorkspace.apps);
+    return toWorkspace(
+      partnerWorkspace.workspace,
+      apps,
+      configRef,
+      partnerWorkspace.id,
+    );
+  },
+);
+
+const findContactWorkspace = cache(
+  async (
+    url: string,
+    contactId: ID,
+    partnerId: ID,
+    client: Client,
+  ): Promise<Workspace | null> => {
+    const contact = await client.aOSPartner.findOne({
+      where: {id: contactId},
+      select: {
+        mainPartner: {
+          partnerWorkspaceSet: {
+            where: {workspace: {url}},
+            select: {
+              portalAppConfig: {id: true},
+              apps: {select: appSelectFields},
+              workspace: workspaceFields,
+            },
+          },
+        },
+        contactWorkspaceConfigSet: {
+          where: {portalWorkspace: {url}, partner: {id: partnerId}},
+          select: {
+            isAdmin: true,
+            contactAppPermissionList: {
+              select: {roleSelect: true, app: {code: true}},
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  const partnerWorkspace = contact?.mainPartner?.partnerWorkspaceSet?.[0];
-  if (!partnerWorkspace?.workspace) return null;
+    const partnerWorkspace = contact?.mainPartner?.partnerWorkspaceSet?.[0];
+    if (!partnerWorkspace?.workspace) return null;
 
-  const partnerApps = installedApps(partnerWorkspace.apps);
-  const config = contact?.contactWorkspaceConfigSet?.[0];
+    const partnerApps = installedApps(partnerWorkspace.apps);
+    const config = contact?.contactWorkspaceConfigSet?.[0];
 
-  /* Admins see every installed app of the workspace; everyone else sees only
-     the apps they have a permission row for, carrying that row's role. */
-  let apps: Subapp[];
-  if (config?.isAdmin) {
-    apps = partnerApps.map(app => ({...app, isContactAdmin: true}));
-  } else {
-    const permissions = config?.contactAppPermissionList ?? [];
-    apps = partnerApps
-      .filter(app => permissions.some(item => item.app?.code === app.code))
-      .map(app => ({
-        ...app,
-        role: normalizeRole(
-          permissions.find(item => item.app?.code === app.code)?.roleSelect,
-        ),
-      }));
-  }
+    /* Admins see every installed app of the workspace; everyone else sees only
+       the apps they have a permission row for, carrying that row's role. */
+    let apps: Subapp[];
+    if (config?.isAdmin) {
+      apps = partnerApps.map(app => ({...app, isContactAdmin: true}));
+    } else {
+      const permissions = config?.contactAppPermissionList ?? [];
+      apps = partnerApps
+        .filter(app => permissions.some(item => item.app?.code === app.code))
+        .map(app => ({
+          ...app,
+          role: normalizeRole(
+            permissions.find(item => item.app?.code === app.code)?.roleSelect,
+          ),
+        }));
+    }
 
-  const configRef = partnerWorkspace.portalAppConfig;
-  if (!configRef) return null;
+    const configRef = partnerWorkspace.portalAppConfig;
+    if (!configRef) return null;
 
-  return toWorkspace(
-    partnerWorkspace.workspace,
-    apps,
-    configRef,
-    partnerWorkspace.id,
-  );
-}
+    return toWorkspace(
+      partnerWorkspace.workspace,
+      apps,
+      configRef,
+      partnerWorkspace.id,
+    );
+  },
+);
