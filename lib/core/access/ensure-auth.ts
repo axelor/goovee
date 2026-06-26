@@ -3,11 +3,7 @@ import 'server-only';
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {manager, type Tenant} from '@/tenant';
-import {
-  resolveWorkspaceApp,
-  type Subapp,
-  type Workspace,
-} from '@/orm/workspace';
+import {findWorkspace, type Subapp, type Workspace} from '@/orm/workspace';
 import type {User} from '@/types';
 
 /**
@@ -68,12 +64,8 @@ export async function ensureAuth<TAllowGuest extends boolean = false>({
   }
   const {client} = tenant;
 
-  const {workspace, subapp} = await resolveWorkspaceApp({
-    code,
-    url,
-    user,
-    client,
-  });
+  const workspace = await findWorkspace({url, user, client});
+  const subapp = workspace?.apps.find(app => app.code === code) ?? null;
 
   /* Fast path: the app is accessible and either a user is present or this page
      permits guests. */
