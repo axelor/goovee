@@ -19,19 +19,19 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {checkoutSuccessSearchParamsSchema} from '../../../common/utils/validators';
 
 /* Success destination after `onApprove` fires in the Payments component.
- * `onApprove` passes the purchase-row ids from this checkout via repeated
- * `id` query params; we re-read those rows (partner-scoped, so a
- * tampered id can't surface someone else's purchase) and show only them.
- * Reaching this page without ids means there's nothing to confirm. */
+ * `onApprove` passes the marketplace order id created at this checkout via the
+ * `orderId` query param; we re-read that order's lines (partner-scoped, so a
+ * tampered id can't surface someone else's order) and show them.
+ * Reaching this page without an order id means there's nothing to confirm. */
 export default async function CheckoutSuccessPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
-  searchParams: Promise<{id?: string | string[]}>;
+  searchParams: Promise<{orderId?: string}>;
 }) {
   const params = await props.params;
-  const {id: purchaseIds} = checkoutSuccessSearchParamsSchema.parse(
+  const {orderId} = checkoutSuccessSearchParamsSchema.parse(
     await props.searchParams,
   );
-  if (purchaseIds.length === 0) notFound();
+  if (!orderId) notFound();
   const {
     workspaceURL,
     workspaceURI,
@@ -66,7 +66,7 @@ export default async function CheckoutSuccessPage(props: {
     client: access.tenant.client,
     workspaceId: access.workspace.id,
     mainPartnerId: getPartnerId(access.user),
-    purchaseIds,
+    orderId,
   });
 
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;

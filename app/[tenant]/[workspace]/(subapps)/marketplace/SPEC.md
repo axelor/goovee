@@ -239,28 +239,26 @@ Paid listings go through a cart → checkout flow:
       external redirects), it re-confirms each item is still published and not
       already owned. If something changed (e.g. the buyer bought it in another
       tab, or the publisher pulled a version), the grant is blocked.
-   3. **Grants access** — records the ownership rows (for the customer) and marks
-      the payment as processed, in one transaction. Each ownership row also
+   3. **Grants access** — records a **marketplace order** grouping this checkout's
+      purchases and the per-listing ownership rows (for the customer), and marks
+      the payment as processed, in one transaction. Each ownership row
       **captures the price the buyer was charged** — the without-tax and
-      tax-inclusive amounts, the tax rate, and the charged currency — so the
-      purchase is a self-contained record for revenue reporting
-      (see [§4.10](#410-my-account)).
-   4. **Creates the order** — picks the buyer's invoicing address and creates
-      the sale order + invoice, then links them back to the ownership rows.
+      tax-inclusive amounts, the tax rate, and the charged currency — so it is a
+      self-contained record for revenue reporting (see [§4.10](#410-my-account)).
+   4. **Creates the sale order + invoice** — produced **after the response**. A
+      failure leaves the order **pending** (see below) and never affects access.
 
    **Invoicing address selection.** The address is taken from the **customer**
    account (not the individual contact): among the customer's **non-archived**
    addresses marked as _invoicing_ addresses, it uses the one flagged
    **default**, or — if none is flagged — the **first** invoicing address on
-   file. If the customer has **no** usable invoicing address, the order/invoice
-   is skipped (see below).
+   file. If the customer has **no** usable invoicing address, the order is left
+   **pending** rather than invoiced (see below).
 
-   **Access is granted independently of invoicing.** If there's no invoicing
-   address, or order/invoice creation fails, the buyer **still keeps access** —
-   checkout returns success with a warning message (shown as a toast). It does
-   not undo the purchase. The failure only goes to the server console; there is
-   **no automated retry or AOS alert**, so a missing invoice has to be
-   noticed and reconciled manually (see [§9](#9-current-limitations--gotchas)).
+   **Access is granted independently of invoicing.** The buyer keeps access even
+   if the sale order/invoice is delayed or fails; a pending order shows as
+   **"Order pending" / "Invoice pending"** in their purchases until it completes
+   (see [§9](#9-current-limitations--gotchas)).
 
    The cart is then cleared and the buyer lands on the **success page**, which
    lists this checkout's purchases (scoped to their account) each with a
@@ -491,7 +489,8 @@ links to the sections below and through to the user's own profile in the
 contributor section appears only when the workspace allows publishing.
 
 - **My Purchases** — the listings owned by the user's customer, with purchase
-  date and links to the order/invoice. Paginated.
+  date and links to the order/invoice, or **"Order pending" / "Invoice pending"**
+  until those exist. Paginated.
 - **Favourites** — the user's saved listings (see [§4.4](#44-favourites)).
 - **My Contributions** — the contributor area, available **only when the
   workspace allows publishing**, and only to users with **full marketplace
@@ -763,11 +762,10 @@ Set by an admin in the AOS; each affects storefront behaviour:
   explanation. (The "Online payment is not available." / "Payment options are
   not configured." messages exist only as server-side guards that the UI never
   reaches, since no button renders to trigger them.)
-- **Paid-but-uninvoiced purchases aren't surfaced.** If invoice/order creation
-  fails after a successful payment (e.g. no invoicing address), the buyer keeps
-  access but the failure is only written to the server console — there's no
-  automated retry or AOS alert, so it must be caught and reconciled
-  manually.
+- **Order/invoice creation is best-effort, with no automatic retry.** The sale
+  order + invoice are created after checkout responds, so they can briefly lag,
+  and an order stays **pending** if creation fails. There is no automatic retry;
+  a pending order is recovered from the AOS, not the storefront.
 - **Archiving a review doesn't fix the aggregates.** The review disappears from
   the listing page, but the average rating and rating count are only recomputed
   when a review is saved or deleted through the storefront — an AOS-side archive

@@ -377,8 +377,8 @@ const activityActorSelect = {
 
 export type ActivityItem = {
   kind: ActivityKind;
-  /** The reviewer (`author`) or buyer/downloader (`partner`), as the ORM
-   *  returns it; null when the source row has no partner. */
+  /** The reviewer (`author`), purchase `owner`, or download `partner`, as the
+   *  ORM returns it; null when the source row has none. */
   actor: Payload<AOSPartner, {select: typeof activityActorSelect}> | null;
   marketplaceProduct: Payload<
     AOSMarketplaceProduct,
@@ -435,7 +435,7 @@ export async function getRecentActivity({
       ...(take ? {take} : {}),
       select: {
         purchaseDateTime: true,
-        partner: activityActorSelect,
+        owner: activityActorSelect,
         marketplaceProduct: activityProductSelect,
       },
     }),
@@ -461,7 +461,7 @@ export async function getRecentActivity({
       })),
     ...purchases.map(purchase => ({
       kind: 'purchase' as const,
-      actor: purchase.partner,
+      actor: purchase.owner,
       marketplaceProduct: purchase.marketplaceProduct,
       at: purchase.purchaseDateTime,
     })),

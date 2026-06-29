@@ -188,14 +188,16 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       label: i18n.t('Order'),
       desktopClassName: 'w-[15%]',
       content: purchase =>
-        purchase.saleOrder?.id ? (
+        purchase.productOrder?.saleOrder?.id ? (
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.orders}/${purchase.saleOrder.id}`}
+            href={`${workspaceURI}/${SUBAPP_CODES.orders}/${purchase.productOrder.saleOrder.id}`}
             className="text-sm text-primary hover:underline">
-            {purchase.saleOrder.saleOrderSeq ?? i18n.t('View')}
+            {purchase.productOrder.saleOrder.saleOrderSeq ?? i18n.t('View')}
           </Link>
         ) : (
-          <span className="text-sm text-muted-foreground">—</span>
+          <span className="text-sm text-muted-foreground">
+            {i18n.t('Order pending')}
+          </span>
         ),
     },
     {
@@ -203,14 +205,16 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
       label: i18n.t('Invoice'),
       desktopClassName: 'w-[15%]',
       content: purchase =>
-        purchase.invoice?.id ? (
+        purchase.productOrder?.invoice?.id ? (
           <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.invoices}/${purchase.invoice.id}`}
+            href={`${workspaceURI}/${SUBAPP_CODES.invoices}/${purchase.productOrder.invoice.id}`}
             className="text-sm text-primary hover:underline">
-            {purchase.invoice.invoiceId ?? i18n.t('View')}
+            {purchase.productOrder.invoice.invoiceId ?? i18n.t('View')}
           </Link>
         ) : (
-          <span className="text-sm text-muted-foreground">—</span>
+          <span className="text-sm text-muted-foreground">
+            {i18n.t('Invoice pending')}
+          </span>
         ),
     },
   ];

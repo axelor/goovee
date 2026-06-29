@@ -13,12 +13,9 @@ import type {ActionResponse} from '@/types/action';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {WorkspaceURLSchema} from '@/utils/validators';
 import {headers} from 'next/headers';
+import {after} from 'next/server';
 import {z} from 'zod';
-import {
-  attachOrderToPurchases,
-  findPartnerInvoicingAddresses,
-  recordPurchases,
-} from '../orm';
+import {findPartnerInvoicingAddresses, recordOrder} from '../orm';
 import {createMarketplaceOrder} from '../service';
 import {getMarketplaceConfig} from '../orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
@@ -251,7 +248,7 @@ export async function payboxCreateOrder(props: {
 
 export async function checkout(
   props: z.input<typeof CheckoutSchema>,
-): ActionResponse<{purchaseIds: string[]}> {
+): ActionResponse<{orderId: string}> {
   const parsed = CheckoutSchema.safeParse(props);
   if (!parsed.success)
     return {error: true, message: z.prettifyError(parsed.error)};
@@ -350,20 +347,42 @@ export async function checkout(
   });
   if (recheck.error) return recheck;
 
-  let purchaseIds: string[] = [];
+  /* Resolve the order context up front (payment mode + the buyer's invoicing address) so it is
+   * captured on the order in the grant transaction; the AOS side later rebuilds the SaleOrder +
+   * Invoice from the stored order alone, with no live workspace/config/auth lookup. */
+  const paymentModeId = getPaymentModeId(
+    marketplaceConfig.paymentOptionSet,
+    parsed.data.payment.mode,
+  );
+
+  const buyerPartner = await findPartnerInvoicingAddresses({
+    client,
+    mainPartnerId,
+  });
+  const invoicingPartnerAddress =
+    buyerPartner?.partnerAddressList?.find(addr => addr.isDefaultAddr) ??
+    buyerPartner?.partnerAddressList?.[0];
+
+  let orderId = '';
   try {
     await client.$transaction(async txClient => {
-      purchaseIds = await recordPurchases(
-        txClient,
-        mainPartnerId,
-        cart.items.map(item => ({
+      orderId = await recordOrder({
+        client: txClient,
+        ordererId: access.user.id,
+        ownerId: mainPartnerId,
+        items: cart.items.map(item => ({
           productId: item.productId,
           priceWt: item.priceWt,
           priceAti: item.priceAti,
           taxRate: item.taxRate,
-          currencyCodeISO: item.currencyCodeISO,
         })),
-      );
+        currencyCodeISO: cart.currencyCodeISO,
+        paidAmount,
+        companyId: marketplaceConfig.company?.id ?? null,
+        paymentModeId: paymentModeId ?? null,
+        invoicingAddress: invoicingPartnerAddress?.address ?? null,
+        paymentContextId,
+      });
       await markPaymentAsProcessed({
         contextId: paymentContextId,
         version: paymentContextVersion,
@@ -378,61 +397,21 @@ export async function checkout(
     };
   }
 
-  const paymentModeId = getPaymentModeId(
-    marketplaceConfig.paymentOptionSet,
-    parsed.data.payment.mode,
-  );
-
-  try {
-    const buyerPartner = await findPartnerInvoicingAddresses({
-      client,
-      mainPartnerId,
-    });
-
-    const addressId =
-      buyerPartner?.partnerAddressList?.find(addr => addr.isDefaultAddr)?.id ??
-      buyerPartner?.partnerAddressList?.[0]?.id;
-    if (!addressId) {
-      return {
-        success: true,
-        data: {purchaseIds},
-        message: await t(
-          'Invoice creation failed: no invoicing address found.',
-        ),
-      };
+  /* Access is granted; the response returns immediately and the order/invoice is created on the AOS
+   * side after the response. If it fails (e.g. a missing invoicing address), the order is left for
+   * admin recovery and the buyer's purchases show "pending" until then. */
+  after(async () => {
+    try {
+      await createMarketplaceOrder({orderId, config});
+    } catch (e) {
+      console.error('marketplace: order/invoice creation failed', {
+        orderId,
+        mainPartnerId,
+        paymentContextId,
+        error: e,
+      });
     }
+  });
 
-    const {invoiceId, saleOrderId} = await createMarketplaceOrder({
-      cart,
-      workspace: access.workspace,
-      mainPartnerId,
-      contactId: access.user.isContact ? access.user.id : undefined,
-      invoicingAddressId: addressId,
-      paidAmount: cart.total,
-      paymentModeId,
-      config,
-    });
-
-    await attachOrderToPurchases(client, mainPartnerId, productIds, {
-      invoiceId,
-      saleOrderId,
-    });
-  } catch (e) {
-    const reason = e instanceof Error ? e.message : '';
-    console.error('marketplace: invoice creation failed', {
-      mainPartnerId,
-      productIds,
-      paymentContextId,
-      error: e,
-    });
-    return {
-      success: true,
-      data: {purchaseIds},
-      message: reason
-        ? await t('Invoice creation failed: {0}', reason)
-        : await t('Invoice creation failed.'),
-    };
-  }
-
-  return {success: true, data: {purchaseIds}};
+  return {success: true, data: {orderId}};
 }

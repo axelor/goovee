@@ -87,7 +87,7 @@ async function findOwnedProductIds({
 }): Promise<Set<string>> {
   const owned = await client.aOSMarketplaceProductPurchase.find({
     where: {
-      partner: {id: mainPartnerId},
+      owner: {id: mainPartnerId},
       marketplaceProduct: {id: {in: productIds}},
     },
     select: {marketplaceProduct: {id: true}},
