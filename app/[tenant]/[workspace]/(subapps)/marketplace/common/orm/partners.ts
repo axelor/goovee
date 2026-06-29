@@ -24,7 +24,11 @@ export async function findPartnerInvoicingAddresses({
           OR: [{archived: false}, {archived: null}],
           isInvoicingAddr: true,
         },
-        select: {id: true, isDefaultAddr: true},
+        select: {
+          id: true,
+          isDefaultAddr: true,
+          address: {id: true, formattedFullName: true},
+        },
       },
     },
   });

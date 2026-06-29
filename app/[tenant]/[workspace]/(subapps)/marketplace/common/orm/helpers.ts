@@ -146,7 +146,7 @@ export function withBundleAccessFilter({
           statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
           marketplaceProduct: and<AOSMarketplaceProduct>([
             productAccess,
-            {purchaseList: {partner: {id: mainPartnerId}}},
+            {purchaseList: {owner: {id: mainPartnerId}}},
           ]),
         },
         // Owner (publisher) — any status

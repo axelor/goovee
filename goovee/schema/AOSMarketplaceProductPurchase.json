@@ -5,7 +5,13 @@
   "fields": [
     {
       "type": "ManyToOne",
-      "name": "partner",
+      "name": "productOrder",
+      "target": "AOSMarketplaceProductOrder",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "owner",
       "target": "AOSPartner",
       "required": true
     },
@@ -14,16 +20,6 @@
       "name": "marketplaceProduct",
       "target": "AOSMarketplaceProduct",
       "required": true
-    },
-    {
-      "type": "ManyToOne",
-      "name": "invoice",
-      "target": "AOSInvoice"
-    },
-    {
-      "type": "ManyToOne",
-      "name": "saleOrder",
-      "target": "AOSOrder"
     },
     {
       "type": "DateTime",

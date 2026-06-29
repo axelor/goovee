@@ -153,15 +153,11 @@ export type MyFavoritesSearchParams = z.infer<
   typeof myFavoritesSearchParamsSchema
 >;
 
-/* Checkout success page. `id` carries the purchase-row ids from this
- * checkout — repeated query keys (?id=1&id=2) arrive as an array, a single
- * one as a string; normalize both to a clean string[]. */
+/* Checkout success page. `orderId` is the marketplace order created at this checkout; the page
+ * re-reads that order's lines (partner-scoped, so a tampered id can't surface someone else's
+ * order) and shows them as the confirmation. */
 export const checkoutSuccessSearchParamsSchema = z.object({
-  id: z
-    .union([z.string(), z.array(z.string())])
-    .transform(val => (Array.isArray(val) ? val : [val]).filter(Boolean))
-    .catch([])
-    .default([]),
+  orderId: z.string().trim().min(1).optional(),
 });
 
 export type CheckoutSuccessSearchParams = z.infer<

@@ -4,26 +4,23 @@ import type {ID} from '@/types';
 import {BigDecimal} from '@goovee/orm';
 import {versionNumberFields, type QueryProps} from './helpers';
 
-/** Price captured at checkout, persisted on each new purchase row. */
+/** Price captured at checkout, persisted on each purchase line. */
 export type PurchasePriceInput = {
   productId: string;
   priceWt: number;
   priceAti: number;
   taxRate: number;
-  /** ISO 4217 code of the charged currency; resolved to a Currency FK. */
-  currencyCodeISO: string;
 };
 
-// ---- PURCHASES / OWNERSHIP ---- //
+// ---- ORDERS / PURCHASES / OWNERSHIP ---- //
 
-/* Marketplace ownership records. The unique (partner, marketplaceProduct)
- * constraint on the AOS side makes `recordPurchases` and
- * `attachOrderToPurchases` idempotent — safe to retry from the success
- * page or a backfill job.
- *
- * The `invoice` field is nullable: the goovee tx writes the access row
- * immediately, and the post-commit AOS HTTP call back-attaches the
- * invoice id once the SO/Invoice/InvoicePayment have been created. */
+/* A marketplace order groups a checkout's purchase (access) lines and owns the context needed to
+ * build the SaleOrder + Invoice. goovee writes the header + lines in the grant transaction; the
+ * order/invoice is then created on the AOS side (at checkout via after(), or by admin recovery) and
+ * linked onto the header — never read back here. The buyer's listings reach the order/invoice via
+ * each line's `productOrder`. The unique (owner, marketplaceProduct) constraint keeps ownership
+ * one row per product: a concurrent re-checkout of an owned product collides on it and rolls back
+ * the whole create, so the buyer is never granted the same product twice. */
 
 export type MarketplacePurchase = Awaited<
   ReturnType<typeof findPurchases>
@@ -35,25 +32,25 @@ export async function findPurchases({
   mainPartnerId,
   take,
   skip,
-  purchaseIds,
+  orderId,
 }: {
   client: Client;
   /** Listings are scoped to a single workspace, so purchases of products in
    *  another workspace of the same tenant must not surface here. */
   workspaceId: ID;
   mainPartnerId: ID;
-  /** When provided, restricts the result to these purchase rows (still
-   *  partner-scoped, so it's safe against tampered ids). */
-  purchaseIds?: string[];
+  /** When provided, restricts the result to one order's lines (still
+   *  owner-scoped, so it's safe against a tampered order id). */
+  orderId?: string;
 } & Pick<QueryProps<AOSMarketplaceProductPurchase>, 'take' | 'skip'>) {
   return client.aOSMarketplaceProductPurchase.find({
     ...(take ? {take} : {}),
     ...(skip ? {skip} : {}),
     where: {
       OR: [{archived: false}, {archived: null}],
-      partner: {id: mainPartnerId},
+      owner: {id: mainPartnerId},
       marketplaceProduct: {portalWorkspace: {id: workspaceId}},
-      ...(purchaseIds?.length ? {id: {in: purchaseIds}} : {}),
+      ...(orderId ? {productOrder: {id: orderId}} : {}),
     },
     orderBy: {purchaseDateTime: 'DESC'},
     select: {
@@ -71,126 +68,83 @@ export async function findPurchases({
         coverStyle: true,
         currentVersion: {id: true, ...versionNumberFields},
       },
-      invoice: {id: true, invoiceId: true},
-      saleOrder: {id: true, saleOrderSeq: true},
+      /* The order/invoice live on the order header; reach them through the line's order. */
+      productOrder: {
+        saleOrder: {id: true, saleOrderSeq: true},
+        invoice: {id: true, invoiceId: true},
+      },
     },
   });
 }
 
-/* Returns the purchase-row ids for every marketplace product in `items`
- * owned by the partner (newly created here plus any already-owned). Each new
- * row captures the price the buyer was charged. Callers use the returned ids
- * to scope the success page to exactly this checkout. */
-export async function recordPurchases(
-  client: Client,
-  partnerId: ID,
-  items: PurchasePriceInput[],
-  invoiceId: ID | null = null,
-): Promise<string[]> {
-  if (!items.length) return [];
-  const productIds = items.map(item => item.productId);
-  const byProductId = new Map(items.map(item => [item.productId, item]));
-
-  const existing = await client.aOSMarketplaceProductPurchase.find({
-    where: {
-      partner: {id: partnerId},
-      marketplaceProduct: {id: {in: productIds}},
-    },
-    select: {marketplaceProduct: {id: true}},
-  });
-  const existingIds = new Set(existing.map(row => row.marketplaceProduct.id));
-  const missing = productIds.filter(id => !existingIds.has(id));
-
-  // Resolve charged-currency FKs by ISO code (the cart is single-currency, but
-  // resolve per distinct code to stay correct regardless).
-  const currencyIdByCode = await resolveCurrencyIds(
-    client,
-    missing.map(id => byProductId.get(id)!.currencyCodeISO),
-  );
-
+/* Creates the marketplace order header and a purchase (access) line per cart item, returning the
+ * order id. The caller hands the resolved order context; this function owns how each piece is
+ * stored — e.g. it takes the invoicing address and derives both the stored address id and its
+ * frozen formatted text. `ordererId` is the logged-in user (the order's `orderedBy`); `ownerId` is
+ * the owning main partner set as each line's `owner` (the ownership/access key). The context fields are
+ * nullable because a missing value (e.g. no invoicing address) is itself a recoverable failure
+ * cause; `paymentContextId` is stored as the id string (PaymentContext is goovee-owned). */
+export async function recordOrder({
+  client,
+  ordererId,
+  ownerId,
+  items,
+  currencyCodeISO,
+  paidAmount,
+  companyId,
+  paymentModeId,
+  invoicingAddress,
+  paymentContextId,
+}: {
+  client: Client;
+  ordererId: ID;
+  ownerId: ID;
+  items: PurchasePriceInput[];
+  /** ISO 4217 code of the cart's single charged currency, shared by the order and every line. */
+  currencyCodeISO: string;
+  /** Total the buyer was charged at checkout, in that currency. */
+  paidAmount: number;
+  companyId: ID | null;
+  paymentModeId: ID | null;
+  invoicingAddress: {id: ID; formattedFullName: string | null} | null;
+  paymentContextId: ID | null;
+}): Promise<string> {
+  /* The cart is validated single-currency at checkout. Link the Currency FK by its ISO code on the
+   * order and every line — the code came from pricing a product, so it always matches a record. */
   const now = new Date();
-  for (const productId of missing) {
-    const item = byProductId.get(productId)!;
-    const currencyId = currencyIdByCode.get(item.currencyCodeISO);
-    if (!currencyId) continue; // unknown currency — can't price the row
-    try {
-      await client.aOSMarketplaceProductPurchase.create({
-        data: {
-          partner: {select: {id: partnerId}},
-          marketplaceProduct: {select: {id: productId}},
-          ...(invoiceId ? {invoice: {select: {id: invoiceId}}} : {}),
-          purchaseDateTime: now,
-          priceWt: new BigDecimal(String(item.priceWt)),
-          priceAti: new BigDecimal(String(item.priceAti)),
-          taxRate: new BigDecimal(String(item.taxRate)),
-          currency: {select: {id: currencyId}},
-        },
-        select: {id: true},
-      });
-    } catch {
-      /* Unique (partner, marketplaceProduct) violation from a concurrent
-       * insert. Already-owned is exactly the state we want, so swallow. */
-    }
-  }
-  /* Re-read so the returned set is complete regardless of which rows were
-   * created here vs. already present (or inserted by a concurrent tab). */
-  const rows = await client.aOSMarketplaceProductPurchase.find({
-    where: {
-      partner: {id: partnerId},
-      marketplaceProduct: {id: {in: productIds}},
+  const lines = items.map(item => ({
+    owner: {select: {id: ownerId}},
+    marketplaceProduct: {select: {id: item.productId}},
+    purchaseDateTime: now,
+    priceWt: new BigDecimal(String(item.priceWt)),
+    priceAti: new BigDecimal(String(item.priceAti)),
+    taxRate: new BigDecimal(String(item.taxRate)),
+    currency: {select: {codeISO: currencyCodeISO}},
+  }));
+
+  const order = await client.aOSMarketplaceProductOrder.create({
+    data: {
+      orderedBy: {select: {id: ordererId}},
+      currency: {select: {codeISO: currencyCodeISO}},
+      paidAmount: new BigDecimal(String(paidAmount)),
+      ...(companyId && {company: {select: {id: companyId}}}),
+      ...(paymentModeId && {paymentMode: {select: {id: paymentModeId}}}),
+      ...(invoicingAddress && {
+        invoicingAddress: {select: {id: invoicingAddress.id}},
+        ...(invoicingAddress.formattedFullName && {
+          invoicingAddressStr: invoicingAddress.formattedFullName,
+        }),
+      }),
+      ...(paymentContextId && {paymentContextId}),
+      purchaseList: {create: lines},
     },
     select: {id: true},
   });
-  return rows.map(row => row.id);
+
+  return order.id;
 }
 
-/** Maps distinct ISO currency codes to their Currency record ids. */
-async function resolveCurrencyIds(
-  client: Client,
-  codes: string[],
-): Promise<Map<string, string>> {
-  const distinct = [...new Set(codes)];
-  if (!distinct.length) return new Map();
-  const currencies = await client.aOSCurrency.find({
-    where: {codeISO: {in: distinct}},
-    select: {codeISO: true},
-  });
-  return new Map(
-    currencies
-      .filter(currency => currency.codeISO)
-      .map(currency => [currency.codeISO!, currency.id]),
-  );
-}
-
-export async function attachOrderToPurchases(
-  client: Client,
-  partnerId: ID,
-  productIds: string[],
-  {invoiceId, saleOrderId}: {invoiceId: ID; saleOrderId: ID},
-) {
-  if (!productIds.length) return;
-  const rows = await client.aOSMarketplaceProductPurchase.find({
-    where: {
-      partner: {id: partnerId},
-      marketplaceProduct: {id: {in: productIds}},
-      invoice: {id: null},
-    },
-    select: {id: true, version: true},
-  });
-  for (const row of rows) {
-    await client.aOSMarketplaceProductPurchase.update({
-      data: {
-        id: row.id,
-        version: row.version,
-        invoice: {select: {id: invoiceId}},
-        saleOrder: {select: {id: saleOrderId}},
-      },
-      select: {id: true},
-    });
-  }
-}
-
-/* Determines if a user can download a product based on purchase state. */
+/* Determines if a user can download a product based on ownership (the access key on the line). */
 export async function canDownloadProduct({
   client,
   productId,
@@ -209,7 +163,7 @@ export async function canDownloadProduct({
   if (publisherId && mainPartnerId === publisherId) return true;
   const purchase = await client.aOSMarketplaceProductPurchase.findOne({
     where: {
-      partner: {id: mainPartnerId},
+      owner: {id: mainPartnerId},
       marketplaceProduct: {id: productId},
     },
     select: {id: true},
