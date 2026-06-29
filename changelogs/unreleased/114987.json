@@ -1,0 +1,5 @@
+{
+  "title": "Fix website seeding script failing on AOSMetaJsonField create",
+  "type": "fix",
+  "scope": ["website"]
+}
