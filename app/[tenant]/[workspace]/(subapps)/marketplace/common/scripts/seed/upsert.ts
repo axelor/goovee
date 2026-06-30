@@ -9,6 +9,7 @@ import {sql} from '@/utils/template-string';
 import {BigDecimal, type CreateArgs} from '@goovee/orm';
 import {MARKETPLACE_ICONS} from '../../constants/icons';
 import {PRODUCT_MODERATION_STATUS} from '../../constants/statuses';
+import {REVIEW_MODERATION_STATUS} from '../../constants/statuses';
 import {DEMO_PREFIX, demoKey} from './constants';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -510,6 +511,7 @@ export async function upsertReview({
       ...payload,
       marketplaceProduct: {select: {id: productId}},
       author: {select: {id: author.id}},
+      moderationStatusSelect: REVIEW_MODERATION_STATUS.VISIBLE,
     },
     select: {id: true},
   });

@@ -30,6 +30,11 @@
       "name": "reviewComment"
     },
     {
+      "type": "Int",
+      "name": "moderationStatusSelect",
+      "required": true
+    },
+    {
       "type": "Boolean",
       "name": "archived"
     }

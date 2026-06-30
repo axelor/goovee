@@ -21,6 +21,7 @@ import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
 import {useOptimistic, useState, useTransition} from 'react';
 import {deleteReview, saveReview} from '../../../../actions';
+import {REVIEW_MODERATION_STATUS} from '../../../../constants/statuses';
 import type {MyReview} from '../../../../orm';
 import {Rating} from '../../shared/rating';
 import {PartnerAvatar} from '../../shared/partner-avatar';
@@ -233,10 +234,18 @@ export function YourReviewCard({
             </Button>
           </div>
         </div>
-        {displayReview.reviewComment && (
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            {displayReview.reviewComment}
-          </p>
+        {initial?.moderationStatusSelect === REVIEW_MODERATION_STATUS.HIDDEN ? (
+          <div className="rounded-md border border-border bg-muted p-3 text-sm">
+            <p className="font-medium text-foreground">
+              {i18n.t('Hidden by a moderator')}
+            </p>
+          </div>
+        ) : (
+          displayReview.reviewComment && (
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {displayReview.reviewComment}
+            </p>
+          )
         )}
       </div>
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>

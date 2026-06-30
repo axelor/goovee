@@ -25,7 +25,9 @@ import {
   type SingleProduct,
 } from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
+import {REVIEW_MODERATION_STATUS} from '../../../../constants/statuses';
 import {YourReviewCard} from '../your-review-card';
+import {ReportReviewButton} from '../report-review-button';
 import {Rating} from '../../shared/rating';
 import {PartnerAvatar} from '../../shared/partner-avatar';
 import {TooltipDate} from '../../shared/tooltip-date';
@@ -202,36 +204,52 @@ export async function ReviewsTab({
             <div
               key={review.id}
               className="bg-card rounded-lg border border-border p-6 space-y-3">
-              <div className="flex items-start gap-3">
-                <PartnerAvatar partner={review.author} tenantId={tenantId} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-foreground text-sm">
-                      {review.author.simpleFullName}
-                    </p>
-                    {review.createdOn && (
-                      <TooltipDate
-                        date={review.createdOn}
-                        displayType="relative"
-                        showTooltip={true}
-                        prefix="•"
-                        className="text-xs text-muted-foreground"
-                      />
-                    )}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 min-w-0">
+                  <PartnerAvatar partner={review.author} tenantId={tenantId} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-foreground text-sm">
+                        {review.author.simpleFullName}
+                      </p>
+                      {review.createdOn && (
+                        <TooltipDate
+                          date={review.createdOn}
+                          displayType="relative"
+                          showTooltip={true}
+                          prefix="•"
+                          className="text-xs text-muted-foreground"
+                        />
+                      )}
+                    </div>
+                    <Rating
+                      value={review.rating}
+                      showValue={false}
+                      size={12}
+                      className="mt-1"
+                    />
                   </div>
-                  <Rating
-                    value={review.rating}
-                    showValue={false}
-                    size={12}
-                    className="mt-1"
-                  />
                 </div>
+                {/* A logged-in user (never the author — own review is excluded
+                  from this list) can report a visible review. */}
+                {user &&
+                  review.moderationStatusSelect !==
+                    REVIEW_MODERATION_STATUS.HIDDEN && (
+                    <ReportReviewButton
+                      reviewId={review.id}
+                      workspaceURL={workspaceURL}
+                    />
+                  )}
               </div>
-              {review.reviewComment && (
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {review.reviewComment}
-                </p>
-              )}
+              {/* A hidden review keeps its rating but not its comment, so it reads
+                as a rating-only review and the hidden text never reaches the client. */}
+              {review.moderationStatusSelect !==
+                REVIEW_MODERATION_STATUS.HIDDEN &&
+                review.reviewComment && (
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {review.reviewComment}
+                  </p>
+                )}
             </div>
           );
         })}

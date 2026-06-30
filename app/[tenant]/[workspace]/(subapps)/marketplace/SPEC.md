@@ -50,7 +50,7 @@ _ownership_ is tracked at the **customer** level.
 | Persona                     | Can do                                                                                                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                                           |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Visitor (guest)**         | Browse, search, open any published listing, read reviews                                                                                                                   | No login required to look around.<br>Any action that changes data (buy, favourite, review, download a paid item) redirects to login first.                                                                                                                                                                                                                      |
-| **Member / Buyer**          | Everything a visitor can, plus:<br>favourite, buy, download, write/edit a review, see their purchases & favourites                                                         | A logged-in **user** (a customer or one of its contacts).<br>Purchases belong to the **customer**, so they're shared with everyone under it.                                                                                                                                                                                                                    |
+| **Member / Buyer**          | Everything a visitor can, plus:<br>favourite, buy, download, write/edit a review, report another user's review, see their purchases & favourites                           | A logged-in **user** (a customer or one of its contacts).<br>Purchases belong to the **customer**, so they're shared with everyone under it.                                                                                                                                                                                                                    |
 | **Contributor / Publisher** | Everything a member can, plus:<br>create listings, upload versions/bundles, manage the version lifecycle, see their contributions & revenue                                | Only when the workspace **allows publishing**, and only with **full marketplace access**: the customer account itself, a **contact admin**, or a contact whose marketplace role is **Total**. A **Restricted** contact remains a buyer.<br>The listing is published under the user's **customer**, so every full-access user under that customer can manage it. |
 | **Workspace admin**         | Configure the storefront:<br>branding, whether publishing is allowed, whether submissions need review, payment options, and the workspace default product used for pricing | Configured in AOS, not in the storefront UI.<br>See [§7](#7-workspace-configuration).                                                                                                                                                                                                                                                                           |
 
@@ -304,6 +304,32 @@ counting failure never fails the download.
 - The listing's **average rating** and **rating count** are maintained
   automatically as reviews are added, changed, or removed.
 - Guests are prompted to log in to review.
+
+**Reporting a review.** A logged-in user can **report** another user's review,
+picking one fixed **reason** — Spam, Offensive, Inappropriate, or Other (no free
+text). **Guests cannot report**, and **a user cannot report their own review**.
+**Publishers can report** reviews on their listings but can never hide them
+(moderation is admin-only, below). A user gets **one report per review** —
+re-reporting is refused ("already reported"), though a different user can still
+report it. Reporting flags the review for an admin; it does not hide it.
+
+**Moderation.** Reviews are **post-moderated**: they go live immediately, and an
+admin hides violations afterwards from the AOS, not the storefront (like version
+rejection, see [§9](#9-current-limitations--gotchas)). Per review the admin can:
+
+- **Hide** (a **reason is required**, kept as an internal note) — the comment
+  stops showing to other buyers; the rating is unaffected. Hiding also resolves
+  the review's open reports.
+- **Restore** — a hidden review becomes visible again.
+- **Dismiss reports** — clears the open reports and leaves the review visible.
+  Reports are kept as history, so a user who already reported a review cannot
+  report it again.
+
+A hidden review keeps its **rating** but not its comment: other buyers see it as
+a **rating-only review**, while the **author** still sees their own, marked
+**"hidden by a moderator"** — the reason is internal and not shown to them. The
+rating **keeps counting** toward the listing's average and count — hiding removes
+only the comment from display.
 
 ### 4.9 Publishing & versions (contributors)
 
@@ -598,6 +624,15 @@ For **active** and **frozen**, download follows the normal [per-version access](
 purchaser (and the publisher) still downloads from My Purchases, but a **free**
 product — having no purchase entitlement — stops being downloadable to buyers.
 Only [archiving](#54-archived-records) cuts off download for a paid purchaser too.
+### 5.5 Review moderation states
+
+| State       | Comment shown to other buyers | Comment shown to its author | Counts toward rating |
+| ----------- | ----------------------------- | --------------------------- | -------------------- |
+| **Visible** | Yes                           | Yes                         | Yes                  |
+| **Hidden**  | No — shows as rating-only     | Yes, marked hidden          | Yes (telemetry)      |
+
+A review is **Visible** when authored; an admin can move it to **Hidden** (and
+back) from the AOS (see [§4.8](#48-reviews--ratings)).
 
 ---
 
@@ -682,6 +717,19 @@ Set by an admin in the AOS; each affects storefront behaviour:
 | Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
 | View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                                                                               |
 | View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
+| Action                                        | Guest | Member     | Publisher         | Notes                                                                         |
+| --------------------------------------------- | ----- | ---------- | ----------------- | ----------------------------------------------------------------------------- |
+| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                                                               |
+| Download free published version               | ✅    | ✅         | ✅                | no login required                                                             |
+| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                                                                      |
+| Buy a paid listing                            | ❌    | ✅         | ✅                |                                                                               |
+| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                                                               |
+| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing                                           |
+| Report another user's review                  | ❌    | ✅         | ✅ (others' only) | one per review; not your own                                                  |
+| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access (not a Restricted contact) |
+| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
+| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                            |
+| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
 
 ---
 
@@ -702,6 +750,11 @@ Set by an admin in the AOS; each affects storefront behaviour:
   moderation reason is shown to the publisher (in contributions), the admin, and
   to a buyer who purchased the product (via a dialog in My Purchases) — never on
   the public storefront.
+- **Review moderation is AOS only.** Buyers can _report_ a review from the
+  storefront, but hiding, restoring, and dismissing reports are done by an admin
+  in the AOS — there is no storefront moderation UI. A hidden review still counts
+  toward the rating (only its comment is removed), and a user who already reported
+  a review can't report it again.
 - **A free listing is never "owned."** Ownership records exist only for paid
   purchases, so free listings won't appear under My Purchases.
 - **No-payment checkout fails silently.** If online payment is off or no provider
