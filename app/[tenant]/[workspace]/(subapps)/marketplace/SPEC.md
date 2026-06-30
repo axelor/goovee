@@ -505,17 +505,41 @@ The Overview summarises activity across the contributor's own listings:
   **downloads**, and **purchases** across their listings, each with the actor's
   name and a relative time.
 
+### 4.11 Product moderation
+
+An admin can moderate an individual listing from the back-office, separately from
+[archiving](#54-archived-records). Two reversible levels, each carrying a reason:
+
+- **Frozen** — the listing stays fully visible and purchasable; only its
+  **publisher** is locked out — they cannot edit it, add a version, or unpublish
+  one. In [My Contributions](#410-my-account) its status shows **Frozen** (the
+  reason on hover) and its edit control is disabled.
+- **Taken down** — as frozen, **plus** removed from the storefront entirely:
+  hidden from the catalogue and search **and** its detail page no longer opens
+  (direct links 404). New purchases are blocked.
+
+A buyer who already **purchased** a taken-down paid listing keeps downloading it
+from [My Purchases](#410-my-account) — the download route still honours the
+existing entitlement. A **free** listing has no entitlement to fall back on, so
+taking it down makes it unavailable to everyone but the publisher. The
+moderation reason is shown to the publisher (contributions), the admin, and — via
+a dialog on the download button in My Purchases — to a buyer who already
+purchased it; it never appears on the public storefront. Restoring returns the
+listing to active and clears the moderation. See
+[§5.5](#55-product-moderation-states).
+
 ---
 
 ## 5. Rules & states (reference)
 
 ### 5.1 Listing visibility
 
-| Condition                                                     | Visible to                  |
-| ------------------------------------------------------------- | --------------------------- |
-| Has ≥1 **published** version, not archived, in this workspace | Everyone (incl. guests)     |
-| Only draft / in-review / unpublished versions                 | **Owner only**, via preview |
-| Archived                                                      | No one                      |
+| Condition                                                     | Visible to                                                                                                                                                    |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Has ≥1 **published** version, not archived, in this workspace | Everyone (incl. guests)                                                                                                                                       |
+| Only draft / in-review / unpublished versions                 | **Owner only**, via preview                                                                                                                                   |
+| Taken down by moderation                                      | Hidden from catalogue, search **and** its detail page (direct links 404); paid owners still download via My Purchases ([§5.5](#55-product-moderation-states)) |
+| Archived                                                      | No one                                                                                                                                                        |
 
 ### 5.2 Download access (per version)
 
@@ -556,6 +580,24 @@ new reference. Concretely:
 Two checks deliberately **do** see archived records, so identifiers stay
 reserved: slug generation (an archived listing keeps its URL) and the
 version-number duplicate check (an archived version's number can't be reused).
+
+### 5.5 Product moderation states
+
+Moderation is separate from [archiving](#54-archived-records): archive removes a
+listing entirely, moderation is a reversible admin action with a recorded reason
+(see [§4.11](#411-product-moderation)).
+
+| State          | Catalogue / search | Detail page | Publisher can edit | New purchase | Download                                |
+| -------------- | ------------------ | ----------- | ------------------ | ------------ | --------------------------------------- |
+| **Active**     | ✅                 | ✅          | ✅                 | ✅           | ✅                                      |
+| **Frozen**     | ✅                 | ✅          | ❌                 | ✅           | ✅                                      |
+| **Taken down** | ❌ hidden          | ❌ 404      | ❌                 | ❌ blocked   | paid → owner via My Purchases; free → ✗ |
+
+For **active** and **frozen**, download follows the normal [per-version access](#52-download-access-per-version)
+(free → all, paid → purchasers + owner). For **taken down**, an existing paid
+purchaser (and the publisher) still downloads from My Purchases, but a **free**
+product — having no purchase entitlement — stops being downloadable to buyers.
+Only [archiving](#54-archived-records) cuts off download for a paid purchaser too.
 
 ---
 
@@ -628,18 +670,18 @@ Set by an admin in the AOS; each affects storefront behaviour:
 
 ## 8. Permissions summary
 
-| Action                                        | Guest | Member     | Publisher         | Notes                                                                         |
-| --------------------------------------------- | ----- | ---------- | ----------------- | ----------------------------------------------------------------------------- |
-| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                                                               |
-| Download free published version               | ✅    | ✅         | ✅                | no login required                                                             |
-| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                                                                      |
-| Buy a paid listing                            | ❌    | ✅         | ✅                |                                                                               |
-| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                                                               |
-| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing                                           |
-| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access (not a Restricted contact) |
-| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
-| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                            |
-| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
+| Action                                        | Guest | Member     | Publisher         | Notes                                                                                                                            |
+| --------------------------------------------- | ----- | ---------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                                                                                                                  |
+| Download free published version               | ✅    | ✅         | ✅                | no login required                                                                                                                |
+| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                                                                                                                         |
+| Buy a paid listing                            | ❌    | ✅         | ✅                |                                                                                                                                  |
+| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                                                                                                                  |
+| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing                                                                                              |
+| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access (not a Restricted contact); blocked while the listing is frozen or taken down |
+| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
+| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                                                                               |
+| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
 
 ---
 
@@ -655,6 +697,11 @@ Set by an admin in the AOS; each affects storefront behaviour:
 - **Rejection is AOS only.** There is no storefront UI for a reviewer to
   reject a submission; "Rejected" is set in the AOS. The storefront shows the
   author the **latest** rejection reason, but not the full rejection history.
+- **Product moderation is back-office only.** Freezing, taking down and restoring
+  a listing are AOS actions; there is no storefront UI for the moderator. The
+  moderation reason is shown to the publisher (in contributions), the admin, and
+  to a buyer who purchased the product (via a dialog in My Purchases) — never on
+  the public storefront.
 - **A free listing is never "owned."** Ownership records exist only for paid
   purchases, so free listings won't appear under My Purchases.
 - **No-payment checkout fails silently.** If online payment is off or no provider

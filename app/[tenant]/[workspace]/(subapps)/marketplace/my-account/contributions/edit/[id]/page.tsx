@@ -13,6 +13,7 @@ import {getTotal} from '@/utils/pagination';
 import {Link} from '@/ui/components/link';
 import {redirect} from 'next/navigation';
 import {MARKETPLACE_TYPE} from '../../../../common/constants/marketplace-types';
+import {PRODUCT_MODERATION_STATUS} from '../../../../common/constants/statuses';
 import {
   findMyProductForEdit,
   findMyProductVersions,
@@ -66,6 +67,14 @@ export default async function EditProductPage(props: {
   const firstPage = loaded?.[1] ?? null;
   /* Unknown / not-owned id → back to the listing rather than 404 a stale link. */
   if (!isNew && !product) redirect(returnHref);
+  /* A frozen or taken-down product can't be edited (server rejects the save too);
+     send the publisher back to contributions, where its state and reason are shown. */
+  if (
+    product &&
+    product.moderationStatusSelect !== PRODUCT_MODERATION_STATUS.ACTIVE
+  ) {
+    redirect(returnHref);
+  }
   const cloned = product ? clone(product) : undefined;
 
   const leafLabel = isNew

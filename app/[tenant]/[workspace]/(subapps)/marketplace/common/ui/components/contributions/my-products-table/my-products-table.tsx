@@ -22,6 +22,7 @@ import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
 import {
   MARKETPLACE_VERSION_STATUS,
   MARKETPLACE_VERSION_STATUS_LABELS,
+  PRODUCT_MODERATION_STATUS,
 } from '../../../../constants/statuses';
 
 function statusBadgeClass(status: string | null): string {
@@ -35,6 +36,12 @@ function statusBadgeClass(status: string | null): string {
     default:
       return 'bg-muted text-muted-foreground';
   }
+}
+
+function moderationBadgeClass(status: number): string {
+  return status === PRODUCT_MODERATION_STATUS.TAKEN_DOWN
+    ? 'bg-destructive/15 text-destructive'
+    : 'bg-palette-orange/40 text-palette-orange-dark';
 }
 import type {
   CompatibilityVersion,
@@ -135,6 +142,23 @@ export function MyProductsTable({
       label: i18n.t('Status'),
       desktopClassName: 'w-[15%]',
       content: product => {
+        if (
+          product.moderationStatusSelect !== PRODUCT_MODERATION_STATUS.ACTIVE
+        ) {
+          return (
+            <span
+              title={product.moderationReason ?? undefined}
+              className={cn(
+                'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap',
+                moderationBadgeClass(product.moderationStatusSelect),
+              )}>
+              {product.moderationStatusSelect ===
+              PRODUCT_MODERATION_STATUS.FROZEN
+                ? i18n.t('Frozen')
+                : i18n.t('Taken down')}
+            </span>
+          );
+        }
         const status = product.latestVersion?.statusSelect ?? null;
         return (
           <span
@@ -260,6 +284,10 @@ export function MyProductsTable({
                         product.saleCurrency ?? newListingCurrency
                       }
                       inAti={product.inAti ?? inAti}
+                      moderationLocked={
+                        product.moderationStatusSelect !==
+                        PRODUCT_MODERATION_STATUS.ACTIVE
+                      }
                     />
                     {product.currentVersion ? (
                       <Link

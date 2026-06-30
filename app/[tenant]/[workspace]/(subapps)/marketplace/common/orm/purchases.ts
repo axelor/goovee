@@ -65,6 +65,8 @@ export async function findPurchases({
         name: true,
         description: true,
         marketplaceTypeSelect: true,
+        moderationStatusSelect: true,
+        moderationReason: true,
         iconCode: true,
         coverStyle: true,
         currentVersion: {id: true, ...versionNumberFields},

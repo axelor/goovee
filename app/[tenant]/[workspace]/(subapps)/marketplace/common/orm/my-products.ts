@@ -57,6 +57,8 @@ export async function findMyProducts({
       averageRating: true,
       ratingCount: true,
       installCount: true,
+      moderationStatusSelect: true,
+      moderationReason: true,
       ...priceSelectFields,
       currentVersion: {id: true, ...versionNumberFields, statusSelect: true},
       latestVersion: {id: true, ...versionNumberFields, statusSelect: true},
@@ -115,6 +117,7 @@ export async function findMyProductForEdit({
     select: {
       id: true,
       version: true,
+      moderationStatusSelect: true,
       name: true,
       slug: true,
       description: true,

@@ -1,0 +1,6 @@
+{
+  "title": "Marketplace products can be frozen or taken down by moderation",
+  "type": "feature",
+  "description": "A taken-down product is removed from the catalogue, search and its detail page and can no longer be bought; a buyer who already purchased it keeps downloading it from My Purchases, where a dialog shows the take-down reason, while a free product becomes unavailable. A frozen or taken-down product becomes read-only for its publisher, who sees the reason in their contributions.",
+  "scope": ["marketplace"]
+}

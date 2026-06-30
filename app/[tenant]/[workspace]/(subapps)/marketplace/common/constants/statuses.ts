@@ -25,3 +25,11 @@ export const MARKETPLACE_VERSION_STATUS_LABELS: Record<string, string> = {
   [MARKETPLACE_VERSION_STATUS.REJECTED]: 'Rejected',
   [MARKETPLACE_VERSION_STATUS.UNPUBLISHED]: 'Unpublished',
 };
+
+/* Admin moderation of a product. Integer-backed, mirroring the back-office
+   selection: 1 active / 2 frozen / 3 taken down. */
+export const PRODUCT_MODERATION_STATUS = {
+  ACTIVE: 1,
+  FROZEN: 2,
+  TAKEN_DOWN: 3,
+} as const;
