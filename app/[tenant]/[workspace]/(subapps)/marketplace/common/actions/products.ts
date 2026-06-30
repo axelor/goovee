@@ -12,7 +12,10 @@ import {BigDecimal} from '@goovee/orm';
 import {headers} from 'next/headers';
 import {z} from 'zod';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
-import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
+import {
+  MARKETPLACE_VERSION_STATUS,
+  PRODUCT_MODERATION_STATUS,
+} from '../constants/statuses';
 import type {MyProductForEdit, MyProductVersion} from '../orm';
 import {
   findMyProductForEdit,
@@ -288,9 +291,20 @@ export async function saveProductWithVersions(
             access.workspace,
             partnerId,
           )({id: payload.id}),
-          select: {id: true, categorySet: {select: {id: true}}},
+          select: {
+            id: true,
+            moderationStatusSelect: true,
+            categorySet: {select: {id: true}},
+          },
         });
         if (!current) throw new Error('PRODUCT_NOT_FOUND');
+        /* A frozen or taken-down product is locked against all authoring —
+         * product edits, new versions, and unpublishing alike. */
+        if (
+          current.moderationStatusSelect !== PRODUCT_MODERATION_STATUS.ACTIVE
+        ) {
+          throw new Error('PRODUCT_UNDER_MODERATION');
+        }
         /* Rewrite the product row only when a product field actually changed —
          * the editor omits the product block on a versions-only save, so it's
          * left untouched (no needless write, no bumped optimistic-lock version,
@@ -368,6 +382,7 @@ export async function saveProductWithVersions(
             salePrice: new BigDecimal(String(product.salePrice ?? 0)),
             marketplaceTypeSelect: product.marketplaceTypeSelect,
             slug,
+            moderationStatusSelect: PRODUCT_MODERATION_STATUS.ACTIVE,
             inAti: config.defaultProductForMarketplace?.inAti ?? false,
             saleCurrency: {select: {id: defaultSaleCurrency.id}},
             publisher: {select: {id: partnerId}},
@@ -588,6 +603,14 @@ export async function saveProductWithVersions(
     }
     if (errorMessage === 'PRODUCT_NOT_FOUND') {
       return {error: true, message: await t('Product not found')};
+    }
+    if (errorMessage === 'PRODUCT_UNDER_MODERATION') {
+      return {
+        error: true,
+        message: await t(
+          'This product is under moderation and cannot be edited.',
+        ),
+      };
     }
     if (errorMessage === 'MISSING_PRODUCT') {
       return {

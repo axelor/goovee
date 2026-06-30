@@ -12,7 +12,10 @@ import type {
   SelectOptions,
   WhereOptions,
 } from '@goovee/orm';
-import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
+import {
+  MARKETPLACE_VERSION_STATUS,
+  PRODUCT_MODERATION_STATUS,
+} from '../constants/statuses';
 import type {Workspace} from '@/orm/workspace';
 import {Maybe} from '@/types/util';
 import {productPriceSelectFields} from '@/product/orm';
@@ -41,11 +44,17 @@ export function withProductAccessFilter(workspace: Workspace) {
 }
 
 export function getPublishedProductFilter(): WhereOptions<AOSMarketplaceProduct> {
+  /* Storefront visibility: at least one published, non-archived version, and not
+     taken down. active and frozen both stay visible (freeze is a publisher-side
+     lock only); a taken-down product drops off the storefront entirely — never
+     listed, searched, or reachable by its detail page. moderationStatusSelect is
+     NOT NULL. */
   return {
     versionList: {
       statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
       OR: [{archived: false}, {archived: null}],
     },
+    moderationStatusSelect: {ne: PRODUCT_MODERATION_STATUS.TAKEN_DOWN},
   };
 }
 
@@ -90,9 +99,12 @@ export function withMyProductAccessFilter(workspace: Workspace, partnerId: ID) {
  * Branches the caller can satisfy:
  *   - **Owner** of the marketplace product (publisher) → any version, any
  *     status (delegated to {@link getMyProductAccessFilter}).
- *   - **Free + published** — `salePrice` ≤ 0 (or null) on the product.
- *   - **Paid + owned + published** — a MarketplaceProductPurchase row
- *     exists for the caller's partner on this marketplace product.
+ *   - **Free + published + not taken down** — `salePrice` ≤ 0 (or null); a
+ *     taken-down free product has no purchase record to fall back on, so it
+ *     stops being downloadable (owner aside).
+ *   - **Paid + owned + published** — a MarketplaceProductPurchase row exists
+ *     for the caller's partner (unaffected by take-down, so a purchaser keeps
+ *     downloading a taken-down product from My Purchases).
  *
  * Single query, no pre-fetch. Non-owner non-purchaser callers of paid
  * products never match.
@@ -113,14 +125,19 @@ export function withBundleAccessFilter({
       {OR: [{archived: false}, {archived: null}]},
       {marketplaceProduct: {id: productId}},
       or<AOSMarketplaceProductVersion>([
-        // Free + published. `salePrice <= 0` excludes NULL in SQL, so
-        // the null branch is included explicitly for legacy / admin-
+        // Free + published + not taken down. `salePrice <= 0` excludes NULL in
+        // SQL, so the null branch is included explicitly for legacy / admin-
         // edited products that never had a price set.
         {
           statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
           marketplaceProduct: and<AOSMarketplaceProduct>([
             productAccess,
             {OR: [{salePrice: {le: 0}}, {salePrice: null}]},
+            {
+              moderationStatusSelect: {
+                ne: PRODUCT_MODERATION_STATUS.TAKEN_DOWN,
+              },
+            },
           ]),
         },
         // Paid + owned + published — purchaseList is the o2m back-ref
@@ -154,7 +171,7 @@ export function withScreenshotAccessFilter(
       or<AOSMarketplaceProduct>([
         // must be owned by the caller
         mainPartnerId && withMyProductAccessFilter(workspace, mainPartnerId)(),
-        // or published
+        // or published (and not taken down) — same visibility as the storefront
         withPublishedProductFilter(workspace)(),
       ]),
     ]);

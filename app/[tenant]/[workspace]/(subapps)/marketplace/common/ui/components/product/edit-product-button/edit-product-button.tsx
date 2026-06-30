@@ -29,6 +29,9 @@ type Props = {
   /** The listing's own tax basis (its `inAti`, falling back to the workspace
    *  default) — resolved by the caller. */
   inAti: boolean;
+  /** Locks editing when the product is under moderation (frozen / taken down);
+   *  the server rejects the save regardless, this just disables the entry. */
+  moderationLocked?: boolean;
 };
 
 export function EditProductButton({
@@ -42,6 +45,7 @@ export function EditProductButton({
   allowToPublish,
   listingCurrency,
   inAti,
+  moderationLocked = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,8 +81,13 @@ export function EditProductButton({
       <button
         type="button"
         onClick={handleOpen}
-        disabled={loading}
-        className="rounded-full p-1.5 transition-colors hover:bg-muted">
+        disabled={loading || moderationLocked}
+        title={
+          moderationLocked
+            ? i18n.t('This product is under moderation and cannot be edited.')
+            : undefined
+        }
+        className="rounded-full p-1.5 transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50">
         {loading ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
         ) : (

@@ -3,6 +3,17 @@
 import {RESPONSIVE_SIZES, SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import type {Cloned} from '@/types/util';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/ui/components/alert-dialog';
 import {Collapsible, CollapsibleContent} from '@/ui/components/collapsible';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {
@@ -24,6 +35,7 @@ import {
 import {Link} from '@/ui/components/link';
 import {Fragment, useState, type ReactNode} from 'react';
 import {DEFAULT_GRADIENT, GRADIENT_MAP} from '../../../../constants/gradients';
+import {PRODUCT_MODERATION_STATUS} from '../../../../constants/statuses';
 import type {MarketplacePurchase} from '../../../../orm';
 import {formatVersionNumber} from '../../../../utils/version-number';
 import {ProductIcon} from '../../shared/product-icon';
@@ -42,6 +54,48 @@ type Props = {
   purchases: Purchase[];
   workspaceURI: string;
 };
+
+/* Download control for a taken-down purchase: the product is off the storefront,
+   so clicking download first opens a dialog with the moderation reason, then lets
+   the existing owner proceed. Works the same on mobile and desktop. */
+function TakenDownDownload({
+  downloadUrl,
+  reason,
+}: {
+  downloadUrl: string;
+  reason: string | null;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <button
+          type="button"
+          aria-label={i18n.t('Download')}
+          className="p-1.5 rounded-full hover:bg-muted transition-colors">
+          <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{i18n.t('No longer available')}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {reason
+              ? reason
+              : i18n.t('This product has been taken down by a moderator.')}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{i18n.t('Close')}</AlertDialogCancel>
+          <AlertDialogAction asChild>
+            <a href={downloadUrl} download>
+              {i18n.t('Download anyway')}
+            </a>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 export function MyPurchasesTable({purchases, workspaceURI}: Props) {
   const responsive = useResponsive();
@@ -75,7 +129,9 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
               <ProductIcon code={product.iconCode} className="w-6 h-6" />
             </div>
             <div className="min-w-0">
-              {product.slug ? (
+              {product.slug &&
+              product.moderationStatusSelect !==
+                PRODUCT_MODERATION_STATUS.TAKEN_DOWN ? (
                 <Link
                   href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
                   className="font-medium text-foreground truncate hover:underline">
@@ -86,10 +142,17 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                   {product.name}
                 </div>
               )}
-              {product.description && (
-                <div className="text-xs text-muted-foreground line-clamp-2">
-                  <InnerHTML content={product.description} />
-                </div>
+              {product.moderationStatusSelect ===
+              PRODUCT_MODERATION_STATUS.TAKEN_DOWN ? (
+                <span className="mt-1 inline-flex items-center rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">
+                  {i18n.t('No longer available')}
+                </span>
+              ) : (
+                product.description && (
+                  <div className="text-xs text-muted-foreground line-clamp-2">
+                    <InnerHTML content={product.description} />
+                  </div>
+                )
               )}
             </div>
           </div>
@@ -194,6 +257,9 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
           const product = purchase.marketplaceProduct;
           const version = product?.currentVersion;
           const canDownload = product?.id && version?.id;
+          const isTakenDown =
+            product?.moderationStatusSelect ===
+            PRODUCT_MODERATION_STATUS.TAKEN_DOWN;
           return (
             <Fragment key={purchase.id}>
               <TableRow>
@@ -218,20 +284,29 @@ export function MyPurchasesTable({purchases, workspaceURI}: Props) {
                 <TableCell className="p-3">
                   <div className="flex justify-end gap-1">
                     {canDownload ? (
-                      <a
-                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
-                        aria-label={i18n.t('Download')}
-                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                        <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                      </a>
+                      isTakenDown ? (
+                        <TakenDownDownload
+                          downloadUrl={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                          reason={product.moderationReason}
+                        />
+                      ) : (
+                        <a
+                          href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/api/products/${product.id}/versions/${version.id}/download`}
+                          aria-label={i18n.t('Download')}
+                          className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                          <DownloadIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                        </a>
+                      )
                     ) : null}
-                    {product?.slug && (
-                      <Link
-                        href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
-                        className="p-1.5 rounded-full hover:bg-muted transition-colors">
-                        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-                      </Link>
-                    )}
+                    {product?.slug &&
+                      product.moderationStatusSelect !==
+                        PRODUCT_MODERATION_STATUS.TAKEN_DOWN && (
+                        <Link
+                          href={`${workspaceURI}/${SUBAPP_CODES.marketplace}/products/${product.slug}`}
+                          className="p-1.5 rounded-full hover:bg-muted transition-colors">
+                          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                        </Link>
+                      )}
                   </div>
                 </TableCell>
               </TableRow>
