@@ -33,3 +33,19 @@ export const PRODUCT_MODERATION_STATUS = {
   FROZEN: 2,
   TAKEN_DOWN: 3,
 } as const;
+
+/* Moderation state of a review. A review is visible when authored; an admin can
+ * hide a violation from the back-office. Mirrors the integer selection
+ * portal.marketplace.review.moderation.status.select on the backend. */
+export const REVIEW_MODERATION_STATUS = {
+  VISIBLE: 1,
+  HIDDEN: 2,
+} as const;
+
+/* State of a review report. A report is pending until an admin resolves it (by
+ * hiding the review or dismissing its reports). Mirrors the integer selection
+ * portal.marketplace.review.report.status.select on the backend. */
+export const REVIEW_REPORT_STATUS = {
+  PENDING: 1,
+  RESOLVED: 2,
+} as const;

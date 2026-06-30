@@ -27,3 +27,23 @@ export const deleteReviewSchema = z.object({
 });
 
 export type DeleteReviewInput = z.infer<typeof deleteReviewSchema>;
+
+/* Fixed set of report reasons a user picks in the report popup; mirrors the
+ * string selection portal.marketplace.review.report.reason.select on the
+ * backend. No free-text. */
+export const REPORT_REASONS = [
+  'spam',
+  'offensive',
+  'inappropriate',
+  'other',
+] as const;
+
+export type ReportReason = (typeof REPORT_REASONS)[number];
+
+export const reportReviewSchema = z.object({
+  reviewId: z.string().min(1),
+  workspaceURL: z.string().min(1),
+  reasonSelect: z.enum(REPORT_REASONS),
+});
+
+export type ReportReviewInput = z.infer<typeof reportReviewSchema>;

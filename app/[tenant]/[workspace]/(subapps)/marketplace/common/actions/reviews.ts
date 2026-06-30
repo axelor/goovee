@@ -9,16 +9,23 @@ import {z} from 'zod';
 import {
   type DeleteReviewInput,
   deleteReviewSchema,
+  type ReportReviewInput,
+  reportReviewSchema,
   type SaveReviewInput,
   saveReviewSchema,
 } from '../constants/review';
 import {
+  createReviewReport,
+  findExistingReport,
   findExistingReview,
   findProductAccess,
   recomputeProductRating,
   withProductAccessFilter,
 } from '../orm';
-import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
+import {
+  MARKETPLACE_VERSION_STATUS,
+  REVIEW_MODERATION_STATUS,
+} from '../constants/statuses';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
@@ -123,6 +130,9 @@ export async function saveReview(
           author: {select: {id: access.user.id}},
           rating: payload.rating,
           reviewComment: payload.reviewComment ?? null,
+          /* New reviews are visible; set it explicitly so the column is never
+           * null (moderation only ever flips it to hidden from the back-office). */
+          moderationStatusSelect: REVIEW_MODERATION_STATUS.VISIBLE,
           ...(reviewedVersion && {reviewedVersion}),
         },
       });
@@ -211,5 +221,64 @@ export async function deleteReview(
     const message =
       e instanceof Error ? e.message : await t('An error occurred');
     return {error: true, message};
+  }
+}
+
+export async function reportReview(
+  input: ReportReviewInput,
+): ActionResponse<true> {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+  const parsed = reportReviewSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true, message: z.prettifyError(parsed.error)};
+  }
+  const {reviewId, workspaceURL, reasonSelect} = parsed.data;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {client} = access.tenant;
+  const reporterId = access.user.id;
+
+  try {
+    const review = await client.aOSMarketplaceReview.findOne({
+      where: {id: reviewId},
+      select: {id: true, author: {id: true}},
+    });
+    if (!review) {
+      return {error: true, message: await t('Review not found')};
+    }
+    // A user cannot report their own review.
+    if (review.author.id === reporterId) {
+      return {
+        error: true,
+        message: await t('You cannot report your own review'),
+      };
+    }
+    /* One report per (review, reporter): a repeat report is rejected here, and
+     * the unique constraint is the final guard under a race (caught below). */
+    const existing = await findExistingReport({client, reviewId, reporterId});
+    if (existing) {
+      return {
+        error: true,
+        message: await t('You have already reported this review'),
+      };
+    }
+    await createReviewReport({client, reviewId, reporterId, reasonSelect});
+    return {success: true, data: true};
+  } catch (err) {
+    console.error('marketplace: failed to report review', {
+      reviewId,
+      reporterId,
+      error: err,
+    });
+    return {error: true, message: await t('Something went wrong')};
   }
 }
