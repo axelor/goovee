@@ -14,6 +14,7 @@ import {cn} from '@/utils/css';
 import {getPaginationButtons} from '@/utils/pagination';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Link} from '@/ui/components/link';
+import {MyContributionsTab} from '../../../../constants/tabs';
 import {
   ListMyProduct,
   type CompatibilityVersion,
@@ -37,7 +38,6 @@ type ProductsListTabProps = {
   inAti: boolean;
   page?: number;
   totalPages?: number;
-  paramName?: string;
 };
 
 export async function ProductsListTab({
@@ -54,7 +54,6 @@ export async function ProductsListTab({
   inAti,
   page = 1,
   totalPages = 1,
-  paramName,
 }: ProductsListTabProps) {
   return (
     <div className="space-y-6">
@@ -73,7 +72,7 @@ export async function ProductsListTab({
       />
 
       {/* Pagination */}
-      {paramName && totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex justify-center">
           <Pagination>
             <PaginationContent>
@@ -88,8 +87,8 @@ export async function ProductsListTab({
                     href={{
                       pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                       query: {
-                        tab: paramName === 'skillsPage' ? 'skills' : 'apps',
-                        [paramName]: Math.max(1, page - 1),
+                        tab: MyContributionsTab.Products,
+                        productsPage: Math.max(1, page - 1),
                       },
                     }}>
                     <span className="sr-only">{await t('Previous')}</span>
@@ -115,9 +114,8 @@ export async function ProductsListTab({
                           href={{
                             pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                             query: {
-                              tab:
-                                paramName === 'skillsPage' ? 'skills' : 'apps',
-                              [paramName]: String(value),
+                              tab: MyContributionsTab.Products,
+                              productsPage: String(value),
                             },
                           }}>
                           {value}
@@ -138,8 +136,8 @@ export async function ProductsListTab({
                     href={{
                       pathname: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
                       query: {
-                        tab: paramName === 'skillsPage' ? 'skills' : 'apps',
-                        [paramName]: page + 1,
+                        tab: MyContributionsTab.Products,
+                        productsPage: page + 1,
                       },
                     }}>
                     <span className="sr-only">{await t('Next')}</span>

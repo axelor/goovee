@@ -66,7 +66,6 @@ export async function ProductsTab({
       compatibilityVersions={compatibilityVersions}
       page={page}
       totalPages={totalPages}
-      paramName="productsPage"
     />
   );
 }
