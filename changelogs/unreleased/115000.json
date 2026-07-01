@@ -1,0 +1,6 @@
+{
+  "title": "Persist the payment provider's transaction reference on the payment context",
+  "type": "feature",
+  "description": "Every online payment now records the provider's transaction identifier (Stripe payment intent for card and bank transfer, PayPal capture id, Paybox/Up2Pay transaction number, or HUB PISP payment request id) on a dedicated providerTransactionRef column of the payment context when the payment is confirmed or captured. The reference is stored uniformly across all payment methods and apps, and an already-recorded reference is never overwritten, so a paid order or invoice can be reconciled to the actual provider transaction afterwards. Up2Pay now requests its transaction number via PBX_RETOUR (transaction:S).",
+  "scope": ["invoices", "shop", "events", "core"]
+}

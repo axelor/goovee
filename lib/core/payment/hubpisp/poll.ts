@@ -154,7 +154,9 @@ export async function pollPaymentRequestStatus({
 
       console.log('[HUBPISP][POLL] Transaction status', {
         contextId,
+        paymentRequestResourceId,
         transactionStatus,
+        statusReasonInformation,
       });
 
       const isTerminal = await applyTransactionStatus({

@@ -91,6 +91,7 @@ export const UP2PAY_REDIRECT_PARAMS = [
   'ref',
   'erreur',
   'sign',
+  'transaction',
   'type',
 ] as const;
 

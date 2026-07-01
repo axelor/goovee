@@ -72,6 +72,7 @@ export async function findPaymentContext({
       mode: true,
       status: true,
       payer: true,
+      providerTransactionRef: true,
     },
   });
 
@@ -96,6 +97,7 @@ export async function findPaymentContext({
     mode: context.mode as PaymentOption,
     status: context.status as ContextStatus,
     payer: context.payer,
+    providerTransactionRef: context.providerTransactionRef,
   };
 }
 
@@ -121,6 +123,35 @@ export async function updatePaymentContextData({
   });
 
   return result;
+}
+
+export async function recordProviderTransactionRef({
+  context,
+  client,
+  providerTransactionRef,
+}: {
+  context: {
+    id: string;
+    version: number;
+    providerTransactionRef?: string | null;
+  };
+  client: Client;
+  providerTransactionRef?: string | null;
+}): Promise<void> {
+  if (!providerTransactionRef || context.providerTransactionRef) return;
+
+  const {version} = await client.paymentContext.update({
+    data: {
+      id: context.id,
+      version: context.version,
+      providerTransactionRef,
+      updatedOn: new Date(),
+    },
+    select: {version: true},
+  });
+
+  context.version = version;
+  context.providerTransactionRef = providerTransactionRef;
 }
 
 export function markPaymentAsProcessed(params: {
