@@ -1,0 +1,6 @@
+{
+  "title": "Partners can request publisher access on the marketplace",
+  "type": "feature",
+  "description": "Instead of the shared workspace-wide publish flag, a partner (via a total or admin contact) requests publisher access from their contributions page, and a back-office admin approves, rejects temporarily (with a re-request date and reason) or bans them. Publishing is unlocked only once a partner is approved; a partner that has not requested, is pending, was declined or is banned sees the state of their request in place of the publisher console.",
+  "scope": ["marketplace"]
+}

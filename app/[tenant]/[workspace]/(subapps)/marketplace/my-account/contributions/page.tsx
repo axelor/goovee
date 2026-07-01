@@ -19,10 +19,12 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {MyContributionsTab} from '../../common/constants/tabs';
 import {
+  canRequestPublisherAccess,
   countMyProducts,
   findCompatibilityVersions,
   findLicenses,
   findProductCategories,
+  findPublisherAccess,
   resolveNewListingCurrency,
 } from '../../common/orm';
 import {PublishNewButton} from '../../common/ui/components/product/publish-new-button';
@@ -34,6 +36,7 @@ import {ProductsTab} from '../../common/ui/components/contributions/products-tab
 import {canManageProducts} from '../../common/utils/auth-helper';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getMarketplaceConfig} from '../../common/orm/config';
+import {PublisherAccessRequest} from '../../common/ui/components/contributions/publisher-access-request';
 import {
   myContributionsParamsSchema,
   myContributionsSearchParamsSchema,
@@ -92,7 +95,8 @@ export default async function MyContributionsPage(props: {
   const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   /* Contributions is a seller-only area; non-sellers can't reach it even by
-   * typing the URL. */
+   * typing the URL. The workspace master switch and the manage-products role
+   * are hard gates; publisher approval (below) drives what's shown, not a 404. */
   if (
     !config?.allowToPublish ||
     !canManageProducts({user: access.user, subapp: access.subapp})
@@ -101,20 +105,45 @@ export default async function MyContributionsPage(props: {
   }
   const partnerId = getPartnerId(access.user);
 
-  const [categories, licenses, compatibilityVersions, newListingCurrency] =
-    await Promise.all([
-      findProductCategories({
-        client,
-        take: 100,
-        orderBy: {sequence: 'ASC'},
-      }),
-      findLicenses({client}),
-      findCompatibilityVersions(client),
-      resolveNewListingCurrency({
-        client,
-        mainPartnerId: partnerId,
-      }),
-    ]);
+  /* An approved publisher sees the full console; anyone else (no request yet,
+   * pending, declined or banned) sees the request panel instead. */
+  const publisherAccess = await findPublisherAccess({
+    client,
+    partnerId,
+    workspaceId: access.workspace.id,
+  });
+  const isPublisher = publisherAccess.isPublisher;
+
+  /* The categories/licenses/compatibility/currency reads feed only the publisher
+   * console (the Publish-new button and the products tab), so a non-publisher —
+   * who just sees the request panel — never pays for them. */
+  const consoleData = isPublisher
+    ? await Promise.all([
+        findProductCategories({
+          client,
+          take: 100,
+          orderBy: {sequence: 'ASC'},
+        }),
+        findLicenses({client}),
+        findCompatibilityVersions(client),
+        resolveNewListingCurrency({
+          client,
+          mainPartnerId: partnerId,
+        }),
+      ]).then(
+        ([
+          categories,
+          licenses,
+          compatibilityVersions,
+          newListingCurrency,
+        ]) => ({
+          categories,
+          licenses,
+          compatibilityVersions,
+          newListingCurrency,
+        }),
+      )
+    : null;
 
   const {tab, productsPage} = searchParams;
 
@@ -202,96 +231,110 @@ export default async function MyContributionsPage(props: {
               )}
             </p>
           </div>
-          {config.allowToPublish && (
+          {isPublisher && consoleData && (
             <PublishNewButton
               workspaceURI={workspaceURI}
               workspaceURL={workspaceURL}
-              categories={clone(categories)}
-              licenses={clone(licenses)}
-              compatibilityVersions={clone(compatibilityVersions)}
+              categories={clone(consoleData.categories)}
+              licenses={clone(consoleData.licenses)}
+              compatibilityVersions={clone(consoleData.compatibilityVersions)}
               requiresReview={config.requiresReview === true}
               allowToPublish={config.allowToPublish === true}
-              newListingCurrency={clone(newListingCurrency)}
+              newListingCurrency={clone(consoleData.newListingCurrency)}
               inAti={config.defaultProductForMarketplace?.inAti === true}
             />
           )}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="pb-6">
-        <div className="border-b border-border flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Link
-            href={tabNavLink(MyContributionsTab.Overview)}
-            replace
-            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              tab === MyContributionsTab.Overview
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
-            }`}>
-            {await t('Overview')}
-          </Link>
-          <Link
-            href={tabNavLink(MyContributionsTab.Products)}
-            replace
-            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              tab === MyContributionsTab.Products
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
-            }`}>
-            {await t('Products')} (
-            <Suspense fallback="...">
-              <Await
-                promise={countMyProducts({
-                  mainPartnerId: partnerId,
-                  client,
-                  workspace: access.workspace,
-                })}
-              />
-            </Suspense>
-            )
-          </Link>
-          <Link
-            href={tabNavLink(MyContributionsTab.Revenue)}
-            replace
-            className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
-              tab === MyContributionsTab.Revenue
-                ? 'text-primary border-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
-            }`}>
-            {await t('Revenue')}
-          </Link>
+      {/* Tabs — only an approved publisher gets the console tabs. */}
+      {isPublisher && (
+        <div className="pb-6">
+          <div className="border-b border-border flex overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link
+              href={tabNavLink(MyContributionsTab.Overview)}
+              replace
+              className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+                tab === MyContributionsTab.Overview
+                  ? 'text-primary border-primary'
+                  : 'text-muted-foreground hover:text-foreground border-transparent'
+              }`}>
+              {await t('Overview')}
+            </Link>
+            <Link
+              href={tabNavLink(MyContributionsTab.Products)}
+              replace
+              className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+                tab === MyContributionsTab.Products
+                  ? 'text-primary border-primary'
+                  : 'text-muted-foreground hover:text-foreground border-transparent'
+              }`}>
+              {await t('Products')} (
+              <Suspense fallback="...">
+                <Await
+                  promise={countMyProducts({
+                    mainPartnerId: partnerId,
+                    client,
+                    workspace: access.workspace,
+                  })}
+                />
+              </Suspense>
+              )
+            </Link>
+            <Link
+              href={tabNavLink(MyContributionsTab.Revenue)}
+              replace
+              className={`px-6 pt-4 pb-3 font-medium transition-colors border-b-2 ${
+                tab === MyContributionsTab.Revenue
+                  ? 'text-primary border-primary'
+                  : 'text-muted-foreground hover:text-foreground border-transparent'
+              }`}>
+              {await t('Revenue')}
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       <div>
-        {tab === MyContributionsTab.Overview && (
-          <OverviewTab
-            mainPartnerId={partnerId}
-            client={client}
-            workspace={access.workspace}
-            config={config}
-            workspaceURI={workspaceURI}
-            tenantId={tenantId}
-          />
-        )}
-        {tab === MyContributionsTab.Products && (
-          <ProductsTab
-            mainPartnerId={partnerId}
-            client={client}
-            workspace={access.workspace}
-            config={config}
-            newListingCurrency={newListingCurrency}
-            workspaceURI={workspaceURI}
+        {isPublisher && consoleData ? (
+          <>
+            {tab === MyContributionsTab.Overview && (
+              <OverviewTab
+                mainPartnerId={partnerId}
+                client={client}
+                workspace={access.workspace}
+                config={config}
+                workspaceURI={workspaceURI}
+                tenantId={tenantId}
+              />
+            )}
+            {tab === MyContributionsTab.Products && (
+              <ProductsTab
+                mainPartnerId={partnerId}
+                client={client}
+                workspace={access.workspace}
+                config={config}
+                newListingCurrency={consoleData.newListingCurrency}
+                workspaceURI={workspaceURI}
+                workspaceURL={workspaceURL}
+                categories={consoleData.categories}
+                licenses={consoleData.licenses}
+                compatibilityVersions={consoleData.compatibilityVersions}
+                page={productsPage}
+              />
+            )}
+            {tab === MyContributionsTab.Revenue && comingSoonBanner}
+          </>
+        ) : (
+          <PublisherAccessRequest
             workspaceURL={workspaceURL}
-            categories={categories}
-            licenses={licenses}
-            compatibilityVersions={compatibilityVersions}
-            page={productsPage}
+            status={publisherAccess.request?.statusSelect ?? null}
+            cooldownUntil={publisherAccess.request?.cooldownUntil ?? null}
+            rejectionReason={publisherAccess.request?.rejectionReason ?? null}
+            canRequest={canRequestPublisherAccess(publisherAccess.request)}
           />
         )}
-        {tab === MyContributionsTab.Revenue && comingSoonBanner}
       </div>
     </div>
   );

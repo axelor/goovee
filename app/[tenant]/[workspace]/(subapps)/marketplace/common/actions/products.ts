@@ -18,6 +18,7 @@ import {
   findMyProductForEdit,
   findMyProductVersions,
   findProductsBySearch,
+  findPublisherAccess,
   generateUniqueProductSlug,
   resolveNewListingCurrency,
   type ProductSearchResult,
@@ -80,6 +81,20 @@ export async function loadMyProductForEdit(
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
+    };
+  }
+
+  const {isPublisher} = await findPublisherAccess({
+    client,
+    partnerId,
+    workspaceId: access.workspace.id,
+  });
+  if (!isPublisher) {
+    return {
+      error: true,
+      message: await t(
+        'Your account is not approved to publish on this marketplace.',
+      ),
     };
   }
 
@@ -211,6 +226,19 @@ export async function saveProductWithVersions(
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
+    };
+  }
+  const {isPublisher} = await findPublisherAccess({
+    client,
+    partnerId,
+    workspaceId: access.workspace.id,
+  });
+  if (!isPublisher) {
+    return {
+      error: true,
+      message: await t(
+        'Your account is not approved to publish on this marketplace.',
+      ),
     };
   }
   const requiresReview = config.requiresReview === true;
