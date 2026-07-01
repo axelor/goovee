@@ -6,6 +6,16 @@ export enum MARKETPLACE_VERSION_STATUS {
   UNPUBLISHED = 'unpublished',
 }
 
+/* Publisher access request states (integer-backed, workflow order). Approving a
+ * request sets the partner's `isMarketplacePublisher` flag, which — with the
+ * workspace master switch — is what actually gates publishing. */
+export enum PUBLISHER_REQUEST_STATUS {
+  REQUESTED = 1,
+  REJECTED = 2,
+  APPROVED = 3,
+  BANNED = 4,
+}
+
 // Untranslated display labels for each status value. Translate at runtime
 // with the appropriate translate function (`i18n.t` client / `t` server).
 export const MARKETPLACE_VERSION_STATUS_LABELS: Record<string, string> = {

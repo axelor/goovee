@@ -9,6 +9,7 @@ export * from './my-products';
 export * from './partners';
 export * from './price';
 export * from './products';
+export * from './publisher-requests';
 export * from './purchases';
 export * from './ratings';
 export * from './reviews';

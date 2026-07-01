@@ -8,7 +8,11 @@ import {clone} from '@/utils';
 import {getTotal} from '@/utils/pagination';
 import {headers} from 'next/headers';
 import {z} from 'zod';
-import {findMyProductVersions, type MyProductVersion} from '../orm';
+import {
+  findMyProductVersions,
+  findPublisherAccess,
+  type MyProductVersion,
+} from '../orm';
 import {canManageProducts} from '../utils/auth-helper';
 import {getMarketplaceConfig} from '../orm/config';
 import {SUBAPP_CODES} from '@/constants';
@@ -63,6 +67,20 @@ export async function loadProductVersions(
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
+    };
+  }
+
+  const {isPublisher} = await findPublisherAccess({
+    client,
+    partnerId,
+    workspaceId: access.workspace.id,
+  });
+  if (!isPublisher) {
+    return {
+      error: true,
+      message: await t(
+        'Your account is not approved to publish on this marketplace.',
+      ),
     };
   }
 
