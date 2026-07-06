@@ -2,9 +2,8 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
-import {manager} from '@/tenant';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -18,42 +17,27 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
   const {'group-id': groupId} = params;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return new NextResponse('Bad Request', {status: 400});
-  }
-  const {client} = tenant;
-
-  const session = await getSession();
-
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    user: session?.user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-  if (!subapp) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access.tenant;
 
   const group = await findGroupById(
     groupId,
-    String(workspace.id),
+    String(access.workspace.id),
     client,
-    session?.user,
+    access.user,
   );
 
   if (!group?.image?.id) {
@@ -64,8 +48,8 @@ export async function GET(
   const file = await findFile({
     id: imageId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

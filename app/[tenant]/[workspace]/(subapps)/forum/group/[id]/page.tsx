@@ -1,13 +1,16 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {User} from '@/types';
 import {clone} from '@/utils';
-import {getSession} from '@/auth';
-import {manager} from '@/tenant';
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {isCommentEnabled} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -44,26 +47,49 @@ async function ForumGroup({
   };
   searchParams: {[key: string]: string | undefined};
 }) {
-  const session = await getSession();
-  const user = session?.user as User;
-  const userId = user?.id as string;
   const type = searchParams?.type ?? FORUM_CONTENT.POSTS;
 
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user} = access;
+  const {client} = access.tenant;
+  const userId = user?.id as string;
+
+  const config = await getForumConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const enableComment = isCommentEnabled({
+    subapp: SUBAPP_CODES.forum,
+    config,
+  });
+
+  const workspace = clone(access.workspace);
 
   const groupId = params.id as string;
 
@@ -78,7 +104,7 @@ async function ForumGroup({
       ? await findGroupsByMembers({
           id: userId,
           orderBy: GROUPS_ORDER_BY,
-          workspaceID: workspace?.id,
+          workspaceID: workspace.id,
           client,
           user,
         })
@@ -95,7 +121,7 @@ async function ForumGroup({
 
   const selectedGroup = (await findGroupById(
     groupId,
-    workspace?.id!,
+    workspace.id,
     client,
     user,
   ).then(clone)) as Group | null;
@@ -111,7 +137,7 @@ async function ForumGroup({
       <div className="hidden lg:block">
         <NavMenu items={MENU} />
       </div>
-      <Hero selectedGroup={selectedGroup} workspace={workspace} />
+      <Hero selectedGroup={selectedGroup} config={clone(config)} />
       <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-[17.563rem_1fr] gap-5">
         <GroupControls
           memberGroups={memberGroups}
@@ -133,8 +159,9 @@ async function ForumGroup({
                 params={params}
                 searchParams={searchParams}
                 client={client}
-                user={user}
+                user={user ?? null}
                 workspace={workspace}
+                enableComment={enableComment}
               />
             )}
           </Suspense>

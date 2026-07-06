@@ -1,11 +1,11 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {getSession} from '@/auth';
 import {isFileOfRecord} from '@/comments/orm';
 import {SUBAPP_CODES} from '@/constants';
 import {isCommentEnabled} from '@/lib/core/comments';
-import {manager} from '@/tenant';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
+import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -24,45 +24,35 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
   const {'post-id': postId, 'file-id': fileId} = params;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return new NextResponse('Bad Request', {status: 400});
-  }
-  const {client} = tenant;
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.forum, workspace})) {
-    return new NextResponse('Forbidden', {status: 403});
-  }
-
-  const app = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
-    user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-  if (!app?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getForumConfig(access.workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Not found', {status: 404});
+  }
+
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.forum, config})) {
+    return new NextResponse('Forbidden', {status: 403});
   }
 
   const {posts = []} = await findPosts({
     whereClause: {id: postId},
-    workspaceID: workspace.id,
+    workspaceID: access.workspace.id,
     client,
     user,
   });
@@ -77,8 +67,8 @@ export async function GET(
   const file = await findFile({
     id: fileId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

@@ -1,7 +1,7 @@
 'use client';
 
 // ---- CORE IMPORTS ---- //
-import {PortalWorkspace} from '@/orm/workspace';
+import {EventsConfig} from '@/subapps/events/common/orm/config';
 import type {Cloned} from '@/types/util';
 import {isCommentEnabled} from '@/comments';
 import {SUBAPP_CODES} from '@/constants';
@@ -15,20 +15,20 @@ import type {FullEvent} from '@/subapps/events/common/orm/event';
 
 export function EventDetails({
   eventDetails,
-  workspace,
+  config,
 }: {
   eventDetails: Cloned<FullEvent>;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: EventsConfig | Cloned<EventsConfig>;
 }) {
   const eventId = eventDetails.id;
 
   const enableComment = isCommentEnabled({
     subapp: SUBAPP_CODES.events,
-    workspace,
+    config,
   });
   return (
     <div className="container mx-auto flex flex-col gap-6 pt-6 pb-24 lg:pb-6">
-      <EventPageCard eventDetails={eventDetails} workspace={workspace} />
+      <EventPageCard eventDetails={eventDetails} config={config} />
       {enableComment && (
         <CommentsSection eventId={eventId} slug={eventDetails.slug} />
       )}

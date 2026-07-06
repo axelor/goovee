@@ -2,9 +2,8 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import {manager} from '@/tenant';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
 import {streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -18,42 +17,28 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
   const {'file-id': fileId} = params;
 
-  const session = await getSession();
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return new NextResponse('Bad Request', {status: 400});
-  const {client} = tenant;
-  const storage = tenant?.config?.aos?.storage;
-
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    user: session?.user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-
-  if (!subapp?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access.tenant;
+  const storage = access.tenant.config.aos.storage;
 
   const file = await fetchFile({
     id: fileId,
     client,
     workspaceURL,
-    user: session?.user,
+    user: access.user,
   });
 
   if (!file?.metaFile?.id) {

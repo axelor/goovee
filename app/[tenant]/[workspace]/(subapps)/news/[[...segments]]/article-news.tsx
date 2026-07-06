@@ -5,12 +5,13 @@ import {Suspense} from 'react';
 import {clone} from '@/utils';
 import {SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
 import {CommentsSkeleton} from '@/lib/core/comments';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import {
   FeedListSkeleton,
   NewsInfoSkeleton,
@@ -31,6 +32,7 @@ import {findNews} from '@/subapps/news/common/orm/news';
 
 export async function ArticleNews({
   workspace,
+  config,
   segments,
   client,
   tenantId,
@@ -39,7 +41,8 @@ export async function ArticleNews({
   user,
   slug,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
+  config: NewsConfig | Cloned<NewsConfig>;
   segments: string[];
   client: Client;
   tenantId: string;
@@ -80,8 +83,7 @@ export async function ArticleNews({
   const navigatingPathFromURL = `${SUBAPP_CODES.news}${segmentPath}`;
   const directRoute = !slicedSegments?.length;
 
-  const isRecommendationEnable =
-    workspace.config?.enableRecommendedNews || false;
+  const isRecommendationEnable = config.enableRecommendedNews || false;
 
   return (
     <div className={`container mx-auto grid grid-cols-1 gap-6 mt-6`}>
@@ -103,14 +105,14 @@ export async function ArticleNews({
         {/* Main News Info Section */}
         <div className="lg:col-span-2">
           <Suspense fallback={<NewsInfoSkeleton />}>
-            <NewsInfoWrapper news={newsObject} workspace={workspace} />
+            <NewsInfoWrapper news={newsObject} config={config} />
           </Suspense>
         </div>
 
         <div className="w-full flex flex-col gap-6">
           {/* SocialMedia Section */}
           <Suspense fallback={<SocialMediaSkeleton />}>
-            <SocialMediaWrapper workspace={workspace} />
+            <SocialMediaWrapper config={config} />
           </Suspense>
 
           {/* Attachments Section */}
@@ -149,7 +151,7 @@ export async function ArticleNews({
       <Suspense fallback={<CommentsSkeleton />}>
         <CommentsWrapper
           news={newsObject}
-          workspace={workspace}
+          config={config}
           user={user}
           workspaceURI={workspaceURI}
         />

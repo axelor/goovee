@@ -4,12 +4,13 @@ import type {Cloned} from '@/types/util';
 // ---- CORE IMPORTS ----//
 import type {Client} from '@/goovee/.generated/client';
 import {getSession} from '@/auth';
-import {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {User} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import {
   CategoriesSkeleton,
   Hero,
@@ -38,7 +39,7 @@ async function HomePageNewsFeed({
   client,
   user,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
 }) {
@@ -89,9 +90,11 @@ async function HomePageNewsFeed({
 
 export async function Homepage({
   workspace,
+  config,
   client,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
+  config: NewsConfig | Cloned<NewsConfig>;
   client: Client;
 }) {
   const session = await getSession();
@@ -106,7 +109,7 @@ export async function Homepage({
       </div>
 
       <div className="h-full flex flex-col">
-        <Hero workspace={workspace} />
+        <Hero config={config} />
 
         <div className="container mx-auto grid grid-cols-1 gap-6 mb-20 lg:mb-0">
           <Suspense fallback={<CategoriesSkeleton />}>

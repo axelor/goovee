@@ -1,13 +1,14 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ----//
 import {clone} from '@/utils';
-import {getSession} from '@/auth';
-import {manager} from '@/tenant';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getNewsConfig} from '@/subapps/news/common/orm/config';
 import {workspacePathname} from '@/utils/workspace';
-import {findWorkspace} from '@/orm/workspace';
-import {DEFAULT_PAGE} from '@/constants';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {DEFAULT_PAGE, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import Homepage from '@/subapps/news/[[...segments]]/homepage';
@@ -21,25 +22,40 @@ export default async function Page(props: {
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
-  const {tenant: tenantId} = params;
 
-  const session = await getSession();
-  const user = session?.user;
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.news,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getNewsConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
 
   const {segments} = params;
   const homepage = !segments;
@@ -47,7 +63,13 @@ export default async function Page(props: {
   const {page = DEFAULT_PAGE} = searchParams;
 
   if (homepage) {
-    return <Homepage workspace={workspace} client={client} />;
+    return (
+      <Homepage
+        workspace={clone(access.workspace)}
+        config={clone(config)}
+        client={client}
+      />
+    );
   }
 
   const slug = segments?.at(-1) || '';
@@ -57,11 +79,12 @@ export default async function Page(props: {
     return (
       <Suspense fallback={<ArticleSkeleton />}>
         <ArticleNews
-          workspace={workspace}
+          workspace={clone(access.workspace)}
+          config={clone(config)}
           segments={segments}
           client={client}
-          tenantId={tenantId}
-          workspaceURL={workspace.url}
+          tenantId={tenant}
+          workspaceURL={access.workspace.url}
           workspaceURI={workspaceURI}
           user={user}
           slug={slug}
@@ -72,7 +95,7 @@ export default async function Page(props: {
 
   return (
     <CategoryNews
-      workspace={workspace}
+      workspace={clone(access.workspace)}
       client={client}
       page={Number(page)}
       segments={segments}

@@ -19,9 +19,9 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
 import type {ComputedProduct, Product, Category, PageInfo} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {MobileSortBy, SortBy, ProductCard, ProductListItem} from '..';
 import styles from './product-list.module.scss';
 
@@ -42,7 +42,7 @@ export function ProductList({
   categories,
   category,
   pageInfo = {page: 1, pages: 1, count: 0, hasNext: false, hasPrev: false},
-  workspace,
+  config,
   breadcrumbs,
   productPath,
   defaultSort,
@@ -53,7 +53,7 @@ export function ProductList({
   categories?: Category[];
   category?: Category;
   pageInfo?: PageInfo;
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ShopConfig | Cloned<ShopConfig>;
   productPath?: string;
   defaultSort?: string;
   hidePriceAndPurchase: boolean;
@@ -191,7 +191,7 @@ export function ProductList({
             {category && category?.name}
           </h4>
           <SortBy
-            workspace={workspace}
+            config={config}
             onChange={handleChangeSortBy}
             value={sort || defaultSort}
             className="flex-grow-0! basis-[25%]"
@@ -210,7 +210,7 @@ export function ProductList({
         <div className="bg-card text-card-foreground shadow mb-4 grid md:hidden grid-cols-2 gap-2 p-2">
           <MobileSortBy
             active={sort || defaultSort}
-            workspace={workspace}
+            config={config}
             onChange={handleChangeSortBy}
           />
           <MobileFilters />
@@ -237,7 +237,7 @@ export function ProductList({
                     product={computedProduct}
                     quantity={quantity}
                     onAdd={handleAdd}
-                    displayPrices={workspace?.config?.displayPrices ?? false}
+                    displayPrices={config.displayPrices ?? false}
                     hidePriceAndPurchase={hidePriceAndPurchase}
                     category={category!}
                   />

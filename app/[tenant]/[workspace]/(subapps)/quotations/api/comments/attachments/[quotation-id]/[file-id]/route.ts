@@ -1,16 +1,19 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {getSession} from '@/auth';
+// ---- CORE IMPORTS ---- //
 import {isFileOfRecord} from '@/comments/orm';
 import {SUBAPP_CODES} from '@/constants';
 import {isCommentEnabled} from '@/lib/core/comments';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
+import {getQuotationsConfig} from '../../../../../common/orm/config';
 import {PartnerKey} from '@/types';
 import {findFile, streamFile} from '@/utils/download';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {workspacePathname} from '@/utils/workspace';
+
+// ---- LOCAL IMPORTS ---- //
 import {findQuotation} from '../../../../../common/orm/quotations';
-import {manager} from '@/tenant';
 
 export async function GET(
   request: NextRequest,
@@ -24,44 +27,38 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
   const {'quotation-id': quotationId, 'file-id': fileId} = params;
 
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    return new NextResponse('Unauthorized', {status: 401});
-  }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return new NextResponse('Bad Request', {status: 400});
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.quotations,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: false,
   });
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
+  }
+  const {user, subapp} = access;
+  const {client} = access.tenant;
 
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
+  const config = await getQuotationsConfig(access.workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Not found', {status: 404});
   }
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.quotations, workspace})) {
+  if (
+    !isCommentEnabled({
+      subapp: SUBAPP_CODES.quotations,
+      config,
+    })
+  ) {
     return new NextResponse('Forbidden', {status: 403});
   }
 
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.quotations,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!app?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
-  }
-
-  const {role, isContactAdmin} = app;
+  const {role, isContactAdmin} = subapp;
 
   const quotationWhereClause = getWhereClauseForEntity({
     user,
@@ -88,8 +85,8 @@ export async function GET(
   const file = await findFile({
     id: fileId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

@@ -1,6 +1,6 @@
 'use client';
 import {i18n} from '@/locale';
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../../common/orm/config';
 import type {Cloned} from '@/types/util';
 import {useToast} from '@/ui/hooks';
 import type {ID} from '@/types';
@@ -65,7 +65,7 @@ export function ChildTicketsHeader(props: {
   contacts: ContactPartner[];
   userId: ID;
   childrenIds: ID[];
-  formFields: PortalAppConfig['ticketingFormFieldSet'];
+  formFields: TicketingConfig['ticketingFormFieldSet'];
 }) {
   const {
     ticketId,

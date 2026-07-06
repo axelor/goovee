@@ -1,7 +1,6 @@
 'use client';
 
 import {Suspense} from 'react';
-import type {Cloned} from '@/types/util';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -9,13 +8,7 @@ import {Container} from '@/ui/components';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
-import {
-  isCommentEnabled,
-  SORT_TYPE,
-  Comments,
-  CommentsSkeleton,
-} from '@/comments';
-import {type PortalWorkspace} from '@/orm/workspace';
+import {SORT_TYPE, Comments, CommentsSkeleton} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -34,10 +27,10 @@ import {withBasePath} from '@/lib/core/path/base-path';
 
 const Content = ({
   quotation,
-  workspace,
+  enableComment,
 }: {
   quotation: QuotationDetail;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  enableComment: boolean;
   orderSubapp?: boolean;
 }) => {
   const {
@@ -54,11 +47,6 @@ const Content = ({
 
   const router = useRouter();
   const {workspaceURI, tenant} = useWorkspace();
-
-  const enableComment = isCommentEnabled({
-    subapp: SUBAPP_CODES.quotations,
-    workspace,
-  });
 
   const hideDiscount = saleOrderLineList?.every(
     item => parseFloat(String(item.discountAmount)) === 0,

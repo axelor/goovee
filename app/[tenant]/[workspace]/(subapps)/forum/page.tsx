@@ -1,13 +1,16 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {manager} from '@/tenant';
-import {findWorkspace} from '@/orm/workspace';
-import {User} from '@/types';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {isCommentEnabled} from '@/comments';
+import {User} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {FORUM_CONTENT, GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
@@ -33,26 +36,49 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
 
-  const session = await getSession();
-  const user = session?.user as User;
-  const userId = user?.id as string;
   const type = searchParams?.type || FORUM_CONTENT.POSTS;
 
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user} = access;
+  const {client} = access.tenant;
+  const userId = user?.id as string;
+
+  const config = await getForumConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const enableComment = isCommentEnabled({
+    subapp: SUBAPP_CODES.forum,
+    config,
+  });
+
+  const workspace = clone(access.workspace);
 
   const groups = await findGroups({
     workspaceURL: workspace.url,
@@ -90,7 +116,7 @@ export default async function Page(props: {
   return (
     <div className="flex flex-col h-full flex-1">
       <div className="hidden lg:block">{/* <NavMenu items={MENU} /> */}</div>
-      <Hero selectedGroup={null} workspace={workspace} />
+      <Hero selectedGroup={null} config={clone(config)} />
       <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
         <GroupControls
           memberGroups={memberGroups}
@@ -110,9 +136,10 @@ export default async function Page(props: {
               <PostsContent
                 searchParams={searchParams}
                 workspace={workspace}
+                enableComment={enableComment}
                 groupIDs={groupIDs}
                 memberGroupIDs={memberGroupIDs}
-                user={user}
+                user={user ?? null}
                 client={client}
               />
             )}

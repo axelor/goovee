@@ -39,7 +39,7 @@ export async function fetchFolders({
       },
       ...(params?.where || {}),
       AND: [
-        await filterPrivate({client, user}),
+        filterPrivate({user}),
         archived
           ? {archived: true}
           : {OR: [{archived: false}, {archived: null}]},
@@ -103,7 +103,7 @@ export async function fetchFiles({
         id,
       },
       AND: [
-        await filterPrivate({client, user}),
+        filterPrivate({user}),
         archived
           ? {archived: true}
           : {OR: [{archived: false}, {archived: null}]},
@@ -153,7 +153,7 @@ export async function fetchLatestFiles({
         url: workspaceURL,
       },
       AND: [
-        await filterPrivate({client, user}),
+        filterPrivate({user}),
         archived
           ? {archived: true}
           : {OR: [{archived: false}, {archived: null}]},
@@ -206,7 +206,7 @@ export async function fetchFile({
         url: workspaceURL,
       },
       AND: [
-        await filterPrivate({client, user}),
+        filterPrivate({user}),
         archived
           ? {archived: true}
           : {OR: [{archived: false}, {archived: null}]},
@@ -269,7 +269,7 @@ export async function fetchExplorerCategories({
           url: workspaceURL,
         },
         AND: [
-          await filterPrivate({client, user}),
+          filterPrivate({user}),
           archived
             ? {archived: true}
             : {OR: [{archived: false}, {archived: null}]},

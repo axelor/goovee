@@ -29,7 +29,7 @@ export async function findEventCategories({
         workspace: {url: workspaceURL},
         OR: [{archived: false}, {archived: null}],
       },
-      await filterPrivate({user, client}),
+      filterPrivate({user}),
     ]),
     orderBy: {name: ORDER_BY.ASC},
     select: {

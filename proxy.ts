@@ -7,6 +7,7 @@ import {getBasePath} from '@/lib/core/path/base-path';
 
 export const TENANT_HEADER = 'x-tenant-id';
 export const WORKSPACE_HEADER = 'x-workspace-id';
+export const CURRENT_PATH_HEADER = 'x-current-path';
 
 export const config = {
   matcher: [
@@ -96,6 +97,10 @@ export default async function proxy(req: NextRequest) {
   }
 
   const headers = new Headers(req.headers);
+
+  /* Record the path (with query string) being requested so server components
+     can send a denied guest back to exactly where they were after login. */
+  headers.set(CURRENT_PATH_HEADER, url.pathname + url.search);
 
   if (tenant) {
     headers.set(TENANT_HEADER, tenant);

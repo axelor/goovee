@@ -41,7 +41,9 @@
       "@/comments/*": ["./lib/core/comments/*"],
       "@/environment": ["./lib/core/environment/index"],
       "@/environment/*": ["./lib/core/environment/*"],
-      "@/pwa/*": ["./lib/core/pwa/*"]
+      "@/pwa/*": ["./lib/core/pwa/*"],
+      "@/service": ["./lib/core/service/index"],
+      "@/service/*": ["./lib/core/service/*"]
     }
   },
   "include": [

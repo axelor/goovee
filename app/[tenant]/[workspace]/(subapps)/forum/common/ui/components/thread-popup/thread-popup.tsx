@@ -1,7 +1,6 @@
 'use client';
 
 import {Swiper, SwiperSlide} from 'swiper/react';
-import type {Cloned} from '@/types/util';
 import {Navigation} from 'swiper/modules';
 
 // ---- CORE IMPORTS ---- //
@@ -20,19 +19,18 @@ import {
 } from '@/subapps/forum/common/types/forum';
 
 import styles from './styles.module.scss';
-import {PortalWorkspace} from '@/orm/workspace';
 
 export const ThreadPopup = ({
   post,
   open,
   images,
   onClose,
-  workspace,
+  enableComment,
 }: {
   post?: PostWithMembership;
   open: boolean;
   images: Attachment[];
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  enableComment: boolean;
   onClose: () => void;
 }) => {
   const {workspaceURI} = useWorkspace();
@@ -80,7 +78,7 @@ export const ThreadPopup = ({
           </div>
           <div className="md:pt-12 md:pr-4 pb-6 md:pb-0 w-full md:w-1/2 h-[28.125rem] md:h-full overflow-auto">
             <Thread
-              workspace={workspace}
+              enableComment={enableComment}
               post={post}
               showHeader={false}
               showCommentsByDefault={true}
