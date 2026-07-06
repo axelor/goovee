@@ -723,6 +723,38 @@ export async function findProductBySlug({
   }).then(({products}) => products?.[0] ?? null);
 }
 
+/**
+ * Lightweight product lookup for page metadata (title/description) only.
+ * Skips the full pricing/category pipeline of findProductBySlug — a single
+ * findOne selecting name + description, gated by the same privacy filter.
+ */
+export async function findProductMetaBySlug({
+  slug,
+  workspace,
+  user,
+  client,
+}: {
+  slug: Product['slug'];
+  workspace: Workspace | Cloned<Workspace>;
+  user?: User;
+  client: Client;
+}) {
+  if (!slug || !workspace) {
+    return null;
+  }
+
+  return client.aOSProduct.findOne({
+    where: {
+      slug,
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
+    },
+    select: {
+      name: true,
+      description: true,
+    },
+  });
+}
+
 type WSProduct = {
   productId: number;
   prices: [{type: 'WT'; price: string}, {type: 'ATI'; price: string}];

@@ -61,7 +61,9 @@ export async function GET(
       return new NextResponse('File not found', {status: 404});
     }
 
-    return streamFile(file);
+    const response = await streamFile(file);
+    response.headers.set('Cache-Control', 'private, max-age=3600');
+    return response;
   } else {
     return new NextResponse('Picture not found', {status: 404});
   }
