@@ -1,6 +1,0 @@
-{
-  "title": "Fix empty shop catalogue when prices are fetched from the web service after login",
-  "type": "fix",
-  "description": "For workspaces configured to fetch prices from the web service after login, the product listing, product detail, cart, order creation and quotation requests now correctly load products and prices instead of showing an empty catalogue.",
-  "scope": ["shop"]
-}
