@@ -27,7 +27,6 @@ import {clone, scale} from '@/utils';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
 import type {PaymentContext} from '@/lib/core/payment/common/type';
 import {getPaymentModeId} from '@/utils/payment';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {validateRegistration} from '@/subapps/events/common/actions/validation';
@@ -494,9 +493,7 @@ export const createComment: CreateComment = async props => {
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name || '';
-      const eventUrl = withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`,
-      );
+      const eventUrl = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,
