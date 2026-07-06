@@ -23,6 +23,37 @@ import type {HubPispLocalInstrument} from '@/lib/core/payment/hubpisp/constants'
 import {manager} from '@/tenant';
 import {HubPispApiError} from '@/lib/core/payment/hubpisp/utils';
 
+/**
+ * The payment link is not queryable right away when BPCE fires the webhook:
+ * wait 2s before each GET (per BPCE) and retry on 400, since notifications
+ * are never redelivered.
+ */
+const LINK_FETCH_DELAY_MS = 2_000;
+const LINK_FETCH_MAX_ATTEMPTS = 3;
+
+async function fetchPaymentLinkStatusWithRetry(
+  resourceId: string,
+): Promise<PaymentLinkStatusResult> {
+  for (let attempt = 1; ; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, LINK_FETCH_DELAY_MS));
+    try {
+      return await fetchPaymentLinkStatus(resourceId);
+    } catch (err) {
+      if (
+        !(err instanceof HubPispApiError) ||
+        err.status !== 400 ||
+        attempt >= LINK_FETCH_MAX_ATTEMPTS
+      ) {
+        throw err;
+      }
+      console.warn(
+        '[HUBPISP][WEBHOOK] Payment link not yet available, retrying',
+        {resourceId, attempt, body: err.body},
+      );
+    }
+  }
+}
+
 export async function POST(
   _request: Request,
   {params}: {params: Promise<{resourceId: string}>},
@@ -31,14 +62,14 @@ export async function POST(
 
   let linkData: PaymentLinkStatusResult;
   try {
-    linkData = await fetchPaymentLinkStatus(resourceId);
+    linkData = await fetchPaymentLinkStatusWithRetry(resourceId);
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {
-      console.warn('[HUBPISP][WEBHOOK] Payment link not yet available', {
-        resourceId,
-        body: err.body,
-      });
-      // Do NOT fail the webhook — BPCE will retry.
+      console.warn(
+        '[HUBPISP][WEBHOOK] Payment link not available after retries',
+        {resourceId, attempts: LINK_FETCH_MAX_ATTEMPTS, body: err.body},
+      );
+      // Do NOT fail the webhook — BPCE never redelivers; the expiry backstop reconcile picks the payment up instead.
       return new NextResponse('OK', {status: 200});
     }
 
