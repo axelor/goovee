@@ -1,6 +1,6 @@
 {
   "name": "@goovee/core",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development serwist build && next dev",
