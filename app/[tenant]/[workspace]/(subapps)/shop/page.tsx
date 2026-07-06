@@ -76,8 +76,10 @@ async function Featured({
     user,
   }).then(clone)) as FeaturedCategory[];
 
-  for (const category of featuredCategories) {
-    if (category?.productList?.length) {
+  await Promise.all(
+    featuredCategories.map(async category => {
+      if (!category?.productList?.length) return;
+
       const res = await findProducts({
         ids: category.productList.map(p => p.id),
         workspace: workspace!,
@@ -89,8 +91,8 @@ async function Featured({
       }).then(clone);
 
       category.products = (res as {products: ComputedProduct[]})?.products;
-    }
-  }
+    }),
+  );
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
