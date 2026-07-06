@@ -691,7 +691,7 @@ export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {id, searchKey, orderBy, workspaceID, workspaceURL} = parsed.data;
+  const {id, searchKey, orderBy, workspaceURL} = parsed.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
@@ -715,7 +715,7 @@ export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
     id,
     searchKey,
     orderBy,
-    workspaceID,
+    workspaceID: access.workspace.id,
     client: access.tenant.client,
     user: access.user,
   });

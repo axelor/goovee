@@ -64,7 +64,6 @@ export default async function Page(props: {
             userId={user.id}
             group={group}
             sortBy={sortBy}
-            workspaceID={access.workspace.id}
             workspaceURL={workspaceURL}
           />
         </Suspense>

@@ -129,7 +129,6 @@ export const FetchGroupsByMembersSchema = z.object({
       forumGroup: z.object({name: OrderDirectionSchema}),
     })
     .optional(),
-  workspaceID: IdSchema,
   workspaceURL: z.string(),
 });
 export type FetchGroupsByMembersInput = z.input<
