@@ -1,0 +1,6 @@
+{
+  "title": "Fix duplicated base path in notification \"View\" links",
+  "type": "fix",
+  "description": "Under a base path deployment, the \"View\" link on an unread notification pointed to a URL where the base path was repeated and led to a not-found page. Invoice, event, news, forum and ticketing notifications now link to the correct page.",
+  "scope": ["invoices", "events", "news", "forum", "ticketing"]
+}

@@ -5,7 +5,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import type {Client} from '@/goovee/.generated/client';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {toWorkspaceURI} from '@/utils/workspace';
 
 export async function notifyInvoicePaymentSuccess({
   invoiceId,
@@ -33,10 +33,11 @@ export async function notifyInvoicePaymentSuccess({
     if (!invoice?.portalWorkspace?.url) return;
 
     const workspaceURL = invoice.portalWorkspace.url;
-    const workspaceURI = new URL(workspaceURL).pathname;
-    const invoiceUrl = withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.invoices}/${invoiceId}`,
+    const workspaceURI = toWorkspaceURI(
+      workspaceURL,
+      process.env.GOOVEE_PUBLIC_HOST,
     );
+    const invoiceUrl = `${workspaceURI}/${SUBAPP_CODES.invoices}/${invoiceId}`;
 
     const tr = getTranslation.bind(null, {
       locale: user.localization?.code || DEFAULT_LOCALE,
