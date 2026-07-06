@@ -1,6 +1,0 @@
-{
-  "title": "Send guests to login instead of a not-found page for an unavailable sub-app",
-  "type": "change",
-  "description": "When a signed-out visitor opens a sub-app that exists but isn't available to them, they are now taken to the login page — and returned to the page they wanted after signing in — instead of a page-not-found. A signed-in visitor who isn't allowed the sub-app now sees an access-denied page. A sub-app that genuinely doesn't exist or isn't enabled still shows page-not-found. This is consistent across every sub-app.",
-  "scope": ["core"]
-}
