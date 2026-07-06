@@ -1,0 +1,6 @@
+{
+  "title": "Speed up news pages by memoizing the category lookup per request",
+  "type": "fix",
+  "description": "Reduced redundant database work on the news pages. The news category lookup — previously repeated for each news block on a homepage or category page — is now request-memoized, so it runs once per request. What users can access and see is unchanged.",
+  "scope": ["news"]
+}
