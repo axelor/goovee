@@ -15,6 +15,7 @@ import {getPartnerId} from '@/utils';
 
 const requestPublisherAccessSchema = z.object({
   workspaceURL: z.string().min(1),
+  publishingPlan: z.string().trim().min(1).max(2000),
 });
 
 type RequestPublisherAccessInput = z.infer<typeof requestPublisherAccessSchema>;
@@ -37,7 +38,7 @@ export async function requestPublisherAccess(
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL} = parsed.data;
+  const {workspaceURL, publishingPlan} = parsed.data;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.marketplace,
@@ -113,6 +114,7 @@ export async function requestPublisherAccess(
           statusSelect: PUBLISHER_REQUEST_STATUS.REQUESTED,
           cooldownUntil: null,
           rejectionReason: null,
+          publishingPlan,
           requestDateTime: new Date(),
           requestedByContact: {select: {id: contactId}},
         },
@@ -122,6 +124,7 @@ export async function requestPublisherAccess(
       await client.aOSMarketplacePublisherRequest.create({
         data: {
           statusSelect: PUBLISHER_REQUEST_STATUS.REQUESTED,
+          publishingPlan,
           requestDateTime: new Date(),
           partner: {select: {id: partnerId}},
           portalWorkspace: {select: {id: workspaceId}},
