@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
 import type {ID} from '@/types';
-import {Workspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
@@ -11,14 +10,12 @@ import {fetchGroupsByMembers} from '@/subapps/forum/common/action/action';
 export async function MembersNoticationsWrapper({
   userId,
   group,
-  workspaceID,
   workspaceURL,
   sortBy,
 }: {
   userId: ID;
   group: string;
   sortBy: string;
-  workspaceID: Workspace['id'];
   workspaceURL: string;
 }) {
   const groupMembers = (await fetchGroupsByMembers({
@@ -29,7 +26,6 @@ export async function MembersNoticationsWrapper({
         name: sortBy,
       },
     },
-    workspaceID,
     workspaceURL,
   }).then(clone)) as MemberGroup[];
 
