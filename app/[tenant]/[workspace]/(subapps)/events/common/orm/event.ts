@@ -30,6 +30,7 @@ import {and} from '@/utils/orm';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_STATUS, EVENT_TYPE} from '@/subapps/events/common/constants';
+import {findAccessibleEventCategoryIds} from '@/subapps/events/common/orm/event-category';
 import {findProductsFromWS} from '@/subapps/events/common/service';
 import {
   findSelectionItems,
@@ -138,6 +139,81 @@ export type FullEvent = ExpandRecursively<
   NonNullable<Awaited<ReturnType<typeof findEvent>>>
 >;
 
+/* Shared access/visibility predicate for a single event: same rules used by
+   findEvent, reused by the lightweight lookups so file routes can resolve an
+   event without recomputing the whole record (and its pricing web-service). */
+function buildEventAccessWhere({
+  id,
+  slug,
+  workspaceURL,
+  privateFilter,
+}: {
+  id?: ID;
+  slug?: string;
+  workspaceURL: string;
+  privateFilter: ReturnType<typeof filterPrivate>;
+}) {
+  return and<AOSPortalEvent>([
+    id && {id},
+    slug ? {slug} : {slug: {ne: null}},
+    privateFilter,
+    {OR: [{archived: false}, {archived: null}]},
+    {
+      statusSelect: EVENT_STATUS.PUBLISHED,
+      eventCategorySet: and<AOSPortalEventCategory>([
+        {workspace: {url: workspaceURL}},
+        privateFilter,
+      ]),
+    },
+  ]);
+}
+
+/* Minimal access-checked lookup: resolves only the event image id. */
+export async function findEventImage({
+  id,
+  slug,
+  workspaceURL,
+  client,
+  user,
+}: {
+  id?: ID;
+  slug?: string;
+  workspaceURL: string;
+  client: Client;
+  user?: User | null;
+}) {
+  if (!((slug || id) && workspaceURL)) return null;
+
+  const privateFilter = filterPrivate({user});
+  return client.aOSPortalEvent.findOne({
+    where: buildEventAccessWhere({id, slug, workspaceURL, privateFilter}),
+    select: {eventImage: {id: true}},
+  });
+}
+
+/* Minimal access-checked lookup: resolves only the event id. */
+export async function findEventIdForAccess({
+  id,
+  slug,
+  workspaceURL,
+  client,
+  user,
+}: {
+  id?: ID;
+  slug?: string;
+  workspaceURL: string;
+  client: Client;
+  user?: User | null;
+}) {
+  if (!((slug || id) && workspaceURL)) return null;
+
+  const privateFilter = filterPrivate({user});
+  return client.aOSPortalEvent.findOne({
+    where: buildEventAccessWhere({id, slug, workspaceURL, privateFilter}),
+    select: {id: true},
+  });
+}
+
 export async function findEvent({
   id,
   slug,
@@ -158,19 +234,12 @@ export async function findEvent({
   const privateFilter = filterPrivate({user});
   const event = await client.aOSPortalEvent
     .findOne({
-      where: and<AOSPortalEvent>([
-        id && {id},
-        slug ? {slug} : {slug: {ne: null}},
+      where: buildEventAccessWhere({
+        id,
+        slug,
+        workspaceURL: workspace.url,
         privateFilter,
-        {OR: [{archived: false}, {archived: null}]},
-        {
-          statusSelect: EVENT_STATUS.PUBLISHED,
-          eventCategorySet: and<AOSPortalEventCategory>([
-            {workspace: {url: workspace.url}},
-            privateFilter,
-          ]),
-        },
-      ]),
+      }),
       select: {
         id: true,
         eventTitle: true,
@@ -439,15 +508,23 @@ export async function findEvents({
   const currentDateTime = dayjs().toISOString();
   const todayStartTime = dayjs().startOf(DAY).toISOString();
   const privateFilter = filterPrivate({user});
+
+  const accessibleCategoryIds = await findAccessibleEventCategoryIds({
+    workspaceURL,
+    categoryids,
+    privateFilter,
+    client,
+  });
+
+  if (!accessibleCategoryIds.length) {
+    return {events: [], pageInfo: emptyPageInfo};
+  }
+
   const whereClause = and<AOSPortalEvent>([
     {
       statusSelect: EVENT_STATUS.PUBLISHED,
       slug: {ne: null},
-      eventCategorySet: and<AOSPortalEventCategory>([
-        {workspace: {url: workspaceURL}},
-        categoryids?.length && {id: {in: categoryids}},
-        privateFilter,
-      ]),
+      eventCategorySet: {id: {in: accessibleCategoryIds}},
     },
     privateFilter,
     ids?.length && {id: {in: ids}},
