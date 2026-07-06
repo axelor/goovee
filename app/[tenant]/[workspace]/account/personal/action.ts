@@ -33,6 +33,7 @@ import {
   type UpdateProfileImage,
 } from '../common/utils/validators';
 import {PARTNER_PICTURE_PURPOSE} from '../common/constants';
+import {getAccountConfig} from '../common/orm/config';
 
 function error(message: string) {
   return {
@@ -390,7 +391,13 @@ export async function generateOTPForUpdate(data: EmailUpdateOTP) {
     return error(await t('Bad request'));
   }
 
-  if (!workspace?.config?.otpTemplateList?.length) {
+  const config = await getAccountConfig(workspace.config.id, client);
+
+  if (!config) {
+    return error(await t('Bad request'));
+  }
+
+  if (!config.otpTemplateList?.length) {
     return generateOTP({
       email,
       scope: Scope.EmailUpdate,
@@ -398,7 +405,6 @@ export async function generateOTPForUpdate(data: EmailUpdateOTP) {
       client,
     });
   } else {
-    const {config} = workspace;
     const {otpTemplateList} = config;
 
     const localization =

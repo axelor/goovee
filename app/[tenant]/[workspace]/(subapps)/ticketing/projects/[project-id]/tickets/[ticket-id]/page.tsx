@@ -1,13 +1,14 @@
 import type {ID} from '@/types';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
 import {Comments, isCommentEnabled, SORT_TYPE} from '@/comments';
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,12 +21,14 @@ import {Skeleton} from '@/ui/components/skeleton';
 import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {encodeFilter, getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../../common/orm/config';
+import {getTicketingConfig} from '../../../../common/orm/config';
 import {createComment, fetchComments} from '../../../../common/actions';
 import {ALL_TICKETS_TITLE} from '../../../../common/constants';
 import {
@@ -55,7 +58,6 @@ import {
   ParentTicketList,
   RelatedTicketList,
 } from '../../../../common/ui/components/ticket-list';
-import {ensureAuth} from '../../../../common/utils/auth-helper';
 import type {EncodedTicketFilter} from '../../../../common/utils/validators';
 import {
   ChildTicketsHeader,
@@ -72,30 +74,52 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const {workspaceURI, workspaceURL} = workspacePathname(params);
+  const {workspaceURI, workspaceURL, tenant} = workspacePathname(params);
   const projectId = params['project-id'];
   const ticketId = params['ticket-id'];
 
-  const {tenant: tenantId} = params;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/${ticketId}`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  if (error) notFound();
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
+
+  const config = await getTicketingConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
 
   const [ticket, statuses, categories, priorities, contacts] =
     await Promise.all([
-      findTicket({ticketId, projectId, client, user, subapp, workspace}),
+      findTicket({
+        ticketId,
+        projectId,
+        client,
+        user,
+        subapp,
+        workspace: access.workspace,
+      }),
       findTicketStatuses(projectId, client),
       findTicketCategories(projectId, client),
       findTicketPriorities(projectId, client),
@@ -157,30 +181,30 @@ export default async function Page(props: {
             categories={categories}
             priorities={priorities}
             contacts={contacts}
-            formFields={clone(workspace.config.ticketingFormFieldSet)}
-            showCancel={workspace.config.isDisplayCancelBtn}
-            showClose={workspace.config.isDisplayCloseBtn}
-            showAssignment={workspace.config.isDisplayAssignmentBtn}
+            formFields={clone(config.ticketingFormFieldSet)}
+            showCancel={config.isDisplayCancelBtn}
+            showClose={config.isDisplayCloseBtn}
+            showAssignment={config.isDisplayAssignmentBtn}
           />
 
           <div
             className={cn('space-y-4 rounded-md border bg-card p-4 mt-5', {
               ['hidden']:
-                !workspace.config.isDisplayTicketParent &&
-                !workspace.config.isDisplayChildTicket &&
-                !workspace.config.isDisplayRelatedTicket,
+                !config.isDisplayTicketParent &&
+                !config.isDisplayChildTicket &&
+                !config.isDisplayRelatedTicket,
             })}>
-            {workspace.config.isDisplayTicketParent && (
+            {config.isDisplayTicketParent && (
               <Suspense fallback={<Skeleton className="h-[160px]" />}>
                 <ParentTicket
                   ticketId={ticket.id}
                   projectId={ticket.project?.id}
                   client={client}
-                  fields={workspace.config.ticketingFieldSet}
+                  fields={config.ticketingFieldSet}
                 />
               </Suspense>
             )}
-            {workspace.config.isDisplayChildTicket && (
+            {config.isDisplayChildTicket && (
               <Suspense fallback={<Skeleton className="h-[160px]" />}>
                 <ChildTickets
                   projectId={ticket.project?.id}
@@ -190,18 +214,18 @@ export default async function Page(props: {
                   contacts={contacts}
                   userId={user.id}
                   client={client}
-                  fields={workspace.config.ticketingFieldSet}
-                  formFields={workspace.config.ticketingFormFieldSet}
+                  fields={config.ticketingFieldSet}
+                  formFields={config.ticketingFormFieldSet}
                 />
               </Suspense>
             )}
-            {workspace.config.isDisplayRelatedTicket && (
+            {config.isDisplayRelatedTicket && (
               <Suspense fallback={<Skeleton className="h-[160px]" />}>
                 <RelatedTickets
                   ticketId={ticket.id}
                   projectId={ticket.project?.id}
                   client={client}
-                  fields={workspace.config.ticketingFieldSet}
+                  fields={config.ticketingFieldSet}
                 />
               </Suspense>
             )}
@@ -209,7 +233,10 @@ export default async function Page(props: {
         </>
       </TicketDetailsProvider>
 
-      {isCommentEnabled({subapp: SUBAPP_CODES.ticketing, workspace}) && (
+      {isCommentEnabled({
+        subapp: SUBAPP_CODES.ticketing,
+        config,
+      }) && (
         <div className="rounded-md border bg-card p-4 mt-5">
           <h4 className="text-xl font-semibold border-b">
             {await t('Comments')}
@@ -257,8 +284,8 @@ async function ChildTickets({
   contacts: ContactPartner[];
   userId: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
-  formFields: PortalAppConfig['ticketingFormFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
+  formFields: TicketingConfig['ticketingFormFieldSet'];
 }) {
   if (!projectId) return;
 
@@ -298,7 +325,7 @@ async function ParentTicket({
   projectId?: ID;
   ticketId: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   if (!projectId) return;
   const [childIds, ticket] = await Promise.all([
@@ -332,7 +359,7 @@ async function RelatedTickets({
   ticketId: ID;
   projectId?: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   if (!projectId) return;
   const [linkTypes, links] = await Promise.all([

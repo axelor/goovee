@@ -3,7 +3,7 @@
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {TENANT_HEADER} from '@/proxy';
 import {
   findDefaultDeliveryAddress,
@@ -12,96 +12,124 @@ import {
   findInvoicingAddresses,
   findPartnerAddress,
 } from '@/orm/address';
+import {SUBAPP_CODES} from '@/constants';
 import type {ID} from '@/types';
 import {clone, getPartnerId} from '@/utils';
-import {manager} from '@/tenant';
-import {IdSchema} from '@/utils/validators';
+import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
 
-export async function findDefaultInvoicing() {
-  const session = await getSession();
-  const user = session?.user;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!(user && tenantId)) return null;
-
-  const userId = getPartnerId(user);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
-
-  return findDefaultInvoicingAddress(userId, client).then(clone);
-}
-
-export async function findDefaultDelivery() {
-  const session = await getSession();
-  const user = session?.user;
+export async function findDefaultInvoicing({
+  workspaceURL,
+}: {
+  workspaceURL: string;
+}) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) return null;
 
-  if (!(user && tenantId)) return null;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) return null;
 
-  const userId = getPartnerId(user);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
-
-  return findDefaultDeliveryAddress(userId, client).then(clone);
+  const userId = getPartnerId(access.user);
+  return findDefaultInvoicingAddress(userId, access.tenant.client).then(clone);
 }
 
-export async function findAddress(id: ID) {
+export async function findDefaultDelivery({
+  workspaceURL,
+}: {
+  workspaceURL: string;
+}) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
+
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) return null;
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) return null;
+
+  const userId = getPartnerId(access.user);
+  return findDefaultDeliveryAddress(userId, access.tenant.client).then(clone);
+}
+
+export async function findAddress({
+  id,
+  workspaceURL,
+}: {
+  id: ID;
+  workspaceURL: string;
+}) {
   if (!IdSchema.safeParse(id).success) return null;
-
-  const session = await getSession();
-  const user = session?.user;
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) return null;
 
-  if (!(user && tenantId)) return null;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) return null;
 
-  const userId = getPartnerId(user);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
-
-  return findPartnerAddress({partnerId: userId, addressId: id, client}).then(
-    clone,
-  );
+  const userId = getPartnerId(access.user);
+  return findPartnerAddress({
+    partnerId: userId,
+    addressId: id,
+    client: access.tenant.client,
+  }).then(clone);
 }
 
-export async function fetchDeliveryAddresses() {
-  const session = await getSession();
-  const user = session?.user;
+export async function fetchDeliveryAddresses({
+  workspaceURL,
+}: {
+  workspaceURL: string;
+}) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) return null;
 
-  if (!(user && tenantId)) return null;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) return null;
 
-  const userId = getPartnerId(user);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
-
-  return findDeliveryAddresses(userId, client).then(clone);
+  const userId = getPartnerId(access.user);
+  return findDeliveryAddresses(userId, access.tenant.client).then(clone);
 }
 
-export async function fetchInvoicingAddresses() {
-  const session = await getSession();
-  const user = session?.user;
+export async function fetchInvoicingAddresses({
+  workspaceURL,
+}: {
+  workspaceURL: string;
+}) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) return null;
 
-  if (!(user && tenantId)) return null;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) return null;
 
-  const userId = getPartnerId(user);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
-
-  return findInvoicingAddresses(userId, client).then(clone);
+  const userId = getPartnerId(access.user);
+  return findInvoicingAddresses(userId, access.tenant.client).then(clone);
 }

@@ -3,7 +3,7 @@ import {filterPrivate} from '@/orm/filter';
 import type {Cloned} from '@/types/util';
 import type {Client} from '@/goovee/.generated/client';
 import type {User, Category} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 
 type RawCategory = {
   id: string;
@@ -41,7 +41,7 @@ export async function findCategories({
   user,
   archived,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   archived?: boolean;
@@ -54,7 +54,7 @@ export async function findCategories({
         id: workspace.id,
       },
       AND: [
-        await filterPrivate({client, user}),
+        filterPrivate({user}),
         archived
           ? {archived: true}
           : {OR: [{archived: false}, {archived: null}]},
@@ -77,7 +77,7 @@ export async function findFeaturedCategories({
   user,
   archived,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   archived?: boolean;
@@ -91,7 +91,7 @@ export async function findFeaturedCategories({
       },
       isFeatured: true,
       AND: [
-        await filterPrivate({client, user}),
+        filterPrivate({user}),
         archived
           ? {archived: true}
           : {OR: [{archived: false}, {archived: null}]},

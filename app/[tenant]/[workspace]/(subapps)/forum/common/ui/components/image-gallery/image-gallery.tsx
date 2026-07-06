@@ -1,7 +1,6 @@
 'use client';
 
 import {useState} from 'react';
-import type {Cloned} from '@/types/util';
 import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
@@ -18,16 +17,15 @@ import type {
   PostWithMembership,
 } from '@/subapps/forum/common/types/forum';
 import {ThreadPopup} from '@/subapps/forum/common/ui/components';
-import {PortalWorkspace} from '@/orm/workspace';
 
 export const ImageGallery = ({
   images,
   post,
-  workspace,
+  enableComment,
 }: {
   images: Attachment[];
   post?: PostWithMembership;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  enableComment: boolean;
 }) => {
   const showOverlay = images.length > MAX_IMAGES_BEFORE_OVERLAY;
 
@@ -77,7 +75,7 @@ export const ImageGallery = ({
         images={images}
         open={openPopUp}
         onClose={closeThreadPopup}
-        workspace={workspace}
+        enableComment={enableComment}
       />
     </>
   );

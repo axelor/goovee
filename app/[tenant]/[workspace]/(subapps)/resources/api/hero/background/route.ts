@@ -2,46 +2,37 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/tenant';
+
+// ---- LOCAL IMPORTS ---- //
+import {getResourcesConfig} from '@/subapps/resources/common/orm/config';
 
 export async function GET(
   request: NextRequest,
   props: {params: Promise<{tenant: string; workspace: string}>},
 ) {
   const params = await props.params;
-  const {workspaceURL, tenant: tenantId} = workspacePathname(params);
+  const {workspaceURL, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return new NextResponse('Bad Request', {status: 400});
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user: session?.user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.resources,
-    user: session?.user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-  if (!subapp?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access.tenant;
 
-  const bgImageId = workspace.config?.resourcesHeroBgImage?.id;
+  const config = await getResourcesConfig(access.workspace.config.id, client);
+
+  const bgImageId = config?.resourcesHeroBgImage?.id;
 
   if (!bgImageId) {
     return new NextResponse('Image not found', {status: 404});
@@ -50,8 +41,8 @@ export async function GET(
   const file = await findFile({
     id: bgImageId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

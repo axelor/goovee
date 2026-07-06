@@ -26,8 +26,7 @@
       "type": "String",
       "name": "model",
       "column": "model_name",
-      "required": true,
-      "internal": true
+      "required": true
     },
     {
       "type": "String",
@@ -37,8 +36,7 @@
       "type": "String",
       "name": "modelField",
       "column": "model_field",
-      "required": true,
-      "internal": true
+      "required": true
     },
     {
       "type": "String",

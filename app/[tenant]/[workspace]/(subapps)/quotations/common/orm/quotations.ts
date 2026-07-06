@@ -9,7 +9,7 @@ import {
 import {getSkip} from '@/utils/pagination';
 import {getPageInfo} from '@/utils';
 import type {ID, Partner} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {formatNumber} from '@/locale/server/formatters';
 import {and} from '@/utils/orm';
 import type {WhereOptions} from '@goovee/orm';
@@ -34,7 +34,7 @@ export const fetchQuotations = async ({
     page?: string | number;
   };
   client: Client;
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
 }) => {
   const {page = DEFAULT_PAGE, limit, where = {}} = params;
   const {id: clientPartnerId} = where.clientPartner || {};
@@ -97,7 +97,7 @@ export async function findQuotation({
   id: ID;
   client: Client;
   params?: {where?: WhereOptions<AOSOrder>};
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
 }) {
   if (!(client && workspaceURL)) return null;
 

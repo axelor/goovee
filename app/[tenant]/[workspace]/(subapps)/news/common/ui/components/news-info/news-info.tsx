@@ -12,11 +12,11 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatDate} from '@/locale/formatters';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {BadgeList, Skeleton, InnerHTML} from '@/ui/components';
-import {PortalWorkspace} from '@/orm/workspace';
 import {cn} from '@/utils/css';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import type {NewsCategory, NewsImage} from '@/subapps/news/common/types';
 import {getFormatString} from '@/subapps/news/common/utils';
 import {PUBLISHED_ON} from '@/subapps/news/common/constants';
@@ -31,7 +31,7 @@ export const NewsInfo = ({
   publicationDateTime,
   content,
   author,
-  workspace,
+  config,
 }: {
   title: string;
   slug: string;
@@ -45,14 +45,14 @@ export const NewsInfo = ({
     simpleFullName?: string;
     picture?: {id: string};
   };
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: NewsConfig | Cloned<NewsConfig>;
 }) => {
   const {tenant, workspaceURI} = useWorkspace();
   const {
     isShowPublicationAuthor,
     isShowPublicationDate,
     isShowPublicationTime,
-  } = workspace?.config || {};
+  } = config;
 
   const shouldShowAuthor = isShowPublicationAuthor && !!author;
   const shouldShowDate = isShowPublicationDate && !!publicationDateTime;

@@ -11,22 +11,24 @@ import {
   IMAGE_URL,
   SUBAPP_CODES,
 } from '@/constants';
-import type {PortalWorkspace} from '@/orm/workspace';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ResourcesConfig} from '@/subapps/resources/common/orm/config';
 import Search from './search';
 
 export const Hero = ({
-  workspace,
+  config,
   workspaceURI,
+  workspaceURL,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ResourcesConfig | Cloned<ResourcesConfig>;
   workspaceURI: string;
+  workspaceURL: string;
 }) => {
-  const renderSearch = () => <Search workspaceURL={workspace.url} />;
+  const renderSearch = () => <Search workspaceURL={workspaceURL} />;
 
-  const imageURL = workspace?.config?.resourcesHeroBgImage?.id
+  const imageURL = config.resourcesHeroBgImage?.id
     ? withBasePath(
         `${workspaceURI}/${SUBAPP_CODES.resources}/api/hero/background`,
       )
@@ -35,23 +37,16 @@ export const Hero = ({
   return (
     <>
       <HeroSearch
-        title={
-          workspace?.config?.resourcesHeroTitle ||
-          i18n.t(BANNER_TITLES.resources)
-        }
+        title={config.resourcesHeroTitle || i18n.t(BANNER_TITLES.resources)}
         description={
-          workspace?.config?.resourcesHeroDescription ||
-          i18n.t(BANNER_DESCRIPTION)
+          config.resourcesHeroDescription || i18n.t(BANNER_DESCRIPTION)
         }
         image={imageURL}
         background={
-          (workspace?.config
-            ?.resourcesHeroOverlayColorSelect as OverlayColor) || 'default'
+          (config.resourcesHeroOverlayColorSelect as OverlayColor) || 'default'
         }
         blendMode={
-          workspace?.config?.resourcesHeroOverlayColorSelect
-            ? 'overlay'
-            : 'normal'
+          config.resourcesHeroOverlayColorSelect ? 'overlay' : 'normal'
         }
         renderSearch={renderSearch}
       />

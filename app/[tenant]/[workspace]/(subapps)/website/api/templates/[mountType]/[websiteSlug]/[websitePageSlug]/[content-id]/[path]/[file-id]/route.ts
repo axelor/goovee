@@ -1,7 +1,7 @@
 import {z} from 'zod';
 import {SUBAPP_CODES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
 import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse} from 'next/server';
 import {
@@ -14,7 +14,6 @@ import {findFile, streamFile} from '@/utils/download';
 import {LayoutMountType} from '@/app/[tenant]/[workspace]/(subapps)/website/common/types';
 import {MOUNT_TYPE} from '@/app/[tenant]/[workspace]/(subapps)/website/common/constants';
 import {MountTypeSchema} from '@/app/[tenant]/[workspace]/(subapps)/website/common/utils/validators';
-import {manager} from '@/tenant';
 
 export async function GET(
   req: NextRequest,
@@ -32,11 +31,7 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {
-    workspaceURL,
-    workspaceURI,
-    tenant: tenantId,
-  } = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
   const {
     'content-id': contentId,
     'file-id': fileId,
@@ -59,34 +54,21 @@ export async function GET(
       status: 400,
     });
   }
-  const session = await getSession();
-  const user = session?.user;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return new NextResponse('Invalid tenant', {status: 401});
-  }
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const app = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.website,
-    user,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-  if (!app?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {user} = access;
+  const {client} = access.tenant;
+  const config = access.tenant.config;
 
   let attrs;
   if (mountType === MOUNT_TYPE.PAGE) {
@@ -106,6 +88,7 @@ export async function GET(
     const line = await populateContent({
       line: websitePage.contentLines[0],
       client,
+      config,
       path: stringToPath(path),
     });
     attrs = line?.content?.attrs;
@@ -116,6 +99,7 @@ export async function GET(
       workspaceURI,
       user,
       client,
+      config,
       mountTypes: [mountType],
       path: stringToPath(path),
     });
@@ -141,8 +125,8 @@ export async function GET(
   const file = await findFile({
     id: metaFile.id,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

@@ -5,6 +5,7 @@ import {findWorkspace} from '@/orm/workspace';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/tenant';
+import {getShellConfig} from '../../../../orm/config';
 
 export async function GET(
   request: NextRequest,
@@ -30,7 +31,12 @@ export async function GET(
     return new NextResponse('Invalid workspace', {status: 401});
   }
 
-  const logoId = workspace.logo?.id || workspace.config?.company?.logo?.id;
+  const config = await getShellConfig(workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Invalid workspace', {status: 401});
+  }
+
+  const logoId = workspace.logo?.id || config.company?.logo?.id;
   if (!logoId) {
     return new NextResponse('Logo not available', {status: 404});
   }

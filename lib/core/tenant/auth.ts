@@ -2,7 +2,7 @@ import type {TenantConfig} from './types';
 
 type AOSAuth = TenantConfig['aos']['auth'];
 
-export function getAOSAuthHeaders(auth: AOSAuth) {
+export function getAOSAuthHeaders(auth: AOSAuth): Record<string, string> {
   if (auth.apiKey) {
     return {'API-KEY': auth.apiKey};
   }
