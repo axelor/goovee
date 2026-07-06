@@ -8,7 +8,7 @@ import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
-import {findEvent} from '@/subapps/events/common/orm/event';
+import {findEventImage} from '@/subapps/events/common/orm/event';
 
 export async function GET(
   request: NextRequest,
@@ -37,12 +37,11 @@ export async function GET(
   }
   const {client} = access.tenant;
 
-  const event = await findEvent({
+  const event = await findEventImage({
     slug,
+    workspaceURL,
     client,
-    config: access.tenant.config,
     user: access.user,
-    workspace: access.workspace,
   });
 
   if (!event?.eventImage?.id) {
