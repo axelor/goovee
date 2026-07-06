@@ -6,7 +6,7 @@ import {
   findPartnerCurrency,
   findPartnerFiscalPosition,
 } from '@/product/orm';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {MarketplaceConfig} from './config';
 import {computePrice, type ComputedPrice} from '../utils/price';
 import type {PriceableMarketplaceProduct} from './helpers';
 
@@ -17,7 +17,7 @@ import type {PriceableMarketplaceProduct} from './helpers';
  *  `mp.product` (same path AOS takes on the SO line). */
 export function withPrice<T extends PriceableMarketplaceProduct>(
   mp: T,
-  workspace: PortalWorkspaceWithConfig,
+  config: MarketplaceConfig,
   priceContext: PriceContext,
 ): T & {price: ComputedPrice} {
   return {
@@ -25,7 +25,7 @@ export function withPrice<T extends PriceableMarketplaceProduct>(
     price: computePrice({
       product: mp.product,
       priceContext,
-      company: workspace.config.company,
+      company: config.company,
       priceOverride: {
         salePrice: mp.salePrice,
         saleCurrency: mp.saleCurrency,

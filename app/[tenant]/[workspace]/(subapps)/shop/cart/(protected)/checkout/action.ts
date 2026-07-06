@@ -4,15 +4,14 @@ import {z} from 'zod';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {accessMessage} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder, findStripeOrder} from '@/payment/stripe/actions';
-import {manager} from '@/tenant';
 import {PaymentOption} from '@/types';
 import {computeTotal} from '@/utils/cart';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
@@ -28,6 +27,8 @@ import {
   formatNumber,
 } from '@/subapps/shop/common/utils/order';
 import {createOrder} from '@/subapps/shop/common/service';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
+import type {ActionResponse} from '@/types/action';
 import {
   CartOrderSchema,
   PayboxCreateOrderSchema,
@@ -44,16 +45,7 @@ import {
 export async function paypalCaptureOrder({
   orderId,
   workspaceURL,
-}: PaypalCaptureOrderInput) {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
+}: PaypalCaptureOrderInput): ActionResponse<string> {
   const parsedPaypalCapture = PaypalCaptureOrderSchema.safeParse({
     orderId,
     workspaceURL,
@@ -61,8 +53,6 @@ export async function paypalCaptureOrder({
   if (!parsedPaypalCapture.success) {
     return {error: true, message: z.prettifyError(parsedPaypalCapture.error)};
   }
-
-  const user = session?.user;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -73,45 +63,33 @@ export async function paypalCaptureOrder({
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
+
+  const {user, tenant} = access;
   const {client} = tenant;
 
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -119,7 +97,7 @@ export async function paypalCaptureOrder({
   }
 
   const allowPaypal = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paypal,
   );
 
@@ -132,7 +110,7 @@ export async function paypalCaptureOrder({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config,
     client,
   });
 
@@ -152,11 +130,14 @@ export async function paypalCaptureOrder({
 
     const {total} = computeTotal({
       cart,
-      workspace,
+      config,
       formatNumber,
     });
 
-    const expectedAmount = computeExpectedAmount({total, workspace});
+    const expectedAmount = computeExpectedAmount({
+      total,
+      config,
+    });
 
     if (Number(amount) !== Number(expectedAmount)) {
       return {
@@ -166,14 +147,15 @@ export async function paypalCaptureOrder({
     }
 
     const paymentModeId = getPaymentModeId(
-      workspace?.config?.paymentOptionSet,
+      config?.paymentOptionSet,
       PaymentOption.paypal,
     );
 
     try {
       const res = await createOrder({
         cart,
-        workspace,
+        workspace: access.workspace,
+        workspaceConfig: config,
         user,
         client,
         config: tenant.config,
@@ -202,15 +184,6 @@ export async function paypalCaptureOrder({
 }
 
 export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedCartOrder = CartOrderSchema.safeParse({cart, workspaceURL});
   if (!parsedCartOrder.success) {
     return {error: true, message: z.prettifyError(parsedCartOrder.error)};
@@ -225,47 +198,33 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
     };
   }
 
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -273,7 +232,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   }
 
   const allowPaypal = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paypal,
   );
 
@@ -286,7 +245,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config,
     client,
   });
 
@@ -298,11 +257,14 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   }
   const {total, currency} = computeTotal({
     cart,
-    workspace,
+    config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config,
+  });
 
   const payer = await findGooveeUserByEmail(user?.email, client);
   const payerEmail = payer?.emailAddress?.address;
@@ -337,14 +299,6 @@ export async function createStripeCheckoutSession({
   cart,
   workspaceURL,
 }: CartOrderInput) {
-  const session = await getSession();
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedCartOrder = CartOrderSchema.safeParse({cart, workspaceURL});
   if (!parsedCartOrder.success) {
     return {error: true, message: z.prettifyError(parsedCartOrder.error)};
@@ -359,47 +313,33 @@ export async function createStripeCheckoutSession({
     };
   }
 
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -407,7 +347,7 @@ export async function createStripeCheckoutSession({
   }
 
   const allowStripe = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.stripe,
   );
 
@@ -420,7 +360,7 @@ export async function createStripeCheckoutSession({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config,
     client,
   });
 
@@ -433,11 +373,14 @@ export async function createStripeCheckoutSession({
 
   const {total, currency} = computeTotal({
     cart,
-    workspace,
+    config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config,
+  });
 
   const payer = await findGooveeUserByEmail(user.email, client);
   const payerEmail = payer?.emailAddress?.address;
@@ -485,15 +428,7 @@ export async function createStripeCheckoutSession({
 export async function validateStripePayment({
   stripeSessionId,
   workspaceURL,
-}: ValidateStripePaymentInput) {
-  const session = await getSession();
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
+}: ValidateStripePaymentInput): ActionResponse<string> {
   const parsedStripeValidation = ValidateStripePaymentSchema.safeParse({
     stripeSessionId,
     workspaceURL,
@@ -505,8 +440,6 @@ export async function validateStripePayment({
     };
   }
 
-  const user = session?.user;
-
   const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
@@ -516,45 +449,33 @@ export async function validateStripePayment({
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
+
+  const {user, tenant} = access;
   const {client} = tenant;
 
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -562,7 +483,7 @@ export async function validateStripePayment({
   }
 
   const allowStripe = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.stripe,
   );
   if (!allowStripe) {
@@ -574,7 +495,7 @@ export async function validateStripePayment({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config,
     client,
   });
 
@@ -604,11 +525,14 @@ export async function validateStripePayment({
 
   const {total} = computeTotal({
     cart,
-    workspace,
+    config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config,
+  });
 
   if (Number(paidAmount) !== Number(expectedAmount)) {
     return {
@@ -618,14 +542,15 @@ export async function validateStripePayment({
   }
 
   const paymentModeId = getPaymentModeId(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.stripe,
   );
 
   try {
     const res = await createOrder({
       cart,
-      workspace,
+      workspace: access.workspace,
+      workspaceConfig: config,
       user,
       client,
       config: tenant.config,
@@ -651,15 +576,6 @@ export async function payboxCreateOrder({
   workspaceURL,
   uri,
 }: PayboxCreateOrderInput) {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
   const parsedPayboxCreate = PayboxCreateOrderSchema.safeParse({
     cart,
     workspaceURL,
@@ -678,47 +594,33 @@ export async function payboxCreateOrder({
     };
   }
 
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: false,
   });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
 
-  if (!workspace) {
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -726,7 +628,7 @@ export async function payboxCreateOrder({
   }
 
   const allowPaybox = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paybox,
   );
   if (!allowPaybox) {
@@ -738,7 +640,7 @@ export async function payboxCreateOrder({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config,
     client,
   });
 
@@ -750,11 +652,14 @@ export async function payboxCreateOrder({
   }
   const {total, currency} = computeTotal({
     cart,
-    workspace,
+    config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config,
+  });
 
   const payer = await findGooveeUserByEmail(user?.email, client);
   const payerEmail = payer?.emailAddress?.address;
@@ -792,16 +697,7 @@ export async function payboxCreateOrder({
 export async function validatePayboxPayment({
   params,
   workspaceURL,
-}: ValidatePayboxPaymentInput) {
-  const session = await getSession();
-
-  if (!session) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
+}: ValidatePayboxPaymentInput): ActionResponse<string> {
   const parsedPayboxValidation = ValidatePayboxPaymentSchema.safeParse({
     params,
     workspaceURL,
@@ -813,8 +709,6 @@ export async function validatePayboxPayment({
     };
   }
 
-  const user = session?.user;
-
   const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
@@ -824,45 +718,33 @@ export async function validatePayboxPayment({
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok)
+    return {error: true, message: await accessMessage(access.reason)};
+
+  const {user, tenant} = access;
   const {client} = tenant;
 
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!workspace) {
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
-
-  const hasShopAccess = await findSubappAccess({
-    code: SUBAPP_CODES.shop,
-    user,
-    url: workspace.url,
-    client,
-  });
-
-  if (!hasShopAccess) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
-  }
-
-  if (!workspace?.config?.confirmOrder) {
+  if (!config?.confirmOrder) {
     return {
       error: true,
       message: await t('Not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!config?.allowOnlinePaymentForEcommerce) {
     return {
       error: true,
       message: await t('Online payment is not available'),
@@ -870,7 +752,7 @@ export async function validatePayboxPayment({
   }
 
   const allowPaybox = isPaymentOptionAvailable(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paybox,
   );
   if (!allowPaybox) {
@@ -882,7 +764,7 @@ export async function validatePayboxPayment({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config,
     client,
   });
 
@@ -909,11 +791,14 @@ export async function validatePayboxPayment({
 
   const {total} = computeTotal({
     cart,
-    workspace,
+    config,
     formatNumber,
   });
 
-  const expectedAmount = computeExpectedAmount({total, workspace});
+  const expectedAmount = computeExpectedAmount({
+    total,
+    config,
+  });
 
   if (Number(paidAmount) !== Number(expectedAmount)) {
     return {
@@ -923,14 +808,15 @@ export async function validatePayboxPayment({
   }
 
   const paymentModeId = getPaymentModeId(
-    workspace?.config?.paymentOptionSet,
+    config?.paymentOptionSet,
     PaymentOption.paybox,
   );
 
   try {
     const res = await createOrder({
       cart,
-      workspace,
+      workspace: access.workspace,
+      workspaceConfig: config,
       user,
       client,
       config: tenant.config,

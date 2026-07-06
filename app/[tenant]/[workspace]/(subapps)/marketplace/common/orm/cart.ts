@@ -1,6 +1,6 @@
 import type {Client} from '@/goovee/.generated/client';
 import {ID} from '@/types';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {Workspace} from '@/orm/workspace';
 import {priceSelectFields, withPublishedProductFilter} from './helpers';
 
 export type CartProduct = Awaited<ReturnType<typeof findCartProducts>>[number];
@@ -12,7 +12,7 @@ export async function findCartProducts({
   productIds,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   mainPartnerId: string;
   productIds: string[];
 }) {
@@ -50,7 +50,7 @@ export async function findCartProductsAvailability({
   productIds,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   mainPartnerId: string;
   productIds: string[];
 }) {

@@ -14,9 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/ui/components';
-import type {PortalWorkspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {SORT_BY_OPTIONS} from '@/subapps/shop/common/constants';
 import type {SortOption} from '@/subapps/shop/common/types';
 import styles from './sort-by.module.scss';
@@ -25,20 +25,17 @@ export function SortBy({
   onChange,
   options: optionsProp,
   value: valueProp,
-  workspace,
+  config,
   className,
 }: {
   onChange: (opts: {value: string}) => void;
   options?: SortOption[];
   value?: string;
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ShopConfig | Cloned<ShopConfig>;
   className?: string;
 }) {
   const options =
-    optionsProp ||
-    SORT_BY_OPTIONS.filter(
-      o => workspace?.config && (workspace.config[o.value] as boolean),
-    );
+    optionsProp || SORT_BY_OPTIONS.filter(o => config[o.value] as boolean);
 
   if (!options?.length) {
     return null;
@@ -74,17 +71,15 @@ export function SortBy({
   );
 }
 export function MobileSortBy({
-  workspace,
+  config,
   onChange,
   active,
 }: {
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ShopConfig | Cloned<ShopConfig>;
   onChange: ({value}: {value: string}) => void;
   active?: string | null;
 }) {
-  const options = SORT_BY_OPTIONS.filter(
-    o => workspace?.config && (workspace?.config[o.value] as boolean),
-  );
+  const options = SORT_BY_OPTIONS.filter(o => config[o.value] as boolean);
 
   if (!options?.length) {
     return null;

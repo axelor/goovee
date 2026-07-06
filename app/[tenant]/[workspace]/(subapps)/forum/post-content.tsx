@@ -3,7 +3,7 @@ import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
 import {DEFAULT_LIMIT} from '@/constants';
 import {User} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
@@ -13,16 +13,18 @@ import {ThreadList} from '@/subapps/forum/common/ui/components';
 export async function PostsContent({
   searchParams,
   workspace,
+  enableComment,
   groupIDs,
   memberGroupIDs,
   user,
   client,
 }: {
   searchParams: {[key: string]: string | undefined};
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
+  enableComment: boolean;
   groupIDs: string[];
   memberGroupIDs: string[];
-  user: User;
+  user: User | null;
   client: Client;
 }) {
   const {sort, limit, search, searchid} = searchParams;
@@ -32,10 +34,10 @@ export async function PostsContent({
     limit: limit ? Number(limit) : DEFAULT_LIMIT,
     search,
     ids: searchid ? [searchid] : undefined,
-    workspaceID: workspace?.id!,
+    workspaceID: workspace.id,
     groupIDs,
     client,
-    user,
+    user: user ?? undefined,
     memberGroupIDs,
   }).then(clone);
 
@@ -46,7 +48,7 @@ export async function PostsContent({
         posts={posts}
         memberGroupIDs={memberGroupIDs}
         selectedGroupId={null}
-        workspace={workspace}
+        enableComment={enableComment}
       />
     </div>
   );

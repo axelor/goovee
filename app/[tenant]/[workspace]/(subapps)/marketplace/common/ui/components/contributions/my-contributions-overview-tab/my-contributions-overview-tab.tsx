@@ -9,7 +9,8 @@ import {
   getRevenueSummary,
   getSalesStat,
 } from '../../../../orm';
-import type {PortalWorkspaceWithConfig} from '../../../../utils/auth-helper';
+import type {Workspace} from '@/orm/workspace';
+import type {MarketplaceConfig} from '../../../../orm/config';
 import {Swipe} from '../../shared/swipe';
 import {PendingActions, PendingActionsSkeleton} from './pending-actions';
 import {RecentActivity, RecentActivitySkeleton} from './recent-activity';
@@ -25,7 +26,8 @@ import {
 interface OverviewTabProps {
   mainPartnerId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   workspaceURI: string;
   tenantId: string;
 }
@@ -41,10 +43,11 @@ export function OverviewTab({
   mainPartnerId,
   client,
   workspace,
+  config,
   workspaceURI,
   tenantId,
 }: OverviewTabProps) {
-  const ctx = {client, workspace, mainPartnerId};
+  const ctx = {client, workspace, config, mainPartnerId};
   const sales = getSalesStat(ctx);
   const installs = getInstallsStat(ctx);
   const avgRating = getAvgRatingStat(ctx);

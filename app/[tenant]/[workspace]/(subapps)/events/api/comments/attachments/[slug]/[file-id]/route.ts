@@ -1,14 +1,16 @@
 import {NextRequest, NextResponse} from 'next/server';
 
-import {getSession} from '@/auth';
+// ---- CORE IMPORTS ---- //
 import {isFileOfRecord} from '@/comments/orm';
+import {isCommentEnabled} from '@/comments';
 import {SUBAPP_CODES} from '@/constants';
-import {isCommentEnabled} from '@/lib/core/comments';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import {manager} from '@/tenant';
+import {accessStatus} from '@/lib/core/access/denial';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
+// ---- LOCAL IMPORTS ---- //
 import {findEvent} from '../../../../../common/orm/event';
 
 export async function GET(
@@ -23,46 +25,39 @@ export async function GET(
   },
 ) {
   const params = await props.params;
-  const {workspaceURL} = workspacePathname(params);
-  const {slug, 'file-id': fileId, tenant: tenantId} = params;
+  const {workspaceURL, tenant} = workspacePathname(params);
+  const {slug, 'file-id': fileId} = params;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return new NextResponse('Bad Request', {status: 400});
-  const {client, config} = tenant;
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
     url: workspaceURL,
-    client,
+    tenantId: tenant,
+    allowGuest: true,
   });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
+  const {client} = access.tenant;
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.events, workspace})) {
+  /* Workspace carries config as {id} only; fetch the heavy config so the
+     shared isCommentEnabled helper can read the comment flags. */
+  const config = await getEventsConfig(access.workspace.config.id, client);
+  if (!config) {
     return new NextResponse('Forbidden', {status: 403});
   }
 
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.events,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!app?.isInstalled) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.events, config})) {
+    return new NextResponse('Forbidden', {status: 403});
   }
 
   const event = await findEvent({
     slug,
-    workspaceURL,
     client,
-    config,
-    user,
+    config: access.tenant.config,
+    user: access.user,
+    workspace: access.workspace,
   });
   if (!event) {
     return new NextResponse('Forbidden', {status: 403});
@@ -75,8 +70,8 @@ export async function GET(
   const file = await findFile({
     id: fileId,
     meta: true,
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
+    client,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

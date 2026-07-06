@@ -1,17 +1,18 @@
 import {Suspense} from 'react';
 import type {Cloned} from '@/types/util';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ----//
-import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {Card} from '@/ui/components/card';
-import {ORDER_BY} from '@/constants';
+import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
-import {manager} from '@/tenant';
+import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 
 // ---- LOCAL IMPORTS ---- //
@@ -53,30 +54,45 @@ export default async function Page(props: {
   if (!EVENT_TAB_ITEMS.some(item => item.label === type)) {
     return notFound();
   }
-  const {tenant: tenantId} = params;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getEventsConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = clone(access.workspace);
 
   return (
     <main className="w-full">
-      <Hero workspace={workspace} />
+      <Hero config={clone(config)} />
       <div className="py-6 container mx-auto grid grid-cols-1 lg:grid-cols-[24rem_1fr] gap-4 lg:gap-6 mb-16">
         <Card className="p-4 border-none shadow-none flex flex-col gap-2 md:flex-row lg:flex-col h-fit rounded-2xl">
           <EventCalendar
@@ -121,7 +137,7 @@ async function Categories({
 }: {
   user?: User;
   client: Client;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   categoryIds: string[];
 }) {
   const categories: Cloned<Category>[] = await findEventCategories({
@@ -151,7 +167,7 @@ async function EventList({
   categoryIds: string[];
   page: string | number;
   user?: User;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   type: string;
 }) {

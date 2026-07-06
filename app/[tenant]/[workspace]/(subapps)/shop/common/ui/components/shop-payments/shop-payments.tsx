@@ -11,7 +11,7 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {i18n} from '@/locale';
 import type {SuccessResponse} from '@/types/action';
-import {PortalWorkspace, Subapp} from '@/orm/workspace';
+import {Subapp} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
@@ -23,14 +23,15 @@ import {
   payboxCreateOrder,
   validatePayboxPayment,
 } from '@/subapps/shop/cart/(protected)/checkout/action';
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {ORDER_SUCCESS_PARAM} from '@/subapps/shop/common/constants';
 
 type ShopPaymentsProps = {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ShopConfig | Cloned<ShopConfig>;
   orderSubapp?: Subapp | null;
 };
 
-export function ShopPayments({workspace, orderSubapp}: ShopPaymentsProps) {
+export function ShopPayments({config, orderSubapp}: ShopPaymentsProps) {
   const router = useRouter();
   const {toast} = useToast();
   const {workspaceURI, workspaceURL} = useWorkspace();
@@ -52,7 +53,7 @@ export function ShopPayments({workspace, orderSubapp}: ShopPaymentsProps) {
   return (
     <>
       <Payments
-        workspace={workspace}
+        config={config}
         onValidate={async () => {
           if (noAddress) {
             toast({

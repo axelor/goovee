@@ -5,7 +5,6 @@ import type {Cloned} from '@/types/util';
 import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {type PortalWorkspace} from '@/orm/workspace';
 import {Container, NavView, TableList, AlertToast} from '@/ui/components';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -21,17 +20,18 @@ import {
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import {Columns, UnpaidColumns} from '@/subapps/invoices/common/ui/components';
+import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import type {InvoiceListItem} from '@/subapps/invoices/common/types/invoices';
 
 export default function Content({
   invoices = [],
   pageInfo,
-  workspace,
+  config,
   invoiceType,
 }: {
   invoices: InvoiceListItem[];
   pageInfo?: PageInfo;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoiceType: string;
 }) {
   const router = useRouter();
@@ -50,11 +50,9 @@ export default function Content({
     return invoices?.some(({isUnpaid}) => isUnpaid);
   }, [invoices]);
 
-  const config = workspace?.config;
-
-  const allowOnlinePayment = config?.allowOnlinePaymentForEcommerce;
-  const canPayInvoice = config?.canPayInvoice;
-  const paymentOptionSet = config?.paymentOptionSet;
+  const allowOnlinePayment = config.allowOnlinePaymentForEcommerce;
+  const canPayInvoice = config.canPayInvoice;
+  const paymentOptionSet = config.paymentOptionSet;
 
   const allowInvoicePayment = !!(
     allowOnlinePayment &&

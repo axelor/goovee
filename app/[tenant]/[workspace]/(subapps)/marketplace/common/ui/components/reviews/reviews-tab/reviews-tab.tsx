@@ -12,7 +12,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/ui/components/pagination';
-import {clone} from '@/utils';
+import {clone, getPartnerId} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPaginationButtons, getSkip, getTotal} from '@/utils/pagination';
 import {ChevronLeft, ChevronRight, Star} from 'lucide-react';
@@ -119,7 +119,7 @@ export async function ReviewsTab({
 
   // The publisher and its members cannot review their own product.
   const isPublisherMember =
-    !!user && user.mainPartnerId === product.publisher.id;
+    !!user && getPartnerId(user) === product.publisher.id;
 
   const yourReviewCard =
     preview || isPublisherMember ? null : (

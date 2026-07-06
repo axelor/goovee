@@ -22,16 +22,19 @@ import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPages, getPaginationButtons, getSkip} from '@/utils/pagination';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {getPartnerId} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {MARKETPLACE_TYPE} from '../../common/constants/marketplace-types';
 import {findFavoriteProducts} from '../../common/orm';
+import {getMarketplaceConfig} from '../../common/orm/config';
 import {PriceTypeSelect} from '../../common/ui/components/product/price-type-select';
 import {ProductTypeSelect} from '../../common/ui/components/product/product-type-select';
 import {MyFavoritesTable} from '../../common/ui/components/favorites/my-favorites-table';
-import {ensureAuth} from '../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {FavoritesSearch} from './search';
 import {
   myAccountParamsSchema,
@@ -69,28 +72,43 @@ export default async function FavoritesPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/favorites`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
+
+  const {client} = access.tenant;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
+  if (!config) notFound();
 
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
   const favoritesHref = `${marketplaceBase}/my-account/favorites`;
 
   const products = await findFavoriteProducts({
-    client: auth.tenant.client,
-    workspace: auth.workspace,
-    userId: auth.user.id,
-    mainPartnerId: auth.user.mainPartnerId,
+    client,
+    workspace: access.workspace,
+    config,
+    userId: access.user.id,
+    mainPartnerId: getPartnerId(access.user),
     search,
     type,
     priceType,

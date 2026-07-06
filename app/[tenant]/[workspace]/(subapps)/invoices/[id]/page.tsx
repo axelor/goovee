@@ -1,106 +1,129 @@
 import {Suspense} from 'react';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {clone} from '@/utils';
 import {getSession} from '@/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
-import {SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
-import {PartnerKey, type User} from '@/types';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {SignOutBanner} from './sign-out-banner';
 import {TokenInvalid} from './token-invalid';
+import {getInvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
 import {InvoiceSkeleton} from '@/subapps/invoices/common/ui/components';
 
 type Params = {id: string; tenant: string; workspace: string};
 type SearchParams = {[key: string]: string | undefined};
-type Session = Awaited<ReturnType<typeof getSession>>;
 
 async function Invoice({
   params,
   searchParams,
-  session,
 }: {
   params: Params;
   searchParams: SearchParams;
-  session: Session;
 }) {
-  const {id, tenant: tenantId} = params;
-
-  const tenant = await manager.getTenant(tenantId);
-
-  if (!tenant) {
-    return notFound();
-  }
-
-  const {client} = tenant;
-
+  const {id, tenant} = params;
   const token = searchParams.token;
   const {workspaceURL, workspaceURI} = workspacePathname(params);
 
-  let user: User | undefined;
-
-  if (!token) {
-    user = session?.user;
-  }
-  if (!token && !user) return notFound();
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    user,
-    client,
-  }).then(clone);
-
-  if (!workspace) return notFound();
-
-  let invoicesWhereClause = {};
-
-  if (user) {
-    const app = await findSubappAccess({
-      code: SUBAPP_CODES.invoices,
-      user: user,
+  /* Token path: a capability scoped to one invoice. ensureTokenAccess only
+     establishes the workspace; the token is fused into findInvoice below, which
+     is what actually authorizes this invoice. */
+  if (token) {
+    const access = await ensureTokenAccess({
       url: workspaceURL,
-      client,
+      tenantId: tenant,
+      token,
     });
+    if (!access.ok) notFound();
 
-    if (!app?.isInstalled) {
-      return notFound();
-    }
-
-    const {role, isContactAdmin} = app;
-
-    invoicesWhereClause = getWhereClauseForEntity({
-      user,
-      role,
-      isContactAdmin,
-      partnerKey: PartnerKey.PARTNER,
+    const invoice = await findInvoice({
+      id,
+      token: access.token,
+      client: access.tenant.client,
+      workspaceURL,
     });
+    if (!invoice) return <TokenInvalid />;
+
+    const config = await getInvoicesConfig(
+      access.workspace.config.id,
+      access.tenant.client,
+    );
+    if (!config) notFound();
+
+    return (
+      <Content
+        invoice={clone(invoice)}
+        config={clone(config)}
+        workspaceURI={workspaceURI}
+        token={access.token}
+      />
+    );
   }
+
+  /* Session path: the visitor must be a logged-in user with access to the
+     invoices app, and only sees invoices their partner owns. */
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.invoices,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const invoicesWhereClause = getWhereClauseForEntity({
+    user: access.user,
+    role: access.subapp.role,
+    isContactAdmin: access.subapp.isContactAdmin,
+    partnerKey: PartnerKey.PARTNER,
+  });
 
   const invoice = await findInvoice({
     id,
-    ...(token ? {token} : {params: {where: invoicesWhereClause}}),
-    client,
+    params: {where: invoicesWhereClause},
+    client: access.tenant.client,
     workspaceURL,
   });
+  if (!invoice) notFound();
 
-  if (!invoice) {
-    if (token) return <TokenInvalid />;
-    return notFound();
-  }
+  const config = await getInvoicesConfig(
+    access.workspace.config.id,
+    access.tenant.client,
+  );
+  if (!config) notFound();
 
   return (
     <Content
       invoice={clone(invoice)}
-      workspace={workspace}
+      config={clone(config)}
       workspaceURI={workspaceURI}
-      token={token}
     />
   );
 }
@@ -121,7 +144,7 @@ export default async function Page(props: {
   }
   return (
     <Suspense fallback={<InvoiceSkeleton />}>
-      <Invoice params={params} searchParams={searchParams} session={session} />
+      <Invoice params={params} searchParams={searchParams} />
     </Suspense>
   );
 }

@@ -1,182 +1,110 @@
+import {cache} from 'react';
+
 // ---- CORE IMPORTS ---- //
-import {ALLOW_ALL_REGISTRATION, ALLOW_AOS_ONLY_REGISTRATION} from '@/constants';
+import {
+  ALLOW_ALL_REGISTRATION,
+  ALLOW_AOS_ONLY_REGISTRATION,
+  ROLE,
+} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
+import type {
+  AOSPortalApp,
+  AOSPortalWorkspace,
+} from '@/goovee/.generated/models';
 import {AOSPortalAppConfig} from '@/goovee/.generated/models';
 import {ID, Partner, User} from '@/types';
 import {clone, getPartnerId} from '@/utils';
 import {Payload, SelectOptions} from '@goovee/orm';
 
-export const portalAppConfigFields = {
+/**
+ * Reusable SELECT fragment for the AOSPortalApp columns surfaced as a
+ * workspace sub-app. The ORM always returns id and version for a relation
+ * select, so the resulting App / Subapp type carries those too.
+ */
+export const appSelectFields = {
+  background: true,
+  orderForMySpaceMenu: true,
+  showInMySpace: true,
+  code: true,
+  showInTopMenu: true,
+  color: true,
+  icon: true,
+  isInstalled: true,
   name: true,
-  company: {
-    id: true,
-    name: true,
-    timezone: true,
-    logo: {
-      id: true,
-    },
-  },
-  byNewest: true,
-  byFeature: true,
-  byAToZ: true,
-  byZToA: true,
-  byLessExpensive: true,
-  byMostExpensive: true,
-  displayPrices: true,
-  mainPrice: true,
-  displayTwoPrices: true,
-  hidePriceForEmptyPricelist: true,
-  confirmOrder: true,
-  requestQuotation: true,
-  priceAfterLogin: true,
+  orderForTopMenu: true,
+} as const satisfies SelectOptions<AOSPortalApp>;
+
+export type App = Payload<AOSPortalApp, {select: typeof appSelectFields}>;
+
+export type Subapp = App & {
+  role?: 'restricted' | 'total';
+  isContactAdmin?: boolean;
+};
+/* Reusable select fragments for the config concerns shared across sub-apps.
+   A per-app config select spreads the fragments it needs, so the shared
+   consumer — <Payments>, isCommentEnabled, shouldHidePricesAndPurchase —
+   accepts the app's narrow config rather than every config field. */
+export const paymentConfigSelect = {
+  allowOnlinePaymentForEcommerce: true,
   paymentOptionSet: {
     select: {
       name: true,
       typeSelect: true,
+      transferTypeSelect: true,
       paymentMode: {
         id: true,
       },
-      transferTypeSelect: true,
     },
   },
-  ticketStatusChangeMethod: true,
-  ticketHeroTitle: true,
-  ticketHeroBgImage: {
-    id: true,
-    fileName: true,
-  },
-  ticketHeroDescription: true,
-  ticketHeroOverlayColorSelect: true,
-  forumHeroTitle: true,
-  forumHeroDescription: true,
-  forumHeroOverlayColorSelect: true,
-  forumHeroBgImage: {id: true},
-  eventHeroTitle: true,
-  eventHeroDescription: true,
-  eventHeroOverlayColorSelect: true,
-  eventHeroBgImage: {id: true},
-  newsHeroTitle: true,
-  newsHeroDescription: true,
-  newsHeroOverlayColorSelect: true,
-  newsHeroBgImage: {id: true},
-  resourcesHeroTitle: true,
-  resourcesHeroDescription: true,
-  resourcesHeroOverlayColorSelect: true,
-  resourcesHeroBgImage: {id: true},
-  allowOnlinePaymentForEcommerce: true,
-  carouselList: {
-    select: {
-      title: true,
-      subTitle: true,
-      href: true,
-      image: {id: true},
-    },
-  },
-  hyperlinkList: {
-    select: {
-      title: true,
-      link: true,
-      logo: {id: true},
-    },
-  },
-  allowGuestEventRegistration: true,
-  enableRecommendedNews: true,
-  enableSocialMediaSharing: true,
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type PaymentConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof paymentConfigSelect}
+>;
+
+export const commentConfigSelect = {
   enableComment: true,
-  enableNewsComment: true,
   enableEventComment: true,
-  socialMediaSelect: true,
-  canInviteMembers: true,
-  isExistingContactsOnly: true,
-  invitationTemplateList: {
-    select: {
-      localization: {code: true},
-      template: {name: true, subject: true, content: true, language: true},
-    },
-  },
+  enableNewsComment: true,
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type CommentConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof commentConfigSelect}
+>;
+
+export const priceVisibilityConfigSelect = {
+  hidePriceForEmptyPricelist: true,
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type PriceVisibilityConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof priceVisibilityConfigSelect}
+>;
+
+export const mainPriceConfigSelect = {
+  mainPrice: true,
+} as const satisfies SelectOptions<AOSPortalAppConfig>;
+
+export type MainPriceConfig = Payload<
+  AOSPortalAppConfig,
+  {select: typeof mainPriceConfigSelect}
+>;
+
+export const otpTemplateConfigSelect = {
   otpTemplateList: {
     select: {
       localization: {code: true},
       template: {name: true, subject: true, content: true, language: true},
     },
   },
-  noMoreStockSelect: true,
-  outOfStockQty: true,
-  defaultStockLocation: {id: true},
-  directoryHeroTitle: true,
-  directoryHeroBgImage: {
-    id: true,
-    fileName: true,
-  },
-  directoryHeroDescription: true,
-  directoryHeroOverlayColorSelect: true,
-  nonPublicEmailNotFoundMessage: true,
-  canPayInvoice: true,
-  allowOnlinePaymentForInvoices: true,
-  isShowAllTickets: true,
-  isShowMyTickets: true,
-  isShowManagedTicket: true,
-  isShowCreatedTicket: true,
-  isShowResolvedTicket: true,
-  ticketingFieldSet: {select: {name: true}},
-  ticketingFormFieldSet: {select: {name: true}},
-  isDisplayChildTicket: true,
-  isDisplayRelatedTicket: true,
-  isDisplayTicketParent: true,
-  isDisplayAssignmentBtn: true,
-  isDisplayCancelBtn: true,
-  isDisplayCloseBtn: true,
-  isShowPublicationAuthor: true,
-  isShowPublicationDate: true,
-  isShowPublicationTime: true,
-  isDisplayContact: true,
-  contactEmailAddress: {address: true},
-  contactName: true,
-  contactPhone: true,
-  isCompanyOrAddressRequired: true,
-  payInAdvance: true,
-  advancePaymentPercentage: true,
-  isHomepageDisplay: true,
-  isHomepageDisplayNews: true,
-  isHomepageDisplayEvents: true,
-  isHomepageDisplayMessage: true,
-  isHomepageDisplayResources: true,
-  isHomepageDisplayHyperlinks: true,
-  homepageHeroTitle: true,
-  homepageHeroDescription: true,
-  homepageHeroOverlayColorSelect: true,
-  homepageHeroBgImage: {id: true},
-  isFixedHeader: true,
-  chatDisplayTypeSelect: true,
-  termsOfUseAcceptanceText: true,
-  marketplaceHeroTitle: true,
-  marketplaceHeroDescription: true,
-  marketplaceHeroOverlayColorSelect: true,
-  marketplaceHeroBgImage: {id: true},
-  allowToPublish: true,
-  requiresReview: true,
-  defaultProductForMarketplace: {id: true, inAti: true},
 } as const satisfies SelectOptions<AOSPortalAppConfig>;
 
-export type PortalAppConfig = Payload<
+export type OtpTemplateConfig = Payload<
   AOSPortalAppConfig,
-  {select: typeof portalAppConfigFields}
+  {select: typeof otpTemplateConfigSelect}
 >;
-
-export type App = {
-  id: string;
-  version: number;
-  name: string | null;
-  code: string | null;
-  color: string | null;
-  background: string | null;
-  icon: string | null;
-  isInstalled: boolean | null;
-  orderForMySpaceMenu: number | null;
-  orderForTopMenu: number | null;
-  showInMySpace: boolean | null;
-  showInTopMenu: boolean | null;
-};
 
 export type AppWithRole = App & {role: string | null};
 
@@ -317,18 +245,7 @@ export async function findContactWorkspaceConfig({
           contactAppPermissionList: {
             select: {
               roleSelect: true,
-              app: {
-                background: true,
-                orderForMySpaceMenu: true,
-                showInMySpace: true,
-                code: true,
-                showInTopMenu: true,
-                color: true,
-                icon: true,
-                isInstalled: true,
-                name: true,
-                orderForTopMenu: true,
-              },
+              app: appSelectFields,
             },
           },
         },
@@ -354,73 +271,6 @@ export async function findContactWorkspaceConfig({
   };
 }
 
-type IntermediateWorkspaceConfig = Promise<{
-  config: PortalAppConfig;
-  apps: App[] | null;
-  workspacePermissionConfig: {id: string};
-} | null>;
-
-export async function findPartnerWorkspaceConfig({
-  url,
-  partnerId,
-  client,
-}: {
-  url: string;
-  partnerId?: ID;
-  client: Client;
-}): IntermediateWorkspaceConfig {
-  if (!(url && partnerId)) return null;
-
-  const res = await client.aOSPartner.findOne({
-    where: {
-      id: partnerId,
-    },
-    select: {
-      partnerWorkspaceSet: {
-        where: {
-          workspace: {
-            url,
-          },
-        },
-        select: {
-          portalAppConfig: portalAppConfigFields,
-          apps: {
-            select: {
-              background: true,
-              orderForMySpaceMenu: true,
-              showInMySpace: true,
-              code: true,
-              showInTopMenu: true,
-              color: true,
-              icon: true,
-              isInstalled: true,
-              name: true,
-              orderForTopMenu: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!res?.partnerWorkspaceSet?.length) {
-    return null;
-  }
-
-  const partnerWorkspaceConfig = res.partnerWorkspaceSet[0];
-
-  if (!partnerWorkspaceConfig) return null;
-
-  const portalAppConfig = partnerWorkspaceConfig?.portalAppConfig;
-  if (!portalAppConfig) return null;
-
-  return {
-    config: portalAppConfig,
-    apps: partnerWorkspaceConfig?.apps,
-    workspacePermissionConfig: {id: partnerWorkspaceConfig.id},
-  };
-}
-
 export async function findDefaultPartnerWorkspaceConfig({
   url,
   client,
@@ -438,21 +288,8 @@ export async function findDefaultPartnerWorkspaceConfig({
     },
     select: {
       defaultPartnerWorkspace: {
-        apps: {
-          select: {
-            background: true,
-            orderForMySpaceMenu: true,
-            showInMySpace: true,
-            code: true,
-            showInTopMenu: true,
-            color: true,
-            icon: true,
-            isInstalled: true,
-            name: true,
-            orderForTopMenu: true,
-          },
-        },
-        portalAppConfig: portalAppConfigFields,
+        apps: {select: appSelectFields},
+        portalAppConfig: otpTemplateConfigSelect,
       },
     },
   });
@@ -485,153 +322,32 @@ export async function findDefaultPartnerWorkspace({
   return res?.defaultWorkspace;
 }
 
-export async function findDefaultGuestWorkspaceConfig({
-  url,
-  client,
-}: {
-  url: string;
-  client: Client;
-}): IntermediateWorkspaceConfig {
-  if (!url) return null;
-
-  const workspace = await client.aOSPortalWorkspace.findOne({
-    where: {
-      url: {
-        like: url,
-      },
-    },
-    select: {
-      defaultGuestWorkspace: {
-        apps: {
-          select: {
-            background: true,
-            orderForMySpaceMenu: true,
-            showInMySpace: true,
-            code: true,
-            showInTopMenu: true,
-            color: true,
-            icon: true,
-            isInstalled: true,
-            name: true,
-            orderForTopMenu: true,
-          },
-        },
-        portalAppConfig: portalAppConfigFields,
-      },
-    },
-  });
-
-  const defaultGuestWorkspaceConfig = workspace?.defaultGuestWorkspace;
-
-  if (!defaultGuestWorkspaceConfig) return null;
-  const portalAppConfig = defaultGuestWorkspaceConfig?.portalAppConfig;
-  if (!portalAppConfig) return null;
-
-  return {
-    config: portalAppConfig,
-    apps: defaultGuestWorkspaceConfig.apps,
-    workspacePermissionConfig: {id: defaultGuestWorkspaceConfig.id},
-  };
-}
-
-export type PortalWorkspace = {
-  id: string;
-  name: string | null;
-  version: number;
-  workspaceUser: {id: string; version: number} | null;
-  theme: {
-    id: string;
-    version: number;
-    name: string | null;
-    css: string | null;
-  } | null;
-  url: string;
-  logo: {id: string; version: number} | null;
-  navigationSelect: string;
-  config: PortalAppConfig;
-  apps: App[];
-  workspacePermissionConfig: {
-    id: string;
-  };
-};
-
 export async function findWorkspace({
   url = '',
   user,
   client,
 }: {
   url?: string;
-  user?: Pick<User, 'id' | 'isContact' | 'mainPartnerId'>;
+  user?: WorkspaceUser;
   client: Client;
-}): Promise<PortalWorkspace | null> {
+}): Promise<Workspace | null> {
   if (!url) return null;
 
-  const workspace = await client.aOSPortalWorkspace.findOne({
-    where: {
-      url: {
-        like: url,
-      },
-    },
-    select: {
-      name: true,
-      url: true,
-      defaultTheme: {name: true, css: true},
-      navigationSelect: true,
-      user: {id: true},
-      workspaceLogo: {
-        id: true,
-      },
-    },
-  });
-
-  if (!workspace) return null;
-
-  let workspaceConfig: {
-    config: PortalAppConfig;
-    apps: App[] | null;
-    workspacePermissionConfig: {id: string};
-  } | null;
-
-  if (user) {
-    const partnerId = getPartnerId(user);
-
-    workspaceConfig = await findPartnerWorkspaceConfig({
-      partnerId,
-      url,
-      client,
-    });
-  } else {
-    workspaceConfig = await findDefaultGuestWorkspaceConfig({
-      url,
-      client,
-    });
+  /* One scoped query per user type resolves the workspace and the user's
+     accessible apps (each carrying its role for contacts). The heavy config is
+     fetched on demand by callers via their per-app config getter (e.g.
+     getShopConfig); a sub-app check is just apps.find(code) on the result. */
+  if (!user) {
+    return findGuestWorkspace(url, client);
   }
 
-  if (!workspaceConfig) return null;
+  if (!user.isContact) {
+    return findPartnerWorkspace(url, getPartnerId(user), client);
+  }
 
-  const {
-    id,
-    name,
-    version,
-    defaultTheme: theme,
-    navigationSelect,
-    user: workspaceUser,
-    workspaceLogo: logo,
-  } = workspace;
+  if (!user.mainPartnerId) return null;
 
-  return {
-    id,
-    name,
-    version,
-    workspaceUser,
-    theme,
-    url,
-    logo,
-    navigationSelect: navigationSelect || 'leftSide',
-    config: workspaceConfig.config,
-    apps: workspaceConfig.apps || [],
-    workspacePermissionConfig: workspaceConfig.workspacePermissionConfig,
-  };
+  return findContactWorkspace(url, user.id, user.mainPartnerId, client);
 }
 
 export async function findOpenWorkspaces({
@@ -653,20 +369,7 @@ export async function findOpenWorkspaces({
         url: true,
         allowRegistrationSelect: true,
         defaultGuestWorkspace: {
-          apps: {
-            select: {
-              background: true,
-              orderForMySpaceMenu: true,
-              showInMySpace: true,
-              code: true,
-              showInTopMenu: true,
-              color: true,
-              icon: true,
-              isInstalled: true,
-              name: true,
-              orderForTopMenu: true,
-            },
-          },
+          apps: {select: appSelectFields},
         },
       },
       orderBy: {updatedOn: 'DESC'},
@@ -834,7 +537,7 @@ export async function findWorkspaceForRegistration({
   url,
   client,
 }: {
-  url: PortalWorkspace['url'];
+  url: Workspace['url'];
   client: Client;
 }) {
   if (!url) {
@@ -866,20 +569,7 @@ export async function findWorkspaceForRegistration({
           url: true,
           allowRegistrationSelect: true,
           defaultGuestWorkspace: {
-            apps: {
-              select: {
-                background: true,
-                orderForMySpaceMenu: true,
-                showInMySpace: true,
-                code: true,
-                showInTopMenu: true,
-                color: true,
-                icon: true,
-                isInstalled: true,
-                name: true,
-                orderForTopMenu: true,
-              },
-            },
+            apps: {select: appSelectFields},
             portalAppConfig: {
               termsOfUseAcceptanceText: true,
             },
@@ -903,7 +593,7 @@ export async function canRegisterForWorkspace({
   url,
   client,
 }: {
-  url: PortalWorkspace['url'];
+  url: Workspace['url'];
   client: Client;
 }): Promise<boolean> {
   if (!url) {
@@ -950,23 +640,6 @@ export async function findWorkspaces({
   return [];
 }
 
-export type Subapp = {
-  id: string;
-  version: number;
-  name: string | null;
-  code: string | null;
-  color: string | null;
-  background: string | null;
-  icon: string | null;
-  isInstalled: boolean | null;
-  orderForMySpaceMenu: number | null;
-  orderForTopMenu: number | null;
-  showInMySpace: boolean | null;
-  showInTopMenu: boolean | null;
-  role?: 'restricted' | 'total';
-  isContactAdmin?: boolean;
-};
-
 export async function findWorkspaceApps({
   url,
   user,
@@ -976,34 +649,10 @@ export async function findWorkspaceApps({
   user?: User;
   client: Client;
 }): Promise<Subapp[]> {
+  /* findWorkspace already resolves the user's accessible apps per type —
+     contact permissions and admin included — so no further filtering here. */
   const workspace = await findWorkspace({url, user, client});
-
-  const apps = workspace?.apps;
-
-  if (!apps) {
-    return [];
-  }
-
-  if (!user || !user.isContact) {
-    return apps;
-  }
-
-  const contactWorkpaceConfig = await findContactWorkspaceConfig({
-    url: workspace.url,
-    contactId: user.id,
-    partnerId: user.mainPartnerId!,
-    client,
-  });
-
-  if (contactWorkpaceConfig?.isAdmin) {
-    return apps.map(app => ({...app, isContactAdmin: true}));
-  }
-
-  const contactApps = (contactWorkpaceConfig?.apps || []).filter(app =>
-    apps.some(a => a.code === app.code && a.isInstalled),
-  );
-
-  return contactApps as Subapp[];
+  return workspace?.apps ?? [];
 }
 
 export async function findSubapps({
@@ -1024,21 +673,10 @@ export async function findSubapps({
   return apps;
 }
 
-export async function findSubapp({
-  code,
-  url,
-  user,
-  client,
-}: {
-  code: string;
-  url: string;
-  user?: User;
-  client: Client;
-}): Promise<Subapp | undefined> {
-  const subapps = await findSubapps({url, user, client});
+type WorkspaceUser = Pick<User, 'id' | 'isContact' | 'mainPartnerId'>;
 
-  return subapps.find(app => app.code === code);
-}
+const normalizeRole = (roleSelect?: string | null): Subapp['role'] =>
+  roleSelect === ROLE.TOTAL ? 'total' : 'restricted';
 
 export async function findSubappAccess({
   code,
@@ -1047,15 +685,175 @@ export async function findSubappAccess({
   client,
 }: {
   code: string;
-  user: any;
+  user?: WorkspaceUser;
   url: string;
   client: Client;
 }): Promise<Subapp | null> {
-  if (!(code && url)) return null;
-
-  const subapp = await findSubapp({code, url, user, client});
-
-  if (!subapp?.isInstalled) return null;
-
-  return subapp;
+  const workspace = await findWorkspace({url, user, client});
+  return workspace?.apps.find(app => app.code === code) ?? null;
 }
+
+const workspaceFields = {
+  name: true,
+  url: true,
+  defaultTheme: {name: true, css: true},
+  navigationSelect: true,
+  user: {id: true},
+  workspaceLogo: {id: true},
+} as const satisfies SelectOptions<AOSPortalWorkspace>;
+
+type WorkspaceRow = Payload<
+  AOSPortalWorkspace,
+  {select: typeof workspaceFields}
+>;
+
+const toWorkspace = (
+  ws: WorkspaceRow,
+  apps: Subapp[],
+  config: {id: string},
+  permissionConfigId: string,
+) => ({
+  id: ws.id,
+  name: ws.name,
+  version: ws.version,
+  workspaceUser: ws.user,
+  theme: ws.defaultTheme,
+  url: ws.url ?? '',
+  logo: ws.workspaceLogo,
+  navigationSelect: ws.navigationSelect || 'leftSide',
+  apps,
+  config,
+  workspacePermissionConfig: {id: permissionConfigId},
+});
+
+export type Workspace = ReturnType<typeof toWorkspace>;
+
+const installedApps = (apps: Subapp[] | null | undefined): Subapp[] =>
+  (apps ?? []).filter(app => app.isInstalled);
+
+export const findGuestWorkspace = cache(
+  async (url: string, client: Client): Promise<Workspace | null> => {
+    const workspace = await client.aOSPortalWorkspace.findOne({
+      where: {url: {like: url}},
+      select: {
+        ...workspaceFields,
+        defaultGuestWorkspace: {
+          portalAppConfig: {id: true},
+          apps: {select: appSelectFields},
+        },
+      },
+    });
+
+    const guest = workspace?.defaultGuestWorkspace;
+    if (!workspace || !guest) return null;
+
+    const configRef = guest.portalAppConfig;
+    if (!configRef) return null;
+
+    const apps = installedApps(guest.apps);
+    return toWorkspace(workspace, apps, configRef, guest.id);
+  },
+);
+
+const findPartnerWorkspace = cache(
+  async (
+    url: string,
+    partnerId: ID,
+    client: Client,
+  ): Promise<Workspace | null> => {
+    const partner = await client.aOSPartner.findOne({
+      where: {id: partnerId},
+      select: {
+        partnerWorkspaceSet: {
+          where: {workspace: {url}},
+          select: {
+            portalAppConfig: {id: true},
+            apps: {select: appSelectFields},
+            workspace: workspaceFields,
+          },
+        },
+      },
+    });
+
+    const partnerWorkspace = partner?.partnerWorkspaceSet?.[0];
+    if (!partnerWorkspace?.workspace) return null;
+
+    const configRef = partnerWorkspace.portalAppConfig;
+    if (!configRef) return null;
+
+    const apps = installedApps(partnerWorkspace.apps);
+    return toWorkspace(
+      partnerWorkspace.workspace,
+      apps,
+      configRef,
+      partnerWorkspace.id,
+    );
+  },
+);
+
+const findContactWorkspace = cache(
+  async (
+    url: string,
+    contactId: ID,
+    partnerId: ID,
+    client: Client,
+  ): Promise<Workspace | null> => {
+    const contact = await client.aOSPartner.findOne({
+      where: {id: contactId},
+      select: {
+        mainPartner: {
+          partnerWorkspaceSet: {
+            where: {workspace: {url}},
+            select: {
+              portalAppConfig: {id: true},
+              apps: {select: appSelectFields},
+              workspace: workspaceFields,
+            },
+          },
+        },
+        contactWorkspaceConfigSet: {
+          where: {portalWorkspace: {url}, partner: {id: partnerId}},
+          select: {
+            isAdmin: true,
+            contactAppPermissionList: {
+              select: {roleSelect: true, app: {code: true}},
+            },
+          },
+        },
+      },
+    });
+
+    const partnerWorkspace = contact?.mainPartner?.partnerWorkspaceSet?.[0];
+    if (!partnerWorkspace?.workspace) return null;
+
+    const partnerApps = installedApps(partnerWorkspace.apps);
+    const config = contact?.contactWorkspaceConfigSet?.[0];
+
+    /* Admins see every installed app of the workspace; everyone else sees only
+       the apps they have a permission row for, carrying that row's role. */
+    let apps: Subapp[];
+    if (config?.isAdmin) {
+      apps = partnerApps.map(app => ({...app, isContactAdmin: true}));
+    } else {
+      const permissions = config?.contactAppPermissionList ?? [];
+      apps = partnerApps
+        .filter(app => permissions.some(item => item.app?.code === app.code))
+        .map(app => ({
+          ...app,
+          role: normalizeRole(
+            permissions.find(item => item.app?.code === app.code)?.roleSelect,
+          ),
+        }));
+    }
+
+    const configRef = partnerWorkspace.portalAppConfig;
+    if (!configRef) return null;
+
+    return toWorkspace(
+      partnerWorkspace.workspace,
+      apps,
+      configRef,
+      partnerWorkspace.id,
+    );
+  },
+);

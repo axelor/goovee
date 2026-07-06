@@ -1,12 +1,10 @@
-import axios from 'axios';
-
 // ---- CORE IMPORTS ---- //
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import {filterPrivate} from '@/orm/filter';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {ID, MainWebsite, User, Website, WebsitePage} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {findModelFields} from '@/orm/model-fields';
 import {SUBAPP_CODES} from '@/constants';
@@ -37,7 +35,7 @@ export async function findAllMainWebsites({
   client,
   locale,
 }: {
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   user?: User;
   client: Client;
   locale?: string | null;
@@ -52,7 +50,7 @@ export async function findAllMainWebsites({
         url: workspaceURL,
       },
       defaultWebsite: {
-        ...(await filterPrivate({client, user})),
+        ...filterPrivate({user}),
       },
       AND: [{OR: [{archived: false}, {archived: null}]}],
     },
@@ -72,7 +70,7 @@ export async function findAllMainWebsites({
               }
             : {}),
           website: {
-            ...(await filterPrivate({client, user})),
+            ...filterPrivate({user}),
           },
         },
         select: {
@@ -104,7 +102,7 @@ export async function findAllWebsites({
   user,
   client,
 }: {
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   user?: User;
   client: Client;
 }) {
@@ -119,10 +117,7 @@ export async function findAllWebsites({
           url: workspaceURL,
         },
       },
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       slug: true,
@@ -171,7 +166,7 @@ export async function findWebsiteSeoBySlug({
   client,
 }: {
   websiteSlug: Website['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   user?: User;
   client: Client;
 }) {
@@ -183,10 +178,7 @@ export async function findWebsiteSeoBySlug({
     where: {
       slug: websiteSlug,
       mainWebsite: {workspaceSet: {url: workspaceURL}},
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {name: true},
   });
@@ -199,14 +191,16 @@ export async function findWebsiteBySlug({
   workspaceURI,
   user,
   client,
+  config,
   mountTypes,
   path,
 }: {
   websiteSlug: Website['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   workspaceURI: string;
   user?: User;
   client: Client;
+  config: TenantConfig;
   mountTypes?: LayoutMountType[];
   /** @param mounTypes should be an array of single mountType for path to work
    * ex: mountTypes:[ "header" ]
@@ -226,10 +220,7 @@ export async function findWebsiteBySlug({
     where: {
       slug: websiteSlug,
       mainWebsite: {workspaceSet: {url: workspaceURL}},
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       name: true,
@@ -269,7 +260,7 @@ export async function findWebsiteBySlug({
             id: website.menu.id,
           },
           page: {
-            ...(await filterPrivate({client, user})),
+            ...filterPrivate({user}),
           },
         },
         select: {
@@ -308,6 +299,7 @@ export async function findWebsiteBySlug({
       modelName: CONTENT_MODEL,
       modelField: CONTENT_MODEL_ATTRS,
       client,
+      config,
       path,
       modelFieldCache,
       modelRecordCache,
@@ -322,6 +314,7 @@ export async function findWebsiteBySlug({
       modelName: CONTENT_MODEL,
       modelField: CONTENT_MODEL_ATTRS,
       client,
+      config,
       path,
       modelFieldCache,
       modelRecordCache,
@@ -350,7 +343,7 @@ export async function findAllWebsitePages({
   client,
 }: {
   websiteSlug: Website['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   user?: User;
   client: Client;
 }) {
@@ -363,10 +356,7 @@ export async function findAllWebsitePages({
       website: {
         slug: websiteSlug,
       },
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       slug: true,
@@ -385,7 +375,7 @@ export async function findWebsitePageSeoBySlug({
 }: {
   websiteSlug: Website['slug'];
   websitePageSlug: WebsitePage['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   user?: User;
   client: Client;
 }) {
@@ -405,10 +395,7 @@ export async function findWebsitePageSeoBySlug({
           },
         },
       },
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {seoTitle: true, seoDescription: true, seoKeyword: true},
   });
@@ -425,7 +412,7 @@ export async function findWebsitePageBySlug({
 }: {
   websiteSlug: Website['slug'];
   websitePageSlug: WebsitePage['slug'];
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   user?: User;
   client: Client;
   contentId?: string;
@@ -447,10 +434,7 @@ export async function findWebsitePageBySlug({
         },
       },
       ...(contentId && {contentLines: {content: {id: contentId}}}),
-      AND: [
-        await filterPrivate({client, user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       isWiki: true,
@@ -481,7 +465,7 @@ export async function findAllMainWebsiteLanguages({
   client,
 }: {
   mainWebsiteId: MainWebsite['id'] | undefined;
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   user?: User;
   client: Client;
 }) {
@@ -502,7 +486,7 @@ export async function findAllMainWebsiteLanguages({
         languageList: {
           where: {
             website: {
-              ...(await filterPrivate({client, user})),
+              ...filterPrivate({user}),
             },
           },
           select: {
@@ -524,11 +508,13 @@ async function getRelationalFieldTypeData({
   value,
   modelRecordCache,
   client,
+  config,
 }: {
   field: {targetModel?: string};
   value: any;
   modelRecordCache: Cache;
   client: Client;
+  config: TenantConfig;
 }) {
   const targetModel = field?.targetModel;
 
@@ -562,6 +548,7 @@ async function getRelationalFieldTypeData({
 
     let records = await findModelRecords({
       client,
+      config,
       modelName: targetModel,
       ids: uncachedIds,
     });
@@ -596,6 +583,7 @@ async function getCustomRelationalFieldTypeData({
   jsonModelCache,
   jsonModelRecordCache,
   client,
+  config,
   path,
 }: {
   field: {targetJsonModel?: {name?: string}};
@@ -605,6 +593,7 @@ async function getCustomRelationalFieldTypeData({
   jsonModelCache: Cache;
   jsonModelRecordCache: Cache;
   client: Client;
+  config: TenantConfig;
   path?: string[];
 }) {
   const pathFieldName = path?.[0];
@@ -685,6 +674,7 @@ async function getCustomRelationalFieldTypeData({
                 modelField: JSON_MODEL_ATTRS,
                 jsonModelName: targetJsonModelName,
                 client,
+                config,
                 modelFieldCache,
                 modelRecordCache,
                 jsonModelCache,
@@ -796,6 +786,7 @@ const populateAttributes = async ({
   jsonModelName,
   modelField,
   client,
+  config,
   modelFieldCache,
   modelRecordCache,
   jsonModelCache,
@@ -807,6 +798,7 @@ const populateAttributes = async ({
   jsonModelName?: string;
   modelField: string;
   client: Client;
+  config: TenantConfig;
   modelFieldCache: Cache;
   modelRecordCache: Cache;
   jsonModelCache: Cache;
@@ -870,6 +862,7 @@ const populateAttributes = async ({
       jsonModelCache,
       jsonModelRecordCache,
       client,
+      config,
       path: path?.[1] ? path.slice(1) : undefined,
     });
 
@@ -883,6 +876,7 @@ export async function populateContent({
   line,
   path,
   client,
+  config,
   modelFieldCache = new Cache(),
   modelRecordCache = new Cache(),
   jsonModelCache = new Cache(),
@@ -894,6 +888,7 @@ export async function populateContent({
    */
   path?: string[];
   client: Client;
+  config: TenantConfig;
   modelFieldCache?: Cache;
   modelRecordCache?: Cache;
   jsonModelCache?: Cache;
@@ -910,6 +905,7 @@ export async function populateContent({
         modelName: CONTENT_MODEL,
         modelField: CONTENT_MODEL_ATTRS,
         client,
+        config,
         modelFieldCache,
         modelRecordCache,
         jsonModelCache,
@@ -923,6 +919,7 @@ export async function populateContent({
 export function populateLinesByChunk({
   contentLines,
   client,
+  config,
   path,
   chunkSize,
 }: {
@@ -933,6 +930,7 @@ export function populateLinesByChunk({
   chunkSize?: number;
   contentLines: ContentLine[];
   client: Client;
+  config: TenantConfig;
 }): Promise<ReplacedContentLine[]>[] {
   const jsonModelCache = new Cache();
   const jsonModelRecordCache = new Cache();
@@ -953,6 +951,7 @@ export function populateLinesByChunk({
           populateContent({
             line,
             client,
+            config,
             path,
             modelFieldCache,
             modelRecordCache,
@@ -986,7 +985,7 @@ async function findModelRecords({
   ids,
 }: {
   client: Client;
-  config?: TenantConfig;
+  config: TenantConfig;
   modelName: string;
   ids: string[];
 }) {
@@ -1004,25 +1003,16 @@ async function findModelRecords({
   const aos = config?.aos;
 
   if (!aos?.url) return [];
-  const res = await axios
-    .post(
-      `${aos.url}/ws/rest/${modelName}/search`,
-      {
-        data: {
-          _domain: 'self.id in :ids',
-          _domainContext: {ids},
-        },
-      },
-      {headers: getAOSAuthHeaders(aos.auth)},
-    )
-    .then(res => res?.data)
-    .catch(() => console.log('Error with trying to fetch model fields'));
 
-  if (res?.status !== 0 || !res.data) {
-    return [];
-  }
-
-  return res.data;
+  return aosClient(aos)
+    .search(modelName, {
+      data: {_domain: 'self.id in :ids', _domainContext: {ids}},
+    })
+    .then(({records}) => records)
+    .catch(() => {
+      console.log('Error with trying to fetch model fields');
+      return [];
+    });
 }
 
 export async function canEditWiki({

@@ -27,7 +27,12 @@ import {
 } from '../orm';
 import {savePayloadSchema} from '../ui/components/product/product-edit/combined-validator';
 import {VERSIONS_PAGE_SIZE} from '../ui/components/versions/version-form/validator';
-import {canManageProducts, ensureAuth} from '../utils/auth-helper';
+import {canManageProducts} from '../utils/auth-helper';
+import {getMarketplaceConfig} from '../orm/config';
+import {SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
+import {getPartnerId} from '@/utils';
 import {parseVersionNumber} from '../utils/version-number';
 
 const loadMyProductForEditSchema = z.object({
@@ -56,12 +61,22 @@ export async function loadMyProductForEdit(
   }
   const {productId, workspaceURL} = parsed.data;
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error) {
-    return {error: true, message};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
+  const {client} = access.tenant;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
+  const partnerId = getPartnerId(access.user);
 
-  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
+  if (
+    !config?.allowToPublish ||
+    !canManageProducts({user: access.user, subapp: access.subapp})
+  ) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
@@ -73,15 +88,15 @@ export async function loadMyProductForEdit(
   const [product, versions] = await Promise.all([
     findMyProductForEdit({
       productId,
-      mainPartnerId: auth.user.mainPartnerId,
-      client: auth.tenant.client,
-      workspace: auth.workspace,
+      mainPartnerId: partnerId,
+      client,
+      workspace: access.workspace,
     }),
     findMyProductVersions({
       productId,
-      mainPartnerId: auth.user.mainPartnerId,
-      client: auth.tenant.client,
-      workspace: auth.workspace,
+      mainPartnerId: partnerId,
+      client,
+      workspace: access.workspace,
       skip: 0,
       take: VERSIONS_PAGE_SIZE,
     }),
@@ -123,18 +138,21 @@ export async function searchProducts(
   }
   const {search, workspaceURL, type} = parsed.data;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
     allowGuest: true,
   });
-  if (error) {
-    return {error: true, message: await t('Unauthorized')};
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
   const products = await findProductsBySearch({
     search,
     type,
-    client: auth.tenant.client,
-    workspace: auth.workspace,
+    client: access.tenant.client,
+    workspace: access.workspace,
   });
   return {success: true, data: clone(products)};
 }
@@ -175,18 +193,27 @@ export async function saveProductWithVersions(
   const payload = parsed.data;
   const product = payload.product;
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error) {
-    return {error: true, message};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
+  const {client} = access.tenant;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
+  const partnerId = getPartnerId(access.user);
+  if (
+    !config?.allowToPublish ||
+    !canManageProducts({user: access.user, subapp: access.subapp})
+  ) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
     };
   }
-  const {client} = auth.tenant;
-  const requiresReview = auth.workspace.config.requiresReview === true;
+  const requiresReview = config.requiresReview === true;
 
   /* Parse every version number up front, map each row's staged status to its
    * effective status (publish → in-review when the workspace requires it), and
@@ -230,8 +257,8 @@ export async function saveProductWithVersions(
         /* Edit: verify ownership first (always). */
         const current = await txClient.aOSMarketplaceProduct.findOne({
           where: withMyProductAccessFilter(
-            auth.workspace,
-            auth.user.mainPartnerId,
+            access.workspace,
+            partnerId,
           )({id: payload.id}),
           select: {id: true, categorySet: {select: {id: true}}},
         });
@@ -264,7 +291,7 @@ export async function saveProductWithVersions(
               supportContactUrl: product.supportContactUrl || null,
               license: {select: {id: product.licenseId}},
               salePrice: new BigDecimal(String(product.salePrice ?? 0)),
-              updatedByPartner: {select: {id: auth.user.id}},
+              updatedByPartner: {select: {id: access.user.id}},
               ...(toAdd.length || toRemove.length
                 ? {
                     categorySet: {
@@ -286,16 +313,16 @@ export async function saveProductWithVersions(
          * edit. */
         if (!product) throw new Error('MISSING_PRODUCT');
         const workspaceDefaultProductId =
-          auth.workspace.config.defaultProductForMarketplace?.id;
+          config.defaultProductForMarketplace?.id;
         if (!workspaceDefaultProductId) throw new Error('MP_NOT_CONFIGURED');
         const defaultSaleCurrency = await resolveNewListingCurrency({
           client: txClient,
-          mainPartnerId: auth.user.mainPartnerId,
+          mainPartnerId: partnerId,
         });
         if (!defaultSaleCurrency) throw new Error('NO_CURRENCY');
         const slug = await generateUniqueProductSlug({
           client: txClient,
-          workspaceId: auth.workspace.id,
+          workspaceId: access.workspace.id,
           name: product.name,
         });
         const created = await txClient.aOSMarketplaceProduct.create({
@@ -313,14 +340,12 @@ export async function saveProductWithVersions(
             salePrice: new BigDecimal(String(product.salePrice ?? 0)),
             marketplaceTypeSelect: product.marketplaceTypeSelect,
             slug,
-            inAti:
-              auth.workspace.config.defaultProductForMarketplace?.inAti ??
-              false,
+            inAti: config.defaultProductForMarketplace?.inAti ?? false,
             saleCurrency: {select: {id: defaultSaleCurrency.id}},
-            publisher: {select: {id: auth.user.mainPartnerId}},
-            createdByPartner: {select: {id: auth.user.id}},
+            publisher: {select: {id: partnerId}},
+            createdByPartner: {select: {id: access.user.id}},
             product: {select: {id: workspaceDefaultProductId}},
-            portalWorkspace: {select: {id: auth.workspace.id}},
+            portalWorkspace: {select: {id: access.workspace.id}},
             categorySet: {select: product.categoryIds.map(id => ({id}))},
             averageRating: new BigDecimal('0'),
             ratingCount: 0,
@@ -338,7 +363,7 @@ export async function saveProductWithVersions(
         await syncProductImages({
           client: txClient,
           productId,
-          owner: auth.user.id,
+          owner: access.user.id,
           images: payload.images,
         });
       }
@@ -367,7 +392,7 @@ export async function saveProductWithVersions(
           uploadedFileId = await redeemUpload({
             token: row.bundleToken,
             purpose: 'marketplace:bundle',
-            owner: auth.user.id,
+            owner: access.user.id,
             client: txClient,
           });
         }

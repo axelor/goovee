@@ -3,7 +3,10 @@ import {
   findVersionForDownload,
   incrementInstallCount,
 } from '@/subapps/marketplace/common/orm';
-import {ensureAuth} from '@/subapps/marketplace/common/utils/auth-helper';
+import {SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
+import {getPartnerId} from '@/utils';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse, after} from 'next/server';
@@ -23,19 +26,24 @@ export async function GET(
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
   const {'product-id': productId, 'version-id': versionId} = params;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
     allowGuest: true,
   });
-  if (error) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
 
-  const {client} = auth.tenant;
+  const {client} = access.tenant;
 
   const version = await findVersionForDownload({
     client,
-    workspace: auth.workspace,
-    mainPartnerId: auth.user?.mainPartnerId,
+    workspace: access.workspace,
+    mainPartnerId: access.user ? getPartnerId(access.user) : undefined,
     productId,
     versionId,
   });
@@ -47,7 +55,7 @@ export async function GET(
     id: version.bundleFile.id,
     meta: true,
     client,
-    storage: auth.tenant.config.aos.storage,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {
@@ -69,7 +77,7 @@ export async function GET(
           client: txClient,
           productId,
           versionId,
-          partnerId: auth.user?.id,
+          partnerId: access.user?.id,
         });
         await incrementInstallCount({client: txClient, productId});
       });
@@ -77,7 +85,7 @@ export async function GET(
       console.error('marketplace: failed to record install', {
         productId,
         versionId,
-        userId: auth.user?.id ?? null,
+        userId: access.user?.id ?? null,
         error: e,
       });
     }

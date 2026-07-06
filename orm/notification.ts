@@ -10,7 +10,7 @@ import type {
 } from '@goovee/orm';
 import {SUBAPP_CODES} from '@/constants';
 import type {User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import type {NotificationAppCode} from '@/utils/validators';
 import {findSubappAccess} from './workspace';
 import {filterPartnersByRecordAccess, filterPrivate} from './filter';
@@ -18,7 +18,7 @@ import {filterPartnersByRecordAccess, filterPrivate} from './filter';
 type Params = {
   code: NotificationAppCode;
   user: User;
-  url: PortalWorkspace['url'];
+  url: Workspace['url'];
   client: Client;
 };
 
@@ -258,7 +258,7 @@ async function findEventsCategories(params: Params) {
     .find({
       where: {
         workspace: {url},
-        ...(await filterPrivate({user, client})),
+        ...filterPrivate({user}),
       },
       select: {
         name: true,
@@ -316,7 +316,7 @@ async function findNewsCategories(params: Params) {
     .find({
       where: {
         workspace: {url},
-        ...(await filterPrivate({user, client})),
+        ...filterPrivate({user}),
       },
       select: {
         name: true,
@@ -385,7 +385,7 @@ async function findResourcesFolders(params: Params) {
         parent: {
           id: {eq: null},
         },
-        ...(await filterPrivate({user, client})),
+        ...filterPrivate({user}),
       },
       select: {
         fileName: true,
@@ -454,7 +454,7 @@ async function findForumGroups(params: Params) {
         },
         forumGroup: {
           workspace: {url},
-          ...(await filterPrivate({user, client})),
+          ...filterPrivate({user}),
         },
       },
       select: {
@@ -854,6 +854,7 @@ function partnerToUser(partner: Partner, tenantId: string): User {
     isContact: partner.isContact,
     simpleFullName: partner.simpleFullName,
     mainPartnerId: partner.isContact ? partner.mainPartner?.id : undefined,
+    partnerCategoryId: undefined,
     tenantId,
     image: null,
   };

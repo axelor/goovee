@@ -2,8 +2,9 @@ import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
+import type {Workspace} from '@/orm/workspace';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {MarketplaceConfig} from './config';
 import {
   priceSelectFields,
   versionNumberFields,
@@ -18,6 +19,7 @@ export async function findMyProducts({
   mainPartnerId,
   client,
   workspace,
+  config,
   type,
   where,
   take,
@@ -26,7 +28,8 @@ export async function findMyProducts({
 }: {
   mainPartnerId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   type?: MARKETPLACE_TYPE;
 } & QueryProps<AOSMarketplaceProduct>) {
   // "My" === published by this partner; scoped by withMyProductAccessFilter.
@@ -67,7 +70,7 @@ export async function findMyProducts({
     ),
   });
 
-  return products.map(p => withPrice(p, workspace, priceContext));
+  return products.map(p => withPrice(p, config, priceContext));
 }
 
 /** Lightweight ownership check: resolves the product only if it lives in
@@ -82,7 +85,7 @@ export async function findMyProductAccess({
   productId: ID;
   mainPartnerId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
 }) {
   return client.aOSMarketplaceProduct.findOne({
     where: withMyProductAccessFilter(workspace, mainPartnerId)({id: productId}),
@@ -105,7 +108,7 @@ export async function findMyProductForEdit({
   productId: ID;
   mainPartnerId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
 }) {
   return client.aOSMarketplaceProduct.findOne({
     where: withMyProductAccessFilter(workspace, mainPartnerId)({id: productId}),
@@ -166,7 +169,7 @@ export async function countMyProducts({
 }: {
   mainPartnerId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   type?: MARKETPLACE_TYPE;
 }): Promise<number> {
   const count = await client.aOSMarketplaceProduct.count({

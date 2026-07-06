@@ -26,12 +26,13 @@ import {computeTotal} from '@/utils/cart';
 import {getProductImageURL} from '@/utils/files';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {type PortalWorkspace, type Subapp} from '@/orm/workspace';
+import {type Subapp} from '@/orm/workspace';
 import {formatNumber} from '@/locale/formatters';
 import {calculateAdvanceAmount} from '@/utils/payment';
 import type {ComputedProduct} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {findProduct} from '@/subapps/shop/common/actions/cart';
 import {AddressSelection} from '@/subapps/shop/common/ui/components/address-selection';
 import {SHIPPING_TYPE} from '@/subapps/shop/common/constants/index';
@@ -87,21 +88,21 @@ function Summary({cart}: {cart: CheckoutCart}) {
 function Total({
   cart,
   shippingType,
-  workspace,
+  config,
 }: {
   cart: CheckoutCart;
   shippingType: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ShopConfig | Cloned<ShopConfig>;
 }) {
   const {
     total,
     displayTotal,
     scale: {currency: currencyScale},
     currency: {symbol: currencySymbol},
-  } = computeTotal({cart, workspace});
+  } = computeTotal({cart, config});
 
-  const payInAdvance = workspace.config?.payInAdvance ?? false;
-  const advancePaymentPercentage = workspace.config?.advancePaymentPercentage;
+  const payInAdvance = config?.payInAdvance ?? false;
+  const advancePaymentPercentage = config?.advancePaymentPercentage;
 
   const shipping = Number(
     scale(SHIPPING_TYPE_COST[shippingType], currencyScale),
@@ -240,11 +241,11 @@ function Title({
 }
 
 export default function Content({
-  workspace,
+  config,
   orderSubapp,
   tenant,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ShopConfig | Cloned<ShopConfig>;
   orderSubapp?: Subapp | null;
   tenant: string;
 }) {
@@ -257,7 +258,7 @@ export default function Content({
   );
 
   const router = useRouter();
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const {cart} = useCart();
   const [computedProducts, setComputedProducts] = useState<
     (ComputedProduct | null)[]
@@ -265,7 +266,7 @@ export default function Content({
   const [loading, setLoading] = useState(true);
   const [confirmationDialog, setConfirmationDialog] = useState(false);
 
-  const confirmOrder = workspace?.config?.confirmOrder;
+  const confirmOrder = config?.confirmOrder;
 
   const closeConfirmation = () => {
     setConfirmationDialog(false);
@@ -289,7 +290,7 @@ export default function Content({
           cart.items.map((i: {product: string | number}) =>
             findProduct({
               id: String(i.product),
-              workspace: workspace,
+              workspaceURL,
             }),
           ),
         )
@@ -302,7 +303,7 @@ export default function Content({
       }
     };
     init();
-  }, [cart, computedProducts, workspace, userId, tenant]);
+  }, [cart, computedProducts, userId, tenant, workspaceURL]);
 
   const $cart = useMemo(
     () => ({
@@ -342,18 +343,11 @@ export default function Content({
         <div className="col-span-12 xl:col-span-3">
           <div className="flex flex-col gap-6">
             <Summary cart={$cart} />
-            <Total
-              cart={$cart}
-              shippingType={shippingType}
-              workspace={workspace}
-            />
+            <Total cart={$cart} shippingType={shippingType} config={config} />
             <div className="flex flex-col gap-2">
               {confirmOrder ? (
                 <>
-                  <ShopPayments
-                    workspace={workspace}
-                    orderSubapp={orderSubapp}
-                  />
+                  <ShopPayments config={config} orderSubapp={orderSubapp} />
                 </>
               ) : null}
             </div>

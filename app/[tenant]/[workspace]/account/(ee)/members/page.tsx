@@ -8,6 +8,7 @@ import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
+import {getAccountConfig} from '../../common/orm/config';
 import {findAvailableSubapps, findMembers} from '../../common/orm/members';
 import {findInvites} from '../../common/orm/invites';
 
@@ -38,6 +39,12 @@ export default async function Page(props: {
     return notFound();
   }
 
+  const config = await getAccountConfig(workspace.config.id, client);
+
+  if (!config) {
+    return notFound();
+  }
+
   const partnerId = (user?.isContact ? user.mainPartnerId : user.id)!;
 
   const invites = await findInvites({
@@ -65,7 +72,7 @@ export default async function Page(props: {
         members={$members}
         invites={invites}
         availableApps={availableApps || []}
-        canInviteMembers={workspace?.config?.canInviteMembers}
+        canInviteMembers={config.canInviteMembers}
       />
     </div>
   );

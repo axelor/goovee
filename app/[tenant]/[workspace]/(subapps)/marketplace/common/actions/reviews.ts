@@ -19,7 +19,10 @@ import {
   withProductAccessFilter,
 } from '../orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
-import {ensureAuth} from '../utils/auth-helper';
+import {SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
+import {getPartnerId} from '@/utils';
 
 export async function saveReview(
   input: SaveReviewInput,
@@ -36,14 +39,16 @@ export async function saveReview(
     };
   }
   const payload = parsed.data;
-  const {error, message, auth} = await ensureAuth(
-    payload.workspaceURL,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: payload.workspaceURL,
     tenantId,
-  );
-  if (error) {
-    return {error: true, message};
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-  const {client} = auth.tenant;
+  const {client} = access.tenant;
+  const partnerId = getPartnerId(access.user);
 
   let publisherId: string;
   if (payload.reviewedVersionId) {
@@ -55,7 +60,7 @@ export async function saveReview(
       where: {
         id: payload.reviewedVersionId,
         statusSelect: MARKETPLACE_VERSION_STATUS.PUBLISHED,
-        marketplaceProduct: withProductAccessFilter(auth.workspace)({
+        marketplaceProduct: withProductAccessFilter(access.workspace)({
           id: payload.productId,
         }),
       },
@@ -69,7 +74,7 @@ export async function saveReview(
     const product = await findProductAccess({
       recordId: payload.productId,
       client,
-      workspace: auth.workspace,
+      workspace: access.workspace,
       select: {id: true, publisher: {id: true}},
     });
     if (!product) {
@@ -79,7 +84,7 @@ export async function saveReview(
   }
 
   // The publisher and its members cannot review their own product.
-  if (publisherId === auth.user.mainPartnerId) {
+  if (publisherId === partnerId) {
     return {
       error: true,
       message: await t('You cannot review your own product'),
@@ -94,7 +99,7 @@ export async function saveReview(
     const existing = await findExistingReview({
       client,
       productId: payload.productId,
-      userId: auth.user.id,
+      userId: access.user.id,
     });
 
     let reviewId: string;
@@ -115,7 +120,7 @@ export async function saveReview(
         select: {id: true},
         data: {
           marketplaceProduct: {select: {id: payload.productId}},
-          author: {select: {id: auth.user.id}},
+          author: {select: {id: access.user.id}},
           rating: payload.rating,
           reviewComment: payload.reviewComment ?? null,
           ...(reviewedVersion && {reviewedVersion}),
@@ -133,7 +138,7 @@ export async function saveReview(
         console.error('marketplace: failed to update product rating', {
           productId: payload.productId,
           reviewId,
-          userId: auth.user?.id ?? null,
+          userId: access.user.id,
           error: err,
         });
       }
@@ -162,17 +167,21 @@ export async function deleteReview(
     };
   }
   const {productId, workspaceURL} = parsed.data;
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error) {
-    return {error: true, message};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-  const {client} = auth.tenant;
+  const {client} = access.tenant;
 
   try {
     const existing = await findExistingReview({
       client,
       productId,
-      userId: auth.user.id,
+      userId: access.user.id,
     });
     if (!existing) {
       return {error: true, message: await t('No review to delete')};
@@ -191,7 +200,7 @@ export async function deleteReview(
         console.error('marketplace: failed to update product rating', {
           productId,
           reviewId: existing.id,
-          userId: auth.user?.id ?? null,
+          userId: access.user.id,
           error: err,
         });
       }

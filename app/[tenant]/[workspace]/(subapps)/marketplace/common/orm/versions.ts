@@ -3,7 +3,7 @@ import type {AOSMarketplaceProductVersion} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and} from '@/utils/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {Workspace} from '@/orm/workspace';
 import {
   versionNumberFields,
   versionSortOrder,
@@ -94,7 +94,7 @@ export async function findMyProductVersions({
   productId: ID;
   mainPartnerId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   take: number;
   skip: number;
 }) {
@@ -211,7 +211,7 @@ export async function findVersionForDownload({
   versionId,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   mainPartnerId: string | null | undefined;
   productId: ID;
   versionId: ID;

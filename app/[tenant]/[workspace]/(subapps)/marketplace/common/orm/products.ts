@@ -4,8 +4,9 @@ import {ID} from '@/types';
 import {Maybe} from '@/types/util';
 import {and, or} from '@/utils/orm';
 import type {Payload, SelectOptions} from '@goovee/orm';
+import type {Workspace} from '@/orm/workspace';
 import {MARKETPLACE_TYPE} from '../constants/marketplace-types';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {MarketplaceConfig} from './config';
 import {slugify} from '../utils/slugify';
 import {
   priceSelectFields,
@@ -31,7 +32,7 @@ export async function findProductAccess<
 }: {
   recordId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   select?: T;
 }): Promise<Payload<AOSMarketplaceProduct, {select: T}> | null> {
   return client.aOSMarketplaceProduct.findOne({
@@ -54,7 +55,7 @@ export async function findProductsBySearch({
   search: string;
   type?: MARKETPLACE_TYPE;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   take?: number;
 }) {
   const pattern = `%${search}%`;
@@ -85,6 +86,7 @@ export type ListProduct = Awaited<ReturnType<typeof findProducts>>[number];
 export async function findProducts({
   client,
   workspace,
+  config,
   mainPartnerId,
   where,
   take,
@@ -92,7 +94,8 @@ export async function findProducts({
   orderBy,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   mainPartnerId?: string | null;
 } & QueryProps<AOSMarketplaceProduct>) {
   const products = await client.aOSMarketplaceProduct.find({
@@ -123,7 +126,7 @@ export async function findProducts({
     ),
   });
 
-  return products.map(p => withPrice(p, workspace, priceContext));
+  return products.map(p => withPrice(p, config, priceContext));
 }
 
 export type SingleProduct = NonNullable<
@@ -134,12 +137,14 @@ export async function findProduct({
   slug,
   client,
   workspace,
+  config,
   mainPartnerId,
   preview = false,
 }: {
   slug: string;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   mainPartnerId?: string | null;
   /* Owner-only preview of an unpublished product: drop the published
    * filter and scope strictly to the caller's own products instead. */
@@ -220,7 +225,7 @@ export async function findProduct({
       resolved.saleCurrency?.codeISO ?? resolved.product?.saleCurrency?.codeISO,
     ],
   });
-  return withPrice(resolved, workspace, priceContext);
+  return withPrice(resolved, config, priceContext);
 }
 
 /**
@@ -277,7 +282,7 @@ export async function getProductScreenshot({
   mainPartnerId,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   productId: ID;
   fileId: ID;
   mainPartnerId: Maybe<ID>;

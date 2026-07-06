@@ -1,14 +1,17 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {FaChevronRight} from 'react-icons/fa';
 import {MdAdd} from 'react-icons/md';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 
 // ---- CORE IMPORTS ---- //
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {Client} from '@/goovee/.generated/client';
-import type {PortalAppConfig} from '@/orm/workspace';
+import {getTicketingConfig} from '../../../common/orm/config';
+import type {TicketingConfig} from '../../../common/orm/config';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getCurrentPath} from '@/utils/current-path';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -57,7 +60,6 @@ import type {SearchParams} from '../../../common/types/search-param';
 import {TicketList} from '../../../common/ui/components/ticket-list';
 import {ClientFilter} from './client-filter';
 import {getPages, getSkip} from '@/utils/pagination';
-import {ensureAuth} from '../../../common/utils/auth-helper';
 import {getOrderBy, getWhere} from '../../../common/utils/search-param';
 import Search from '../search';
 
@@ -80,22 +82,44 @@ export default async function Page(props: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets?${new URLSearchParams(searchParams).toString()}`,
-        workspaceURI,
-        tenant,
-      }),
-    );
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  if (error) notFound();
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
 
-  const project = await findProject({projectId, client, user, workspace});
+  const config = await getTicketingConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const project = await findProject({
+    projectId,
+    client,
+    user,
+    workspace: access.workspace,
+  });
 
   if (!project) notFound();
 
@@ -110,9 +134,7 @@ export default async function Page(props: {
     subapp,
   }).then(clone);
 
-  const allowedFields = new Set(
-    workspace.config.ticketingFieldSet?.map(f => f.name),
-  );
+  const allowedFields = new Set(config.ticketingFieldSet?.map(f => f.name));
 
   const hasFilter = FILTER_FIELDS.some(field => allowedFields.has(field));
 
@@ -179,7 +201,7 @@ export default async function Page(props: {
               searchParams={searchParams}
               projectId={projectId}
               client={client}
-              fields={workspace.config.ticketingFieldSet}
+              fields={config.ticketingFieldSet}
             />
           </Suspense>
         )}
@@ -187,7 +209,7 @@ export default async function Page(props: {
       <div>
         <TicketList
           tickets={tickets}
-          fields={clone(workspace.config.ticketingFieldSet)}
+          fields={clone(config.ticketingFieldSet)}
         />
         {pages > 1 && (
           <TablePagination
@@ -279,7 +301,7 @@ async function AsyncFilter({
   searchParams: SearchParams;
   projectId: ID;
   client: Client;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   const [contacts, statuses, priorities, company, clientPartner, categories] =
     await Promise.all([

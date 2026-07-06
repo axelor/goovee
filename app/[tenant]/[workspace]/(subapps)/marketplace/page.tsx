@@ -21,11 +21,13 @@ import {
   getTotal,
 } from '@/utils/pagination';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {getPartnerId} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import type {OrderByOptions} from '@goovee/orm';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {MARKETPLACE_TYPE} from './common/constants/marketplace-types';
 import {
   findProductCategories,
@@ -37,7 +39,8 @@ import {ProductCard} from './common/ui/components/product/product-card';
 import {PriceTypeSelect} from './common/ui/components/product/price-type-select';
 import {ProductSortSelect} from './common/ui/components/product/product-sort-select';
 import {ProductTypeSelect} from './common/ui/components/product/product-type-select';
-import {ensureAuth} from './common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getMarketplaceConfig} from './common/orm/config';
 import {
   PAGE_SIZE,
   pageParamsSchema,
@@ -71,22 +74,36 @@ export default async function Page(props: {
 
   const listingHref = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
     allowGuest: true,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: listingHref,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
 
   const {limit, page, category, sort, priceType, type: rawType} = searchParams;
-  const client = auth.tenant.client;
+  const client = access.tenant.client;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
+  if (!config) notFound();
+  const partnerId = access.user ? getPartnerId(access.user) : undefined;
 
   // Known type codes from the selection enum. Validate the URL value
   // against this set so an unknown code falls back to 'all'.
@@ -146,8 +163,9 @@ export default async function Page(props: {
 
   const products = await findProducts({
     client,
-    workspace: auth.workspace,
-    mainPartnerId: auth.user?.mainPartnerId,
+    workspace: access.workspace,
+    config,
+    mainPartnerId: partnerId,
     take: limit,
     skip: getSkip(limit, page),
     where: and<AOSMarketplaceProduct>([
@@ -168,21 +186,19 @@ export default async function Page(props: {
   return (
     <>
       <Hero
-        title={
-          auth.workspace.config.marketplaceHeroTitle || (await t('Marketplace'))
-        }
+        title={config.marketplaceHeroTitle || (await t('Marketplace'))}
         description={
-          auth.workspace.config.marketplaceHeroDescription ||
+          config.marketplaceHeroDescription ||
           (await t(
             'Discover and install apps and skills to extend your portal.',
           ))
         }
         background={
-          (auth.workspace.config
-            .marketplaceHeroOverlayColorSelect as OverlayColor | null) ?? null
+          (config.marketplaceHeroOverlayColorSelect as OverlayColor | null) ??
+          null
         }
         image={
-          auth.workspace.config.marketplaceHeroBgImage?.id
+          config.marketplaceHeroBgImage?.id
             ? `${workspaceURI}/${SUBAPP_CODES.marketplace}/api/hero/background`
             : null
         }

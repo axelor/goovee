@@ -1,7 +1,10 @@
 import {NextRequest, NextResponse} from 'next/server';
+import {SUBAPP_CODES} from '@/constants';
 import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
-import {ensureAuth} from '../../../../../common/utils/auth-helper';
+import {getPartnerId} from '@/utils';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
 import {getProductScreenshot} from '../../../../../common/orm';
 
 /**
@@ -30,20 +33,25 @@ export async function GET(
   } = await props.params;
   const {workspaceURL} = workspacePathname({tenant: tenantId, workspace});
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
     allowGuest: true,
   });
-  if (error) {
-    return new NextResponse('Unauthorized', {status: 401});
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
-  const {client} = auth.tenant;
+  const {client} = access.tenant;
 
   const picture = await getProductScreenshot({
     client,
-    workspace: auth.workspace,
+    workspace: access.workspace,
     productId,
     fileId,
-    mainPartnerId: auth.user?.mainPartnerId,
+    mainPartnerId: access.user ? getPartnerId(access.user) : undefined,
   });
   if (!picture?.id) {
     return new NextResponse('Picture not found', {status: 404});
@@ -53,7 +61,7 @@ export async function GET(
     id: picture.id,
     meta: true,
     client,
-    storage: auth.tenant.config.aos.storage,
+    storage: access.tenant.config.aos.storage,
   });
   if (!file) {
     return new NextResponse('File not found', {status: 404});

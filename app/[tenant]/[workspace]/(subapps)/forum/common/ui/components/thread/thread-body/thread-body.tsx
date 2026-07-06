@@ -1,7 +1,6 @@
 'use client';
 
 import React, {useMemo} from 'react';
-import type {Cloned} from '@/types/util';
 import {MdOutlineMoreHoriz} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -35,16 +34,15 @@ import {
   ImageGallery,
 } from '@/subapps/forum/common/ui/components';
 import {useTruncatedElement} from '@/subapps/forum/common/ui/hooks/use-truncatedElement';
-import {PortalWorkspace} from '@/orm/workspace';
 
 export const ThreadBody = ({
   post,
   usePopUpStyles = false,
-  workspace,
+  enableComment,
 }: {
   post?: PostWithMembership;
   usePopUpStyles?: boolean;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  enableComment: boolean;
 }) => {
   const {title, content, attachmentList, author, postDateT} = post ?? {};
 
@@ -142,7 +140,11 @@ export const ThreadBody = ({
           </div>
         </div>
         {images?.length > 0 && !usePopUpStyles && (
-          <ImageGallery post={post} images={images} workspace={workspace} />
+          <ImageGallery
+            post={post}
+            images={images}
+            enableComment={enableComment}
+          />
         )}
 
         {files?.length > 0 &&

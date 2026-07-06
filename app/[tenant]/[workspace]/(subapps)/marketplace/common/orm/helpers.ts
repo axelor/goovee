@@ -13,7 +13,7 @@ import type {
   WhereOptions,
 } from '@goovee/orm';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {Workspace} from '@/orm/workspace';
 import {Maybe} from '@/types/util';
 import {productPriceSelectFields} from '@/product/orm';
 
@@ -24,14 +24,14 @@ export type QueryProps<T extends Entity> = {
   skip?: number;
 };
 
-export function getProductAccessFilter(workspace: PortalWorkspaceWithConfig) {
+export function getProductAccessFilter(workspace: Workspace) {
   return and<AOSMarketplaceProduct>([
     {OR: [{archived: false}, {archived: null}]},
     {portalWorkspace: {id: workspace.id}},
   ]);
 }
 
-export function withProductAccessFilter(workspace: PortalWorkspaceWithConfig) {
+export function withProductAccessFilter(workspace: Workspace) {
   return function (where?: WhereOptions<AOSMarketplaceProduct>) {
     return and<AOSMarketplaceProduct>([
       where,
@@ -49,9 +49,7 @@ export function getPublishedProductFilter(): WhereOptions<AOSMarketplaceProduct>
   };
 }
 
-export function withPublishedProductFilter(
-  workspace: PortalWorkspaceWithConfig,
-) {
+export function withPublishedProductFilter(workspace: Workspace) {
   return function (where?: WhereOptions<AOSMarketplaceProduct>) {
     return and<AOSMarketplaceProduct>([
       where,
@@ -71,20 +69,14 @@ export function withCategoryAccessFilter() {
   };
 }
 
-export function getMyProductAccessFilter(
-  workspace: PortalWorkspaceWithConfig,
-  partnerId: ID,
-) {
+export function getMyProductAccessFilter(workspace: Workspace, partnerId: ID) {
   return and<AOSMarketplaceProduct>([
     {publisher: {id: partnerId}},
     getProductAccessFilter(workspace),
   ]);
 }
 
-export function withMyProductAccessFilter(
-  workspace: PortalWorkspaceWithConfig,
-  partnerId: ID,
-) {
+export function withMyProductAccessFilter(workspace: Workspace, partnerId: ID) {
   return function (where?: WhereOptions<AOSMarketplaceProduct>) {
     return and<AOSMarketplaceProduct>([
       where,
@@ -110,7 +102,7 @@ export function withBundleAccessFilter({
   mainPartnerId,
   productId,
 }: {
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   mainPartnerId?: ID;
   productId: ID;
 }) {
@@ -153,7 +145,7 @@ export function withBundleAccessFilter({
 }
 
 export function withScreenshotAccessFilter(
-  workspace: PortalWorkspaceWithConfig,
+  workspace: Workspace,
   mainPartnerId: Maybe<ID>,
 ) {
   return function (where?: WhereOptions<AOSMarketplaceProduct>) {

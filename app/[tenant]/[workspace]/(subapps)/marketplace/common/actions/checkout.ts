@@ -20,7 +20,10 @@ import {
   recordPurchases,
 } from '../orm';
 import {createMarketplaceOrder} from '../service';
-import {ensureAuth} from '../utils/auth-helper';
+import {getMarketplaceConfig} from '../orm/config';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
+import {getPartnerId} from '@/utils';
 import {
   CartProductIdsSchema,
   recheckCartAvailability,
@@ -60,30 +63,35 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
   const {productIds, workspaceURL} = input;
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return err(await t('Tenant ID is missing.'));
-  const {
-    auth,
-    error: authError,
-    message: authMessage,
-  } = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (authError) return err(authMessage);
-  const {client, config} = auth.tenant;
+  if (!access.ok) return err(await accessMessage(access.reason));
+  const {client, config} = access.tenant;
+  const marketplaceConfig = await getMarketplaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!marketplaceConfig) return err(await t('Invalid workspace'));
+  const partnerId = getPartnerId(access.user);
 
   const cartResult = await validateCart({
     client,
-    workspace: auth.workspace,
-    mainPartnerId: auth.user.mainPartnerId,
+    workspace: access.workspace,
+    config: marketplaceConfig,
+    mainPartnerId: partnerId,
     productIds,
   });
   if (cartResult.error) return cartResult;
   const cart = cartResult.data;
 
-  const workspace = auth.workspace;
-  if (!workspace.config.allowOnlinePaymentForEcommerce) {
+  const workspace = access.workspace;
+  if (!marketplaceConfig.allowOnlinePaymentForEcommerce) {
     return err(await t('Online payment is not available.'));
   }
-  const paymentOptionSet = workspace.config.paymentOptionSet;
+  const paymentOptionSet = marketplaceConfig.paymentOptionSet;
   if (!paymentOptionSet?.length) {
     return err(await t('Payment options are not configured.'));
   }
@@ -94,12 +102,12 @@ async function prepare(input: {productIds: string[]; workspaceURL: string}) {
   const context = {
     cart,
     workspaceURL,
-    mainPartnerId: auth.user.mainPartnerId,
+    mainPartnerId: partnerId,
   };
 
   return {
     success: true as const,
-    data: {auth, config, cart, workspace, paymentOptionSet, context},
+    data: {access, config, cart, workspace, paymentOptionSet, context},
   };
 }
 
@@ -112,7 +120,7 @@ export async function createStripeCheckoutSession(props: {
 
   const prep = await prepare(parsed.data);
   if ('error' in prep) return prep;
-  const {auth, cart, paymentOptionSet, context} = prep.data;
+  const {access, cart, paymentOptionSet, context} = prep.data;
 
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.stripe)) {
     return err(await t('Stripe is not available.'));
@@ -122,8 +130,8 @@ export async function createStripeCheckoutSession(props: {
   }
 
   const payer = await findGooveeUserByEmail(
-    auth.user.email,
-    auth.tenant.client,
+    access.user.email,
+    access.tenant.client,
   );
   const emailAddress = payer?.emailAddress?.address;
   const payerId = payer?.id;
@@ -145,8 +153,8 @@ export async function createStripeCheckoutSession(props: {
       amount: cart.total,
       currency: cart.currencyCodeISO,
       context,
-      tenantId: auth.tenant.id,
-      client: auth.tenant.client,
+      tenantId: access.tenant.id,
+      client: access.tenant.client,
       url: {success: successUrl, error: cancelUrl},
     });
     return {client_secret: session.client_secret, url: session.url};
@@ -164,7 +172,7 @@ export async function paypalCreateOrder(props: {
 
   const prep = await prepare(parsed.data);
   if ('error' in prep) return prep;
-  const {auth, cart, paymentOptionSet, context} = prep.data;
+  const {access, cart, paymentOptionSet, context} = prep.data;
 
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.paypal)) {
     return err(await t('PayPal is not available.'));
@@ -174,8 +182,8 @@ export async function paypalCreateOrder(props: {
   }
 
   const payer = await findGooveeUserByEmail(
-    auth.user.email,
-    auth.tenant.client,
+    access.user.email,
+    access.tenant.client,
   );
   const emailAddress = payer?.emailAddress?.address;
   if (!emailAddress) return err(await t('Buyer email could not be resolved.'));
@@ -185,7 +193,7 @@ export async function paypalCreateOrder(props: {
       amount: cart.total,
       currency: cart.currencyCodeISO,
       email: emailAddress,
-      client: auth.tenant.client,
+      client: access.tenant.client,
       context,
     });
     return {success: true, order: response?.result};
@@ -207,7 +215,7 @@ export async function payboxCreateOrder(props: {
     workspaceURL: parsed.data.workspaceURL,
   });
   if ('error' in prep) return prep;
-  const {auth, cart, paymentOptionSet, context} = prep.data;
+  const {access, cart, paymentOptionSet, context} = prep.data;
 
   if (!isPaymentOptionAvailable(paymentOptionSet, PaymentOption.paybox)) {
     return err(await t('Paybox is not available.'));
@@ -217,8 +225,8 @@ export async function payboxCreateOrder(props: {
   }
 
   const payer = await findGooveeUserByEmail(
-    auth.user.email,
-    auth.tenant.client,
+    access.user.email,
+    access.tenant.client,
   );
   const emailAddress = payer?.emailAddress?.address;
   if (!emailAddress) return err(await t('Buyer email could not be resolved.'));
@@ -229,7 +237,7 @@ export async function payboxCreateOrder(props: {
       currency: cart.currencyCodeISO,
       email: emailAddress,
       context,
-      client: auth.tenant.client,
+      client: access.tenant.client,
       url: {
         success: `${process.env.GOOVEE_PUBLIC_HOST}${parsed.data.uri}?paybox_response=true`,
         failure: `${process.env.GOOVEE_PUBLIC_HOST}${parsed.data.uri}?paybox_error=true`,
@@ -252,15 +260,22 @@ export async function checkout(
   if (!tenantId)
     return {error: true, message: await t('Tenant ID is missing.')};
 
-  const {
-    auth,
-    error: authError,
-    message: authMessage,
-  } = await ensureAuth(parsed.data.workspaceURL, tenantId, {allowGuest: false});
-  if (authError) {
-    return {error: true, message: authMessage};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: parsed.data.workspaceURL,
+    tenantId,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-  const {client, config} = auth.tenant;
+  const {client, config} = access.tenant;
+  const marketplaceConfig = await getMarketplaceConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!marketplaceConfig) {
+    return {error: true, message: await t('Invalid workspace')};
+  }
 
   let paidAmount: number;
   let paymentContextId: string;
@@ -329,7 +344,7 @@ export async function checkout(
    * version. Block the grant if so. Prices are NOT re-checked here. */
   const recheck = await recheckCartAvailability({
     client,
-    workspace: auth.workspace,
+    workspace: access.workspace,
     mainPartnerId,
     productIds,
   });
@@ -364,7 +379,7 @@ export async function checkout(
   }
 
   const paymentModeId = getPaymentModeId(
-    auth.workspace.config.paymentOptionSet,
+    marketplaceConfig.paymentOptionSet,
     parsed.data.payment.mode,
   );
 
@@ -389,9 +404,9 @@ export async function checkout(
 
     const {invoiceId, saleOrderId} = await createMarketplaceOrder({
       cart,
-      workspace: auth.workspace,
+      workspace: access.workspace,
       mainPartnerId,
-      contactId: auth.user.isContact ? auth.user.id : undefined,
+      contactId: access.user.isContact ? access.user.id : undefined,
       invoicingAddressId: addressId,
       paidAmount: cart.total,
       paymentModeId,

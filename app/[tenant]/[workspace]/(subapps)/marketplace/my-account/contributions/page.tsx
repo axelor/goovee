@@ -11,9 +11,11 @@ import {
 } from '@/ui/components/breadcrumb';
 import {clone} from '@/utils';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {getPartnerId} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {MyContributionsTab} from '../../common/constants/tabs';
 import {
@@ -29,7 +31,9 @@ import {Construction} from 'lucide-react';
 import {NoticeBanner} from '../../common/ui/components/shared/notice-banner';
 import {OverviewTab} from '../../common/ui/components/contributions/my-contributions-overview-tab';
 import {ProductsTab} from '../../common/ui/components/contributions/products-tab';
-import {canManageProducts, ensureAuth} from '../../common/utils/auth-helper';
+import {canManageProducts} from '../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getMarketplaceConfig} from '../../common/orm/config';
 import {
   myContributionsParamsSchema,
   myContributionsSearchParamsSchema,
@@ -60,38 +64,55 @@ export default async function MyContributionsPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
+
+  const {client} = access.tenant;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
 
   /* Contributions is a seller-only area; non-sellers can't reach it even by
    * typing the URL. */
-  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
+  if (
+    !config?.allowToPublish ||
+    !canManageProducts({user: access.user, subapp: access.subapp})
+  ) {
     notFound();
   }
+  const partnerId = getPartnerId(access.user);
 
   const [categories, licenses, compatibilityVersions, newListingCurrency] =
     await Promise.all([
       findProductCategories({
-        client: auth.tenant.client,
+        client,
         take: 100,
         orderBy: {sequence: 'ASC'},
       }),
-      findLicenses({client: auth.tenant.client}),
-      findCompatibilityVersions(auth.tenant.client),
+      findLicenses({client}),
+      findCompatibilityVersions(client),
       resolveNewListingCurrency({
-        client: auth.tenant.client,
-        mainPartnerId: auth.user.mainPartnerId,
+        client,
+        mainPartnerId: partnerId,
       }),
     ]);
 
@@ -181,20 +202,17 @@ export default async function MyContributionsPage(props: {
               )}
             </p>
           </div>
-          {auth.workspace.config.allowToPublish && (
+          {config.allowToPublish && (
             <PublishNewButton
               workspaceURI={workspaceURI}
               workspaceURL={workspaceURL}
               categories={clone(categories)}
               licenses={clone(licenses)}
               compatibilityVersions={clone(compatibilityVersions)}
-              requiresReview={auth.workspace.config.requiresReview === true}
-              allowToPublish={auth.workspace.config.allowToPublish === true}
+              requiresReview={config.requiresReview === true}
+              allowToPublish={config.allowToPublish === true}
               newListingCurrency={clone(newListingCurrency)}
-              inAti={
-                auth.workspace.config.defaultProductForMarketplace?.inAti ===
-                true
-              }
+              inAti={config.defaultProductForMarketplace?.inAti === true}
             />
           )}
         </div>
@@ -225,9 +243,9 @@ export default async function MyContributionsPage(props: {
             <Suspense fallback="...">
               <Await
                 promise={countMyProducts({
-                  mainPartnerId: auth.user.mainPartnerId,
-                  client: auth.tenant.client,
-                  workspace: auth.workspace,
+                  mainPartnerId: partnerId,
+                  client,
+                  workspace: access.workspace,
                 })}
               />
             </Suspense>
@@ -250,18 +268,20 @@ export default async function MyContributionsPage(props: {
       <div>
         {tab === MyContributionsTab.Overview && (
           <OverviewTab
-            mainPartnerId={auth.user.mainPartnerId}
-            client={auth.tenant.client}
-            workspace={auth.workspace}
+            mainPartnerId={partnerId}
+            client={client}
+            workspace={access.workspace}
+            config={config}
             workspaceURI={workspaceURI}
             tenantId={tenantId}
           />
         )}
         {tab === MyContributionsTab.Products && (
           <ProductsTab
-            mainPartnerId={auth.user.mainPartnerId}
-            client={auth.tenant.client}
-            workspace={auth.workspace}
+            mainPartnerId={partnerId}
+            client={client}
+            workspace={access.workspace}
+            config={config}
             newListingCurrency={newListingCurrency}
             workspaceURI={workspaceURI}
             workspaceURL={workspaceURL}

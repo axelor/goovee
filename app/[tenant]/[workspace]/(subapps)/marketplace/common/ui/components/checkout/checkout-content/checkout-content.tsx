@@ -3,7 +3,7 @@
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {MarketplaceConfig} from '../../../../orm/config';
 import {PaymentOption} from '@/types';
 import type {SuccessResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
@@ -22,7 +22,7 @@ import {useMarketplaceCart} from '../../../../hooks/use-marketplace-cart';
 import {CartItemCard} from '../../cart/cart-item-card';
 
 type Props = {
-  workspace: Cloned<PortalWorkspace>;
+  config: Cloned<MarketplaceConfig>;
 };
 
 function formatPrice(
@@ -42,7 +42,7 @@ function formatPrice(
  * provider session actions. Server-side guards (auth, drift, paid-only,
  * not-owned) run inside each action so the buyer can't tamper with the
  * cart between this page and the provider redirect. */
-export function CheckoutContent({workspace}: Props) {
+export function CheckoutContent({config}: Props) {
   const router = useRouter();
   const {workspaceURI, workspaceURL} = useWorkspace();
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
@@ -111,7 +111,7 @@ export function CheckoutContent({workspace}: Props) {
       </div>
 
       <Payments
-        workspace={workspace}
+        config={config}
         disabled={false}
         onValidate={async () => true}
         onApprove={onApprove}

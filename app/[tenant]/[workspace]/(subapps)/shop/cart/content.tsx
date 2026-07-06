@@ -31,10 +31,10 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {SEARCH_PARAMS} from '@/constants';
 import type {Product, ComputedProduct} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {findProduct} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/actions/cart';
 import type {
   EnrichedCartItem,
@@ -200,12 +200,12 @@ function CartItems({
   cart,
   disabled,
   onRemove,
-  workspace,
+  config,
 }: {
   cart: EnrichedCart;
   disabled?: boolean;
   onRemove: (product: Product) => Promise<void>;
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config?: ShopConfig | Cloned<ShopConfig>;
 }) {
   const handleRemove =
     (product: Product) => (event: React.MouseEvent<HTMLElement>) => {
@@ -220,7 +220,7 @@ function CartItems({
           item={item}
           disabled={disabled}
           handleRemove={handleRemove}
-          displayPrices={workspace?.config?.displayPrices ?? undefined}
+          displayPrices={config?.displayPrices ?? undefined}
         />
       ))}
     </div>
@@ -232,18 +232,18 @@ function CartSummary({
   onRequestQuotation,
   hideRequestQuotation,
   hideCheckout,
-  workspace,
+  config,
 }: {
   cart: EnrichedCart;
   onRequestQuotation: () => void;
   hideRequestQuotation?: boolean;
   hideCheckout?: boolean;
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config?: ShopConfig | Cloned<ShopConfig>;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const noitem = !cart?.items?.length;
-  const {displayTotal} = computeTotal({cart, workspace});
+  const {displayTotal} = computeTotal({cart, config});
   const {workspaceURI, tenant} = useWorkspace();
   const {data: session} = authClient.useSession();
   const authenticated = session?.user?.id;
@@ -260,7 +260,7 @@ function CartSummary({
 
   return (
     <div className="col-span-12 xl:col-span-3 p-4 bg-card text-card-foreground rounded-lg">
-      {workspace?.config?.displayPrices && (
+      {config?.displayPrices && (
         <>
           <p className="text-xl font-semibold mb-6">{i18n.t('Total')}</p>
           <Separator className="mb-2" />
@@ -327,10 +327,10 @@ function CartSummary({
 }
 
 export default function Content({
-  workspace,
+  config,
   tenant,
 }: {
-  workspace?: PortalWorkspace | Cloned<PortalWorkspace>;
+  config?: ShopConfig | Cloned<ShopConfig>;
   tenant: string;
 }) {
   const {data: session} = authClient.useSession();
@@ -338,7 +338,7 @@ export default function Content({
   const userId = user?.id;
 
   const {cart, removeItem} = useCart();
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const router = useRouter();
   const [updating, setUpdating] = useState(false);
   const [computedProducts, setComputedProducts] = useState<
@@ -401,7 +401,7 @@ export default function Content({
           cart.items.map((i: {product: string | number}) =>
             findProduct({
               id: String(i.product),
-              workspace,
+              workspaceURL,
             }),
           ),
         )
@@ -428,7 +428,7 @@ export default function Content({
       }
     };
     init();
-  }, [cart, computedProducts, workspace, userId, tenant, removeItem]);
+  }, [cart, computedProducts, userId, tenant, removeItem, workspaceURL]);
 
   const $cart = useMemo(
     () => ({
@@ -459,7 +459,7 @@ export default function Content({
               cart={$cart}
               onRemove={openProductConfirmation}
               disabled={updating}
-              workspace={workspace}
+              config={config}
             />
           ) : (
             <p className="text-xl font-bold">{i18n.t('Your cart is empty.')}</p>
@@ -468,9 +468,9 @@ export default function Content({
         <CartSummary
           cart={$cart}
           onRequestQuotation={openQuotationConfirmation}
-          workspace={workspace}
-          hideRequestQuotation={!workspace?.config?.requestQuotation}
-          hideCheckout={!workspace?.config?.confirmOrder}
+          config={config}
+          hideRequestQuotation={!config?.requestQuotation}
+          hideCheckout={!config?.confirmOrder}
         />
         <AlertDialog open={Boolean(confirmationDialog)}>
           <AlertDialogContent>

@@ -23,13 +23,15 @@ import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {getPages, getPaginationButtons, getSkip} from '@/utils/pagination';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {getPartnerId} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {findPurchases} from '../../common/orm';
 import {MyPurchasesTable} from '../../common/ui/components/purchases/my-purchases-table';
-import {ensureAuth} from '../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
   myPurchasesParamsSchema,
   myPurchasesSearchParamsSchema,
@@ -60,19 +62,29 @@ export default async function MyPurchasesPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/purchases`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
 
   const {limit, page} = searchParams;
 
@@ -93,9 +105,9 @@ export default async function MyPurchasesPage(props: {
   };
 
   const purchases = await findPurchases({
-    client: auth.tenant.client,
-    workspaceId: auth.workspace.id,
-    mainPartnerId: auth.user.mainPartnerId,
+    client: access.tenant.client,
+    workspaceId: access.workspace.id,
+    mainPartnerId: getPartnerId(access.user),
     take: limit,
     skip: getSkip(limit, page),
   });

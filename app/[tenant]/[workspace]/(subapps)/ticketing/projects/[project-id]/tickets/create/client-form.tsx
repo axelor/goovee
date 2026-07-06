@@ -1,6 +1,6 @@
 'use client';
 
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../../common/orm/config';
 import type {ID} from '@/types';
 import {useRouter} from 'next/navigation';
 import {useCallback} from 'react';
@@ -19,7 +19,7 @@ export function Form(props: {
   contacts: ContactPartner[];
   workspaceURI: string;
   parentId?: string;
-  formFields: PortalAppConfig['ticketingFormFieldSet'];
+  formFields: TicketingConfig['ticketingFormFieldSet'];
 }) {
   const {
     categories,

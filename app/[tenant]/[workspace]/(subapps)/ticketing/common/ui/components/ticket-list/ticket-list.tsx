@@ -23,16 +23,16 @@ import {
   RemoveLinkButton,
   RemoveParentButton,
 } from './ticket-row-buttons';
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../orm/config';
 
 type TicketListProps = {
   tickets: Cloned<TicketListTicket>[];
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 };
 
 function filterColumns<T extends Record<string, any>>(
   columns: Column<T>[],
-  fields: PortalAppConfig['ticketingFieldSet'],
+  fields: TicketingConfig['ticketingFieldSet'],
 ) {
   if (!fields) return columns;
   const fieldnames = fields.map(field => field.name);
@@ -95,7 +95,7 @@ export function TicketList(props: TicketListProps) {
 export function ParentTicketList(props: {
   ticketId: string;
   tickets: Cloned<ParentTicket>[];
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   const {tickets, ticketId, fields} = props;
 
@@ -145,7 +145,7 @@ export function ParentTicketList(props: {
 export function ChildTicketList(props: {
   ticketId: string;
   tickets?: Cloned<ChildTicket[]>;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   const {tickets, ticketId, fields} = props;
   const hasTickets = Boolean(tickets?.length);
@@ -196,7 +196,7 @@ export function ChildTicketList(props: {
 export function RelatedTicketList(props: {
   ticketId: string;
   links: Cloned<TicketLink[]>;
-  fields: PortalAppConfig['ticketingFieldSet'];
+  fields: TicketingConfig['ticketingFieldSet'];
 }) {
   const {links, ticketId, fields} = props;
   const hasLinks = Boolean(links?.length);

@@ -8,7 +8,8 @@ import {
   findCartProducts,
   findCartProductsAvailability,
 } from '../orm';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {Workspace} from '@/orm/workspace';
+import type {MarketplaceConfig} from '../orm/config';
 import {ComputedPrice, computePrice} from '../utils/price';
 
 export const CartProductIdsSchema = z
@@ -52,11 +53,13 @@ export type ValidatedCart = {
 export async function validateCart({
   client,
   workspace,
+  config,
   mainPartnerId,
   productIds,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   mainPartnerId: string;
   productIds: string[];
 }): ActionResponse<ValidatedCart> {
@@ -107,7 +110,7 @@ export async function validateCart({
     const price = computePrice({
       product: product.product,
       priceContext,
-      company: workspace.config.company,
+      company: config.company,
       priceOverride: {
         salePrice: product.salePrice,
         saleCurrency: product.saleCurrency,
@@ -185,7 +188,7 @@ export async function recheckCartAvailability({
   productIds,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
   mainPartnerId: string;
   productIds: string[];
 }) {

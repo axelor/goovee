@@ -10,11 +10,13 @@ import {
 } from '@/ui/components/breadcrumb';
 import {clone} from '@/utils';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {CheckoutContent} from '../../common/ui/components/checkout/checkout-content';
-import {ensureAuth} from '../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getMarketplaceConfig} from '../../common/orm/config';
 
 export default async function CheckoutPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -26,19 +28,35 @@ export default async function CheckoutPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/cart/checkout`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
+
+  const config = await getMarketplaceConfig(
+    access.workspace.config.id,
+    access.tenant.client,
+  );
+  if (!config) notFound();
 
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 
@@ -68,7 +86,7 @@ export default async function CheckoutPage(props: {
         {await t('Checkout')}
       </h1>
 
-      <CheckoutContent workspace={clone(auth.workspace)} />
+      <CheckoutContent config={clone(config)} />
     </div>
   );
 }

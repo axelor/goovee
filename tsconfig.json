@@ -42,7 +42,9 @@
       "@/environment": ["./lib/core/environment/index"],
       "@/environment/*": ["./lib/core/environment/*"],
       "@/pwa/*": ["./lib/core/pwa/*"],
-      "@/product/*": ["./lib/core/product/*"]
+      "@/product/*": ["./lib/core/product/*"],
+      "@/service": ["./lib/core/service/index"],
+      "@/service/*": ["./lib/core/service/*"]
     }
   },
   "include": [

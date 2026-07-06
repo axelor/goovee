@@ -1,14 +1,18 @@
 import {SUBAPP_CODES} from '@/constants';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {getPartnerId} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {
   findCompatibilityVersions,
   findLicenses,
   findProductCategories,
   resolveNewListingCurrency,
 } from '../../../common/orm';
-import {canManageProducts, ensureAuth} from '../../../common/utils/auth-helper';
+import {canManageProducts} from '../../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getMarketplaceConfig} from '../../../common/orm/config';
 
 /**
  * Shared setup for the contributions edit routes: resolve the workspace, run the
@@ -26,36 +30,54 @@ export async function loadEditContext(params: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
+
+  const {client} = access.tenant;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
+
   /* Seller-only area — non-sellers can't reach the edit routes by URL either. */
-  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
+  if (
+    !config?.allowToPublish ||
+    !canManageProducts({user: access.user, subapp: access.subapp})
+  ) {
     notFound();
   }
+  const partnerId = getPartnerId(access.user);
 
   const [categories, licenses, compatibilityVersions, newListingCurrency] =
     await Promise.all([
       findProductCategories({
-        client: auth.tenant.client,
+        client,
         take: 100,
         orderBy: {sequence: 'ASC'},
       }),
-      findLicenses({client: auth.tenant.client}),
-      findCompatibilityVersions(auth.tenant.client),
+      findLicenses({client}),
+      findCompatibilityVersions(client),
       resolveNewListingCurrency({
-        client: auth.tenant.client,
-        mainPartnerId: auth.user.mainPartnerId,
+        client,
+        mainPartnerId: partnerId,
       }),
     ]);
 
@@ -63,13 +85,15 @@ export async function loadEditContext(params: {
     workspaceURI,
     workspaceURL,
     tenantId,
-    auth,
+    access,
+    partnerId,
+    config,
     categories,
     licenses,
     compatibilityVersions,
     newListingCurrency,
-    requiresReview: auth.workspace.config.requiresReview === true,
-    allowToPublish: auth.workspace.config.allowToPublish === true,
-    inAti: auth.workspace.config.defaultProductForMarketplace?.inAti === true,
+    requiresReview: config.requiresReview === true,
+    allowToPublish: config.allowToPublish === true,
+    inAti: config.defaultProductForMarketplace?.inAti === true,
   };
 }

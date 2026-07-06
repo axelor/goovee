@@ -16,6 +16,7 @@ import {
   findDefaultPartnerWorkspaceConfig,
   findWorkspace,
 } from '@/orm/workspace';
+import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
 import {withMattermostSync} from '@/lib/core/mattermost';
 import {RESET_PASSWORD} from '@/constants';
@@ -397,6 +398,14 @@ const credentials = {
           });
         }
 
+        const config = await getAuthConfig(workspace.config.id, client);
+        if (!config) {
+          throw new APIError('BAD_REQUEST', {
+            ...ERROR_CODES.BAD_REQUEST,
+            message: await getTranslation({tenant: tenantId}, 'Bad request'),
+          });
+        }
+
         const emailAddress = invite?.emailAddress?.address;
         if (!emailAddress) {
           throw new APIError('BAD_REQUEST', {
@@ -408,7 +417,7 @@ const credentials = {
           });
         }
 
-        if (!workspace.config.otpTemplateList?.length) {
+        if (!config.otpTemplateList?.length) {
           return coreGenerateOTP({
             email: emailAddress,
             scope: Scope.Registration,
@@ -417,7 +426,7 @@ const credentials = {
           });
         }
 
-        const {otpTemplateList} = workspace.config;
+        const {otpTemplateList} = config;
         const localization = invite.partner?.localization?.code;
 
         let template =

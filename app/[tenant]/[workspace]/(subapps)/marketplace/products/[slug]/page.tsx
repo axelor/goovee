@@ -14,10 +14,11 @@ import {
 } from '@/ui/components/breadcrumb';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {workspacePathname} from '@/utils/workspace';
 import {Eye} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {MARKETPLACE_VERSION_STATUS_LABELS} from '../../common/constants/statuses';
 import {ProductTab} from '../../common/constants/tabs';
@@ -33,7 +34,10 @@ import {OverviewTab} from '../../common/ui/components/product/overview-tab';
 import {ReviewsTab} from '../../common/ui/components/reviews/reviews-tab';
 import {SupportTab} from '../../common/ui/components/product/support-tab';
 import {VersionsTab} from '../../common/ui/components/versions/versions-tab';
-import {canManageProducts, ensureAuth} from '../../common/utils/auth-helper';
+import {canManageProducts} from '../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getMarketplaceConfig} from '../../common/orm/config';
+import {getPartnerId} from '@/utils';
 import {
   productPageParamsSchema,
   productSearchParamsSchema,
@@ -71,12 +75,35 @@ export default async function ProductPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenantId, {
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
     allowGuest: true,
   });
-  if (error) notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
+  }
 
-  const client = auth.tenant.client;
+  const client = access.tenant.client;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
+  if (!config) notFound();
+  const partnerId = access.user ? getPartnerId(access.user) : undefined;
 
   const {tab, reviewPage, versionPage, preview} = searchParams;
 
@@ -84,9 +111,9 @@ export default async function ProductPage(props: {
    * anyone requesting it without an account or publishing rights gets a 404. */
   if (
     preview &&
-    (!auth.user ||
-      !auth.workspace.config.allowToPublish ||
-      !canManageProducts({user: auth.user, subapp: auth.subapp}))
+    (!access.user ||
+      !config.allowToPublish ||
+      !canManageProducts({user: access.user, subapp: access.subapp}))
   ) {
     notFound();
   }
@@ -94,8 +121,9 @@ export default async function ProductPage(props: {
   const product = await findProduct({
     slug: params.slug,
     client,
-    workspace: auth.workspace,
-    mainPartnerId: auth.user?.mainPartnerId,
+    workspace: access.workspace,
+    config,
+    mainPartnerId: partnerId,
     preview,
   });
 
@@ -143,7 +171,7 @@ export default async function ProductPage(props: {
     client,
     productId: product.id,
     publisherId: product.publisher.id,
-    mainPartnerId: auth.user?.mainPartnerId,
+    mainPartnerId: partnerId,
     paid: isPaid(product.price.ati),
   });
 
@@ -192,7 +220,7 @@ export default async function ProductPage(props: {
         <ProductHeaderCard
           product={product}
           client={client}
-          user={auth.user}
+          user={access.user}
           workspaceURL={workspaceURL}
           workspaceURI={workspaceURI}
           tenantId={tenantId}
@@ -287,7 +315,7 @@ export default async function ProductPage(props: {
                 tenantId={tenantId}
                 client={client}
                 reviewPage={reviewPage}
-                user={auth.user}
+                user={access.user}
                 preview={preview}
                 loginHref={getLoginURL({
                   callbackurl: productUrl({tab: ProductTab.Reviews}),

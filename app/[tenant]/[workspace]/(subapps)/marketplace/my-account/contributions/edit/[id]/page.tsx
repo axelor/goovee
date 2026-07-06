@@ -49,15 +49,15 @@ export default async function EditProductPage(props: {
     : await Promise.all([
         findMyProductForEdit({
           productId: id,
-          mainPartnerId: ctx.auth.user.mainPartnerId,
-          client: ctx.auth.tenant.client,
-          workspace: ctx.auth.workspace,
+          mainPartnerId: ctx.partnerId,
+          client: ctx.access.tenant.client,
+          workspace: ctx.access.workspace,
         }),
         findMyProductVersions({
           productId: id,
-          mainPartnerId: ctx.auth.user.mainPartnerId,
-          client: ctx.auth.tenant.client,
-          workspace: ctx.auth.workspace,
+          mainPartnerId: ctx.partnerId,
+          client: ctx.access.tenant.client,
+          workspace: ctx.access.workspace,
           skip: 0,
           take: VERSIONS_PAGE_SIZE,
         }),

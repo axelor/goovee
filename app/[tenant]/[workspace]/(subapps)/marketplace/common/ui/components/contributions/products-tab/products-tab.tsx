@@ -9,13 +9,15 @@ import {
   type ListLicense,
 } from '../../../../orm';
 import type {Currency} from '@/product/orm';
-import type {PortalWorkspaceWithConfig} from '../../../../utils/auth-helper';
+import type {Workspace} from '@/orm/workspace';
+import type {MarketplaceConfig} from '../../../../orm/config';
 import {ProductsListTab} from '../products-list-tab';
 
 type ProductsTabProps = {
   mainPartnerId: ID;
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   newListingCurrency: Currency | null;
   workspaceURI: string;
   workspaceURL: string;
@@ -31,6 +33,7 @@ export async function ProductsTab({
   mainPartnerId,
   client,
   workspace,
+  config,
   newListingCurrency,
   workspaceURI,
   workspaceURL,
@@ -43,6 +46,7 @@ export async function ProductsTab({
     mainPartnerId,
     client,
     workspace,
+    config,
     take: PAGE_SIZE,
     skip: getSkip(PAGE_SIZE, page),
     orderBy: {createdOn: 'DESC'},
@@ -55,10 +59,10 @@ export async function ProductsTab({
     <ProductsListTab
       products={products}
       title={await t('Products')}
-      requiresReview={workspace.config.requiresReview === true}
-      allowToPublish={workspace.config.allowToPublish === true}
+      requiresReview={config.requiresReview === true}
+      allowToPublish={config.allowToPublish === true}
       newListingCurrency={newListingCurrency}
-      inAti={workspace.config.defaultProductForMarketplace?.inAti === true}
+      inAti={config.defaultProductForMarketplace?.inAti === true}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
       categories={categories}

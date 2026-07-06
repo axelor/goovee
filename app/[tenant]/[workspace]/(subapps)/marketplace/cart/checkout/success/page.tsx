@@ -4,17 +4,18 @@ import {Button} from '@/ui/components';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {cn} from '@/utils/css';
 import {getLoginURL} from '@/utils/url';
+import {getPartnerId} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {CheckCircle2, Download} from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {
   DEFAULT_GRADIENT,
   GRADIENT_MAP,
 } from '../../../common/constants/gradients';
 import {findPurchases} from '../../../common/orm';
 import {ProductIcon} from '../../../common/ui/components/shared/product-icon';
-import {ensureAuth} from '../../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {checkoutSuccessSearchParamsSchema} from '../../../common/utils/validators';
 
 /* Success destination after `onApprove` fires in the Payments component.
@@ -37,24 +38,34 @@ export default async function CheckoutSuccessPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/purchases`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/purchases`,
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
 
   const recent = await findPurchases({
-    client: auth.tenant.client,
-    workspaceId: auth.workspace.id,
-    mainPartnerId: auth.user.mainPartnerId,
+    client: access.tenant.client,
+    workspaceId: access.workspace.id,
+    mainPartnerId: getPartnerId(access.user),
     purchaseIds,
   });
 

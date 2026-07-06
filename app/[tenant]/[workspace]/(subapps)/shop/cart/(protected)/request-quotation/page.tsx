@@ -1,55 +1,73 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findWorkspace, findSubappAccess} from '@/orm/workspace';
-import {clone} from '@/utils';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {findSubappAccess} from '@/orm/workspace';
 import {workspacePathname} from '@/utils/workspace';
-import {SUBAPP_CODES} from '@/constants';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
   const params = await props.params;
-  const {tenant: tenantId} = params;
-  const session = await getSession();
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user: session?.user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: false,
+  });
 
-  if (!workspace?.config?.requestQuotation) {
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  if (!config?.requestQuotation) {
     redirect(`${workspaceURI}/shop/cart`);
   }
 
   const quotationSubapp = await findSubappAccess({
     code: SUBAPP_CODES.quotations,
-    user: session?.user,
+    user,
     url: workspaceURL,
     client,
   });
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
-    user: session?.user,
-    workspace,
+    user,
+    config,
     client,
   });
 
   if (hidePriceAndPurchase) notFound();
-  return (
-    <Content workspace={workspace} quotationSubapp={Boolean(quotationSubapp)} />
-  );
+  return <Content quotationSubapp={Boolean(quotationSubapp)} />;
 }

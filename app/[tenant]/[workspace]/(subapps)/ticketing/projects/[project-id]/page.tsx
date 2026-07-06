@@ -1,4 +1,4 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {Suspense} from 'react';
 import {IconType} from 'react-icons';
 import {FaChevronRight} from 'react-icons/fa';
@@ -12,7 +12,10 @@ import {
 } from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getTicketingConfig} from '../../common/orm/config';
+import {getCurrentPath} from '@/utils/current-path';
 import {t} from '@/locale/server';
 import {
   Breadcrumb,
@@ -53,7 +56,6 @@ import {
 import type {SearchParams} from '../../common/types/search-param';
 import {Swipe} from '@/ui/components/swipe';
 import {TicketList} from '../../common/ui/components/ticket-list';
-import {ensureAuth} from '../../common/utils/auth-helper';
 import {getSkip} from '@/utils/pagination';
 import {getOrderBy} from '../../common/utils/search-param';
 import type {EncodedTicketFilter} from '../../common/utils/validators';
@@ -71,23 +73,40 @@ export default async function Page(props0: {
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}?${new URLSearchParams(searchParams).toString()}`,
-        workspaceURI,
-        tenant,
-      }),
-    );
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  if (error) notFound();
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
+
+  const config = await getTicketingConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
 
   const [project, tickets, statuses] = await Promise.all([
-    findProject({projectId, client, user, workspace}),
+    findProject({projectId, client, user, workspace: access.workspace}),
     findTickets({
       projectId,
       take: Number(limit),
@@ -109,35 +128,35 @@ export default async function Page(props0: {
   const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
   const items = [
-    workspace.config.isShowAllTickets && {
+    config.isShowAllTickets && {
       label: await t(ALL_TICKETS_TITLE),
       count: getAllTicketCount({projectId, client, user, subapp}),
       icon: MdAllInbox,
       href: allTicketsURL,
       iconClassName: 'bg-palette-pink text-palette-pink-dark',
     },
-    workspace.config.isShowMyTickets && {
+    config.isShowMyTickets && {
       label: await t(MY_TICKETS_TITLE),
       count: getMyTicketCount({projectId, client, user, subapp}),
       href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, myTickets: true})}&title=${encodeURIComponent(MY_TICKETS_TITLE)}`,
       icon: MdAllInbox,
       iconClassName: 'bg-palette-blue text-palette-blue-dark',
     },
-    workspace.config.isShowManagedTicket && {
+    config.isShowManagedTicket && {
       label: await t(MANAGED_TICKETS_TITLE),
       count: getManagedTicketCount({projectId, client, user, subapp}),
       icon: MdListAlt,
       href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, managedBy: [user.id.toString()]})}&title=${encodeURIComponent(MANAGED_TICKETS_TITLE)}`,
       iconClassName: 'bg-palette-purple text-palette-purple-dark',
     },
-    workspace.config.isShowCreatedTicket && {
+    config.isShowCreatedTicket && {
       label: await t(CREATED_TICKETS_TITLE),
       count: getCreatedTicketCount({projectId, client, user, subapp}),
       icon: MdPending,
       href: `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status, createdBy: [user.id.toString()]})}&title=${encodeURIComponent(CREATED_TICKETS_TITLE)}`,
       iconClassName: 'bg-palette-yellow text-palette-yellow-dark',
     },
-    workspace.config.isShowResolvedTicket && {
+    config.isShowResolvedTicket && {
       label: await t(RESOLVED_TICKETS_TITLE),
       count: getResolvedTicketCount({projectId, client, user, subapp}),
       icon: MdCheckCircleOutline,
@@ -195,7 +214,7 @@ export default async function Page(props0: {
       <div>
         <TicketList
           tickets={tickets}
-          fields={clone(workspace.config.ticketingFieldSet)}
+          fields={clone(config.ticketingFieldSet)}
         />
         <div className="flex justify-end p-4">
           <Link

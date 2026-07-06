@@ -12,7 +12,7 @@ import {
   SUBAPP_CODES,
 } from '@/constants';
 import {i18n} from '@/lib/core/locale';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {EventsConfig} from '@/subapps/events/common/orm/config';
 import {HeroSearch, Search} from '@/ui/components';
 import type {OverlayColor} from '@/types';
 import {useToast} from '@/ui/hooks';
@@ -23,11 +23,11 @@ import {getAllEvents} from '@/subapps/events/common/actions/actions';
 import {SearchItem} from '@/subapps/events/common/ui/components';
 
 export const Hero = ({
-  workspace,
+  config,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: EventsConfig | Cloned<EventsConfig>;
 }) => {
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
 
@@ -40,7 +40,7 @@ export const Hero = ({
       findQuery={async ({query}: {query: string}) => {
         try {
           const {error, message, data} = await getAllEvents({
-            workspaceURL: workspace.url,
+            workspaceURL,
             search: query,
           });
           if (error) {
@@ -68,23 +68,18 @@ export const Hero = ({
     />
   );
 
-  const imageURL = workspace?.config?.eventHeroBgImage?.id
+  const imageURL = config.eventHeroBgImage?.id
     ? withBasePath(`${workspaceURI}/${SUBAPP_CODES.events}/api/hero/background`)
     : withBasePath(IMAGE_URL);
   return (
     <HeroSearch
-      title={workspace?.config?.eventHeroTitle || i18n.t(BANNER_TITLES.events)}
-      description={
-        workspace?.config?.eventHeroDescription || i18n.t(BANNER_DESCRIPTION)
-      }
+      title={config.eventHeroTitle || i18n.t(BANNER_TITLES.events)}
+      description={config.eventHeroDescription || i18n.t(BANNER_DESCRIPTION)}
       image={imageURL}
       background={
-        (workspace?.config?.eventHeroOverlayColorSelect as OverlayColor) ||
-        'default'
+        (config.eventHeroOverlayColorSelect as OverlayColor) || 'default'
       }
-      blendMode={
-        workspace?.config?.eventHeroOverlayColorSelect ? 'overlay' : 'normal'
-      }
+      blendMode={config.eventHeroOverlayColorSelect ? 'overlay' : 'normal'}
       renderSearch={renderSearch}
     />
   );

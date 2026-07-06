@@ -1,7 +1,5 @@
-import type {Client} from '@/goovee/.generated/client';
 import {AOSPartner} from '@/goovee/.generated/models';
 import type {WhereOptions} from '@goovee/orm';
-import {findPartnerById} from './partner';
 import type {User} from '@/types';
 import {and, or} from '@/utils/orm';
 
@@ -56,9 +54,11 @@ const openRecordFilters = [
   },
 ];
 
-/* Complementary to filterPartnersByRecordAccess — see note above. */
-export const filterPrivate = async (
-  {user, client}: {user?: User; client: Client},
+/* Complementary to filterPartnersByRecordAccess — see note above.
+ * Pure transform: the partner id and partner-category id both come from the
+ * request-scoped session (customSession), so no partner lookup is needed. */
+export const filterPrivate = (
+  {user}: {user: User | null | undefined},
   config: {
     privateOnly?: boolean;
   } = {},
@@ -67,23 +67,13 @@ export const filterPrivate = async (
     OR: openRecordFilters,
   };
 
-  if (!(client && user)) {
-    return defaultFilter;
-  }
-
-  const partnerId = user?.isContact ? user.mainPartnerId : user.id;
+  const partnerId = user?.isContact ? user.mainPartnerId : user?.id;
 
   if (!partnerId) {
     return defaultFilter;
   }
 
-  const partner = await findPartnerById(partnerId, client);
-
-  if (!partner) {
-    return defaultFilter;
-  }
-
-  const partnerCategory = partner?.partnerCategory;
+  const categoryId = user?.partnerCategoryId;
 
   let OR: any[] = [];
 
@@ -101,16 +91,16 @@ export const filterPrivate = async (
           {
             partnerSet: {
               id: {
-                in: [partner.id],
+                in: [partnerId],
               },
             },
           },
-          ...(partnerCategory
+          ...(categoryId
             ? [
                 {
                   partnerCategorySet: {
                     id: {
-                      in: [partnerCategory.id],
+                      in: [categoryId],
                     },
                   },
                 },

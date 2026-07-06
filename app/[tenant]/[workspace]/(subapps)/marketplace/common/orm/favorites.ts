@@ -2,8 +2,9 @@ import type {Client} from '@/goovee/.generated/client';
 import type {AOSMarketplaceProduct} from '@/goovee/.generated/models';
 import type {ID} from '@/types';
 import {and, or} from '@/utils/orm';
+import type {Workspace} from '@/orm/workspace';
 import type {MARKETPLACE_TYPE} from '../constants/marketplace-types';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {MarketplaceConfig} from './config';
 import {
   priceSelectFields,
   withPublishedProductFilter,
@@ -71,6 +72,7 @@ export type ListFavoriteProduct = Awaited<
 export async function findFavoriteProducts({
   client,
   workspace,
+  config,
   userId,
   mainPartnerId,
   search,
@@ -80,7 +82,8 @@ export async function findFavoriteProducts({
   skip,
 }: {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   userId: ID;
   mainPartnerId?: string | null;
   search?: string;
@@ -147,7 +150,7 @@ export async function findFavoriteProducts({
     ),
   });
 
-  return favorites.map(product => withPrice(product, workspace, priceContext));
+  return favorites.map(product => withPrice(product, config, priceContext));
 }
 
 // ---- FAVORITE MUTATIONS ---- //

@@ -3,6 +3,9 @@
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import type {ActionResponse} from '@/types/action';
+import {SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
 import {getLoginURL} from '@/utils/url';
 import {headers} from 'next/headers';
 import {redirect} from 'next/navigation';
@@ -12,7 +15,6 @@ import {
   findProductAccess,
   setPartnerFavorite,
 } from '../orm';
-import {ensureAuth} from '../utils/auth-helper';
 
 const AddToFavoritesSchema = z.object({
   productId: z.string().min(1),
@@ -47,32 +49,31 @@ export async function addProductToFavorites(
   const {productId, workspaceURL, workspaceURI, returnUrl, isFavorite} =
     result.data;
 
-  const {error, message, auth, forceLogin} = await ensureAuth(
-    workspaceURL,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
     tenantId,
-  );
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: returnUrl,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
-  }
-  if (error) {
-    return {error: true, message};
+  });
+  if (!access.ok) {
+    /* Favouriting requires a login; bounce a guest to the sign-in page with a
+     * callback back to where they were, then surface other denials as errors. */
+    if (access.reason === 'unauthenticated') {
+      redirect(
+        getLoginURL({callbackurl: returnUrl, workspaceURI, tenant: tenantId}),
+      );
+    }
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const client = auth.tenant.client;
-  const userId = auth.user.id;
+  const client = access.tenant.client;
+  const userId = access.user.id;
 
   try {
     const [product, partner] = await Promise.all([
       findProductAccess({
         recordId: productId,
         client,
-        workspace: auth.workspace,
+        workspace: access.workspace,
         select: {id: true},
       }),
       findPartnerWithFavorite({

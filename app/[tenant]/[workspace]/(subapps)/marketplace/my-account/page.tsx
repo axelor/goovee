@@ -10,6 +10,8 @@ import {
 } from '@/ui/components/breadcrumb';
 import {Button} from '@/ui/components';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {getPartnerId} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {
   ChevronRight,
@@ -19,8 +21,10 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
-import {canManageProducts, ensureAuth} from '../common/utils/auth-helper';
+import {notFound, redirect, unauthorized} from 'next/navigation';
+import {canManageProducts} from '../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getMarketplaceConfig} from '../common/orm/config';
 import {myAccountParamsSchema} from '../common/utils/validators';
 
 export default async function MyAccountPage(props: {
@@ -38,22 +42,40 @@ export default async function MyAccountPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenantId, {
-    allowGuest: false,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
   });
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`,
-        workspaceURI,
-        tenant: tenantId,
-      }),
-    );
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
   }
-  if (error) notFound();
+
+  const config = await getMarketplaceConfig(
+    access.workspace.config.id,
+    access.tenant.client,
+  );
+  if (!config) notFound();
+  const partnerId = getPartnerId(access.user);
 
   const isSeller =
-    auth.workspace.config.allowToPublish === true && canManageProducts(auth);
+    config.allowToPublish === true &&
+    canManageProducts({user: access.user, subapp: access.subapp});
   const accountBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account`;
 
   const cards: Array<{
@@ -126,7 +148,7 @@ export default async function MyAccountPage(props: {
           </div>
           <Button asChild variant="outline" className="rounded-full">
             <Link
-              href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${auth.user.mainPartnerId}`}>
+              href={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${partnerId}`}>
               {await t('See partner profile')}
             </Link>
           </Button>

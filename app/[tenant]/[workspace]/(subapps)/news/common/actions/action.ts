@@ -8,11 +8,11 @@ import {headers} from 'next/headers';
 import {clone} from '@/utils';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
-import {getSession} from '@/auth';
 import {ModelMap, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {getNewsConfig} from '@/subapps/news/common/orm/config';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
-import {manager} from '@/tenant';
 import {addComment, findComments} from '@/comments/orm';
 import {
   CreateComment,
@@ -41,9 +41,6 @@ export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const session = await getSession();
-  const user = session?.user;
-
   const tenantId = (await headers()).get(TENANT_HEADER);
 
   if (!tenantId) {
@@ -53,38 +50,32 @@ export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.news,
-    user,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: true,
   });
-
-  if (!subapp) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
+  const {user} = access;
+  const {client} = access.tenant;
 
-  if (!workspace) {
+  const config = await getNewsConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
     };
   }
 
-  const {news} = await findNews({workspace, client, user}).then(clone);
+  const {news} = await findNews({
+    workspace: access.workspace,
+    client,
+    user,
+  }).then(clone);
 
   return news;
 }
@@ -103,34 +94,21 @@ export async function findRecommendedNews({
     return {error: true, message: z.prettifyError(parsed.error)};
   }
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.news,
-    user,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: true,
   });
-
-  if (!subapp) {
-    return {
-      error: true,
-      message: await t('Unauthorized'),
-    };
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
 
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
-  });
+  const {user} = access;
+  const {client} = access.tenant;
 
-  if (!workspace) {
+  const config = await getNewsConfig(access.workspace.config.id, client);
+  if (!config) {
     return {
       error: true,
       message: await t('Invalid workspace'),
@@ -138,7 +116,7 @@ export async function findRecommendedNews({
   }
 
   const {news} = await findNews({
-    workspace,
+    workspace: access.workspace,
     client,
     limit: DEFAULT_NEWS_ASIDE_LIMIT,
     orderBy: {
@@ -151,12 +129,6 @@ export async function findRecommendedNews({
 }
 
 export const createComment: CreateComment = async props => {
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    return {error: true, message: await t('Unauthorized')};
-  }
-
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
@@ -168,21 +140,30 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.news,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-  if (!workspace) {
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getNewsConfig(access.workspace.config.id, client);
+  if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
   }
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, workspace})) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, config})) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -191,19 +172,9 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await t('Invalid model type')};
   }
 
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.news,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!app?.isInstalled) {
-    return {error: true, message: await t('Unauthorized Access')};
-  }
-
   const {news} = await findNews({
     id: rest.recordId,
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   });
@@ -215,17 +186,18 @@ export const createComment: CreateComment = async props => {
 
   try {
     // keeps attachment tokens redeemable if creation fails
-    const [comment, parentComment] = await client.$transaction(txClient =>
-      addComment({
-        modelName,
-        userId: user.id,
-        workspaceUserId: workspaceUser.id,
-        client: txClient,
-        commentField: 'note',
-        trackingField: 'publicBody',
-        subject: `${user.simpleFullName || user.name} added a comment`,
-        ...rest,
-      }),
+    const [comment, parentComment] = await access.tenant.client.$transaction(
+      txClient =>
+        addComment({
+          modelName,
+          userId: user.id,
+          workspaceUserId: workspaceUser.id,
+          client: txClient,
+          commentField: 'note',
+          trackingField: 'publicBody',
+          subject: `${user.simpleFullName || user.name} added a comment`,
+          ...rest,
+        }),
     );
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
@@ -277,9 +249,6 @@ export const createComment: CreateComment = async props => {
 
 export const fetchComments: FetchComments = async props => {
   const {workspaceURL, ...rest} = FetchCommentsPropsSchema.parse(props);
-  const session = await getSession();
-
-  const user = session?.user;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -290,17 +259,25 @@ export const fetchComments: FetchComments = async props => {
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Invalid tenant')};
-  const {client} = tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.news,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
 
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
+  const {user} = access;
+  const {client} = access.tenant;
 
-  if (!workspace) {
+  const config = await getNewsConfig(access.workspace.config.id, client);
+  if (!config) {
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, workspace})) {
+  if (!isCommentEnabled({subapp: SUBAPP_CODES.news, config})) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -309,19 +286,9 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('Invalid model type')};
   }
 
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.news,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!app?.isInstalled) {
-    return {error: true, message: await t('Unauthorized Access')};
-  }
-
   const {news} = await findNews({
     id: rest.recordId,
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   });

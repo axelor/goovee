@@ -1,18 +1,20 @@
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import type {Cloned} from '@/types/util';
 import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ----//
-import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import type {Client} from '@/goovee/.generated/client';
 import {User} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {Card} from '@/ui/components';
 import {t} from '@/locale/server';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {PageInfo} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -57,28 +59,41 @@ export default async function Page(props: {
     return notFound();
   }
 
-  const {tenant: tenantId} = params;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
-
-  if (!user) return notFound();
-
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: false,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getEventsConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  const workspace = clone(access.workspace);
 
   return (
     <main className="w-full">
@@ -137,7 +152,7 @@ async function Categories({
 }: {
   user?: User;
   client: Client;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   categoryIds: string[];
 }) {
   const categories: Cloned<Category>[] = await findEventCategories({
@@ -168,7 +183,7 @@ async function EventList({
   categoryIds: string[];
   page: string | number;
   user?: User;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   type: string;
   query: string;

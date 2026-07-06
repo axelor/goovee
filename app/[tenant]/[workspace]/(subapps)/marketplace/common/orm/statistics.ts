@@ -16,14 +16,16 @@ import type {Payload, SelectOptions} from '@goovee/orm';
 import {format, startOfMonth, subMonths} from 'date-fns';
 import {RECENT_REVIEW_WINDOW_DAYS} from '../constants/review';
 import {MARKETPLACE_VERSION_STATUS} from '../constants/statuses';
-import type {PortalWorkspaceWithConfig} from '../utils/auth-helper';
+import type {Workspace} from '@/orm/workspace';
+import type {MarketplaceConfig} from './config';
 import {formatVersionNumber} from '../utils/version-number';
 import {withMyProductAccessFilter, type QueryProps} from './helpers';
 import {getPriceContext} from './price';
 
 type ContributionQuery = {
   client: Client;
-  workspace: PortalWorkspaceWithConfig;
+  workspace: Workspace;
+  config: MarketplaceConfig;
   mainPartnerId: ID;
 };
 
@@ -522,6 +524,7 @@ function revenueMonths(): {key: string; iso: string}[] {
 export async function getRevenueSummary({
   client,
   workspace,
+  config,
   mainPartnerId,
 }: ContributionQuery): Promise<RevenueSummary> {
   const months = revenueMonths();
@@ -587,7 +590,7 @@ export async function getRevenueSummary({
   }
   const targetCode = target.codeISO;
   const decimals = target.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
-  const companyTimezone = workspace.config.company?.timezone;
+  const companyTimezone = config.company?.timezone;
 
   let unconvertible = 0;
   const byMonth = new Map<string, number>();

@@ -13,7 +13,9 @@ import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
 import {isPaymentOptionAvailable} from '@/utils/payment';
 import {TENANT_HEADER} from '@/proxy';
-import {manager} from '@/tenant';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
 import {scale} from '@/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {ensureLeadingSlash} from '@/utils/url';
@@ -40,26 +42,44 @@ export async function createStripeCheckoutSession(props: {
   const {eventId, workspaceURL, values} = parsed.data;
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client, config} = tenant;
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getEventsConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return error(await t('Invalid workspace'));
+
   const validationRes = await validateRegistration({
     eventId,
     values,
     workspaceURL,
+    config: workspaceConfig,
+    user,
     client,
   });
 
   if (validationRes.error) {
     return validationRes;
   }
-  const {workspace, user} = validationRes.data;
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!workspaceConfig?.allowOnlinePaymentForEcommerce) {
     return error(await t('Online payment is not available'));
   }
 
-  const paymentOptionSet = workspace?.config?.paymentOptionSet;
+  const paymentOptionSet = workspaceConfig?.paymentOptionSet;
   if (!paymentOptionSet?.length) {
     return error(await t('Payment options are not configured'));
   }
@@ -74,9 +94,10 @@ export async function createStripeCheckoutSession(props: {
 
   const $event = await findEvent({
     id: eventId,
+    user,
     client,
     config,
-    workspaceURL,
+    workspace: access.workspace,
   });
 
   if (!$event) {
@@ -152,27 +173,43 @@ export async function paypalCreateOrder(props: {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client, config} = tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getEventsConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return error(await t('Invalid workspace'));
 
   const validationRes = await validateRegistration({
     eventId,
     values,
     workspaceURL,
-    client: client,
+    config: workspaceConfig,
+    user,
+    client,
   });
 
   if (validationRes.error) {
     return validationRes;
   }
-  const {workspace, user} = validationRes.data;
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!workspaceConfig?.allowOnlinePaymentForEcommerce) {
     return error(await t('Online payment is not available'));
   }
 
-  const paymentOptionSet = workspace?.config?.paymentOptionSet;
+  const paymentOptionSet = workspaceConfig?.paymentOptionSet;
   if (!paymentOptionSet?.length) {
     return error(await t('Payment options are not configured.'));
   }
@@ -188,9 +225,10 @@ export async function paypalCreateOrder(props: {
 
   const $event = await findEvent({
     id: eventId,
+    user,
     client,
     config,
-    workspaceURL,
+    workspace: access.workspace,
   });
 
   if (!$event) {
@@ -251,26 +289,42 @@ export async function payboxCreateOrder(props: {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('TenantId is required'));
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client, config} = tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getEventsConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return error(await t('Invalid workspace'));
 
   const validationRes = await validateRegistration({
     eventId,
     values,
     workspaceURL,
+    config: workspaceConfig,
+    user,
     client,
   });
   if (validationRes.error) {
     return validationRes;
   }
-  const {workspace, user} = validationRes.data;
 
-  if (!workspace?.config?.allowOnlinePaymentForEcommerce) {
+  if (!workspaceConfig?.allowOnlinePaymentForEcommerce) {
     return error(await t('Online payment is not available'));
   }
 
-  const paymentOptionSet = workspace?.config?.paymentOptionSet;
+  const paymentOptionSet = workspaceConfig?.paymentOptionSet;
   if (!paymentOptionSet?.length) {
     return error(await t('Payment options are not configured.'));
   }
@@ -285,9 +339,10 @@ export async function payboxCreateOrder(props: {
 
   const $event = await findEvent({
     id: eventId,
+    user,
     client,
     config,
-    workspaceURL,
+    workspace: access.workspace,
   });
 
   if (!$event) {

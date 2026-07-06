@@ -9,7 +9,12 @@ import {getTotal} from '@/utils/pagination';
 import {headers} from 'next/headers';
 import {z} from 'zod';
 import {findMyProductVersions, type MyProductVersion} from '../orm';
-import {canManageProducts, ensureAuth} from '../utils/auth-helper';
+import {canManageProducts} from '../utils/auth-helper';
+import {getMarketplaceConfig} from '../orm/config';
+import {SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
+import {getPartnerId} from '@/utils';
 
 const loadProductVersionsSchema = z.object({
   productId: z.string().min(1),
@@ -39,24 +44,33 @@ export async function loadProductVersions(
   }
   const {productId, workspaceURL, skip, take} = parsed.data;
 
-  const {error, message, auth} = await ensureAuth(workspaceURL, tenantId);
-  if (error) {
-    return {error: true, message};
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
+  const {client} = access.tenant;
+  const config = await getMarketplaceConfig(access.workspace.config.id, client);
+  const partnerId = getPartnerId(access.user);
 
-  if (!auth.workspace.config.allowToPublish || !canManageProducts(auth)) {
+  if (
+    !config?.allowToPublish ||
+    !canManageProducts({user: access.user, subapp: access.subapp})
+  ) {
     return {
       error: true,
       message: await t('Publishing is not allowed in this workspace'),
     };
   }
-  const {client} = auth.tenant;
 
   const versions = await findMyProductVersions({
     productId,
-    mainPartnerId: auth.user.mainPartnerId,
+    mainPartnerId: partnerId,
     client,
-    workspace: auth.workspace,
+    workspace: access.workspace,
     take,
     skip,
   });

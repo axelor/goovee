@@ -8,11 +8,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/ui/components/breadcrumb';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {CartContent} from '../common/ui/components/cart/cart-content';
-import {ensureAuth} from '../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 
 export default async function CartPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -24,8 +26,30 @@ export default async function CartPage(props: {
     tenant: tenantId,
   } = workspacePathname(params);
 
-  const {error} = await ensureAuth(workspaceURL, tenantId, {allowGuest: true});
-  if (error) notFound();
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.marketplace,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          tenant: tenantId,
+        }),
+      );
+    }
+    unauthorized();
+  }
 
   const marketplaceBase = `${workspaceURI}/${SUBAPP_CODES.marketplace}`;
 

@@ -14,7 +14,8 @@ import {getBasePath} from '@/lib/core/path/base-path';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
-import Workspace from './workspace-context';
+import {getShellConfig} from './orm/config';
+import WorkspaceProvider from './workspace-context';
 import CartProvider from '@/app/[tenant]/[workspace]/cart/cart-provider';
 import Header from './header';
 import Sidebar from './sidebar';
@@ -106,6 +107,20 @@ export default async function Layout(props: {
         );
   }
 
+  const config = await getShellConfig($workspace.config.id, client);
+
+  if (!config) {
+    return user
+      ? notFound()
+      : redirect(
+          getLoginURL({
+            callbackurl: workspaceURI,
+            workspaceURI,
+            [SEARCH_PARAMS.TENANT_ID]: tenantId,
+          }),
+        );
+  }
+
   const host = process.env.GOOVEE_PUBLIC_HOST!;
   const baseUrl = `${host}${getBasePath()}`;
 
@@ -133,7 +148,7 @@ export default async function Layout(props: {
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace: $workspace,
+    config,
     client,
   });
 
@@ -159,7 +174,7 @@ export default async function Layout(props: {
   }
 
   return (
-    <Workspace
+    <WorkspaceProvider
       id={$workspace.id}
       workspace={workspace}
       tenant={tenantId}
@@ -170,8 +185,8 @@ export default async function Layout(props: {
             <Sidebar
               subapps={subapps}
               workspaces={workspaces}
-              showHome={$workspace?.config?.isHomepageDisplay}
-              workspace={$workspace}
+              showHome={config.isHomepageDisplay}
+              config={clone(config)}
             />
           )}
           <div className="flex flex-col flex-1 max-h-full max-w-full min-w-0">
@@ -180,21 +195,23 @@ export default async function Layout(props: {
               isTopNavigation={isTopNavigation}
               workspaces={workspaces}
               workspace={$workspace}
+              config={clone(config)}
               cartCodes={cartCodes}
             />
             <div className="flex flex-col flex-grow min-h-0">
               <div className="flex-grow">{children}</div>
-              <Footer workspace={$workspace} />
+              <Footer config={clone(config)} />
             </div>
           </div>
           <MobileMenu
             subapps={subapps}
             workspaces={workspaces}
             workspace={$workspace}
+            config={clone(config)}
             cartCodes={cartCodes}
           />
         </div>
       </CartProvider>
-    </Workspace>
+    </WorkspaceProvider>
   );
 }
