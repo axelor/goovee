@@ -1,6 +1,0 @@
-{
-  "title": "Validate forum server-action inputs and enforce group access",
-  "type": "fix",
-  "description": "The forum addPost, fetchPosts, and fetchGroupsByMembers server actions now validate their inputs with zod like the other forum actions. addPost also verifies the user can access the target group before creating a post, and fetchGroupsByMembers whitelists the orderBy shape instead of forwarding an arbitrary object to the ORM.",
-  "scope": ["forum"]
-}
