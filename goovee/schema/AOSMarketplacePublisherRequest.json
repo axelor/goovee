@@ -21,6 +21,10 @@
       "target": "AOSPartner"
     },
     {
+      "type": "String",
+      "name": "publishingPlan"
+    },
+    {
       "type": "Int",
       "name": "statusSelect",
       "required": true

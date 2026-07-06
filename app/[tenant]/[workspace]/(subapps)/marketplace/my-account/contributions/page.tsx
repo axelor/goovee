@@ -328,7 +328,7 @@ export default async function MyContributionsPage(props: {
           </>
         ) : (
           <PublisherAccessRequest
-            workspaceURL={workspaceURL}
+            applyHref={`${workspaceURI}/${SUBAPP_CODES.marketplace}/my-account/contributions/apply`}
             status={publisherAccess.request?.statusSelect ?? null}
             cooldownUntil={publisherAccess.request?.cooldownUntil ?? null}
             rejectionReason={publisherAccess.request?.rejectionReason ?? null}

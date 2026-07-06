@@ -1,22 +1,24 @@
 import {t} from '@/locale/server';
+import {Button} from '@/ui/components';
+import {Link} from '@/ui/components/link';
 import {Ban, Clock, Rocket, XCircle} from 'lucide-react';
 import type {ComponentType, ReactNode} from 'react';
 import {PUBLISHER_REQUEST_STATUS} from '../../../../constants/statuses';
-import {RequestAccessButton} from './request-access-button';
 
 /**
  * Status-driven publisher-access panel shown in Contributions when the partner
- * is not yet an approved publisher: request access, pending, declined (with the
- * reason and either a re-request date or a "request again" button), or banned.
+ * is not yet an approved publisher: sign up, pending, declined (with the reason
+ * and either a re-request date or an "apply again" link), or banned. The sign
+ * up / apply again actions link to the application form at `applyHref`.
  */
 export async function PublisherAccessRequest({
-  workspaceURL,
+  applyHref,
   status,
   cooldownUntil,
   rejectionReason,
   canRequest,
 }: {
-  workspaceURL: string;
+  applyHref: string;
   status: number | null;
   cooldownUntil: Date | null;
   rejectionReason: string | null;
@@ -29,10 +31,9 @@ export async function PublisherAccessRequest({
   );
   let reason: string | null = null;
   let action: ReactNode = (
-    <RequestAccessButton
-      workspaceURL={workspaceURL}
-      label={await t('Request access')}
-    />
+    <Button asChild size="lg" className="rounded-full">
+      <Link href={applyHref}>{await t('Sign up to become a publisher')}</Link>
+    </Button>
   );
 
   if (status === PUBLISHER_REQUEST_STATUS.REQUESTED) {
@@ -55,13 +56,12 @@ export async function PublisherAccessRequest({
     reason = rejectionReason;
     if (canRequest) {
       description = await t(
-        'Your previous request was declined. You can request publisher access again.',
+        'Your previous request was declined. You can apply for publisher access again.',
       );
       action = (
-        <RequestAccessButton
-          workspaceURL={workspaceURL}
-          label={await t('Request again')}
-        />
+        <Button asChild size="lg" className="rounded-full">
+          <Link href={applyHref}>{await t('Apply again')}</Link>
+        </Button>
       );
     } else {
       const when = cooldownUntil ? cooldownUntil.toLocaleDateString() : '';
