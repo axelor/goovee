@@ -15,7 +15,7 @@ import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
 import {requestOrder} from '@/subapps/shop/common/service';
-import {IdSchema} from '@/utils/validators';
+import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
 import {CartSchema, type CartInput} from '@/subapps/shop/common/validators';
 
 export async function findProduct({
@@ -26,6 +26,7 @@ export async function findProduct({
   workspaceURL: string;
 }) {
   if (!IdSchema.safeParse(id).success) return null;
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
@@ -77,6 +78,7 @@ export async function requestQuotation({
   workspaceURL: string;
 }) {
   if (!CartSchema.safeParse(cart).success) return null;
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;

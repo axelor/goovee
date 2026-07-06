@@ -15,13 +15,15 @@ import {
 import {SUBAPP_CODES} from '@/constants';
 import type {ID} from '@/types';
 import {clone, getPartnerId} from '@/utils';
-import {IdSchema} from '@/utils/validators';
+import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
 
 export async function findDefaultInvoicing({
   workspaceURL,
 }: {
   workspaceURL: string;
 }) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
@@ -42,6 +44,8 @@ export async function findDefaultDelivery({
 }: {
   workspaceURL: string;
 }) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
@@ -65,6 +69,7 @@ export async function findAddress({
   workspaceURL: string;
 }) {
   if (!IdSchema.safeParse(id).success) return null;
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
@@ -90,6 +95,8 @@ export async function fetchDeliveryAddresses({
 }: {
   workspaceURL: string;
 }) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
@@ -110,6 +117,8 @@ export async function fetchInvoicingAddresses({
 }: {
   workspaceURL: string;
 }) {
+  if (!WorkspaceURLSchema.safeParse(workspaceURL).success) return null;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return null;
 
