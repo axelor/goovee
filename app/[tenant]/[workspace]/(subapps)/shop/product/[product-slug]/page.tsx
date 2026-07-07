@@ -54,11 +54,15 @@ export async function generateMetadata(props: {
   const {user} = access;
   const {client} = access.tenant;
 
+  const categories = await findCategories(access.workspace.id, user, client);
+  const categoryids = categories.map(c => getcategoryids(c)).flat();
+
   const product = await findProductMetaBySlug({
     slug: productSlug,
     workspace: access.workspace,
     user,
     client,
+    categoryids,
   });
 
   if (!product) {
@@ -117,10 +121,11 @@ async function Product({
   );
   if (!workspaceConfig) return notFound();
 
-  const categories = await findCategories({
-    workspace: access.workspace,
+  const categories = await findCategories(
+    access.workspace.id,
+    user,
     client,
-  }).then(clone);
+  ).then(clone);
 
   const categoryids = categories.map(c => getcategoryids(c)).flat();
 

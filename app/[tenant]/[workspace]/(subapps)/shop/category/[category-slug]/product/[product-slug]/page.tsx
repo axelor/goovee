@@ -42,6 +42,7 @@ export async function generateMetadata(props: {
   const params = await props.params;
   const {workspaceURL, tenant: tenantId} = workspacePathname(params);
 
+  const categorySlug = params['category-slug'];
   const productSlug = params['product-slug'];
 
   const access = await ensureAccess({
@@ -55,11 +56,17 @@ export async function generateMetadata(props: {
   const {user} = access;
   const {client} = access.tenant;
 
+  const categories = await findCategories(access.workspace.id, user, client);
+  const $category =
+    (categories as Category[]).find(c => c.slug === categorySlug) ?? null;
+  if (!$category) return null;
+
   const product = await findProductMetaBySlug({
     slug: productSlug,
     workspace: access.workspace,
     user,
     client,
+    categoryids: [$category.id],
   });
 
   if (!product) {
@@ -128,11 +135,11 @@ async function Product({
   );
   if (!workspaceConfig) return notFound();
 
-  const categories = await findCategories({
-    workspace: access.workspace,
-    client,
+  const categories = await findCategories(
+    access.workspace.id,
     user,
-  }).then(clone);
+    client,
+  ).then(clone);
 
   const $category =
     (categories as Category[]).find(c => c.slug === categorySlug) ?? null;

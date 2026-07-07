@@ -725,19 +725,22 @@ export async function findProductBySlug({
 
 /**
  * Lightweight product lookup for page metadata (title/description) only.
- * Skips the full pricing/category pipeline of findProductBySlug — a single
- * findOne selecting name + description, gated by the same privacy filter.
+ * Skips the full pricing pipeline of findProductBySlug — a single findOne
+ * selecting name + description, gated by the same privacy and category
+ * (workspace catalog) filters.
  */
 export async function findProductMetaBySlug({
   slug,
   workspace,
   user,
   client,
+  categoryids,
 }: {
   slug: Product['slug'];
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
+  categoryids?: (string | number)[];
 }) {
   if (!slug || !workspace) {
     return null;
@@ -746,6 +749,9 @@ export async function findProductMetaBySlug({
   return client.aOSProduct.findOne({
     where: {
       slug,
+      ...(categoryids?.length
+        ? {portalCategorySet: {id: {in: categoryids}}}
+        : {}),
       AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
