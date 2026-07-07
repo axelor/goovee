@@ -11,10 +11,7 @@ import {
   SUBAPP_CODES,
   YEAR,
 } from '@/constants';
-import type {
-  AOSPortalEvent,
-  AOSPortalEventCategory,
-} from '@/goovee/.generated/models';
+import type {AOSPortalEvent} from '@/goovee/.generated/models';
 import {dayjs} from '@/locale';
 import type {OpUnitType} from 'dayjs';
 import {formatNumber} from '@/locale/server/formatters';
@@ -141,18 +138,33 @@ export type FullEvent = ExpandRecursively<
 
 /* Shared access/visibility predicate for a single event: same rules used by
    findEvent, reused by the lightweight lookups so file routes can resolve an
-   event without recomputing the whole record (and its pricing web-service). */
-function buildEventAccessWhere({
+   event without recomputing the whole record (and its pricing web-service).
+   Category access is resolved the same way findEvents resolves it — as a
+   flat id list from a separate query — instead of nesting privateFilter
+   inside eventCategorySet, which compounds with the event's own privateFilter
+   into a join graph expensive enough to misfire Postgres's JIT threshold.
+   Returns null when no category in the workspace is accessible at all. */
+async function buildEventAccessWhere({
   id,
   slug,
   workspaceURL,
   privateFilter,
+  client,
 }: {
   id?: ID;
   slug?: string;
   workspaceURL: string;
   privateFilter: ReturnType<typeof filterPrivate>;
+  client: Client;
 }) {
+  const accessibleCategoryIds = await findAccessibleEventCategoryIds({
+    workspaceURL,
+    privateFilter,
+    client,
+  });
+
+  if (!accessibleCategoryIds.length) return null;
+
   return and<AOSPortalEvent>([
     id && {id},
     slug ? {slug} : {slug: {ne: null}},
@@ -160,10 +172,7 @@ function buildEventAccessWhere({
     {OR: [{archived: false}, {archived: null}]},
     {
       statusSelect: EVENT_STATUS.PUBLISHED,
-      eventCategorySet: and<AOSPortalEventCategory>([
-        {workspace: {url: workspaceURL}},
-        privateFilter,
-      ]),
+      eventCategorySet: {id: {in: accessibleCategoryIds}},
     },
   ]);
 }
@@ -185,8 +194,17 @@ export async function findEventImage({
   if (!((slug || id) && workspaceURL)) return null;
 
   const privateFilter = filterPrivate({user});
+  const where = await buildEventAccessWhere({
+    id,
+    slug,
+    workspaceURL,
+    privateFilter,
+    client,
+  });
+  if (!where) return null;
+
   return client.aOSPortalEvent.findOne({
-    where: buildEventAccessWhere({id, slug, workspaceURL, privateFilter}),
+    where,
     select: {eventImage: {id: true}},
   });
 }
@@ -208,8 +226,17 @@ export async function findEventIdForAccess({
   if (!((slug || id) && workspaceURL)) return null;
 
   const privateFilter = filterPrivate({user});
+  const where = await buildEventAccessWhere({
+    id,
+    slug,
+    workspaceURL,
+    privateFilter,
+    client,
+  });
+  if (!where) return null;
+
   return client.aOSPortalEvent.findOne({
-    where: buildEventAccessWhere({id, slug, workspaceURL, privateFilter}),
+    where,
     select: {id: true},
   });
 }
@@ -232,14 +259,18 @@ export async function findEvent({
   if (!((slug || id) && workspace.url)) return null;
 
   const privateFilter = filterPrivate({user});
+  const where = await buildEventAccessWhere({
+    id,
+    slug,
+    workspaceURL: workspace.url,
+    privateFilter,
+    client,
+  });
+  if (!where) return null;
+
   const event = await client.aOSPortalEvent
     .findOne({
-      where: buildEventAccessWhere({
-        id,
-        slug,
-        workspaceURL: workspace.url,
-        privateFilter,
-      }),
+      where,
       select: {
         id: true,
         eventTitle: true,
