@@ -42,11 +42,9 @@ async function Categories({
   user: User | undefined;
   workspace: Workspace | Cloned<Workspace>;
 }) {
-  const categories = await findCategories({
-    workspace,
-    client,
-    user,
-  }).then(clone);
+  const categories = await findCategories(workspace.id, user, client).then(
+    clone,
+  );
 
   const parentcategories = (categories as Category[])?.filter(c => !c.parent);
 
