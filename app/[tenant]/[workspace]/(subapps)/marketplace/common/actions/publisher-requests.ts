@@ -7,6 +7,7 @@ import {headers} from 'next/headers';
 import {z} from 'zod';
 import {PUBLISHER_REQUEST_STATUS} from '../constants/statuses';
 import {canManageProducts} from '../utils/auth-helper';
+import {findPublisherAccess} from '../orm';
 import {getMarketplaceConfig} from '../orm/config';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
@@ -72,10 +73,18 @@ export async function requestPublisherAccess(
   const contactId = access.user.isContact ? String(access.user.id) : partnerId;
 
   try {
-    const existing = await client.aOSMarketplacePublisherRequest.findOne({
-      where: {partner: {id: partnerId}, portalWorkspace: {id: workspaceId}},
-      select: {statusSelect: true, cooldownUntil: true},
+    const {isPublisher, request: existing} = await findPublisherAccess({
+      client,
+      partnerId,
+      workspaceId,
     });
+
+    /* Already an approved publisher: nothing to do. `isMarketplacePublisher` is
+     * the authoritative gate, so this also covers a flag set directly in the
+     * back office with no (or a stale) request row. */
+    if (isPublisher) {
+      return {success: true, data: {status: PUBLISHER_REQUEST_STATUS.APPROVED}};
+    }
 
     /* Already pending or approved: nothing to do. */
     if (
