@@ -5,7 +5,6 @@ import {headers} from 'next/headers';
 import {revalidatePath} from 'next/cache';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
 import {getPublicEnvironment} from '@/environment';
 import {
   DEFAULT_CURRENCY_CODE,
@@ -15,8 +14,6 @@ import {
 } from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
-import {manager} from '@/tenant';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
 import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
 import {createUp2payOrder} from '@/payment/up2pay/actions';
 import {createHubPispPaymentLink} from '@/payment/hubpisp/actions';
@@ -30,8 +27,7 @@ import {
   cancelInvalidPendingBankTransfers,
 } from '@/payment/stripe/actions';
 import {findPaymentContext, markPaymentAsProcessed} from '@/payment/common/orm';
-import {PartnerKey, PaymentOption, User} from '@/types';
-import {getWhereClauseForEntity} from '@/utils/filters';
+import {PaymentOption} from '@/types';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {getHubPispTransferTypes} from '@/payment/hubpisp/utils';
 import {formatNumber} from '@/lib/core/locale/server/formatters';
@@ -76,7 +72,10 @@ import {
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
-import {validatePaymentData} from '@/subapps/invoices/common/utils/validations';
+import {
+  resolveInvoicePaymentAccess,
+  validatePaymentData,
+} from '@/subapps/invoices/common/utils/validations';
 import {updateInvoice} from '@/subapps/invoices/common/service';
 import {ActionResponse} from '@/types/action';
 import {Invoice} from '../types/invoices';
@@ -106,26 +105,32 @@ export async function paypalCreateOrder({
     return {error: true, message: await t('Tenant is missing')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
+    config,
+    client,
     invoice,
     amount,
+    invoiceFilter,
     workspaceURL,
     tenantId,
-    client,
-    token,
   });
   if (validationResult.error) {
     return validationResult;
   }
-  const {workspace, user, $amount, $invoice} = validationResult.data;
+  const {$amount, $invoice} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
   const allowPaypal = isPaymentOptionAvailable(
     paymentOptions,
     PaymentOption.paypal,
@@ -196,72 +201,32 @@ export async function paypalCaptureOrder({
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
-  }
-  const {client, config} = tenant;
-
-  let user;
-  let invoicesWhereClause = {};
-
-  if (!token) {
-    const session = await getSession();
-    user = session?.user;
-  }
-
-  if (!token && !user) return {error: true, message: await t('Unauthorized')};
-
-  const workspace = await findWorkspace({
-    user,
-    url: workspaceURL,
-    client,
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
   });
-  if (!workspace) {
-    return {
-      error: true,
-      message: await t('Invalid workspace'),
-    };
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, invoiceFilter} = access.data;
+  const {client} = tenant;
 
-  if (user) {
-    const subapp = await findSubappAccess({
-      code: SUBAPP_CODES.invoices,
-      user,
-      url: workspace.url,
-      client,
-    });
-    if (!subapp) {
-      return {
-        error: true,
-        message: await t('Unauthorized app access'),
-      };
-    }
-
-    const {role, isContactAdmin} = subapp;
-    invoicesWhereClause = getWhereClauseForEntity({
-      user,
-      role,
-      isContactAdmin,
-      partnerKey: PartnerKey.PARTNER,
-    });
-  }
-
-  if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+  if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
     return {
       error: true,
       message: await t('Payment not allowed'),
     };
   }
 
-  if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+  if (!config.allowOnlinePaymentForInvoices) {
     return {
       error: true,
       message: await t('Online payment is not available'),
     };
   }
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
   if (!paymentOptions?.length) {
     return {
       error: true,
@@ -301,7 +266,7 @@ export async function paypalCaptureOrder({
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: invoice.id,
-      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
+      ...invoiceFilter,
       workspaceURL,
       tenantId,
       client,
@@ -322,9 +287,9 @@ export async function paypalCaptureOrder({
     );
 
     const isPartialPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
     const isTotalPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
     if (isTotalPayment && purchaseAmount !== remainingAmount) {
       return {
@@ -339,7 +304,7 @@ export async function paypalCaptureOrder({
     }
 
     const updatedInvoice = await updateInvoice({
-      config,
+      config: tenant.config,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
       paymentModeId: context?.data?.paymentModeId,
@@ -388,27 +353,32 @@ export async function createStripeCheckoutSession({
     return {error: true, message: await t('Tenant is missing')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
+    config,
+    client,
     invoice,
     amount,
+    invoiceFilter,
     workspaceURL,
     tenantId,
-    client,
-    token,
   });
   if (validationResult.error) {
     return validationResult;
   }
-  const {workspace, user, $amount, $invoice, isPartialPayment} =
-    validationResult.data;
+  const {$amount, $invoice, isPartialPayment} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowStripe = isPaymentOptionAvailable(
     paymentOptions,
@@ -495,69 +465,33 @@ export async function validateStripePayment({
     return {error: true, message: await t('Invalid tenant')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
-  const {client, config} = tenant;
+  const {tenant, config, invoiceFilter} = access.data;
+  const {client} = tenant;
 
   try {
-    let user: User | undefined;
-    let invoicesWhereClause = {};
-
-    if (!token) {
-      const session = await getSession();
-      user = session?.user;
-    }
-    if (!user && !token) {
-      return {error: true, message: await t('Unauthorized')};
-    }
-
-    const workspace = await findWorkspace({
-      url: workspaceURL,
-      client,
-      user,
-    });
-
-    if (!workspace) {
-      return {error: true, message: await t('Invalid workspace')};
-    }
-
-    if (user) {
-      const subapp = await findSubappAccess({
-        code: SUBAPP_CODES.invoices,
-        user,
-        url: workspace.url,
-        client,
-      });
-
-      if (!subapp) {
-        return {error: true, message: await t('Unauthorized app access')};
-      }
-
-      invoicesWhereClause = getWhereClauseForEntity({
-        user,
-        role: subapp.role,
-        isContactAdmin: subapp.isContactAdmin,
-        partnerKey: PartnerKey.PARTNER,
-      });
-    }
-
-    if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+    if (!config.allowOnlinePaymentForInvoices) {
       return {
         error: true,
         message: await t('Online payment is not available'),
       };
     }
 
-    if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+    if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
       return {
         error: true,
         message: await t('Invoice payment not allowed'),
       };
     }
 
-    const paymentOptions = workspace?.config?.paymentOptionSet;
+    const paymentOptions = config.paymentOptionSet;
     if (!paymentOptions?.length) {
       return {
         error: true,
@@ -596,7 +530,7 @@ export async function validateStripePayment({
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: invoice.id,
-      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
+      ...invoiceFilter,
       workspaceURL,
       tenantId,
       client,
@@ -614,9 +548,9 @@ export async function validateStripePayment({
     );
 
     const isPartialPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
     const isTotalPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
     if (isTotalPayment && purchaseAmount !== remainingAmount) {
       return {
@@ -631,7 +565,7 @@ export async function validateStripePayment({
     }
 
     const result = await updateInvoice({
-      config,
+      config: tenant.config,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
       paymentModeId: context?.data?.paymentModeId,
@@ -659,7 +593,7 @@ export async function validateStripePayment({
        * more bank transfers but paid via another method (card) instead. */
       const updatedInvoice = await findInvoice({
         id: $invoice.id,
-        params: {where: invoicesWhereClause},
+        ...invoiceFilter,
         workspaceURL,
         tenantId,
         client: txClient,
@@ -720,26 +654,32 @@ export async function createStripeBankTransferIntent({
     return {error: true, message: await t('Tenant is missing')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
+    config,
+    client,
     invoice,
     amount,
+    invoiceFilter,
     workspaceURL,
     tenantId,
-    client,
-    token,
   });
   if (validationResult.error) {
     return validationResult;
   }
-  const {workspace, user, $amount, $invoice} = validationResult.data;
+  const {$amount, $invoice} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowStripe = isPaymentOptionAvailable(
     paymentOptions,
@@ -843,65 +783,33 @@ export async function cancelStripeBankTransferPaymentIntent({
     return {error: true, message: await t('Invalid tenant')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, invoiceFilter} = access.data;
   const {client} = tenant;
 
   try {
-    let user: User | undefined;
-    let invoicesWhereClause = {};
-
-    if (!token) {
-      const session = await getSession();
-      user = session?.user;
-    }
-    if (!user && !token) {
-      return {error: true, message: await t('Unauthorized')};
-    }
-
-    const workspace = await findWorkspace({user, url: workspaceURL, client});
-
-    if (!workspace) {
-      return {error: true, message: await t('Invalid workspace')};
-    }
-
-    if (user) {
-      const subapp = await findSubappAccess({
-        code: SUBAPP_CODES.invoices,
-        user,
-        url: workspace.url,
-        client,
-      });
-
-      if (!subapp) {
-        return {error: true, message: await t('Unauthorized app access')};
-      }
-
-      invoicesWhereClause = getWhereClauseForEntity({
-        user,
-        role: subapp.role,
-        isContactAdmin: subapp.isContactAdmin,
-        partnerKey: PartnerKey.PARTNER,
-      });
-    }
-
-    if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+    if (!config.allowOnlinePaymentForInvoices) {
       return {
         error: true,
         message: await t('Online payment is not available'),
       };
     }
 
-    if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+    if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
       return {
         error: true,
         message: await t('Invoice payment not allowed'),
       };
     }
 
-    const paymentOptions = workspace?.config?.paymentOptionSet;
+    const paymentOptions = config.paymentOptionSet;
     if (!paymentOptions?.length) {
       return {
         error: true,
@@ -949,7 +857,7 @@ export async function cancelStripeBankTransferPaymentIntent({
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: data.id,
-      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
+      ...invoiceFilter,
       workspaceURL,
       tenantId,
       client,
@@ -1000,27 +908,32 @@ export async function payboxCreateOrder({
     return {error: true, message: await t('Tenant is missing')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
+    config,
+    client,
     invoice,
     amount,
+    invoiceFilter,
     workspaceURL,
     tenantId,
-    client,
-    token,
   });
   if (validationResult.error) {
     return validationResult;
   }
-  const {workspace, user, $amount, $invoice, isPartialPayment} =
-    validationResult.data;
+  const {$amount, $invoice, isPartialPayment} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowPaybox = isPaymentOptionAvailable(
     paymentOptions,
@@ -1095,69 +1008,33 @@ export async function validatePayboxPayment({
     return {error: true, message: await t('Invalid tenant')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
-  const {client, config} = tenant;
+  const {tenant, config, invoiceFilter} = access.data;
+  const {client} = tenant;
 
   try {
-    let user;
-    let invoicesWhereClause = {};
-
-    if (!token) {
-      const session = await getSession();
-      user = session?.user;
-    }
-    if (!user && !token) {
-      return {error: true, message: await t('Unauthorized')};
-    }
-
-    const workspace = await findWorkspace({
-      url: workspaceURL,
-      client,
-      user,
-    });
-
-    if (!workspace) {
-      return {error: true, message: await t('Invalid workspace')};
-    }
-
-    if (user) {
-      const subapp = await findSubappAccess({
-        code: SUBAPP_CODES.invoices,
-        user,
-        url: workspace.url,
-        client,
-      });
-
-      if (!subapp) {
-        return {error: true, message: await t('Unauthorized app access')};
-      }
-
-      invoicesWhereClause = getWhereClauseForEntity({
-        user,
-        role: subapp.role,
-        isContactAdmin: subapp.isContactAdmin,
-        partnerKey: PartnerKey.PARTNER,
-      });
-    }
-
-    if (!workspace?.config?.allowOnlinePaymentForInvoices) {
+    if (!config.allowOnlinePaymentForInvoices) {
       return {
         error: true,
         message: await t('Online payment is not available'),
       };
     }
 
-    if (workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
+    if (config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.NO) {
       return {
         error: true,
         message: await t('Invoice payment not allowed'),
       };
     }
 
-    const paymentOptions = workspace?.config?.paymentOptionSet;
+    const paymentOptions = config.paymentOptionSet;
     if (!paymentOptions?.length) {
       return {
         error: true,
@@ -1194,7 +1071,7 @@ export async function validatePayboxPayment({
     const $invoice = await findInvoice({
       type: INVOICE.UNPAID,
       id: invoice.id,
-      ...(token ? {token} : {params: {where: invoicesWhereClause}}),
+      ...invoiceFilter,
       workspaceURL,
       tenantId,
       client,
@@ -1212,9 +1089,9 @@ export async function validatePayboxPayment({
     );
 
     const isPartialPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.PARTIAL;
     const isTotalPayment =
-      workspace?.config?.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
+      config.canPayInvoice === INVOICE_PAYMENT_OPTIONS.TOTAL;
 
     if (isTotalPayment && purchaseAmount !== remainingAmount) {
       return {
@@ -1229,7 +1106,7 @@ export async function validatePayboxPayment({
     }
 
     const result = await updateInvoice({
-      config,
+      config: tenant.config,
       amount: purchaseAmount,
       invoiceId: $invoice.id,
       paymentModeId: context?.data?.paymentModeId,
@@ -1284,28 +1161,33 @@ export async function up2payCreateOrder({
     return {error: true, message: await t('Tenant is missing')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
+    config,
+    client,
     invoice,
     amount,
+    invoiceFilter,
     workspaceURL,
     tenantId,
-    client,
-    token,
   });
 
   if (validationResult.error) {
     return validationResult;
   }
-  const {workspace, user, $amount, $invoice, isPartialPayment} =
-    validationResult.data;
+  const {$amount, $invoice, isPartialPayment} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowUp2pay = isPaymentOptionAvailable(
     paymentOptions,
@@ -1419,28 +1301,34 @@ export async function initiatePispPayment({
     return {error: true, message: await t('Tenant is missing')};
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return {error: true, message: await t('Tenant not found')};
+  const access = await resolveInvoicePaymentAccess({
+    workspaceURL,
+    tenantId,
+    token,
+  });
+  if (access.error) {
+    return access;
   }
+  const {tenant, config, user, invoiceFilter} = access.data;
   const {client} = tenant;
 
   const validationResult = await validatePaymentData({
+    config,
+    client,
     invoice,
     amount,
+    invoiceFilter,
     workspaceURL,
     tenantId,
-    client,
-    token,
   });
 
   if (validationResult.error) {
     return validationResult;
   }
 
-  const {workspace, user, $amount, $invoice} = validationResult.data;
+  const {$amount, $invoice} = validationResult.data;
 
-  const paymentOptions = workspace?.config?.paymentOptionSet;
+  const paymentOptions = config.paymentOptionSet;
 
   const allowHubPisp = isPaymentOptionAvailable(
     paymentOptions,

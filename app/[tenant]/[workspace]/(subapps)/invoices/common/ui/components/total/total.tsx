@@ -20,6 +20,7 @@ import {
 } from '@/ui/components';
 import {formatNumber} from '@/locale/formatters';
 import {useSearchParams} from '@/ui/hooks';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {BankTransferList} from '@/ui/components/payment/stripe';
 import {HubPispPendingList} from '@/ui/components/payment/hubpisp';
 import {cn} from '@/utils/css';
@@ -38,7 +39,7 @@ import {cancelStripeBankTransferPaymentIntent} from '@/app/[tenant]/[workspace]/
 
 export function Total({
   isUnpaid,
-  workspace,
+  config,
   invoice,
   invoiceType,
   workspaceURI,
@@ -65,10 +66,9 @@ export function Total({
     setPaymentType(null);
   }, []);
 
-  const config = workspace?.config;
-  const allowOnlinePayment = config?.allowOnlinePaymentForInvoices;
-  const canPayInvoice = config?.canPayInvoice ?? INVOICE_PAYMENT_OPTIONS.NO;
-  const paymentOptionSet = config?.paymentOptionSet;
+  const allowOnlinePayment = config.allowOnlinePaymentForInvoices;
+  const canPayInvoice = config.canPayInvoice ?? INVOICE_PAYMENT_OPTIONS.NO;
+  const paymentOptionSet = config.paymentOptionSet;
 
   const allowInvoicePayment =
     isUnpaid &&
@@ -78,7 +78,7 @@ export function Total({
 
   const remainingAmountValue = parseFloat(amountRemaining?.value || '0');
 
-  const workspaceURL = workspace?.url!;
+  const {workspaceURL} = useWorkspace();
 
   const {toast} = useToast();
 
@@ -289,7 +289,7 @@ export function Total({
             </div>
             <Separator />
             <InvoicePayments
-              workspace={workspace}
+              config={config}
               invoice={invoice}
               amount={currentAmount}
               paymentType={paymentType}

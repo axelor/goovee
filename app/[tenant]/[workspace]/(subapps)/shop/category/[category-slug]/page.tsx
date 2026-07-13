@@ -1,14 +1,14 @@
 import {Suspense} from 'react';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- ///
-import {findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {getSession} from '@/auth';
-import {DEFAULT_LIMIT} from '@/constants';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {DEFAULT_LIMIT, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {Category} from '@/types';
-import {manager} from '@/tenant';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 // ---- LOCAL IMPORTS ---- //
@@ -17,6 +17,7 @@ import {
   ProductListSkeleton,
 } from '@/subapps/shop/common/ui/components';
 import {findProducts} from '@/subapps/shop/common/orm/product';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {SORT_BY_OPTIONS} from '@/subapps/shop/common/constants';
 import {getcategoryids} from '@/subapps/shop/common/utils/categories';
@@ -29,32 +30,50 @@ async function Category({
   params: {tenant: string; workspace: string; 'category-slug': string};
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {tenant: tenantId} = params;
   const {search, limit, page, sort} = searchParams;
 
   const categorySlug = params['category-slug'];
 
-  const session = await getSession();
-  const user = session?.user;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getShopConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return notFound();
+
   const categories = await findCategories({
-    workspace,
+    workspace: access.workspace,
     client,
     user,
   }).then(clone);
@@ -90,7 +109,7 @@ async function Category({
   const breadcrumbs = $category ? getbreadcrumbs($category) : [];
 
   const availableSortByOptions = SORT_BY_OPTIONS.filter(
-    o => workspace?.config && (workspace?.config?.[o.value] as boolean),
+    o => workspaceConfig && (workspaceConfig?.[o.value] as boolean),
   );
 
   const defaultSort = availableSortByOptions?.[0]?.value;
@@ -101,16 +120,18 @@ async function Category({
     page,
     limit: limit ? Number(limit) : DEFAULT_LIMIT,
     categoryids,
-    workspace,
+    workspace: access.workspace,
+    workspaceConfig,
     user,
     client,
+    config,
   });
 
   const parentcategories = $cats.filter(c => !c.parent);
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspaceConfig,
     client,
   });
 
@@ -124,7 +145,7 @@ async function Category({
       categories={parentcategories}
       pageInfo={pageInfo}
       hidePriceAndPurchase={hidePriceAndPurchase}
-      workspace={workspace}
+      config={clone(workspaceConfig)}
       productPath={`${workspaceURI}/shop/category/${$category.slug}/product/`}
       defaultSort={defaultSort}
     />

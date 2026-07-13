@@ -4,6 +4,7 @@ import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse} from 'next/server';
 import {manager} from '@/tenant';
+import {getShellConfig} from '../../../../orm/config';
 
 export async function GET(
   request: NextRequest,
@@ -28,11 +29,16 @@ export async function GET(
     return new NextResponse('Invalid workspace', {status: 401});
   }
 
-  if (!workspace.config?.isHomepageDisplay) {
+  const config = await getShellConfig(workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Invalid workspace', {status: 401});
+  }
+
+  if (!config.isHomepageDisplay) {
     return new NextResponse('Unauthorized', {status: 401});
   }
 
-  const bgImageId = workspace.config?.homepageHeroBgImage?.id;
+  const bgImageId = config.homepageHeroBgImage?.id;
 
   if (!bgImageId) {
     return new NextResponse('Image not found', {status: 404});

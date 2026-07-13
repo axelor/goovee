@@ -5,7 +5,6 @@ import {after} from 'next/server';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ----//
-import {getSession} from '@/auth';
 import {
   CreateComment,
   CreateCommentPropsSchema,
@@ -18,8 +17,9 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {t, tattr, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {TENANT_HEADER} from '@/proxy';
-import {manager} from '@/tenant';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {getEventsConfig} from '@/subapps/events/common/orm/config';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessMessage} from '@/lib/core/access/denial';
 import {ID, PaymentOption} from '@/types';
 import {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
@@ -30,12 +30,7 @@ import {getPaymentModeId} from '@/utils/payment';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
-import {
-  validate,
-  validateRegistration,
-  withSubapp,
-  withWorkspace,
-} from '@/subapps/events/common/actions/validation';
+import {validateRegistration} from '@/subapps/events/common/actions/validation';
 import {
   FetchContactsSchema,
   FetchEventSchema,
@@ -105,21 +100,17 @@ export async function getAllEvents(props: {
     return error(await t('Tenant ID is missing!'));
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client} = tenant;
-
-  const result = await validate([
-    withWorkspace(workspaceURL, client, {checkAuth: false}),
-    withSubapp(SUBAPP_CODES.events, workspaceURL, client),
-  ]);
-
-  if (result.error) {
-    return result;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
-
-  const session = await getSession();
-  const user = session?.user;
+  const {user} = access;
+  const {client} = access.tenant;
 
   try {
     const {events, pageInfo} = await findEvents({
@@ -152,9 +143,24 @@ export async function register(
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('Tenant ID is missing!'));
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client, config} = tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getEventsConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return error(await t('Invalid workspace'));
 
   let paidAmount: number,
     values: RegistrationValues,
@@ -183,6 +189,8 @@ export async function register(
     eventId,
     values,
     workspaceURL,
+    config: workspaceConfig,
+    user,
     client,
   });
 
@@ -190,14 +198,14 @@ export async function register(
     return validationResult;
   }
 
-  const {workspace, participants, user} = validationResult.data;
+  const {participants} = validationResult.data;
 
   const $event = await findEvent({
     id: eventId,
-    workspaceURL,
     user,
     client,
     config,
+    workspace: access.workspace,
   });
 
   if (!$event) return error(await t('Event not found!'));
@@ -217,7 +225,7 @@ export async function register(
 
   let registration: Registration;
   try {
-    registration = await client.$transaction(async txClient => {
+    registration = await access.tenant.client.$transaction(async txClient => {
       const reg = await registerParticipants({
         eventId,
         participants,
@@ -247,16 +255,16 @@ export async function register(
      Errors are logged but do not fail the registration. */
   if (paidAmount > 0) {
     const paymentModeId = getPaymentModeId(
-      workspace?.config?.paymentOptionSet,
+      workspaceConfig?.paymentOptionSet,
       paymentMode!,
     );
 
     after(async () => {
       const res = await createInvoice({
-        workspace,
+        workspace: access.workspace,
         config,
         registrationId: registration.id,
-        currencyCode: $event.currency?.code,
+        currencyCode: $event.currency?.code ?? '',
         paymentModeId,
       });
 
@@ -302,9 +310,9 @@ export async function register(
     generateRegistrationMailAction({
       eventId,
       participants,
-      workspaceURL,
       client,
       config,
+      workspace: access.workspace,
     }),
   );
 
@@ -324,18 +332,16 @@ export async function fetchContacts(props: {
     return error(await t('Bad request'));
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client} = tenant;
-
-  const result = await validate([
-    withWorkspace(workspaceURL, client, {checkAuth: false}),
-    withSubapp(SUBAPP_CODES.events, workspaceURL, client),
-  ]);
-
-  if (result.error) {
-    return result;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
+  const {client} = access.tenant;
 
   try {
     const data = await findContacts({search, workspaceURL, client}).then(clone);
@@ -363,23 +369,22 @@ export async function isValidParticipant(props: {
     return error(await t('Email is required'));
   }
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-  if (!workspace) return error(await t('Invalid workspace'));
-
-  const result = await validate([
-    withSubapp(SUBAPP_CODES.events, workspaceURL, client),
-  ]);
-
-  if (result.error) {
-    return result;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
   }
+  const {client} = access.tenant;
+
+  const workspaceConfig = await getEventsConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return error(await t('Invalid workspace'));
 
   const event = await findEventConfig({
     id: eventId,
@@ -395,9 +400,9 @@ export async function isValidParticipant(props: {
     if (
       !isEventPrivate(event) &&
       !isEventPublic(event) &&
-      workspace.config?.nonPublicEmailNotFoundMessage?.trim()
+      workspaceConfig?.nonPublicEmailNotFoundMessage?.trim()
     ) {
-      return error(await tattr(workspace.config.nonPublicEmailNotFoundMessage));
+      return error(await tattr(workspaceConfig.nonPublicEmailNotFoundMessage));
     }
     return error(await t('This email can not be registered to this event'));
   }
@@ -413,12 +418,6 @@ export async function isValidParticipant(props: {
 }
 
 export const createComment: CreateComment = async props => {
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    return {error: true, message: await t('Unauthorized')};
-  }
-
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
@@ -430,21 +429,35 @@ export const createComment: CreateComment = async props => {
   }
   const {workspaceURL, workspaceURI, ...rest} = parsed.data;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Tenant not found')};
-  const {client, config} = tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
 
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-  if (!workspace) {
+  const workspaceConfig = await getEventsConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) {
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  const {workspaceUser} = workspace;
+  const {workspaceUser} = access.workspace;
   if (!workspaceUser) {
     return {error: true, message: await t('Workspace user is missing')};
   }
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.events, workspace})) {
+  if (
+    !isCommentEnabled({subapp: SUBAPP_CODES.events, config: workspaceConfig})
+  ) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -453,22 +466,12 @@ export const createComment: CreateComment = async props => {
     return {error: true, message: await t('Invalid model type')};
   }
 
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.events,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!app?.isInstalled) {
-    return {error: true, message: await t('Unauthorized Access')};
-  }
-
   const event = await findEvent({
     id: rest.recordId,
-    workspaceURL,
     client,
     config,
     user,
+    workspace: access.workspace,
   });
   if (!event) {
     return {error: true, message: await t('Record not found')};
@@ -476,17 +479,18 @@ export const createComment: CreateComment = async props => {
 
   try {
     // keeps attachment tokens redeemable if creation fails
-    const [comment, parentComment] = await client.$transaction(txClient =>
-      addComment({
-        modelName,
-        userId: user.id,
-        workspaceUserId: workspaceUser.id,
-        client: txClient,
-        commentField: 'note',
-        trackingField: 'publicBody',
-        subject: `${user.simpleFullName || user.name} added a comment`,
-        ...rest,
-      }),
+    const [comment, parentComment] = await access.tenant.client.$transaction(
+      txClient =>
+        addComment({
+          modelName,
+          userId: user.id,
+          workspaceUserId: workspaceUser.id,
+          client: txClient,
+          commentField: 'note',
+          trackingField: 'publicBody',
+          subject: `${user.simpleFullName || user.name} added a comment`,
+          ...rest,
+        }),
     );
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
@@ -541,9 +545,6 @@ export const fetchComments: FetchComments = async props => {
   if (!parsedComments.success)
     return {error: true, message: z.prettifyError(parsedComments.error)};
   const {workspaceURL, ...rest} = parsedComments.data;
-  const session = await getSession();
-
-  const user = session?.user;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -554,17 +555,30 @@ export const fetchComments: FetchComments = async props => {
     };
   }
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return {error: true, message: await t('Tenant not found')};
-  const {client, config} = tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
 
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-
-  if (!workspace) {
+  const workspaceConfig = await getEventsConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) {
     return {error: true, message: await t('Invalid workspace')};
   }
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.events, workspace})) {
+  if (
+    !isCommentEnabled({subapp: SUBAPP_CODES.events, config: workspaceConfig})
+  ) {
     return {error: true, message: await t('Comments are not enabled')};
   }
 
@@ -573,22 +587,12 @@ export const fetchComments: FetchComments = async props => {
     return {error: true, message: await t('Invalid model type')};
   }
 
-  const app = await findSubappAccess({
-    code: SUBAPP_CODES.events,
-    user,
-    url: workspaceURL,
-    client,
-  });
-  if (!app?.isInstalled) {
-    return {error: true, message: await t('Unauthorized Access')};
-  }
-
   const event = await findEvent({
     id: rest.recordId,
-    workspaceURL,
     client,
     config,
     user,
+    workspace: access.workspace,
   });
   if (!event) {
     return {error: true, message: await t('Record not found')};
@@ -625,27 +629,25 @@ export const fetchEvent = async (props: {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return error(await t('Tenant ID is missing!'));
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return error(await t('Tenant not found'));
-  const {client, config} = tenant;
-
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-  if (!workspace) return error(await t('Invalid workspace'));
-
-  const subappValidation = await validate([
-    withSubapp(SUBAPP_CODES.events, workspaceURL, client),
-  ]);
-  if (subappValidation.error) return subappValidation;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
 
   const event = await findEvent({
     slug,
-    workspaceURL,
     client,
     config,
     user,
+    workspace: access.workspace,
   });
   if (!event) return error(await t('Record not found'));
 

@@ -6,7 +6,9 @@ import {workspacePathname} from '@/utils/workspace';
 import {isCommentEnabled} from '@/comments';
 
 import {findTicketAccess} from '../../../../../common/orm/tickets';
-import {ensureAuth} from '../../../../../common/utils/auth-helper';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {accessStatus} from '@/lib/core/access/denial';
+import {getTicketingConfig} from '../../../../../common/orm/config';
 import {SUBAPP_CODES} from '@/constants';
 
 export async function GET(
@@ -24,14 +26,31 @@ export async function GET(
   const {workspaceURL, tenant} = workspacePathname(params);
   const {'ticket-id': ticketId, 'file-id': fileId} = params;
 
-  const {error, auth} = await ensureAuth(workspaceURL, tenant);
-  if (error) {
-    return new NextResponse('Unauthorized', {status: 401});
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return new NextResponse('Unauthorized', {
+      status: accessStatus(access.reason),
+    });
   }
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
 
-  if (!isCommentEnabled({subapp: SUBAPP_CODES.quotations, workspace})) {
+  const config = await getTicketingConfig(access.workspace.config.id, client);
+  if (!config) {
+    return new NextResponse('Not found', {status: 404});
+  }
+
+  if (
+    !isCommentEnabled({
+      subapp: SUBAPP_CODES.ticketing,
+      config,
+    })
+  ) {
     return new NextResponse('Forbidden', {status: 403});
   }
 
@@ -39,7 +58,7 @@ export async function GET(
     client,
     user,
     subapp,
-    workspace,
+    workspace: access.workspace,
     recordId: ticketId,
   });
   if (!ticket) {
@@ -60,7 +79,7 @@ export async function GET(
     id: fileId,
     meta: true,
     client,
-    storage: auth.tenant.config.aos.storage,
+    storage: access.tenant.config.aos.storage,
   });
 
   if (!file) {

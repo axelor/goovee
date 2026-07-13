@@ -7,6 +7,7 @@ import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
+import {getAccountConfig} from '../../../common/orm/config';
 import {findAvailableSubapps} from '../../../common/orm/members';
 import Form from './form';
 
@@ -33,7 +34,13 @@ export default async function Page(props: {
     client,
   });
 
-  if (!workspace?.config?.canInviteMembers) {
+  if (!workspace) {
+    return notFound();
+  }
+
+  const config = await getAccountConfig(workspace.config.id, client);
+
+  if (!config?.canInviteMembers) {
     return notFound();
   }
 

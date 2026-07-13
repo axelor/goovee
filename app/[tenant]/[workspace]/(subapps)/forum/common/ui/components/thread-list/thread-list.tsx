@@ -1,7 +1,5 @@
 'use client';
 
-import type {Cloned} from '@/types/util';
-
 // ---- CORE IMPORTS ---- //
 import {DropdownToggle, Separator} from '@/ui/components';
 import {i18n} from '@/locale';
@@ -9,7 +7,6 @@ import {useSearchParams} from '@/ui/hooks';
 import {URL_PARAMS} from '@/constants';
 import {SORT_BY_OPTIONS} from '@/comments';
 import {PageInfo} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -23,13 +20,13 @@ export const ThreadList = ({
   pageInfo,
   memberGroupIDs,
   selectedGroupId,
-  workspace,
+  enableComment,
 }: {
   posts: PostWithMembership[];
   pageInfo: PageInfo;
   memberGroupIDs: string[];
   selectedGroupId: string | null;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  enableComment: boolean;
 }) => {
   const {update, searchParams} = useSearchParams();
   const sort = searchParams.get('sort') ?? 'new';
@@ -66,7 +63,7 @@ export const ThreadList = ({
             pageInfo={pageInfo}
             memberGroupIDs={memberGroupIDs}
             selectedGroupId={selectedGroupId}
-            workspace={workspace}
+            enableComment={enableComment}
           />
         </div>
       )}

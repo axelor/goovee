@@ -2,7 +2,7 @@
 
 import {i18n} from '@/locale';
 import {formatDate} from '@/locale/formatters';
-import type {PortalAppConfig} from '@/orm/workspace';
+import type {TicketingConfig} from '../../../orm/config';
 import type {Maybe} from '@/types/util';
 import {
   Button,
@@ -46,7 +46,7 @@ type Props = {
   categories: TCategory[];
   priorities: TPriority[];
   contacts: ContactPartner[];
-  formFields: PortalAppConfig['ticketingFormFieldSet'];
+  formFields: TicketingConfig['ticketingFormFieldSet'];
   showCancel?: boolean | null;
   showClose?: boolean | null;
   showAssignment?: boolean | null;

@@ -1,19 +1,21 @@
 // ---- CORE IMPORTS ---- //
-import {PortalWorkspace} from '@/orm/workspace';
 import {calculateAdvanceAmount} from '@/utils/payment';
 import type {Cloned} from '@/types/util';
+
+// ---- LOCAL IMPORTS ---- //
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 
 export const formatNumber = (n: number | string) => n;
 
 export function computeExpectedAmount({
   total,
-  workspace,
+  config,
 }: {
   total: number | string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  config: ShopConfig | Cloned<ShopConfig>;
 }): string {
-  const payInAdvance = workspace.config?.payInAdvance;
-  const advancePaymentPercentage = workspace.config?.advancePaymentPercentage;
+  const payInAdvance = config?.payInAdvance;
+  const advancePaymentPercentage = config?.advancePaymentPercentage;
 
   if (
     payInAdvance &&

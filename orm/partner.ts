@@ -12,7 +12,7 @@ import type {Client} from '@/goovee/.generated/client';
 import {USER_CREATED_FROM} from '@/constants';
 import {clone} from '@/utils';
 import {ID, Localization} from '@/types';
-import {PortalWorkspace} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {
   findContactWorkspaceConfig,
   findDefaultPartnerWorkspaceConfig,
@@ -34,6 +34,7 @@ const partnerFields = {
   linkedinLink: true,
   mainPartner: {
     id: true,
+    partnerCategory: {id: true},
     simpleFullName: true,
     isInDirectory: true,
     isEmailInDirectory: true,
@@ -145,7 +146,7 @@ export async function isAdminContact({
   workspaceURL,
   client,
 }: {
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   client: Client;
 }) {
   const session = await getSession();

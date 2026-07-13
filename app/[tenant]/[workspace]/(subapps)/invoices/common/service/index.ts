@@ -1,7 +1,5 @@
-import axios from 'axios';
-
 // ---- CORE IMPORTS ---- //
-import {getAOSHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import type {ID} from '@/types';
@@ -38,17 +36,15 @@ export async function updateInvoice({
   };
 
   try {
-    const {data} = await axios.post(
-      `${aos.url}/ws/portal/invoice/payment`,
-      payload,
-      {headers: getAOSHeaders(aos)},
-    );
+    const data = await aosClient(aos).request<
+      {status?: number; message?: string} & Record<string, unknown>
+    >('ws/portal/invoice/payment', {body: payload});
     if (data?.status === -1) {
       return {
         error: true,
-        message: await t(
-          data?.message || 'Unable to update invoice. Please try again later.',
-        ),
+        message: data?.message
+          ? await t(data.message)
+          : await t('Unable to update invoice. Please try again later.'),
       };
     }
 

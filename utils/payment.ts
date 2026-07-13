@@ -1,13 +1,13 @@
-import {PortalAppConfig} from '@/orm/workspace';
+import {PaymentConfig} from '@/orm/workspace';
 import {PaymentOption} from '@/types';
 
 export const isPaymentOptionAvailable = (
-  paymentOptions: PortalAppConfig['paymentOptionSet'] = [],
+  paymentOptions: PaymentConfig['paymentOptionSet'] = [],
   type: PaymentOption,
 ) => (paymentOptions || []).some(option => option.typeSelect === type);
 
 export const getPaymentModeId = (
-  paymentOptions: PortalAppConfig['paymentOptionSet'] = [],
+  paymentOptions: PaymentConfig['paymentOptionSet'] = [],
   type: PaymentOption,
 ) =>
   (paymentOptions || [])?.find(option => option.typeSelect === type)

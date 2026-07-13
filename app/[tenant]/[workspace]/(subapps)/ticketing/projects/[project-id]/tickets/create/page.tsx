@@ -1,10 +1,13 @@
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {FaChevronRight} from 'react-icons/fa';
 
 // ---- CORE IMPORTS ---- //
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getTicketingConfig} from '../../../../common/orm/config';
 import {t} from '@/locale/server';
 import {clone} from '@/utils';
+import {getCurrentPath} from '@/utils/current-path';
 import {encodeFilter, getLoginURL} from '@/utils/url';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
@@ -27,7 +30,6 @@ import {
   findTicketStatuses,
 } from '../../../../common/orm/projects';
 import {findTicketAccess} from '../../../../common/orm/tickets';
-import {ensureAuth} from '../../../../common/utils/auth-helper';
 import type {EncodedTicketFilter} from '../../../../common/utils/validators';
 import {Form} from './client-form';
 
@@ -46,20 +48,38 @@ export default async function Page(props: {
   const projectId = params['project-id'];
   const {parentId} = searchParams;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${projectId}/tickets/create?${new URLSearchParams(searchParams).toString()}`,
-        workspaceURI,
-        tenant,
-      }),
-    );
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
 
-  if (error) notFound();
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const {user, subapp} = access;
+  const {client} = access.tenant;
+
+  const config = await getTicketingConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
 
   if (parentId) {
     const parentTicket = await findTicketAccess({
@@ -68,14 +88,14 @@ export default async function Page(props: {
       client,
       user,
       subapp,
-      workspace,
+      workspace: access.workspace,
     });
     if (parentTicket?.project?.id !== projectId) notFound();
   }
 
   const [project, statuses, categories, priorities, contacts] =
     await Promise.all([
-      findProject({projectId, client, user, workspace}),
+      findProject({projectId, client, user, workspace: access.workspace}),
       findTicketStatuses(projectId, client),
       findTicketCategories(projectId, client).then(clone),
       findTicketPriorities(projectId, client).then(clone),
@@ -141,7 +161,7 @@ export default async function Page(props: {
         userId={user.id}
         parentId={parentId}
         workspaceURI={workspaceURI}
-        formFields={clone(workspace.config.ticketingFormFieldSet)}
+        formFields={clone(config.ticketingFormFieldSet)}
       />
     </div>
   );

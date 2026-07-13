@@ -1,5 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import type {ExpandRecursively} from '@/types/util';
+import type {Cloned, ExpandRecursively} from '@/types/util';
 import {
   DATE_FORMATS,
   DAY,
@@ -22,7 +22,7 @@ import {filterPrivate} from '@/orm/filter';
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
 import type {ID, PageInfo, User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import {formatDateToISOString, formatToTwoDigits} from '@/utils/date';
@@ -141,21 +141,21 @@ export type FullEvent = ExpandRecursively<
 export async function findEvent({
   id,
   slug,
-  workspaceURL,
   config,
   client,
   user,
+  workspace,
 }: {
   id?: ID;
   slug?: string;
-  workspaceURL: string;
   config: TenantConfig;
   client: Client;
-  user?: User;
+  user: User | null | undefined;
+  workspace: Workspace | Cloned<Workspace>;
 }) {
-  if (!((slug || id) && workspaceURL)) return null;
+  if (!((slug || id) && workspace.url)) return null;
 
-  const privateFilter = await filterPrivate({user, client});
+  const privateFilter = filterPrivate({user});
   const event = await client.aOSPortalEvent
     .findOne({
       where: and<AOSPortalEvent>([
@@ -166,7 +166,7 @@ export async function findEvent({
         {
           statusSelect: EVENT_STATUS.PUBLISHED,
           eventCategorySet: and<AOSPortalEventCategory>([
-            {workspace: {url: workspaceURL}},
+            {workspace: {url: workspace.url}},
             privateFilter,
           ]),
         },
@@ -241,15 +241,16 @@ export async function findEvent({
   const {saleCurrency} = eventProduct || {};
 
   const productsFromWS = await findProductsFromWS({
-    workspaceURL,
-    config,
-    client,
     eventId: event.id,
+    config,
+    partnerWorkspaceId: workspace.id,
+    partnerId: user?.id,
   });
 
-  const displayWt: string = productsFromWS?.priceWT || defaultPrice?.toString();
+  const displayWt: string =
+    productsFromWS?.priceWT || defaultPrice?.toString() || '';
   const displayAti: string =
-    productsFromWS?.priceATI || defaultPrice?.toString();
+    productsFromWS?.priceATI || defaultPrice?.toString() || '';
 
   const currencySymbol = saleCurrency?.symbol || DEFAULT_CURRENCY_SYMBOL;
   const scale = saleCurrency?.numberOfDecimals || DEFAULT_CURRENCY_SCALE;
@@ -317,7 +318,7 @@ export async function findEvent({
     };
   });
 
-  const eventLink = `${workspaceURL}/${SUBAPP_CODES.events}/${event.slug}`;
+  const eventLink = `${workspace.url}/${SUBAPP_CODES.events}/${event.slug}`;
 
   const additionalFieldSet = (await Promise.all(
     (event.additionalFieldSet ?? []).map(async field => {
@@ -376,7 +377,7 @@ export async function findEvents({
   selectedDates?: (Date | string)[];
   workspaceURL: string;
   client: Client;
-  user?: User;
+  user: User | null | undefined;
   onlyRegisteredEvent?: boolean;
   eventType?: string;
   orderBy?: Record<string, string>;
@@ -437,7 +438,7 @@ export async function findEvents({
   );
   const currentDateTime = dayjs().toISOString();
   const todayStartTime = dayjs().startOf(DAY).toISOString();
-  const privateFilter = await filterPrivate({user, client});
+  const privateFilter = filterPrivate({user});
   const whereClause = and<AOSPortalEvent>([
     {
       statusSelect: EVENT_STATUS.PUBLISHED,
@@ -544,7 +545,7 @@ export async function findEventConfig({
 }: {
   id: ID;
   client: Client;
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
 }): Promise<EventConfig | null> {
   if (!id) return null;
 

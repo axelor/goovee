@@ -1,14 +1,14 @@
 import {Suspense} from 'react';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {manager} from '@/tenant';
-import {clone} from '@/utils';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {workspacePathname} from '@/utils/workspace';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
-import {findWorkspace} from '@/orm/workspace';
-import {workspacePathname} from '@/utils/workspace';
 import {
   ForumNotificationSkeleton,
   NotificationHeader,
@@ -22,31 +22,38 @@ export default async function Page(props: {
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
-  const {tenant: tenantId} = params;
-  const session = await getSession();
-  const user = session?.user;
-  const {workspaceURL} = workspacePathname(params);
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: false,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user} = access;
 
   const group = searchParams?.group as string;
   const sortBy = searchParams?.sortBy?.toUpperCase() as string;
-
-  if (!user?.id) {
-    return notFound();
-  }
 
   return (
     <div>
@@ -57,7 +64,7 @@ export default async function Page(props: {
             userId={user.id}
             group={group}
             sortBy={sortBy}
-            workspaceID={workspace.id}
+            workspaceURL={workspaceURL}
           />
         </Suspense>
       </NotificationHeader>

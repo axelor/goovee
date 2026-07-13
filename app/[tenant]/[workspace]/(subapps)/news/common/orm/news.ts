@@ -4,7 +4,7 @@ import type {Cloned} from '@/types/util';
 import {clone, getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
 import type {User} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 import {ORDER_BY} from '@/constants';
 import {filterPrivate} from '@/orm/filter';
 
@@ -62,7 +62,7 @@ export async function findNonArchivedNewsCategories({
   user,
   client,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
 }) {
@@ -75,7 +75,7 @@ export async function findNonArchivedNewsCategories({
           id: workspace.id,
         },
 
-        ...(await filterPrivate({client, user})),
+        ...filterPrivate({user}),
       },
       select: {
         parentCategory: {
@@ -160,7 +160,7 @@ export async function findNews({
   page?: string | number;
   limit?: number;
   slug?: string | null;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   categoryIds?: (string | number)[];
   client: Client;
   user?: User;
@@ -211,7 +211,7 @@ export async function findNews({
     },
     ...(params?.where || {}),
     AND: [
-      await filterPrivate({user, client}),
+      filterPrivate({user}),
       getArchivedFilter({archived}),
       ...(params?.where?.AND || []),
     ],
@@ -275,7 +275,7 @@ export async function findNewsImageBySlug({
   isFullView = false,
 }: {
   slug: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   archived?: boolean;
@@ -289,7 +289,7 @@ export async function findNewsImageBySlug({
     where: {
       slug,
       categorySet: {workspace: {id: workspace.id}},
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     select: {image: {id: true}, thumbnailImage: {id: true}},
   });
@@ -307,7 +307,7 @@ export async function findCategoryImageBySlug({
   user,
 }: {
   slug: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }): Promise<string | undefined> {
@@ -317,7 +317,7 @@ export async function findCategoryImageBySlug({
     where: {
       slug,
       workspace: {id: workspace.id},
-      ...(await filterPrivate({user, client})),
+      ...filterPrivate({user}),
     },
     select: {
       image: {id: true},
@@ -337,7 +337,7 @@ export async function isAttachmentOfNews({
 }: {
   slug: string;
   fileId: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }): Promise<boolean> {
@@ -348,7 +348,7 @@ export async function isAttachmentOfNews({
       slug,
       attachmentList: {metaFile: {id: fileId}},
       categorySet: {workspace: {id: workspace.id}},
-      ...(await filterPrivate({user, client})),
+      ...filterPrivate({user}),
     },
     select: {id: true},
   });
@@ -368,7 +368,7 @@ export async function findCategories({
   category?: string | null;
   showAllCategories?: boolean;
   slug?: string | null;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   archived?: boolean;
@@ -382,7 +382,7 @@ export async function findCategories({
       workspace: {
         id: workspace.id,
       },
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
       ...(category
         ? {
             parentCategory: {
@@ -427,7 +427,7 @@ export async function findCategoryTitleBySlugName({
   user,
 }: {
   slug: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   archived?: boolean;
   user?: User;
@@ -440,7 +440,7 @@ export async function findCategoryTitleBySlugName({
       workspace: {
         id: workspace.id,
       },
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     select: {
       name: true,
@@ -467,7 +467,7 @@ export async function findNewsByCategory({
   page?: string | number;
   limit?: number;
   slug?: string;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   params?: NewsQueryParams;
@@ -524,7 +524,7 @@ export async function findHomePageHeaderNews({
   user,
   limit = HEADER_NEWS_LIMIT,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   limit?: number;
@@ -549,7 +549,7 @@ export async function findHomePageFeaturedNews({
   client,
   user,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }) {
@@ -573,7 +573,7 @@ export async function findHomePageAsideNews({
   client,
   user,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }) {
@@ -593,7 +593,7 @@ export async function findHomePageFooterNews({
   client,
   user,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
 }) {
@@ -614,7 +614,7 @@ export async function findCategoryPageHeaderNews({
   user,
   slug,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -637,7 +637,7 @@ export async function findCategoryPageFeaturedNews({
   user,
   slug,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -665,7 +665,7 @@ export async function findCategoryAsideNews({
   slug,
   page = DEFAULT_PAGE,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -696,7 +696,7 @@ export async function findCategoryFooterNews({
   slug,
   page = DEFAULT_PAGE,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -727,7 +727,7 @@ export async function findCategoryBottomFeedNews({
   slug,
   page = DEFAULT_PAGE,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug: string;
@@ -760,7 +760,7 @@ export async function findNewsCount({
   user,
   slug,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;
@@ -778,7 +778,7 @@ export async function findNewsAttachments({
   user,
   slug,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;
@@ -818,7 +818,7 @@ export async function findNewsRelatedNews({
   user,
   slug,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;
@@ -858,10 +858,7 @@ export async function findNewsRelatedNews({
                   }
                 : {}),
             },
-            AND: [
-              await filterPrivate({user, client}),
-              getArchivedFilter({archived: false}),
-            ],
+            AND: [filterPrivate({user}), getArchivedFilter({archived: false})],
           },
           select: {
             title: true,
@@ -901,7 +898,7 @@ export async function findNewsByCategoryCount({
   user,
   slug,
 }: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user?: User;
   slug?: string;

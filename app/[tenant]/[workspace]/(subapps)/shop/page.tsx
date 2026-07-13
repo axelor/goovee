@@ -1,19 +1,22 @@
 import {Suspense} from 'react';
 import type {Cloned} from '@/types/util';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
-import {findWorkspace} from '@/orm/workspace';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {User, Category, ComputedProduct} from '@/types';
-import type {PortalWorkspace} from '@/orm/workspace';
+import type {Workspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
+import {getShopConfig, type ShopConfig} from '@/subapps/shop/common/orm/config';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {
   findCategories,
@@ -37,7 +40,7 @@ async function Categories({
 }: {
   client: Client;
   user: User | undefined;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
 }) {
   const categories = await findCategories({
     workspace,
@@ -50,24 +53,22 @@ async function Categories({
   return <ProductCategories categories={parentcategories} />;
 }
 
-async function Carousel({
-  workspace,
-}: {
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
-}) {
-  const carouselList = workspace?.config?.carouselList;
-
-  return <HomeCarousel images={carouselList} />;
+async function Carousel({config}: {config: ShopConfig | Cloned<ShopConfig>}) {
+  return <HomeCarousel images={clone(config?.carouselList)} />;
 }
 
 async function Featured({
   client,
+  config,
+  workspaceConfig,
   user,
   workspace,
 }: {
   client: Client;
+  config: TenantConfig;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user: User | undefined;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
 }) {
   const featuredCategories = (await findFeaturedCategories({
     workspace: workspace!,
@@ -80,8 +81,10 @@ async function Featured({
       const res = await findProducts({
         ids: category.productList.map(p => p.id),
         workspace: workspace!,
+        workspaceConfig,
         user,
         client,
+        config,
         categoryids: [category.id],
       }).then(clone);
 
@@ -91,54 +94,81 @@ async function Featured({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config: workspaceConfig,
     client,
   });
 
   return (
     <FeaturedCategories
       categories={featuredCategories}
-      workspace={workspace}
+      config={clone(workspaceConfig)}
       hidePriceAndPurchase={hidePriceAndPurchase}
     />
   );
 }
 
 async function Shop({params}: {params: {tenant: string; workspace: string}}) {
-  const {tenant: tenantId} = params;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: true,
+  });
 
-  if (!workspace) {
-    return notFound();
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
   }
+
+  const {user} = access;
+  const {client} = access.tenant;
+  const {config} = access.tenant;
+
+  const workspaceConfig = await getShopConfig(
+    access.workspace.config.id,
+    client,
+  );
+  if (!workspaceConfig) return notFound();
 
   return (
     <div>
       <div className="relative">
         <Suspense fallback={<CategoriesSkeleton />}>
-          <Categories workspace={workspace} user={user} client={client} />
+          <Categories
+            workspace={access.workspace}
+            user={user}
+            client={client}
+          />
         </Suspense>
       </div>
       <Suspense fallback={<CarouselSkeleton />}>
-        <Carousel workspace={workspace} />
+        <Carousel config={workspaceConfig} />
       </Suspense>
       <div className="container flex flex-col gap-6 mx-auto px-2 mb-4">
         <Suspense fallback={<FeaturedCategoriesSkeleton />}>
-          <Featured workspace={workspace} user={user} client={client} />
+          <Featured
+            workspace={access.workspace}
+            workspaceConfig={workspaceConfig}
+            user={user}
+            client={client}
+            config={config}
+          />
         </Suspense>
       </div>
     </div>

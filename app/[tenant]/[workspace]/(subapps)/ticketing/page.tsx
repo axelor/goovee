@@ -1,7 +1,7 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 
 // ---- CORE IMPORTS ---- //
-import {IMAGE_URL, SUBAPP_CODES} from '@/constants';
+import {IMAGE_URL, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import type {OverlayColor} from '@/types';
 import {t} from '@/locale/server';
 import {HeroSearch} from '@/ui/components';
@@ -17,8 +17,11 @@ import {
 import {cn} from '@/utils/css';
 import {workspacePathname} from '@/utils/workspace';
 import {Link} from '@/ui/components/link';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {getTicketingConfig} from './common/orm/config';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {getPages, getSkip} from '@/utils/pagination';
 
@@ -26,7 +29,6 @@ import {getPages, getSkip} from '@/utils/pagination';
 import {formatNumber} from '@/locale/server/formatters';
 import {findProjectsWithTaskCount} from './common/orm/projects';
 import {getPaginationButtons} from '@/utils/pagination';
-import {ensureAuth} from './common/utils/auth-helper';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -37,20 +39,38 @@ export default async function Page(props: {
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const {limit = 8, page = 1} = searchParams;
-  const {error, auth, forceLogin} = await ensureAuth(workspaceURL, tenant);
-  if (forceLogin) {
-    redirect(
-      getLoginURL({
-        callbackurl: `${workspaceURI}/${SUBAPP_CODES.ticketing}`,
-        workspaceURI,
-        tenant,
-      }),
-    );
-  }
-  if (error) notFound();
 
-  const {workspace, user, subapp} = auth;
-  const {client} = auth.tenant;
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.ticketing,
+    url: workspaceURL,
+    tenantId: tenant,
+    allowGuest: false,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {user, subapp} = access;
+  const {client} = access.tenant;
+
+  const config = await getTicketingConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
 
   const projects = await findProjectsWithTaskCount({
     take: +limit,
@@ -58,7 +78,7 @@ export default async function Page(props: {
     client,
     user,
     subapp,
-    workspace,
+    workspace: access.workspace,
   });
 
   const pages = getPages(projects, limit);
@@ -69,7 +89,7 @@ export default async function Page(props: {
     <h3>{await t('No projects found')}</h3>;
   }
 
-  const imageURL = workspace.config.ticketHeroBgImage?.id
+  const imageURL = config.ticketHeroBgImage?.id
     ? withBasePath(
         `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/hero/background`,
       )
@@ -78,20 +98,17 @@ export default async function Page(props: {
   return (
     <>
       <HeroSearch
-        title={workspace.config.ticketHeroTitle || (await t('app-ticketing'))}
+        title={config.ticketHeroTitle || (await t('app-ticketing'))}
         description={
-          workspace.config.ticketHeroDescription ||
+          config.ticketHeroDescription ||
           (await t(
             'Mi eget leo viverra cras pharetra enim viverra. Ac at non pretium etiam viverra. Ac at non pretium etiam',
           ))
         }
         background={
-          (workspace.config.ticketHeroOverlayColorSelect as OverlayColor) ||
-          'default'
+          (config.ticketHeroOverlayColorSelect as OverlayColor) || 'default'
         }
-        blendMode={
-          workspace.config.ticketHeroOverlayColorSelect ? 'overlay' : 'normal'
-        }
+        blendMode={config.ticketHeroOverlayColorSelect ? 'overlay' : 'normal'}
         image={imageURL}
       />
       <div className="container py-6 space-y-6">

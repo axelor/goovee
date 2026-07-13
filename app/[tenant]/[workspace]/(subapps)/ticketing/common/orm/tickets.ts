@@ -1,9 +1,8 @@
 import type {Entity, Payload, SelectOptions, UpdateArgs} from '@goovee/orm';
 import type {ID} from '@/types';
-import axios from 'axios';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSHeaders} from '@/tenant/auth';
+import {aosClient, AOSError} from '@/service';
 import {type Track} from '@/comments';
 import {ORDER_BY} from '@/constants';
 import type {AOSProjectTask} from '@/goovee/.generated/models';
@@ -17,7 +16,6 @@ import {
   ASSIGNMENT,
   INVOICING_TYPE,
   TYPE_SELECT,
-  VERSION_MISMATCH_CAUSE_CLASS,
   VERSION_MISMATCH_ERROR,
 } from '../constants';
 import type {
@@ -330,8 +328,6 @@ export async function updateTicket({
 
     const {aos} = tenant.config;
 
-    const ws = `${aos.url}/ws/rest/com.axelor.apps.project.db.ProjectTask`;
-
     const toUpdate = {
       ...(category && {projectTaskCategory: {id: category}}),
       ...(priority && {priority: {id: priority}}),
@@ -344,28 +340,22 @@ export async function updateTicket({
       throw new Error(await t('Nothing to update'));
     }
 
-    const res = await axios
-      .post(
-        ws,
-        {
-          data: {
-            id,
-            version,
-            ...toUpdate,
-          },
-          fields: ['project'],
-        },
-        {headers: getAOSHeaders(aos)},
-      )
-      .then(({data}) => data);
-
-    if (!res.data || res?.status === -1) {
-      if (res.data?.causeClass === VERSION_MISMATCH_CAUSE_CLASS) {
-        const e = new Error(res.data.message);
-        e.name = VERSION_MISMATCH_ERROR;
-        throw e;
+    try {
+      await aosClient(aos).save(
+        'com.axelor.apps.project.db.ProjectTask',
+        {id, version, ...toUpdate},
+        {fields: ['project']},
+      );
+    } catch (err) {
+      if (err instanceof AOSError) {
+        if (err.isConcurrentUpdate) {
+          const mismatch = new Error(err.message);
+          mismatch.name = VERSION_MISMATCH_ERROR;
+          throw mismatch;
+        }
+        throw new Error(await t('Failed to update ticket'));
       }
-      throw new Error(await t('Failed to update ticket'));
+      throw err;
     }
 
     newTicket = await client.aOSProjectTask.findOne({

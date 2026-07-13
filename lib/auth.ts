@@ -264,6 +264,7 @@ export const auth = betterAuth({
         simpleFullName = '',
         isContact,
         mainPartner,
+        partnerCategory,
         localization,
         picture,
       } = partner;
@@ -276,6 +277,9 @@ export const auth = betterAuth({
           isContact,
           simpleFullName,
           mainPartnerId: isContact ? mainPartner?.id : undefined,
+          partnerCategoryId: isContact
+            ? mainPartner?.partnerCategory?.id
+            : partnerCategory?.id,
           tenantId,
           locale: localization?.code,
           image:

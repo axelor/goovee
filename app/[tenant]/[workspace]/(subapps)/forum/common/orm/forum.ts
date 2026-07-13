@@ -6,7 +6,7 @@ import {ID, User} from '@/types';
 import type {PageInfo} from '@/types';
 import {clone, getPageInfo} from '@/utils';
 import {getSkip} from '@/utils/pagination';
-import {PortalWorkspace} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {filterPrivate} from '@/orm/filter';
 
 // ---- LOCAL IMPORTS ---- //
@@ -28,7 +28,7 @@ export async function findGroups({
   user,
   archived = false,
 }: {
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: Workspace['url'];
   client: Client;
   user?: User;
   archived?: boolean;
@@ -40,7 +40,7 @@ export async function findGroups({
       workspace: {
         url: workspaceURL,
       },
-      AND: [await filterPrivate({user, client}), getArchivedFilter({archived})],
+      AND: [filterPrivate({user}), getArchivedFilter({archived})],
     },
     select: {
       name: true,
@@ -63,7 +63,7 @@ export async function findGroupsByMembers({
   id: ID | null;
   searchKey?: string;
   orderBy?: Record<string, unknown>;
-  workspaceID: PortalWorkspace['id'];
+  workspaceID: Workspace['id'];
   client: Client;
   user?: User;
   archived?: boolean;
@@ -76,7 +76,7 @@ export async function findGroupsByMembers({
     },
     forumGroup: {
       workspace: {id: workspaceID},
-      AND: [await filterPrivate({user, client}), getArchivedFilter({archived})],
+      AND: [filterPrivate({user}), getArchivedFilter({archived})],
       ...(searchKey ? {name: {like: `%${searchKey}%`}} : {}),
     },
   };
@@ -152,7 +152,7 @@ export async function findPosts({
   search?: string | undefined;
   ids?: Array<Post['id']> | undefined;
   whereClause?: Record<string, unknown>;
-  workspaceID: PortalWorkspace['id'];
+  workspaceID: Workspace['id'];
   groupIDs?: ID[];
   client: Client;
   user?: User;
@@ -210,7 +210,7 @@ export async function findPosts({
       },
       ...(groupIDs.length ? {id: {in: groupIDs}} : {}),
       ...(whereClause.forumGroup as object | undefined),
-      AND: [await filterPrivate({client, user}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     ...(search
       ? {
@@ -346,7 +346,7 @@ export async function findGroupById(
       workspace: {
         id: workspaceID,
       },
-      AND: [await filterPrivate({user, client}), archivedFilter],
+      AND: [filterPrivate({user}), archivedFilter],
     },
     select: {
       name: true,
@@ -393,10 +393,7 @@ export async function findMemberGroupById({
           id: workspaceID,
         },
         id: groupID,
-        AND: [
-          await filterPrivate({user, client}),
-          getArchivedFilter({archived}),
-        ],
+        AND: [filterPrivate({user}), getArchivedFilter({archived})],
       },
     },
     select: {
@@ -413,7 +410,7 @@ export async function findRecentlyActivePosts({
   user,
   limit = 3,
 }: {
-  workspaceID: PortalWorkspace['id'];
+  workspaceID: Workspace['id'];
   client: Client;
   user?: User;
   limit?: number;

@@ -1,4 +1,4 @@
-import {PortalAppConfig} from '@/orm/workspace';
+import {PaymentConfig} from '@/orm/workspace';
 import {PaymentOption} from '@/types';
 import {HUBPISP_TRANSFER_TYPE} from './constants';
 import {HubPispTransferType} from './types';
@@ -8,7 +8,7 @@ export function generateRequestId(): string {
 }
 
 export const getHubPispTransferTypes = (
-  paymentOptions: PortalAppConfig['paymentOptionSet'] = [],
+  paymentOptions: PaymentConfig['paymentOptionSet'] = [],
 ): HubPispTransferType[] => {
   const raw = (paymentOptions || []).find(
     option => option.typeSelect === PaymentOption.hubpisp,

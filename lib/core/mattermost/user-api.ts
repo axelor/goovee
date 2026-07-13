@@ -5,7 +5,7 @@ import {
   isCreateMattermostUsersEnabled,
   getAosUrl,
 } from './utils';
-import {getAOSHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import type {TenantConfig} from '@/tenant';
 import type {
   MattermostUser,
@@ -121,7 +121,6 @@ async function createMattermostUser(
       };
     }
 
-    const url = `${aosUrl}/ws/user/createUser`;
     const requestBody = {
       name: params.name,
       firstName: params.firstName,
@@ -130,11 +129,8 @@ async function createMattermostUser(
       version: 0,
     };
 
-    await axios.post(url, requestBody, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAOSHeaders(params.config.aos),
-      },
+    await aosClient(params.config.aos).request('ws/user/createUser', {
+      body: requestBody,
     });
 
     return {
@@ -145,7 +141,7 @@ async function createMattermostUser(
     return {
       success: false,
       error: error,
-      message: error.response?.data?.message || error.message,
+      message: error.message,
     };
   }
 }

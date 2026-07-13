@@ -1,14 +1,14 @@
-import axios from 'axios';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {getAOSHeaders} from '@/tenant/auth';
+import {aosClient} from '@/service';
 import {t} from '@/locale/server';
-import {PortalWorkspace} from '@/orm/workspace';
+import {Workspace} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
+import type {SuccessResponse} from '@/types/action';
 import type {CartInput, CartItemInput} from '@/subapps/shop/common/validators';
 import {computeTotal} from '@/utils/cart';
 import {TENANT_HEADER} from '@/proxy';
@@ -19,29 +19,38 @@ import {calculateAdvanceAmount} from '@/utils/payment';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct} from '@/subapps/shop/common/orm/product';
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {formatNumber} from '@/subapps/shop/common/utils/order';
 
 export async function createOrder({
   cart,
   workspace,
+  workspaceConfig,
   user,
   client,
   config,
   paymentModeId,
 }: {
   cart: CartInput;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   user: NonNullable<User>;
   client: Client;
   config: Tenant['config'];
   paymentModeId?: string;
-}) {
+}): Promise<SuccessResponse<string>> {
   const {aos} = config;
-  const ws = `${aos.url}/ws/portal/orders/order`;
 
   const computedProducts = await Promise.all(
     cart.items.map((i: CartItemInput) =>
-      findProduct({id: i.product, workspace, user, client}),
+      findProduct({
+        id: i.product,
+        workspace,
+        workspaceConfig,
+        user,
+        client,
+        config,
+      }),
     ),
   );
 
@@ -56,15 +65,19 @@ export async function createOrder({
     })),
   };
 
-  const {total} = computeTotal({cart: $cart, workspace, formatNumber});
+  const {total} = computeTotal({
+    cart: $cart,
+    config: workspaceConfig,
+    formatNumber,
+  });
 
   const {id, isContact, mainPartnerId} = user;
   const partnerId = isContact && mainPartnerId ? mainPartnerId : id;
   const contactId = isContact && mainPartnerId ? id : undefined;
 
   const {invoicingAddress, deliveryAddress} = cart;
-  const payInAdvance = workspace.config?.payInAdvance;
-  const advancePaymentPercentage = workspace.config?.advancePaymentPercentage;
+  const payInAdvance = workspaceConfig?.payInAdvance;
+  const advancePaymentPercentage = workspaceConfig?.advancePaymentPercentage;
 
   const paidAmount =
     payInAdvance && Number(advancePaymentPercentage) > 0
@@ -75,7 +88,7 @@ export async function createOrder({
         }).toString()
       : Number(total).toString();
 
-  const isAtiPricing = workspace?.config?.mainPrice === MAIN_PRICE.ATI;
+  const isAtiPricing = workspaceConfig?.mainPrice === MAIN_PRICE.ATI;
 
   const payload = {
     partnerId,
@@ -101,28 +114,32 @@ export async function createOrder({
     paymentModeId,
   };
 
-  const res = await axios.post(ws, payload, {
-    headers: getAOSHeaders(aos),
-  });
+  const res = await aosClient(aos).request<{
+    status?: number;
+    message?: string;
+    data?: string;
+  }>('ws/portal/orders/order', {body: payload});
 
-  if (res?.data?.status === -1) {
+  if (res?.status === -1) {
     throw new Error(
-      res?.data?.message
-        ? await t(res.data.message)
+      res?.message
+        ? await t(res.message)
         : await t('Order creation failed. Please try again.'),
     );
   }
 
-  return res?.data;
+  return {success: true, data: res.data ?? ''};
 }
 
 export async function requestOrder({
   cart,
   workspace,
+  workspaceConfig,
   type = 'order',
 }: {
   cart: CartInput;
-  workspace: PortalWorkspace | Cloned<PortalWorkspace>;
+  workspace: Workspace | Cloned<Workspace>;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   type?: 'quotation' | 'order';
 }) {
   const tenantId = (await headers()).get(TENANT_HEADER);
@@ -138,20 +155,25 @@ export async function requestOrder({
   if (!tenant?.config?.aos?.url) return null;
 
   const {aos} = tenant.config;
-  const {client} = tenant;
-
-  const ws = `${aos.url}/ws/portal/orders/${type}`;
+  const {client, config} = tenant;
 
   const session = await getSession();
   const user = session?.user;
 
-  if (!(session && workspace && workspace.config)) return null;
+  if (!(session && workspace && workspaceConfig)) return null;
 
   try {
     const computedProducts = (
       await Promise.all(
         cart.items.map(i =>
-          findProduct({id: i.product, workspace, user, client}),
+          findProduct({
+            id: i.product,
+            workspace,
+            workspaceConfig,
+            user,
+            client,
+            config,
+          }),
         ),
       )
     ).filter(Boolean);
@@ -169,7 +191,11 @@ export async function requestOrder({
       ],
     };
 
-    const {total} = computeTotal({cart: $cart, workspace, formatNumber});
+    const {total} = computeTotal({
+      cart: $cart,
+      config: workspaceConfig,
+      formatNumber,
+    });
 
     let partnerId, contactId;
 
@@ -183,7 +209,7 @@ export async function requestOrder({
       }
     }
     const {invoicingAddress, deliveryAddress} = cart;
-    const isAtiPricing = workspace?.config?.mainPrice === MAIN_PRICE.ATI;
+    const isAtiPricing = workspaceConfig?.mainPrice === MAIN_PRICE.ATI;
 
     const payload = {
       partnerId,
@@ -207,15 +233,15 @@ export async function requestOrder({
       deliveryPartnerAddressId: deliveryAddress,
     };
 
-    const res = await axios.post(ws, payload, {
-      headers: getAOSHeaders(aos),
-    });
+    const res = await aosClient(aos).request<
+      {status?: number} & Record<string, unknown>
+    >(`ws/portal/orders/${type}`, {body: payload});
 
-    if (res?.data?.status === -1) {
+    if (res?.status === -1) {
       return null;
     }
 
-    return res?.data;
+    return res;
   } catch (err) {
     console.error(err);
     return null;

@@ -1,17 +1,19 @@
 import {Suspense} from 'react';
-import {notFound, redirect} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {findSubappAccess} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {SUBAPP_CODES} from '@/constants';
+import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {workspacePathname} from '@/utils/workspace';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
 import {CheckoutSkeleton} from '@/subapps/shop/common/ui/components';
+import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 async function Checkout({
@@ -19,24 +21,41 @@ async function Checkout({
 }: {
   params: {tenant: string; workspace: string};
 }) {
-  const {tenant: tenantId} = params;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const session = await getSession();
-  const user = session?.user;
-
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.shop,
     url: workspaceURL,
-    client,
-  }).then(clone);
+    tenantId: tenant,
+    allowGuest: false,
+  });
 
-  if (!workspace?.config?.confirmOrder) {
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {user} = access;
+  const {client} = access.tenant;
+
+  const config = await getShopConfig(access.workspace.config.id, client);
+  if (!config) return notFound();
+
+  if (!config?.confirmOrder) {
     redirect(`${workspaceURI}/shop/cart`);
   }
 
@@ -49,7 +68,7 @@ async function Checkout({
 
   const hidePriceAndPurchase = await shouldHidePricesAndPurchase({
     user,
-    workspace,
+    config,
     client,
   });
 
@@ -57,9 +76,9 @@ async function Checkout({
 
   return (
     <Content
-      workspace={workspace}
-      orderSubapp={orderSubapp}
-      tenant={tenantId}
+      config={clone(config)}
+      orderSubapp={clone(orderSubapp)}
+      tenant={tenant}
     />
   );
 }

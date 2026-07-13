@@ -10,7 +10,6 @@ import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {ErrorResponse, SuccessResponse} from '@/types/action';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import type {PortalWorkspace} from '@/orm/workspace';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 import {PaymentUpdateStatus} from '@/lib/core/payment/sse';
 
@@ -26,13 +25,14 @@ import {
   validatePayboxPayment,
   validateStripePayment,
 } from '@/subapps/invoices/common/actions';
+import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import {Invoice} from '@/subapps/invoices/common/types/invoices';
 import {INVOICE_PAYMENT_OPTIONS} from '@/subapps/invoices/common/constants/invoices';
 import {SUBAPP_CODES} from '@/constants';
 import {Cloned} from '@/types/util';
 
 export function InvoicePayments({
-  workspace,
+  config,
   invoice,
   amount,
   paymentType,
@@ -41,7 +41,7 @@ export function InvoicePayments({
   token,
   onPaymentUpdate,
 }: {
-  workspace: PortalWorkspace;
+  config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoice: Cloned<Invoice>;
   amount: string;
   paymentType: INVOICE_PAYMENT_OPTIONS | null;
@@ -50,8 +50,7 @@ export function InvoicePayments({
   token?: string;
   onPaymentUpdate?: (status: PaymentUpdateStatus) => void;
 }) {
-  const workspaceURL = workspace?.url;
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
 
   const router = useRouter();
   const {toast} = useToast();
@@ -142,7 +141,7 @@ export function InvoicePayments({
   return (
     <Payments
       disabled={!Number(amount)}
-      workspace={workspace}
+      config={config}
       onValidate={async () => {
         const isValid = await handleInvoiceValidation();
 

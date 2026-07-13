@@ -21,11 +21,11 @@ import {
 import {findWorkspace} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
 import {SEARCH_PARAMS} from '@/constants';
-import type {PortalWorkspace} from '@/orm/workspace';
 import {getPartnerId} from '@/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import {getAccountConfig} from '../../../common/orm/config';
 import {inviteTemplate} from '../../../common/constants/template';
 import {
   findInviteForEmail,
@@ -117,7 +117,7 @@ export async function sendInvites({
   role,
   apps,
 }: {
-  workspaceURL: PortalWorkspace['url'];
+  workspaceURL: string;
   workspaceURI: string;
   emails: string;
   role: Role;
@@ -159,7 +159,13 @@ export async function sendInvites({
     return error(await t('Bad request'));
   }
 
-  if (!workspace.config?.canInviteMembers) {
+  const config = await getAccountConfig(workspace.config.id, client);
+
+  if (!config) {
+    return error(await t('Bad request'));
+  }
+
+  if (!config.canInviteMembers) {
     return error(await t('Unauthorized'));
   }
 
@@ -219,8 +225,8 @@ export async function sendInvites({
 
   let mailConfig: any;
 
-  if (workspace?.config?.invitationTemplateList?.length) {
-    const {invitationTemplateList} = workspace.config;
+  if (config.invitationTemplateList?.length) {
+    const {invitationTemplateList} = config;
     const localization = partner?.localization?.code;
 
     let template =
@@ -298,7 +304,7 @@ export async function sendInvites({
 
       const existingContact = await findContactByEmail(email, client);
 
-      if (workspace.config?.isExistingContactsOnly) {
+      if (config.isExistingContactsOnly) {
         if (!existingContact?.isContact) {
           emailsWithOutSamePartner.push(email);
           continue; // don't send invite to email who is not a contact

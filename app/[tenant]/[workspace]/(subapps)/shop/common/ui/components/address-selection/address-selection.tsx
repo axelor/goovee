@@ -35,7 +35,7 @@ export function AddressSelection({
   );
 
   const {cart, updateAddress} = useCart();
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceURL} = useWorkspace();
 
   const {
     invoicingAddress: cartInvoicingAddress,
@@ -46,28 +46,32 @@ export function AddressSelection({
     setLoading(true);
 
     const [delivery, invoicing] = await Promise.all([
-      cartDeliveryAddress ? findAddress(cartDeliveryAddress) : null,
-      cartInvoicingAddress ? findAddress(cartInvoicingAddress) : null,
+      cartDeliveryAddress
+        ? findAddress({id: cartDeliveryAddress, workspaceURL})
+        : null,
+      cartInvoicingAddress
+        ? findAddress({id: cartInvoicingAddress, workspaceURL})
+        : null,
     ]);
     if (delivery) setDeliveryAddress(delivery as unknown as PartnerAddress);
     if (invoicing) setInvoicingAddress(invoicing as unknown as PartnerAddress);
     setLoading(false);
-  }, [cartDeliveryAddress, cartInvoicingAddress]);
+  }, [cartDeliveryAddress, cartInvoicingAddress, workspaceURL]);
 
   const resolveDefaultAddresses = useCallback(async () => {
     setLoading(true);
 
     const getDeliveryAddress = async (): Promise<PartnerAddress | null> => {
-      const def = await findDefaultDelivery();
+      const def = await findDefaultDelivery({workspaceURL});
       if (def) return def as unknown as PartnerAddress;
-      const addresses = await fetchDeliveryAddresses();
+      const addresses = await fetchDeliveryAddresses({workspaceURL});
       return (addresses?.[0] ?? null) as unknown as PartnerAddress | null;
     };
 
     const getInvoicingAddress = async (): Promise<PartnerAddress | null> => {
-      const def = await findDefaultInvoicing();
+      const def = await findDefaultInvoicing({workspaceURL});
       if (def) return def as unknown as PartnerAddress;
-      const addresses = await fetchInvoicingAddresses();
+      const addresses = await fetchInvoicingAddresses({workspaceURL});
       return (addresses?.[0] ?? null) as unknown as PartnerAddress | null;
     };
 
@@ -95,7 +99,7 @@ export function AddressSelection({
     }
 
     setLoading(false);
-  }, [updateAddress]);
+  }, [updateAddress, workspaceURL]);
 
   useEffect(() => {
     if (cartDeliveryAddress && cartInvoicingAddress) {

@@ -2,16 +2,18 @@ import {NextRequest, NextResponse} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {RELATED_MODELS, SUBAPP_CODES} from '@/constants';
-import {getSession} from '@/lib/core/auth';
-import {manager} from '@/tenant';
-import {findSubappAccess, findWorkspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {ensureTokenAccess} from '@/lib/core/access/ensure-token-access';
+import {accessStatus} from '@/lib/core/access/denial';
 import {findLatestDMSFileByName, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {PartnerKey, User} from '@/types';
+import {PartnerKey, type User} from '@/types';
+import type {Client} from '@/goovee/.generated/client';
 
 // ---- LOCAL IMPORTS ---- //
 import {findInvoice} from '@/subapps/invoices/common/orm/invoices';
+import type {Invoice} from '@/subapps/invoices/common/types/invoices';
 
 export async function GET(
   request: NextRequest,
@@ -28,68 +30,72 @@ export async function GET(
   const {'invoice-id': invoiceId} = params;
   const token = request.nextUrl.searchParams.get('token') ?? undefined;
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    return new NextResponse('Bad Request', {status: 400});
-  }
-  const {client} = tenant;
+  let client: Client;
+  let storage: string | undefined | null;
+  let invoice: Invoice | null;
+  let fileAccess: {skipUserCheck: true} | {user: User};
 
-  let invoicesWhereClause = {};
-  let user: User | undefined;
-
-  if (!token) {
-    const session = await getSession();
-    user = session?.user;
-
-    if (!user) {
-      return new NextResponse('Unauthorized', {status: 401});
-    }
-
-    const subapp = await findSubappAccess({
-      code: SUBAPP_CODES.invoices,
-      user,
+  if (token) {
+    /* Token path: the token is fused into findInvoice, which is what authorizes
+       this specific invoice; ensureTokenAccess only resolves the workspace. */
+    const access = await ensureTokenAccess({
       url: workspaceURL,
+      tenantId,
+      token,
+    });
+    if (!access.ok) {
+      return new NextResponse('Not found', {
+        status: accessStatus(access.reason),
+      });
+    }
+    client = access.tenant.client;
+    storage = access.tenant.config.aos.storage;
+    invoice = await findInvoice({
+      id: invoiceId,
+      token: access.token,
+      workspaceURL,
+      tenantId,
       client,
     });
-
-    if (!subapp?.isInstalled) {
-      return new NextResponse('Unauthorized', {status: 401});
+    fileAccess = {skipUserCheck: true};
+  } else {
+    const access = await ensureAccess({
+      code: SUBAPP_CODES.invoices,
+      url: workspaceURL,
+      tenantId,
+      allowGuest: false,
+    });
+    if (!access.ok) {
+      return new NextResponse('Unauthorized', {
+        status: accessStatus(access.reason),
+      });
     }
-
-    invoicesWhereClause = getWhereClauseForEntity({
-      user,
-      role: subapp.role,
-      isContactAdmin: subapp.isContactAdmin,
+    client = access.tenant.client;
+    storage = access.tenant.config.aos.storage;
+    const invoicesWhereClause = getWhereClauseForEntity({
+      user: access.user,
+      role: access.subapp.role,
+      isContactAdmin: access.subapp.isContactAdmin,
       partnerKey: PartnerKey.PARTNER,
     });
+    invoice = await findInvoice({
+      id: invoiceId,
+      params: {where: invoicesWhereClause},
+      workspaceURL,
+      tenantId,
+      client,
+    });
+    fileAccess = {user: access.user};
   }
-
-  const workspace = await findWorkspace({
-    url: workspaceURL,
-    client,
-    user,
-  });
-
-  if (!workspace) {
-    return new NextResponse('Invalid workspace', {status: 401});
-  }
-
-  const invoice = await findInvoice({
-    id: invoiceId,
-    ...(token ? {token} : {params: {where: invoicesWhereClause}}),
-    workspaceURL,
-    tenantId,
-    client,
-  });
 
   if (!invoice) {
     return new NextResponse('Invoice not found', {status: 404});
   }
 
   const file = await findLatestDMSFileByName({
-    client: tenant.client,
-    storage: tenant.config.aos.storage,
-    ...(token ? {skipUserCheck: true} : {user}),
+    client,
+    storage,
+    ...fileAccess,
     relatedId: invoiceId,
     relatedModel: RELATED_MODELS.INVOICE,
     name: invoice.invoiceId || '',
