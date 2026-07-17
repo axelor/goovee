@@ -93,6 +93,15 @@ export const findInvoices = async ({
         currency: currencySymbol,
         type: 'DECIMAL',
       }),
+      amountRemaining: {
+        value: amountRemaining,
+        symbol: currencySymbol,
+        formattedValue: await formatNumber(String(amountRemaining ?? 0), {
+          scale,
+          currency: currencySymbol,
+          type: 'DECIMAL',
+        }),
+      },
     });
   }
 
@@ -161,6 +170,7 @@ export const findInvoice = async ({
             country: {
               name: true,
               alpha2Code: true,
+              numericCode: true,
             },
           },
           partner: {
@@ -168,8 +178,8 @@ export const findInvoice = async ({
           },
         },
         partner: {
-          firstName: true,
           simpleFullName: true,
+          firstName: true,
           fixedPhone: true,
           emailAddress: {
             address: true,
