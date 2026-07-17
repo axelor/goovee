@@ -67,6 +67,11 @@ export interface Product extends Model {
     outOfStock: boolean;
     showMessage: boolean;
   };
+  portalCategorySet?: Array<{
+    id: ID;
+    name?: string | null;
+    slug?: string | null;
+  }>;
 }
 
 export interface Currency extends Model {

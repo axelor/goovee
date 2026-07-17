@@ -507,6 +507,61 @@ export async function updateDefaultInvoicingAddress({
   }
 }
 
+/**
+ * Smart address book — assign a partner address as the default for a given
+ * kind. Ensures the address carries the matching type flag (so it stays
+ * eligible, e.g. for checkout selection), then reuses the per-kind default
+ * updater which enforces a single default and handles the shared
+ * `isDefaultAddr` flag across types.
+ */
+export async function assignDefaultAddress({
+  partnerId,
+  partnerAddressId,
+  kind,
+  client,
+}: {
+  partnerId: Partner['id'];
+  partnerAddressId: PartnerAddress['id'];
+  kind: 'invoicing' | 'delivery';
+  client: Client;
+}) {
+  if (!(partnerId && partnerAddressId)) return null;
+
+  const partnerAddress = await client.aOSPartnerAddress.findOne({
+    where: {id: partnerAddressId, partner: {id: partnerId}},
+    select: {isInvoicingAddr: true, isDeliveryAddr: true},
+  });
+
+  if (!partnerAddress) return null;
+
+  const typeField = kind === 'invoicing' ? 'isInvoicingAddr' : 'isDeliveryAddr';
+
+  if (!partnerAddress[typeField]) {
+    await client.aOSPartnerAddress.update({
+      data: {
+        id: partnerAddress.id,
+        version: partnerAddress.version,
+        [typeField]: true,
+      },
+      select: {id: true},
+    });
+  }
+
+  return kind === 'invoicing'
+    ? updateDefaultInvoicingAddress({
+        partnerAddressId,
+        partnerId,
+        client,
+        isDefault: true,
+      })
+    : updateDefaultDeliveryAddress({
+        partnerAddressId,
+        partnerId,
+        client,
+        isDefault: true,
+      });
+}
+
 export async function findCountries(client: Client) {
   const countries = await client.aOSCountry.find({
     select: {name: true},
