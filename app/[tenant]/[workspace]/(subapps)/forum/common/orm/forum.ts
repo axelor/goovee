@@ -253,6 +253,7 @@ export async function findPosts({
           },
         },
         author: {
+          id: true,
           simpleFullName: true,
           picture: {
             fileName: true,
@@ -262,6 +263,8 @@ export async function findPosts({
             sizeText: true,
           },
         },
+        bestReply: {id: true},
+        statusSelect: true,
         createdOn: true,
       },
     })
@@ -496,4 +499,70 @@ export async function findRecentlyActivePosts({
   );
 
   return posts as RecentlyActivePost[];
+}
+
+/**
+ * Reply (comment) counts per post. Comments are mail_message rows related to
+ * ForumPost (top-level, non-empty note) — same definition used elsewhere.
+ * Returns a map keyed by post id.
+ */
+export async function findCommentCounts({
+  postIds,
+  client,
+}: {
+  postIds: Array<string | number>;
+  client: Client;
+}): Promise<Record<string, number>> {
+  if (!postIds?.length) return {};
+
+  const placeholders = postIds.map((_, i) => `$${i + 1}`).join(', ');
+
+  const rows: any = await client
+    .$raw(
+      `
+      SELECT m.related_id AS "postId", COUNT(*)::int AS "count"
+      FROM mail_message m
+      WHERE m.related_model = 'com.axelor.apps.portal.db.ForumPost'
+        AND m.related_id IN (${placeholders})
+        AND m.parent_mail_message IS NULL
+        AND m.note IS NOT NULL AND m.note <> ''
+      GROUP BY m.related_id
+      `,
+      ...postIds.map(id => Number(id)),
+    )
+    .catch(() => []);
+
+  const map: Record<string, number> = {};
+  (rows || []).forEach((r: any) => {
+    map[String(r.postId)] = Number(r.count) || 0;
+  });
+  return map;
+}
+
+/**
+ * Real member + post counts for a forum group (used in the discussion-detail
+ * sidebar group card).
+ */
+export async function findGroupMeta({
+  groupId,
+  client,
+}: {
+  groupId?: ID;
+  client: Client;
+}): Promise<{memberCount: number; postCount: number}> {
+  if (!groupId) return {memberCount: 0, postCount: 0};
+
+  const [memberCount, postCount] = await Promise.all([
+    client.aOSPortalForumGroupMember
+      .count({where: {forumGroup: {id: groupId}}})
+      .catch(() => 0),
+    client.aOSPortalForumPost
+      .count({where: {forumGroup: {id: groupId}}})
+      .catch(() => 0),
+  ]);
+
+  return {
+    memberCount: Number(memberCount) || 0,
+    postCount: Number(postCount) || 0,
+  };
 }
