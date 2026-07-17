@@ -15,7 +15,7 @@ import {PartnerKey} from '@/types';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {TableSkeleton} from '@/ui/components/table';
+import {SplitViewListSkeleton} from '@/ui/components/record-skeleton';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
@@ -104,7 +104,7 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   return (
-    <Suspense fallback={<TableSkeleton columnCount={3} rowCount={10} />}>
+    <Suspense fallback={<SplitViewListSkeleton />}>
       <Quotations params={params} searchParams={searchParams} />
     </Suspense>
   );

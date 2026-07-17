@@ -5,7 +5,7 @@ import {memo, useEffect, useMemo, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {DocViewer, Separator} from '@/ui/components';
+import {DocViewer} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {InvoiceProps} from '@/subapps/invoices/common/types/invoices';
@@ -63,13 +63,17 @@ export const Invoice = memo(({invoiceId, downloadURL}: InvoiceProps) => {
   }, [docFile]);
 
   return (
-    <div className="flex flex-col basis-full bg-card text-card-foreground px-6 py-4 gap-4 rounded-lg">
-      <h4 className="text-xl font-medium mb-0">{i18n.t('Invoice')}</h4>
-      <Separator />
-      {
-        docFile && <DocViewer documents={documents} />
-        // BUG: if the DocViewer is re rendered, document is not displayed, memoizing the Invoice component fixes the issue
-      }
+    <div className="flex flex-col basis-full">
+      <header className="px-6 py-4 border-b border-ink-100 bg-white">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400 mb-1">
+          {i18n.t('Document')}
+        </p>
+        <h2 className="text-lg font-bold text-ink-900">{i18n.t('Invoice')}</h2>
+      </header>
+      <div className="bg-ink-50 min-h-[600px]">
+        {docFile && <DocViewer documents={documents} />}
+        {/* BUG: if the DocViewer is re rendered, document is not displayed, memoizing the Invoice component fixes the issue */}
+      </div>
     </div>
   );
 });

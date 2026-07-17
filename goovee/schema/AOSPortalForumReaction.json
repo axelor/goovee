@@ -1,0 +1,26 @@
+{
+  "name": "AOSPortalForumReaction",
+  "table": "portal_forum_reaction",
+  "synchronize": false,
+  "fields": [
+    {
+      "name": "reactionSelect",
+      "type": "String"
+    },
+    {
+      "name": "post",
+      "type": "ManyToOne",
+      "target": "AOSPortalForumPost"
+    },
+    {
+      "name": "reactionComment",
+      "type": "ManyToOne",
+      "target": "AOSMailMessage"
+    },
+    {
+      "name": "author",
+      "type": "ManyToOne",
+      "target": "AOSPartner"
+    }
+  ]
+}

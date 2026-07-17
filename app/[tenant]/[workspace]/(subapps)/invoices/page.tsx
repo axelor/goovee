@@ -9,7 +9,7 @@ import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {SEARCH_PARAMS, SUBAPP_CODES, DEFAULT_LIMIT} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {TableSkeleton} from '@/ui/components/table';
+import {SplitViewListSkeleton} from '@/ui/components/record-skeleton';
 import {PartnerKey} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -112,7 +112,7 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   return (
-    <Suspense fallback={<TableSkeleton />}>
+    <Suspense fallback={<SplitViewListSkeleton />}>
       <Invoices params={params} searchParams={searchParams} />
     </Suspense>
   );

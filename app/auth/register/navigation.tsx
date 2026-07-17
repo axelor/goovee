@@ -1,14 +1,14 @@
 'use client';
 
-import Image from 'next/image';
 import {useSearchParams} from 'next/navigation';
+import {MdMailOutline} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {Button} from '@/ui/components/button';
-import {Separator} from '@/ui/components/separator';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
+
+// ---- LOCAL IMPORTS ---- //
+import {AuthShell, authButtonClass} from '../common/ui/auth-shell';
 
 export default function Navigation({
   showGoogleOauth,
@@ -19,51 +19,50 @@ export default function Navigation({
   const searchQuery = new URLSearchParams(searchParams).toString();
 
   return (
-    <div className="container space-y-6 mt-8 md:!w-3/4 xl:!w-1/2">
-      <h1 className="text-[2rem] font-semibold">{i18n.t('Sign Up')}</h1>
-      <div className="bg-white py-4 px-6 space-y-4">
-        <Link href={`/auth/register/email?${searchQuery}`} className="w-full">
-          <Button variant="success" className="w-full rounded-full">
-            {i18n.t('Sign Up with email')}
-          </Button>
-        </Link>
-        <p className="text-success">
-          {i18n.t('Already have an account')} ?{' '}
-          <Link href={`/auth/login?${searchQuery}`}>
-            <span className="underline">{i18n.t('Log In')}</span>
-          </Link>
+    <AuthShell>
+      <div className="mb-7">
+        <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink-900">
+          {i18n.t('Sign Up')}
+        </h2>
+        <p className="mt-1.5 text-sm text-ink-500">
+          {i18n.t('Create your account to access the portal')}
         </p>
+      </div>
+
+      <div className="flex flex-col gap-3.5">
+        <Link
+          href={`/auth/register/email?${searchQuery}`}
+          className={authButtonClass}>
+          <MdMailOutline className="size-[18px]" />
+          {i18n.t('Sign Up with email')}
+        </Link>
+
         {showGoogleOauth && (
           <>
-            <div className="flex items-center gap-4">
-              <div className="grow">
-                <Separator />
-              </div>
-              <h5 className="mb-0 font-medium text-[2rem]">{i18n.t('Or')}</h5>
-              <div className="grow">
-                <Separator />
-              </div>
+            <div className="relative my-1 text-center">
+              <div className="h-px bg-ink-100" />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[12px] text-ink-400">
+                {i18n.t('Or')}
+              </span>
             </div>
-            <Button
-              asChild
-              type="button"
-              variant="outline-success"
-              className="w-full rounded-full">
-              <Link href={`/auth/register/google?${searchQuery}`}>
-                <Image
-                  alt="Google"
-                  src={withBasePath('/images/google.svg')}
-                  height={24}
-                  width={24}
-                  className="me-2"
-                />
-
-                {i18n.t('Sign Up with Google')}
-              </Link>
-            </Button>
+            <Link
+              href={`/auth/register/google?${searchQuery}`}
+              className="inline-flex w-full items-center justify-center gap-2.5 rounded-[11px] border border-ink-150 bg-white px-4 py-3 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-25">
+              <span className="font-extrabold text-[#4285F4]">G</span>
+              {i18n.t('Sign Up with Google')}
+            </Link>
           </>
         )}
+
+        <div className="mt-1.5 text-center text-[13.5px] text-ink-500">
+          {i18n.t('Already have an account')} ?{' '}
+          <Link
+            href={`/auth/login?${searchQuery}`}
+            className="font-bold text-royal hover:underline">
+            {i18n.t('Log In')}
+          </Link>
+        </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }

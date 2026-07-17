@@ -6,14 +6,20 @@ import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {findSubappAccess} from '@/orm/workspace';
 import {SUBAPP_CODES} from '@/constants';
-import {PartnerKey, type Partner} from '@/types';
-import {findDeliveryAddresses, findInvoicingAddresses} from '@/orm/address';
+import {PartnerKey} from '@/types';
+import {
+  findAddresses,
+  findCountries,
+  findDeliveryAddresses,
+  findInvoicingAddresses,
+} from '@/orm/address';
 import {getWhereClauseForEntity} from '@/utils/filters';
 import {manager} from '@/tenant';
+import {findQuotation} from '@/subapps/quotations/common/orm/quotations';
 
 // ---- LOCAL IMPORTS ---- //
-import Content from './content';
-import {findQuotation} from '@/subapps/quotations/common/orm/quotations';
+import AddressesContent from './content';
+import {AddressBook} from './common/ui/components';
 
 interface PageParams {
   params: Promise<{id: string; tenant: string; workspace: string}>;
@@ -22,77 +28,6 @@ interface PageParams {
     checkout?: boolean;
     callbackURL?: string;
   }>;
-}
-
-async function fetchUser() {
-  const session = await getSession();
-  const user = session?.user;
-  if (!user) {
-    return null;
-  }
-  return {user, session};
-}
-
-async function fetchQuotationData(
-  quotationId: string,
-  tenantId: string,
-  params: {id: string; tenant: string; workspace: string},
-  user: any,
-) {
-  const {workspaceURL} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return null;
-  const {client} = tenant;
-
-  const subapp = await findSubappAccess({
-    code: SUBAPP_CODES.quotations,
-    user,
-    url: workspaceURL,
-    client,
-  });
-
-  if (!subapp) {
-    return null;
-  }
-
-  const {role, isContactAdmin} = subapp;
-  const where = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.CLIENT_PARTNER,
-  });
-
-  const quotation: any = await findQuotation({
-    id: quotationId,
-    client,
-    params: {where},
-    workspaceURL,
-  }).then(clone);
-
-  if (!quotation) {
-    return null;
-  }
-
-  return {
-    recordId: quotation.id,
-    address: {
-      invoicingAddress: quotation.mainInvoicingAddress,
-      deliveryAddress: quotation.deliveryAddress,
-    },
-  };
-}
-
-async function fetchAddresses(userId: Partner['id'], client: any) {
-  const deliveryAddresses = await findDeliveryAddresses(userId, client).then(
-    clone,
-  );
-  const invoicingAddresses = await findInvoicingAddresses(userId, client).then(
-    clone,
-  );
-
-  return {deliveryAddresses, invoicingAddresses};
 }
 
 export default async function Page(props: PageParams) {
@@ -105,55 +40,95 @@ export default async function Page(props: PageParams) {
     callbackURL,
   } = searchParams || {};
 
-  const userSession = await fetchUser();
-  if (!userSession) {
-    return notFound();
-  }
-  const {user} = userSession;
+  const session = await getSession();
+  const user = session?.user;
+  if (!user) return notFound();
 
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) return notFound();
   const {client} = tenant;
 
+  const {workspaceURL} = workspacePathname(params);
+  const userId = getPartnerId(user);
+
+  const fromQuotation = !!quotationId;
+  const fromCheckout = !!checkout;
+  const standalone = !fromQuotation && !fromCheckout;
+
+  // Standalone account tab → smart address book.
+  if (standalone) {
+    const [addresses, countries] = await Promise.all([
+      findAddresses(userId, client).then(clone),
+      findCountries(client).then(clone),
+    ]);
+
+    return (
+      <AddressBook
+        addresses={addresses || []}
+        countries={(countries as any) || []}
+      />
+    );
+  }
+
+  // Checkout / quotation → existing address selection flow.
   let data = {
-    recordId: null,
+    recordId: null as any,
     address: {invoicingAddress: null, deliveryAddress: null},
   };
 
   if (quotationId) {
-    const quotation = await fetchQuotationData(
-      quotationId,
-      tenantId,
-      params,
+    const subapp = await findSubappAccess({
+      code: SUBAPP_CODES.quotations,
       user,
-    );
-    if (!quotation) {
-      return notFound();
+      url: workspaceURL,
+      client,
+    });
+    if (subapp) {
+      const {role, isContactAdmin} = subapp;
+      const where = getWhereClauseForEntity({
+        user,
+        role,
+        isContactAdmin,
+        partnerKey: PartnerKey.CLIENT_PARTNER,
+      });
+      const quotation: any = await findQuotation({
+        id: quotationId,
+        client,
+        params: {where},
+        workspaceURL,
+      }).then(clone);
+      if (quotation) {
+        data = {
+          recordId: quotation.id,
+          address: {
+            invoicingAddress: quotation.mainInvoicingAddress,
+            deliveryAddress: quotation.deliveryAddress,
+          },
+        };
+      }
     }
-    data = quotation;
   }
 
-  const userId = getPartnerId(user);
-
-  const {deliveryAddresses, invoicingAddresses} = await fetchAddresses(
-    userId,
-    client,
-  );
-
-  const fromQuotation: boolean = !!quotationId;
-  const fromCheckout: boolean = checkout;
+  const [deliveryAddresses, invoicingAddresses, countries] = await Promise.all([
+    findDeliveryAddresses(userId, client).then(clone),
+    findInvoicingAddresses(userId, client).then(clone),
+    findCountries(client).then(clone),
+  ]);
 
   return (
-    <Content
-      quotation={{
-        id: data.recordId,
-        ...data.address,
-      }}
-      invoicingAddresses={invoicingAddresses}
-      deliveryAddresses={deliveryAddresses}
-      fromQuotation={fromQuotation}
-      fromCheckout={fromCheckout}
-      callbackURL={callbackURL}
-    />
+    <div className="flex flex-col gap-6">
+      <AddressesContent
+        quotation={{
+          id: data.recordId,
+          ...data.address,
+        }}
+        invoicingAddresses={invoicingAddresses}
+        deliveryAddresses={deliveryAddresses}
+        countries={(countries as any) || []}
+        fromQuotation={fromQuotation}
+        fromCheckout={fromCheckout}
+        callbackURL={callbackURL}
+      />
+    </div>
   );
 }

@@ -60,34 +60,34 @@ export const EventCard = ({event}: EventCardProps) => {
     htmlContent?.replace(/<img[^>]*>/g, '');
 
   return (
-    <Card className="p-2 overflow-hidden cursor-pointer rounded-2xl flex gap-6 h-fit border-none shadow-none ">
-      <div className="w-[150px] h-[150px] rounded-lg  flex-shrink-0 relative">
+    <Card className="p-4 overflow-hidden cursor-pointer rounded-xl flex gap-5 h-fit border border-ink-100 shadow-xs hover:shadow-soft-md transition-shadow bg-white">
+      <div className="w-[140px] h-[140px] rounded-lg flex-shrink-0 relative bg-ink-50 overflow-hidden">
         <Image
-          height={150}
-          width={150}
+          height={140}
+          width={140}
           alt="Event image"
-          className="rounded-lg w-[150px] h-[150px] object-cover"
+          className="rounded-lg w-[140px] h-[140px] object-cover"
           src={getListEventImageURL({event, workspaceURI})}
         />
       </div>
 
-      <div className="flex w-full gap-10 py-2">
+      <div className="flex w-full gap-6 py-1">
         <div
-          className={`flex flex-col flex-1 ${styles['event-details-container']}`}>
-          <CardHeader className="w-full p-0">
-            <CardTitle className="flex flex-col xs:flex-row items-start justify-between w-full ">
-              <p className="text-base font-semibold w-full flex justify-between">
+          className={`flex flex-col flex-1 gap-2 ${styles['event-details-container']}`}>
+          <CardHeader className="w-full p-0 gap-1">
+            <CardTitle className="flex items-start justify-between gap-3 w-full">
+              <p className="text-base font-bold text-ink-900 leading-snug line-clamp-2">
                 {event.eventTitle}
-                {event?.isRegistered && (
-                  <Badge
-                    variant="outline"
-                    className="text-[0.625rem] font-medium py-1 px-2 text-success border-success h-6 flex flex-none">
-                    {i18n.t('#Registered')}
-                  </Badge>
-                )}
               </p>
+              {event?.isRegistered && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] font-semibold py-0.5 px-2 text-mint-700 border-mint-200 bg-mint-50 h-fit flex-none">
+                  {i18n.t('#Registered')}
+                </Badge>
+              )}
             </CardTitle>
-            <CardDescription className="text-sm font-medium text-secondary">
+            <CardDescription className="text-xs font-medium text-ink-500 tabular-nums">
               {`${event.eventStartDateTime ? formatDateTime(event.eventStartDateTime, {dateFormat: 'MMMM D YYYY - ', timeFormat: 'h:mmA'}) : ''}
             ${event.eventEndDateTime && !event.eventAllDay ? i18n.t('to') : ''}
              ${
@@ -102,9 +102,9 @@ export const EventCard = ({event}: EventCardProps) => {
             </CardDescription>
             <BadgeList items={event.eventCategorySet} />
           </CardHeader>
-          <CardContent className="p-0 mt-1">
+          <CardContent className="p-0">
             <InnerHTML
-              className={`text-sm max-h-[6.375rem] w-full font-normal line-clamp-2 text-gray-dark overflow-hidden ${mainStyles['constrained-content']} prose`}
+              className={`text-sm w-full font-normal line-clamp-2 text-ink-500 overflow-hidden ${mainStyles['constrained-content']} prose`}
               content={
                 event?.eventDescription
                   ? stripImages(event.eventDescription)
@@ -113,9 +113,11 @@ export const EventCard = ({event}: EventCardProps) => {
             />
           </CardContent>
         </div>
-        <div className="flex-col hidden lg:flex items-center justify-center pr-2">
-          <Button className="bg-success-light hover:bg-success-light text-success hover:text-success h-10 w-10 p-0 rounded-lg">
-            <MdChevronRight className="h-6 w-6" />
+        <div className="flex-col hidden lg:flex items-center justify-center pr-1">
+          <Button
+            className="bg-royal-pale hover:bg-royal text-royal hover:text-white h-10 w-10 p-0 rounded-lg transition-colors"
+            aria-label={i18n.t('Open event')}>
+            <MdChevronRight className="h-5 w-5" />
           </Button>
         </div>
       </div>

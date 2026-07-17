@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the quotations sub-app",
+  "type": "change",
+  "description": "The quotations list and quotation detail views have been redesigned with the new design system, including a master-detail list layout and a status timeline covering the draft-to-order journey.",
+  "scope": ["quotations"]
+}

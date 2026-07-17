@@ -1205,11 +1205,11 @@ export async function up2payCreateOrder({
   }
 
   const billingInfo = {
-    firstName: $invoice.partner?.firstName || '',
-    lastName: $invoice.partner?.name || '',
-    addressLine1: $invoice.address?.addressl4 || '',
-    zipCode: $invoice.address?.zip || '',
-    city: $invoice.address?.city?.name || '',
+    firstName: $invoice?.partner?.firstName || '',
+    lastName: $invoice?.partner?.name || '',
+    addressLine1: $invoice?.address?.addressl4 || '',
+    zipCode: $invoice?.address?.zip || '',
+    city: $invoice?.address?.city?.name || '',
     // Up2Pay PBX_BILLING expects the ISO 3166-1 numeric country code (e.g. "250" for France), not the alpha-2 code.
     countryCode: $invoice?.address?.country?.numericCode || '',
   };
@@ -1375,6 +1375,7 @@ export async function initiatePispPayment({
       name: [$invoice?.partner?.firstName, $invoice?.partner?.name]
         .filter(Boolean)
         .join(' '),
+      email: pispEmail,
     };
     const currencyCode = $invoice.currency?.code || DEFAULT_CURRENCY_CODE;
     const response = await createHubPispPaymentLink({

@@ -129,6 +129,118 @@
     --palette-deeppurple: 262 52% 47%;
     --palette-deeppurple-light: 261 46% 84%;
     --palette-deeppurple-dark: 258 58% 42%;
+
+    /* ------------------------------------------------------------
+       New design tokens (additive — coexist with the legacy ones)
+       Royal Blue + Axelor Mint + Slate-tinted neutrals + statuses.
+       Used only by screens that have been refactored to the new
+       visual direction; legacy classes (bg-primary, bg-secondary,
+       bg-success, ...) keep their current meaning everywhere else.
+       ------------------------------------------------------------ */
+
+    /* Royal blue — CTAs, sidebar, accents */
+    --royal: 215 79% 40%; /* #1554b5 */
+    --royal-dark: 217 81% 30%; /* #0e3f8a */
+    --royal-light: 211 100% 75%; /* #7fb6ff */
+    --royal-pale: 213 73% 96%; /* #eef4fc */
+    --royal-border: 213 53% 86%; /* #c6d8f1 */
+
+    /* Mint (Axelor) — semantic success / delivery / payment */
+    --mint-50: 144 60% 96%; /* #effaf4 */
+    --mint-100: 142 64% 90%; /* #d6f3e2 */
+    --mint-200: 144 56% 79%; /* #aee6c8 */
+    --mint-300: 144 50% 66%; /* #7ed3a8 */
+    --mint-400: 147 46% 53%; /* #4ebd87 */
+    --mint-500: 148 56% 41%; /* #2ea36b */
+    --mint-600: 150 62% 32%; /* #1f8556 */
+    --mint-700: 151 60% 26%; /* #1a6a47 */
+    --mint-800: 152 57% 21%; /* #17533a */
+    --mint-900: 152 50% 16%; /* #143f2e */
+
+    /* Ink — slate-tinted neutrals (slightly cool) */
+    --ink-0: 0 0% 100%; /* #ffffff */
+    --ink-25: 210 14% 98%; /* #fafbfc */
+    --ink-50: 210 13% 96%; /* #f4f6f8 */
+    --ink-100: 214 14% 93%; /* #eaedf1 */
+    --ink-150: 213 14% 89%; /* #dde2e8 */
+    --ink-200: 213 14% 82%; /* #c8cfd8 */
+    --ink-300: 215 12% 68%; /* #a4adba */
+    --ink-400: 215 9% 53%; /* #7a8492 */
+    --ink-500: 217 12% 40%; /* #5a6472 */
+    --ink-600: 217 14% 30%; /* #404956 */
+    --ink-700: 217 16% 21%; /* #2d343f */
+    --ink-800: 213 21% 14%; /* #1c222b */
+    --ink-900: 216 28% 8%; /* #0f1319 */
+
+    /* Semantic status colors (bg / fg / dot) */
+    --status-pending-bg: 39 100% 94%; /* #fff4e0 */
+    --status-pending-fg: 38 100% 27%; /* #8a5300 */
+    --status-pending-dot: 36 82% 50%; /* #e89614 */
+
+    --status-confirmed-bg: 39 100% 94%;
+    --status-confirmed-fg: 38 100% 27%;
+    --status-confirmed-dot: 36 82% 50%;
+
+    --status-shipped-bg: 213 92% 94%; /* #e3effd */
+    --status-shipped-fg: 213 75% 40%; /* #1759b8 */
+    --status-shipped-dot: 213 75% 53%; /* #2d7ee0 */
+
+    --status-delivered-bg: 141 56% 90%; /* #d9f2e4 */
+    --status-delivered-fg: 148 65% 25%; /* #156a3f */
+    --status-delivered-dot: 148 56% 41%; /* #2ea36b */
+
+    --status-paid-bg: 141 56% 90%;
+    --status-paid-fg: 148 65% 25%;
+    --status-paid-dot: 148 56% 41%;
+
+    --status-accepted-bg: 141 56% 90%;
+    --status-accepted-fg: 148 65% 25%;
+    --status-accepted-dot: 148 56% 41%;
+
+    --status-cancelled-bg: 0 78% 95%; /* #fde6e6 */
+    --status-cancelled-fg: 2 65% 36%; /* #97231f */
+    --status-cancelled-dot: 0 60% 54%; /* #d04545 */
+
+    --status-unpaid-bg: 0 78% 95%;
+    --status-unpaid-fg: 2 65% 36%;
+    --status-unpaid-dot: 0 60% 54%;
+
+    --status-rejected-bg: 0 78% 95%;
+    --status-rejected-fg: 2 65% 36%;
+    --status-rejected-dot: 0 60% 54%;
+
+    --status-overdue-bg: 19 88% 91%; /* #fde0d3 */
+    --status-overdue-fg: 15 76% 27%; /* #7a2410 */
+    --status-overdue-dot: 12 77% 43%; /* #c63a18 */
+
+    --status-partial-bg: 39 100% 94%;
+    --status-partial-fg: 38 100% 27%;
+    --status-partial-dot: 36 82% 50%;
+
+    --status-proposal-bg: 39 100% 94%;
+    --status-proposal-fg: 38 100% 27%;
+    --status-proposal-dot: 36 82% 50%;
+
+    --status-draft-bg: 214 12% 95%; /* #eef0f3 */
+    --status-draft-fg: 216 16% 35%; /* #4a5567 */
+    --status-draft-dot: 213 11% 63%; /* #8a95a5 */
+
+    --status-expired-bg: 214 12% 95%;
+    --status-expired-fg: 216 16% 35%;
+    --status-expired-dot: 215 12% 68%;
+
+    --status-feedback-bg: 263 86% 95%; /* #f3eafe */
+    --status-feedback-fg: 266 56% 41%; /* #5c2ea3 */
+    --status-feedback-dot: 258 90% 66%; /* #8b5cf6 */
+
+    /* Multi-layer soft shadows */
+    --sh-xs: 0 1px 2px rgba(15, 19, 25, 0.04);
+    --sh-sm: 0 1px 2px rgba(15, 19, 25, 0.05), 0 1px 3px rgba(15, 19, 25, 0.04);
+    --sh-md: 0 2px 4px rgba(15, 19, 25, 0.04), 0 4px 12px rgba(15, 19, 25, 0.05);
+    --sh-lg: 0 4px 8px rgba(15, 19, 25, 0.04),
+      0 12px 28px rgba(15, 19, 25, 0.07);
+    --sh-xl: 0 8px 16px rgba(15, 19, 25, 0.06),
+      0 24px 48px rgba(15, 19, 25, 0.1);
   }
 
   .dark {

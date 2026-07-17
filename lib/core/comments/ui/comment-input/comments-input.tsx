@@ -71,6 +71,8 @@ type CommentProps = {
   className?: string;
   onSubmit: (props: CreateProps) => Promise<void>;
   autoFocus?: boolean;
+  /** Drops the input's own border/background so it can blend into a parent card. */
+  bare?: boolean;
 };
 
 export function CommentInput({
@@ -80,6 +82,7 @@ export function CommentInput({
   showAttachmentIcon = true,
   onSubmit,
   autoFocus = false,
+  bare = false,
 }: CommentProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,6 +196,7 @@ export function CommentInput({
                 <FormControl>
                   <TextArea
                     className={className}
+                    bare={bare}
                     autoFocus={autoFocus}
                     minHeight={32}
                     maxHeight={300}
@@ -223,8 +227,8 @@ export function CommentInput({
                         )}
                         <Button
                           type="submit"
-                          className="px-6 py-1.5 h-9 text-base font-medium"
-                          variant="success"
+                          className="px-5 py-1.5 h-9 text-sm font-semibold"
+                          variant="royal"
                           disabled={isSubmitting || disabled || isUploading}>
                           {i18n.t('Send')}
                         </Button>
@@ -329,19 +333,26 @@ export function CommentInput({
 
 const TextArea = forwardRef<
   AutosizeTextAreaRef,
-  AutosizeTextAreaProps & {endAdornment: ReactNode; dummyValue: string}
+  AutosizeTextAreaProps & {
+    endAdornment: ReactNode;
+    dummyValue: string;
+    bare?: boolean;
+  }
 >((props, ref) => {
-  const {endAdornment, className, dummyValue, ...rest} = props;
+  const {endAdornment, className, dummyValue, bare, ...rest} = props;
   return (
     <div
       className={cn(
-        'flex items-end flex-wrap rounded-md border border-input bg-white pr-1 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+        'flex items-end flex-wrap pr-1 text-sm',
+        bare
+          ? 'bg-transparent'
+          : 'rounded-lg border border-ink-150 bg-white transition-shadow focus-within:border-royal focus-within:shadow-[0_0_0_3px_rgba(21,84,181,0.12)]',
       )}>
       <div className="flex flex-col grow">
         <AutosizeTextarea
           ref={ref}
           className={cn(
-            'placeholder:text-sm placeholder:text-gray-dark border-none focus-visible:outline-none focus-visible:!ring-0 focus-visible:ring-none resize-none',
+            'placeholder:text-sm placeholder:text-ink-400 border-none focus-visible:outline-none focus-visible:!ring-0 focus-visible:ring-none resize-none',
             className,
           )}
           {...rest}

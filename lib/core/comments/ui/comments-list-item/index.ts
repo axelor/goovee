@@ -1,1 +1,1 @@
-export {CommentListItem} from './comments-list-item';
+export {CommentListItem, getInitials} from './comments-list-item';

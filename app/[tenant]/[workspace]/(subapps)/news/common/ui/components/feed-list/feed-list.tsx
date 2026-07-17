@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import {MdChevronRight} from 'react-icons/md';
 import Image from 'next/image';
 
@@ -30,16 +29,15 @@ export const FeedList = ({
   const {workspaceURI} = useWorkspace();
   return (
     <div
-      className={`bg-white h-max p-4 rounded-lg ${
+      className={`bg-white p-4 rounded-xl border border-ink-100 shadow-xs h-max ${
         width ? `lg-${width}` : 'lg:w-2/5'
       }`}>
-      <div className="font-semibold text-xl mb-[6px]">{title}</div>
-      <div>
+      <h2 className="font-bold text-lg text-ink-900 mb-3 tracking-[-0.015em]">
+        {title}
+      </h2>
+      <div className="divide-y divide-ink-100">
         {items?.map(
-          (
-            {id, title, publicationDateTime, categorySet, image, slug},
-            index,
-          ) => {
+          ({id, title, publicationDateTime, categorySet, image, slug}) => {
             const imageUrl = image?.id
               ? withBasePath(
                   `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
@@ -47,42 +45,34 @@ export const FeedList = ({
               : withBasePath(NO_IMAGE_URL);
 
             return (
-              <React.Fragment key={id}>
-                <Link
-                  href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
-                  className={`w-full flex gap-4 justify-between items-center flex-auto p-2 cursor-pointer`}>
-                  <div className="flex w-full gap-4 [overflow-wrap:anywhere]">
-                    <Image
-                      src={imageUrl}
-                      alt={image?.fileName || i18n.t('News image')}
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
-                    />
-                    <div className="w-full flex flex-col justify-between">
-                      <div className="flex flex-col gap-1">
-                        <BadgeList
-                          items={categorySet}
-                          labelClassName="rounded font-normal text-[0.5rem]"
-                          rootClassName="gap-2"
-                        />
-                        <div className="font-semibold text-base mb-2 line-clamp-1">
-                          {title}
-                        </div>
-                      </div>
-                      <div className="font-medium text-[10px] text-zinc-500">
-                        {formatRelativeTime(publicationDateTime)}
-                      </div>
-                    </div>
+              <Link
+                key={id}
+                href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
+                className="group w-full flex gap-3 items-center py-3 px-1 -mx-1 first:pt-0 last:pb-0 cursor-pointer rounded-lg transition-colors hover:bg-ink-25">
+                <Image
+                  src={imageUrl}
+                  alt={image?.fileName || i18n.t('News image')}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 rounded-lg object-cover flex-shrink-0 bg-ink-50"
+                />
+                <div className="w-full min-w-0 flex flex-col gap-1.5 [overflow-wrap:anywhere]">
+                  <BadgeList
+                    items={categorySet}
+                    labelClassName="rounded-full font-semibold text-[10px] px-2 py-0.5"
+                    rootClassName="gap-1.5"
+                  />
+                  <div className="font-bold text-sm text-ink-900 leading-snug line-clamp-1">
+                    {title}
                   </div>
-                  <div className="bg-success/10 rounded-lg w-8 h-8 flex items-center justify-center">
-                    <MdChevronRight className="text-success text-2xl" />
+                  <div className="font-medium text-[11px] text-ink-400">
+                    {formatRelativeTime(publicationDateTime)}
                   </div>
-                </Link>
-                {index < items.length - 1 && (
-                  <Separator className="bg-zinc-300" />
-                )}
-              </React.Fragment>
+                </div>
+                <div className="bg-royal-pale group-hover:bg-royal rounded-lg w-8 h-8 flex items-center justify-center shrink-0 transition-colors">
+                  <MdChevronRight className="text-royal group-hover:text-white text-lg transition-colors" />
+                </div>
+              </Link>
             );
           },
         )}

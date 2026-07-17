@@ -14,7 +14,11 @@ export type InvoiceListItem = {
   dueDate: string;
   exTaxTotal: string;
   inTaxTotal: string;
-  amountRemaining: string | null;
+  amountRemaining: {
+    value: string | null;
+    symbol: string;
+    formattedValue: string | number | null | undefined;
+  };
   isUnpaid: boolean;
 };
 
@@ -164,7 +168,7 @@ export type Invoice = {
       version: number;
       name: string | null;
       alpha2Code: string | null;
-      numericCode: string | null;
+      numericCode?: string | null;
     } | null;
     zip: string | null;
     city: {

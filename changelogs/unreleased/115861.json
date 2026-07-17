@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the account sub-app",
+  "type": "change",
+  "description": "The account area now uses a grouped navigation rail, a redesigned address book with an edit modal, and a table-based members management screen with an invite modal.",
+  "scope": ["users"]
+}

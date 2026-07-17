@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the auth screens",
+  "type": "change",
+  "description": "Login, signup and password reset now share a new split-screen auth shell with redesigned form fields, replacing the previous legacy layout.",
+  "scope": ["users"]
+}

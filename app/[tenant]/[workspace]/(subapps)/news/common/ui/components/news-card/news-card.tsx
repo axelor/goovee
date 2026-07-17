@@ -29,8 +29,8 @@ export const NewsCard = ({
     <Link
       key={id}
       href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
-      className="bg-white rounded-lg flex flex-col cursor-pointer">
-      <div className="w-full h-[150px] rounded-t-lg relative">
+      className="bg-white rounded-xl border border-ink-100 shadow-xs hover:shadow-soft-md transition-shadow flex flex-col cursor-pointer overflow-hidden">
+      <div className="w-full aspect-[16/10] relative bg-ink-50">
         <Image
           src={
             image?.id
@@ -41,24 +41,22 @@ export const NewsCard = ({
           }
           alt={image?.fileName || 'News image'}
           fill
-          className="object-cover rounded-t-lg"
-          sizes="(min-width: 1024px) 212px, (min-width: 768px) 480px, 100vw"
+          className="object-cover"
+          sizes="(min-width: 1024px) 320px, (min-width: 768px) 480px, 100vw"
         />
       </div>
-      <div className="py-2 px-4 flex flex-col justify-between flex-grow">
-        <div className="flex flex-col gap-1">
-          <BadgeList
-            items={categorySet}
-            labelClassName="rounded font-normal text-[0.5rem]"
-            rootClassName="gap-2"
-          />
-          <div className="font-semibold text-base mb-1 line-clamp-2">
-            {title}
-          </div>
-        </div>
-        <div className="font-medium text-[10px] text-zinc-500">
+      <div className="p-4 flex flex-col gap-3 flex-grow">
+        <BadgeList
+          items={categorySet}
+          labelClassName="rounded-full font-semibold text-[10px] px-2 py-0.5"
+          rootClassName="gap-1.5"
+        />
+        <h3 className="font-bold text-base text-ink-900 leading-snug line-clamp-2 mt-auto">
+          {title}
+        </h3>
+        <p className="font-medium text-xs text-ink-400 mt-auto">
           {formatRelativeTime(publicationDateTime)}
-        </div>
+        </p>
       </div>
     </Link>
   );

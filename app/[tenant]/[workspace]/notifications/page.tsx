@@ -1,7 +1,10 @@
-import {UnreadNotificationsList} from './unread-list';
-import {t} from '@/locale/server';
-import {getSession} from '@/lib/core/auth';
 import {notFound} from 'next/navigation';
+
+// ---- CORE IMPORTS ---- //
+import {getSession} from '@/lib/core/auth';
+
+// ---- LOCAL IMPORTS ---- //
+import {UnreadNotificationsList} from './unread-list';
 
 export default async function Page() {
   const session = await getSession();
@@ -10,10 +13,7 @@ export default async function Page() {
   if (!user) notFound();
 
   return (
-    <div className="px-4 md:px-12 py-2 md:py-4 space-y-6">
-      <h2 className="text-3xl font-bold text-foreground">
-        {await t('Notifications')}
-      </h2>
+    <div className="bg-ink-25 min-h-full">
       <UnreadNotificationsList />
     </div>
   );

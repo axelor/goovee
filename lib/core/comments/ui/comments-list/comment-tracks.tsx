@@ -2,19 +2,26 @@ import {MdArrowRightAlt} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
+import {cn} from '@/utils/css';
 
 import type {TrackObject} from '../../types';
 
 type CommentTracksProps = {
   data: TrackObject;
+  variant?: 'default' | 'conversation';
 };
 
-export function CommentTracks({data}: CommentTracksProps) {
+export function CommentTracks({data, variant = 'default'}: CommentTracksProps) {
   const {title, tracks} = data;
+  const isConversation = variant === 'conversation';
   return (
-    <div className="px-4 text-xs mb-1">
-      {title && <div className="font-semibold mb-1 -ml-9">{i18n.t(title)}</div>}
-      <ul className="list-disc">
+    <div className={cn('text-xs mb-1', !isConversation && 'px-4')}>
+      {title && (
+        <div className={cn('font-semibold mb-1', !isConversation && '-ml-9')}>
+          {i18n.t(title)}
+        </div>
+      )}
+      <ul className={cn('list-disc', isConversation && 'pl-5')}>
         {tracks?.map(({title, oldValue, value}, index) => {
           if (title === 'comment.note') return;
           return (

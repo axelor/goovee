@@ -6,7 +6,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {i18n} from '@/locale';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {Button, Loader, Separator} from '@/ui/components';
+import {Button, Loader} from '@/ui/components';
 import {ADDRESS_TYPE} from '@/constants';
 import type {PartnerAddress} from '@/types';
 import {Link} from '@/ui/components/link';
@@ -122,71 +122,81 @@ export function AddressSelection({
 
   const LinkButton = ({
     children,
+    variant,
     ...props
   }: React.ComponentPropsWithoutRef<typeof Button>) => (
     <Link
       className="block"
       href={`${workspaceURI}/account/addresses?checkout=true${callbackURL ? `&callbackURL=${callbackURL}` : ''}`}>
-      <Button className="rounded-full" variant="outline" {...props}>
+      <Button variant={variant ?? 'royal-outline'} size="sm" {...props}>
         {children}
       </Button>
     </Link>
   );
 
   return (
-    <div className="bg-card text-card-foreground p-6 rounded-lg">
-      <h3 className="text-xl font-medium">{title || i18n.t('Contact')}</h3>
-      <Separator className="my-4" />
+    <section className="bg-white border border-ink-100 shadow-xs rounded-xl p-6">
+      <h2 className="text-lg font-bold text-ink-900 mb-4">
+        {title || i18n.t('Contact')}
+      </h2>
       {loading ? (
         <Loader />
       ) : noAddress ? (
-        <div className="border p-4 rounded-lg space-y-2">
-          <h3 className="text-lg font-semibold mb-4">
+        <div className="rounded-lg border border-ink-150 p-4 flex flex-col gap-3">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-ink-400">
             {i18n.t('Invoicing and delivery address')}
           </h3>
-          <LinkButton>{i18n.t('Create or Select an address')}</LinkButton>
+          <LinkButton variant="royal">
+            {i18n.t('Create or Select an address')}
+          </LinkButton>
         </div>
       ) : sameDeliveryAndInvoicingAddress ? (
-        <div className="border p-4 rounded-lg space-y-2">
-          <h3 className="text-lg font-semibold mb-4">
+        <div className="rounded-lg border border-ink-150 p-4 flex flex-col gap-3">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-ink-400">
             {i18n.t('Invoicing and delivery address')}
           </h3>
-          <div>
-            <h5 className="font-bold text-xl">
-              {deliveryAddress?.address?.addressl2}
-            </h5>
-            <h6>{deliveryAddress?.address?.addressl4}</h6>
-            <h6>{deliveryAddress?.address?.addressl6}</h6>
-            <h6>{deliveryAddress?.address?.country?.name}</h6>
-          </div>
+          <AddressBlock address={deliveryAddress?.address} />
           <LinkButton>{i18n.t('Choose another address')}</LinkButton>
         </div>
       ) : (
-        <div className="space-y-2 divide-y">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
             {title: 'Delivery Address', address: deliveryAddress?.address},
             {title: 'Invoicing Address', address: invoicingAddress?.address},
           ].map(({title, address}) => (
-            <div key={title} className="border p-4 rounded-lg space-y-2">
-              <h3 className="text-lg font-semibold mb-4">{i18n.t(title)}</h3>
+            <div
+              key={title}
+              className="rounded-lg border border-ink-150 p-4 flex flex-col gap-3">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-ink-400">
+                {i18n.t(title)}
+              </h3>
               {address ? (
                 <>
-                  <div>
-                    <h5 className="font-bold text-xl">{address.addressl2}</h5>
-                    <h6>{address.addressl4}</h6>
-                    <h6>{address.addressl6}</h6>
-                    <h6>{address.country?.name}</h6>
-                  </div>
+                  <AddressBlock address={address} />
                   <LinkButton>{i18n.t('Choose another address')}</LinkButton>
                 </>
               ) : (
-                <LinkButton variant="default">
+                <LinkButton variant="royal">
                   {i18n.t('Create or Select an address')}
                 </LinkButton>
               )}
             </div>
           ))}
         </div>
+      )}
+    </section>
+  );
+}
+
+function AddressBlock({address}: {address: any}) {
+  if (!address) return null;
+  return (
+    <div className="text-sm leading-snug">
+      <p className="font-bold text-base text-ink-900">{address.addressl2}</p>
+      {address.addressl4 && <p className="text-ink-700">{address.addressl4}</p>}
+      {address.addressl6 && <p className="text-ink-700">{address.addressl6}</p>}
+      {address.country?.name && (
+        <p className="text-ink-500 mt-0.5">{address.country.name}</p>
       )}
     </div>
   );

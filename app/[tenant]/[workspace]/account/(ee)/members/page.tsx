@@ -4,6 +4,7 @@ import {notFound} from 'next/navigation';
 import {getSession} from '@/auth';
 import {workspacePathname} from '@/utils/workspace';
 import {findWorkspace} from '@/orm/workspace';
+import {isAdminContact, isPartner} from '@/orm/partner';
 import {manager} from '@/lib/core/tenant';
 
 // ---- LOCAL IMPORTS ---- //
@@ -28,6 +29,14 @@ export default async function Page(props: {
 
   const session = await getSession();
   const user = session?.user!;
+
+  const isAdmin =
+    Boolean(await isPartner()) ||
+    Boolean(await isAdminContact({client, workspaceURL}));
+
+  if (!isAdmin) {
+    return notFound();
+  }
 
   const workspace = await findWorkspace({
     url: workspaceURL,
@@ -67,13 +76,11 @@ export default async function Page(props: {
   const $members = [...members?.partners, ...members?.contacts];
 
   return (
-    <div className="bg-white p-2 lg:p-0 lg:bg-inherit">
-      <Content
-        members={$members}
-        invites={invites}
-        availableApps={availableApps || []}
-        canInviteMembers={config.canInviteMembers}
-      />
-    </div>
+    <Content
+      members={$members}
+      invites={invites}
+      availableApps={availableApps || []}
+      canInviteMembers={config.canInviteMembers ?? undefined}
+    />
   );
 }

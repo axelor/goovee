@@ -33,10 +33,16 @@ import {withBasePath} from '@/lib/core/path/base-path';
 //----LOCAL IMPORTS -----//
 import {
   findGroupById,
+  findGroups,
   findGroupsByMembers,
   findMemberGroupById,
   findPosts,
 } from '@/subapps/forum/common/orm/forum';
+import {
+  getReactionSummaries,
+  findUserReaction,
+  type VoteValue,
+} from '@/subapps/forum/common/orm/reaction';
 import {
   FORUM_POST_ATTACHMENT_PURPOSE,
   NOTIFICATION_VALUES,
@@ -721,6 +727,50 @@ export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
   });
 }
 
+export async function findSearchPosts({workspaceURL}: {workspaceURL: string}) {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) {
+    return {error: true, message: await t('TenantId is required')};
+  }
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) {
+    return {error: true, message: await accessMessage(access.reason)};
+  }
+
+  const {user, workspace} = access;
+  const {client} = access.tenant;
+
+  const groups = await findGroups({workspaceURL, client, user}).then(clone);
+  const groupIDs = groups.map((g: any) => g.id);
+
+  const memberGroups: any = user?.id
+    ? await findGroupsByMembers({
+        id: user.id,
+        workspaceID: workspace.id!,
+        client,
+        user,
+      })
+    : [];
+  const memberGroupIDs = memberGroups.map((g: any) => g?.forumGroup?.id);
+
+  const {posts = []} = await findPosts({
+    workspaceID: workspace.id!,
+    groupIDs,
+    memberGroupIDs,
+    client,
+    user,
+    limit: 50,
+  }).then(clone);
+
+  return posts;
+}
+
 export const createComment: CreateComment = async props => {
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
@@ -1083,3 +1133,216 @@ export const getSubscribersByGroup = async ({
     };
   }
 };
+
+// ============================================================
+// Forum reactions (up/down votes) + best answer / resolved status
+// ============================================================
+
+async function resolveForumContext(workspaceURL: string) {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId)
+    return {error: true as const, message: await t('TenantId is required')};
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return {error: true as const, message: await accessMessage(access.reason)};
+  }
+
+  return {
+    error: false as const,
+    client: access.tenant.client,
+    user: access.user,
+  };
+}
+
+export async function reactionSummary({
+  workspaceURL,
+  postIds = [],
+  commentIds = [],
+}: {
+  workspaceURL?: string;
+  postIds?: Array<string | number>;
+  commentIds?: Array<string | number>;
+}) {
+  const empty = {post: {}, comment: {}};
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId || !workspaceURL) return empty;
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) return empty;
+
+  return getReactionSummaries({
+    client: access.tenant.client,
+    postIds,
+    commentIds,
+    partnerId: access.user?.id,
+  });
+}
+
+export async function toggleReaction({
+  workspaceURL,
+  target,
+  id,
+  value,
+}: {
+  workspaceURL: string;
+  target: 'post' | 'comment';
+  id: string;
+  value: VoteValue;
+}) {
+  const ctx = await resolveForumContext(workspaceURL);
+  if (ctx.error) return ctx;
+  const {client, user} = ctx;
+
+  const existing = await findUserReaction({
+    client,
+    target,
+    id,
+    partnerId: user.id,
+  });
+
+  try {
+    if (!existing) {
+      await client.aOSPortalForumReaction.create({
+        data: {
+          reactionSelect: value,
+          author: {select: {id: user.id}},
+          ...(target === 'post'
+            ? {post: {select: {id}}}
+            : {reactionComment: {select: {id}}}),
+        } as any,
+        select: {reactionSelect: true},
+      });
+    } else if (existing.reactionSelect === value) {
+      await client.aOSPortalForumReaction.delete({
+        id: existing.id,
+        version: existing.version,
+      });
+    } else {
+      await client.aOSPortalForumReaction.update({
+        data: {
+          id: existing.id,
+          version: existing.version,
+          reactionSelect: value,
+        },
+        select: {reactionSelect: true},
+      });
+    }
+  } catch (err) {
+    return {error: true as const, message: await t('Something went wrong')};
+  }
+
+  const summaries = await getReactionSummaries({
+    client,
+    postIds: target === 'post' ? [id] : [],
+    commentIds: target === 'comment' ? [id] : [],
+    partnerId: user.id,
+  });
+  const summary =
+    target === 'post'
+      ? summaries.post[String(id)]
+      : summaries.comment[String(id)];
+
+  return {success: true as const, summary};
+}
+
+export async function setBestReply({
+  workspaceURL,
+  postId,
+  commentId,
+}: {
+  workspaceURL: string;
+  postId: string;
+  commentId: string | null;
+}) {
+  const ctx = await resolveForumContext(workspaceURL);
+  if (ctx.error) return ctx;
+  const {client, user} = ctx;
+
+  const post = await client.aOSPortalForumPost.findOne({
+    where: {id: postId} as any,
+    select: {
+      author: {id: true},
+      bestReply: {id: true},
+    },
+  });
+  if (!post) return {error: true as const, message: await t('Bad request')};
+
+  // Only the post author may curate the best answer.
+  if (String((post as any).author?.id) !== String(user.id)) {
+    return {error: true as const, message: await t('Unauthorized')};
+  }
+
+  // Toggle off when re-selecting the current best answer or clearing.
+  const unset =
+    !commentId || String((post as any).bestReply?.id) === String(commentId);
+
+  try {
+    await client.aOSPortalForumPost.update({
+      data: {
+        id: postId,
+        version: (post as any).version,
+        bestReply: unset ? null : {select: {id: commentId}},
+      } as any,
+      select: {id: true},
+    });
+  } catch (err) {
+    return {error: true as const, message: await t('Something went wrong')};
+  }
+
+  return {
+    success: true as const,
+    bestReplyId: unset ? null : commentId,
+  };
+}
+
+export async function setPostStatus({
+  workspaceURL,
+  postId,
+  resolved,
+}: {
+  workspaceURL: string;
+  postId: string;
+  resolved: boolean;
+}) {
+  const ctx = await resolveForumContext(workspaceURL);
+  if (ctx.error) return ctx;
+  const {client, user} = ctx;
+
+  const post = await client.aOSPortalForumPost.findOne({
+    where: {id: postId} as any,
+    select: {author: {id: true}},
+  });
+  if (!post) return {error: true as const, message: await t('Bad request')};
+
+  // Only the post author may resolve/reopen the discussion.
+  if (String((post as any).author?.id) !== String(user.id)) {
+    return {error: true as const, message: await t('Unauthorized')};
+  }
+
+  const status = resolved ? 'resolved' : 'open';
+  try {
+    await client.aOSPortalForumPost.update({
+      data: {
+        id: postId,
+        version: (post as any).version,
+        statusSelect: status,
+      } as any,
+      select: {statusSelect: true},
+    });
+  } catch (err) {
+    return {error: true as const, message: await t('Something went wrong')};
+  }
+
+  return {success: true as const, status};
+}

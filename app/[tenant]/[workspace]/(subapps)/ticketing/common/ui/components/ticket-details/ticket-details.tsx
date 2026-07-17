@@ -87,13 +87,13 @@ export function TicketDetails(props: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(value => handleSubmit(value))}>
-        <div className="flex flex-col-reverse lg:flex-col gap-4 rounded-md border bg-card p-4 mt-5">
-          <div className="grid grid-cols-1 gap-4 lg:flex lg:flex-row-reverse lg:justify-start lg:grow">
+        <div className="flex flex-col-reverse lg:flex-col gap-4">
+          <div className="grid grid-cols-1 gap-2 lg:flex lg:flex-row-reverse lg:justify-start lg:grow">
             {hasEditableFields && (
               <Button
                 size="sm"
                 type="submit"
-                variant="success"
+                variant="royal"
                 disabled={!form.formState.isDirty || loading}>
                 {i18n.t('Save Changes')}
               </Button>
@@ -106,12 +106,14 @@ export function TicketDetails(props: Props) {
           </div>
           <div className="space-y-3">
             {allowedFields.has(FIELDS.ID) && (
-              <div className="flex justify-between">
-                <p className="text-base font-medium">#{ticket?.id}</p>
-              </div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400">
+                {i18n.t('Ticket')} #{ticket?.id}
+              </p>
             )}
-            <h1 className="text-xl font-semibold">{ticket.name}</h1>
-            <hr />
+            <h1 className="text-2xl font-bold text-ink-900 tracking-[-0.01em] leading-tight">
+              {ticket.name}
+            </h1>
+            <hr className="border-ink-100" />
             <div className="flex flex-col gap-4">
               <>
                 <div className="flex items-center gap-4">
@@ -129,7 +131,7 @@ export function TicketDetails(props: Props) {
                   </span>
                 </div>
                 {(allowedFields.has(FIELDS.STATUS) || close || cancel) && (
-                  <hr className="hidden lg:block" />
+                  <hr className="hidden lg:block border-ink-100" />
                 )}
               </>
               {allowedFields.has(FIELDS.CATEGORY) && (
@@ -214,7 +216,7 @@ export function TicketDetails(props: Props) {
               )}
             </div>
             <hr
-              className={cn({
+              className={cn('border-ink-100', {
                 ['hidden']:
                   !allowedFields.has(FIELDS.PRIORITY) &&
                   !allowedFields.has(FIELDS.CATEGORY),
@@ -242,7 +244,7 @@ export function TicketDetails(props: Props) {
               </p>
             )}
             <hr
-              className={cn({
+              className={cn('border-ink-100', {
                 ['hidden']:
                   !allowedFields.has(FIELDS.CREATED_BY) &&
                   !allowedFields.has(FIELDS.CREATED_ON),
@@ -321,7 +323,7 @@ export function TicketDetails(props: Props) {
               )}
             </div>
             <hr
-              className={cn({
+              className={cn('border-ink-100', {
                 ['hidden']:
                   !allowedFields.has(FIELDS.TASK_END_DATE) &&
                   !allowedFields.has(FIELDS.MANAGED_BY) &&
@@ -347,7 +349,7 @@ export function TicketDetails(props: Props) {
               </p>
             )}
             <hr
-              className={cn({
+              className={cn('border-ink-100', {
                 ['hidden']:
                   !allowedFields.has(FIELDS.PROGRESS) &&
                   !allowedFields.has(FIELDS.TARGET_VERSION),
@@ -371,7 +373,7 @@ export function TicketDetails(props: Props) {
                       <span>{ticket.invoicingUnit?.name}</span>
                     </div>
                   </div>
-                  <hr />
+                  <hr className="border-ink-100" />
                 </>
               )}
             <RichTextViewer content={ticket.description ?? undefined} />
@@ -402,7 +404,7 @@ function AssignToButton({className}: {className?: string}) {
       size="sm"
       type="button"
       className={className}
-      variant="success"
+      variant="royal-outline"
       disabled={loading}
       onClick={handleAssignment}>
       {i18n.t(
@@ -461,7 +463,7 @@ function CloseTicket({className}: {className?: string}) {
       <DialogTrigger asChild>
         <Button
           size="sm"
-          variant="success"
+          variant="mint"
           disabled={loading}
           className={className}>
           {i18n.t('Close ticket')}

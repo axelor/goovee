@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the notifications page",
+  "type": "change",
+  "description": "Unread notifications are now grouped by period (Today, This week, Older) and shown with typed icons and colors per notification kind.",
+  "scope": ["core"]
+}

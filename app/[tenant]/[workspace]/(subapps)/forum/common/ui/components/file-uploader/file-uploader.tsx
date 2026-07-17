@@ -1,23 +1,20 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
-import {MdClose, MdDeleteOutline} from 'react-icons/md';
-import Image from 'next/image';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  MdClose,
+  MdDeleteOutline,
+  MdOutlineFileUpload,
+  MdOutlineUploadFile,
+} from 'react-icons/md';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {
-  Button,
-  FileIcon,
-  Input,
-  ScrollArea,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/ui/components';
+import {cn} from '@/utils/css';
+import {FileIcon} from '@/ui/components';
 import {useToast} from '@/ui/hooks/use-toast';
 import {getFileSizeText} from '@/utils/files';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {
@@ -50,12 +47,17 @@ export const FileUploader = ({
   handleClose,
 }: FileUploaderProps) => {
   const [docs, setDocs] = useState<DocItem[]>(initialValue ?? []);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {toast} = useToast();
 
   useEffect(() => {
     setDocs(initialValue ?? []);
   }, [initialValue]);
+
+  // Open the native file picker reliably (a bare <label htmlFor> can be flaky
+  // inside a portalled dialog — drive the input imperatively instead).
+  const openPicker = () => inputRef.current?.click();
 
   // accept only the supported document types; reject the rest at pick time
   const addFiles = (fileList: FileList | null) => {
@@ -94,96 +96,165 @@ export const FileUploader = ({
     setDocs(prev => prev.filter((_, i) => i !== index));
   };
 
+  const confirm = () => {
+    onUpload(docs);
+    handleClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className={`max-w-screen-lg h-fit p-1 lg:p-4`}>
-        <DialogTitle className="hidden" />
-        <div className="bg-white w-full h-screen lg:h-full z-[100]">
-          <ScrollArea className="relative w-full h-fit max-h-[90vh] pt-8">
-            <Button
-              className="w-6 h-6 flex items-center justify-center rounded-full p-px absolute top-0 right-0 cursor-pointer bg-white hover:bg-white"
-              onClick={handleClose}>
-              <MdClose className="h-full w-full text-muted-foreground" />
-            </Button>
+    <DialogPrimitive.Root
+      open={open}
+      onOpenChange={isOpen => {
+        if (!isOpen) handleClose();
+      }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay
+          className={cn(
+            'fixed inset-0 z-[60] bg-ink-900/50 backdrop-blur-sm',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+          )}
+        />
+        <DialogPrimitive.Content
+          className={cn(
+            'fixed inset-0 z-[60] m-auto flex h-fit max-h-[90vh] w-[calc(100%-2rem)] max-w-[560px] flex-col overflow-hidden rounded-[20px] bg-white shadow-xl focus:outline-none',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+          )}>
+          <DialogPrimitive.Title className="sr-only">
+            {i18n.t('Attach files')}
+          </DialogPrimitive.Title>
+
+          {/* Header — royal gradient + dots pattern (matches New discussion) */}
+          <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-royal-dark to-royal px-6 py-[22px] text-white">
             <div
-              className="flex flex-col w-full h-full gap-4"
-              onDrop={handleDrop}
-              onDragOver={event => event.preventDefault()}>
-              {docs.length === 0 ? (
-                <label
-                  htmlFor="file-upload"
-                  className="w-full rounded-sm border flex flex-col gap-2 md:gap-4 items-center justify-center h-full cursor-pointer p-2">
-                  <div className="w-[24.063rem] h-[18.313rem] relative my-2">
-                    <Image
-                      fill
-                      src={withBasePath('/images/upload.png')}
-                      className="aspect-auto"
-                      objectFit="contain"
-                      alt="Upload png"
-                    />
-                  </div>
-                  <h2>{i18n.t(CLICK_HERE_DRAG_DROP_FILE)}</h2>
-                  <span className="text-muted-foreground">
+              className="pointer-events-none absolute inset-0 opacity-50"
+              style={{
+                backgroundImage:
+                  'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 1px)',
+                backgroundSize: '18px 18px',
+              }}
+            />
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label={i18n.t('Close')}
+              className="absolute right-4 top-4 z-10 grid size-8 place-items-center rounded-lg bg-white/15 text-white transition-colors hover:bg-white/25">
+              <MdClose className="size-4" />
+            </button>
+            <div className="relative flex items-center gap-3.5">
+              <div className="grid size-11 shrink-0 place-items-center rounded-[11px] bg-white/[0.18]">
+                <MdOutlineUploadFile className="size-5" />
+              </div>
+              <div>
+                <h2 className="text-[19px] font-extrabold tracking-[-0.015em]">
+                  {i18n.t('Attach files')}
+                </h2>
+                <p className="mt-0.5 text-[13px] text-white/85">
+                  {i18n.t('Add documents to your discussion')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div
+            className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6"
+            onDrop={handleDrop}
+            onDragOver={event => event.preventDefault()}>
+            {docs.length === 0 ? (
+              <button
+                type="button"
+                onClick={openPicker}
+                className="flex w-full flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-ink-150 py-12 transition-colors hover:border-royal hover:bg-royal-pale/40">
+                <div className="grid size-14 place-items-center rounded-full bg-royal-pale text-royal">
+                  <MdOutlineFileUpload className="size-7" />
+                </div>
+                <div className="px-4 text-center">
+                  <p className="text-sm font-semibold text-ink-800">
+                    {i18n.t(CLICK_HERE_DRAG_DROP_FILE)}
+                  </p>
+                  <p className="mt-1 text-[12.5px] text-ink-500">
                     {i18n.t(SUPPORTED_FILE_PDF_DOC)}
-                  </span>
-                </label>
-              ) : (
-                <div className="flex flex-col gap-3 p-2">
-                  {docs.map((doc, index) => (
-                    <div
-                      key={doc.uploadId ?? `${doc.file.name}-${index}`}
-                      className="flex items-center gap-2 border rounded-md p-2">
-                      <FileIcon
-                        fileType={doc.file.type}
-                        className="h-6 w-6 shrink-0"
-                      />
-                      <div className="flex flex-col flex-1 gap-1">
-                        <span className="text-sm text-muted-foreground line-clamp-1">
-                          {doc.file.name} - {getFileSizeText(doc.file.size)}
-                        </span>
-                        <Input
-                          placeholder={i18n.t(FILE_TITLE)}
-                          className="h-9 shadow-none"
-                          value={doc.title}
-                          onChange={e =>
-                            handleTitleChange(index, e.target.value)
-                          }
-                        />
-                      </div>
-                      <MdDeleteOutline
-                        className="w-6 h-6 text-destructive cursor-pointer shrink-0"
-                        onClick={() => removeDoc(index)}
+                  </p>
+                </div>
+              </button>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {docs.map((doc, index) => (
+                  <div
+                    key={doc.uploadId ?? `${doc.file.name}-${index}`}
+                    className="flex items-center gap-3 rounded-xl border border-ink-150 p-3">
+                    <FileIcon
+                      fileType={doc.file.type}
+                      className="size-7 shrink-0"
+                    />
+                    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                      <span className="line-clamp-1 text-[12.5px] text-ink-500">
+                        {doc.file.name} — {getFileSizeText(doc.file.size)}
+                      </span>
+                      <input
+                        placeholder={i18n.t(FILE_TITLE)}
+                        className="h-9 w-full rounded-[8px] border border-ink-150 px-3 text-[13px] text-ink-800 outline-none transition-colors focus:border-royal"
+                        value={doc.title}
+                        onChange={e => handleTitleChange(index, e.target.value)}
                       />
                     </div>
-                  ))}
-                  <label
-                    htmlFor="file-upload"
-                    className="self-start text-sm text-success cursor-pointer underline">
-                    {i18n.t('Add more files')}
-                  </label>
-                </div>
-              )}
-              <Button
-                variant="success"
-                className="w-full rounded-md h-10 mt-4"
-                onClick={() => {
-                  onUpload(docs);
-                  handleClose();
-                }}>
+                    <button
+                      type="button"
+                      onClick={() => removeDoc(index)}
+                      aria-label={i18n.t('Remove')}
+                      className="grid size-8 shrink-0 place-items-center rounded-lg text-destructive transition-colors hover:bg-destructive/10">
+                      <MdDeleteOutline className="size-5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={openPicker}
+                  className="self-start text-[13px] font-semibold text-royal transition-colors hover:text-royal-dark">
+                  + {i18n.t('Add more files')}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="flex shrink-0 items-center justify-end gap-2.5 border-t border-ink-100 px-6 py-4">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="rounded-[10px] border border-ink-150 bg-white px-[18px] py-2.5 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-25">
+              {i18n.t('Cancel')}
+            </button>
+            {docs.length === 0 ? (
+              <button
+                type="button"
+                onClick={openPicker}
+                className="inline-flex items-center gap-2 rounded-[10px] bg-royal px-[22px] py-2.5 text-sm font-bold text-white shadow-[0_1px_2px_rgba(13,30,75,0.15),0_6px_14px_rgba(13,30,75,0.18)] transition-colors hover:bg-royal-dark">
+                <MdOutlineFileUpload className="size-4" />
+                {i18n.t('Browse files')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={confirm}
+                className="inline-flex items-center gap-2 rounded-[10px] bg-royal px-[22px] py-2.5 text-sm font-bold text-white shadow-[0_1px_2px_rgba(13,30,75,0.15),0_6px_14px_rgba(13,30,75,0.18)] transition-colors hover:bg-royal-dark">
+                <MdOutlineUploadFile className="size-4" />
                 {i18n.t(UPLOAD)}
-              </Button>
-            </div>
-            <input
-              id="file-upload"
-              type="file"
-              multiple
-              accept={DOC_ACCEPT}
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-          </ScrollArea>
-        </div>
-      </DialogContent>
-    </Dialog>
+              </button>
+            )}
+          </div>
+
+          <input
+            ref={inputRef}
+            id="file-upload"
+            type="file"
+            multiple
+            accept={DOC_ACCEPT}
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 };

@@ -26,6 +26,7 @@ type CommentsListProps = {
   trackingField: TrackingField;
   disableReply?: boolean;
   attachmentDownloadUrl: string;
+  variant?: 'default' | 'conversation';
 };
 
 export const CommentsList = ({
@@ -42,6 +43,7 @@ export const CommentsList = ({
   trackingField,
   disableReply,
   attachmentDownloadUrl,
+  variant = 'default',
 }: CommentsListProps) => {
   return (
     <div
@@ -62,6 +64,7 @@ export const CommentsList = ({
           trackingField={trackingField}
           disableReply={disableReply}
           attachmentDownloadUrl={attachmentDownloadUrl}
+          variant={variant}
         />
       ))}
     </div>

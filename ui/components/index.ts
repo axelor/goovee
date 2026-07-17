@@ -230,3 +230,12 @@ export {AlertToast} from './alert-toast';
 export {AccordionMenu} from './accordion-menu';
 export {Spinner} from './spinner';
 export {Link} from './link';
+export {StatusPill} from './status-pill';
+export type {StatusKey, StatusPillProps} from './status-pill/status-pill';
+export {StatusTimeline} from './status-timeline';
+export type {
+  TimelineStep,
+  TimelineStepState,
+  TimelineTone,
+  StatusTimelineProps,
+} from './status-timeline/status-timeline';

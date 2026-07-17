@@ -6,13 +6,13 @@ import React from 'react';
 // ---- CORE IMPORTS ---- //
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {formatRelativeTime} from '@/locale/formatters';
-import {BadgeList} from '@/ui/components';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
 
 type NewsCategory = {
   id: string;
   name: string;
+  label?: string | null;
   color?: string | null;
   parentCategory?: {
     id: string;
@@ -47,10 +47,12 @@ export function BigNewsCard({
   description?: string;
   publicationDateTime: string;
 }): React.JSX.Element {
+  const category = Array.isArray(categorySet) ? categorySet[0] : undefined;
+
   return (
     <Link
       href={`${workspaceURI}/${navigatingPathFrom}/${SUBAPP_PAGE.article}/${slug}`}
-      className="relative lg:h-full p-4 flex flex-col rounded-lg cursor-pointer">
+      className="group relative flex flex-col rounded-xl cursor-pointer overflow-hidden border border-ink-100 transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-md min-h-[360px]">
       <Image
         src={
           image?.id
@@ -61,31 +63,41 @@ export function BigNewsCard({
         }
         alt={image?.fileName || 'News image'}
         fill
-        className="object-cover rounded-lg"
+        className="object-cover"
         sizes="(min-width: 1024px) 576px, (min-width: 768px) 991px, 100vw"
       />
+      {category && (
+        <span
+          className="absolute top-3.5 left-3.5 z-10 px-2.5 py-1 rounded-md bg-royal text-white text-[11px] font-bold tracking-[0.04em]"
+          style={{lineHeight: 1.4}}>
+          {category.name || category.label || ''}
+        </span>
+      )}
       <div
-        className="absolute inset-0 rounded-md"
+        aria-hidden
+        className="absolute inset-0"
         style={{
-          background: `linear-gradient(76deg, rgba(0, 0, 0, 0.40) 1.1%, rgba(0, 0, 0, 0.08) 100%)`,
-        }}></div>
-      <div className="flex gap-2 z-10 h-[172px]">
-        <BadgeList
-          items={categorySet}
-          rootClassName="z-10"
-          labelClassName="rounded font-normal text-[8px] h-max"
-        />
-      </div>
-      <div className="flex flex-col flex-1 justify-between gap-2 text-white z-10">
-        <div className="flex flex-col justify-between flex-1">
-          <div className="font-semibold text-base line-clamp-3 h-[72px] drop-shadow-md">
-            {title}
-          </div>
-          <div className="font-medium text-xs line-clamp-3 drop-shadow-md">
+          background:
+            'linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.85) 100%)',
+        }}
+      />
+      <div className="relative z-10 mt-auto p-[18px] text-white">
+        <h3
+          className="m-0 mb-2 text-lg font-bold tracking-[-0.015em] leading-snug line-clamp-2"
+          style={{textShadow: '0 1px 4px rgba(0,0,0,0.4)'}}>
+          {title}
+        </h3>
+        {description && (
+          <p
+            className="m-0 text-[12.5px] text-white/85 line-clamp-2"
+            style={{
+              lineHeight: 1.5,
+              textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+            }}>
             {description}
-          </div>
-        </div>
-        <div className="font-medium text-[10px]">
+          </p>
+        )}
+        <div className="mt-2.5 text-[11px] font-semibold text-white/60">
           {formatRelativeTime(publicationDateTime)}
         </div>
       </div>

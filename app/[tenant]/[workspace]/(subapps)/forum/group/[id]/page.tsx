@@ -1,53 +1,32 @@
 import {notFound, redirect, unauthorized} from 'next/navigation';
-import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
-import {User} from '@/types';
 import {clone} from '@/utils';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {isCommentEnabled} from '@/comments';
+import {SEARCH_PARAMS, SUBAPP_CODES, DEFAULT_LIMIT} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
+import {GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
 import {
+  findCommentCounts,
   findGroupById,
-  findUser,
+  findGroupMeta,
   findGroupsByMembers,
-  findGroups,
+  findPostsByGroupId,
 } from '@/subapps/forum/common/orm/forum';
-import type {Group, MemberGroup} from '@/subapps/forum/common/types/forum';
-import {
-  FORUM_CONTENT,
-  GROUPS_ORDER_BY,
-  MENU,
-} from '@/subapps/forum/common/constants';
-import {ForumSkeleton} from '@/subapps/forum/common/ui/components/skeletons';
-import {
-  NavMenu,
-  Tabs,
-  GroupControls,
-  Hero,
-} from '@/subapps/forum/common/ui/components';
-import {ComposePost} from '@/app/[tenant]/[workspace]/(subapps)/forum/common/ui/components';
-import {ThreadListSkeleton} from '@/subapps/forum/common/ui/components';
-import {GroupPostsContent} from './group-post-content';
+import {getReactionSummaries} from '@/subapps/forum/common/orm/reaction';
+import {ForumGroup} from '@/subapps/forum/common/ui/components';
 
-async function ForumGroup({
-  params,
-  searchParams,
-}: {
-  params: {
-    id: string;
-    tenant: string;
-    workspace: string;
-  };
-  searchParams: {[key: string]: string | undefined};
+export default async function Page(props: {
+  params: Promise<{id: string; tenant: string; workspace: string}>;
+  searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
-  const type = searchParams?.type ?? FORUM_CONTENT.POSTS;
+  const params = await props.params;
+  const searchParams = await props.searchParams;
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
@@ -84,107 +63,75 @@ async function ForumGroup({
   const config = await getForumConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const enableComment = isCommentEnabled({
-    subapp: SUBAPP_CODES.forum,
-    config,
-  });
-
   const workspace = clone(access.workspace);
 
-  const groupId = params.id as string;
+  const groupId = params.id;
 
-  const groups = await findGroups({
-    workspaceURL: workspace.url,
-    client,
-    user,
-  }).then(clone);
-
-  const memberGroups = (
-    userId
-      ? await findGroupsByMembers({
-          id: userId,
-          orderBy: GROUPS_ORDER_BY,
-          workspaceID: workspace.id,
-          client,
-          user,
-        })
-      : []
-  ) as MemberGroup[];
-
-  const memberGroupIDs = memberGroups
-    ?.map(group => group.forumGroup?.id)
-    .filter((id): id is string => Boolean(id));
-
-  const nonMemberGroups = groups.filter(group => {
-    return !memberGroupIDs?.includes(group.id);
-  }) as Group[];
-
-  const selectedGroup = (await findGroupById(
+  const group: any = await findGroupById(
     groupId,
     workspace.id,
     client,
     user,
-  ).then(clone)) as Group | null;
+  ).then(clone);
+  if (!group) return notFound();
 
-  const $user = (await findUser({userId, client}).then(clone)) as User;
-
-  if (!selectedGroup) {
-    return notFound();
-  }
-
-  return (
-    <div className="flex flex-col h-full flex-1">
-      <div className="hidden lg:block">
-        <NavMenu items={MENU} />
-      </div>
-      <Hero selectedGroup={selectedGroup} config={clone(config)} />
-      <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-[17.563rem_1fr] gap-5">
-        <GroupControls
-          memberGroups={memberGroups}
-          nonMemberGroups={nonMemberGroups}
-          user={$user}
-          selectedGroup={selectedGroup}
-        />
-        <div>
-          <ComposePost
-            user={$user}
-            memberGroups={memberGroups}
-            selectedGroup={selectedGroup}
-          />
-          <Tabs activeTab={type} />
-          <Suspense fallback={<ThreadListSkeleton />}>
-            {type === FORUM_CONTENT.POSTS && (
-              <GroupPostsContent
-                memberGroupIDs={memberGroupIDs}
-                params={params}
-                searchParams={searchParams}
-                client={client}
-                user={user ?? null}
-                workspace={workspace}
-                enableComment={enableComment}
-              />
-            )}
-          </Suspense>
-        </div>
-      </div>
-    </div>
+  const memberGroups: any = userId
+    ? await findGroupsByMembers({
+        id: userId,
+        orderBy: GROUPS_ORDER_BY,
+        workspaceID: workspace.id,
+        client,
+        user,
+      })
+    : [];
+  const memberGroupIDs = memberGroups.map((g: any) => g?.forumGroup?.id);
+  const memberRecord = memberGroups.find(
+    (g: any) => String(g?.forumGroup?.id) === String(groupId),
   );
-}
 
-export default async function Page(props: {
-  params: Promise<{
-    id: string;
-    type: string;
-    tenant: string;
-    workspace: string;
-  }>;
-  searchParams: Promise<{[key: string]: string | undefined}>;
-}) {
-  const searchParams = await props.searchParams;
-  const params = await props.params;
+  const groupMeta = await findGroupMeta({groupId, client});
+
+  const {posts = []} = await findPostsByGroupId({
+    id: groupId,
+    workspaceID: workspace.id,
+    sort: searchParams?.sort,
+    search: searchParams?.search,
+    limit: searchParams?.limit ? Number(searchParams.limit) : DEFAULT_LIMIT,
+    client,
+    user,
+    memberGroupIDs,
+  }).then(clone);
+
+  const postIds = posts.map((p: any) => p.id);
+  const replyCounts = await findCommentCounts({postIds, client});
+  const reactions = await getReactionSummaries({
+    client,
+    postIds,
+    partnerId: userId,
+  });
+  const scoreByPost: Record<string, number> = {};
+  for (const [id, s] of Object.entries(reactions.post)) {
+    scoreByPost[id] = s.score;
+  }
+  const postsWithCounts = posts.map((p: any) => ({
+    ...p,
+    replyCount: replyCounts[String(p.id)] ?? 0,
+  }));
+
+  const forumBase = `${workspaceURI}/${SUBAPP_CODES.forum}`;
+
   return (
-    <Suspense fallback={<ForumSkeleton />}>
-      <ForumGroup params={params} searchParams={searchParams} />
-    </Suspense>
+    <ForumGroup
+      group={{id: group.id, name: group.name}}
+      groupMeta={groupMeta}
+      posts={postsWithCounts}
+      scoreByPost={scoreByPost}
+      isMember={Boolean(memberRecord)}
+      memberRecordId={memberRecord?.id}
+      userId={userId}
+      groups={memberGroups.map((g: any) => g.forumGroup)}
+      canPost={Boolean(memberRecord)}
+      backHref={forumBase}
+    />
   );
 }

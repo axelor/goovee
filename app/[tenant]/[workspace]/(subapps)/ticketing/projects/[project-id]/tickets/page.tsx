@@ -141,83 +141,89 @@ export default async function Page(props: {
   const url = `${workspaceURI}/ticketing/projects/${projectId}/tickets`;
   const pages = getPages(tickets, limit);
   return (
-    <div className="container my-6 space-y-6 mx-auto">
-      <div className="flex flex-col items-center justify-between md:flex-row gap-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                asChild
-                className="text-foreground-muted cursor-pointer truncate text-md">
-                <Link href={`${workspaceURI}/ticketing`}>
-                  {await t('Projects')}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <FaChevronRight className="text-primary" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                asChild
-                className="cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-md">
-                <Link href={`${workspaceURI}/ticketing/projects/${projectId}`}>
-                  {project.name}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <FaChevronRight className="text-primary" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="truncate text-lg font-semibold">
-                <h2 className="font-semibold text-xl">
-                  {await t(title || 'Tickets')}
-                </h2>
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <Button variant="success" className="flex items-center" asChild>
-          <Link
-            href={`${workspaceURI}/ticketing/projects/${projectId}/tickets/create`}>
-            <MdAdd className="size-6" />
-            <span>{await t('Create a ticket')}</span>
-          </Link>
-        </Button>
-      </div>
-      <div className="lg:flex items-end justify-between gap-6">
-        <Search
-          projectId={projectId}
-          inputClassName="h-[39px] placeholder:!text-sm text-sm"
-        />
-        {hasFilter && (
-          <Suspense
-            fallback={
-              <Skeleton className="h-10 w-[400px] bg-success-light shrink-0" />
-            }>
-            <AsyncFilter
-              url={url}
-              searchParams={searchParams}
-              projectId={projectId}
-              client={client}
-              fields={config.ticketingFieldSet}
-            />
-          </Suspense>
-        )}
-      </div>
-      <div>
-        <TicketList
-          tickets={tickets}
-          fields={clone(config.ticketingFieldSet)}
-        />
-        {pages > 1 && (
-          <TablePagination
-            url={url}
-            pages={pages}
-            searchParams={searchParams}
+    <div className="bg-ink-25 min-h-full">
+      <div className="container my-6 space-y-5 mx-auto">
+        <div className="flex flex-col items-start justify-between md:flex-row gap-4">
+          <div>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-ink-500 cursor-pointer truncate text-sm">
+                    <Link href={`${workspaceURI}/ticketing`}>
+                      {await t('Projects')}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <FaChevronRight className="text-ink-300" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-ink-500 cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-sm">
+                    <Link
+                      href={`${workspaceURI}/ticketing/projects/${projectId}`}>
+                      {project.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <FaChevronRight className="text-ink-300" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="truncate text-sm text-ink-700 font-medium">
+                    {await t(title || 'Tickets')}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <h1 className="text-3xl font-bold text-ink-900 tracking-[-0.01em] mt-3">
+              {await t(title || 'Tickets')}
+            </h1>
+          </div>
+          <Button variant="royal" className="flex items-center gap-1.5" asChild>
+            <Link
+              href={`${workspaceURI}/ticketing/projects/${projectId}/tickets/create`}>
+              <MdAdd className="size-5" />
+              <span>{await t('Create a ticket')}</span>
+            </Link>
+          </Button>
+        </div>
+        <div className="lg:flex items-end justify-between gap-6">
+          <Search
+            projectId={projectId}
+            inputClassName="h-11 placeholder:!text-sm text-sm bg-white border-ink-150"
           />
-        )}
+          {hasFilter && (
+            <Suspense
+              fallback={
+                <Skeleton className="h-10 w-[400px] bg-ink-50 shrink-0" />
+              }>
+              <AsyncFilter
+                url={url}
+                searchParams={searchParams}
+                projectId={projectId}
+                client={client}
+                fields={config.ticketingFieldSet}
+              />
+            </Suspense>
+          )}
+        </div>
+        <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
+          <TicketList
+            tickets={tickets}
+            fields={clone(config.ticketingFieldSet)}
+          />
+          {pages > 1 && (
+            <TablePagination
+              url={url}
+              pages={pages}
+              searchParams={searchParams}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

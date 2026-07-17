@@ -4,28 +4,16 @@ import {Suspense} from 'react';
 import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
-import {
-  DEFAULT_LOGO_URL,
-  IMAGE_URL,
-  ORDER_BY,
-  SUBAPP_CODES,
-  SUBAPP_PAGE,
-} from '@/constants';
+import {NO_IMAGE_URL, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {parseCommentContent} from '@/lib/core/comments';
 import {t} from '@/lib/core/locale/server';
-import type {User, OverlayColor} from '@/types';
+import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
-import {BigNewsCard} from '@/ui/components/big-news-card';
-import {Card, CardContent, CardHeader, CardTitle} from '@/ui/components/card';
-import {Carousel} from '@/ui/components/carousel';
-import {HeroSearch} from '@/ui/components/hero-search';
 import {Icon} from '@/ui/components/icon';
 import {InnerHTML} from '@/ui/components/inner-html';
 import {Skeleton} from '@/ui/components/skeleton/skeleton';
-import {BadgeList} from '@/ui/components/badge-list';
 import {FileIcon} from '@/ui/components/file-icon';
-import {clone} from '@/utils';
 import {cn} from '@/utils/css';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
@@ -55,15 +43,6 @@ export async function Home({
   workspaceURI: string;
   apps: any[];
 }) {
-  const imageURL = config.homepageHeroBgImage?.id
-    ? withBasePath(`${workspaceURI}/api/home/hero/background`)
-    : withBasePath(IMAGE_URL);
-
-  const logoId = workspace.logo?.id || config.company?.logo?.id;
-  const logoURL = logoId
-    ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
-    : withBasePath(DEFAULT_LOGO_URL);
-
   const showNews =
     config.isHomepageDisplayNews &&
     apps.some(app => app.code === SUBAPP_CODES.news && app.isInstalled);
@@ -86,36 +65,73 @@ export async function Home({
     config.isHomepageDisplayHyperlinks &&
     (config.hyperlinkList?.length ?? 0) > 0;
 
-  return (
-    <div>
-      <HeroSearch
-        title={config.homepageHeroTitle || (await t('app-home'))}
-        description={
-          config.homepageHeroDescription ||
-          (await t(
-            'Mi eget leo viverra cras pharetra enim viverra. Ac at non pretium etiam viverra. Ac at non pretium etiam',
-          ))
-        }
-        background={
-          (config.homepageHeroOverlayColorSelect || 'default') as OverlayColor
-        }
-        blendMode={config.homepageHeroOverlayColorSelect ? 'overlay' : 'normal'}
-        groupImg={logoURL}
-        groupImgClassName="object-contain"
-        groupClassName="w-24 aspect-[2/1] mb-2"
-        image={imageURL}
-      />
+  const welcomeTitle =
+    config.homepageHeroTitle || (await t('Welcome to your client portal'));
+  const welcomeSubtitle =
+    config.homepageHeroDescription ||
+    (await t('Catalogue, orders, support and events on a single portal'));
 
-      {showNews && (
-        <div className="container my-6 mx-auto space-y-6">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="font-semibold text-xl">{await t('Latest news')}</h2>
-            <Link
-              href={`${workspaceURI}/${SUBAPP_CODES.news}`}
-              className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-              {await t('View all')} <ArrowRight className="h-3 w-3" />
-            </Link>
+  return (
+    <div className="bg-ink-25 flex flex-col flex-1 min-h-0">
+      {/* Hero welcome */}
+      <section
+        className="relative overflow-hidden text-white"
+        style={{
+          background:
+            'linear-gradient(135deg, hsl(var(--royal-dark)) 0%, hsl(var(--royal)) 100%)',
+          padding: '56px 32px 64px',
+        }}>
+        {/* Dot grid */}
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-40"
+          style={{
+            background:
+              'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.10) 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
+          }}
+        />
+        {/* Decorative waves */}
+        <svg
+          aria-hidden
+          viewBox="0 0 1200 400"
+          preserveAspectRatio="none"
+          className="absolute inset-0 w-full h-full opacity-50">
+          <path
+            d="M0,80 Q300,260 600,200 T1200,180 L1200,400 L0,400 Z"
+            fill="none"
+            stroke="rgba(127,182,255,0.18)"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M0,120 Q300,280 600,240 T1200,220 L1200,400 L0,400 Z"
+            fill="none"
+            stroke="rgba(127,182,255,0.14)"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M0,160 Q300,310 600,290 T1200,260 L1200,400 L0,400 Z"
+            fill="none"
+            stroke="rgba(127,182,255,0.10)"
+            strokeWidth="1.5"
+          />
+        </svg>
+
+        <div className="relative max-w-[1280px] mx-auto flex flex-col items-center text-center">
+          <div className="font-extrabold text-2xl tracking-[0.08em] text-white/85 mb-4">
+            a<span className="text-royal-light">×</span>elor
           </div>
+          <h1 className="m-0 text-[38px] font-extrabold tracking-[-0.025em] leading-[1.15]">
+            {welcomeTitle}
+          </h1>
+          <p className="mt-3 text-[17px] text-white/85 max-w-2xl">
+            {welcomeSubtitle}
+          </p>
+        </div>
+      </section>
+
+      <div className="max-w-[1280px] w-full mx-auto px-8 py-10">
+        {showNews && (
           <Suspense fallback={<NewsSkeleton />}>
             <LatestNews
               workspace={workspace}
@@ -124,71 +140,66 @@ export async function Home({
               workspaceURI={workspaceURI}
             />
           </Suspense>
-        </div>
-      )}
+        )}
 
-      {(hasContents || showHyperlinks) && (
-        <div
-          className={cn('container my-6 mx-auto grid grid-cols-1 gap-6', {
-            'lg:grid-cols-[1fr_200px]': showHyperlinks && hasContents,
-          })}>
-          {hasContents && (
-            <div className="space-y-6 min-w-0">
-              <h2 className="font-semibold text-xl">
-                {await t('Latest contents')}
-              </h2>
+        {(hasContents || showHyperlinks) && (
+          <div
+            className={cn(
+              'grid grid-cols-1 gap-6 mt-11',
+              hasContents && showHyperlinks
+                ? 'lg:grid-cols-[1fr_1fr_1fr_240px]'
+                : hasContents
+                  ? 'lg:grid-cols-3'
+                  : '',
+            )}>
+            {showEvents && (
+              <Suspense fallback={<ContentCardSkeleton />}>
+                <EventsCard
+                  workspace={workspace}
+                  client={client}
+                  user={user}
+                  workspaceURI={workspaceURI}
+                />
+              </Suspense>
+            )}
+            {showForum && (
+              <Suspense fallback={<ContentCardSkeleton />}>
+                <ForumCard
+                  workspace={workspace}
+                  client={client}
+                  user={user}
+                  workspaceURI={workspaceURI}
+                />
+              </Suspense>
+            )}
+            {showResources && (
+              <Suspense fallback={<ContentCardSkeleton />}>
+                <ResourcesCard
+                  workspace={workspace}
+                  client={client}
+                  user={user}
+                  workspaceURI={workspaceURI}
+                />
+              </Suspense>
+            )}
+            {showHyperlinks && (
+              <aside>
+                <h3 className="m-0 mb-3.5 text-lg font-bold tracking-[-0.015em] text-ink-900">
+                  {await t('Useful links')}
+                </h3>
+                <HyperlinkGrid config={config} workspaceURI={workspaceURI} />
+              </aside>
+            )}
+          </div>
+        )}
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {showEvents && (
-                  <Suspense fallback={<ContentCardSkeleton />}>
-                    <EventsCard
-                      workspace={workspace}
-                      client={client}
-                      user={user}
-                      workspaceURI={workspaceURI}
-                    />
-                  </Suspense>
-                )}
-                {showForum && (
-                  <Suspense fallback={<ContentCardSkeleton />}>
-                    <ForumCard
-                      workspace={workspace}
-                      client={client}
-                      user={user}
-                      workspaceURI={workspaceURI}
-                    />
-                  </Suspense>
-                )}
-
-                {showResources && (
-                  <Suspense fallback={<ContentCardSkeleton />}>
-                    <ResourcesCard
-                      workspace={workspace}
-                      client={client}
-                      user={user}
-                      workspaceURI={workspaceURI}
-                    />
-                  </Suspense>
-                )}
-              </div>
-            </div>
-          )}
-
-          {showHyperlinks && (
-            <aside className="space-y-6">
-              <h2 className="font-semibold text-xl">
-                {await t('Useful links')}
-              </h2>
-              <HyperlinkCard config={config} workspaceURI={workspaceURI} />
-            </aside>
-          )}
-        </div>
-      )}
-
-      <div className="lg:hidden h-20" />
+        <div className="lg:hidden h-20" />
+      </div>
     </div>
   );
 }
+
+// ---- Sub-sections ---- //
 
 async function LatestNews({
   workspace,
@@ -205,44 +216,99 @@ async function LatestNews({
     workspace,
     client,
     user,
-    limit: 5,
+    limit: 3,
   });
 
-  if (!news?.length)
-    return (
-      <h2 className="text-xl font-semibold">{await t('No news available.')}</h2>
-    );
+  if (!news?.length) return null;
 
   return (
-    <Carousel
-      pagination={false}
-      className="overflow-visible pb-2"
-      slideClassName="!h-auto [&>*]:h-full"
-      breakpoints={{0: {slidesPerView: 1}, 768: {slidesPerView: 3}}}>
-      {news.map(
-        ({
-          id,
-          title,
-          image,
-          categorySet,
-          description,
-          publicationDateTime,
-          slug,
-        }: any) => (
-          <BigNewsCard
-            key={id}
-            navigatingPathFrom={SUBAPP_CODES.news}
-            slug={slug}
-            image={image}
+    <section>
+      <SectionHeader
+        title={await t('Latest news')}
+        seeAllHref={`${workspaceURI}/${SUBAPP_CODES.news}`}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
+        {news.slice(0, 3).map((article: any) => (
+          <HeroNewsCard
+            key={article.id}
+            article={article}
             workspaceURI={workspaceURI}
-            categorySet={categorySet}
-            title={title}
-            description={description}
-            publicationDateTime={publicationDateTime}
           />
-        ),
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function HeroNewsCard({
+  article,
+  workspaceURI,
+}: {
+  article: any;
+  workspaceURI: string;
+}) {
+  const {slug, image, title, description, categorySet, publicationDateTime} =
+    article;
+  const category = categorySet?.[0];
+  const imageURL = image?.id
+    ? withBasePath(
+        `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image?isFullView=true`,
+      )
+    : withBasePath(NO_IMAGE_URL);
+
+  return (
+    <Link
+      href={`${workspaceURI}/${SUBAPP_CODES.news}/${SUBAPP_PAGE.article}/${slug}`}
+      className={cn(
+        'group relative block rounded-[14px] overflow-hidden cursor-pointer h-[360px]',
+        'border border-ink-100',
+        'transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-md',
+      )}>
+      <Image
+        src={imageURL}
+        alt={image?.fileName || 'News image'}
+        fill
+        className="object-cover"
+        sizes="(min-width: 1024px) 420px, (min-width: 768px) 33vw, 100vw"
+      />
+      {category && (
+        <span
+          className="absolute top-3.5 left-3.5 px-2.5 py-1 rounded-md bg-royal text-white text-[11px] font-bold tracking-[0.04em]"
+          style={{lineHeight: 1.4}}>
+          {category.name}
+        </span>
       )}
-    </Carousel>
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.85) 100%)',
+        }}
+      />
+      <div className="absolute left-0 right-0 bottom-0 px-[18px] pb-[18px] text-white">
+        <h3
+          className="m-0 mb-2 text-lg font-bold tracking-[-0.015em] leading-snug line-clamp-2"
+          style={{textShadow: '0 1px 4px rgba(0,0,0,0.4)'}}>
+          {title}
+        </h3>
+        {description && (
+          <p
+            className="m-0 text-[12.5px] text-white/85 line-clamp-2"
+            style={{
+              lineHeight: 1.5,
+              textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+            }}>
+            <InnerHTML content={description} />
+          </p>
+        )}
+        {publicationDateTime && (
+          <div className="mt-2.5 text-[11px] font-semibold text-white/60">
+            <DateDisplay date={publicationDateTime} />
+          </div>
+        )}
+      </div>
+    </Link>
   );
 }
 
@@ -267,47 +333,46 @@ async function EventsCard({
   });
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-medium flex items-center gap-2">
-          <Icon name="event" className="h-5 w-5 text-primary" />
-          {await t('Events')}
-        </CardTitle>
-        {events?.length > 0 && (
-          <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.events}`}
-            className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-            {await t('View all')} <ArrowRight className="h-3 w-3" />
-          </Link>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {events && events.length > 0 ? (
-          events.map((event: any) => (
-            <Link
-              key={event.id}
-              href={`${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`}
-              className="block group">
-              <div className="flex flex-col space-y-1 rounded-md border p-3 hover:bg-muted/50 transition-colors">
-                <span className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
+    <ContentColumn
+      title={await t('Events')}
+      icon="event"
+      seeAllHref={`${workspaceURI}/${SUBAPP_CODES.events}`}
+      emptyLabel={await t('No upcoming events')}
+      hasItems={Boolean(events?.length)}>
+      <ul className="flex flex-col gap-3">
+        {events?.map((event: any) => {
+          const category = event.eventCategorySet?.[0];
+          return (
+            <li key={event.id}>
+              <Link
+                href={`${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`}
+                className={cn(
+                  'block p-3 rounded-[10px] border border-ink-100 bg-ink-25',
+                  'transition-colors hover:bg-royal-pale',
+                )}>
+                <p className="text-sm font-bold text-ink-900 leading-snug line-clamp-1 mb-1.5">
                   {event.eventTitle}
-                </span>
-                <div className="flex justify-between text-xs text-muted-foreground text-right">
-                  <BadgeList items={clone(event.eventCategorySet)} />
-                  <Suspense>
-                    <DateDisplay date={event.eventStartDateTime} />
-                  </Suspense>
+                </p>
+                <div className="flex items-center justify-between gap-2">
+                  {category && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-royal text-white text-[10px] font-bold tracking-[0.02em]">
+                      {category.name}
+                    </span>
+                  )}
+                  {event.eventStartDateTime && (
+                    <span className="text-[11.5px] text-ink-500 tabular-nums">
+                      <Suspense>
+                        <DateDisplay date={event.eventStartDateTime} />
+                      </Suspense>
+                    </span>
+                  )}
                 </div>
-              </div>
-            </Link>
-          ))
-        ) : (
-          <div className="text-sm text-muted-foreground text-center py-4">
-            {await t('No upcoming events')}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </ContentColumn>
   );
 }
 
@@ -322,71 +387,57 @@ async function ForumCard({
   user: User | undefined;
   workspaceURI: string;
 }) {
-  const forumPosts = await findRecentlyActivePosts({
+  const posts = await findRecentlyActivePosts({
     workspaceID: workspace.id,
     client,
     user,
     limit: 3,
   });
+  const byLabel = await t('by');
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-medium flex items-center gap-2">
-          <Icon name="forum" className="h-5 w-5 text-primary" />
-          {await t('Forum')}
-        </CardTitle>
-        {forumPosts?.length > 0 && (
-          <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.forum}`}
-            className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-            {await t('View all')} <ArrowRight className="h-3 w-3" />
-          </Link>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {forumPosts && forumPosts.length > 0 ? (
-          forumPosts.map((post: RecentlyActivePost) => {
-            const note = parseCommentContent(post.comment.note);
-            if (typeof note !== 'string') return null;
-            return (
+    <ContentColumn
+      title={await t('Forum')}
+      icon="forum"
+      seeAllHref={`${workspaceURI}/${SUBAPP_CODES.forum}`}
+      emptyLabel={await t('No recent discussions')}
+      hasItems={Boolean(posts?.length)}>
+      <ul className="flex flex-col gap-3.5">
+        {posts?.map((post: RecentlyActivePost) => {
+          const note = parseCommentContent(post.comment.note);
+          if (typeof note !== 'string') return null;
+          const author =
+            post.comment.partner?.simpleFullName ||
+            post.comment.partner?.name ||
+            post.comment.createdBy?.fullName ||
+            '';
+          return (
+            <li key={post.id}>
               <Link
-                key={post.id}
                 href={`${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`}
                 className="block group">
-                <div className="flex flex-col space-y-1 rounded-md border p-3 hover:bg-muted/50 transition-colors">
-                  <InnerHTML
-                    content={note}
-                    className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2"
-                  />
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <div>
-                      {t('by')}{' '}
-                      <span className="font-medium truncate">
-                        {post.comment.partner
-                          ? (post.comment.partner.simpleFullName ??
-                            post.comment.partner.name)
-                          : post.comment.createdBy?.fullName}
-                      </span>{' '}
-                    </div>
-                    <Suspense>
-                      <DateDisplay date={post.comment.createdOn} />
-                    </Suspense>
-                  </div>
-                  <div className="flex items-center text-xs text-muted-foreground line-clamp-1">
-                    <span className="font-medium truncate">{post.title}</span>
-                  </div>
-                </div>{' '}
+                <div className="text-[12.5px] text-ink-500 mb-1">
+                  <strong className="text-ink-700 font-semibold">
+                    {byLabel} {author}
+                  </strong>{' '}
+                  ·{' '}
+                  <Suspense>
+                    <DateDisplay date={post.comment.createdOn} />
+                  </Suspense>
+                </div>
+                <InnerHTML
+                  content={note}
+                  className="text-[13.5px] font-semibold text-ink-900 leading-snug line-clamp-2 mb-1"
+                />
+                <div className="text-xs font-semibold text-royal line-clamp-1">
+                  {post.title}
+                </div>
               </Link>
-            );
-          })
-        ) : (
-          <div className="text-sm text-muted-foreground text-center py-4">
-            {await t('No recent discussions')}
-          </div>
-        )}{' '}
-      </CardContent>
-    </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </ContentColumn>
   );
 }
 
@@ -409,65 +460,50 @@ async function ResourcesCard({
   });
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-medium flex items-center gap-2">
-          <Icon name="resource" className="h-5 w-5 text-primary" />
-          {await t('Resources')}
-        </CardTitle>
-        {files?.length > 0 && (
-          <Link
-            href={`${workspaceURI}/${SUBAPP_CODES.resources}`}
-            className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-            {await t('View all')} <ArrowRight className="h-3 w-3" />
-          </Link>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {files && files.length > 0 ? (
-          files.map(file => {
-            return (
-              <Link
-                key={file.id}
-                href={`${workspaceURI}/${SUBAPP_CODES.resources}/${file.id}`}
-                className="block group rounded-md border p-3 hover:bg-muted/50 transition-colors">
-                <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
-                  <FileIcon
-                    fileType={file.metaFile?.fileType}
-                    className={'h-6 w-6 shrink-0'}
-                  />
-                  <div className="flex flex-col min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm group-hover:text-primary transition-colors truncate">
-                        {file.fileName}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-xs text-muted-foreground gap-2">
-                      {file.metaFile?.sizeText && (
-                        <p className="line-clamp-1">{file.metaFile.sizeText}</p>
-                      )}
-                      {file.metaFile?.createdOn && (
-                        <span className="line-clamp-1 ms-auto">
-                          <DateDisplay date={file.metaFile.createdOn} />
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })
-        ) : (
-          <div className="text-sm text-muted-foreground text-center py-4">
-            {await t('No recent resources')}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <ContentColumn
+      title={await t('Resources')}
+      icon="resource"
+      seeAllHref={`${workspaceURI}/${SUBAPP_CODES.resources}`}
+      emptyLabel={await t('No recent resources')}
+      hasItems={Boolean(files?.length)}>
+      <ul className="flex flex-col gap-2 -mx-1">
+        {files?.map(file => (
+          <li key={file.id}>
+            <Link
+              href={`${workspaceURI}/${SUBAPP_CODES.resources}/${file.id}`}
+              className={cn(
+                'flex items-center gap-2.5 px-2 py-2 rounded-lg',
+                'transition-colors hover:bg-ink-25',
+              )}>
+              <FileIcon
+                fileType={file.metaFile?.fileType}
+                className="h-8 w-8 shrink-0 rounded-md"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-[12.5px] font-semibold text-ink-900 truncate">
+                  {file.fileName}
+                </p>
+                <p className="text-[10.5px] text-ink-500 tabular-nums">
+                  {file.metaFile?.sizeText || '--'}
+                  {file.metaFile?.createdOn && (
+                    <>
+                      {' · '}
+                      <Suspense>
+                        <DateDisplay date={file.metaFile.createdOn} />
+                      </Suspense>
+                    </>
+                  )}
+                </p>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </ContentColumn>
   );
 }
 
-async function HyperlinkCard({
+function HyperlinkGrid({
   config,
   workspaceURI,
 }: {
@@ -479,7 +515,7 @@ async function HyperlinkCard({
   if (!hyperlinkList?.length) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3">
       {hyperlinkList.map(item => (
         <a
           key={item.id}
@@ -487,13 +523,17 @@ async function HyperlinkCard({
           title={item.title ?? undefined}
           target="_blank"
           rel="noopener noreferrer"
-          className="block p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+          className={cn(
+            'aspect-square rounded-[14px] bg-white border border-ink-100',
+            'grid place-items-center overflow-hidden p-3',
+            'transition-transform duration-150 hover:scale-[1.04] hover:shadow-soft-md',
+          )}>
           <Image
             src={withBasePath(`${workspaceURI}/api/hyperlink/${item.id}/logo`)}
-            alt={item.title || 'Related Link'}
-            width={200}
-            height={100}
-            className="w-full h-auto object-contain"
+            alt={`Related link`}
+            width={120}
+            height={120}
+            className="w-full h-full object-contain"
           />
         </a>
       ))}
@@ -501,36 +541,98 @@ async function HyperlinkCard({
   );
 }
 
+// ---- Building blocks ---- //
+
+function SectionHeader({
+  title,
+  seeAllHref,
+}: {
+  title: string;
+  seeAllHref?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-[18px]">
+      <h2 className="m-0 text-[22px] font-bold tracking-[-0.02em] text-ink-900">
+        {title}
+      </h2>
+      {seeAllHref && <SeeAll href={seeAllHref} />}
+    </div>
+  );
+}
+
+async function SeeAll({href}: {href: string}) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-royal hover:underline">
+      {await t('View all')} <ArrowRight className="h-3 w-3" />
+    </Link>
+  );
+}
+
+async function ContentColumn({
+  title,
+  icon,
+  seeAllHref,
+  emptyLabel,
+  hasItems,
+  children,
+}: {
+  title: string;
+  icon: string;
+  seeAllHref?: string;
+  emptyLabel: string;
+  hasItems: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="bg-white border border-ink-100 rounded-[14px] p-[18px] shadow-xs">
+      <div className="flex items-center justify-between mb-3.5">
+        <div className="inline-flex items-center gap-2 text-[17px] font-bold text-ink-900">
+          <Icon name={icon} className="h-[17px] w-[17px] text-royal" />
+          {title}
+        </div>
+        {hasItems && seeAllHref && <SeeAll href={seeAllHref} />}
+      </div>
+      {hasItems ? (
+        children
+      ) : (
+        <p className="py-4 text-center text-sm text-ink-400">{emptyLabel}</p>
+      )}
+    </section>
+  );
+}
+
+// ---- Skeletons ---- //
+
 export function NewsSkeleton() {
   return (
-    <div className="space-y-6">
-      <Skeleton className="h-7 w-48" /> {/* Title "Latest news" */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <section>
+      <div className="flex items-center justify-between mb-[18px]">
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-20" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
         {[1, 2, 3].map(i => (
-          <Skeleton key={i} className="h-[280px] w-full rounded-xl" />
+          <Skeleton key={i} className="h-[360px] w-full rounded-[14px]" />
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
 export function ContentCardSkeleton() {
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <Skeleton className="h-6 w-32" />
+    <section className="bg-white border border-ink-100 rounded-[14px] p-[18px] shadow-xs">
+      <div className="flex items-center justify-between mb-3.5">
+        <Skeleton className="h-5 w-28" />
         <Skeleton className="h-4 w-16" />
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </div>
+      <div className="flex flex-col gap-3">
         {[1, 2, 3].map(i => (
-          <div
-            key={i}
-            className="flex flex-col space-y-2 rounded-md border p-3">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-1/2" />
-          </div>
+          <Skeleton key={i} className="h-16 w-full rounded-[10px]" />
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

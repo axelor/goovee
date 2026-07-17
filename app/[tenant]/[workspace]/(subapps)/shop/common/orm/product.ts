@@ -163,6 +163,18 @@ const getProductFields = ({
         },
       },
     },
+    productCategory: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+    portalCategorySet: {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+    },
     slug: true,
   }) as const;
 
@@ -226,6 +238,10 @@ const getWhereClause = ({
     AND: [
       filterPrivate({user}),
       archived ? {archived: true} : {OR: [{archived: false}, {archived: null}]},
+      // The shop only exposes sellable products — this also keeps non-sellable
+      // items out even when they are attached to a portal category (e.g. the
+      // "[EVENT]" product backing event registrations).
+      {sellable: true},
     ],
   };
 
