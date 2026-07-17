@@ -1,10 +1,10 @@
 import {notFound} from 'next/navigation';
 import type {Cloned} from '@/types/util';
-import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ----//
 import {getSession} from '@/auth';
-import {SUBAPP_CODES} from '@/constants';
+import {clone} from '@/utils';
+import {DEFAULT_PAGE} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import type {Workspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
@@ -12,105 +12,17 @@ import {t} from '@/locale/server';
 // ---- LOCAL IMPORTS ---- //
 import {
   findCategoryTitleBySlugName,
-  findNewsByCategoryCount,
+  findNewsByCategory,
 } from '@/subapps/news/common/orm/news';
-import {
-  CategoriesSkeleton,
-  NavMenuSkeleton,
-  LeadStoriesSkeleton,
-  CategoryHomeSkeleton,
-  CategoryNewsGridSkeleton,
-} from '@/subapps/news/common/ui/components';
-import {
-  CategoryNewsGridLayoutWrapper,
-  NavMenuWrapper,
-  SubCategorySliderWrapper,
-  CategoryPageHeaderNewsWrapper,
-} from '@/subapps/news/[[...segments]]/wrappers';
-import styles from '@/subapps/news/common/ui/styles/news.module.scss';
+import {NewsEditorial} from '@/subapps/news/common/ui/components';
+import PaginationContent from '@/subapps/news/[[...segments]]/pagination-content';
 import {NO_NEWS_AVAILABLE} from '@/subapps/news/common/constants';
 
-async function CategoryGrid({
-  segments,
-  page,
-  workspace,
-  client,
-  slug = '',
-}: {
-  segments: string[];
-  page: number;
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  slug?: string;
-}) {
-  const session = await getSession();
-  const user = session?.user;
-
-  const categoryTitle = await findCategoryTitleBySlugName({
-    slug,
-    workspace,
-    client,
-    user,
-  });
-
-  const navigatingPathFromURL = `${SUBAPP_CODES.news}/${segments?.map((slug: string) => slug).join('/')}`;
-
-  if (!categoryTitle) {
-    return notFound();
-  }
-
-  const newsCount = await findNewsByCategoryCount({
-    workspace,
-    client,
-    user,
-    slug,
-  });
-
-  if (!newsCount) {
-    return (
-      <div className="font-medium text-center flex items-center justify-center py-4 flex-1">
-        {await t(NO_NEWS_AVAILABLE)}
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto grid grid-cols-1 pb-6 px-4 gap-6 mb-20 lg:mb-0">
-      <Suspense fallback={<CategoriesSkeleton />}>
-        <SubCategorySliderWrapper
-          slug={slug}
-          title={categoryTitle}
-          workspace={workspace}
-          user={user}
-          client={client}
-        />
-      </Suspense>
-      <Suspense fallback={<LeadStoriesSkeleton />}>
-        <CategoryPageHeaderNewsWrapper
-          workspace={workspace}
-          client={client}
-          slug={slug}
-          navigatingPathFrom={navigatingPathFromURL}
-          page={page}
-        />
-      </Suspense>
-      <Suspense fallback={<CategoryNewsGridSkeleton />}>
-        <CategoryNewsGridLayoutWrapper
-          workspace={workspace}
-          client={client}
-          slug={slug}
-          navigatingPathFrom={navigatingPathFromURL}
-          page={page}
-        />
-      </Suspense>
-    </div>
-  );
-}
+const CATEGORY_LIMIT = 12;
 
 export async function CategoryNews({
   workspace,
   client,
-  segments = [],
   page,
   slug,
 }: {
@@ -123,23 +35,46 @@ export async function CategoryNews({
   const session = await getSession();
   const user = session?.user;
 
+  const categoryTitle = await findCategoryTitleBySlugName({
+    slug,
+    workspace,
+    client,
+    user,
+  });
+
+  if (!categoryTitle) {
+    return notFound();
+  }
+
+  const result = await findNewsByCategory({
+    slug,
+    workspace,
+    client,
+    user,
+    page: page || DEFAULT_PAGE,
+    limit: CATEGORY_LIMIT,
+    orderBy: {publicationDateTime: 'DESC'},
+    params: {
+      select: {
+        description: true,
+        author: {simpleFullName: true},
+      },
+    },
+  }).then(clone);
+
+  const articles = (result as any)?.news || [];
+  const pageInfo = (result as any)?.pageInfo;
+
   return (
-    <div className={`flex flex-col h-full flex-1 ${styles['news-container']}`}>
-      <div className="hidden lg:block relative">
-        <Suspense fallback={<NavMenuSkeleton />}>
-          <NavMenuWrapper workspace={workspace} client={client} user={user} />
-        </Suspense>
-      </div>
-      <Suspense fallback={<CategoryHomeSkeleton />}>
-        <CategoryGrid
-          segments={segments}
-          page={Number(page)}
-          workspace={workspace}
-          client={client}
-          slug={slug}
-        />
-      </Suspense>
-    </div>
+    <NewsEditorial articles={articles} heading={categoryTitle}>
+      {articles.length === 0 ? (
+        <div className="py-16 text-center font-medium text-ink-500">
+          {await t(NO_NEWS_AVAILABLE)}
+        </div>
+      ) : (
+        <PaginationContent pageInfo={pageInfo} />
+      )}
+    </NewsEditorial>
   );
 }
 

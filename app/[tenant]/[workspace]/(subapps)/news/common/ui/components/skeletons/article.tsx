@@ -2,11 +2,11 @@
 
 // ---- CORE IMPORTS ---- //
 import {CommentsSkeleton} from '@/lib/core/comments';
+import {Skeleton} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {
   FeedListSkeleton,
-  NewsInfoSkeleton,
   BreadcrumbsSkeleton,
 } from '@/subapps/news/common/ui/components';
 
@@ -17,8 +17,12 @@ export function ArticleSkeleton() {
         <BreadcrumbsSkeleton />
       </div>
       <div className=" grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <NewsInfoSkeleton />
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <Skeleton className="h-72 w-full rounded-xl" />
+          <Skeleton className="h-7 w-3/4" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
         </div>
         <div className="w-full flex flex-col gap-6">
           {/* RelatedNews Section */}
