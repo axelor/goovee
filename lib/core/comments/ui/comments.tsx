@@ -34,6 +34,7 @@ import type {
 } from '../types';
 import {CommentInput} from './comment-input';
 import {CommentsList} from './comments-list';
+import {getInitials} from './comments-list-item';
 import {useComments} from '../hooks';
 
 export type CommentsProps = {
@@ -60,6 +61,7 @@ export type CommentsProps = {
   disableReply?: boolean;
   placeholder?: string;
   attachmentDownloadUrl: string;
+  variant?: 'default' | 'conversation';
 };
 
 export function Comments(props: CommentsProps) {
@@ -87,22 +89,27 @@ export function Comments(props: CommentsProps) {
     disableReply,
     placeholder,
     attachmentDownloadUrl,
+    variant = 'default',
   } = props;
+  const isConversation = variant === 'conversation';
   const inputOnTop = inputPosition === 'top';
   const [showComments, setShowComments] = useState(showCommentsByDefault);
   const [sortBy, setSortBy] = useState<SORT_TYPE>(sortByProp);
   const hasScrolled = useRef(false);
 
-  const {comments, totalComments, loadMore, onCreate, hasMore} = useComments({
-    recordId,
-    subapp,
-    sortBy,
-    limit,
-    newCommentOnTop: inputPosition === 'top',
-    showRepliesInMainThread: showRepliesInMainThread,
-    fetchComments,
-    createComment,
-  });
+  const {comments, totalComments, loadMore, onCreate, hasMore, fetching} =
+    useComments({
+      recordId,
+      subapp,
+      sortBy,
+      limit,
+      newCommentOnTop: inputPosition === 'top',
+      showRepliesInMainThread: showRepliesInMainThread,
+      fetchComments,
+      createComment,
+    });
+  // Initial fetch: no comments loaded yet — show a skeleton, not a blank gap.
+  const isInitialLoading = fetching && comments.length === 0;
   const {data: session} = authClient.useSession();
   const isLoggedIn = !!session?.user?.id;
   const isDisabled = !isLoggedIn || disabled;
@@ -163,21 +170,38 @@ export function Comments(props: CommentsProps) {
     if (value) setSortBy(value as SORT_TYPE);
   }, []);
 
-  const renderCommentInput = () => (
-    <CommentInput
-      disabled={isDisabled}
-      className={cn(
-        'placeholder:text-sm placeholder:text-gray border bg-white',
-        isDisabled && 'bg-gray-light placeholder:text-gray-dark',
-      )}
-      placeholderText={
-        isLoggedIn
-          ? i18n.t(placeholder || COMMENT)
-          : i18n.t(DISABLED_COMMENT_PLACEHOLDER)
-      }
-      onSubmit={handleCreate}
-    />
-  );
+  const renderCommentInput = () => {
+    const input = (
+      <CommentInput
+        bare={isConversation}
+        disabled={isDisabled}
+        className={cn(
+          'placeholder:text-sm placeholder:text-gray',
+          !isConversation && 'border bg-white',
+          isConversation &&
+            'border-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0',
+          isDisabled && 'bg-gray-light placeholder:text-gray-dark',
+        )}
+        placeholderText={
+          isLoggedIn
+            ? i18n.t(placeholder || COMMENT)
+            : i18n.t(DISABLED_COMMENT_PLACEHOLDER)
+        }
+        onSubmit={handleCreate}
+      />
+    );
+
+    if (!isConversation) return input;
+
+    return (
+      <div className="sticky bottom-0 flex items-start gap-3 rounded-2xl border border-ink-100 bg-white p-4 shadow-md transition-shadow focus-within:border-royal focus-within:shadow-[0_0_0_3px_rgba(21,84,181,0.12)]">
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-peach-avatar text-[11px] font-bold text-white">
+          {getInitials(session?.user?.name ?? session?.user?.email)}
+        </div>
+        <div className="min-w-0 flex-1">{input}</div>
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col">
@@ -220,11 +244,29 @@ export function Comments(props: CommentsProps) {
             {renderCommentInput()}
           </div>
         )}
-        {showComments && comments?.length ? (
+        {isInitialLoading && showComments ? (
           <div
             className={cn(
-              'border-t flex flex-col gap-4',
-              usePopUpStyles ? 'py-4 px-4 md:px-0' : 'p-4',
+              'flex flex-col gap-4',
+              !isConversation && 'border-t',
+              isConversation
+                ? 'gap-3.5'
+                : usePopUpStyles
+                  ? 'py-4 px-4 md:px-0'
+                  : 'p-4',
+            )}>
+            <ThreadSkeleton conversation={isConversation} />
+          </div>
+        ) : showComments && comments?.length ? (
+          <div
+            className={cn(
+              'flex flex-col gap-4',
+              !isConversation && 'border-t',
+              isConversation
+                ? 'gap-3.5'
+                : usePopUpStyles
+                  ? 'py-4 px-4 md:px-0'
+                  : 'p-4',
             )}>
             {!hideSortBy && (
               <div className="w-full flex gap-4 items-center">
@@ -256,6 +298,7 @@ export function Comments(props: CommentsProps) {
               trackingField={trackingField}
               disableReply={disableReply}
               attachmentDownloadUrl={attachmentDownloadUrl}
+              variant={variant}
             />
 
             {!hideCommentsFooter && (
@@ -293,6 +336,37 @@ export function Comments(props: CommentsProps) {
         {!inputOnTop && renderCommentInput()}
       </div>
     </div>
+  );
+}
+
+function ThreadSkeleton({
+  conversation,
+  count = 3,
+}: {
+  conversation?: boolean;
+  count?: number;
+}) {
+  return (
+    <>
+      {Array.from({length: count}).map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            'rounded-xl border border-ink-100 bg-white p-[18px]',
+            !conversation && 'shadow-xs',
+          )}>
+          <div className="flex items-center gap-2.5">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+          <div className="mt-3 flex flex-col gap-2">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-4/5" />
+          </div>
+        </div>
+      ))}
+    </>
   );
 }
 
