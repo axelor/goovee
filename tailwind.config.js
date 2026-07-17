@@ -1,4 +1,4 @@
-const { fontFamily } = require('tailwindcss/defaultTheme');
+const {fontFamily} = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -173,23 +173,152 @@ module.exports = {
             dark: 'hsl(var(--palette-deeppurple-dark))',
           },
         },
+        // ---- New design system (additive) ----
+        royal: {
+          DEFAULT: 'hsl(var(--royal))',
+          dark: 'hsl(var(--royal-dark))',
+          light: 'hsl(var(--royal-light))',
+          pale: 'hsl(var(--royal-pale))',
+          border: 'hsl(var(--royal-border))',
+        },
+        mint: {
+          50: 'hsl(var(--mint-50))',
+          100: 'hsl(var(--mint-100))',
+          200: 'hsl(var(--mint-200))',
+          300: 'hsl(var(--mint-300))',
+          400: 'hsl(var(--mint-400))',
+          500: 'hsl(var(--mint-500))',
+          600: 'hsl(var(--mint-600))',
+          700: 'hsl(var(--mint-700))',
+          800: 'hsl(var(--mint-800))',
+          900: 'hsl(var(--mint-900))',
+        },
+        ink: {
+          0: 'hsl(var(--ink-0))',
+          25: 'hsl(var(--ink-25))',
+          50: 'hsl(var(--ink-50))',
+          100: 'hsl(var(--ink-100))',
+          150: 'hsl(var(--ink-150))',
+          200: 'hsl(var(--ink-200))',
+          300: 'hsl(var(--ink-300))',
+          400: 'hsl(var(--ink-400))',
+          500: 'hsl(var(--ink-500))',
+          600: 'hsl(var(--ink-600))',
+          700: 'hsl(var(--ink-700))',
+          800: 'hsl(var(--ink-800))',
+          900: 'hsl(var(--ink-900))',
+        },
+        status: {
+          pending: {
+            bg: 'hsl(var(--status-pending-bg))',
+            fg: 'hsl(var(--status-pending-fg))',
+            dot: 'hsl(var(--status-pending-dot))',
+          },
+          confirmed: {
+            bg: 'hsl(var(--status-confirmed-bg))',
+            fg: 'hsl(var(--status-confirmed-fg))',
+            dot: 'hsl(var(--status-confirmed-dot))',
+          },
+          shipped: {
+            bg: 'hsl(var(--status-shipped-bg))',
+            fg: 'hsl(var(--status-shipped-fg))',
+            dot: 'hsl(var(--status-shipped-dot))',
+          },
+          delivered: {
+            bg: 'hsl(var(--status-delivered-bg))',
+            fg: 'hsl(var(--status-delivered-fg))',
+            dot: 'hsl(var(--status-delivered-dot))',
+          },
+          paid: {
+            bg: 'hsl(var(--status-paid-bg))',
+            fg: 'hsl(var(--status-paid-fg))',
+            dot: 'hsl(var(--status-paid-dot))',
+          },
+          accepted: {
+            bg: 'hsl(var(--status-accepted-bg))',
+            fg: 'hsl(var(--status-accepted-fg))',
+            dot: 'hsl(var(--status-accepted-dot))',
+          },
+          cancelled: {
+            bg: 'hsl(var(--status-cancelled-bg))',
+            fg: 'hsl(var(--status-cancelled-fg))',
+            dot: 'hsl(var(--status-cancelled-dot))',
+          },
+          unpaid: {
+            bg: 'hsl(var(--status-unpaid-bg))',
+            fg: 'hsl(var(--status-unpaid-fg))',
+            dot: 'hsl(var(--status-unpaid-dot))',
+          },
+          rejected: {
+            bg: 'hsl(var(--status-rejected-bg))',
+            fg: 'hsl(var(--status-rejected-fg))',
+            dot: 'hsl(var(--status-rejected-dot))',
+          },
+          overdue: {
+            bg: 'hsl(var(--status-overdue-bg))',
+            fg: 'hsl(var(--status-overdue-fg))',
+            dot: 'hsl(var(--status-overdue-dot))',
+          },
+          partial: {
+            bg: 'hsl(var(--status-partial-bg))',
+            fg: 'hsl(var(--status-partial-fg))',
+            dot: 'hsl(var(--status-partial-dot))',
+          },
+          proposal: {
+            bg: 'hsl(var(--status-proposal-bg))',
+            fg: 'hsl(var(--status-proposal-fg))',
+            dot: 'hsl(var(--status-proposal-dot))',
+          },
+          draft: {
+            bg: 'hsl(var(--status-draft-bg))',
+            fg: 'hsl(var(--status-draft-fg))',
+            dot: 'hsl(var(--status-draft-dot))',
+          },
+          expired: {
+            bg: 'hsl(var(--status-expired-bg))',
+            fg: 'hsl(var(--status-expired-fg))',
+            dot: 'hsl(var(--status-expired-dot))',
+          },
+          feedback: {
+            bg: 'hsl(var(--status-feedback-bg))',
+            fg: 'hsl(var(--status-feedback-fg))',
+            dot: 'hsl(var(--status-feedback-dot))',
+          },
+        },
       },
       fontFamily: {
         sans: ['var(--font-sans)', ...fontFamily.sans],
+        mono: ['var(--font-mono)', ...fontFamily.mono],
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        xl: '14px',
+        '2xl': '20px',
+        '3xl': '28px',
+      },
+      boxShadow: {
+        xs: 'var(--sh-xs)',
+        'soft-sm': 'var(--sh-sm)',
+        'soft-md': 'var(--sh-md)',
+        'soft-lg': 'var(--sh-lg)',
+        'soft-xl': 'var(--sh-xl)',
+      },
+      backgroundImage: {
+        'royal-gradient':
+          'linear-gradient(180deg, hsl(var(--royal)) 0%, hsl(var(--royal-dark)) 100%)',
+        'mint-logo': 'linear-gradient(135deg, #4ebd87, #1f8556)',
+        'peach-avatar': 'linear-gradient(135deg, #ffd58a, #ff9b6b)',
       },
       keyframes: {
         'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
+          from: {height: '0'},
+          to: {height: 'var(--radix-accordion-content-height)'},
         },
         'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
+          from: {height: 'var(--radix-accordion-content-height)'},
+          to: {height: '0'},
         },
       },
       animation: {

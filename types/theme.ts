@@ -40,6 +40,54 @@ export type Theme = {
     input?: string;
     ring?: string;
 
+    /* Redesign primary accent (sidebar, CTAs). CSS vars: --royal,
+     * --royal-dark, --royal-light, --royal-pale, --royal-border. */
+    royal?: {
+      default?: string;
+      dark?: string;
+      light?: string;
+      pale?: string;
+      border?: string;
+    };
+
+    /* Redesign semantic success accent. CSS vars: --mint-50 … --mint-900. */
+    mint?: Partial<
+      Record<
+        | '50'
+        | '100'
+        | '200'
+        | '300'
+        | '400'
+        | '500'
+        | '600'
+        | '700'
+        | '800'
+        | '900',
+        string
+      >
+    >;
+
+    /* Redesign neutral scale (text, surfaces, borders). CSS vars:
+     * --ink-0, --ink-25, --ink-50 … --ink-900. */
+    ink?: Partial<
+      Record<
+        | '0'
+        | '25'
+        | '50'
+        | '100'
+        | '150'
+        | '200'
+        | '300'
+        | '400'
+        | '500'
+        | '600'
+        | '700'
+        | '800'
+        | '900',
+        string
+      >
+    >;
+
     palette?: Record<string, Record<string, string>>;
   };
   radius?: string;
