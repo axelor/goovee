@@ -83,6 +83,109 @@ export async function fetchLatestFolders({
   });
 }
 
+export async function fetchPinnedFoldersWithMeta({
+  workspaceURL,
+  client,
+  user,
+}: {
+  workspaceURL: string;
+  client: Client;
+  user?: User;
+}) {
+  if (!workspaceURL) return [];
+
+  const folders = await client.aOSDMSFile.find({
+    where: {
+      isDirectory: true,
+      isHomepage: true,
+      workspaceSet: {url: workspaceURL},
+      AND: [
+        filterPrivate({user}),
+        {OR: [{archived: false}, {archived: null}]},
+      ],
+    },
+    select: {
+      fileName: true,
+      parent: {id: true, fileName: true},
+      contentType: true,
+      description: true,
+      colorSelect: true,
+      logoSelect: true,
+      updatedOn: true,
+    },
+    orderBy: {updatedOn: 'DESC'} as any,
+    take: 12,
+  });
+
+  // For each folder, count its children files (cheap: one extra query per folder)
+  const result = await Promise.all(
+    folders.map(async folder => {
+      const itemCount = await client.aOSDMSFile.find({
+        where: {
+          isDirectory: {ne: true},
+          parent: {id: folder.id},
+          AND: [
+            filterPrivate({user}),
+            {OR: [{archived: false}, {archived: null}]},
+          ],
+        },
+        select: {id: true},
+      });
+      return {...folder, itemCount: itemCount.length};
+    }),
+  );
+
+  return result;
+}
+
+export async function fetchNewFiles({
+  workspaceURL,
+  client,
+  user,
+  sinceDays = 14,
+  take = 10,
+}: {
+  workspaceURL: string;
+  client: Client;
+  user?: User;
+  sinceDays?: number;
+  take?: number;
+}) {
+  if (!workspaceURL) return [];
+
+  const cutoff = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
+
+  const files = await client.aOSDMSFile.find({
+    where: {
+      isDirectory: {ne: true},
+      workspaceSet: {url: workspaceURL},
+      createdOn: {ge: cutoff},
+      AND: [
+        filterPrivate({user}),
+        {OR: [{archived: false}, {archived: null}]},
+      ],
+    },
+    select: {
+      fileName: true,
+      parent: {fileName: true},
+      createdBy: {name: true, fullName: true},
+      createdOn: true,
+      metaFile: {
+        sizeText: true,
+        createdOn: true,
+        updatedOn: true,
+        fileName: true,
+        fileSize: true,
+        fileType: true,
+      },
+    },
+    orderBy: {createdOn: 'DESC'} as any,
+    take,
+  });
+
+  return files;
+}
+
 export async function fetchFiles({
   id,
   user,
@@ -125,6 +228,50 @@ export async function fetchFiles({
       },
     },
   });
+
+  return files;
+}
+
+export async function searchFiles({
+  search,
+  workspaceURL,
+  user,
+  client,
+  take = 20,
+}: {
+  search: string;
+  workspaceURL: string;
+  user?: User;
+  client: Client;
+  take?: number;
+}) {
+  const q = search?.trim();
+  if (!workspaceURL || !q) return [];
+
+  const files = await client.aOSDMSFile
+    .find({
+      where: {
+        isDirectory: {ne: true},
+        fileName: {like: `%${q}%`},
+        workspaceSet: {
+          url: workspaceURL,
+        },
+        AND: [
+          filterPrivate({user}),
+          {OR: [{archived: false}, {archived: null}]},
+        ],
+      },
+      select: {
+        fileName: true,
+        parent: {id: true, fileName: true},
+        metaFile: {fileType: true},
+      },
+      orderBy: {
+        updatedOn: 'DESC',
+      } as any,
+      take,
+    })
+    .then(clone);
 
   return files;
 }
@@ -234,10 +381,52 @@ export async function fetchFile({
       partnerCategorySet: {select: {id: true}},
       isDirectory: true,
       description: true,
+      parent: {
+        id: true,
+        fileName: true,
+        colorSelect: true,
+        parent: {id: true, fileName: true},
+      },
     },
   });
 
   return file;
+}
+
+export async function fetchFolderWithParent({
+  id,
+  workspaceURL,
+  user,
+  client,
+}: {
+  id: string;
+  workspaceURL: string;
+  user?: User;
+  client: Client;
+}) {
+  if (!workspaceURL) return null;
+
+  const folder = await client.aOSDMSFile.findOne({
+    where: {
+      id,
+      isDirectory: true,
+      workspaceSet: {url: workspaceURL},
+      AND: [
+        filterPrivate({user}),
+        {OR: [{archived: false}, {archived: null}]},
+      ],
+    },
+    select: {
+      fileName: true,
+      description: true,
+      colorSelect: true,
+      logoSelect: true,
+      updatedOn: true,
+      parent: {fileName: true, id: true},
+    },
+  });
+
+  return folder;
 }
 
 export async function fetchColors() {
