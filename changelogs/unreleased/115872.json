@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the orders sub-app",
+  "type": "change",
+  "description": "The orders list and order detail views have been redesigned with the new design system, including a master-detail list layout, a status timeline and a reworked information layout.",
+  "scope": ["orders"]
+}

@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the ticketing sub-app",
+  "type": "change",
+  "description": "The ticketing list, ticket detail and ticket creation views have been redesigned with the new design system, including a compact header, a dedicated status sidebar and token-based status pills.",
+  "scope": ["ticketing"]
+}

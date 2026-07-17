@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the invoices sub-app",
+  "type": "change",
+  "description": "The invoices list and invoice detail views have been redesigned with the new design system, including a master-detail list layout, a paid/unpaid/partial/overdue status pill and a reworked payment total panel.",
+  "scope": ["invoices"]
+}
