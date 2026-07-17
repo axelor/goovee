@@ -25,6 +25,23 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-primary',
         link: 'text-primary underline-offset-4 hover:underline',
+
+        // ---- New design system variants (additive) ----
+        // Solid variants carry a transparent border so their content box
+        // matches the *-outline variants → text stays vertically aligned
+        // when both are placed side by side.
+        royal:
+          'bg-royal text-white border border-transparent hover:bg-royal-dark rounded-[10px] shadow-[0_1px_2px_rgba(13,30,75,0.15),0_4px_12px_rgba(13,30,75,0.12)]',
+        'royal-outline':
+          'bg-white text-royal border border-royal-border hover:bg-royal-pale rounded-[10px]',
+        'royal-ghost':
+          'bg-transparent text-royal border border-transparent hover:bg-royal-pale rounded-[10px]',
+        dark: 'bg-ink-900 text-white border border-transparent hover:bg-ink-800 rounded-[10px]',
+        mint: 'bg-mint-500 text-white border border-transparent hover:bg-mint-600 rounded-[10px] shadow-[0_1px_2px_rgba(20,63,46,0.15),0_4px_12px_rgba(20,63,46,0.10)]',
+        'mint-outline':
+          'bg-white text-mint-700 border border-mint-200 hover:bg-mint-50 rounded-[10px]',
+        'ink-outline':
+          'bg-white text-ink-700 border border-ink-150 hover:bg-ink-50 rounded-[10px]',
       },
       size: {
         default: 'h-10 px-4 py-2',
