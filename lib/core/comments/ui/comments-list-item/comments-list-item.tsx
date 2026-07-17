@@ -311,7 +311,9 @@ export const CommentListItem = ({
     <div
       className={cn(
         'flex flex-col gap-2 rounded-xl transition-colors',
-        isTopLevel && !isConversation && 'bg-white border border-ink-100 shadow-xs p-4',
+        isTopLevel &&
+          !isConversation &&
+          'bg-white border border-ink-100 shadow-xs p-4',
         isTopLevel &&
           isConversation &&
           cn(

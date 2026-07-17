@@ -140,14 +140,12 @@ export function DocsFolderView({
           <p className="text-[15px] font-semibold text-ink-700">
             {labels.emptyTitle}
           </p>
-          <p className="mt-1 text-[13px] text-ink-500">{labels.emptySubtitle}</p>
+          <p className="mt-1 text-[13px] text-ink-500">
+            {labels.emptySubtitle}
+          </p>
         </div>
       ) : view === 'list' ? (
-        <FileTable
-          files={files}
-          labels={labels}
-          viewHref={viewHref}
-        />
+        <FileTable files={files} labels={labels} viewHref={viewHref} />
       ) : (
         <FileGrid files={files} labels={labels} viewHref={viewHref} />
       )}
@@ -264,8 +262,7 @@ function FileGrid({
       {files.map(file => {
         const fresh = isNew(file, labels.newCutoffMs);
         const dateValue = file.metaFile?.updatedOn ?? file.createdOn;
-        const author =
-          file.createdBy?.fullName ?? file.createdBy?.name ?? '—';
+        const author = file.createdBy?.fullName ?? file.createdBy?.name ?? '—';
         return (
           <Link
             key={file.id}

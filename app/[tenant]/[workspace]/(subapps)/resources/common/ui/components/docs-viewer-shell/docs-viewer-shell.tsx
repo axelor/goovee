@@ -1,11 +1,7 @@
 'use client';
 
 import {Link} from '@/ui/components/link';
-import {
-  MdArrowBack,
-  MdChevronRight,
-  MdDownload,
-} from 'react-icons/md';
+import {MdArrowBack, MdChevronRight, MdDownload} from 'react-icons/md';
 
 import {SUBAPP_CODES} from '@/constants';
 import {formatDateTime} from '@/lib/core/locale/formatters';

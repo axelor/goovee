@@ -52,16 +52,10 @@ export function getFileVisual(
   )
     return {Icon: MdImage, tone: 'purple'};
 
-  if (
-    ct.includes('spreadsheet') ||
-    ['xlsx', 'xls', 'csv', 'ods'].includes(ext)
-  )
+  if (ct.includes('spreadsheet') || ['xlsx', 'xls', 'csv', 'ods'].includes(ext))
     return {Icon: MdTableChart, tone: 'green'};
 
-  if (
-    ct.includes('presentation') ||
-    ['pptx', 'ppt', 'odp'].includes(ext)
-  )
+  if (ct.includes('presentation') || ['pptx', 'ppt', 'odp'].includes(ext))
     return {Icon: MdSlideshow, tone: 'orange'};
 
   if (
@@ -71,16 +65,22 @@ export function getFileVisual(
   )
     return {Icon: MdDescription, tone: 'blue'};
 
-  if (
-    ct.startsWith('text/') ||
-    ['txt', 'md', 'rtf'].includes(ext)
-  )
+  if (ct.startsWith('text/') || ['txt', 'md', 'rtf'].includes(ext))
     return {Icon: MdArticle, tone: 'grey'};
 
   if (
-    ['js', 'ts', 'tsx', 'jsx', 'json', 'html', 'css', 'xml', 'yaml', 'yml'].includes(
-      ext,
-    ) ||
+    [
+      'js',
+      'ts',
+      'tsx',
+      'jsx',
+      'json',
+      'html',
+      'css',
+      'xml',
+      'yaml',
+      'yml',
+    ].includes(ext) ||
     ct.includes('javascript') ||
     ct.includes('html')
   )
@@ -130,7 +130,11 @@ export function DocFileIcon({
   const {Icon, tone} = getFileVisual(fileType, fileName);
   const iconSize = Math.round(size * 0.5);
   const radius =
-    rounded === 'sm' ? 'rounded-md' : rounded === 'lg' ? 'rounded-xl' : 'rounded-lg';
+    rounded === 'sm'
+      ? 'rounded-md'
+      : rounded === 'lg'
+        ? 'rounded-xl'
+        : 'rounded-lg';
   return (
     <span
       className={cn(
@@ -171,7 +175,9 @@ const FOLDER_TONE_BG: Record<string, string> = {
 
 export function getFolderToneClasses(colorSelect?: string | null): string {
   if (!colorSelect) return 'bg-royal-pale text-royal-dark';
-  return FOLDER_TONE_BG[colorSelect.toLowerCase()] ?? 'bg-royal-pale text-royal-dark';
+  return (
+    FOLDER_TONE_BG[colorSelect.toLowerCase()] ?? 'bg-royal-pale text-royal-dark'
+  );
 }
 
 export function FolderIcon({

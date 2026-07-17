@@ -41,7 +41,9 @@ export function SearchItem({
   const {workspaceURI} = useWorkspace();
 
   const src = image?.id
-    ? withBasePath(`${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`)
+    ? withBasePath(
+        `${workspaceURI}/${SUBAPP_CODES.news}/api/news/${slug}/image`,
+      )
     : withBasePath(NO_IMAGE_URL);
   const cat = categorySet?.[0]?.name;
 

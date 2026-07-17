@@ -123,7 +123,6 @@ function Content({event}: ContentProps) {
                 </span>
               </div>
             )}
-
           </div>
         </section>
 

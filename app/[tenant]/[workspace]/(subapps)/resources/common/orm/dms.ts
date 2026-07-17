@@ -99,10 +99,7 @@ export async function fetchPinnedFoldersWithMeta({
       isDirectory: true,
       isHomepage: true,
       workspaceSet: {url: workspaceURL},
-      AND: [
-        filterPrivate({user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       fileName: true,
@@ -160,10 +157,7 @@ export async function fetchNewFiles({
       isDirectory: {ne: true},
       workspaceSet: {url: workspaceURL},
       createdOn: {ge: cutoff},
-      AND: [
-        filterPrivate({user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       fileName: true,
@@ -411,10 +405,7 @@ export async function fetchFolderWithParent({
       id,
       isDirectory: true,
       workspaceSet: {url: workspaceURL},
-      AND: [
-        filterPrivate({user}),
-        {OR: [{archived: false}, {archived: null}]},
-      ],
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       fileName: true,
