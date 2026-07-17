@@ -46,3 +46,8 @@ export {SubscriptionsPriceView} from './subscriptions-price-view';
 export {EmailFormField} from './email-form-field';
 export {EventPayments} from './event-payments';
 export {CompanyAddressField} from './company-address-field';
+export {EventsTabsT2} from './tabs-t2';
+export type {EventsTabT2Key} from './tabs-t2';
+export {QRPlaceholder} from './qr-placeholder';
+export {MagazineHub} from './magazine-hub';
+export type {MagazineHubLabels} from './magazine-hub';

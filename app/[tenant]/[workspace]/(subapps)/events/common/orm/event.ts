@@ -499,6 +499,7 @@ export async function findEvents({
         },
         eventImage: {id: true},
         eventDescription: true,
+        eventPlace: true,
         eventStartDateTime: true,
         eventEndDateTime: true,
         eventAllDay: true,

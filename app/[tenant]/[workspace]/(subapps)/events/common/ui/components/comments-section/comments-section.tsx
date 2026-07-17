@@ -22,6 +22,7 @@ export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
       <h2 className="text-xl font-semibold">{i18n.t('Comments')}</h2>
 
       <Comments
+        variant="conversation"
         recordId={eventId}
         subapp={SUBAPP_CODES.events}
         inputPosition="bottom"
@@ -32,6 +33,7 @@ export const CommentsSection = ({eventId, slug}: CommentSectionProps) => {
         hideTopBorder
         hideCloseComments
         showRepliesInMainThread
+        disableReply
         createComment={createComment}
         fetchComments={fetchComments}
         trackingField="publicBody"
