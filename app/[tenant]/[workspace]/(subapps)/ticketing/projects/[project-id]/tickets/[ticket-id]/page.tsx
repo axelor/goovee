@@ -7,6 +7,7 @@ import {FaChevronRight} from 'react-icons/fa';
 import {Comments, isCommentEnabled, SORT_TYPE} from '@/comments';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
+import {formatDate} from '@/locale/formatters';
 import type {Client} from '@/goovee/.generated/client';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {
@@ -51,8 +52,12 @@ import type {
   ContactPartner,
   Priority,
 } from '../../../../common/types';
-import {TicketDetails} from '../../../../common/ui/components/ticket-details';
+import {
+  TicketCompactHeader,
+  TicketSidebar,
+} from '../../../../common/ui/components/ticket-details';
 import {TicketDetailsProvider} from '../../../../common/ui/components/ticket-details/ticket-details-provider';
+import {RichTextViewer} from '@/ui/components/rich-text-editor/rich-text-viewer';
 import {
   ChildTicketList,
   ParentTicketList,
@@ -64,6 +69,16 @@ import {
   ParentTicketsHeader,
   RelatedTicketsHeader,
 } from './headers';
+
+function initialsOf(name: string): string {
+  return name
+    .split(' ')
+    .map(w => w[0])
+    .filter(Boolean)
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
 
 export default async function Page(props: {
   params: Promise<{
@@ -132,136 +147,197 @@ export default async function Page(props: {
   const status = statuses.filter(s => !s.isCompleted).map(s => s.id);
   const allTicketsURL = `${ticketsURL}?filter=${encodeFilter<EncodedTicketFilter>({status})}&title=${encodeURIComponent(ALL_TICKETS_TITLE)}`;
 
+  // Opening request = the client-authored first message of the conversation.
+  const requesterName =
+    ticket.createdByContact?.simpleFullName ??
+    ticket.project?.company?.name ??
+    '';
+  const requesterInitials = initialsOf(requesterName);
+  const createdOnLabel = ticket.createdOn ? formatDate(ticket.createdOn) : '';
+
   return (
-    <div className="container mt-5 mb-20">
-      <Breadcrumb className="flex-shrink">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              asChild
-              className="text-foreground-muted cursor-pointer truncate text-md">
-              <Link href={`${workspaceURI}/ticketing`}>
-                {await t('Projects')}
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <FaChevronRight className="text-primary" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              asChild
-              className="cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-md">
-              <Link href={`${workspaceURI}/ticketing/projects/${projectId}`}>
-                {ticket.project?.name}
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <FaChevronRight className="text-primary" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild className="cursor-pointer text-md">
-              <Link href={allTicketsURL}>{await t(ALL_TICKETS_TITLE)}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <FaChevronRight className="text-primary" />
-          </BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbPage className="truncate text-lg font-semibold">
-              <h2 className="font-semibold text-xl">{ticket.name}</h2>
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="bg-ink-25 min-h-full">
       <TicketDetailsProvider ticket={ticket}>
-        <>
-          <TicketDetails
-            categories={categories}
-            priorities={priorities}
-            contacts={contacts}
-            formFields={clone(config.ticketingFormFieldSet)}
-            showCancel={config.isDisplayCancelBtn}
-            showClose={config.isDisplayCloseBtn}
-            showAssignment={config.isDisplayAssignmentBtn}
-          />
-
-          <div
-            className={cn('space-y-4 rounded-md border bg-card p-4 mt-5', {
-              ['hidden']:
-                !config.isDisplayTicketParent &&
-                !config.isDisplayChildTicket &&
-                !config.isDisplayRelatedTicket,
-            })}>
-            {config.isDisplayTicketParent && (
-              <Suspense fallback={<Skeleton className="h-[160px]" />}>
-                <ParentTicket
-                  ticketId={ticket.id}
-                  projectId={ticket.project?.id}
-                  client={client}
-                  fields={config.ticketingFieldSet}
-                />
-              </Suspense>
-            )}
-            {config.isDisplayChildTicket && (
-              <Suspense fallback={<Skeleton className="h-[160px]" />}>
-                <ChildTickets
-                  projectId={ticket.project?.id}
-                  ticketId={ticket.id}
-                  categories={categories}
-                  priorities={priorities}
-                  contacts={contacts}
-                  userId={user.id}
-                  client={client}
-                  fields={config.ticketingFieldSet}
-                  formFields={config.ticketingFormFieldSet}
-                />
-              </Suspense>
-            )}
-            {config.isDisplayRelatedTicket && (
-              <Suspense fallback={<Skeleton className="h-[160px]" />}>
-                <RelatedTickets
-                  ticketId={ticket.id}
-                  projectId={ticket.project?.id}
-                  client={client}
-                  fields={config.ticketingFieldSet}
-                />
-              </Suspense>
-            )}
+        {/* Full-width header bar */}
+        <div className="bg-white border-b border-ink-100">
+          <div className="container py-4 space-y-3">
+            <Breadcrumb className="flex-shrink">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-ink-500 cursor-pointer truncate text-sm">
+                    <Link href={`${workspaceURI}/ticketing`}>
+                      {await t('Projects')}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <FaChevronRight className="text-ink-300" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-ink-500 cursor-pointer max-w-[8ch] md:max-w-[15ch] truncate text-sm">
+                    <Link
+                      href={`${workspaceURI}/ticketing/projects/${projectId}`}>
+                      {ticket.project?.name}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <FaChevronRight className="text-ink-300" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-ink-500 cursor-pointer text-sm">
+                    <Link href={allTicketsURL}>
+                      {await t(ALL_TICKETS_TITLE)}
+                    </Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <FaChevronRight className="text-ink-300" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="truncate text-sm text-ink-700 font-medium">
+                    {ticket.name}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <TicketCompactHeader
+              backHref={allTicketsURL}
+              showCancel={config.isDisplayCancelBtn}
+              showClose={config.isDisplayCloseBtn}
+            />
           </div>
-        </>
-      </TicketDetailsProvider>
-
-      {isCommentEnabled({
-        subapp: SUBAPP_CODES.ticketing,
-        config,
-      }) && (
-        <div className="rounded-md border bg-card p-4 mt-5">
-          <h4 className="text-xl font-semibold border-b">
-            {await t('Comments')}
-          </h4>
-          <Comments
-            key={Math.random()}
-            recordId={ticket.id}
-            subapp={SUBAPP_CODES.ticketing}
-            sortBy={SORT_TYPE.new}
-            showCommentsByDefault
-            hideTopBorder
-            hideSortBy
-            hideCloseComments
-            hideCommentsHeader
-            showRepliesInMainThread
-            trackingField="publicBody"
-            commentField="note"
-            createComment={createComment}
-            fetchComments={fetchComments}
-            attachmentDownloadUrl={withBasePath(
-              `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
-            )}
-          />
         </div>
-      )}
+
+        <div className="container py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-start">
+            {/* Left — conversation */}
+            <div className="flex flex-col gap-4 min-w-0">
+              <h2 className="text-lg font-bold text-ink-900">
+                {await t('Ticketing')}
+              </h2>
+
+              {/* Opening request — first message of the thread */}
+              {ticket.description && (
+                <div className="rounded-xl border border-ink-100 bg-white p-[18px]">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-peach-avatar text-[11px] font-bold text-white">
+                      {requesterInitials}
+                    </div>
+                    <span className="text-sm font-semibold text-ink-900">
+                      {requesterName}
+                    </span>
+                    <span className="rounded bg-ink-100 px-2 py-0.5 text-[11px] font-semibold text-ink-600">
+                      {await t('Initial request')}
+                    </span>
+                    <span className="text-ink-300">·</span>
+                    <span className="text-[11px] tabular-nums text-ink-400">
+                      {createdOnLabel}
+                    </span>
+                  </div>
+                  <div className="mt-3">
+                    <RichTextViewer content={ticket.description} />
+                  </div>
+                </div>
+              )}
+
+              {isCommentEnabled({
+                subapp: SUBAPP_CODES.ticketing,
+                config,
+              }) && (
+                <Comments
+                  key={ticket.id}
+                  variant="conversation"
+                  inputPosition="bottom"
+                  recordId={ticket.id}
+                  subapp={SUBAPP_CODES.ticketing}
+                  sortBy={SORT_TYPE.old}
+                  showCommentsByDefault
+                  hideTopBorder
+                  hideSortBy
+                  hideCloseComments
+                  hideCommentsHeader
+                  showRepliesInMainThread
+                  trackingField="publicBody"
+                  commentField="note"
+                  createComment={createComment}
+                  fetchComments={fetchComments}
+                  attachmentDownloadUrl={withBasePath(
+                    `${workspaceURI}/${SUBAPP_CODES.ticketing}/api/comments/attachments/${ticket.id}`,
+                  )}
+                />
+              )}
+            </div>
+
+            {/* Right — sidebar */}
+            <aside className="flex flex-col gap-5 lg:sticky lg:top-6">
+              <TicketSidebar
+                categories={categories}
+                priorities={priorities}
+                contacts={contacts}
+                formFields={clone(config.ticketingFormFieldSet)}
+                showAssignment={config.isDisplayAssignmentBtn}
+              />
+
+              <div
+                className={cn(
+                  'space-y-4 rounded-xl border border-ink-100 bg-white shadow-xs p-5',
+                  {
+                    ['hidden']:
+                      !config.isDisplayTicketParent &&
+                      !config.isDisplayChildTicket &&
+                      !config.isDisplayRelatedTicket,
+                  },
+                )}>
+                <h3 className="text-sm font-bold uppercase tracking-[0.06em] text-ink-400">
+                  {await t('Related tickets')}
+                </h3>
+                {config.isDisplayTicketParent && (
+                  <Suspense fallback={<Skeleton className="h-[120px]" />}>
+                    <ParentTicket
+                      ticketId={ticket.id}
+                      projectId={ticket.project?.id}
+                      client={client}
+                      fields={config.ticketingFieldSet}
+                    />
+                  </Suspense>
+                )}
+                {config.isDisplayChildTicket && (
+                  <Suspense fallback={<Skeleton className="h-[120px]" />}>
+                    <ChildTickets
+                      projectId={ticket.project?.id}
+                      ticketId={ticket.id}
+                      categories={categories}
+                      priorities={priorities}
+                      contacts={contacts}
+                      userId={user.id}
+                      client={client}
+                      fields={config.ticketingFieldSet}
+                      formFields={config.ticketingFormFieldSet}
+                    />
+                  </Suspense>
+                )}
+                {config.isDisplayRelatedTicket && (
+                  <Suspense fallback={<Skeleton className="h-[120px]" />}>
+                    <RelatedTickets
+                      ticketId={ticket.id}
+                      projectId={ticket.project?.id}
+                      client={client}
+                      fields={config.ticketingFieldSet}
+                    />
+                  </Suspense>
+                )}
+              </div>
+            </aside>
+          </div>
+        </div>
+      </TicketDetailsProvider>
     </div>
   );
 }

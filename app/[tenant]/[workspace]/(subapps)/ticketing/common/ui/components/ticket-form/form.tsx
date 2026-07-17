@@ -104,6 +104,7 @@ export function TicketForm(props: TicketFormProps) {
 
   const form = useForm<CreateFormData>({
     resolver: zodResolver(refinedSchema),
+    mode: 'onChange',
     defaultValues: {
       managedBy: allowedFields.has(FIELDS.MANAGED_BY)
         ? userId.toString()
@@ -173,7 +174,7 @@ export function TicketForm(props: TicketFormProps) {
         <form
           ref={formRef}
           onSubmit={form.handleSubmit(handleSubmitWithAction)}>
-          <div className="space-y-4 rounded-md border bg-card p-4">
+          <div className="space-y-4">
             <FormField
               control={form.control}
               name="subject"
@@ -191,70 +192,72 @@ export function TicketForm(props: TicketFormProps) {
                 </FormItem>
               )}
             />
-            {allowedFields.has(FIELDS.CATEGORY) && (
-              <FormField
-                control={form.control}
-                name="category"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>{i18n.t('Category')}*</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value?.toString()}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={i18n.t('Select your category')}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map(category => (
-                          <SelectItem
-                            value={category.id.toString()}
-                            key={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            {allowedFields.has(FIELDS.PRIORITY) && (
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>{i18n.t('Priority')}*</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value?.toString()}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={i18n.t('Select your priority')}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {priorities.map(priority => (
-                          <SelectItem
-                            value={priority.id.toString()}
-                            key={priority.id}>
-                            {priority.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {allowedFields.has(FIELDS.CATEGORY) && (
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({field}) => (
+                    <FormItem>
+                      <FormLabel>{i18n.t('Category')}*</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={i18n.t('Select your category')}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map(category => (
+                            <SelectItem
+                              value={category.id.toString()}
+                              key={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {allowedFields.has(FIELDS.PRIORITY) && (
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({field}) => (
+                    <FormItem>
+                      <FormLabel>{i18n.t('Priority')}*</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={i18n.t('Select your priority')}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {priorities.map(priority => (
+                            <SelectItem
+                              value={priority.id.toString()}
+                              key={priority.id}>
+                              {priority.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
             {allowedFields.has(FIELDS.MANAGED_BY) && (
               <FormField
                 control={form.control}
@@ -311,8 +314,8 @@ export function TicketForm(props: TicketFormProps) {
               <Button
                 type="submit"
                 className="w-30"
-                variant="success"
-                disabled={success}>
+                variant="royal"
+                disabled={success || !form.formState.isValid}>
                 {i18n.t('Create a ticket')}
               </Button>
             </div>
