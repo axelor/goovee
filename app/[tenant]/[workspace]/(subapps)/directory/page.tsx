@@ -95,7 +95,7 @@ export default async function Page(props: {
     : withBasePath(IMAGE_URL);
 
   return (
-    <>
+    <div className="bg-ink-25 min-h-full">
       <Hero
         title={config?.directoryHeroTitle}
         description={config?.directoryHeroDescription}
@@ -104,43 +104,42 @@ export default async function Page(props: {
         }
         image={imageURL}
       />
-      <div className="container mb-5">
-        <div className="my-4">
+      <div className="container py-8">
+        <div className="bg-white rounded-xl border border-ink-100 shadow-xs p-4 mb-6">
           <Filter />
         </div>
         {!partners || partners.length === 0 ? (
-          <h2 className="font-semibold text-xl text-center mt-5">
-            {await t('No entries found.')}
-          </h2>
+          <div className="bg-white rounded-xl border border-ink-100 shadow-xs p-12 text-center mt-4">
+            <h2 className="font-semibold text-base text-ink-700">
+              {await t('No entries found.')}
+            </h2>
+          </div>
         ) : (
-          <>
-            {/* NOTE: expand class applied by the map , when it is expanded and when it is in mobile view */}
-            <div className="flex has-[.expand]:flex-col gap-4 mt-4">
-              <Suspense fallback={<MapSkeleton />}>
-                <ServerMap entries={partners} client={client} />
-              </Suspense>
-              <main className="grow flex flex-col gap-4">
-                {partners.map(item => (
-                  <Card
-                    item={item}
-                    url={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${item.id}`}
-                    key={item.id}
-                    tenant={tenant}
-                  />
-                ))}
-                {pages > 1 && (
-                  <CardPagination
-                    url={`${workspaceURI}/${SUBAPP_CODES.directory}`}
-                    pages={pages}
-                    searchParams={searchParams}
-                  />
-                )}
-              </main>
-            </div>
-          </>
+          <div className="flex has-[.expand]:flex-col gap-6 mt-4 items-start">
+            <Suspense fallback={<MapSkeleton />}>
+              <ServerMap entries={partners} client={client} />
+            </Suspense>
+            <main className="grow flex flex-col gap-4">
+              {partners.map(item => (
+                <Card
+                  item={item}
+                  url={`${workspaceURI}/${SUBAPP_CODES.directory}/entry/${item.id}`}
+                  key={item.id}
+                  tenant={tenant}
+                />
+              ))}
+              {pages > 1 && (
+                <CardPagination
+                  url={`${workspaceURI}/${SUBAPP_CODES.directory}`}
+                  pages={pages}
+                  searchParams={searchParams}
+                />
+              )}
+            </main>
+          </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

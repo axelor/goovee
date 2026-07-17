@@ -64,30 +64,30 @@ export function Card(props: CardProps) {
     <Wrapper
       href={{pathname: url}}
       className={cn(
-        'flex bg-card rounded-lg overflow-hidden shadow-md border border-border/20 transition-all duration-300 hover:shadow-xl hover:border-primary/10',
+        'flex bg-white rounded-xl overflow-hidden shadow-xs border border-ink-100 transition-all duration-200 hover:shadow-soft-md hover:border-ink-200',
         className,
       )}>
-      <div className="p-4 sm:p-5 flex-1">
-        <h3 className="font-bold text-lg md:text-xl text-foreground line-clamp-2">
+      <div className="p-5 sm:p-6 flex-1 min-w-0">
+        <h3 className="font-bold text-lg md:text-xl text-ink-900 leading-tight line-clamp-2">
           {item.portalCompanyName}
         </h3>
         {item.mainAddress?.formattedFullName && (
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
+          <p className="mt-1.5 text-xs uppercase tracking-[0.06em] font-semibold text-ink-400 line-clamp-1">
             {item.mainAddress.formattedFullName}
           </p>
         )}
-        <div className="mt-3 text-sm text-muted-foreground">
+        <div className="mt-3 text-sm text-ink-500 leading-relaxed">
           <InnerHTML
             content={stripImages(item.directoryCompanyDescription)}
             className="line-clamp-3"
           />
         </div>
       </div>
-      <div className="w-1/4 max-w-[150px] flex-shrink-0 relative">
+      <div className="w-1/4 max-w-[160px] flex-shrink-0 relative bg-ink-50">
         <Image
           fill
-          sizes="150px"
-          className="object-contain"
+          sizes="160px"
+          className="object-contain p-3"
           src={getPartnerImageURL(item.picture?.id, tenant, {
             noimage: true,
             noimageSrc: NO_IMAGE_URL,
