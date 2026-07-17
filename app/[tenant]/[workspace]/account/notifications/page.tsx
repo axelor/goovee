@@ -10,7 +10,7 @@ import {t} from '@/locale/server';
 import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
-import {Title} from '../common/ui/components';
+import {SectionHeader, Title} from '../common/ui/components';
 import {Preference} from './preference';
 import {DevicePushPreference} from './device-push-preference';
 import {findSubapps} from '@/orm/workspace';
@@ -79,11 +79,14 @@ export default async function Page(props: {
   );
 
   return (
-    <div className="bg-white p-2 lg:p-0 lg:bg-inherit">
-      <div className="space-y-20">
+    <div className="flex flex-col gap-6">
+      <SectionHeader
+        eyebrow={await t('Team')}
+        title={await t('Notifications')}
+        description={await t('Choose what you receive and where.')}
+      />
+      <div className="bg-white border border-ink-100 rounded-xl shadow-xs p-6">
         <div className="space-y-4">
-          <Title text={await t('Notifications')} />
-          <Separator />
           <DevicePushPreference />
           <Title text={await t('Email Notifications')} />
           <Separator />

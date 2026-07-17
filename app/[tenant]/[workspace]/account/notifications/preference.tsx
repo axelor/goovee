@@ -3,9 +3,11 @@
 // ---- CORE IMPORTS ---- //
 import {Separator} from '@/ui/components/separator';
 import {useWorkspace} from '../../workspace-context';
-import {Checkbox} from '@/ui/components/checkbox';
 import {useToast} from '@/ui/hooks';
 import type {NotificationAppCode} from '@/utils/validators';
+
+// ---- LOCAL IMPORTS ---- //
+import {AccountToggle} from '../common/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {updatePreference} from './action';
@@ -71,30 +73,28 @@ export function Preference({
     };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 items-center gap-2 p-1">
-        <h5 className="font-medium">{title}</h5>
-        <Checkbox
-          defaultChecked={preference?.activateNotification || false}
-          name="activateNotification"
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-4 py-1">
+        <h5 className="text-sm font-semibold text-ink-900 mb-0">{title}</h5>
+        <AccountToggle
+          aria-label={title}
+          checked={preference?.activateNotification || false}
           onCheckedChange={changePreference(true)}
-          variant="success"
         />
       </div>
       {!hideSubscription && preference?.activateNotification && (
-        <div className="space-y-2">
-          {preference?.subscriptions?.map((subscription, i: number) => (
+        <div className="space-y-1 border-l-2 border-royal-border pl-4 ml-1">
+          {preference?.subscriptions?.map((subscription: any, i: number) => (
             <div
-              className="grid grid-cols-2 items-center gap-2 p-1"
+              className="flex items-center justify-between gap-4 py-1"
               key={subscription?.id}>
-              <p className="text-sm">{subscription?.name}</p>
-              <Checkbox
-                defaultChecked={subscription.activateNotification}
-                name="activateNotification"
+              <p className="text-sm text-ink-700 mb-0">{subscription?.name}</p>
+              <AccountToggle
+                aria-label={subscription?.name}
+                checked={subscription.activateNotification}
                 onCheckedChange={e =>
                   changePreference(false)(e, subscription.id)
                 }
-                variant="success"
               />
             </div>
           ))}

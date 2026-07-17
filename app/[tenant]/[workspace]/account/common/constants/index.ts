@@ -1,62 +1,138 @@
 import {Role} from '../types';
 
 export const ROUTES = {
+  // The 8 original Goovee tabs — each has its own page again.
   personal: 'personal',
-  prefrences: 'preferences',
+  preferences: 'preferences',
   password: 'password',
   addresses: 'addresses',
+  directory: 'directory',
   members: 'members',
   notifications: 'notifications',
   apps: 'apps',
+
+  // Legacy consolidated routes — kept as redirects for backwards compatibility.
+  profile: 'profile',
+  security: 'security',
+  workspace: 'workspace',
   settings: 'settings',
-  directory: 'directory',
 };
 
-export const GLOBAL_MENU = [
+// ---- Grouped lateral rail (8 original tabs, design "AccountV3Rail") ----
+
+export type AccountTabKey =
+  | 'personal'
+  | 'preferences'
+  | 'password'
+  | 'addresses'
+  | 'directory'
+  | 'members'
+  | 'notifications'
+  | 'apps';
+
+export type AccountTabGroup = 'Account' | 'Security' | 'Team';
+
+export type AccountTabIcon =
+  | 'personal'
+  | 'preferences'
+  | 'password'
+  | 'addresses'
+  | 'directory'
+  | 'members'
+  | 'notifications'
+  | 'apps';
+
+export type AccountTab = {
+  key: AccountTabKey;
+  label: string;
+  subtitle: string;
+  description: string;
+  group: AccountTabGroup;
+  route: string;
+  icon: AccountTabIcon;
+  adminOnly?: boolean;
+};
+
+export const ACCOUNT_GROUPS: AccountTabGroup[] = [
+  'Account',
+  'Security',
+  'Team',
+];
+
+export const ACCOUNT_TABS: AccountTab[] = [
   {
-    label: 'Personal settings',
+    key: 'personal',
+    group: 'Account',
     route: ROUTES.personal,
+    icon: 'personal',
+    label: 'Personal settings',
+    subtitle: 'Company identity',
+    description: 'Company information shown across your workspace.',
   },
   {
+    key: 'preferences',
+    group: 'Account',
+    route: ROUTES.preferences,
+    icon: 'preferences',
     label: 'Preferences',
-    route: ROUTES.prefrences,
+    subtitle: 'Default workspace and language',
+    description: 'Default behavior when you sign in.',
   },
   {
-    label: 'Password',
+    key: 'password',
+    group: 'Security',
     route: ROUTES.password,
+    icon: 'password',
+    label: 'Password',
+    subtitle: 'Change your password',
+    description: 'Use a unique password of at least 12 characters.',
   },
-
   {
-    label: 'Addresses',
+    key: 'addresses',
+    group: 'Security',
     route: ROUTES.addresses,
+    icon: 'addresses',
+    label: 'Addresses',
+    subtitle: 'Billing and delivery',
+    description: 'Default addresses for billing and delivery.',
   },
   {
-    label: 'Directory settings',
+    key: 'directory',
+    group: 'Security',
     route: ROUTES.directory,
-  },
-];
-
-export const WORKSPACE_MENU = [
-  {
-    label: 'Notifications',
-    route: ROUTES.notifications,
+    icon: 'directory',
+    label: 'Directory settings',
+    subtitle: 'Public partner profile',
+    description: 'What other partners can see about your company.',
   },
   {
-    label: 'My apps',
-    route: ROUTES.apps,
-  },
-  {
-    label: 'Settings',
-    route: ROUTES.settings,
-  },
-];
-
-export const ADMIN_WORKSPACE_MENU = [
-  {
-    label: 'Members',
+    key: 'members',
+    group: 'Team',
     route: ROUTES.members,
+    icon: 'members',
+    adminOnly: true,
+    label: 'Members',
+    subtitle: 'Users and invitations',
+    description: 'Manage who can access this workspace and their roles.',
   },
-  ...WORKSPACE_MENU,
+  {
+    key: 'notifications',
+    group: 'Team',
+    route: ROUTES.notifications,
+    icon: 'notifications',
+    label: 'Notifications',
+    subtitle: 'Push and e-mail',
+    description: 'Choose what you receive and where.',
+  },
+  {
+    key: 'apps',
+    group: 'Team',
+    route: ROUTES.apps,
+    icon: 'apps',
+    label: 'My apps',
+    subtitle: 'Visible applications',
+    description: 'Enable or hide applications in the side menu.',
+  },
 ];
 
 export const RoleLabel = {
