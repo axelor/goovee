@@ -1,9 +1,12 @@
 'use client';
 
-import {Fragment} from 'react';
+import {Fragment, useState} from 'react';
 import type {Cloned} from '@/types/util';
 import Image from 'next/image';
-import {useRouter} from 'next/navigation';
+import {useRouter, usePathname, useSearchParams} from 'next/navigation';
+import {MdExpandMore} from 'react-icons/md';
+import {useSignOut} from '@/ui/hooks';
+import {getLoginURL} from '@/utils/url';
 
 // ---- CORE IMPORTS ---- //
 import {
@@ -14,6 +17,17 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
 } from '@/ui/components';
 import {i18n} from '@/locale';
 import {DEFAULT_LOGO_URL, SUBAPP_PAGE} from '@/constants';
@@ -64,6 +78,99 @@ function Logo({
   );
 }
 
+function getInitials(name?: string | null, email?: string | null) {
+  const source = (name?.trim() || email?.split('@')[0] || '').toUpperCase();
+  if (!source) return 'U';
+  const parts = source.split(/\s+|[._-]/).filter(Boolean);
+  if (parts.length >= 2) return parts[0][0] + parts[1][0];
+  return source.slice(0, 2);
+}
+
+function ProfilePill({
+  baseURL,
+  tenant,
+}: {
+  baseURL: string;
+  tenant: string | undefined | null;
+}) {
+  const {data: session} = authClient.useSession();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const signOut = useSignOut();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const user = session?.user as
+    | {name?: string; email?: string; image?: string}
+    | undefined;
+
+  const loginURL = getLoginURL({
+    callbackurl: pathname + (searchParams.toString() ? `?${searchParams}` : ''),
+    workspaceURI: baseURL,
+    tenant,
+  });
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push(loginURL);
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className={cn(
+            'flex items-center gap-2 pl-1 pr-2 py-1 rounded-full bg-ink-50',
+            'hover:bg-ink-100 transition-colors focus:outline-none',
+          )}
+          aria-label={i18n.t('User menu')}>
+          <span className="w-7 h-7 rounded-full grid place-items-center bg-peach-avatar text-white font-bold text-[11px] overflow-hidden">
+            {user?.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.image}
+                alt=""
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              getInitials(user?.name, user?.email)
+            )}
+          </span>
+          <MdExpandMore className="text-ink-500 text-[14px]" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <Link href={`${baseURL}/account`} className="cursor-pointer">
+            <DropdownMenuItem className="cursor-pointer">
+              {i18n.t('My Account')}
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onSelect={e => {
+              e.preventDefault();
+              setConfirmOpen(true);
+            }}>
+            {i18n.t('Logout')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{i18n.t('Confirm logout')}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{i18n.t('Cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>
+              {i18n.t('Logout')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 export default function Header({
   subapps,
   isTopNavigation = false,
@@ -83,7 +190,7 @@ export default function Header({
   const {data: session} = authClient.useSession();
   const user = session?.user;
 
-  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {workspaceURI, tenant} = useWorkspace();
   const {visible, loading} = useNavigationVisibility();
   const res: any = useResponsive();
   const env = useEnvironment();
@@ -103,16 +210,18 @@ export default function Header({
   const isFixedHeader = config.isFixedHeader;
 
   return (
-    <div className={cn(isFixedHeader && 'sticky top-0 z-50', 'bg-background')}>
+    <div className={cn(isFixedHeader && 'sticky top-0 z-50', 'bg-white')}>
       <div
         className={cn(
-          'min-h-16 bg-background text-foreground px-6 py-2 flex items-center border-b border-border border-solid',
+          'h-16 bg-white text-ink-900 px-7 flex items-center gap-4',
+          'border-b border-ink-100',
         )}>
         <Logo workspace={workspace} config={config} />
 
         <div className="grow" />
+
         {isLarge && (
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-2">
             {shouldDisplayIcons &&
               subapps
                 .filter((app: any) => app.isInstalled && app.showInTopMenu)
@@ -137,28 +246,40 @@ export default function Header({
                           : `${workspaceURI}/${code}${page}`
                       }
                       target={isExternalChat ? '_blank' : undefined}
-                      rel={isExternalChat ? 'noopener noreferrer' : undefined}>
+                      rel={isExternalChat ? 'noopener noreferrer' : undefined}
+                      className="w-9 h-9 grid place-items-center rounded-lg text-ink-600 hover:bg-ink-50 transition-colors"
+                      aria-label={i18n.t(name)}>
                       {icon ? (
-                        <Icon name={icon} className="h-6 w-6" style={{color}} />
+                        <Icon
+                          name={icon}
+                          className="h-[18px] w-[18px]"
+                          style={color ? {color} : undefined}
+                        />
                       ) : (
-                        <p className="font-medium">{i18n.t(name)}</p>
+                        <p className="font-medium text-sm">{i18n.t(name)}</p>
                       )}
                     </Link>
                   );
                 })}
             {user && <Notification />}
             {showCartIcon && <Cart />}
-            <Account baseURL={workspaceURI} tenant={tenant} />
+            {user && (
+              <>
+                <div className="w-px h-6 bg-ink-100 mx-1.5" />
+                <ProfilePill baseURL={workspaceURI} tenant={tenant} />
+              </>
+            )}
+            {!user && <Account baseURL={workspaceURI} tenant={tenant} />}
           </div>
         )}
       </div>
 
       {showTopNavigation && !loading ? (
-        <div className="bg-background text-foreground z-10 px-6 py-4 hidden lg:flex items-center justify-between border-b border-border border-solid max-w-full gap-10">
+        <div className="bg-white text-ink-900 z-10 px-7 py-4 hidden lg:flex items-center justify-between border-b border-ink-100 max-w-full gap-10">
           <div>
             {Boolean(workspaces?.length) && user && (
               <Select defaultValue={workspaceURI} onValueChange={redirect}>
-                <SelectTrigger className="grow max-w-100 overflow-hidden p-0 border-0 bg-none! h-[auto]">
+                <SelectTrigger className="grow max-w-100 overflow-hidden p-0 border-0 !bg-transparent h-auto">
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
@@ -191,12 +312,12 @@ export default function Header({
                   <Fragment key={code}>
                     {i !== 0 && (
                       <Separator
-                        className="bg-black w-[2px] shrink-0 h-auto"
+                        className="bg-ink-200 w-px shrink-0 h-auto"
                         orientation="vertical"
                       />
                     )}
                     <Link href={`${workspaceURI}/${code}${page}`}>
-                      <div key={code} className="font-medium">
+                      <div className="font-medium text-ink-700 hover:text-royal transition-colors">
                         {i18n.t(name)}
                       </div>
                     </Link>
