@@ -3,7 +3,11 @@ import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
 import {decodeFilter as decode} from '@/utils/url';
 import {getPaymentURL} from '.';
-import {createPaymentContext, findPaymentContext} from '../common/orm';
+import {
+  createPaymentContext,
+  findPaymentContext,
+  recordProviderTransactionRef,
+} from '../common/orm';
 import {PAYBOX_ERRORS} from './constant';
 import {readPEMFile, verifySignature} from './crypto';
 import {getParamsWithoutSign} from './utils';
@@ -49,7 +53,7 @@ export async function createPayboxOrder({
   };
 }
 
-export async function findPayboxOrder({
+export async function confirmPayboxOrder({
   params,
   client,
 }: {
@@ -96,8 +100,15 @@ export async function findPayboxOrder({
     throw new Error('Context not found');
   }
 
+  await recordProviderTransactionRef({
+    context,
+    client,
+    providerTransactionRef: params.transaction,
+  });
+
   return {
     context,
     amount: reference.amount,
+    reference: params.transaction,
   };
 }

@@ -9,9 +9,9 @@ import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {accessMessage} from '@/lib/core/access/denial';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
-import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
-import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
-import {createStripeOrder, findStripeOrder} from '@/payment/stripe/actions';
+import {createPayboxOrder, confirmPayboxOrder} from '@/payment/paybox/actions';
+import {createPaypalOrder, confirmPaypalOrder} from '@/payment/paypal/actions';
+import {createStripeOrder, confirmStripeOrder} from '@/payment/stripe/actions';
 import {PaymentOption} from '@/types';
 import {computeTotal} from '@/utils/cart';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
@@ -121,7 +121,7 @@ export async function paypalCaptureOrder({
     };
   }
   try {
-    const {amount, context} = await findPaypalOrder({
+    const {amount, context} = await confirmPaypalOrder({
       id: orderId,
       client,
     });
@@ -508,7 +508,7 @@ export async function validateStripePayment({
 
   let paidAmount, cart, context;
   try {
-    const order = await findStripeOrder({
+    const order = await confirmStripeOrder({
       id: stripeSessionId,
       client,
     });
@@ -777,7 +777,7 @@ export async function validatePayboxPayment({
 
   let paidAmount, cart, context;
   try {
-    const order = await findPayboxOrder({params, client});
+    const order = await confirmPayboxOrder({params, client});
     cart = order.context.data;
     paidAmount = order.amount;
     context = order.context;

@@ -10,6 +10,7 @@ import {
   updatePaymentContextData,
   markPaymentAsFailed,
   markPaymentAsCancelled,
+  recordProviderTransactionRef,
   CONTEXT_STATUS,
 } from '@/lib/core/payment/common/orm';
 import {findPendingStripeBankTransfers} from './orm';
@@ -126,7 +127,7 @@ export async function createStripeOrder({
   }
 }
 
-export async function findStripeOrder({
+export async function confirmStripeOrder({
   id,
   client,
 }: {
@@ -185,9 +186,21 @@ export async function findStripeOrder({
   }
 
   const currency = lineItems.data?.[0]?.currency || DEFAULT_CURRENCY_CODE;
+
+  const paymentIntent = stripeSession.payment_intent;
+  const reference =
+    typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
+
+  await recordProviderTransactionRef({
+    context,
+    client,
+    providerTransactionRef: reference,
+  });
+
   return {
     context,
     amount: getAmountFromStripe(lineItems.data?.[0]?.amount_total, currency),
+    reference,
   };
 }
 

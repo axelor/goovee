@@ -6,6 +6,8 @@ export type PaymentOrder = {
   amount: number;
   context: PaymentContext;
   cancelled?: boolean;
+  /** Provider's transaction identifier for this payment (intent / capture / transaction id). */
+  reference?: string;
 };
 
 export const PAYMENT_TYPE = {
@@ -38,4 +40,10 @@ export type PaymentContext = {
   mode: PaymentOption;
   status: ContextStatus;
   payer?: string | null;
+  /**
+   * Provider's transaction identifier for this payment, stored on its own
+   * column (not in `data`) so a paid order/invoice can be reconciled to the
+   * provider transaction later. Set once, never overwritten.
+   */
+  providerTransactionRef?: string | null;
 };

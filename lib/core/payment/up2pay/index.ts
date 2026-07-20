@@ -55,7 +55,7 @@ export function getPaymentURL({
     PBX_DEVISE: CURRENCY_CODE[currency] || defaultCurrencyCode,
     PBX_CMD: `${name}-${reference}~${contextId}~${tenantId}`,
     PBX_PORTEUR: email,
-    PBX_RETOUR: 'montant:M;ref:R;erreur:E;sign:K',
+    PBX_RETOUR: 'montant:M;ref:R;erreur:E;transaction:S;sign:K',
     PBX_HASH: 'SHA512',
     PBX_TIME: new Date().toISOString(),
     PBX_SOUHAITAUTHENT: '04',

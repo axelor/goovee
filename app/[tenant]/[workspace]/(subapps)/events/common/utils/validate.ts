@@ -1,9 +1,9 @@
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
 import {t} from '@/locale/server';
-import {findPayboxOrder} from '@/payment/paybox/actions';
-import {findPaypalOrder} from '@/payment/paypal/actions';
-import {findStripeOrder} from '@/payment/stripe/actions';
+import {confirmPayboxOrder} from '@/payment/paybox/actions';
+import {confirmPaypalOrder} from '@/payment/paypal/actions';
+import {confirmStripeOrder} from '@/payment/stripe/actions';
 import {PaymentOption} from '@/types';
 import type {ActionResponse} from '@/types/action';
 import type {PaymentOrder} from '@/lib/core/payment/common/type';
@@ -25,7 +25,7 @@ export const getPaymentInfo = async ({
       case PaymentOption.stripe: {
         const {id} = data;
         if (!id) return error(await t('Stripe payment requires an ID'));
-        const order = await findStripeOrder({
+        const order = await confirmStripeOrder({
           id,
           client,
         });
@@ -34,7 +34,7 @@ export const getPaymentInfo = async ({
       case PaymentOption.paypal: {
         const {id} = data;
         if (!id) return error(await t('PayPal payment requires an ID'));
-        const order = await findPaypalOrder({id, client});
+        const order = await confirmPaypalOrder({id, client});
 
         return {success: true, data: order};
       }
@@ -43,7 +43,7 @@ export const getPaymentInfo = async ({
         if (!params) {
           return error(await t('Paybox payment requires parameters'));
         }
-        const order = await findPayboxOrder({params, client});
+        const order = await confirmPayboxOrder({params, client});
         return {success: true, data: order};
       }
       default:

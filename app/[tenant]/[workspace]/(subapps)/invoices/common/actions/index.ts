@@ -13,14 +13,14 @@ import {
 } from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
-import {createPayboxOrder, findPayboxOrder} from '@/payment/paybox/actions';
+import {createPayboxOrder, confirmPayboxOrder} from '@/payment/paybox/actions';
 import {createUp2payOrder} from '@/payment/up2pay/actions';
 import {createHubPispPaymentLink} from '@/payment/hubpisp/actions';
-import {createPaypalOrder, findPaypalOrder} from '@/payment/paypal/actions';
+import {createPaypalOrder, confirmPaypalOrder} from '@/payment/paypal/actions';
 import {
   createStripePaymentIntent,
   createStripeOrder,
-  findStripeOrder,
+  confirmStripeOrder,
   findStripePaymentIntent,
   cancelStripePaymentIntent,
   cancelInvalidPendingBankTransfers,
@@ -243,7 +243,7 @@ export async function paypalCaptureOrder({
   }
 
   try {
-    const {amount, context} = await findPaypalOrder({
+    const {amount, context} = await confirmPaypalOrder({
       id: orderID,
       client,
     });
@@ -506,7 +506,7 @@ export async function validateStripePayment({
 
     let invoice, purchaseAmount, context;
     try {
-      const order = await findStripeOrder({
+      const order = await confirmStripeOrder({
         id: stripeSessionId,
         client,
       });
@@ -1040,7 +1040,7 @@ export async function validatePayboxPayment({
 
     let invoice, purchaseAmount, context;
     try {
-      const order = await findPayboxOrder({params, client});
+      const order = await confirmPayboxOrder({params, client});
 
       invoice = order.context.data;
       purchaseAmount = order.amount;

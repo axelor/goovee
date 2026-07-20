@@ -5,6 +5,7 @@ import {
   markPaymentAsCancelled,
   markPaymentAsFailed,
   markPaymentAsProcessed,
+  recordProviderTransactionRef,
 } from '../common/orm';
 import {notifyPaymentUpdate, PAYMENT_UPDATE_STATUS} from '../sse';
 import {PAYMENT_SOURCE} from '../common/type';
@@ -108,6 +109,12 @@ export async function processAcscPayment({
   const source = paymentContext.data?.source;
   const entityId = paymentContext.data?.id;
   const paidAmount = paymentContext.data?.amount;
+
+  await recordProviderTransactionRef({
+    context: paymentContext,
+    client,
+    providerTransactionRef: paymentContext.data?.paymentRequestResourceId,
+  });
 
   switch (source) {
     case PAYMENT_SOURCE.INVOICES: {

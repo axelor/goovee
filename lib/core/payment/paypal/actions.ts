@@ -7,7 +7,11 @@ import PayPalClient from '.';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {PaymentOption} from '@/types';
-import {createPaymentContext, findPaymentContext} from '../common/orm';
+import {
+  createPaymentContext,
+  findPaymentContext,
+  recordProviderTransactionRef,
+} from '../common/orm';
 import type {PaymentOrder} from '../common/type';
 
 export async function createPaypalOrder({
@@ -71,7 +75,7 @@ export async function createPaypalOrder({
   return {result};
 }
 
-export async function findPaypalOrder({
+export async function confirmPaypalOrder({
   id,
   client,
 }: {
@@ -119,10 +123,19 @@ export async function findPaypalOrder({
     throw new Error('Context not found');
   }
 
+  const reference = result.purchaseUnits?.[0]?.payments?.captures?.[0]?.id;
+
+  await recordProviderTransactionRef({
+    context,
+    client,
+    providerTransactionRef: reference,
+  });
+
   return {
     context,
     amount: Number(
       result.purchaseUnits?.[0]?.payments?.captures?.[0]?.amount?.value || 0,
     ),
+    reference,
   };
 }

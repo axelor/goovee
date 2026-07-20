@@ -9,6 +9,7 @@ import {
   findPaymentContext,
   markPaymentAsFailed,
   markPaymentAsProcessed,
+  recordProviderTransactionRef,
 } from '@/lib/core/payment/common/orm';
 import {PaymentOption} from '@/types';
 import {UP2PAY_ERRORS, UP2PAY_ERROR_MESSAGES} from '@/payment/up2pay/constants';
@@ -58,12 +59,10 @@ export async function GET(request: Request) {
   const pem = readPEMFile();
 
   const sign = params.get('sign')?.trim();
-
   const erreur = params.get('erreur');
-
   const ref = params.get('ref');
-
   const montant = params.get('montant');
+  const transaction = params.get('transaction');
 
   if (!(pem && message && sign && ref)) {
     console.error('[UP2PAY][WEBHOOK] Missing required params', {
@@ -164,6 +163,12 @@ export async function GET(request: Request) {
 
     return new NextResponse('OK', {status: 200});
   }
+
+  await recordProviderTransactionRef({
+    context: paymentContext,
+    client,
+    providerTransactionRef: transaction ?? undefined,
+  });
 
   const expectedAmount = paymentContext.data?.amount;
   const paidAmount = montant

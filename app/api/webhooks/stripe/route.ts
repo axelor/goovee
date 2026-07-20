@@ -11,6 +11,7 @@ import {
   findPaymentContext,
   markPaymentAsFailed,
   markPaymentAsProcessed,
+  recordProviderTransactionRef,
 } from '@/lib/core/payment/common/orm';
 import {PaymentOption} from '@/types';
 import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/lib/core/payment/common/type';
@@ -166,6 +167,12 @@ export async function POST(req: Request) {
           paymentIntent.amount_received,
           paymentIntent.currency,
         );
+
+        await recordProviderTransactionRef({
+          context: paymentContext,
+          client,
+          providerTransactionRef: paymentIntent.id,
+        });
 
         switch (source) {
           case PAYMENT_SOURCE.INVOICES: {
