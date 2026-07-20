@@ -1,4 +1,5 @@
 // ---- CORE IMPORTS ---- //
+import {cache} from 'react';
 import type {Client} from '@/goovee/.generated/client';
 import type {Cloned} from '@/types/util';
 import {clone, getPageInfo} from '@/utils';
@@ -57,87 +58,83 @@ const EMPTY_NEWS_RESPONSE: NewsResponse = {
   },
 };
 
-export async function findNonArchivedNewsCategories({
-  workspace,
-  user,
-  client,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  user?: User;
-  client: Client;
-}) {
-  if (!workspace) return [];
+export const findNonArchivedNewsCategories = cache(
+  async (workspaceId: string, user: User | undefined, client: Client) => {
+    if (!workspaceId) return [];
 
-  const categories = await client.aOSPortalNewsCategory
-    .find({
-      where: {
-        workspace: {
-          id: workspace.id,
+    const categories = await client.aOSPortalNewsCategory
+      .find({
+        where: {
+          workspace: {
+            id: workspaceId,
+          },
+
+          ...filterPrivate({user}),
         },
-
-        ...filterPrivate({user}),
-      },
-      select: {
-        parentCategory: {
-          id: true,
+        select: {
+          parentCategory: {
+            id: true,
+          },
+          name: true,
+          archived: true,
         },
-        name: true,
-        archived: true,
-      },
-    })
-    .then(clone);
+      })
+      .then(clone);
 
-  const hiearchy = (categories: OrmCategoryEntry[]): CategoryNode[] => {
-    const map: Record<string | number, CategoryNode> = {};
-    categories?.forEach(category => {
-      (category as CategoryNode).children = [];
-      map[category.id] = category as CategoryNode;
-    });
-
-    categories?.forEach(category => {
-      const {parentCategory} = category;
-      if (parentCategory?.id) {
-        map[parentCategory.id]?.children.push(map[category.id]);
-      }
-    });
-
-    const _parent = (
-      category: CategoryNode,
-      parents: Array<string | number> = [],
-    ) => {
-      if (!category._parent) {
-        category._parent = [...parents];
-      }
-
-      category.children.forEach(child => {
-        _parent(child, [...parents, category.id]);
+    const hiearchy = (categories: OrmCategoryEntry[]): CategoryNode[] => {
+      const map: Record<string | number, CategoryNode> = {};
+      categories?.forEach(category => {
+        (category as CategoryNode).children = [];
+        map[category.id] = category as CategoryNode;
       });
+
+      categories?.forEach(category => {
+        const {parentCategory} = category;
+        if (parentCategory?.id) {
+          map[parentCategory.id]?.children.push(map[category.id]);
+        }
+      });
+
+      const _parent = (
+        category: CategoryNode,
+        parents: Array<string | number> = [],
+      ) => {
+        if (!category._parent) {
+          category._parent = [...parents];
+        }
+
+        category.children.forEach(child => {
+          _parent(child, [...parents, category.id]);
+        });
+      };
+
+      Object.values(map).forEach(category => _parent(category));
+
+      Object.values(map).forEach(category => {
+        if (category._parent?.length) {
+          category._parentArchived = category._parent.some(
+            p => map[p]?.archived,
+          );
+        }
+      });
+
+      return Object.keys(map)
+        .filter(key => {
+          const category = map[key];
+          const archived = category.archived || category._parentArchived;
+
+          return !archived;
+        })
+        .map(id => map[id]);
     };
 
-    Object.values(map).forEach(category => _parent(category));
+    const _categories: CategoryNode[] = hiearchy(
+      categories as OrmCategoryEntry[],
+    );
 
-    Object.values(map).forEach(category => {
-      if (category._parent?.length) {
-        category._parentArchived = category._parent.some(p => map[p]?.archived);
-      }
-    });
-
-    return Object.keys(map)
-      .filter(key => {
-        const category = map[key];
-        const archived = category.archived || category._parentArchived;
-
-        return !archived;
-      })
-      .map(id => map[id]);
-  };
-
-  const _categories: CategoryNode[] = hiearchy(
-    categories as OrmCategoryEntry[],
-  );
-
-  return _categories;
-}
+    return _categories;
+  },
+);
 
 export async function findNews({
   id = '',
@@ -172,11 +169,11 @@ export async function findNews({
     return EMPTY_NEWS_RESPONSE;
   }
 
-  const nonarchivedcategory = await findNonArchivedNewsCategories({
-    client,
-    workspace,
+  const nonarchivedcategory = await findNonArchivedNewsCategories(
+    workspace.id,
     user,
-  });
+    client,
+  );
 
   const nonarchivedcategoryids = nonarchivedcategory?.map(c => c.id);
   let categoryIdsFilteredByArchive = nonarchivedcategoryids;
@@ -825,11 +822,11 @@ export async function findNewsRelatedNews({
 }) {
   if (!workspace) return null;
 
-  const nonarchivedcategory = await findNonArchivedNewsCategories({
+  const nonarchivedcategory = await findNonArchivedNewsCategories(
+    workspace.id,
+    user,
     client,
-    workspace: workspace,
-    user: user,
-  });
+  );
 
   const nonarchivedcategoryids = nonarchivedcategory?.map(c => c.id);
 

@@ -11,7 +11,7 @@ import {findFile, streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
-import {findEvent} from '../../../../../common/orm/event';
+import {findEventIdForAccess} from '../../../../../common/orm/event';
 
 export async function GET(
   request: NextRequest,
@@ -52,12 +52,11 @@ export async function GET(
     return new NextResponse('Forbidden', {status: 403});
   }
 
-  const event = await findEvent({
+  const event = await findEventIdForAccess({
     slug,
+    workspaceURL,
     client,
-    config: access.tenant.config,
     user: access.user,
-    workspace: access.workspace,
   });
   if (!event) {
     return new NextResponse('Forbidden', {status: 403});
