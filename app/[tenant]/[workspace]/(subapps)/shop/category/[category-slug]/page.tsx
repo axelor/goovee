@@ -72,11 +72,11 @@ async function Category({
   );
   if (!workspaceConfig) return notFound();
 
-  const categories = await findCategories({
-    workspace: access.workspace,
-    client,
+  const categories = await findCategories(
+    access.workspace.id,
     user,
-  }).then(clone);
+    client,
+  ).then(clone);
 
   const $cats = categories as Category[];
 

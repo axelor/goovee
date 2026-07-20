@@ -18,7 +18,10 @@ import {
   ProductView,
   ProductViewSkeleton,
 } from '@/subapps/shop/common/ui/components';
-import {findProductBySlug} from '@/subapps/shop/common/orm/product';
+import {
+  findProductBySlug,
+  findProductMetaBySlug,
+} from '@/subapps/shop/common/orm/product';
 import {getShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/subapps/shop/common/orm/categories';
 import {
@@ -52,46 +55,27 @@ export async function generateMetadata(props: {
 
   const {user} = access;
   const {client} = access.tenant;
-  const {config} = access.tenant;
 
-  const workspaceConfig = await getShopConfig(
-    access.workspace.config.id,
-    client,
-  );
-  if (!workspaceConfig) return null;
-
-  const categories = await findCategories({
-    workspace: access.workspace,
-    client,
-    user,
-  }).then(clone);
-
+  const categories = await findCategories(access.workspace.id, user, client);
   const $category =
     (categories as Category[]).find(c => c.slug === categorySlug) ?? null;
+  if (!$category) return null;
 
-  if (!$category) {
-    return null;
-  }
-
-  const computedProduct = await findProductBySlug({
+  const product = await findProductMetaBySlug({
     slug: productSlug,
     workspace: access.workspace,
-    workspaceConfig,
     user,
     client,
-    config,
     categoryids: [$category.id],
   });
 
-  if (!computedProduct?.product) {
+  if (!product) {
     return null;
   }
 
-  const {product} = computedProduct;
-
   return {
-    title: product?.name,
-    description: htmlToNormalString(product?.description ?? ''),
+    title: product.name,
+    description: htmlToNormalString(product.description ?? ''),
   };
 }
 
@@ -151,11 +135,11 @@ async function Product({
   );
   if (!workspaceConfig) return notFound();
 
-  const categories = await findCategories({
-    workspace: access.workspace,
-    client,
+  const categories = await findCategories(
+    access.workspace.id,
     user,
-  }).then(clone);
+    client,
+  ).then(clone);
 
   const $category =
     (categories as Category[]).find(c => c.slug === categorySlug) ?? null;
