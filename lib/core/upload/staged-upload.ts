@@ -112,6 +112,37 @@ export const UPLOAD_PURPOSES = {
     maxBytes: RESOURCE_MAX_FILE_SIZE,
     ttlMs: ATTACHMENT_UPLOAD_TTL_MS,
   },
+  /*
+   * Marketplace version bundle. Mirror `MAX_BUNDLE_SIZE` and the `BundleDropzone`
+   * accept rule (app/.../marketplace/common/ui/components/versions/): a real zip
+   * mime OR a `.zip` filename — some browsers send octet-stream for `.zip`.
+   */
+  'marketplace:bundle': {
+    maxBytes: 20 * 1024 * 1024,
+    file: z
+      .file()
+      .refine(
+        file =>
+          file.type === 'application/zip' ||
+          file.type === 'application/x-zip-compressed' ||
+          file.name.toLowerCase().endsWith('.zip'),
+        {error: 'Bundle must be a .zip file'},
+      ),
+  },
+  /*
+   * Marketplace product screenshot. Mirror `MAX_IMAGE_SIZE` and
+   * `ACCEPTED_IMAGE_TYPES` (app/.../marketplace/common/ui/components/product/
+   * product-form/validator.ts). SVG is intentionally excluded (XSS vector).
+   */
+  'marketplace:screenshot': {
+    maxBytes: 5 * 1024 * 1024,
+    file: z
+      .file()
+      .mime(
+        ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'],
+        {error: 'Only JPEG, PNG, WebP, GIF, or AVIF images are allowed'},
+      ),
+  },
 } satisfies Record<string, UploadPolicy>;
 
 export type UploadPurpose = keyof typeof UPLOAD_PURPOSES;

@@ -19,6 +19,11 @@
       "type": "ManyToOne",
       "name": "currency",
       "target": "AOSCurrency"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "priceListSet",
+      "target": "AOSPriceList"
     }
   ]
 }

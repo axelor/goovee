@@ -15,12 +15,18 @@
     {
       "type": "ManyToOne",
       "name": "company",
-      "target": "AOSCompany"
+      "target": "AOSCompany",
+      "required": true
     },
     {
       "type": "ManyToMany",
       "name": "saleTaxSet",
       "target": "AOSTax"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "product",
+      "target": "AOSProduct"
     }
   ]
 }

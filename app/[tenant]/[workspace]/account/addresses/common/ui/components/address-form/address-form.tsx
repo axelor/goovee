@@ -15,7 +15,7 @@ import {City, Country} from '@/types';
 import {useSearchParams, useToast} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {UserType} from '@/lib/core/auth/types';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 
 // ---- LOCAL IMPORTS ---- //
 import {

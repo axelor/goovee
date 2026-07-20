@@ -7,7 +7,7 @@ import {MdEast} from 'react-icons/md';
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {useToast} from '@/ui/hooks';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import type {ComputedProduct} from '@/types';
 import type {Cloned} from '@/types/util';

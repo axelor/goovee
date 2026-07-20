@@ -219,6 +219,20 @@
       "name": "jobTitleFunction",
       "type": "ManyToOne",
       "target": "AOSFunction"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "favouriteMarketplaceProducts",
+      "target": "AOSMarketplaceProduct"
+    },
+    {
+      "type": "Boolean",
+      "name": "isMarketplacePublisher"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currency",
+      "target": "AOSCurrency"
     }
   ]
 }

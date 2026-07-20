@@ -74,6 +74,7 @@ export enum SUBAPP_CODES {
   directory = 'directory',
   survey = 'survey',
   website = 'website',
+  marketplace = 'marketplace',
 }
 
 export enum CHAT_TYPE {
@@ -89,6 +90,7 @@ export const SUBAPP_WITH_ROLES = [
   SUBAPP_CODES.orders,
   SUBAPP_CODES.invoices,
   SUBAPP_CODES.ticketing,
+  SUBAPP_CODES.marketplace,
 ];
 
 /**

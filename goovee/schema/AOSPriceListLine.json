@@ -1,0 +1,38 @@
+{
+  "name": "AOSPriceListLine",
+  "table": "base_price_list_line",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "Int",
+      "name": "typeSelect"
+    },
+    {
+      "type": "Int",
+      "name": "amountTypeSelect"
+    },
+    {
+      "type": "Decimal",
+      "name": "amount"
+    },
+    {
+      "type": "Decimal",
+      "name": "minQty"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "priceList",
+      "target": "AOSPriceList"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "product",
+      "target": "AOSProduct"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "productCategory",
+      "target": "AOSProductCategory"
+    }
+  ]
+}
