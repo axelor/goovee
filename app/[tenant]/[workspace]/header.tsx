@@ -23,7 +23,7 @@ import type {Workspace} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';
 import {useNavigationVisibility} from '@/ui/hooks';
 import {useResponsive} from '@/ui/hooks';
-import Cart from '@/app/[tenant]/[workspace]/cart';
+import CartIcon from '@/app/[tenant]/[workspace]/cart-icon';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
@@ -70,14 +70,14 @@ export default function Header({
   workspaces,
   workspace,
   config,
-  showCart,
+  cartCodes = [],
 }: {
   subapps: any;
   isTopNavigation?: boolean;
   workspaces: {id: string; name: string | null; url: string | null}[];
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
-  showCart?: boolean | null;
+  cartCodes?: string[];
 }) {
   const router = useRouter();
   const {data: session} = authClient.useSession();
@@ -99,7 +99,7 @@ export default function Header({
     : false;
 
   const shouldDisplayIcons = visible && !loading;
-  const showCartIcon = showCart && shouldDisplayIcons;
+  const showCartIcon = shouldDisplayIcons && cartCodes.length > 0;
   const isFixedHeader = config.isFixedHeader;
 
   return (
@@ -109,6 +109,9 @@ export default function Header({
           'min-h-16 bg-background text-foreground px-6 py-2 flex items-center border-b border-border border-solid',
         )}>
         <Logo workspace={workspace} config={config} />
+
+        {/** Subapp-injected header nav slot (filled via Portal). */}
+        <div id="subapp-header-nav" className="ml-8 hidden" />
 
         <div className="grow" />
         {isLarge && (
@@ -147,7 +150,7 @@ export default function Header({
                   );
                 })}
             {user && <Notification />}
-            {showCartIcon && <Cart />}
+            {showCartIcon && <CartIcon enabledCodes={cartCodes} />}
             <Account baseURL={workspaceURI} tenant={tenant} />
           </div>
         )}

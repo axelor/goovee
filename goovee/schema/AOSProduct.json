@@ -9,7 +9,15 @@
     },
     {
       "type": "String",
+      "name": "fullName"
+    },
+    {
+      "type": "String",
       "name": "description"
+    },
+    {
+      "type": "String",
+      "name": "longDescription"
     },
     {
       "type": "String",
@@ -78,8 +86,24 @@
     },
     {
       "type": "ManyToOne",
+      "name": "unit",
+      "target": "AOSUnit"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "salesUnit",
+      "target": "AOSUnit"
+    },
+    {
+      "type": "ManyToOne",
       "name": "productFamily",
       "target": "AOSProductFamily"
+    },
+    {
+      "type": "OneToMany",
+      "name": "accountManagementList",
+      "target": "AOSAccountManagement",
+      "mappedBy": "product"
     },
     {
       "type": "ManyToOne",
@@ -129,6 +153,23 @@
     {
       "name": "slug",
       "type": "String"
+    },
+    {
+      "type": "String",
+      "name": "productTypeSelect"
+    },
+    {
+      "type": "Boolean",
+      "name": "sellable"
+    },
+    {
+      "type": "Boolean",
+      "name": "purchasable"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "defaultSupplierPartner",
+      "target": "AOSPartner"
     }
   ]
 }

@@ -1,0 +1,147 @@
+{
+  "name": "AOSMarketplaceProduct",
+  "table": "portal_marketplace_product",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "name",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "slug",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "description"
+    },
+    {
+      "type": "String",
+      "name": "longDescription"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "product",
+      "target": "AOSProduct",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "portalWorkspace",
+      "target": "AOSPortalWorkspace",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "publisher",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "ManyToMany",
+      "name": "categorySet",
+      "target": "AOSMarketplaceCategory"
+    },
+    {
+      "type": "Decimal",
+      "name": "salePrice",
+      "required": true
+    },
+    {
+      "type": "Boolean",
+      "name": "inAti",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "saleCurrency",
+      "target": "AOSCurrency",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "marketplaceTypeSelect"
+    },
+    {
+      "type": "String",
+      "name": "coverStyle"
+    },
+    {
+      "type": "String",
+      "name": "iconCode"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "license",
+      "target": "AOSMarketplaceLicense"
+    },
+    {
+      "type": "String",
+      "name": "documentationUrl"
+    },
+    {
+      "type": "String",
+      "name": "supportIssuesUrl"
+    },
+    {
+      "type": "String",
+      "name": "supportContactUrl"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "currentVersion",
+      "target": "AOSMarketplaceProductVersion"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "latestVersion",
+      "target": "AOSMarketplaceProductVersion"
+    },
+    {
+      "type": "Decimal",
+      "name": "averageRating"
+    },
+    {
+      "type": "Int",
+      "name": "ratingCount"
+    },
+    {
+      "type": "Int",
+      "name": "installCount"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "createdByPartner",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "updatedByPartner",
+      "target": "AOSPartner"
+    },
+    {
+      "type": "OneToMany",
+      "name": "pictureList",
+      "target": "AOSMarketplaceProductPicture",
+      "mappedBy": "marketplaceProduct"
+    },
+    {
+      "type": "OneToMany",
+      "name": "purchaseList",
+      "target": "AOSMarketplaceProductPurchase",
+      "mappedBy": "marketplaceProduct"
+    },
+    {
+      "type": "OneToMany",
+      "name": "versionList",
+      "target": "AOSMarketplaceProductVersion",
+      "mappedBy": "marketplaceProduct"
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
+    }
+  ]
+}

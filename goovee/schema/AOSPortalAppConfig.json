@@ -418,6 +418,36 @@
     {
       "type": "String",
       "name": "termsOfUseAcceptanceText"
+    },
+    {
+      "type": "Boolean",
+      "name": "allowToPublish"
+    },
+    {
+      "type": "Boolean",
+      "name": "requiresReview"
+    },
+    {
+      "type": "String",
+      "name": "marketplaceHeroTitle"
+    },
+    {
+      "type": "String",
+      "name": "marketplaceHeroDescription"
+    },
+    {
+      "type": "String",
+      "name": "marketplaceHeroOverlayColorSelect"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceHeroBgImage",
+      "target": "AOSMetaFile"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "defaultProductForMarketplace",
+      "target": "AOSProduct"
     }
   ]
 }

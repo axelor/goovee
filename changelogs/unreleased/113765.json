@@ -1,0 +1,6 @@
+{
+  "title": "Restrict marketplace product authoring to total contacts",
+  "type": "feature",
+  "description": "The marketplace subapp now honours the restricted/total contact role. A restricted contact is a buyer only: browsing, downloads and checkout stay open, but the contributions area and the publisher actions are no longer accessible.",
+  "scope": ["marketplace"]
+}

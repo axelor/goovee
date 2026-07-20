@@ -19,6 +19,7 @@ const SCOPE_LABELS = {
   survey: 'Forms',
   ticketing: 'Helpdesk',
   website: 'Content',
+  'marketplace': 'Marketplace',
   core: 'Core Platform',
   users: 'User Accounts',
 };

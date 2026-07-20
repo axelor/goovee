@@ -1,0 +1,6 @@
+{
+  "title": "Show the rejection reason on a rejected marketplace version",
+  "type": "feature",
+  "description": "When a reviewer rejects a version submission they now provide a reason, and the contributions editor shows the latest one to the author so they know what to fix before resubmitting.",
+  "scope": ["marketplace"]
+}
