@@ -41,11 +41,7 @@ export default async function Layout(props: {
 
   const config = await getShopConfig(access.workspace.config.id, client);
   const categories = config
-    ? await findCategories({
-        workspace: access.workspace,
-        client,
-        user,
-      }).then(clone)
+    ? await findCategories(access.workspace.id, user, client).then(clone)
     : [];
 
   const parentcategories = (categories as Category[])?.filter(c => !c.parent);
