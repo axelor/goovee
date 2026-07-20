@@ -9,6 +9,16 @@ import {IconType} from 'react-icons';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {useToast} from '@/ui/hooks';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {SectionHeader} from '@/app/[tenant]/[workspace]/account/common/ui/components';
@@ -60,6 +70,7 @@ export function AddressBook({
   const {toast} = useToast();
   const [editing, setEditing] = useState<Editing>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const invoicingAddrs = addresses.filter(a => a.isInvoicingAddr);
   const shippingAddrs = addresses.filter(a => a.isDeliveryAddr);
@@ -110,7 +121,7 @@ export function AddressBook({
         onAdd={() => setEditing({mode: 'new', kind: 'invoicing'})}
         onEdit={a => setEditing({mode: 'edit', kind: 'invoicing', address: a})}
         onSetDefault={id => handleSetDefault(id, 'invoicing')}
-        onDelete={handleDelete}
+        onDelete={setPendingDelete}
       />
 
       <AddressSection
@@ -122,7 +133,7 @@ export function AddressBook({
         onAdd={() => setEditing({mode: 'new', kind: 'shipping'})}
         onEdit={a => setEditing({mode: 'edit', kind: 'shipping', address: a})}
         onSetDefault={id => handleSetDefault(id, 'shipping')}
-        onDelete={handleDelete}
+        onDelete={setPendingDelete}
       />
 
       {editing && (
@@ -135,6 +146,32 @@ export function AddressBook({
           onSaved={() => router.refresh()}
         />
       )}
+
+      <AlertDialog
+        open={pendingDelete !== null}
+        onOpenChange={value => !value && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {i18n.t('Delete this address?')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('This action cannot be undone.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{i18n.t('Cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (pendingDelete) handleDelete(pendingDelete);
+                setPendingDelete(null);
+              }}>
+              {i18n.t('Delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

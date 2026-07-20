@@ -96,8 +96,9 @@ function OtpInput({
           onChange={e => setAt(i, e.target.value)}
           onKeyDown={e => onKeyDown(i, e)}
           onPaste={onPaste}
+          size={1}
           className={cn(
-            'h-[54px] flex-1 rounded-[11px] border text-center font-mono text-[22px] font-bold text-ink-900 outline-none transition-colors focus:border-royal focus:ring-4 focus:ring-royal-pale',
+            'h-[54px] min-w-0 flex-1 rounded-[11px] border text-center font-mono text-[22px] font-bold text-ink-900 outline-none transition-colors focus:border-royal focus:ring-4 focus:ring-royal-pale',
             d ? 'border-royal bg-royal-pale' : 'border-ink-150 bg-white',
           )}
         />

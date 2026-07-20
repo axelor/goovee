@@ -122,14 +122,8 @@ export function ShopCheckout({
   const subtotal = useMemo(() => {
     let sum = 0;
     for (const item of items) {
-      const raw = item.computedProduct?.price?.displayPrimary ?? '';
-      const cleaned = String(raw)
-        .replace(/[^\d.,-]/g, '')
-        .replace(/\s/g, '');
-      const normalised = cleaned
-        .replace(/\.(?=\d{3}(?:[^\d]|$))/g, '')
-        .replace(',', '.');
-      const n = Number(normalised);
+      // Numeric price rather than re-parsing the localized display string.
+      const n = Number(item.computedProduct?.price?.primary ?? 0);
       if (Number.isFinite(n)) sum += n * Number(item.quantity ?? 0);
     }
     return sum;
@@ -191,6 +185,18 @@ export function ShopCheckout({
             <div className="flex flex-col gap-[18px]">
               <SectionCard title={labels.addressCardTitle}>
                 <CheckoutAddressPicker
+                  type={ADDRESS_TYPE.delivery}
+                  workspaceURI={workspaceURI}
+                  defaultBadgeLabel={labels.addressDefaultBadge}
+                  newActionLabel={labels.addressNewAction}
+                  noneTitle={labels.addressNoneTitle}
+                  loadingLabel={labels.addressLoading}
+                />
+              </SectionCard>
+
+              <SectionCard title={i18n.t('Billing address')}>
+                <CheckoutAddressPicker
+                  type={ADDRESS_TYPE.invoicing}
                   workspaceURI={workspaceURI}
                   defaultBadgeLabel={labels.addressDefaultBadge}
                   newActionLabel={labels.addressNewAction}
@@ -388,12 +394,7 @@ function SummaryRow({
   const imageId = product?.thumbnailImage?.id || product?.images?.[0];
   const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
 
-  const rawPrice = String(item.computedProduct?.price?.displayPrimary ?? '');
-  const cleaned = rawPrice.replace(/[^\d.,-]/g, '').replace(/\s/g, '');
-  const normalised = cleaned
-    .replace(/\.(?=\d{3}(?:[^\d]|$))/g, '')
-    .replace(',', '.');
-  const unitNum = Number(normalised);
+  const unitNum = Number(item.computedProduct?.price?.primary ?? 0);
   const qty = Number(item.quantity ?? 0);
   const lineTotal = Number.isFinite(unitNum) ? unitNum * qty : 0;
 
@@ -437,12 +438,14 @@ function TotalsRow({label, value}: {label: string; value: string}) {
 }
 
 function CheckoutAddressPicker({
+  type,
   workspaceURI,
   defaultBadgeLabel,
   newActionLabel,
   noneTitle,
   loadingLabel,
 }: {
+  type: ADDRESS_TYPE;
   workspaceURI: string;
   defaultBadgeLabel: string;
   newActionLabel: string;
@@ -455,50 +458,39 @@ function CheckoutAddressPicker({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load delivery addresses + seed both delivery and invoicing on the cart.
-  // The visible picker only manages delivery; invoicing follows the default
-  // (or the same address if no separate invoicing default exists).
+  const isInvoicing = type === ADDRESS_TYPE.invoicing;
+
+  // Load the addresses for this address type and seed the matching cart field.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [list, defDelivery, defInvoicing, invoicingList] =
-          await Promise.all([
-            fetchDeliveryAddresses({workspaceURL}),
-            findDefaultDelivery({workspaceURL}),
-            findDefaultInvoicing({workspaceURL}),
-            fetchInvoicingAddresses({workspaceURL}),
-          ]);
+        const [list, def] = await Promise.all([
+          isInvoicing
+            ? fetchInvoicingAddresses({workspaceURL})
+            : fetchDeliveryAddresses({workspaceURL}),
+          isInvoicing
+            ? findDefaultInvoicing({workspaceURL})
+            : findDefaultDelivery({workspaceURL}),
+        ]);
         if (cancelled) return;
         const all = (list as any[]) ?? [];
         setAddresses(all);
 
-        const cartId = cart?.deliveryAddress ?? null;
+        const cartId =
+          (isInvoicing ? cart?.invoicingAddress : cart?.deliveryAddress) ??
+          null;
         const initial =
           (cartId && all.find(a => String(a.id) === String(cartId))) ||
-          (defDelivery as any) ||
+          (def as any) ||
           all[0] ||
           null;
 
         if (initial?.id) {
           setSelectedId(String(initial.id));
-          if (cart?.deliveryAddress !== initial.id) {
-            updateAddress({
-              addressType: ADDRESS_TYPE.delivery,
-              address: initial.id,
-            });
+          if (cartId !== initial.id) {
+            updateAddress({addressType: type, address: initial.id});
           }
-        }
-
-        const invoicing =
-          (defInvoicing as any) ??
-          ((invoicingList as any[]) ?? [])[0] ??
-          initial;
-        if (invoicing?.id && cart?.invoicingAddress !== invoicing.id) {
-          updateAddress({
-            addressType: ADDRESS_TYPE.invoicing,
-            address: invoicing.id,
-          });
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -512,7 +504,7 @@ function CheckoutAddressPicker({
 
   const handleSelect = (addr: any) => {
     setSelectedId(String(addr.id));
-    updateAddress({addressType: ADDRESS_TYPE.delivery, address: addr.id});
+    updateAddress({addressType: type, address: addr.id});
   };
 
   const newAddressHref = `${workspaceURI}/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
@@ -560,7 +552,7 @@ function CheckoutAddressPicker({
             )}>
             <input
               type="radio"
-              name="checkout-address"
+              name={`checkout-address-${type}`}
               checked={active}
               onChange={() => handleSelect(a)}
               className="w-4 h-4 mt-1 accent-royal cursor-pointer shrink-0"

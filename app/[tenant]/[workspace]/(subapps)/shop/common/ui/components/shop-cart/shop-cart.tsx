@@ -119,14 +119,9 @@ export function ShopCart({
   const subtotal = useMemo(() => {
     let sum = 0;
     for (const item of items) {
-      const raw = item.computedProduct?.price?.displayPrimary ?? '';
-      const cleaned = String(raw)
-        .replace(/[^\d.,-]/g, '')
-        .replace(/\s/g, '');
-      const normalised = cleaned
-        .replace(/\.(?=\d{3}(?:[^\d]|$))/g, '')
-        .replace(',', '.');
-      const n = Number(normalised);
+      // Use the numeric price rather than re-parsing the localized display
+      // string (which broke for locales where "," is a thousands separator).
+      const n = Number(item.computedProduct?.price?.primary ?? 0);
       if (Number.isFinite(n)) sum += n * Number(item.quantity ?? 0);
     }
     return sum;
@@ -349,13 +344,8 @@ function CartLine({
 
   const productHref = `${workspaceURI}/${SUBAPP_CODES.shop}/product/${encodeURIComponent(product.slug)}`;
 
-  // Parse the unit price for the per-line total label
-  const rawPrice = String(price?.displayPrimary ?? '');
-  const cleaned = rawPrice.replace(/[^\d.,-]/g, '').replace(/\s/g, '');
-  const normalised = cleaned
-    .replace(/\.(?=\d{3}(?:[^\d]|$))/g, '')
-    .replace(',', '.');
-  const unitNum = Number(normalised);
+  // Per-line total from the numeric unit price (locale-safe).
+  const unitNum = Number(price?.primary ?? 0);
   const qty = Number(item.quantity ?? 0);
   const lineTotal = Number.isFinite(unitNum) ? unitNum * qty : 0;
 

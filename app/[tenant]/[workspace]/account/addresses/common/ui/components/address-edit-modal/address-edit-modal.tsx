@@ -1,6 +1,7 @@
 'use client';
 
 import {useMemo, useState} from 'react';
+import {MdClose, MdOutlineLocationOn} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -8,7 +9,6 @@ import {
   Button,
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DropdownSelector,
   Input,
@@ -145,12 +145,40 @@ export function AddressEditModal({
 
   return (
     <Dialog open={open} onOpenChange={value => !value && onClose()}>
-      <DialogContent className="max-w-[520px] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b border-ink-100">
-          <DialogTitle className="text-[17px] font-bold text-ink-900">
-            {isEdit ? i18n.t('Edit address') : i18n.t('New address')}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent
+        className="max-w-[520px] p-0 gap-0 overflow-hidden"
+        hideClose>
+        {/* Header — royal gradient + dots pattern (matches the forum modal) */}
+        <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-royal-dark to-royal px-6 py-[22px] text-white">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-50"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 1px)',
+              backgroundSize: '18px 18px',
+            }}
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={i18n.t('Close')}
+            className="absolute right-4 top-4 z-10 grid size-8 place-items-center rounded-lg bg-white/15 text-white transition-colors hover:bg-white/25">
+            <MdClose className="size-4" />
+          </button>
+          <div className="relative flex items-center gap-3.5">
+            <div className="grid size-11 shrink-0 place-items-center rounded-[11px] bg-white/[0.18]">
+              <MdOutlineLocationOn className="size-5" />
+            </div>
+            <div>
+              <DialogTitle className="text-[19px] font-extrabold tracking-[-0.015em] text-white">
+                {isEdit ? i18n.t('Edit address') : i18n.t('New address')}
+              </DialogTitle>
+              <p className="mt-0.5 text-[13px] text-white/85">
+                {i18n.t('Invoicing and delivery details')}
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div className="px-6 py-5 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
           <Field label={i18n.t('Address label')}>

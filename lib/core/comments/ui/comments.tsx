@@ -180,7 +180,8 @@ export function Comments(props: CommentsProps) {
           !isConversation && 'border bg-white',
           isConversation &&
             'border-none bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0',
-          isDisabled && 'bg-gray-light placeholder:text-gray-dark',
+          isDisabled &&
+            'bg-gray-light placeholder:text-gray-dark rounded-lg px-3 py-1.5',
         )}
         placeholderText={
           isLoggedIn

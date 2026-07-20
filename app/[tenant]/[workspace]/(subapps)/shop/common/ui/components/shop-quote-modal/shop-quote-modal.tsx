@@ -83,14 +83,7 @@ export function ShopQuoteModal({
   const subtotalHt = useMemo(() => {
     let sum = 0;
     for (const item of computedItems) {
-      const raw = item.computedProduct?.price?.displayPrimary ?? '';
-      const cleaned = String(raw)
-        .replace(/[^\d.,-]/g, '')
-        .replace(/\s/g, '');
-      const normalised = cleaned
-        .replace(/\.(?=\d{3}(?:[^\d]|$))/g, '')
-        .replace(',', '.');
-      const n = Number(normalised);
+      const n = Number(item.computedProduct?.price?.primary ?? 0);
       if (Number.isFinite(n)) sum += n * Number(item.quantity ?? 0);
     }
     return sum;
@@ -287,12 +280,7 @@ function QuoteItemRow({item, fmt}: {item: any; fmt: (n: number) => string}) {
   const imageId = product?.thumbnailImage?.id || product?.images?.[0];
   const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
 
-  const rawPrice = String(item.computedProduct?.price?.displayPrimary ?? '');
-  const cleaned = rawPrice.replace(/[^\d.,-]/g, '').replace(/\s/g, '');
-  const normalised = cleaned
-    .replace(/\.(?=\d{3}(?:[^\d]|$))/g, '')
-    .replace(',', '.');
-  const unitNum = Number(normalised);
+  const unitNum = Number(item.computedProduct?.price?.primary ?? 0);
   const qty = Number(item.quantity ?? 0);
   const lineTotal = Number.isFinite(unitNum) ? unitNum * qty : 0;
 

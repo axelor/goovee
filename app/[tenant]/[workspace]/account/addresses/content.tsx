@@ -7,7 +7,17 @@ import {IconType} from 'react-icons';
 import {MdAdd, MdCheck, MdLocalShipping, MdReceiptLong} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {Button} from '@/ui/components';
+import {
+  Button,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/components';
 import {i18n} from '@/locale';
 import {ADDRESS_TYPE, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -55,9 +65,11 @@ function Content({
     invoicing: null,
     delivery: null,
   });
-  const [createModal, setCreateModal] = useState<{
+  const [addressModal, setAddressModal] = useState<{
     kind: 'invoicing' | 'shipping';
+    address?: any;
   } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -68,30 +80,17 @@ function Content({
 
   const isSubAppActive = fromQuotation || fromCheckout;
 
-  const queryParams: any = {};
-
-  if (fromQuotation) {
-    queryParams.quotation = quotation.id;
-  } else if (fromCheckout) {
-    queryParams.checkout = true;
-  }
-
-  if (callbackURL) {
-    queryParams.callbackURL = callbackURL;
-  }
-
-  const queryString = new URLSearchParams(queryParams).toString();
-
   const handleCreate = (type: ADDRESS_TYPE) => {
-    setCreateModal({
+    setAddressModal({
       kind: type === ADDRESS_TYPE.invoicing ? 'invoicing' : 'shipping',
     });
   };
 
-  const handleEdit = (type: ADDRESS_TYPE, id: string | number) => {
-    router.push(
-      `${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}/${type}/${SUBAPP_PAGE.edit}/${id}${queryString ? `?${queryString}` : ''}`,
-    );
+  const handleEdit = (type: ADDRESS_TYPE, record: any) => {
+    setAddressModal({
+      kind: type === ADDRESS_TYPE.invoicing ? 'invoicing' : 'shipping',
+      address: record,
+    });
   };
 
   const handleDefault = async (
@@ -245,7 +244,7 @@ function Content({
           selectable={isSubAppActive}
           onSelect={handleAddressSelection}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={setPendingDelete}
           onDefault={handleDefault}
           onAdd={handleCreate}
         />
@@ -259,7 +258,7 @@ function Content({
           selectable={isSubAppActive}
           onSelect={handleAddressSelection}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={setPendingDelete}
           onDefault={handleDefault}
           onAdd={handleCreate}
         />
@@ -275,18 +274,45 @@ function Content({
         </Button>
       )}
 
-      {createModal && (
+      {addressModal && (
         <AddressEditModal
           open
-          kind={createModal.kind}
+          kind={addressModal.kind}
+          address={addressModal.address ?? null}
           countries={countries}
-          onClose={() => setCreateModal(null)}
+          onClose={() => setAddressModal(null)}
           onSaved={() => {
-            setCreateModal(null);
+            setAddressModal(null);
             router.refresh();
           }}
         />
       )}
+
+      <AlertDialog
+        open={pendingDelete !== null}
+        onOpenChange={value => !value && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {i18n.t('Delete this address?')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('This action cannot be undone.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{i18n.t('Cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (pendingDelete) handleDelete(pendingDelete);
+                setPendingDelete(null);
+              }}>
+              {i18n.t('Delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -344,7 +370,7 @@ function SelectableAddressSection({
   isFromQuotation?: boolean;
   selectable?: boolean;
   onSelect: (type: ADDRESS_TYPE, partnerAddress: any) => void;
-  onEdit: (type: ADDRESS_TYPE, id: string) => void;
+  onEdit: (type: ADDRESS_TYPE, record: any) => void;
   onDelete: (id: string) => void;
   onDefault: (type: ADDRESS_TYPE, id: string, isDefault: boolean) => void;
   onAdd: (type: ADDRESS_TYPE) => void;
@@ -361,7 +387,8 @@ function SelectableAddressSection({
       </div>
 
       <div className="grid grid-cols-1 gap-3">
-        {(addresses ?? []).map(({id, address, isDefaultAddr}) => {
+        {(addresses ?? []).map(record => {
+          const {id, address, isDefaultAddr} = record;
           const selected = isFromQuotation
             ? currentAddress?.id === address?.id
             : currentAddress?.id === id;
@@ -434,7 +461,7 @@ function SelectableAddressSection({
                   type="button"
                   onClick={e => {
                     e.stopPropagation();
-                    onEdit(type, String(id));
+                    onEdit(type, record);
                   }}
                   className="text-[12.5px] font-semibold text-ink-600 hover:text-ink-900">
                   {i18n.t('Edit')}
