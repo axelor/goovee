@@ -623,6 +623,7 @@ For **active** and **frozen**, download follows the normal [per-version access](
 purchaser (and the publisher) still downloads from My Purchases, but a **free**
 product — having no purchase entitlement — stops being downloadable to buyers.
 Only [archiving](#54-archived-records) cuts off download for a paid purchaser too.
+
 ### 5.5 Review moderation states
 
 | State       | Comment shown to other buyers | Comment shown to its author | Counts toward rating |
@@ -716,19 +717,19 @@ Set by an admin in the AOS; each affects storefront behaviour:
 | Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
 | View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                                                                               |
 | View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
-| Action                                        | Guest | Member     | Publisher         | Notes                                                                         |
-| --------------------------------------------- | ----- | ---------- | ----------------- | ----------------------------------------------------------------------------- |
-| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                                                               |
-| Download free published version               | ✅    | ✅         | ✅                | no login required                                                             |
-| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                                                                      |
-| Buy a paid listing                            | ❌    | ✅         | ✅                |                                                                               |
-| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                                                               |
-| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing                                           |
-| Report another user's review                  | ❌    | ✅         | ✅ (others' only) | one per review; not your own                                                  |
-| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access (not a Restricted contact) |
-| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
-| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                            |
-| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                            |
+| Action                                        | Guest | Member     | Publisher         | Notes                                                                                                                            |
+| --------------------------------------------- | ----- | ---------- | ----------------- | -----------------------------------------------------------------------------                                                    |
+| Browse / search / view published listing      | ✅    | ✅         | ✅                |                                                                                                                                  |
+| Download free published version               | ✅    | ✅         | ✅                | no login required                                                                                                                |
+| Favourite a listing                           | ❌    | ✅         | ✅                | per-user                                                                                                                         |
+| Buy a paid listing                            | ❌    | ✅         | ✅                |                                                                                                                                  |
+| Download paid version                         | ❌    | owned only | ✅ (own listing)  |                                                                                                                                  |
+| Write / edit a review                         | ❌    | ✅         | ✅ (others' only) | one per listing; not on own listing                                                                                              |
+| Report another user's review                  | ❌    | ✅         | ✅ (others' only) | one per review; not your own                                                                                                     |
+| Create / edit / unpublish listings & versions | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access (not a Restricted contact)                                                    |
+| Preview own unpublished listing               | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
+| View My Account (Purchases, Favourites)       | ❌    | ✅         | ✅                | any logged-in user                                                                                                               |
+| View My Contributions                         | ❌    | ❌         | ✅                | needs _Allow publishing_ + full marketplace access                                                                               |
 
 ---
 
