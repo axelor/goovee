@@ -188,6 +188,13 @@ export async function findStripeOrder({
   return {
     context,
     amount: getAmountFromStripe(lineItems.data?.[0]?.amount_total, currency),
+    /* The PaymentIntent is Stripe's refund key; sessions without one (e.g.
+     * not yet finalized) fall back to the session id, still searchable in the
+     * dashboard. */
+    providerTransactionRef:
+      typeof stripeSession.payment_intent === 'string'
+        ? stripeSession.payment_intent
+        : (stripeSession.payment_intent?.id ?? stripeSession.id),
   };
 }
 

@@ -17,9 +17,14 @@ export async function register() {
     const {resumeHubPispPolling} = await import(
       '@/lib/core/payment/hubpisp/startup'
     );
+    const {sweepInterruptedPaymentSagas} = await import(
+      '@/lib/core/payment/saga/startup'
+    );
 
     for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
       try {
+        // Flag payment sagas interrupted by the previous shutdown before resuming any polling that could otherwise re-drive their contexts.
+        await sweepInterruptedPaymentSagas({tenantId: DEFAULT_TENANT});
         await resumeHubPispPolling({tenantId: DEFAULT_TENANT});
         return;
       } catch {

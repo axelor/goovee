@@ -99,5 +99,7 @@ export async function findPayboxOrder({
   return {
     context,
     amount: reference.amount,
+    // Echoed by Paybox per PBX_RETOUR ('transaction:S').
+    providerTransactionRef: params.transaction ?? null,
   };
 }

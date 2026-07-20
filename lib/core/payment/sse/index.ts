@@ -69,8 +69,15 @@ export function notifyPaymentUpdate(
   const set = subscribers.get(key);
 
   if (!set || set.size === 0) {
+    console.log('[SSE] No subscribers for payment update', {key, status});
     return;
   }
+
+  console.log('[SSE] Notifying payment update', {
+    key,
+    status,
+    subscriberCount: set.size,
+  });
 
   const encoder = new TextEncoder();
   const message = encoder.encode(
@@ -84,7 +91,10 @@ export function notifyPaymentUpdate(
       controller.enqueue(message);
       if (isTerminal) controller.close();
     } catch {
-      // subscriber already closed, skip
+      console.error('[SSE] Failed to notify subscriber, already closed', {
+        key,
+        status,
+      });
     }
   }
 

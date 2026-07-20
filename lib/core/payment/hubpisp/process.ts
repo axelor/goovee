@@ -1,18 +1,15 @@
 import type {Client} from '@/goovee/.generated/client';
 import type {TenantConfig} from '@/tenant';
 import {after} from 'next/server';
-import {
-  markPaymentAsCancelled,
-  markPaymentAsFailed,
-  markPaymentAsProcessed,
-} from '../common/orm';
+import {markPaymentAsCancelled, markPaymentAsFailed} from '../common/orm';
 import {notifyPaymentUpdate, PAYMENT_UPDATE_STATUS} from '../sse';
 import {PAYMENT_SOURCE} from '../common/type';
 import type {PaymentContext} from '../common/type';
+import {completePayment} from '../saga';
+import {SAGA_OUTCOME_STATUS} from '@/lib/core/saga';
 import {HUBPISP_TRANSACTION_STATUS} from './constants';
 
 // ---- LOCAL IMPORTS ---- //
-import {updateInvoice} from '@/subapps/invoices/common/service';
 import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
 
 /**
@@ -107,68 +104,46 @@ export async function processAcscPayment({
 }): Promise<void> {
   const source = paymentContext.data?.source;
   const entityId = paymentContext.data?.id;
-  const paidAmount = paymentContext.data?.amount;
 
-  switch (source) {
-    case PAYMENT_SOURCE.INVOICES: {
-      const result = await updateInvoice({
-        config,
-        amount: paidAmount,
-        invoiceId: entityId,
-        paymentModeId: paymentContext.data?.paymentModeId,
-      });
-
-      if (result?.error) {
-        console.error(`'[HUBPISP][WEBHOOK]' Invoice update failed`, {
-          invoiceId: entityId,
-          error: result.error,
-        });
-        await markPaymentAsFailed({
-          contextId: paymentContext.id,
-          version: paymentContext.version,
-          client,
-        });
-        return;
-      }
-
-      if (paymentContext.payer) {
-        const notifyPaymentSuccess = () =>
-          notifyInvoicePaymentSuccess({
-            invoiceId: entityId,
-            payer: paymentContext.payer!,
-            tenantId,
-            client,
-          });
-
-        if (deferNotifications) {
-          after(notifyPaymentSuccess);
-        } else {
-          await notifyPaymentSuccess();
-        }
-      }
-      break;
-    }
-
-    case PAYMENT_SOURCE.SHOP:
-    case PAYMENT_SOURCE.EVENTS:
-      console.warn(`'[HUBPISP][WEBHOOK]' Source not implemented:`, source);
-      return;
-
-    default:
-      console.error(`'[HUBPISP][WEBHOOK]' Unknown payment source:`, source);
-      await markPaymentAsFailed({
-        contextId: paymentContext.id,
-        version: paymentContext.version,
-        client,
-      });
-      return;
-  }
-
-  await markPaymentAsProcessed({
-    contextId: paymentContext.id,
-    version: paymentContext.version,
+  const outcome = await completePayment({
+    tenantId,
     client,
+    config,
+    paymentContext,
+    // The payment-link resourceId is the reference BPCE support works from.
+    providerTransactionRef: paymentContext.data?.resourceId ?? null,
   });
 
-  notifyPaymentUpdate(source, entityId, paymentContext.id);
+  if (outcome.status === SAGA_OUTCOME_STATUS.notClaimed) {
+    // Concurrent webhook/poller already owns this context.
+    console.log(`'[HUBPISP][WEBHOOK]' Context claimed by another runner`, {
+      contextId: paymentContext.id,
+    });
+    return;
+  }
+
+  if (outcome.status !== SAGA_OUTCOME_STATUS.completed) {
+    // Terminal — flagged for the ERP queues; polling must not resume.
+    console.error(`'[HUBPISP][WEBHOOK]' Payment saga failed`, {
+      contextId: paymentContext.id,
+      outcome,
+    });
+    return;
+  }
+
+  if (source === PAYMENT_SOURCE.INVOICES && entityId && paymentContext.payer) {
+    const notifyPaymentSuccess = () =>
+      notifyInvoicePaymentSuccess({
+        invoiceId: entityId,
+        payer: paymentContext.payer!,
+        tenantId,
+        client,
+      });
+
+    if (deferNotifications) {
+      after(notifyPaymentSuccess);
+    } else {
+      await notifyPaymentSuccess();
+    }
+  }
 }

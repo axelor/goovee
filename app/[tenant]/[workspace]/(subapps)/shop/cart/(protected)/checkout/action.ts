@@ -17,18 +17,18 @@ import {computeTotal} from '@/utils/cart';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
-import {markPaymentAsProcessed} from '@/lib/core/payment/common/orm';
+import {completePayment, getSagaErrorResponse} from '@/payment/saga';
+import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {ensureLeadingSlash} from '@/utils/url';
+import type {ActionResponse} from '@/types/action';
 
 // ---- LOCAL IMPORTS ---- //
 import {
   computeExpectedAmount,
   formatNumber,
 } from '@/subapps/shop/common/utils/order';
-import {createOrder} from '@/subapps/shop/common/service';
 import {getShopConfig} from '@/subapps/shop/common/orm/config';
-import type {ActionResponse} from '@/types/action';
 import {
   CartOrderSchema,
   PayboxCreateOrderSchema,
@@ -121,12 +121,19 @@ export async function paypalCaptureOrder({
     };
   }
   try {
-    const {amount, context} = await findPaypalOrder({
+    const {amount, context, providerTransactionRef} = await findPaypalOrder({
       id: orderId,
       client,
     });
 
-    const cart = context.data;
+    const cart = context.data?.cart;
+
+    if (!cart) {
+      return {
+        error: true,
+        message: await t('Invalid payment context'),
+      };
+    }
 
     const {total} = computeTotal({
       cart,
@@ -146,34 +153,20 @@ export async function paypalCaptureOrder({
       };
     }
 
-    const paymentModeId = getPaymentModeId(
-      config?.paymentOptionSet,
-      PaymentOption.paypal,
-    );
+    const outcome = await completePayment({
+      tenantId,
+      client,
+      config: tenant.config,
+      paymentContext: context,
+      amount,
+      providerTransactionRef,
+    });
 
-    try {
-      const res = await createOrder({
-        cart,
-        workspace: access.workspace,
-        workspaceConfig: config,
-        user,
-        client,
-        config: tenant.config,
-        paymentModeId,
-      });
-      await markPaymentAsProcessed({
-        contextId: context.id,
-        version: context.version,
-        client,
-      });
-      return res;
-    } catch (err) {
-      return {
-        error: true,
-        message:
-          err instanceof Error ? err.message : await t('Something went wrong'),
-      };
-    }
+    const sagaError = await getSagaErrorResponse(outcome);
+    if (sagaError) return sagaError;
+
+    // The saga step wrote the created order id onto the context data.
+    return {success: true, data: context.data.id!};
   } catch (err) {
     return {
       error: true,
@@ -276,12 +269,32 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
     };
   }
 
+  /* Carts persisted in local storage may predate currency.code being part of
+   * the product snapshot — fall back rather than charge with no currency. */
+  const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
+
+  const paymentModeId = getPaymentModeId(
+    config?.paymentOptionSet,
+    PaymentOption.paypal,
+  );
+
   try {
     const response = await createPaypalOrder({
       client,
-      context: cart,
+      /* Envelope + tail payload: the saga step rebuilds the createOrder call
+       * from this snapshot alone, without a live session. */
+      context: {
+        source: PAYMENT_SOURCE.SHOP,
+        amount: Number(expectedAmount),
+        amountDue: Number(total),
+        paymentModeId,
+        currencyCode,
+        cart,
+        workspaceURL,
+        user,
+      },
       amount: expectedAmount,
-      currency: currency?.code,
+      currency: currencyCode,
       email: payerEmail,
     });
 
@@ -394,6 +407,11 @@ export async function createStripeCheckoutSession({
 
   const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
 
+  const paymentModeId = getPaymentModeId(
+    config?.paymentOptionSet,
+    PaymentOption.stripe,
+  );
+
   try {
     const session = await createStripeOrder({
       tenantId,
@@ -405,7 +423,18 @@ export async function createStripeCheckoutSession({
       name: 'Cart Checkout',
       amount: Number(expectedAmount),
       currency: currencyCode,
-      context: cart,
+      /* Envelope + tail payload: the saga step rebuilds the createOrder call
+       * from this snapshot alone, without a live session. */
+      context: {
+        source: PAYMENT_SOURCE.SHOP,
+        amount: Number(expectedAmount),
+        amountDue: Number(total),
+        paymentModeId,
+        currencyCode,
+        cart,
+        workspaceURL,
+        user,
+      },
       url: {
         success: `${workspaceURL}/${SUBAPP_CODES.shop}/cart/checkout?stripe_session_id={CHECKOUT_SESSION_ID}`,
         error: `${workspaceURL}/${SUBAPP_CODES.shop}/cart/checkout?stripe_error=true`,
@@ -506,20 +535,28 @@ export async function validateStripePayment({
     };
   }
 
-  let paidAmount, cart, context;
+  let paidAmount, cart, context, providerTransactionRef;
   try {
     const order = await findStripeOrder({
       id: stripeSessionId,
       client,
     });
-    cart = order.context.data;
+    cart = order.context.data?.cart;
     paidAmount = order.amount;
     context = order.context;
+    providerTransactionRef = order.providerTransactionRef;
   } catch (err) {
     return {
       error: true,
       message:
         err instanceof Error ? err.message : await t('Something went wrong'),
+    };
+  }
+
+  if (!cart) {
+    return {
+      error: true,
+      message: await t('Invalid payment context'),
     };
   }
 
@@ -541,27 +578,21 @@ export async function validateStripePayment({
     };
   }
 
-  const paymentModeId = getPaymentModeId(
-    config?.paymentOptionSet,
-    PaymentOption.stripe,
-  );
-
   try {
-    const res = await createOrder({
-      cart,
-      workspace: access.workspace,
-      workspaceConfig: config,
-      user,
+    const outcome = await completePayment({
+      tenantId,
       client,
       config: tenant.config,
-      paymentModeId,
+      paymentContext: context,
+      amount: paidAmount,
+      providerTransactionRef,
     });
-    await markPaymentAsProcessed({
-      contextId: context.id,
-      version: context.version,
-      client,
-    });
-    return res;
+
+    const sagaError = await getSagaErrorResponse(outcome);
+    if (sagaError) return sagaError;
+
+    // The saga step wrote the created order id onto the context data.
+    return {success: true, data: context.data.id!};
   } catch (err) {
     return {
       error: true,
@@ -671,13 +702,33 @@ export async function payboxCreateOrder({
     };
   }
 
+  /* Carts persisted in local storage may predate currency.code being part of
+   * the product snapshot — fall back rather than charge with no currency. */
+  const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
+
+  const paymentModeId = getPaymentModeId(
+    config?.paymentOptionSet,
+    PaymentOption.paybox,
+  );
+
   try {
     const response = await createPayboxOrder({
       client,
       amount: expectedAmount,
-      currency: currency?.code,
+      currency: currencyCode,
       email: payerEmail,
-      context: cart,
+      /* Envelope + tail payload: the saga step rebuilds the createOrder call
+       * from this snapshot alone, without a live session. */
+      context: {
+        source: PAYMENT_SOURCE.SHOP,
+        amount: Number(expectedAmount),
+        amountDue: Number(total),
+        paymentModeId,
+        currencyCode,
+        cart,
+        workspaceURL,
+        user,
+      },
       url: {
         success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
         failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
@@ -775,17 +826,25 @@ export async function validatePayboxPayment({
     };
   }
 
-  let paidAmount, cart, context;
+  let paidAmount, cart, context, providerTransactionRef;
   try {
     const order = await findPayboxOrder({params, client});
-    cart = order.context.data;
+    cart = order.context.data?.cart;
     paidAmount = order.amount;
     context = order.context;
+    providerTransactionRef = order.providerTransactionRef;
   } catch (err) {
     return {
       error: true,
       message:
         err instanceof Error ? err.message : await t('Something went wrong'),
+    };
+  }
+
+  if (!cart) {
+    return {
+      error: true,
+      message: await t('Invalid payment context'),
     };
   }
 
@@ -807,27 +866,21 @@ export async function validatePayboxPayment({
     };
   }
 
-  const paymentModeId = getPaymentModeId(
-    config?.paymentOptionSet,
-    PaymentOption.paybox,
-  );
-
   try {
-    const res = await createOrder({
-      cart,
-      workspace: access.workspace,
-      workspaceConfig: config,
-      user,
+    const outcome = await completePayment({
+      tenantId,
       client,
       config: tenant.config,
-      paymentModeId,
+      paymentContext: context,
+      amount: paidAmount,
+      providerTransactionRef,
     });
-    await markPaymentAsProcessed({
-      contextId: context.id,
-      version: context.version,
-      client,
-    });
-    return res;
+
+    const sagaError = await getSagaErrorResponse(outcome);
+    if (sagaError) return sagaError;
+
+    // The saga step wrote the created order id onto the context data.
+    return {success: true, data: context.data.id!};
   } catch (err) {
     return {
       error: true,

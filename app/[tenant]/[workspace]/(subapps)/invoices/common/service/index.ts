@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
-import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import type {ID} from '@/types';
 
@@ -13,20 +12,24 @@ export async function updateInvoice({
   config: TenantConfig;
   amount: string | number;
   invoiceId: ID;
-  paymentModeId?: number;
+  paymentModeId?: string;
 }) {
+  /* No t() anywhere in this function: its error messages end up in the
+   * payment context's failureReason (the saga is the only consumer) — an
+   * admin record, not a user-facing string — and the saga may not run inside
+   * a request scope, where t() would crash. */
   if (!amount || !invoiceId) {
     return {
       error: true,
-      message: await t(
-        amount ? 'Invoice id is required.' : 'Invoice amount is missing!',
-      ),
+      message: amount
+        ? 'Invoice id is required.'
+        : 'Invoice amount is missing!',
     };
   }
 
   const aos = config?.aos;
   if (!aos?.url) {
-    return {error: true, message: await t('Webservice not available.')};
+    return {error: true, message: 'Webservice not available.'};
   }
 
   const payload = {
@@ -42,20 +45,20 @@ export async function updateInvoice({
     if (data?.status === -1) {
       return {
         error: true,
-        message: data?.message
-          ? await t(data.message)
-          : await t('Unable to update invoice. Please try again later.'),
+        message:
+          data?.message || 'AOS rejected the payment with no error message.',
       };
     }
 
     return data;
   } catch (err) {
     console.error('Invoice update failed:', err);
-    return {
-      error: true,
-      message: await t(
-        'An error occurred while updating your invoice. Please try again later.',
-      ),
-    };
+
+    /* Surface the actual cause so the ERP admin can act on the record
+     * without digging through server logs. aosClient errors already carry
+     * the method, URL and HTTP status in their message. */
+    const detail = err instanceof Error ? err.message : 'Unknown error';
+
+    return {error: true, message: `AOS invoice payment call failed: ${detail}`};
   }
 }

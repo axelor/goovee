@@ -25,7 +25,8 @@ import {
   cancelStripePaymentIntent,
   cancelInvalidPendingBankTransfers,
 } from '@/payment/stripe/actions';
-import {findPaymentContext, markPaymentAsProcessed} from '@/payment/common/orm';
+import {findPaymentContext} from '@/payment/common/orm';
+import {completePayment, getSagaErrorResponse} from '@/payment/saga';
 import {PaymentOption} from '@/types';
 import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
 import {getHubPispTransferTypes} from '@/payment/hubpisp/utils';
@@ -75,7 +76,6 @@ import {
   resolveInvoicePaymentAccess,
   validatePaymentData,
 } from '@/subapps/invoices/common/utils/validations';
-import {updateInvoice} from '@/subapps/invoices/common/service';
 import {ActionResponse} from '@/types/action';
 import {Invoice} from '../types/invoices';
 
@@ -161,8 +161,15 @@ export async function paypalCreateOrder({
       amount: $amount,
       currency: currencyCode,
       context: {
-        ...invoice,
+        id: $invoice.id,
+        source: PAYMENT_SOURCE.INVOICES,
+        amount: Number($amount),
+        amountDue:
+          $invoice.amountRemaining?.value != null
+            ? Number($invoice.amountRemaining.value)
+            : undefined,
         paymentModeId,
+        currencyCode,
       },
       email: payerEmail,
     });
@@ -243,7 +250,7 @@ export async function paypalCaptureOrder({
   }
 
   try {
-    const {amount, context} = await findPaypalOrder({
+    const {amount, context, providerTransactionRef} = await findPaypalOrder({
       id: orderID,
       client,
     });
@@ -298,25 +305,18 @@ export async function paypalCaptureOrder({
       };
     }
 
-    const updatedInvoice = await updateInvoice({
-      config: tenant.config,
-      amount: purchaseAmount,
-      invoiceId: $invoice.id,
-      paymentModeId: context?.data?.paymentModeId,
-    });
-    if (updatedInvoice.error) {
-      return {
-        error: true,
-        message:
-          updatedInvoice.message ||
-          (await t('Something went wrong while updating invoice!')),
-      };
-    }
-    await markPaymentAsProcessed({
-      contextId: context.id,
-      version: context.version,
+    const outcome = await completePayment({
+      tenantId,
       client,
+      config: tenant.config,
+      paymentContext: context,
+      amount: purchaseAmount,
+      providerTransactionRef,
     });
+
+    const sagaError = await getSagaErrorResponse(outcome);
+    if (sagaError) return sagaError;
+
     return {success: true, data: $invoice};
   } catch (error) {
     console.error('Error processing payment:', error);
@@ -414,7 +414,13 @@ export async function createStripeCheckoutSession({
         id: $invoice.id,
         paymentType: PAYMENT_TYPE.CARD,
         source: PAYMENT_SOURCE.INVOICES,
+        amount: Number($amount),
+        amountDue:
+          $invoice.amountRemaining?.value != null
+            ? Number($invoice.amountRemaining.value)
+            : undefined,
         paymentModeId,
+        currencyCode,
       },
       name: await t('Invoice Checkout'),
       amount: Number($amount),
@@ -504,7 +510,7 @@ export async function validateStripePayment({
       };
     }
 
-    let invoice, purchaseAmount, context;
+    let invoice, purchaseAmount, context, providerTransactionRef;
     try {
       const order = await findStripeOrder({
         id: stripeSessionId,
@@ -513,6 +519,7 @@ export async function validateStripePayment({
       invoice = order.context.data;
       purchaseAmount = order.amount;
       context = order.context;
+      providerTransactionRef = order.providerTransactionRef;
     } catch (err) {
       return {
         error: true,
@@ -556,38 +563,29 @@ export async function validateStripePayment({
       };
     }
 
-    const result = await updateInvoice({
+    const outcome = await completePayment({
+      tenantId,
+      client,
       config: tenant.config,
+      paymentContext: context,
       amount: purchaseAmount,
-      invoiceId: $invoice.id,
-      paymentModeId: context?.data?.paymentModeId,
+      providerTransactionRef,
     });
 
-    if (result.error) {
-      return {
-        error: true,
-        message:
-          result.message ||
-          (await t('Something went wrong while updating invoice!')),
-      };
-    }
+    const sagaError = await getSagaErrorResponse(outcome);
+    if (sagaError) return sagaError;
 
-    await client.$transaction(async txClient => {
-      await markPaymentAsProcessed({
-        contextId: context.id,
-        version: context.version,
-        client: txClient,
-      });
-
-      /* After a successful card payment, re-fetch the invoice to get the updated
-       * amount remaining, then clean up any stale pending bank transfer intents.
-       * This handles the case where the customer had previously initiated one or
-       * more bank transfers but paid via another method (card) instead. */
+    /* After a successful card payment, re-fetch the invoice to get the updated
+     * amount remaining, then clean up any stale pending bank transfer intents.
+     * This handles the case where the customer had previously initiated one or
+     * more bank transfers but paid via another method (card) instead.
+     * Cleanup failure must not turn a completed payment into an error response. */
+    try {
       const updatedInvoice = await findInvoice({
         id: $invoice.id,
         ...invoiceFilter,
         workspaceURL,
-        client: txClient,
+        client,
       });
 
       if (updatedInvoice) {
@@ -603,12 +601,14 @@ export async function validateStripePayment({
          * - If amountRemaining > 0 but an intent exceeds what's still owed
          *   (e.g. a partial card payment was made) → cancel as REQUESTED_BY_CUSTOMER */
         await cancelInvalidPendingBankTransfers({
-          client: txClient,
+          client,
           sourceId: String(updatedInvoice.id),
           amountRemaining: updatedAmountRemaining,
         });
       }
-    });
+    } catch (cleanupError) {
+      console.error('Stale bank transfer cleanup failed:', cleanupError);
+    }
 
     revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
@@ -717,10 +717,16 @@ export async function createStripeBankTransferIntent({
       client,
       customer,
       context: {
-        id: invoice.id,
+        id: $invoice.id,
         paymentType: PAYMENT_TYPE.BANK_TRANSFER,
         source: PAYMENT_SOURCE.INVOICES,
+        amount: Number($amount),
+        amountDue:
+          $invoice.amountRemaining?.value != null
+            ? Number($invoice.amountRemaining.value)
+            : undefined,
         paymentModeId,
+        currencyCode,
       },
       amount: Number($amount),
       currency: currencyCode,
@@ -954,8 +960,15 @@ export async function payboxCreateOrder({
       currency: currencyCode,
       email: payerEmail,
       context: {
-        ...invoice,
+        id: $invoice.id,
+        source: PAYMENT_SOURCE.INVOICES,
+        amount: Number($amount),
+        amountDue:
+          $invoice.amountRemaining?.value != null
+            ? Number($invoice.amountRemaining.value)
+            : undefined,
         paymentModeId,
+        currencyCode,
       },
       url: {
         success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true&type=${isPartialPayment ? INVOICE_PAYMENT_OPTIONS.PARTIAL : INVOICE_PAYMENT_OPTIONS.TOTAL}${token ? `&token=${token}` : ''}`))}`,
@@ -1038,13 +1051,14 @@ export async function validatePayboxPayment({
       };
     }
 
-    let invoice, purchaseAmount, context;
+    let invoice, purchaseAmount, context, providerTransactionRef;
     try {
       const order = await findPayboxOrder({params, client});
 
       invoice = order.context.data;
       purchaseAmount = order.amount;
       context = order.context;
+      providerTransactionRef = order.providerTransactionRef;
     } catch (err) {
       console.error('Error:', err);
       return {
@@ -1089,26 +1103,18 @@ export async function validatePayboxPayment({
       };
     }
 
-    const result = await updateInvoice({
+    const outcome = await completePayment({
+      tenantId,
+      client,
       config: tenant.config,
+      paymentContext: context,
       amount: purchaseAmount,
-      invoiceId: $invoice.id,
-      paymentModeId: context?.data?.paymentModeId,
+      providerTransactionRef,
     });
 
-    if (result.error) {
-      return {
-        error: true,
-        message:
-          result.message ||
-          (await t('Something went wrong while updating invoice!')),
-      };
-    }
-    await markPaymentAsProcessed({
-      contextId: context.id,
-      version: context.version,
-      client,
-    });
+    const sagaError = await getSagaErrorResponse(outcome);
+    if (sagaError) return sagaError;
+
     revalidatePath(`${workspaceURI}/${SUBAPP_CODES.invoices}/${$invoice.id}`);
     return {success: true, data: $invoice};
   } catch (error) {
@@ -1226,10 +1232,15 @@ export async function up2payCreateOrder({
       name: $invoice.partner?.name || '',
       reference: $invoice.invoiceId!,
       context: {
-        id: invoice.id,
+        id: $invoice.id,
         source: PAYMENT_SOURCE.INVOICES,
         amount: Number($amount),
+        amountDue:
+          $invoice.amountRemaining?.value != null
+            ? Number($invoice.amountRemaining.value)
+            : undefined,
         paymentModeId,
+        currencyCode,
       },
       billingInfo,
       url: {
@@ -1383,11 +1394,16 @@ export async function initiatePispPayment({
       client,
       email: pispEmail,
       context: {
-        id: invoice.id,
+        id: $invoice.id,
         source: PAYMENT_SOURCE.INVOICES,
         amount: Number($amount),
+        amountDue:
+          $invoice.amountRemaining?.value != null
+            ? Number($invoice.amountRemaining.value)
+            : undefined,
         localInstrument: localInstrument ?? HUBPISP_LOCAL_INSTRUMENT.SCT,
         paymentModeId,
+        currencyCode,
       },
       currency: currencyCode,
       remittanceInformation: `Invoice-${invoice.id}`,

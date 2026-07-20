@@ -91,7 +91,7 @@ export async function pollPaymentRequestStatus({
         id: contextId,
         client,
         mode: PaymentOption.hubpisp,
-        ignoreExpiration: true,
+        ignoreStatus: true,
       });
 
       if (!paymentContext) {
@@ -104,14 +104,11 @@ export async function pollPaymentRequestStatus({
         return;
       }
 
-      if (
-        paymentContext.status === CONTEXT_STATUS.processed ||
-        paymentContext.status === CONTEXT_STATUS.failed ||
-        paymentContext.status === CONTEXT_STATUS.cancelled ||
-        paymentContext.status === CONTEXT_STATUS.expired
-      ) {
+      if (paymentContext.status !== CONTEXT_STATUS.pending) {
+        // Claimed or terminal (processed, failed, cancelled, expired,
+        // refund/reconcile queues) — the saga owns it from here.
         console.log(
-          '[HUBPISP][POLL] Context in terminal state, stopping poll',
+          '[HUBPISP][POLL] Context no longer pending, stopping poll',
           {
             contextId,
             status: paymentContext.status,

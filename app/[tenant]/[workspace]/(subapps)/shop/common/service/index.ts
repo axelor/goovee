@@ -2,7 +2,6 @@ import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
-import {t} from '@/locale/server';
 import {Workspace} from '@/orm/workspace';
 import {Cloned} from '@/types/util';
 import type {Tenant} from '@/tenant';
@@ -16,6 +15,7 @@ import {getSession} from '@/auth';
 import {manager} from '@/tenant';
 import {MAIN_PRICE} from '@/constants';
 import {calculateAdvanceAmount} from '@/utils/payment';
+import {SAGA_FAILURE_STATUS, SagaStepError} from '@/lib/core/saga';
 
 // ---- LOCAL IMPORTS ---- //
 import {findProduct} from '@/subapps/shop/common/orm/product';
@@ -30,6 +30,7 @@ export async function createOrder({
   client,
   config,
   paymentModeId,
+  paymentContextId,
 }: {
   cart: CartInput;
   workspace: Workspace | Cloned<Workspace>;
@@ -38,6 +39,11 @@ export async function createOrder({
   client: Client;
   config: Tenant['config'];
   paymentModeId?: string;
+  /**
+   * AOS dedup key: a call repeated with the same context id (webhook race,
+   * admin retry) resumes the existing order chain instead of duplicating it.
+   */
+  paymentContextId?: string;
 }): Promise<SuccessResponse<string>> {
   const {aos} = config;
 
@@ -112,23 +118,60 @@ export async function createOrder({
     deliveryPartnerAddressId: deliveryAddress,
     paidAmount,
     paymentModeId,
+    paymentContextId,
   };
 
-  const res = await aosClient(aos).request<{
-    status?: number;
-    message?: string;
-    data?: string;
-  }>('ws/portal/orders/order', {body: payload});
+  let res;
+  try {
+    res = await aosClient(aos).request<{
+      status?: number;
+      message?: string;
+      /* Order id string on success; {orderId, failedStage} when the chain
+       * broke mid-way. */
+      data?: string | {orderId?: string | number; failedStage?: string};
+    }>('ws/portal/orders/order', {body: payload});
+  } catch (err) {
+    console.error('Order creation failed:', err);
 
-  if (res?.status === -1) {
-    throw new Error(
-      res?.message
-        ? await t(res.message)
-        : await t('Order creation failed. Please try again.'),
-    );
+    /* This message ends up in the payment context's failureReason (the saga is
+     * the only consumer) — surface the actual cause so the ERP admin can act
+     * on the record without digging through server logs. aosClient errors
+     * already carry the method, URL and HTTP status in their message. */
+    const detail = err instanceof Error ? err.message : 'Unknown error';
+
+    throw new Error(`AOS order call failed: ${detail}`);
   }
 
-  return {success: true, data: res.data ?? ''};
+  if (res?.status === -1) {
+    /* No t() here: this message ends up in the payment context's
+     * failureReason (the saga is the only consumer) — an admin record, not a
+     * user-facing string — and the saga may not run inside a request scope,
+     * where t() would crash. */
+    const message =
+      res?.message || 'AOS rejected the order with no error message.';
+
+    /* AOS reports the committed order id + failed stage when the chain broke
+     * mid-way (the endpoint is three transactions). An order that exists
+     * means the customer got something — route the saga failure to the
+     * reconcile queue with the order id instead of asking for a refund. */
+    const failure = typeof res?.data === 'object' ? res.data : undefined;
+    const orderId = failure?.orderId;
+    const failedStage = failure?.failedStage;
+    if (orderId) {
+      throw new SagaStepError(
+        `${message} (order ${orderId} committed, failed at stage '${failedStage}')`,
+        {
+          routeTo: SAGA_FAILURE_STATUS.reconcileRequired,
+          entityId: String(orderId),
+          stage: failedStage ? String(failedStage) : undefined,
+        },
+      );
+    }
+
+    throw new Error(message);
+  }
+
+  return {success: true, data: typeof res?.data === 'string' ? res.data : ''};
 }
 
 export async function requestOrder({

@@ -1,0 +1,6 @@
+{
+  "title": "Route captured payments through failure queues with ERP incident records",
+  "type": "feature",
+  "description": "When the post-payment business tail (order creation, event registration invoice, invoice payment) fails after the money was captured, the payment context now lands in a refund or reconcile queue and a payment incident record is created in the ERP with the failure step, stage, reason and the provider transaction ref (refund key). ERP fix actions replay the missing operation and report the resolution back through a signed webhook, which moves the context out of its failure queue and notifies the payer by email and web push with a link to the order, invoice or event. Interrupted sagas are swept into the reconcile queue on server restart.",
+  "scope": ["shop", "events", "invoices", "core"]
+}

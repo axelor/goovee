@@ -4,13 +4,10 @@ import {headers} from 'next/headers';
 import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
-import type {Client} from '@/goovee/.generated/client';
 import {stripe} from '@/payment/stripe';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
-  markPaymentAsFailed,
-  markPaymentAsProcessed,
 } from '@/lib/core/payment/common/orm';
 import {PaymentOption} from '@/types';
 import {PAYMENT_SOURCE, PAYMENT_TYPE} from '@/lib/core/payment/common/type';
@@ -19,12 +16,13 @@ import {manager} from '@/tenant';
 import {scale} from '@/utils';
 import {DEFAULT_CURRENCY_SCALE} from '@/constants';
 import {cancelInvalidPendingBankTransfers} from '@/lib/core/payment/stripe/actions';
+import {completePayment} from '@/lib/core/payment/saga';
+import {SAGA_OUTCOME_STATUS} from '@/lib/core/saga';
 import {
   notifyPaymentUpdate,
   PAYMENT_UPDATE_STATUS,
 } from '@/lib/core/payment/sse';
 // --- LOCAL IMPORTS ---- //
-import {updateInvoice} from '@/subapps/invoices/common/service';
 import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
 
 export const STRIPE_EVENTS = {
@@ -34,27 +32,6 @@ export const STRIPE_EVENTS = {
 
 export type StripeEventType =
   (typeof STRIPE_EVENTS)[keyof typeof STRIPE_EVENTS];
-
-async function handleWebhookPaymentFailure({
-  paymentContext,
-  client,
-  reason,
-}: {
-  paymentContext: {id: string; version: number};
-  client: Client;
-  reason: string;
-}) {
-  console.error('Payment processing failed', {
-    contextId: paymentContext.id,
-    reason,
-  });
-
-  await markPaymentAsFailed({
-    contextId: paymentContext.id,
-    version: paymentContext.version,
-    client,
-  });
-}
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -122,7 +99,7 @@ export async function POST(req: Request) {
           id: contextId,
           client,
           mode: PaymentOption.stripe,
-          ignoreExpiration: true,
+          ignoreStatus: true,
         });
 
         if (!paymentContext) {
@@ -134,8 +111,13 @@ export async function POST(req: Request) {
           return new NextResponse('Payment context not found', {status: 500});
         }
 
-        if (paymentContext.status === CONTEXT_STATUS.processed) {
-          console.log('Already processed, skipping');
+        if (paymentContext.status !== CONTEXT_STATUS.pending) {
+          // Already claimed (processing) or terminal (processed / cancelled /
+          // failed / expired) — redelivery cannot help past the claim.
+          console.log('Context already handled, skipping', {
+            contextId,
+            status: paymentContext.status,
+          });
           return new NextResponse(JSON.stringify({received: true}), {
             status: 200,
             headers: {'Content-Type': 'application/json'},
@@ -152,24 +134,50 @@ export async function POST(req: Request) {
         const source = paymentContext.data.source;
         const sourceId = paymentContext.data.id;
 
-        if (!source || !sourceId) {
-          await handleWebhookPaymentFailure({
-            paymentContext,
-            client,
-            reason: 'Missing payment source',
-          });
-          // Permanent error — corrupted context data. Return 200 to stop Stripe retries.
-          break;
-        }
-
         const paidAmount = getAmountFromStripe(
           paymentIntent.amount_received,
           paymentIntent.currency,
         );
 
-        switch (source) {
-          case PAYMENT_SOURCE.INVOICES: {
-            const invoice = await client.aOSInvoice.findOne({
+        /* No business pre-checks before the claim: once money is captured,
+         * every failure must terminate in a saga failure queue where a human
+         * will see it. Pre-claim 500s are reserved for transient errors
+         * (tenant/context lookup, the outer catch-all) — answering a
+         * permanent condition with 500 would strand the context in `pending`
+         * once Stripe stops redelivering. */
+        const outcome = await completePayment({
+          tenantId,
+          client,
+          config,
+          paymentContext,
+          amount: paidAmount,
+          providerTransactionRef: paymentIntent.id,
+        });
+
+        if (outcome.status === SAGA_OUTCOME_STATUS.notClaimed) {
+          console.log('Context claimed by another runner, skipping', {
+            contextId,
+          });
+          break;
+        }
+
+        if (outcome.status !== SAGA_OUTCOME_STATUS.completed) {
+          // Post-claim failure is terminal (flagged for the ERP queues) —
+          // acknowledge with 200, redelivery cannot help anymore.
+          console.error('[STRIPE][WEBHOOK] Payment saga failed', {
+            contextId,
+            outcome,
+          });
+          break;
+        }
+
+        if (source === PAYMENT_SOURCE.INVOICES) {
+          /* Once the payment is applied, reload the invoice to ensure the
+           * remaining balance is accurate, and cancel any pending bank
+           * transfers that are no longer necessary. Cleanup failure must not
+           * fail the webhook — the payment itself is fully processed. */
+          try {
+            const updatedInvoice = await client.aOSInvoice.findOne({
               where: {id: sourceId},
               select: {
                 id: true,
@@ -180,101 +188,40 @@ export async function POST(req: Request) {
               },
             });
 
-            if (!invoice) {
-              console.error('Invoice not found for received payment', {
-                sourceId,
-              });
-              return new NextResponse('Invoice not found', {status: 500});
-            }
+            const amountRemaining = Number(
+              scale(
+                Number(updatedInvoice?.amountRemaining ?? 0),
+                updatedInvoice?.currency?.numberOfDecimals ??
+                  DEFAULT_CURRENCY_SCALE,
+              ),
+            );
 
-            const updateResult = await updateInvoice({
-              config,
-              amount: paidAmount,
-              invoiceId: sourceId,
-              paymentModeId: paymentContext.data?.paymentModeId,
+            await cancelInvalidPendingBankTransfers({
+              client,
+              sourceId,
+              amountRemaining,
             });
-
-            if (updateResult?.error) {
-              // Do NOT mark as failed — payment was already received by Stripe.
-              // Return 500 so Stripe retries the webhook for this transient error.
-              console.error(
-                '[STRIPE][WEBHOOK] Invoice update failed: ',
-                updateResult.message,
-              );
-              return new NextResponse('Invoice update failed', {status: 500});
-            }
-
-            try {
-              await client.$transaction(async txClient => {
-                await markPaymentAsProcessed({
-                  contextId: paymentContext.id,
-                  version: paymentContext.version,
-                  client: txClient,
-                });
-
-                // Once the payment is applied, reload the invoice to ensure the remaining balance
-                // is accurate, and cancel any pending bank transfers that are no longer necessary.
-                const updatedInvoice = await txClient.aOSInvoice.findOne({
-                  where: {id: sourceId},
-                  select: {
-                    id: true,
-                    amountRemaining: true,
-                    currency: {
-                      numberOfDecimals: true,
-                    },
-                  },
-                });
-
-                const amountRemaining = Number(
-                  scale(
-                    Number(updatedInvoice?.amountRemaining ?? 0),
-                    updatedInvoice?.currency?.numberOfDecimals ??
-                      DEFAULT_CURRENCY_SCALE,
-                  ),
-                );
-
-                await cancelInvalidPendingBankTransfers({
-                  client: txClient,
-                  sourceId: invoice.id,
-                  amountRemaining,
-                });
-              });
-            } catch (err) {
-              console.error(
-                '[STRIPE][WEBHOOK] Post-payment transaction failed',
-                {
-                  contextId: paymentContext.id,
-                  sourceId,
-                  error: err instanceof Error ? err.message : err,
-                },
-              );
-              return new NextResponse('Post-payment processing failed', {
-                status: 500,
-              });
-            }
-
-            notifyPaymentUpdate(source, sourceId, paymentContext.id);
-            if (paymentContext.payer) {
-              after(() =>
-                notifyInvoicePaymentSuccess({
-                  invoiceId: sourceId,
-                  payer: paymentContext.payer!,
-                  tenantId,
-                  client,
-                }),
-              );
-            }
-
-            break;
+          } catch (err) {
+            console.error(
+              '[STRIPE][WEBHOOK] Stale bank transfer cleanup failed',
+              {
+                contextId,
+                sourceId,
+                error: err instanceof Error ? err.message : err,
+              },
+            );
           }
 
-          case PAYMENT_SOURCE.SHOP:
-          case PAYMENT_SOURCE.EVENTS:
-            console.warn('Source not implemented:', source);
-            break;
-
-          default:
-            console.warn('Unknown payment source:', source);
+          if (paymentContext.payer) {
+            after(() =>
+              notifyInvoicePaymentSuccess({
+                invoiceId: sourceId,
+                payer: paymentContext.payer!,
+                tenantId,
+                client,
+              }),
+            );
+          }
         }
 
         break;
@@ -305,7 +252,7 @@ export async function POST(req: Request) {
           id: contextId,
           client: client,
           mode: PaymentOption.stripe,
-          ignoreExpiration: true,
+          ignoreStatus: true,
         });
 
         if (!paymentContext) {
@@ -315,6 +262,14 @@ export async function POST(req: Request) {
           });
 
           return new NextResponse('Payment context not found', {status: 500});
+        }
+
+        if (paymentContext.status !== CONTEXT_STATUS.pending) {
+          console.log('[PARTIAL_PAYMENT] Context already handled, skipping', {
+            contextId,
+            status: paymentContext.status,
+          });
+          break;
         }
 
         const source = paymentContext.data?.source;

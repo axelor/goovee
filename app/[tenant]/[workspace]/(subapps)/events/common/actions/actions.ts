@@ -24,9 +24,9 @@ import {ID, PaymentOption} from '@/types';
 import {ActionResponse} from '@/types/action';
 import type {Cloned} from '@/types/util';
 import {clone, scale} from '@/utils';
-import {markPaymentAsProcessed} from '@/payment/common/orm';
+import {completePayment, getSagaErrorResponse} from '@/payment/saga';
+import {SAGA_OUTCOME_STATUS} from '@/lib/core/saga';
 import type {PaymentContext} from '@/lib/core/payment/common/type';
-import {getPaymentModeId} from '@/utils/payment';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
@@ -65,7 +65,6 @@ import {
 import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
-import {createInvoice} from '@/subapps/events/common/service';
 
 export async function getAllEvents(props: {
   limit?: number;
@@ -165,7 +164,8 @@ export async function register(
   let paidAmount: number,
     values: RegistrationValues,
     context: PaymentContext | undefined,
-    paymentMode: PaymentOption | undefined;
+    paymentMode: PaymentOption | undefined,
+    providerTransactionRef: string | null | undefined;
   if ('payment' in parsed.data) {
     paymentMode = parsed.data.payment.mode;
     const paymentInfo = await getPaymentInfo({
@@ -176,9 +176,14 @@ export async function register(
 
     if (paymentInfo.error) return paymentInfo;
 
-    values = paymentInfo.data.context.data;
+    values = paymentInfo.data.context.data?.values;
     paidAmount = paymentInfo.data.amount;
     context = paymentInfo.data.context;
+    providerTransactionRef = paymentInfo.data.providerTransactionRef;
+
+    if (!values) {
+      return error(await t('Invalid payment context'));
+    }
   } else {
     values = parsed.data.values;
     paidAmount = 0;
@@ -223,54 +228,80 @@ export async function register(
   }
 
   let registration: Registration;
-  try {
-    registration = await access.tenant.client.$transaction(async txClient => {
-      const reg = await registerParticipants({
+  let sagaError: Awaited<ReturnType<typeof getSagaErrorResponse>> = null;
+  if (context) {
+    const outcome = await completePayment({
+      tenantId,
+      client,
+      config,
+      paymentContext: context,
+      amount: paidAmount,
+      providerTransactionRef,
+    });
+
+    sagaError = await getSagaErrorResponse(outcome);
+
+    /* A concurrent runner owns the saga — that run sends the confirmations;
+     * sending them here too would double them. */
+    if (outcome.status === SAGA_OUTCOME_STATUS.notClaimed) {
+      return sagaError!;
+    }
+
+    /* The registration is created by the FIRST saga step, so it exists even
+     * when the saga then failed at createInvoice: the user IS registered
+     * (the bookkeeping failure is queued for the ERP separately). Fall
+     * through so the confirmation notification/mail below still go out —
+     * the saga error is returned after them. Refetch the shape the
+     * notification/mail extras need. */
+    const created = context.data?.id
+      ? await client.aOSRegistration.findOne({
+          where: {id: context.data.id},
+          select: {
+            event: {
+              slug: true,
+              eventTitle: true,
+            },
+            participantList: {
+              select: {
+                contact: {
+                  isActivatedOnPortal: true,
+                  emailAddress: {address: true},
+                  localization: {code: true},
+                },
+              },
+            },
+          },
+        })
+      : null;
+
+    if (!created) {
+      // No registration row means the saga failed before creating one.
+      if (sagaError) return sagaError;
+
+      /* The saga completed — registration, invoice and payment all succeeded;
+       * this lookup just found no row (should not happen). The wording must
+       * not push the user to retry. */
+      return error(
+        await t(
+          'Your payment was received and your registration is confirmed — you do not need to register or pay again.',
+        ),
+      );
+    }
+
+    registration = created;
+  } else {
+    try {
+      registration = await registerParticipants({
         eventId,
         participants,
         workspaceURL,
-        client: txClient,
+        client,
       });
-
-      if (context) {
-        await markPaymentAsProcessed({
-          contextId: context.id,
-          version: context.version,
-          client: txClient,
-        });
-      }
-
-      return reg;
-    });
-  } catch (err) {
-    return error(
-      err instanceof Error ? err.message : await t('Registration failed'),
-    );
-  }
-
-  /* createInvoice makes an HTTP call to AOS and must run after the transaction
-     commits — AOS queries the registration by ID, so calling it inside the
-     transaction would make the row invisible to AOS (read committed isolation).
-     Errors are logged but do not fail the registration. */
-  if (paidAmount > 0) {
-    const paymentModeId = getPaymentModeId(
-      workspaceConfig?.paymentOptionSet,
-      paymentMode!,
-    );
-
-    after(async () => {
-      const res = await createInvoice({
-        workspace: access.workspace,
-        config,
-        registrationId: registration.id,
-        currencyCode: $event.currency?.code ?? '',
-        paymentModeId,
-      });
-
-      if (res.error) {
-        console.error('Invoice creation failed:', res.message);
-      }
-    });
+    } catch (err) {
+      return error(
+        err instanceof Error ? err.message : await t('Registration failed'),
+      );
+    }
   }
 
   let userParticipants = registration.participantList?.filter(
@@ -314,6 +345,10 @@ export async function register(
       workspace: access.workspace,
     }),
   );
+
+  /* Returned after the confirmations: the registration stands, but the user
+   * must still see that something went wrong with the processing. */
+  if (sagaError) return sagaError;
 
   return {success: true, data: clone(registration)};
 }
