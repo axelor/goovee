@@ -17,6 +17,7 @@ type BuildPendingStripeBankTransferIntentsArgs<T extends HasPaymentIntent> = {
   currencyCode: string;
   currencySymbol: string;
   scale: number;
+  tenantId: string;
 };
 
 export const buildPendingStripeBankTransferIntents = async <
@@ -26,6 +27,7 @@ export const buildPendingStripeBankTransferIntents = async <
   currencyCode,
   currencySymbol,
   scale,
+  tenantId,
 }: BuildPendingStripeBankTransferIntentsArgs<T>): Promise<
   BankTransferDetailsType[]
 > => {
@@ -35,7 +37,10 @@ export const buildPendingStripeBankTransferIntents = async <
         const paymentIntentId = res.data?.paymentIntent;
         if (!paymentIntentId) return null;
 
-        const paymentIntent = await findStripePaymentIntent(paymentIntentId);
+        const paymentIntent = await findStripePaymentIntent(
+          paymentIntentId,
+          tenantId,
+        );
         if (!paymentIntent?.next_action) return null;
 
         const instructions =

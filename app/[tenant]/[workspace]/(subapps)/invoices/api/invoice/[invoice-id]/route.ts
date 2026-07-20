@@ -54,6 +54,7 @@ export async function GET(
       id: invoiceId,
       token: access.token,
       workspaceURL,
+      tenantId,
       client,
     });
     fileAccess = {skipUserCheck: true};
@@ -81,6 +82,7 @@ export async function GET(
       id: invoiceId,
       params: {where: invoicesWhereClause},
       workspaceURL,
+      tenantId,
       client,
     });
     fileAccess = {user: access.user};

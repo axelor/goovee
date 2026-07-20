@@ -170,6 +170,7 @@ export async function register(
     const paymentInfo = await getPaymentInfo({
       mode: paymentMode,
       data: parsed.data.payment.data,
+      tenantId,
       client,
     });
 

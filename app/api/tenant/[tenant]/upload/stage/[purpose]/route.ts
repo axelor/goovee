@@ -6,7 +6,6 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {manager} from '@/tenant';
 import {getSession} from '@/lib/core/auth';
-import {getStoragePath} from '@/storage/index';
 import {writeToStorage} from '@/lib/core/upload/file';
 import {getUploadPolicy, stageUpload} from '@/lib/core/upload/staged-upload';
 
@@ -41,6 +40,11 @@ export async function POST(
     return new NextResponse('Unauthorized', {status: 401});
   }
 
+  // Guard cross-tenant access: /api/* bypasses the proxy that switches sessions.
+  if (session.user.tenantId !== tenantId) {
+    return new NextResponse('Forbidden', {status: 403});
+  }
+
   // purpose is in the path, so we know the size limit before reading the body
   const policy = getUploadPolicy(purpose);
   if (!policy) {
@@ -52,6 +56,7 @@ export async function POST(
     return new NextResponse('Bad request', {status: 400});
   }
   const {client} = tenant;
+  const storagePath = tenant.config.aos.storage;
 
   if (!request.body) {
     return NextResponse.json({error: 'Missing file'}, {status: 400});
@@ -75,13 +80,14 @@ export async function POST(
   const written = await writeToStorage(request.body, {
     fileName,
     maxBytes: policy.maxBytes,
+    storagePath,
   });
   if (written === null) {
     return NextResponse.json({error: 'File too large'}, {status: 413});
   }
   if (written.size === 0) {
     await fs.promises
-      .rm(path.resolve(getStoragePath(), written.filePath), {force: true})
+      .rm(path.resolve(storagePath, written.filePath), {force: true})
       .catch(() => {});
     return NextResponse.json({error: 'Missing file'}, {status: 400});
   }
@@ -95,7 +101,7 @@ export async function POST(
        * a content `.refine()` reads from disk on demand.
        */
       const blob = await fs.openAsBlob(
-        path.resolve(getStoragePath(), written.filePath),
+        path.resolve(storagePath, written.filePath),
         {type: fileType},
       );
       policy.file.parse(new File([blob], fileName, {type: fileType}));
@@ -116,7 +122,7 @@ export async function POST(
     return NextResponse.json(staged);
   } catch (error: unknown) {
     await fs.promises
-      .rm(path.resolve(getStoragePath(), written.filePath), {force: true})
+      .rm(path.resolve(storagePath, written.filePath), {force: true})
       .catch(() => {});
 
     // file policy violations (mime/refinements) surface as a clean 400

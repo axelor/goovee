@@ -4,6 +4,7 @@ import {z} from 'zod';
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
+import {getPublicEnvironment} from '@/environment';
 import {DEFAULT_CURRENCY_CODE, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
@@ -123,6 +124,7 @@ export async function paypalCaptureOrder({
   try {
     const {amount, context} = await findPaypalOrder({
       id: orderId,
+      tenantId,
       client,
     });
 
@@ -279,6 +281,7 @@ export async function paypalCreateOrder({cart, workspaceURL}: CartOrderInput) {
   try {
     const response = await createPaypalOrder({
       client,
+      tenantId,
       context: cart,
       amount: expectedAmount,
       currency: currency?.code,
@@ -510,6 +513,7 @@ export async function validateStripePayment({
   try {
     const order = await findStripeOrder({
       id: stripeSessionId,
+      tenantId,
       client,
     });
     cart = order.context.data;
@@ -674,13 +678,14 @@ export async function payboxCreateOrder({
   try {
     const response = await createPayboxOrder({
       client,
+      tenantId,
       amount: expectedAmount,
       currency: currency?.code,
       email: payerEmail,
       context: cart,
       url: {
-        success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
-        failure: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
+        success: `${getPublicEnvironment(access.tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,
+        failure: `${getPublicEnvironment(access.tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_error=true`))}`,
       },
     });
 

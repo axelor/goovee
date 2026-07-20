@@ -91,8 +91,10 @@ const formSchema = z
 
 export default function SignUp({
   workspace,
+  googleProviderId,
 }: {
   workspace?: WorkspaceForRegistration;
+  googleProviderId?: string;
 }) {
   const {data: session} = authClient.useSession();
   const user = session?.user;
@@ -145,9 +147,9 @@ export default function SignUp({
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!(workspace && tenantId)) return;
-    await authClient.signIn.social({
-      provider: 'google',
+    if (!(workspace && tenantId && googleProviderId)) return;
+
+    const signUpOptions = {
       callbackURL: redirection,
       errorCallbackURL: withBasePath(
         `/auth/error?tenantId=${tenantId}&workspaceURI=${workspaceURI}`,
@@ -159,6 +161,13 @@ export default function SignUp({
         workspaceURL: workspace?.url,
         locale: l10n.getLocale(),
       },
+    };
+
+    /* OAuth is per-tenant: sign up through the generic provider registered
+     * under google-<tenantId>. */
+    await authClient.signIn.oauth2({
+      providerId: googleProviderId,
+      ...signUpOptions,
     });
   };
 

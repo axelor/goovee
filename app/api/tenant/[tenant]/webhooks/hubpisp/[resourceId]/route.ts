@@ -14,6 +14,7 @@ import {HUBPISP_CONSENT_STATUS} from '@/lib/core/payment/hubpisp/constants';
 import {fetchPaymentRequestStatus} from '@/lib/core/payment/hubpisp/paymentRequest';
 import {pollPaymentRequestStatus} from '@/lib/core/payment/hubpisp/poll';
 import {applyTransactionStatus} from '@/lib/core/payment/hubpisp/process';
+import {getHubPispSettings} from '@/lib/core/payment/hubpisp/settings';
 import type {
   PaymentLinkStatusResult,
   PaymentRequestStatusResult,
@@ -33,11 +34,12 @@ const LINK_FETCH_MAX_ATTEMPTS = 3;
 
 async function fetchPaymentLinkStatusWithRetry(
   resourceId: string,
+  tenantId: string,
 ): Promise<PaymentLinkStatusResult> {
   for (let attempt = 1; ; attempt++) {
     await new Promise(resolve => setTimeout(resolve, LINK_FETCH_DELAY_MS));
     try {
-      return await fetchPaymentLinkStatus(resourceId);
+      return await fetchPaymentLinkStatus(resourceId, tenantId);
     } catch (err) {
       if (
         !(err instanceof HubPispApiError) ||
@@ -56,13 +58,35 @@ async function fetchPaymentLinkStatusWithRetry(
 
 export async function POST(
   _request: Request,
-  {params}: {params: Promise<{resourceId: string}>},
+  {params}: {params: Promise<{tenant: string; resourceId: string}>},
 ) {
-  const {resourceId} = await params;
+  const {tenant: tenantId, resourceId} = await params;
 
+  /* The tenant is authoritative from the path (the webhook URL is registered
+   * per tenant). Resolve it up front so a tenant that does not run Hub PISP is
+   * rejected with a 4xx — a permanent condition the gateway must not retry —
+   * instead of the "not configured" error below surfacing as a 500. */
+  const tenant = await manager.getTenant(tenantId);
+  if (!tenant) {
+    console.error('[HUBPISP][WEBHOOK] Tenant not found', {tenantId});
+    return new NextResponse('Bad Request', {status: 400});
+  }
+  const {client, config} = tenant;
+
+  const {apiUrl, certFingerprint} = getHubPispSettings(config);
+  if (!(apiUrl && certFingerprint)) {
+    console.warn('[HUBPISP][WEBHOOK] Tenant has no Hub PISP config', {
+      tenantId,
+    });
+    return new NextResponse('Hub PISP is not configured for this tenant', {
+      status: 400,
+    });
+  }
+
+  /* The tenant's Hub PISP credentials drive every fetch attempt. */
   let linkData: PaymentLinkStatusResult;
   try {
-    linkData = await fetchPaymentLinkStatusWithRetry(resourceId);
+    linkData = await fetchPaymentLinkStatusWithRetry(resourceId, tenantId);
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {
       console.warn(
@@ -94,20 +118,15 @@ export async function POST(
     return new NextResponse('Bad Request', {status: 400});
   }
 
+  /* Only the context id is taken from endToEnd; the tenant comes from the
+   * authoritative path param. A mismatch surfaces as "context not found" when
+   * the id is looked up in the path tenant's database. */
   const contextId = endToEnd.slice(0, separatorIndex);
-  const tenantId = endToEnd.slice(separatorIndex + 1);
 
-  if (!contextId || !tenantId) {
+  if (!contextId) {
     console.error('[HUBPISP][WEBHOOK] Failed to parse endToEnd', {endToEnd});
     return new NextResponse('Bad Request', {status: 400});
   }
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) {
-    console.error('[HUBPISP][WEBHOOK] Tenant not found', {tenantId});
-    return new NextResponse('Bad Request', {status: 400});
-  }
-  const {client, config} = tenant;
 
   const paymentContext = await findPaymentContext({
     id: contextId,
@@ -175,7 +194,10 @@ export async function POST(
 
   let paymentRequest: PaymentRequestStatusResult;
   try {
-    paymentRequest = await fetchPaymentRequestStatus(paymentRequestResourceId);
+    paymentRequest = await fetchPaymentRequestStatus(
+      paymentRequestResourceId,
+      tenantId,
+    );
   } catch (err) {
     if (err instanceof HubPispApiError && err.status === 400) {
       /**

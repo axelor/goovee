@@ -148,6 +148,7 @@ export interface NotificationParams {
   subscribers: Subscriber[];
   link: string;
   postAuthor?: {id: ID};
+  tenantId: string;
 }
 
 export interface MailTemplateParams {

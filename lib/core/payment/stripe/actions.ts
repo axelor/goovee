@@ -1,7 +1,8 @@
 import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
-import {stripe} from '.';
+import {getStripe} from '.';
+import {manager} from '@/tenant';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {formatAmountForStripe, getAmountFromStripe} from '@/utils/stripe';
 import {
@@ -30,6 +31,7 @@ import {
 import {CountryCode} from './types';
 
 async function getOrCreateStripeCustomer(
+  stripe: Stripe,
   email: string,
   internalUserId: string,
 ) {
@@ -88,6 +90,8 @@ export async function createStripeOrder({
     );
   }
 
+  const stripe = getStripe(await manager.getConfig(tenantId));
+
   try {
     const {id: contextId} = await createPaymentContext({
       context,
@@ -128,14 +132,18 @@ export async function createStripeOrder({
 
 export async function findStripeOrder({
   id,
+  tenantId,
   client,
 }: {
   id: string;
+  tenantId: Tenant['id'];
   client: Client;
 }): Promise<PaymentOrder> {
   if (!id) {
     throw new Error('Session id is required');
   }
+
+  const stripe = getStripe(await manager.getConfig(tenantId));
 
   let stripeSession;
 
@@ -214,6 +222,8 @@ export async function createStripePaymentIntent({
     );
   }
 
+  const stripe = getStripe(await manager.getConfig(tenantId));
+
   try {
     const bankTransfer = getBankTransferConfig(currency, countryCode);
 
@@ -225,6 +235,7 @@ export async function createStripePaymentIntent({
     });
 
     const stripeCustomerId = await getOrCreateStripeCustomer(
+      stripe,
       customer.email,
       customer.id,
     );
@@ -323,10 +334,15 @@ export async function createStripePaymentIntent({
   }
 }
 
-export async function findStripePaymentIntent(paymentIntentId: string) {
+export async function findStripePaymentIntent(
+  paymentIntentId: string,
+  tenantId: Tenant['id'],
+) {
   if (!paymentIntentId) {
     throw new Error('Payment Intent id is required');
   }
+
+  const stripe = getStripe(await manager.getConfig(tenantId));
 
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -341,10 +357,12 @@ export async function findStripePaymentIntent(paymentIntentId: string) {
 export async function cancelStripePaymentIntent({
   id,
   cancellationReason,
+  tenantId,
   client,
 }: {
   id: string;
   cancellationReason: Stripe.PaymentIntentCancelParams.CancellationReason;
+  tenantId: Tenant['id'];
   client: Client;
 }) {
   if (!id) {
@@ -355,8 +373,10 @@ export async function cancelStripePaymentIntent({
     throw new Error('Cancellation reason is required');
   }
 
+  const stripe = getStripe(await manager.getConfig(tenantId));
+
   try {
-    const paymentIntent = await findStripePaymentIntent(id);
+    const paymentIntent = await findStripePaymentIntent(id, tenantId);
     if (paymentIntent.status === PAYMENT_INTENT_STATUS.CANCELED) {
       throw new Error('Payment intent already canceled');
     }
@@ -418,10 +438,12 @@ export async function cancelInvalidPendingBankTransfers({
   client,
   sourceId,
   amountRemaining,
+  tenantId,
 }: {
   client: Client;
   sourceId: string;
   amountRemaining: number;
+  tenantId: Tenant['id'];
 }) {
   if (!sourceId) {
     throw new Error('Source id is required');
@@ -448,7 +470,10 @@ export async function cancelInvalidPendingBankTransfers({
 
       let paymentIntent;
       try {
-        paymentIntent = await findStripePaymentIntent(String(paymentIntentId));
+        paymentIntent = await findStripePaymentIntent(
+          String(paymentIntentId),
+          tenantId,
+        );
       } catch {
         return;
       }
@@ -476,6 +501,7 @@ export async function cancelInvalidPendingBankTransfers({
       await cancelStripePaymentIntent({
         id: String(paymentIntentId),
         cancellationReason,
+        tenantId,
         client,
       });
     }),

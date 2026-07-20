@@ -2,7 +2,7 @@ import '@/load-swc-env';
 
 import type {GooveeClient} from '@/goovee/.generated/client';
 import {manager} from '@/tenant';
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 import axios from 'axios';
 import {parseArgs} from 'node:util';
 
@@ -121,7 +121,7 @@ async function main() {
   if (!aos?.url) fail(`AOS url not configured for tenant '${tenantId}'.`);
 
   const headers = {
-    ...getAOSAuthHeaders(aos.auth),
+    ...getAOSHeaders(aos),
     'Content-Type': 'application/json',
   };
   const endpoint = `${aos.url}/ws/action/${ACTION}`;

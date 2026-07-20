@@ -11,7 +11,6 @@ import {getTranslation} from '@/locale/server';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
-  TenantIdSchema,
   WorkspaceURLSchema,
   NotificationAppCodeSchema,
   type NotificationAppCode,
@@ -165,7 +164,10 @@ async function sendMail({
   entity: {id: string; route: string};
   app: App;
 }) {
-  const mailService = NotificationManager.getService(NotificationType.mail);
+  const mailService = NotificationManager.getService(
+    NotificationType.mail,
+    await manager.getConfig(tenantId),
+  );
 
   const html =
     mail?.body || (await notificationTemplate({user, tenantId, app, entity}));
@@ -300,7 +302,6 @@ const MailSchema = z.object({
 type Mail = z.infer<typeof MailSchema>;
 
 const NotificationWebhookPayloadSchema = z.object({
-  tenantId: TenantIdSchema,
   workspaceUrl: WorkspaceURLSchema,
   code: NotificationAppCodeSchema,
   record: z.object({
@@ -310,7 +311,12 @@ const NotificationWebhookPayloadSchema = z.object({
   mail: MailSchema.nullish(),
 });
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request,
+  props: {params: Promise<{tenant: string}>},
+) {
+  const {tenant: tenantId} = await props.params;
+
   const body = await request.text();
 
   let payload;
@@ -325,7 +331,7 @@ export async function POST(request: Request) {
     return response(z.prettifyError(parsed.error), 400);
   }
 
-  const {tenantId, workspaceUrl, code, record, timestamp, mail} = parsed.data;
+  const {workspaceUrl, code, record, timestamp, mail} = parsed.data;
 
   if (!isValidTimestamp(timestamp)) {
     return response('Invalid timestamp', 400);

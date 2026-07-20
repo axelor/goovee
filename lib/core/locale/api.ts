@@ -21,18 +21,17 @@ const BUNDLE_CACHE_TTL_MS = 60 * 1000;
  * bundle share a single load instead of each hitting the DB. */
 const bundleCache = new LRUCache<string, Promise<TranslationBundle>>(
   BUNDLE_CACHE_CAPACITY,
-  BUNDLE_CACHE_TTL_MS,
+  {ttlMs: BUNDLE_CACHE_TTL_MS},
 );
 
 const tcache: Record<string, Translations> = {};
 const localesDir = path.resolve(process.cwd(), 'public', 'locales');
 const localesPromise = fs.readdir(localesDir).catch(() => [] as string[]);
 
-const includeLanguage = () => {
-  return process.env.INCLUDE_LANGUAGE === 'true';
-};
-
-async function findGeneralTranslations(locale: string): Promise<Translations> {
+async function findGeneralTranslations(
+  locale: string,
+  includeLanguage: boolean,
+): Promise<Translations> {
   if (!locale) {
     return {};
   }
@@ -65,7 +64,7 @@ async function findGeneralTranslations(locale: string): Promise<Translations> {
   const lang = findLocaleLanguage(locale);
 
   const [langTranslations, localeTranslations] = await Promise.all([
-    lang !== locale && includeLanguage() ? readwritecache(lang) : {},
+    lang !== locale && includeLanguage ? readwritecache(lang) : {},
     readwritecache(locale),
   ]);
 
@@ -75,6 +74,7 @@ async function findGeneralTranslations(locale: string): Promise<Translations> {
 async function findTenantTranslations(
   locale: string,
   tenantId: string,
+  includeLanguage: boolean,
 ): Promise<Translations> {
   if (!(locale && tenantId)) {
     return {};
@@ -103,7 +103,7 @@ async function findTenantTranslations(
   const lang = findLocaleLanguage(locale);
 
   const [langTranslations, localeTranslations] = await Promise.all([
-    lang !== locale && includeLanguage() ? find(lang) : {},
+    lang !== locale && includeLanguage ? find(lang) : {},
     find(locale),
   ]);
 
@@ -123,9 +123,15 @@ async function loadTranslationBundle(
   locale: string,
   tenantId?: string,
 ): Promise<TranslationBundle> {
+  /* includeLanguage (also load the base language, e.g. `en` for `en-US`) is a
+   * per-tenant toggle; tenant-less contexts default to off. */
+  const includeLanguage = tenantId
+    ? Boolean((await manager.getConfig(tenantId))?.includeLanguage)
+    : false;
+
   const [generalTranslations, tenantTranslations] = await Promise.all([
-    findGeneralTranslations(locale),
-    tenantId ? findTenantTranslations(locale, tenantId) : {},
+    findGeneralTranslations(locale, includeLanguage),
+    tenantId ? findTenantTranslations(locale, tenantId, includeLanguage) : {},
   ]);
 
   const translations = {...generalTranslations, ...tenantTranslations};

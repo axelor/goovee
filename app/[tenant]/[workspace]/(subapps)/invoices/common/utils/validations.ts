@@ -126,6 +126,7 @@ export async function validatePaymentData({
   amount,
   invoiceFilter,
   workspaceURL,
+  tenantId,
 }: {
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   client: Client;
@@ -133,6 +134,7 @@ export async function validatePaymentData({
   amount: string;
   invoiceFilter: InvoiceFilter;
   workspaceURL: string;
+  tenantId: string;
 }): Promise<
   ActionResponse<{
     $amount: string | number;
@@ -145,6 +147,7 @@ export async function validatePaymentData({
     type: INVOICE.UNPAID,
     ...invoiceFilter,
     workspaceURL,
+    tenantId,
     client,
   });
   if (!$invoice) {

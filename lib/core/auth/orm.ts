@@ -33,6 +33,7 @@ import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import {hash} from './utils';
 import {getPublicEnvironment} from '../environment/utils';
+import {getTenantConfigSync} from '@/tenant/config-provider';
 import {withMattermostSync} from '../mattermost/user-api';
 import type {Client} from '@/goovee/.generated/client';
 
@@ -152,7 +153,10 @@ export async function registerByInvite({
       localizationId: localization?.id,
     });
 
-    const uri = toWorkspaceURI(workspace.url, process.env.GOOVEE_PUBLIC_HOST);
+    const uri = toWorkspaceURI(
+      workspace.url,
+      getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
+    );
 
     revalidatePath('/', 'layout');
 
@@ -638,7 +642,8 @@ export async function registerByKeycloak({
   workspaceURI: string;
   client: Client;
 }): Promise<void> {
-  const workspaceURL = `${getPublicEnvironment().GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
+  const config = getTenantConfigSync(tenantId);
+  const workspaceURL = `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
   const localization = await findRegistrationLocalization({
     locale,
     client,

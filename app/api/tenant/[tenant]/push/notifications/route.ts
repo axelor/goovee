@@ -15,6 +15,11 @@ export async function GET(
     return new NextResponse('Unauthorized', {status: 401});
   }
 
+  // Guard cross-tenant access: /api/* bypasses the proxy that switches sessions.
+  if (session.user.tenantId !== tenantId) {
+    return new NextResponse('Forbidden', {status: 403});
+  }
+
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) {
     return new NextResponse('Bad request', {status: 400});

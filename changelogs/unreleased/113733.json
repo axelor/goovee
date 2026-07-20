@@ -1,0 +1,6 @@
+{
+  "title": "Implement proper multi-tenancy with per-tenant configuration",
+  "type": "feature",
+  "description": "Tenants are configured from a JSON document (file or env), each with its own database and AOS connection, supporting both AOS topologies per tenant: a dedicated AOS instance, or a shared AOS instance with AOS multi-tenancy addressed via X-Tenant-ID. Payment providers, mail, Mattermost, OAuth applications, the web-push signing identity and browser-exposed variables are configurable per tenant, with env values acting as deployment-wide defaults for omitted sections. A browser holds a single tenant session at a time — reaching a different tenant requires logging out first — and startup payment polling resumes for every configured tenant. Single-tenant deployments keep working unchanged from the classic env vars.",
+  "scope": ["core"]
+}

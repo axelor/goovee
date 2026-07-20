@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
-import {DEFAULT_TENANT} from '@/constants';
-import {manager, type TenantClient} from '@/tenant';
+import {manager, type TenantClient, type TenantConfig} from '@/tenant';
 
 import {
   INITIAL_SWEEP_DELAY_MS,
@@ -33,17 +32,26 @@ let started = false;
  */
 async function forEachTenant(
   label: string,
-  task: (tenantId: string, client: TenantClient) => Promise<void>,
+  task: (
+    tenantId: string,
+    client: TenantClient,
+    config: TenantConfig,
+  ) => Promise<void>,
 ): Promise<void> {
-  /*
-   * wip wires only DEFAULT_TENANT. Once per-tenant config lands (#113733),
-   * swap this for `await manager.listTenantIds()` and pass the tenant's
-   * `config.aos.storage` to the upload helpers.
-   */
-  for (const tenantId of [DEFAULT_TENANT]) {
+  let tenantIds: string[];
+  try {
+    tenantIds = await manager.listTenantIds();
+  } catch (error) {
+    console.error(`[UPLOAD][${label}] could not list tenants:`, error);
+    return;
+  }
+
+  for (const tenantId of tenantIds) {
     try {
-      const client = await manager.getClient(tenantId);
-      await task(tenantId, client);
+      const tenant = await manager.getTenant(tenantId);
+      if (!tenant) continue;
+      const {client, config} = tenant;
+      await task(tenantId, client, config);
     } catch (error) {
       console.error(
         `[UPLOAD][${label}] failed for tenant "${tenantId}":`,
@@ -54,8 +62,11 @@ async function forEachTenant(
 }
 
 async function reapTenants(): Promise<void> {
-  await forEachTenant('REAP', async (tenantId, client) => {
-    const {reaped, failed} = await reapExpiredUploads({client});
+  await forEachTenant('REAP', async (tenantId, client, config) => {
+    const {reaped, failed} = await reapExpiredUploads({
+      client,
+      storagePath: config.aos.storage,
+    });
     console.log(
       `[UPLOAD][REAP] tenant "${tenantId}": reaped ${reaped}, failed ${failed}`,
     );
@@ -63,8 +74,11 @@ async function reapTenants(): Promise<void> {
 }
 
 async function pruneTenants(): Promise<void> {
-  await forEachTenant('PRUNE', async (tenantId, client) => {
-    const {pruned} = await pruneStaleUploads({client});
+  await forEachTenant('PRUNE', async (tenantId, client, config) => {
+    const {pruned} = await pruneStaleUploads({
+      client,
+      retentionHours: config.uploadRecordRetentionHours,
+    });
     console.log(`[UPLOAD][PRUNE] tenant "${tenantId}": pruned ${pruned}`);
   });
 }

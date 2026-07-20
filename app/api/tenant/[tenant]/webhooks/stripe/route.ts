@@ -5,7 +5,8 @@ import Stripe from 'stripe';
 
 // ---- CORE IMPORTS ---- //
 import type {Client} from '@/goovee/.generated/client';
-import {stripe} from '@/payment/stripe';
+import {getStripe, getStripeWebhookSecret} from '@/payment/stripe';
+import {tenantConfigProvider} from '@/tenant/config-provider';
 import {
   CONTEXT_STATUS,
   findPaymentContext,
@@ -56,11 +57,23 @@ async function handleWebhookPaymentFailure({
   });
 }
 
-export async function POST(req: Request) {
+export async function POST(
+  req: Request,
+  props: {params: Promise<{tenant: string}>},
+) {
+  const {tenant: tenantId} = await props.params;
+
   const body = await req.text();
   const $headers = await headers();
   const signature = $headers.get('Stripe-Signature');
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  /* The tenant comes from the path (the webhook URL is registered per tenant),
+   * so its webhook secret is selected without reading the untrusted payload.
+   * The event is still trusted only after constructEvent verifies the signature
+   * against that secret. */
+  const tenantConfig = await tenantConfigProvider.get(tenantId);
+
+  const webhookSecret = getStripeWebhookSecret(tenantConfig);
 
   if (webhookSecret) {
     experimental_taintUniqueValue(
@@ -79,7 +92,11 @@ export async function POST(req: Request) {
       });
     }
 
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    event = getStripe(tenantConfig).webhooks.constructEvent(
+      body,
+      signature,
+      webhookSecret,
+    );
   } catch (err) {
     console.error(
       'Stripe webhook verification failed',
@@ -100,9 +117,8 @@ export async function POST(req: Request) {
         });
 
         const contextId = paymentIntent.metadata.context_id;
-        const tenantId = paymentIntent.metadata.tenant_id;
 
-        if (!contextId || !tenantId) {
+        if (!contextId) {
           console.error('Missing payment metadata', {
             eventId: event.id,
             metadata: paymentIntent.metadata,
@@ -237,6 +253,7 @@ export async function POST(req: Request) {
                   client: txClient,
                   sourceId: invoice.id,
                   amountRemaining,
+                  tenantId,
                 });
               });
             } catch (err) {
@@ -253,7 +270,7 @@ export async function POST(req: Request) {
               });
             }
 
-            notifyPaymentUpdate(source, sourceId, paymentContext.id);
+            notifyPaymentUpdate(tenantId, source, sourceId, paymentContext.id);
             if (paymentContext.payer) {
               after(() =>
                 notifyInvoicePaymentSuccess({
@@ -284,9 +301,8 @@ export async function POST(req: Request) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
         const contextId = paymentIntent.metadata.context_id;
-        const tenantId = paymentIntent.metadata.tenant_id;
 
-        if (!contextId || !tenantId) {
+        if (!contextId) {
           console.error('[PARTIAL_PAYMENT] Missing payment metadata', {
             eventId: event.id,
             metadata: paymentIntent.metadata,
@@ -329,6 +345,7 @@ export async function POST(req: Request) {
 
         try {
           notifyPaymentUpdate(
+            tenantId,
             source,
             sourceId,
             paymentContext.id,

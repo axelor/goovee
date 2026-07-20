@@ -112,6 +112,7 @@ export const findInvoice = async ({
   params,
   client,
   workspaceURL,
+  tenantId,
 }: {
   id: Invoice['id'];
   token?: string;
@@ -125,6 +126,7 @@ export const findInvoice = async ({
   };
   client: Client;
   workspaceURL: Workspace['url'];
+  tenantId: string;
 }): Promise<Invoice | null> => {
   if (!workspaceURL) return null;
 
@@ -264,6 +266,7 @@ export const findInvoice = async ({
       currencyCode,
       currencySymbol,
       scale,
+      tenantId,
     });
 
   const pendingHubPispContexts = await findPendingHubPispPayments({
@@ -271,6 +274,7 @@ export const findInvoice = async ({
     entityId: invoice.id,
     currencySymbol,
     scale,
+    tenantId,
   });
 
   return {

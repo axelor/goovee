@@ -51,6 +51,7 @@ async function Invoice({
       token: access.token,
       client: access.tenant.client,
       workspaceURL,
+      tenantId: tenant,
     });
     if (!invoice) return <TokenInvalid />;
 
@@ -110,6 +111,7 @@ async function Invoice({
     params: {where: invoicesWhereClause},
     client: access.tenant.client,
     workspaceURL,
+    tenantId: tenant,
   });
   if (!invoice) notFound();
 

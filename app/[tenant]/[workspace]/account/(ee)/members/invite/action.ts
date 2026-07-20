@@ -7,6 +7,7 @@ import {after} from 'next/server';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
+import {getPublicEnvironment} from '@/environment';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {manager} from '@/tenant';
@@ -243,8 +244,15 @@ export async function sendInvites({
     };
   }
 
+  /* Pin the (guarded non-null) tenant config: TS does not carry the earlier
+   * `if (!tenant) return` narrowing into this closure. */
+  const tenantConfig = tenant.config;
+
   function sendMail({email, link, subject}: any) {
-    const mailService = NotificationManager.getService(NotificationType.mail);
+    const mailService = NotificationManager.getService(
+      NotificationType.mail,
+      tenantConfig,
+    );
 
     after(async () => {
       try {
@@ -350,7 +358,7 @@ export async function sendInvites({
       sendMail({
         subject: workspace?.name || workspace.url,
         email,
-        link: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(
+        link: `${getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST}${withBasePath(
           `/auth/register/invite/${invite.id}/email?${SEARCH_PARAMS.TENANT_ID}=${tenantId}`,
         )}`,
       });

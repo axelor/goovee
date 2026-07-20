@@ -1,25 +1,23 @@
-// GOOVEE_PUBLIC_* vars are read from process.env at request time (not build time).
-// force-dynamic ensures this layout is never statically rendered and cached at build,
-// which would freeze env values and break runtime injection across environments.
+/* The app resolves the tenant per request (path today, host later), so nothing
+ * is statically rendered and frozen at build. This root layout is a
+ * tenant-agnostic shell; the per-tenant theme and browser variables are applied
+ * in app/[tenant]/layout.tsx. */
 export const dynamic = 'force-dynamic';
 
 import {Poppins as FontSans} from 'next/font/google';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {Environment, getPublicEnvironment} from '@/environment';
-import {findTheme} from '@/orm/theme';
+import {LegacyServiceWorkerCleanup} from '@/pwa/legacy-sw-cleanup';
 import {Toaster} from '@/ui/components/toaster';
 
 // ---- LOCAL IMPORTS ---- //
-import Theme from './theme';
 import Locale from './locale';
 import {
   APP_DESCRIPTION,
   APP_TEMPLATE_TITLE,
   DEFAULT_APP_TEMPLATE_TITLE,
 } from '@/constants';
-import {SerwistProvider} from '@/pwa/serwist';
 import {withBasePath} from '@/lib/core/path/base-path';
 import './globals.css';
 import 'swiper/css';
@@ -42,7 +40,7 @@ export const metadata: Metadata = {
     default: DEFAULT_APP_TEMPLATE_TITLE,
   },
   description: APP_DESCRIPTION,
-  manifest: withBasePath('/manifest'),
+  manifest: withBasePath('/manifest.webmanifest'),
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -70,32 +68,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [theme, env] = await Promise.all([findTheme(), getPublicEnvironment()]);
-
+  /* The root shell is tenant-agnostic: per-tenant theme and browser variables
+   * (Environment) are injected by app/[tenant]/layout.tsx, and the tenant-less
+   * auth pages set up their own (app/auth/layout.tsx + per-page Environment).
+   * Locale degrades to a same-origin relative locale fetch when no host is set. */
   return (
-    <Theme theme={theme}>
-      <html lang="en">
-        <head>
-          <meta name="mobile-web-app-capable" content="yes" />
-        </head>
-        <body className={fontSans.className}>
-          <Environment value={env}>
-            <Locale>
-              <SerwistProvider
-                swUrl={withBasePath('/sw.js')}
-                options={{scope: withBasePath('/')}}>
-                {children}
-              </SerwistProvider>
-            </Locale>
-            <Toaster />
-          </Environment>
-        </body>
-      </html>
-    </Theme>
+    <html lang="en">
+      <head>
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
+      <body className={fontSans.className}>
+        <Locale>{children}</Locale>
+        <Toaster />
+        <LegacyServiceWorkerCleanup />
+      </body>
+    </html>
   );
 }

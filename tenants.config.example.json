@@ -1,0 +1,108 @@
+{
+  "$schema": "./tenants.config.schema.json",
+  "$global": {
+    "betterAuthSecret": "<better-auth-secret>",
+    "betterAuthUrl": "https://portal.example.com"
+  },
+  "acme": {
+    "db": {
+      "url": "postgres://user:password@localhost:5432/goovee-acme"
+    },
+    "aos": {
+      "url": "https://erp.acme.example.com/axelor-erp",
+      "storage": "/storage/acme",
+      "auth": {
+        "apiKey": "<api-key>"
+      },
+      "webhookSecret": "<secret>"
+    },
+    "payments": {
+      "stripe": {
+        "clientSecret": "<stripe-secret-key>",
+        "webhookSecret": "<stripe-webhook-secret>"
+      },
+      "paypal": {
+        "clientId": "<paypal-client-id>",
+        "clientSecret": "<paypal-client-secret>",
+        "live": false
+      },
+      "hubpisp": {
+        "tokenUrl": "https://oauth.bpce.example.com/token",
+        "apiUrl": "https://api.bpce.example.com",
+        "clientId": "<hubpisp-client-id>",
+        "clientSecret": "<hubpisp-client-secret>",
+        "certFingerprint": "<acme-cert-sha256-fingerprint>",
+        "beneficiaryName": "<beneficiary-name>",
+        "iban": "<iban>",
+        "bic": "<bic>",
+        "certsDir": "certs/hubpisp/acme"
+      }
+    },
+    "mail": {
+      "host": "smtp.acme.example.com",
+      "port": 587,
+      "user": "noreply@acme.example.com",
+      "password": "<smtp-password>",
+      "email": "noreply@acme.example.com"
+    },
+    "oauth": {
+      "google": {
+        "clientId": "<google-client-id>",
+        "clientSecret": "<google-client-secret>"
+      }
+    },
+    "includeLanguage": true,
+    "uploadRecordRetentionHours": 168,
+    "publicEnv": {
+      "GOOVEE_PUBLIC_HOST": "https://acme.example.com",
+      "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": "<paypal-client-id>"
+    }
+  },
+  "beta": {
+    "db": {
+      "url": "postgres://user:password@localhost:5432/goovee-beta"
+    },
+    "aos": {
+      "url": "https://erp.shared.example.com/axelor-erp",
+      "aosTenantId": "beta",
+      "storage": "/storage/beta",
+      "auth": {
+        "username": "<username>",
+        "password": "<password>"
+      }
+    },
+    "payments": {
+      "up2pay": {
+        "site": "<site>",
+        "rang": "<rang>",
+        "identifiant": "<identifiant>",
+        "secret": "<secret>",
+        "paybox": "<host>",
+        "legacyForwardUrl": "https://legacy-erp.beta.example.com/ipn"
+      },
+      "paybox": {
+        "site": "<site>",
+        "rang": "<rang>",
+        "identifiant": "<identifiant>",
+        "secret": "<secret>",
+        "paybox": "<paybox-payment-page-url>",
+        "backup1": "<paybox-backup1-url>",
+        "backup2": "<paybox-backup2-url>"
+      },
+      "hubpisp": {
+        "tokenUrl": "https://oauth.bpce.example.com/token",
+        "apiUrl": "https://api.bpce.example.com",
+        "clientId": "<hubpisp-client-id>",
+        "clientSecret": "<hubpisp-client-secret>",
+        "certFingerprint": "<beta-cert-sha256-fingerprint>",
+        "beneficiaryName": "<beneficiary-name>",
+        "iban": "<iban>",
+        "bic": "<bic>",
+        "certsDir": "certs/hubpisp/beta"
+      }
+    },
+    "publicEnv": {
+      "GOOVEE_PUBLIC_HOST": "https://beta.example.com"
+    }
+  }
+}

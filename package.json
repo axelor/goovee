@@ -23,6 +23,7 @@
     "directory:seed": "node -r @swc-node/register $npm_package_scripts_directory_common_dir/scripts/seed/run.ts",
     "directory:reset": "node -r @swc-node/register $npm_package_scripts_directory_common_dir/scripts/seed/reset.ts",
     "addresses:geocode": "node -r @swc-node/register ./scripts/addresses/geocode.ts",
+    "tenants:migrate": "node -r @swc-node/register ./scripts/migrate-env-to-tenants.ts",
     "changelogs:validate": "node ./changelogs/validate",
     "changelogs:generate": "node ./changelogs/generate",
     "prepare:bump": "node ./scripts/prepare-bump.js",

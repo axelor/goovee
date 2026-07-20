@@ -1,7 +1,7 @@
-import {experimental_taintUniqueValue} from 'react';
 import {z} from 'zod';
 import {findGooveeUserByEmail} from '@/orm/partner';
 import {manager} from '@/tenant';
+import {getGlobalConfigSync} from '@/tenant/config-provider';
 import {getPartnerImageURL} from '@/utils/files';
 import {
   betterAuth,
@@ -11,8 +11,7 @@ import {
 import {APIError, getOAuthState} from 'better-auth/api';
 import {nextCookies} from 'better-auth/next-js';
 import {customSession} from 'better-auth/plugins';
-import google from './core/auth/(ee)/google';
-import keycloak from './core/auth/(ee)/keycloak';
+import oauthProviders from './core/auth/(ee)/oauth-providers';
 import credentials from './core/auth/credentials';
 import {register, registerByInvite, registerByKeycloak} from './core/auth/orm';
 import {
@@ -21,8 +20,6 @@ import {
   OAuthRegisterSchema,
 } from './core/auth/validation-utils';
 import {withBasePath} from '@/lib/core/path/base-path';
-
-const showKeycloakOauth = process.env.SHOW_KEYCLOAK_OAUTH === 'true';
 
 const ERROR_CODES = defineErrorCodes({
   TENANT_ID_REQUIRED: 'Tenant ID is required',
@@ -59,9 +56,14 @@ const options = {
             }
             const {client, config} = tenant;
 
+            /* OAuth applications are per-tenant, registered as generic
+             * providers under "<provider>-<tenantId>". */
+            const isGoogle = ctx.params?.providerId?.startsWith('google-');
+            const isKeycloak = ctx.params?.providerId?.startsWith('keycloak-');
+
             let partner = await findGooveeUserByEmail(user.email, client);
             if (!partner) {
-              if (ctx.params?.id === 'google' && data.requestSignUp) {
+              if (isGoogle && data.requestSignUp) {
                 const registrationData = {
                   ...data,
                   email: user.email,
@@ -122,7 +124,7 @@ const options = {
 
                 partner = await findGooveeUserByEmail(user.email, client);
               }
-              if (ctx.params?.providerId === 'keycloak') {
+              if (isKeycloak) {
                 const {
                   success,
                   data: keycloakData,
@@ -221,23 +223,17 @@ const options = {
       },
     },
   },
-  plugins: [credentials, ...(showKeycloakOauth && keycloak ? [keycloak] : [])],
-  socialProviders: {google},
+  plugins: [credentials, ...(oauthProviders ? [oauthProviders] : [])],
 } satisfies BetterAuthOptions;
 
-const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
-
-if (betterAuthSecret) {
-  experimental_taintUniqueValue(
-    'Better Auth Secret is an authentication secret. Do not pass to Client Components.',
-    process,
-    betterAuthSecret,
-  );
-}
+/* Deployment-wide auth settings come from the document's "$global" section
+ * (the provider loads synchronously and taints the secret at load). */
+const globalConfig = getGlobalConfigSync();
 
 export const auth = betterAuth({
   ...options,
-  baseURL: process.env.BETTER_AUTH_URL,
+  secret: globalConfig.betterAuthSecret,
+  baseURL: globalConfig.betterAuthUrl,
   basePath: withBasePath('/api/auth'),
   plugins: [
     ...options.plugins,

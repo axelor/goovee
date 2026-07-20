@@ -1,4 +1,4 @@
-import {getAOSAuthHeaders} from '@/tenant/auth';
+import {getAOSHeaders} from '@/tenant/auth';
 
 import type {
   AOSConfig,
@@ -95,7 +95,7 @@ export function aosClient(aos: AOSConfig) {
     const url = `${base}/${path.replace(/^\/+/, '')}`;
 
     const requestHeaders: Record<string, string> = {
-      ...getAOSAuthHeaders(aos.auth),
+      ...getAOSHeaders(aos),
       Accept: 'application/json',
       ...headers,
     };

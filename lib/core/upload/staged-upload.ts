@@ -8,7 +8,6 @@ import {
   COMMENT_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE,
 } from '@/lib/core/comments/constants';
-import {getStoragePath} from '@/storage/index';
 import type {ID} from '@/types';
 import {
   DEFAULT_RECORD_RETENTION_HOURS,
@@ -245,8 +244,10 @@ export async function redeemUpload({
  */
 export async function reapExpiredUploads({
   client,
+  storagePath,
 }: {
   client: GooveeClient;
+  storagePath: string;
 }): Promise<{reaped: number; failed: number}> {
   const abandoned = await client.stagedUpload.find({
     where: {
@@ -267,7 +268,7 @@ export async function reapExpiredUploads({
     try {
       const filePath = row.metaFile?.filePath;
       if (filePath) {
-        await fs.promises.rm(path.resolve(getStoragePath(), filePath), {
+        await fs.promises.rm(path.resolve(storagePath, filePath), {
           force: true,
         });
       }
@@ -322,20 +323,22 @@ export async function reapExpiredUploads({
  */
 export async function pruneStaleUploads({
   client,
+  retentionHours,
 }: {
   client: Client;
+  retentionHours?: number;
 }): Promise<{pruned: number}> {
   /*
-   * Retention overridable in hours via `UPLOAD_RECORD_RETENTION_HOURS`; unset,
-   * non-positive, or invalid falls back to the default — a negative value would
-   * otherwise push the cutoff into the future and prune every terminal record.
+   * Retention (hours) comes from the tenant's config; unset, non-positive, or
+   * invalid falls back to the code default — a negative value would otherwise
+   * push the cutoff into the future and prune every terminal record.
    * `<field> < cutoff` excludes non-terminal rows for free: a NULL `consumedAt`
    * or `reapedAt` is never less than the cutoff, so it never matches.
    */
-  const retentionHours = Number(process.env.UPLOAD_RECORD_RETENTION_HOURS);
   const retentionMs =
-    (retentionHours > 0 ? retentionHours : DEFAULT_RECORD_RETENTION_HOURS) *
-    HOUR_MS;
+    (retentionHours && retentionHours > 0
+      ? retentionHours
+      : DEFAULT_RECORD_RETENTION_HOURS) * HOUR_MS;
   const cutoff = new Date(Date.now() - retentionMs);
 
   const pruned = await client.stagedUpload.deleteAll({

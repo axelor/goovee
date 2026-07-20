@@ -24,10 +24,12 @@ import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notif
 /**
  * Fire-and-forget forward of the IPN to the legacy ERP.
  * Only called when Goovee cannot process the IPN (unrecognized ref format or unknown payment context).
- * Controlled by UP2PAY_LEGACY_FORWARD_URL — if not set, no forwarding occurs.
+ * Controlled by the tenant's payments.up2pay.legacyForwardUrl — if unset, no forwarding occurs.
  */
-function forwardToLegacy(request: Request): boolean {
-  const legacyUrl = process.env.UP2PAY_LEGACY_FORWARD_URL;
+function forwardToLegacy(
+  request: Request,
+  legacyUrl: string | undefined,
+): boolean {
   if (!legacyUrl) return false;
 
   // Use the raw search string to preserve the original encoding (e.g. literal '+' in ref values),
@@ -49,7 +51,12 @@ function forwardToLegacy(request: Request): boolean {
   return true;
 }
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  props: {params: Promise<{tenant: string}>},
+) {
+  const {tenant: tenantId} = await props.params;
+
   const url = new URL(request.url);
   const params = url.searchParams;
 
@@ -88,29 +95,46 @@ export async function GET(request: Request) {
     return new NextResponse('Bad Request', {status: 400});
   }
 
-  // Goovee refs are formatted as: name-reference~contextId~tenantId
-  const refParts = ref.split('~');
-  const [contextId, tenantId] =
-    refParts.length >= 3 ? [refParts.at(-2)!, refParts.at(-1)!] : [null, null];
-
-  if (!(contextId && tenantId)) {
-    // Ref does not match Goovee format — likely a legacy invoice, forward to legacy ERP.
-    console.error(
-      '[UP2PAY][WEBHOOK] Ref does not match Goovee format, forwarding to legacy',
-      {ref},
-    );
-    const forwarded = forwardToLegacy(request);
-    return new NextResponse(forwarded ? 'OK' : 'Bad Request', {
-      status: forwarded ? 200 : 400,
-    });
-  }
-
+  /* The tenant is authoritative from the path (the webhook URL is registered
+   * per tenant). Resolve it before parsing the ref so even a legacy IPN we
+   * cannot attribute to a context can still be forwarded to this tenant's
+   * legacy ERP. */
   const tenant = await manager.getTenant(tenantId);
   if (!tenant) {
     console.error('[UP2PAY][WEBHOOK] Tenant not found', {tenantId});
     return new NextResponse('Bad Request', {status: 400});
   }
   const {client, config} = tenant;
+  const legacyForwardUrl = config.payments?.up2pay?.legacyForwardUrl;
+
+  // Goovee refs are formatted as: name-reference~contextId~tenantId
+  const refParts = ref.split('~');
+  const contextId = refParts.length >= 3 ? refParts.at(-2)! : null;
+  const refTenantId = refParts.length >= 3 ? refParts.at(-1)! : null;
+
+  /* The signing cert is shared across tenants and contextIds are per-tenant
+   * sequences, so a signed IPN replayed to another tenant could match an
+   * unrelated context. Require the ref's tenant to match the path tenant. */
+  if (refTenantId && refTenantId !== tenantId) {
+    console.error('[UP2PAY][WEBHOOK] Ref tenant does not match path tenant', {
+      refTenantId,
+      tenantId,
+      ref,
+    });
+    return new NextResponse('Bad Request', {status: 400});
+  }
+
+  if (!contextId) {
+    // Ref does not match Goovee format — likely a legacy invoice, forward to legacy ERP.
+    console.error(
+      '[UP2PAY][WEBHOOK] Ref does not match Goovee format, forwarding to legacy',
+      {ref},
+    );
+    const forwarded = forwardToLegacy(request, legacyForwardUrl);
+    return new NextResponse(forwarded ? 'OK' : 'Bad Request', {
+      status: forwarded ? 200 : 400,
+    });
+  }
 
   const paymentContext = await findPaymentContext({
     id: contextId,
@@ -128,7 +152,7 @@ export async function GET(request: Request) {
         tenantId,
       },
     );
-    const forwarded = forwardToLegacy(request);
+    const forwarded = forwardToLegacy(request, legacyForwardUrl);
     return new NextResponse(forwarded ? 'OK' : 'Bad Request', {
       status: forwarded ? 200 : 400,
     });
@@ -280,7 +304,7 @@ export async function GET(request: Request) {
     client,
   });
 
-  notifyPaymentUpdate(source, entityId, paymentContext.id);
+  notifyPaymentUpdate(tenantId, source, entityId, paymentContext.id);
 
   return new NextResponse('OK', {status: 200});
 }

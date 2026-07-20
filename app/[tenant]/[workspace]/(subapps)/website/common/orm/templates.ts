@@ -42,7 +42,6 @@ import {
   collectUniqueModels,
   formatCustomFieldName,
 } from '../utils/helper';
-import {getStoragePath} from '@/storage/index';
 import {Website} from '../templates/site';
 import {getFileFromAssets} from '../assets/file-getter';
 
@@ -549,8 +548,9 @@ export async function createCMSContent(props: {
   schema: TemplateSchema;
   demos: DemoLite<TemplateSchema>[];
   fileCache: Cache<Promise<{id: string}>>;
+  storagePath: string;
 }) {
-  const {client, demos, schema, fileCache} = props;
+  const {client, demos, schema, fileCache, storagePath} = props;
 
   return await Promise.all(
     demos.map(async demo => {
@@ -583,6 +583,7 @@ export async function createCMSContent(props: {
         data: demo.data,
         fields: schema.fields,
         fileCache,
+        storagePath,
       });
 
       const contentData: CreateArgs<AOSPortalCmsContent> = {
@@ -638,17 +639,19 @@ async function createMetaFile({
   metaFilePath,
   fileName,
   fileType,
+  storagePath,
 }: {
   client: Client;
   originPath: string;
   metaFilePath: string;
   fileName: string;
   fileType: string;
+  storagePath: string;
 }): Promise<{id: string}> {
   const buffer = await getFileFromAssets(originPath);
   await pump(
     Readable.from(buffer),
-    fs.createWriteStream(path.resolve(getStoragePath(), metaFilePath)),
+    fs.createWriteStream(path.resolve(storagePath, metaFilePath)),
   );
 
   const metaFileData: CreateArgs<AOSMetaFile> = {
@@ -693,12 +696,14 @@ async function getMetaFile({
   fileType,
   filePath: originPath,
   fileCache,
+  storagePath,
 }: {
   fileName: string;
   fileType: string;
   client: Client;
   filePath: string;
   fileCache: Cache<Promise<{id: string}>>;
+  storagePath: string;
 }) {
   const metaFilePath = `${FILE_PREFIX}-${fileName}`;
   const fileCacheKey = `${metaFilePath}-${fileType}-${fileName}`;
@@ -713,6 +718,7 @@ async function getMetaFile({
     metaFilePath,
     fileName,
     fileType,
+    storagePath,
   });
 
   fileCache.set(fileCacheKey, metaFilePromise);
@@ -725,8 +731,9 @@ async function createAttrs(props: {
   fields: Field[];
   data: any;
   fileCache: Cache<Promise<{id: string}>>;
+  storagePath: string;
 }) {
-  const {client, fields, schema, data, fileCache} = props;
+  const {client, fields, schema, data, fileCache, storagePath} = props;
   const {attrs, fieldsMap} = fields.reduce<{
     attrs: Record<string, any>;
     fieldsMap: Map<string, Field>;
@@ -762,6 +769,7 @@ async function createAttrs(props: {
                   fields: modelFields,
                   data: record.attrs,
                   fileCache,
+                  storagePath,
                 }),
                 client,
               });
@@ -780,6 +788,7 @@ async function createAttrs(props: {
               schema,
               data: value.attrs,
               fileCache,
+              storagePath,
             }),
             client,
           });
@@ -803,6 +812,7 @@ async function createAttrs(props: {
                 filePath: record.filePath,
                 client,
                 fileCache,
+                storagePath,
               });
             }),
           );
@@ -814,6 +824,7 @@ async function createAttrs(props: {
             filePath: value.filePath,
             client,
             fileCache,
+            storagePath,
           });
           attrs[key] = {id: Number(record.id)};
         }

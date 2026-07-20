@@ -1,11 +1,11 @@
-import {experimental_taintUniqueValue} from 'react';
 import crypto from 'crypto';
 import fs from 'fs';
 import https from 'https';
 import path from 'path';
 
-function getCertOptions(): {cert: Buffer; key: Buffer} {
-  const certsDir = path.join(process.cwd(), 'certs', 'hubpisp');
+import type {HubPispSettings} from './settings';
+
+function getCertOptions(certsDir: string): {cert: Buffer; key: Buffer} {
   return {
     cert: fs.readFileSync(path.join(certsDir, 'client.crt')),
     key: fs.readFileSync(path.join(certsDir, 'private-key.pem')),
@@ -19,6 +19,7 @@ function getCertOptions(): {cert: Buffer; key: Buffer} {
 export function pispFetch(
   url: string,
   init: RequestInit = {},
+  certsDir: string,
 ): Promise<Response> {
   return new Promise((resolve, reject) => {
     const parsed = new URL(url);
@@ -39,7 +40,7 @@ export function pispFetch(
         path: parsed.pathname + parsed.search,
         method,
         headers,
-        ...getCertOptions(),
+        ...getCertOptions(certsDir),
       },
       res => {
         const chunks: Buffer[] = [];
@@ -77,38 +78,37 @@ export function pispFetch(
  * Fetches a Bearer token from the HUB PISP OAuth endpoint.
  * Uses Basic auth: base64(clientId:clientSecret).
  */
-export async function getPispAccessToken(): Promise<string> {
-  const clientId = process.env.HUBPISP_CLIENT_ID;
-  const clientSecret = process.env.HUBPISP_CLIENT_SECRET;
-  const tokenUrl = process.env.HUBPISP_TOKEN_URL;
+export async function getPispAccessToken(
+  settings: HubPispSettings,
+): Promise<string> {
+  const {clientId, clientSecret, tokenUrl} = settings;
 
-  if (!(clientId && clientSecret && tokenUrl)) {
+  if (!(clientId && clientSecret && tokenUrl && settings.certsDir)) {
     console.error('[HUBPISP][AUTH] Missing credentials', {
       hasClientId: !!clientId,
       hasClientSecret: !!clientSecret,
       hasTokenUrl: !!tokenUrl,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP credentials are not configured');
   }
-
-  experimental_taintUniqueValue(
-    'Hub PISP client secret is a server secret. Do not pass to Client Components.',
-    process,
-    clientSecret,
-  );
 
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString(
     'base64',
   );
 
-  const response = await pispFetch(tokenUrl, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+  const response = await pispFetch(
+    tokenUrl,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'grant_type=client_credentials',
     },
-    body: 'grant_type=client_credentials',
-  });
+    settings.certsDir,
+  );
   if (!response.ok) {
     const body = await response.text();
     console.error('[HUBPISP][AUTH] Token fetch failed', {
@@ -151,18 +151,15 @@ export function generateSignature({
   digest,
   date,
   xRequestId,
+  certsDir,
 }: {
   requestTarget: string;
   digest: string;
   date: string;
   xRequestId: string;
+  certsDir: string;
 }): string {
-  const keyPath = path.join(
-    process.cwd(),
-    'certs',
-    'hubpisp',
-    'private-key.pem',
-  );
+  const keyPath = path.join(certsDir, 'private-key.pem');
 
   if (!fs.existsSync(keyPath)) {
     console.error('[HUBPISP][SIGN] Private key file not found', {keyPath});
@@ -196,6 +193,7 @@ export function buildPispHeaders({
   digest,
   date,
   xRequestId,
+  certsDir,
 }: {
   token: string;
   keyId: string;
@@ -203,12 +201,14 @@ export function buildPispHeaders({
   digest: string;
   date: string;
   xRequestId: string;
+  certsDir: string;
 }): Record<string, string> {
   const signature = generateSignature({
     requestTarget,
     digest,
     date,
     xRequestId,
+    certsDir,
   });
 
   const signatureHeader = `keyId="${keyId.toLowerCase()}",algorithm="rsa-sha256",headers="(request-target) digest date x-request-id",signature="${signature}"`;

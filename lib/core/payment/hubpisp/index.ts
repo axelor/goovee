@@ -4,6 +4,7 @@ import {
   buildPispHeaders,
   pispFetch,
 } from './crypto';
+import {resolveHubPispSettings} from './settings';
 import {
   generateRequestId,
   getDateHeader,
@@ -25,6 +26,7 @@ import type {
 
 export async function createPaymentLink(
   params: CreatePaymentLinkParams,
+  tenantId?: string,
 ): Promise<CreatePaymentLinkResult> {
   const {
     currency,
@@ -40,18 +42,22 @@ export async function createPaymentLink(
     pageConsentInfo: pci,
   } = params;
 
-  const baseUrl = process.env.HUBPISP_API_URL;
-  const keyId = process.env.HUBPISP_CERT_FINGERPRINT;
-  const beneficiaryName = process.env.HUBPISP_BENEFICIARY_NAME;
-  const iban = process.env.HUBPISP_IBAN;
-  const bicFi = process.env.HUBPISP_BIC;
+  const settings = await resolveHubPispSettings(tenantId);
+  const {
+    apiUrl: baseUrl,
+    certFingerprint: keyId,
+    beneficiaryName,
+    iban,
+    bic: bicFi,
+  } = settings;
 
-  if (!(baseUrl && keyId && beneficiaryName && iban)) {
-    console.error('[HUBPISP][CREATE_LINK] Missing env config', {
+  if (!(baseUrl && keyId && beneficiaryName && iban && settings.certsDir)) {
+    console.error('[HUBPISP][CREATE_LINK] Missing config', {
       hasBaseUrl: !!baseUrl,
       hasKeyId: !!keyId,
       hasBeneficiaryName: !!beneficiaryName,
       hasIban: !!iban,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP is not configured');
   }
@@ -62,7 +68,7 @@ export async function createPaymentLink(
     );
   }
 
-  const token = await getPispAccessToken();
+  const token = await getPispAccessToken(settings);
 
   const requestedExecutionDate =
     rawExecutionDate ?? buildParisISOString(Date.now() + 15_000);
@@ -110,13 +116,18 @@ export async function createPaymentLink(
     digest,
     date,
     xRequestId,
+    certsDir: settings.certsDir,
   });
 
-  const response = await pispFetch(`${baseUrl}${PAYMENT_LINK_PATH}`, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json', ...headers},
-    body: bodyString,
-  });
+  const response = await pispFetch(
+    `${baseUrl}${PAYMENT_LINK_PATH}`,
+    {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', ...headers},
+      body: bodyString,
+    },
+    settings.certsDir,
+  );
 
   if (!response.ok) {
     const errorBody = await response.text();
@@ -139,19 +150,21 @@ export async function createPaymentLink(
 
 export async function fetchPaymentLinkStatus(
   resourceId: string,
+  tenantId?: string,
 ): Promise<PaymentLinkStatusResult> {
-  const baseUrl = process.env.HUBPISP_API_URL;
-  const keyId = process.env.HUBPISP_CERT_FINGERPRINT;
+  const settings = await resolveHubPispSettings(tenantId);
+  const {apiUrl: baseUrl, certFingerprint: keyId} = settings;
 
-  if (!(baseUrl && keyId)) {
-    console.error('[HUBPISP][LINK_STATUS] Missing env config', {
+  if (!(baseUrl && keyId && settings.certsDir)) {
+    console.error('[HUBPISP][LINK_STATUS] Missing config', {
       hasBaseUrl: !!baseUrl,
       hasKeyId: !!keyId,
+      hasCertsDir: !!settings.certsDir,
     });
     throw new Error('HUB PISP is not configured');
   }
 
-  const token = await getPispAccessToken();
+  const token = await getPispAccessToken(settings);
 
   const path = `${PAYMENT_LINK_PATH}/${resourceId}`;
   const bodyString = '';
@@ -167,12 +180,17 @@ export async function fetchPaymentLinkStatus(
     digest,
     date,
     xRequestId,
+    certsDir: settings.certsDir,
   });
 
-  const response = await pispFetch(`${baseUrl}${path}`, {
-    method: 'GET',
-    headers,
-  });
+  const response = await pispFetch(
+    `${baseUrl}${path}`,
+    {
+      method: 'GET',
+      headers,
+    },
+    settings.certsDir,
+  );
 
   if (!response.ok) {
     const errorBody = await response.text();
@@ -198,8 +216,9 @@ export async function fetchPaymentLinkStatus(
  */
 export async function getPaymentLinkStatus(
   resourceId: string,
+  tenantId?: string,
 ): Promise<GetPaymentLinkStatusResult> {
-  const data = await fetchPaymentLinkStatus(resourceId);
+  const data = await fetchPaymentLinkStatus(resourceId, tenantId);
   const consentStatus = data.consentStatus;
 
   if (consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {

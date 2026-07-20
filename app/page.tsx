@@ -9,6 +9,7 @@ import {
   findDefaultPartnerWorkspace,
 } from '@/orm/workspace';
 import {getSession} from '@/auth';
+import {getPublicEnvironment} from '@/environment';
 import {clone, getPartnerId} from '@/utils';
 import {TenancyType, manager} from '@/tenant';
 import {DEFAULT_TENANT} from '@/constants';
@@ -27,6 +28,12 @@ export default async function Page(props: {
     tenantId = DEFAULT_TENANT;
   }
 
+  const knownTenantIds = await manager.listTenantIds();
+
+  if (!tenantId || !knownTenantIds.includes(tenantId)) {
+    return notFound();
+  }
+
   const tenant = await manager.getTenant(tenantId);
 
   if (!tenant) {
@@ -35,7 +42,7 @@ export default async function Page(props: {
 
   const {client} = tenant;
 
-  const host = process.env.GOOVEE_PUBLIC_HOST!;
+  const host = getPublicEnvironment(tenant.config).GOOVEE_PUBLIC_HOST!;
   const baseUrl = `${host}${getBasePath()}`;
 
   const workspaces = await findWorkspaces({

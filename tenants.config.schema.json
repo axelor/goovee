@@ -1,0 +1,296 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Goovee configuration",
+  "description": "The single configuration document for Goovee — a reserved \"$global\" section (deployment-wide settings) plus one entry per tenant, keyed by the tenant id (the URL path segment, letters only). Set TENANTS_CONFIG_FILE or TENANTS_CONFIG to point at it. Single-tenant is just a one-entry document keyed \"d\". Nothing is inherited: a section a tenant omits is simply off for that tenant, never filled from the environment or another tenant.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "$global": {
+      "$ref": "#/$defs/globalConfig"
+    }
+  },
+  "required": ["$global"],
+  "propertyNames": {
+    "pattern": "^(\\$schema|\\$global|[a-zA-Z]+)$"
+  },
+  "additionalProperties": {
+    "$ref": "#/$defs/tenantConfig"
+  },
+  "$defs": {
+    "globalConfig": {
+      "type": "object",
+      "description": "Deployment-wide settings, shared by every tenant because they are bound to the single origin / process.",
+      "required": ["betterAuthSecret"],
+      "additionalProperties": false,
+      "properties": {
+        "betterAuthSecret": {
+          "type": "string",
+          "description": "Better Auth signing/encryption secret (the BETTER_AUTH_SECRET equivalent)."
+        },
+        "betterAuthUrl": {
+          "type": "string",
+          "description": "Better Auth base URL (the BETTER_AUTH_URL equivalent)."
+        }
+      }
+    },
+    "tenantConfig": {
+      "type": "object",
+      "required": ["db", "aos", "publicEnv"],
+      "additionalProperties": false,
+      "properties": {
+        "db": {
+          "type": "object",
+          "required": ["url"],
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "Postgres connection URL of this tenant's own database. Every tenant has its own database; isolation is per-database."
+            }
+          }
+        },
+        "aos": {
+          "type": "object",
+          "required": ["url", "auth", "storage"],
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "Base URL of the AOS instance, e.g. https://erp.example.com/axelor-erp. Unique per tenant in topology A (dedicated AOS); shared across tenants in topology B (AOS multi-tenancy)."
+            },
+            "aosTenantId": {
+              "type": "string",
+              "description": "AOS-side tenant id — independent of the Goovee tenant id. Set it when this tenant lives on a shared AOS instance with AOS multi-tenancy (topology B): every AOS call then carries X-Tenant-ID with this value. Leave unset for a dedicated AOS instance (topology A)."
+            },
+            "storage": {
+              "type": "string",
+              "description": "The AOS instance's data.upload.dir base path (created on first connect; back it with a mounted volume so uploads survive). When aosTenantId is set (topology B), goovee reads and writes files under <storage>/<aosTenantId> to match AOP's per-tenant subdirectory; a dedicated instance (topology A) uses this path as-is."
+            },
+            "auth": {
+              "type": "object",
+              "description": "AOS credentials: apiKey (AOS 9+, generated in AOS under Preferences → API Keys) or username/password basic auth. apiKey wins when both are set.",
+              "anyOf": [
+                {"required": ["apiKey"]},
+                {"required": ["username", "password"]}
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "apiKey": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            },
+            "webhookSecret": {
+              "type": "string",
+              "description": "Secret AOS uses to sign notification webhooks for this tenant (the NOTIFICATION_WEBHOOK_SECRET equivalent)."
+            }
+          }
+        },
+        "payments": {
+          "type": "object",
+          "description": "Per-tenant merchant accounts. A provider a tenant omits is simply unavailable for that tenant.",
+          "additionalProperties": false,
+          "properties": {
+            "paypal": {
+              "type": "object",
+              "required": ["clientId", "clientSecret"],
+              "additionalProperties": false,
+              "properties": {
+                "clientId": {"type": "string"},
+                "clientSecret": {"type": "string"},
+                "live": {
+                  "type": "boolean",
+                  "description": "true for live payments; defaults to sandbox."
+                }
+              }
+            },
+            "stripe": {
+              "type": "object",
+              "required": ["clientSecret"],
+              "additionalProperties": false,
+              "properties": {
+                "clientSecret": {"type": "string"},
+                "webhookSecret": {
+                  "type": "string",
+                  "description": "Stripe webhook signing secret for this tenant's webhook endpoint."
+                }
+              }
+            },
+            "paybox": {
+              "type": "object",
+              "required": ["site", "rang", "identifiant", "secret", "paybox"],
+              "additionalProperties": false,
+              "properties": {
+                "site": {"type": "string"},
+                "rang": {"type": "string"},
+                "identifiant": {"type": "string"},
+                "secret": {"type": "string"},
+                "paybox": {
+                  "type": "string",
+                  "description": "Paybox payment page base URL."
+                },
+                "backup1": {"type": "string"},
+                "backup2": {"type": "string"}
+              }
+            },
+            "up2pay": {
+              "type": "object",
+              "required": ["site", "rang", "identifiant", "secret", "paybox"],
+              "additionalProperties": false,
+              "properties": {
+                "site": {"type": "string"},
+                "rang": {"type": "string"},
+                "identifiant": {"type": "string"},
+                "secret": {"type": "string"},
+                "paybox": {
+                  "type": "string",
+                  "description": "Up2Pay payment page base URL."
+                },
+                "legacyForwardUrl": {
+                  "type": "string",
+                  "description": "Where to forward Up2Pay IPNs this tenant cannot attribute to a Goovee payment (legacy-ERP invoices, unknown context). Omit to not forward."
+                }
+              }
+            },
+            "hubpisp": {
+              "type": "object",
+              "description": "Register this tenant's BPCE webhook under the tenant-scoped path /api/tenant/<tenantId>/webhooks/hubpisp/... so the webhook uses this tenant's credentials.",
+              "required": [
+                "tokenUrl",
+                "apiUrl",
+                "clientId",
+                "clientSecret",
+                "certFingerprint",
+                "beneficiaryName",
+                "iban",
+                "certsDir"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "tokenUrl": {"type": "string"},
+                "apiUrl": {"type": "string"},
+                "clientId": {"type": "string"},
+                "clientSecret": {"type": "string"},
+                "certFingerprint": {"type": "string"},
+                "beneficiaryName": {"type": "string"},
+                "iban": {"type": "string"},
+                "bic": {"type": "string"},
+                "certsDir": {
+                  "type": "string",
+                  "description": "Required. Directory holding this tenant's mTLS client.crt and private-key.pem. Must be distinct per HUB PISP tenant — the certificate is the tenant's bank identity, so there is no shared default. Uniqueness is enforced at config load, not by this schema."
+                }
+              }
+            }
+          }
+        },
+        "mail": {
+          "type": "object",
+          "description": "Per-tenant SMTP settings.",
+          "required": ["host", "port", "user", "password"],
+          "additionalProperties": false,
+          "properties": {
+            "host": {"type": "string"},
+            "port": {"type": "number"},
+            "secure": {"type": "boolean"},
+            "user": {"type": "string"},
+            "password": {"type": "string"},
+            "email": {
+              "type": "string",
+              "description": "From address; defaults to user."
+            }
+          }
+        },
+        "mattermost": {
+          "type": "object",
+          "description": "The Mattermost host is browser-facing — set it per tenant via publicEnv.GOOVEE_PUBLIC_MATTERMOST_HOST.",
+          "additionalProperties": false,
+          "properties": {
+            "token": {
+              "type": "string",
+              "description": "Mattermost admin token."
+            },
+            "createUsers": {
+              "type": "boolean",
+              "description": "Create Mattermost users on registration."
+            }
+          }
+        },
+        "oauth": {
+          "type": "object",
+          "description": "Per-tenant OAuth applications. Each provider is registered at startup under the provider id '<provider>-<tenantId>' — register the matching redirect URI (/api/auth/oauth2/callback/<provider>-<tenantId>) with the identity provider. There is no global app: a tenant offers a provider only when it declares it here.",
+          "additionalProperties": false,
+          "properties": {
+            "google": {
+              "type": "object",
+              "required": ["clientId", "clientSecret"],
+              "additionalProperties": false,
+              "properties": {
+                "clientId": {"type": "string"},
+                "clientSecret": {"type": "string"}
+              }
+            },
+            "keycloak": {
+              "type": "object",
+              "required": ["clientId", "clientSecret", "issuer"],
+              "additionalProperties": false,
+              "properties": {
+                "clientId": {"type": "string"},
+                "clientSecret": {"type": "string"},
+                "issuer": {
+                  "type": "string",
+                  "description": "Keycloak realm issuer URL. Each tenant uses its own realm."
+                }
+              }
+            }
+          }
+        },
+        "webPush": {
+          "type": "object",
+          "description": "Web-push signing identity; the public key lives in publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY. A browser holds one push subscription per service-worker registration, so per-tenant key pairs only take effect once tenants run on their own domains.",
+          "required": ["privateKey", "subject"],
+          "additionalProperties": false,
+          "properties": {
+            "privateKey": {"type": "string"},
+            "subject": {
+              "type": "string",
+              "description": "mailto: address or https: URL identifying the sender to push services."
+            }
+          }
+        },
+        "includeLanguage": {
+          "type": "boolean",
+          "description": "Also load the base language (e.g. 'en' for 'en-US') in addition to the specific locale. Defaults to false."
+        },
+        "uploadRecordRetentionHours": {
+          "type": "number",
+          "description": "How long terminal staged-upload records are kept before the prune sweep deletes them. Defaults to 168 (7 days)."
+        },
+        "publicEnv": {
+          "type": "object",
+          "description": "Browser-exposed variables for this tenant (declared in full; not inherited from the environment).",
+          "additionalProperties": false,
+          "properties": {
+            "GOOVEE_PUBLIC_HOST": {"type": "string"},
+            "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": {"type": "string"},
+            "GOOVEE_PUBLIC_LINKEDIN_URL": {"type": "string"},
+            "GOOVEE_PUBLIC_TWITTER_URL": {"type": "string"},
+            "GOOVEE_PUBLIC_INSTAGRAM_URL": {"type": "string"},
+            "GOOVEE_PUBLIC_WHATSAPP_URL": {"type": "string"},
+            "GOOVEE_PUBLIC_MATTERMOST_HOST": {"type": "string"},
+            "GOOVEE_PUBLIC_VAPID_PUBLIC_KEY": {"type": "string"},
+            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL": {"type": "string"},
+            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}

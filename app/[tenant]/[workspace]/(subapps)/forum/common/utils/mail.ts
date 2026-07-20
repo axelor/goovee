@@ -1,5 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {html} from '@/utils/template-string';
+import {manager} from '@/tenant';
 import NotificationManager, {NotificationType} from '@/notification';
 
 // ---- LOCAL IMPORTS ---- //
@@ -19,6 +20,7 @@ export const sendEmailNotifications = async ({
   subscribers,
   link,
   postAuthor,
+  tenantId,
 }: NotificationParams) => {
   try {
     if (!subscribers?.length) {
@@ -53,7 +55,10 @@ export const sendEmailNotifications = async ({
       return;
     }
 
-    const mailService = NotificationManager.getService(NotificationType.mail);
+    const mailService = NotificationManager.getService(
+      NotificationType.mail,
+      await manager.getConfig(tenantId),
+    );
     if (!mailService) {
       console.error('Mail service is not available.');
       return;

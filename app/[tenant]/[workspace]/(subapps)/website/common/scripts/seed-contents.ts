@@ -16,7 +16,7 @@ manager
       console.error('\x1b[31m✖ Tenant not found.\x1b[0m');
       process.exit(1);
     }
-    return seedContents(tenant.client);
+    return seedContents(tenant.client, tenant.config.aos.storage);
   })
   .then(res => {
     const failed = res.filter(res => res.status === 'rejected');

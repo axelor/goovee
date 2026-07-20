@@ -193,7 +193,10 @@ export const generateRegistrationMailAction = async ({
     return;
   }
 
-  const mailService = NotificationManager.getService(NotificationType.mail);
+  const mailService = NotificationManager.getService(
+    NotificationType.mail,
+    config,
+  );
   if (!mailService) {
     console.error('Mail service is not available.');
     return;

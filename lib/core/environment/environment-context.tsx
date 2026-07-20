@@ -2,16 +2,16 @@
 
 import React, {useContext} from 'react';
 
-const EnvironmentContext = React.createContext<
-  Record<string, string | undefined>
->({});
+import type {PublicEnv} from '@/tenant/types';
+
+const EnvironmentContext = React.createContext<PublicEnv>({});
 
 export function Environment({
   children,
   value,
 }: {
   children: React.ReactNode;
-  value: Record<string, string | undefined>;
+  value: PublicEnv;
 }) {
   return (
     <EnvironmentContext.Provider value={value}>

@@ -70,18 +70,21 @@ export async function createHubPispPaymentLink({
   let resourceId: string;
   let consentHref: string;
   try {
-    ({resourceId, consentHref} = await createPaymentLink({
-      amount,
-      currency,
-      remittanceInformation,
-      endToEnd,
-      expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
-      successfulReportUrl,
-      unsuccessfulReportUrl,
-      pageConsentInfo,
-      psuInfo,
-      localInstrument,
-    }));
+    ({resourceId, consentHref} = await createPaymentLink(
+      {
+        amount,
+        currency,
+        remittanceInformation,
+        endToEnd,
+        expireIn: HUBPISP_DEFAULT_EXPIRE_IN,
+        successfulReportUrl,
+        unsuccessfulReportUrl,
+        pageConsentInfo,
+        psuInfo,
+        localInstrument,
+      },
+      tenantId,
+    ));
   } catch (err) {
     await markPaymentAsFailed({contextId, version, client});
     throw err;
@@ -110,10 +113,12 @@ export async function createHubPispPaymentLink({
 export async function findHubPispOrder({
   contextId,
   resourceId,
+  tenantId,
   client,
 }: {
   contextId: string;
   resourceId: string;
+  tenantId: Tenant['id'];
   client: Client;
 }): Promise<PaymentOrder> {
   const context = await findPaymentContext({
@@ -130,7 +135,7 @@ export async function findHubPispOrder({
     throw new Error('Payment context not found');
   }
 
-  const linkStatusResult = await getPaymentLinkStatus(resourceId);
+  const linkStatusResult = await getPaymentLinkStatus(resourceId, tenantId);
 
   if (linkStatusResult.consentStatus === HUBPISP_CONSENT_STATUS.EXPIRED) {
     console.warn('[HUBPISP][FIND_ORDER] Payment link expired', {resourceId});

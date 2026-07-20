@@ -126,6 +126,7 @@ export async function pollPaymentRequestStatus({
       try {
         const paymentRequest = await fetchPaymentRequestStatus(
           paymentRequestResourceId,
+          tenantId,
         );
         transactionStatus =
           paymentRequest?.creditTransferTransaction?.[0]?.transactionStatus ||
