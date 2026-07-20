@@ -1,6 +1,0 @@
-{
-  "title": "Speed up the events list and file routes, add a detail loading skeleton",
-  "type": "fix",
-  "description": "Events pages do less redundant work when loading. The events list query now resolves the accessible categories first and then filters events, avoiding a database join explosion from the privacy filters while keeping the same visibility. The event image and comment-attachment routes no longer recompute the whole event (with its backend pricing call) just to read one id; they use a minimal access-checked lookup instead. Opening an event now shows a loading skeleton immediately while its content is fetched. What users can access, see and pay is unchanged.",
-  "scope": ["events"]
-}
