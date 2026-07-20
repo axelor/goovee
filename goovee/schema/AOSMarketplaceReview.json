@@ -1,0 +1,42 @@
+{
+  "name": "AOSMarketplaceReview",
+  "table": "portal_marketplace_review",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "marketplaceProduct",
+      "target": "AOSMarketplaceProduct",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "reviewedVersion",
+      "target": "AOSMarketplaceProductVersion"
+    },
+    {
+      "type": "ManyToOne",
+      "name": "author",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "rating",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "reviewComment"
+    },
+    {
+      "type": "Int",
+      "name": "moderationStatusSelect",
+      "required": true
+    },
+    {
+      "type": "Boolean",
+      "name": "archived"
+    }
+  ]
+}

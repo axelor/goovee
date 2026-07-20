@@ -4,7 +4,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Button, Loader, Separator} from '@/ui/components';
 import {ADDRESS_TYPE} from '@/constants';

@@ -5,7 +5,8 @@
   "fields": [
     {
       "type": "String",
-      "name": "name"
+      "name": "name",
+      "required": true
     },
     {"name": "logo", "type": "ManyToOne", "target": "AOSMetaFile"},
     {
@@ -22,6 +23,10 @@
       "type": "ManyToOne",
       "name": "partner",
       "target": "AOSPartner"
+    },
+    {
+      "type": "String",
+      "name": "timezone"
     }
   ]
 }

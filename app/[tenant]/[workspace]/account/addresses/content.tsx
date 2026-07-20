@@ -9,7 +9,7 @@ import {i18n} from '@/locale';
 import {ADDRESS_TYPE, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 
 // ---- LOCAL IMPORTS ---- //
 import {AddressesList} from '@/app/[tenant]/[workspace]/account/addresses/common/ui/components';

@@ -1,0 +1,6 @@
+{
+  "title": "Create the marketplace order and invoice after checkout, recoverable on failure",
+  "type": "feature",
+  "description": "A marketplace checkout records an order and grants access, then creates the sale order and invoice afterwards instead of during checkout, so the buyer no longer waits for invoicing to finish. Purchases show \"Order pending\" / \"Invoice pending\" until they exist; a sale order or invoice that did not complete is recovered afterwards rather than lost.",
+  "scope": ["marketplace"]
+}

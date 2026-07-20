@@ -1,0 +1,6 @@
+{
+  "title": "Report a marketplace review and hide moderated comments",
+  "type": "feature",
+  "description": "Buyers can report another user's review with a reason. A review hidden by moderation no longer shows its comment to other buyers — only its rating remains — while its author still sees their own review marked as hidden by a moderator.",
+  "scope": ["marketplace"]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "AOSMarketplaceReviewReport",
+  "table": "portal_marketplace_review_report",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "ManyToOne",
+      "name": "review",
+      "target": "AOSMarketplaceReview",
+      "required": true
+    },
+    {
+      "type": "ManyToOne",
+      "name": "reporter",
+      "target": "AOSPartner",
+      "required": true
+    },
+    {
+      "type": "String",
+      "name": "reasonSelect",
+      "required": true
+    },
+    {
+      "type": "Int",
+      "name": "statusSelect",
+      "required": true
+    }
+  ]
+}

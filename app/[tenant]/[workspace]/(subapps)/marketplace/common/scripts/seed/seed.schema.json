@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://goovee.axelor.com/marketplace/seed.schema.json",
+  "title": "Marketplace seed",
+  "description": "Demo data for the marketplace subapp. Source of truth is scripts/seed/seed.schema.ts (Zod). Keep this file in sync.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["products"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "IDE pointer to this schema file. Ignored at runtime."
+    },
+    "categories": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/Category"}
+    },
+    "compatibilityVersions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/CompatibilityVersion"}
+    },
+    "licenses": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/License"}
+    },
+    "products": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/Product"}
+    }
+  },
+  "$defs": {
+    "Category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "name"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9-]+$",
+          "description": "Upsert key. AOSProductCategory.code; forced to forMarketPlace=true on seed."
+        },
+        "name": {"type": "string", "minLength": 1},
+        "iconCode": {"type": "string"},
+        "colorTheme": {"type": "string"}
+      }
+    },
+    "CompatibilityVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "title"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "Upsert key. AOSMarketplaceAxelorVersion.name (e.g. 'v9.0.9')."
+        },
+        "title": {"type": "string", "minLength": 1},
+        "releaseDateTime": {"type": "string", "format": "date-time"}
+      }
+    },
+    "License": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "name"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._-]*$",
+          "description": "Upsert key. AOSMarketplaceLicense.code — use the SPDX identifier when available (e.g. 'MIT', 'Apache-2.0', 'GPL-3.0-only')."
+        },
+        "name": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "format": "uri"},
+        "description": {"type": "string"},
+        "isPaid": {"type": "boolean"},
+        "sequence": {"type": "integer", "minimum": 0}
+      }
+    },
+    "Version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["versionNumber", "status"],
+      "properties": {
+        "versionNumber": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "changelog": {"type": "string"},
+        "status": {"enum": ["draft", "published"]},
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO datetime. Required for `published`, absent for `draft`. Must be ≤ releasedAt."
+        },
+        "releasedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO datetime — the release / approval date. Required for `published`, absent for `draft`."
+        },
+        "compatibilityVersions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Names that must exist in compatibilityVersions[] or in the DB. Fail-fast otherwise."
+        }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authorEmail", "rating"],
+      "properties": {
+        "authorEmail": {"type": "string", "format": "email"},
+        "rating": {"type": "integer", "minimum": 1, "maximum": 5},
+        "comment": {
+          "type": "string",
+          "description": "Omit to seed a rating-only (no message) review."
+        },
+        "reviewedVersionNumber": {
+          "type": "string",
+          "description": "Defaults to the latest published version of the product."
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "coverStyle",
+        "categoryCode",
+        "price",
+        "versions"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "supplierEmail": {
+          "type": "string",
+          "format": "email",
+          "description": "Override the CLI --supplier default."
+        },
+        "description": {"type": "string", "maxLength": 280},
+        "longDescription": {"type": "string"},
+        "type": {"enum": ["skill", "app"]},
+        "coverStyle": {
+          "type": "string",
+          "pattern": "^gradient-(10|[1-9])$",
+          "description": "gradient-1 .. gradient-10 — must match GRADIENT_MAP."
+        },
+        "categoryCode": {
+          "type": "string",
+          "description": "AOSProductCategory.code; either seeded above or already present with forMarketPlace=true."
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "description": "In the workspace default sale currency. 0 = free product."
+        },
+        "installCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Demo-only fake install count to make listings look realistic. Runtime downloads still increment this normally."
+        },
+        "documentationUrl": {"type": "string", "format": "uri"},
+        "supportIssuesUrl": {"type": "string", "format": "uri"},
+        "supportContactUrl": {"type": "string", "format": "uri"},
+        "versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Version"}
+        },
+        "reviews": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/Review"}
+        }
+      }
+    }
+  }
+}

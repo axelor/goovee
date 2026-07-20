@@ -16,7 +16,7 @@ import {manager} from '@/lib/core/tenant';
 // ---- LOCAL IMPORTS ---- //
 import {getShellConfig} from './orm/config';
 import WorkspaceProvider from './workspace-context';
-import CartContext from './cart-context';
+import CartProvider from '@/app/[tenant]/[workspace]/cart/cart-provider';
 import Header from './header';
 import Sidebar from './sidebar';
 import MobileMenu from './mobile-menu';
@@ -159,7 +159,19 @@ export default async function Layout(props: {
   const shopSubapp = subapps?.find(
     (app: any) => app.code === SUBAPP_CODES.shop,
   );
-  const showCart = !hidePriceAndPurchase && shopSubapp?.isInstalled;
+  const marketplaceSubapp = subapps?.find(
+    (app: any) => app.code === SUBAPP_CODES.marketplace,
+  );
+
+  /* Cart codes the unified cart icon should show, in priority order. Each entry
+   * has a matching descriptor in app/[tenant]/[workspace]/cart/descriptors. */
+  const cartCodes: string[] = [];
+  if (!hidePriceAndPurchase && shopSubapp?.isInstalled) {
+    cartCodes.push(SUBAPP_CODES.shop);
+  }
+  if (marketplaceSubapp?.isInstalled) {
+    cartCodes.push(SUBAPP_CODES.marketplace);
+  }
 
   return (
     <WorkspaceProvider
@@ -167,7 +179,7 @@ export default async function Layout(props: {
       workspace={workspace}
       tenant={tenantId}
       theme={theme}>
-      <CartContext>
+      <CartProvider>
         <div className="h-full w-full flex min-h-screen">
           {isLeftNavigation && (
             <Sidebar
@@ -184,7 +196,7 @@ export default async function Layout(props: {
               workspaces={workspaces}
               workspace={$workspace}
               config={clone(config)}
-              showCart={showCart}
+              cartCodes={cartCodes}
             />
             <div className="flex flex-col flex-grow min-h-0">
               <div className="flex-grow">{children}</div>
@@ -196,10 +208,10 @@ export default async function Layout(props: {
             workspaces={workspaces}
             workspace={$workspace}
             config={clone(config)}
-            showCart={showCart}
+            cartCodes={cartCodes}
           />
         </div>
-      </CartContext>
+      </CartProvider>
     </WorkspaceProvider>
   );
 }

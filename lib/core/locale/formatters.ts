@@ -102,6 +102,7 @@ type DateTimeFormatOpts = {
   seconds?: boolean;
   type?: 'DATE';
   big?: boolean;
+  capitalize?: boolean;
 };
 
 export function getDateFormat({
@@ -191,7 +192,10 @@ export function formatDuration(
 
 export function formatRelativeTime(
   value: string | Date,
-  {type}: Pick<DateTimeFormatOpts, 'type'> = {},
+  {
+    type,
+    capitalize = true,
+  }: Pick<DateTimeFormatOpts, 'type' | 'capitalize'> = {},
 ) {
   let result = '';
 
@@ -212,7 +216,7 @@ export function formatRelativeTime(
     });
   }
 
-  return result[0].toLocaleUpperCase() + result.slice(1);
+  return capitalize ? result[0].toLocaleUpperCase() + result.slice(1) : result;
 }
 
 export function standardizeDate(value: Date | string): Date | null {

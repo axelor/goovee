@@ -9,6 +9,10 @@
     },
     {
       "type": "Int",
+      "name": "computeMethodDiscountSelect"
+    },
+    {
+      "type": "Int",
       "name": "mapApiSelect"
     },
     {
@@ -18,6 +22,17 @@
     {
       "type": "Boolean",
       "name": "archived"
+    },
+    {
+      "type": "OneToMany",
+      "name": "currencyConversionLineList",
+      "target": "AOSCurrencyConversionLine",
+      "mappedBy": "appBase"
+    },
+    {
+      "type": "ManyToMany",
+      "name": "companySpecificProductFieldsSet",
+      "target": "AOSMetaField"
     }
   ]
 }

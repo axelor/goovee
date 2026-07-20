@@ -20,7 +20,7 @@ import {useQuantity, useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
 import type {Category, ComputedProduct} from '@/types';
 import type {ModelField} from '@/orm/model-fields';
 
