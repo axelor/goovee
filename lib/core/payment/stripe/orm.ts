@@ -16,7 +16,8 @@ export async function findPendingStripeBankTransfers({
       mode: 'stripe',
       status: CONTEXT_STATUS.pending,
       AND: [
-        {data: {path: 'id', eq: id}},
+        /* data.id is stored as a JSON string; without an explicit type the ORM infers Int for numeric-looking values and the jsonpath never matches. */
+        {data: {path: 'id', eq: id, type: 'String'}},
         {data: {path: 'paymentType', eq: PAYMENT_TYPE.BANK_TRANSFER}},
         {data: {path: 'paymentIntent', ne: null}},
       ],

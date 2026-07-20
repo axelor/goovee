@@ -4,11 +4,21 @@ import type {Client} from '@/goovee/.generated/client';
 import {type PaymentContext} from './type';
 
 export const CONTEXT_STATUS = {
+  // -- In flight --
+  /** Awaiting gateway confirmation — the only status a saga runner may claim. */
   pending: 'pending',
+  /** Claimed by the payment saga — capture confirmed, business tail running. */
+  processing: 'processing',
+  // -- Terminal: nothing may act on the context anymore.
   processed: 'processed',
   cancelled: 'cancelled',
   failed: 'failed',
   expired: 'expired',
+  // -- Terminal failure queues: a human must act on the ERP side.
+  /** Money captured, customer got nothing — ERP refund queue. */
+  refund_required: 'refund_required',
+  /** Money captured and rightfully kept, ERP records incomplete — ERP reconcile queue. */
+  reconcile_required: 'reconcile_required',
 } as const;
 
 export type ContextStatus =
@@ -52,17 +62,31 @@ export async function findPaymentContext({
   client,
   mode,
   ignoreExpiration = false,
+  ignoreStatus = false,
 }: {
   id: string;
   client: Client;
   mode: PaymentOption;
+  /**
+   * Pass true for long-lived pending instruments (bank transfers, HUB PISP
+   * links) that legitimately outlive the default validity window. Default
+   * (false) is for validating short-lived sessions (card, PayPal, Paybox),
+   * where a stale pending context is auto-marked expired.
+   */
   ignoreExpiration?: boolean;
+  /**
+   * Observer mode: returns the context regardless of status — webhooks and
+   * pollers pass true so a redelivery for an already claimed/terminal context
+   * can be acknowledged instead of erroring. Callers must then check `status`
+   * themselves. Implies ignoreExpiration: an observer never mutates the row.
+   */
+  ignoreStatus?: boolean;
 }): Promise<PaymentContext | null> {
   const context = await client.paymentContext.findOne({
     where: {
       id,
       mode,
-      status: CONTEXT_STATUS.pending,
+      ...(ignoreStatus ? {} : {status: CONTEXT_STATUS.pending}),
     },
     select: {
       id: true,
@@ -77,7 +101,11 @@ export async function findPaymentContext({
 
   if (!context) return null;
 
-  if (!ignoreExpiration) {
+  if (
+    !ignoreExpiration &&
+    !ignoreStatus &&
+    context.status === CONTEXT_STATUS.pending
+  ) {
     if (context.createdOn!.getTime() + CONTEXT_VALIDITY_DURATION < Date.now()) {
       await updatePaymentStatus({
         contextId: context.id,
@@ -121,17 +149,6 @@ export async function updatePaymentContextData({
   });
 
   return result;
-}
-
-export function markPaymentAsProcessed(params: {
-  contextId: string;
-  version: number;
-  client: Client;
-}) {
-  return updatePaymentStatus({
-    ...params,
-    status: CONTEXT_STATUS.processed,
-  });
 }
 
 export function markPaymentAsPending(params: {

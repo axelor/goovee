@@ -1,6 +1,5 @@
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
-import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import {ID} from '@/types';
 import {Workspace} from '@/orm/workspace';
@@ -25,14 +24,18 @@ export async function createInvoice({
 }): ActionResponse<Record<string, unknown>> {
   const aos = config?.aos;
 
+  /* No t() anywhere in this function: its error messages end up in the
+   * payment context's failureReason (the saga is the only consumer) — an
+   * admin record, not a user-facing string — and the saga may not run inside
+   * a request scope, where t() would crash. */
   if (!aos?.url) {
-    return error(await t('Invoice creation failed. Webservice not available.'));
+    return error('Invoice creation failed. Webservice not available.');
   }
 
   try {
     const partnerWorkspaceId = workspace?.workspacePermissionConfig?.id;
     if (!partnerWorkspaceId) {
-      return error(await t('Partner workspace id is missing.'));
+      return error('Partner workspace id is missing.');
     }
 
     const payload = {
@@ -48,20 +51,21 @@ export async function createInvoice({
 
     if (data?.status === -1) {
       return error(
-        data?.message
-          ? await t(data.message)
-          : await t('Unable to create the invoice. Please try again later.'),
+        data?.message || 'AOS rejected the invoice with no error message.',
       );
     }
 
     return {success: true, data};
   } catch (err) {
     console.error('Invoice creation failed:', err);
-    return error(
-      await t(
-        'An error occurred while processing your invoice. Please try again later.',
-      ),
-    );
+
+    /* This message ends up in the payment context's failureReason (the saga is
+     * the only consumer) — surface the actual cause so the ERP admin can act
+     * on the record without digging through server logs. aosClient errors
+     * already carry the method, URL and HTTP status in their message. */
+    const detail = err instanceof Error ? err.message : 'Unknown error';
+
+    return {error: true, message: `AOS event invoice call failed: ${detail}`};
   }
 }
 

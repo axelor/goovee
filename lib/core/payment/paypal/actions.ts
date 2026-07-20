@@ -124,5 +124,8 @@ export async function findPaypalOrder({
     amount: Number(
       result.purchaseUnits?.[0]?.payments?.captures?.[0]?.amount?.value || 0,
     ),
+    // The capture id is PayPal's refund key (not the order id).
+    providerTransactionRef:
+      result.purchaseUnits?.[0]?.payments?.captures?.[0]?.id ?? null,
   };
 }

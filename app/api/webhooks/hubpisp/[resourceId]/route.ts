@@ -113,7 +113,7 @@ export async function POST(
     id: contextId,
     client,
     mode: PaymentOption.hubpisp,
-    ignoreExpiration: true,
+    ignoreStatus: true,
   });
 
   if (!paymentContext) {
@@ -125,7 +125,7 @@ export async function POST(
   }
 
   if (
-    paymentContext.status === CONTEXT_STATUS.processed ||
+    paymentContext.status !== CONTEXT_STATUS.pending ||
     paymentContext.data?.paymentRequestResourceId
   ) {
     console.log('[HUBPISP][WEBHOOK] Context already handled, skipping', {

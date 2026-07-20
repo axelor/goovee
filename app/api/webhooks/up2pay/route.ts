@@ -8,17 +8,16 @@ import {
   CONTEXT_STATUS,
   findPaymentContext,
   markPaymentAsFailed,
-  markPaymentAsProcessed,
 } from '@/lib/core/payment/common/orm';
 import {PaymentOption} from '@/types';
 import {UP2PAY_ERRORS, UP2PAY_ERROR_MESSAGES} from '@/payment/up2pay/constants';
 import {readPEMFile, verifySignature} from '@/payment/up2pay/crypto';
-import {notifyPaymentUpdate} from '@/lib/core/payment/sse';
+import {completePayment} from '@/lib/core/payment/saga';
+import {SAGA_OUTCOME_STATUS} from '@/lib/core/saga';
 import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 import {buildSignatureMessage} from '@/payment/up2pay/utils';
 
 // ---- LOCAL IMPORTS ---- //
-import {updateInvoice} from '@/subapps/invoices/common/service';
 import {notifyInvoicePaymentSuccess} from '@/subapps/invoices/common/utils/notify';
 
 /**
@@ -116,7 +115,7 @@ export async function GET(request: Request) {
     id: contextId,
     client,
     mode: PaymentOption.up2pay,
-    ignoreExpiration: true,
+    ignoreStatus: true,
   });
 
   if (!paymentContext) {
@@ -134,8 +133,13 @@ export async function GET(request: Request) {
     });
   }
 
-  if (paymentContext.status === CONTEXT_STATUS.processed) {
-    console.log('[UP2PAY][WEBHOOK] Already processed, skipping', {contextId});
+  if (paymentContext.status !== CONTEXT_STATUS.pending) {
+    // Already claimed (processing) or terminal (processed / cancelled /
+    // failed / expired) — redelivery cannot help past the claim.
+    console.log('[UP2PAY][WEBHOOK] Context already handled, skipping', {
+      contextId,
+      status: paymentContext.status,
+    });
     return new NextResponse('OK', {status: 200});
   }
 
@@ -186,101 +190,50 @@ export async function GET(request: Request) {
     return new NextResponse('Bad Request', {status: 400});
   }
 
+  // Missing/unknown source or entity id is handled by the saga itself — the
+  // money is captured, so such contexts land in the reconcile queue instead of
+  // being marked failed.
   const source = paymentContext.data?.source;
-  if (!source) {
-    console.error(
-      '[UP2PAY][WEBHOOK] Missing payment source in payment context',
-      {
-        contextId,
-      },
-    );
-
-    await markPaymentAsFailed({
-      contextId: paymentContext.id,
-      version: paymentContext.version,
-      client,
-    });
-
-    return new NextResponse('Bad Request', {status: 400});
-  }
-
   const entityId = paymentContext.data?.id;
-  if (!entityId) {
-    console.error('[UP2PAY][WEBHOOK] Missing entity id in payment context', {
-      contextId,
-    });
 
-    await markPaymentAsFailed({
-      contextId: paymentContext.id,
-      version: paymentContext.version,
-      client,
-    });
-
-    return new NextResponse('Bad Request', {status: 400});
-  }
-
-  switch (source) {
-    case PAYMENT_SOURCE.INVOICES: {
-      const result = await updateInvoice({
-        config,
-        amount: paidAmount,
-        invoiceId: entityId,
-        paymentModeId: paymentContext.data?.paymentModeId,
-      });
-
-      if (result?.error) {
-        console.error('[UP2PAY][WEBHOOK] Invoice update failed', {
-          entityId,
-          error: result.error,
-          message: result.message,
-        });
-
-        await markPaymentAsFailed({
-          contextId: paymentContext.id,
-          version: paymentContext.version,
-          client,
-        });
-
-        return new NextResponse('Internal Server Error', {status: 500});
-      }
-
-      if (paymentContext.payer) {
-        after(() =>
-          notifyInvoicePaymentSuccess({
-            invoiceId: entityId,
-            payer: paymentContext.payer!,
-            tenantId,
-            client,
-          }),
-        );
-      }
-      break;
-    }
-
-    case PAYMENT_SOURCE.SHOP:
-    case PAYMENT_SOURCE.EVENTS:
-      console.warn('[UP2PAY][WEBHOOK] Source not implemented:', source);
-      return new NextResponse('OK', {status: 200});
-
-    default:
-      console.error('[UP2PAY][WEBHOOK] Unknown payment source:', source);
-
-      await markPaymentAsFailed({
-        contextId: paymentContext.id,
-        version: paymentContext.version,
-        client,
-      });
-
-      return new NextResponse('Bad Request', {status: 400});
-  }
-
-  await markPaymentAsProcessed({
-    contextId: paymentContext.id,
-    version: paymentContext.version,
+  const outcome = await completePayment({
+    tenantId,
     client,
+    config,
+    paymentContext,
+    amount: paidAmount,
+    /* Only present once PBX_RETOUR includes the transaction number
+     * (numtrans:S — pending sandbox verification); null until then. */
+    providerTransactionRef: params.get('numtrans') ?? params.get('trans'),
   });
 
-  notifyPaymentUpdate(source, entityId, paymentContext.id);
+  if (outcome.status === SAGA_OUTCOME_STATUS.notClaimed) {
+    console.log('[UP2PAY][WEBHOOK] Context claimed by another runner', {
+      contextId,
+    });
+    return new NextResponse('OK', {status: 200});
+  }
+
+  if (outcome.status !== SAGA_OUTCOME_STATUS.completed) {
+    // Post-claim failure is terminal (flagged for the ERP queues) —
+    // acknowledge with 200, redelivery cannot help anymore.
+    console.error('[UP2PAY][WEBHOOK] Payment saga failed', {
+      contextId,
+      outcome,
+    });
+    return new NextResponse('OK', {status: 200});
+  }
+
+  if (source === PAYMENT_SOURCE.INVOICES && entityId && paymentContext.payer) {
+    after(() =>
+      notifyInvoicePaymentSuccess({
+        invoiceId: entityId,
+        payer: paymentContext.payer!,
+        tenantId,
+        client,
+      }),
+    );
+  }
 
   return new NextResponse('OK', {status: 200});
 }

@@ -11,7 +11,8 @@ import {createPaypalOrder} from '@/payment/paypal/actions';
 import {createStripeOrder} from '@/payment/stripe/actions';
 import {createPayboxOrder} from '@/payment/paybox/actions';
 import {PaymentOption} from '@/types';
-import {isPaymentOptionAvailable} from '@/utils/payment';
+import {getPaymentModeId, isPaymentOptionAvailable} from '@/utils/payment';
+import {PAYMENT_SOURCE} from '@/lib/core/payment/common/type';
 import {TENANT_HEADER} from '@/proxy';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
@@ -131,6 +132,11 @@ export async function createStripeCheckoutSession(props: {
     };
   }
 
+  const paymentModeId = getPaymentModeId(
+    paymentOptionSet,
+    PaymentOption.stripe,
+  );
+
   try {
     const session = await createStripeOrder({
       customer: {
@@ -140,7 +146,19 @@ export async function createStripeCheckoutSession(props: {
       name: await t('Event Registration'),
       amount: expectedAmount,
       currency: currencyCode,
-      context: values,
+      /* Envelope + tail payload: the saga steps rebuild the registration and
+       * invoice calls from this snapshot alone, without a live session. */
+      context: {
+        source: PAYMENT_SOURCE.EVENTS,
+        amount: expectedAmount,
+        paymentModeId,
+        values,
+        eventId,
+        workspaceURL,
+        currencyCode,
+        partnerWorkspaceId: access.workspace.workspacePermissionConfig?.id,
+        ...(user && {user}),
+      },
       tenantId,
       client,
       url: {
@@ -260,13 +278,31 @@ export async function paypalCreateOrder(props: {
   }
 
   const currencyCode = currency?.code || DEFAULT_CURRENCY_CODE;
+
+  const paymentModeId = getPaymentModeId(
+    paymentOptionSet,
+    PaymentOption.paypal,
+  );
+
   try {
     const response = await createPaypalOrder({
       amount: expectedAmount,
       currency: currencyCode,
       email: emailAddress,
       client,
-      context: values,
+      /* Envelope + tail payload: the saga steps rebuild the registration and
+       * invoice calls from this snapshot alone, without a live session. */
+      context: {
+        source: PAYMENT_SOURCE.EVENTS,
+        amount: expectedAmount,
+        paymentModeId,
+        values,
+        eventId,
+        workspaceURL,
+        currencyCode,
+        partnerWorkspaceId: access.workspace.workspacePermissionConfig?.id,
+        ...(user && {user}),
+      },
     });
     return {success: true, order: response?.result};
   } catch (err) {
@@ -373,12 +409,29 @@ export async function payboxCreateOrder(props: {
     };
   }
 
+  const paymentModeId = getPaymentModeId(
+    paymentOptionSet,
+    PaymentOption.paybox,
+  );
+
   try {
     const response = await createPayboxOrder({
       amount: expectedAmount,
       currency: currencyCode,
       email: emailAddress,
-      context: values,
+      /* Envelope + tail payload: the saga steps rebuild the registration and
+       * invoice calls from this snapshot alone, without a live session. */
+      context: {
+        source: PAYMENT_SOURCE.EVENTS,
+        amount: expectedAmount,
+        paymentModeId,
+        values,
+        eventId,
+        workspaceURL,
+        currencyCode,
+        partnerWorkspaceId: access.workspace.workspacePermissionConfig?.id,
+        ...(user && {user}),
+      },
       client,
       url: {
         success: `${process.env.GOOVEE_PUBLIC_HOST}${withBasePath(ensureLeadingSlash(`${uri}?paybox_response=true`))}`,

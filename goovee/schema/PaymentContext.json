@@ -18,6 +18,10 @@
     {
       "type": "String",
       "name": "status"
+    },
+    {
+      "type": "String",
+      "name": "failureReason"
     }
   ]
 }

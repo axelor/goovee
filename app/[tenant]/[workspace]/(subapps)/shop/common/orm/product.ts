@@ -39,7 +39,7 @@ type RawProduct = {
   productAttrs: string | null;
   allowCustomNote: boolean | null;
   _count?: string;
-  saleCurrency: {symbol: string | null} | null;
+  saleCurrency: {code: string | null; symbol: string | null} | null;
   thumbnailImage: {id: string} | null;
   picture: {id: string} | null;
   portalImageList: Array<{picture: {id: string} | null}> | null;
@@ -107,6 +107,7 @@ const getProductFields = ({
     inAti: true,
     description: true,
     saleCurrency: {
+      code: true,
       symbol: true,
     },
     ...(shouldHidePrices ? {} : {salePrice: true}),

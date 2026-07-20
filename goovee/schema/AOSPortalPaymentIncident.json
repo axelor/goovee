@@ -1,0 +1,75 @@
+{
+  "name": "AOSPortalPaymentIncident",
+  "table": "portal_portal_payment_incident",
+  "synchronize": false,
+  "fields": [
+    {
+      "type": "String",
+      "name": "paymentContextId"
+    },
+    {
+      "type": "String",
+      "name": "source"
+    },
+    {
+      "type": "String",
+      "name": "entityId"
+    },
+    {
+      "type": "String",
+      "name": "payerEmail"
+    },
+    {
+      "type": "Decimal",
+      "name": "paidAmount"
+    },
+    {
+      "type": "Decimal",
+      "name": "amountDue"
+    },
+    {
+      "type": "String",
+      "name": "currencyCode"
+    },
+    {
+      "type": "String",
+      "name": "paymentMode"
+    },
+    {
+      "type": "String",
+      "name": "providerTransactionRef"
+    },
+    {
+      "type": "String",
+      "name": "paymentModeId"
+    },
+    {
+      "type": "String",
+      "name": "partnerWorkspaceId"
+    },
+    {
+      "type": "String",
+      "name": "queue"
+    },
+    {
+      "type": "String",
+      "name": "failedStep"
+    },
+    {
+      "type": "String",
+      "name": "failedStage"
+    },
+    {
+      "type": "String",
+      "name": "failureReason"
+    },
+    {
+      "type": "String",
+      "name": "errorDetail"
+    },
+    {
+      "type": "String",
+      "name": "status"
+    }
+  ]
+}
