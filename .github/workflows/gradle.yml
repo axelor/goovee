@@ -6,26 +6,54 @@ on:
   pull_request:
     branches:
       - '**'
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 jobs:
-  format:
+  format-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: 'package.json'
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
       - name: Run format check
         run: pnpm format:check
 
+  changelog-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Validate changelogs
+        run: pnpm changelogs:validate
+
+  translation-check:
+    runs-on: ubuntu-latest
+    # Skipped on draft PRs: translations are only expected once the PR is
+    # marked ready for review.
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Check for missing English translations
+        run: pnpm missing-tr en
+      - name: Check for missing French translations
+        if: ${{ !cancelled() }}
+        run: pnpm missing-tr fr
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Generate models
+        run: pnpm generate
+      - name: Generate Next.js types
+        run: pnpm exec next typegen
+      - name: Type check
+        run: pnpm type-check
+
   tag:
-    needs: format
+    needs: [format-check, changelog-check, translation-check, type-check]
     if: |
       github.event_name == 'push' &&
       (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
@@ -35,7 +63,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
