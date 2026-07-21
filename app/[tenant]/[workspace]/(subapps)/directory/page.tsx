@@ -153,7 +153,7 @@ async function ServerMap(props: {entries: ListEntry[]; client: Client}) {
   if (mapEntries.length === 0) return null;
 
   return (
-    <aside className="space-y-4 z-10">
+    <aside className="space-y-4 z-10 has-[.expand]:w-full">
       <Map showExpand entries={clone(mapEntries)} config={mapConfig} />
     </aside>
   );
