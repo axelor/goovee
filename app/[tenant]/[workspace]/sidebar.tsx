@@ -100,8 +100,7 @@ export function Sidebar({
       {/* Brand block */}
       <div
         className={cn(
-          'flex items-center gap-2.5 min-h-16 border-b border-white/10',
-          collapsed ? 'justify-center px-0' : 'px-[22px]',
+          'flex items-center gap-2.5 min-h-16 border-b border-white/10 px-[22px]',
         )}>
         <button
           type="button"
@@ -157,19 +156,20 @@ export function Sidebar({
           ))}
       </div>
 
-      {/* Section label */}
-      {!collapsed && (
-        <div className="px-[22px] pt-5 pb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-white/55">
-          {i18n.t('Espace')}
-        </div>
-      )}
+      {/* Section label — collapses smoothly so the icons glide up */}
+      <div
+        className={cn(
+          'px-[22px] overflow-hidden text-[11px] font-semibold uppercase tracking-[0.06em] text-white/55',
+          'transition-all duration-200 ease-out',
+          collapsed
+            ? 'max-h-0 opacity-0 pt-0 pb-0'
+            : 'max-h-12 opacity-100 pt-5 pb-2',
+        )}>
+        {i18n.t('Espace')}
+      </div>
 
       {/* Nav */}
-      <nav
-        className={cn(
-          'flex-1 overflow-y-auto',
-          collapsed ? 'px-2 pt-2' : 'px-3 pt-1',
-        )}>
+      <nav className="flex-1 overflow-y-auto px-3 pt-1">
         <TooltipProvider>
           {showHome && (
             <NavItem
@@ -213,7 +213,7 @@ export function Sidebar({
         className={cn(
           'flex items-center gap-2.5 border-t border-white/10',
           'transition hover:bg-white/[0.06]',
-          collapsed ? 'justify-center p-3' : 'px-4 py-3',
+          'px-4 py-3',
           isAccountActive && 'bg-white/[0.08]',
         )}>
         <div
@@ -275,7 +275,7 @@ function NavItem({
       className={cn(
         'group relative flex items-center rounded-lg mb-0.5',
         'text-[13.5px] transition-colors duration-150',
-        collapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2.5',
+        'gap-3 px-3 py-2.5',
         active
           ? 'bg-white/[0.16] text-white font-semibold'
           : 'text-white/80 font-medium hover:bg-white/[0.08] hover:text-white',

@@ -240,14 +240,6 @@ export function ShopCheckout({
                   />
                 </div>
               </SectionCard>
-
-              <SectionCard title={labels.paymentCardTitle}>
-                {confirmOrder ? (
-                  <ShopPayments config={config} orderSubapp={orderSubapp} />
-                ) : (
-                  <p className="text-[13px] text-ink-500">—</p>
-                )}
-              </SectionCard>
             </div>
 
             {/* Right sticky summary */}
@@ -287,8 +279,12 @@ export function ShopCheckout({
                       {fmt(total)}
                     </span>
                   </div>
-                  {/* Note: actual "Pay" button is rendered by <ShopPayments>
-                        in the left payment card. Keep the secure notice here. */}
+                  {/* Payment sits right under the amount. */}
+                  {confirmOrder && (
+                    <div className="mt-4">
+                      <ShopPayments config={config} orderSubapp={orderSubapp} />
+                    </div>
+                  )}
                   <p className="m-0 mt-3.5 text-[11.5px] text-ink-500 text-center leading-[1.5]">
                     {labels.secureNotice}
                   </p>

@@ -476,6 +476,10 @@ export function ForumDetail({
     post: {},
     comment: {},
   });
+  // Frozen display order for replies. Computed once the reaction summaries
+  // load and whenever the comment set changes (new reply) — never on a vote,
+  // so voting updates the score number without making the reply jump.
+  const [orderedIds, setOrderedIds] = useState<string[]>([]);
 
   const commentKey = comments.map((c: AnyRec) => c.id).join(',');
   useEffect(() => {
@@ -483,12 +487,27 @@ export function ForumDetail({
     const commentIds = commentKey ? commentKey.split(',') : [];
     reactionSummary({workspaceURL, postIds: [post.id], commentIds})
       .then(res => {
-        if (active) setReactions(res as ReactionSummaries);
+        if (!active) return;
+        const summaries = res as ReactionSummaries;
+        setReactions(summaries);
+        // "Most helpful" order, frozen at this point.
+        setOrderedIds(
+          [...comments]
+            .sort(
+              (a: AnyRec, b: AnyRec) =>
+                (summaries.comment[String(b.id)]?.score ?? 0) -
+                (summaries.comment[String(a.id)]?.score ?? 0),
+            )
+            .map((c: AnyRec) => String(c.id)),
+        );
       })
       .catch(() => {});
     return () => {
       active = false;
     };
+    // `comments` is intentionally tracked via `commentKey` (its id list) to
+    // avoid refetching/reordering on unrelated re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.id, commentKey, workspaceURL]);
 
   const postSummary = reactions.post[String(post.id)] ?? EMPTY_SUMMARY;
@@ -543,12 +562,17 @@ export function ForumDetail({
 
   const postVotes = postSummary.score;
 
-  // "Most helpful" order: highest score first (ties keep chronological order).
-  const sortedComments = [...comments].sort(
-    (a: AnyRec, b: AnyRec) =>
-      (reactions.comment[String(b.id)]?.score ?? 0) -
-      (reactions.comment[String(a.id)]?.score ?? 0),
-  );
+  // Render replies in the frozen "most helpful" order. Any reply not yet in
+  // that order (e.g. one just posted, before the summaries refetch) is
+  // appended at the end so nothing disappears.
+  const byId = new Map(comments.map((c: AnyRec) => [String(c.id), c]));
+  const orderedSet = new Set(orderedIds);
+  const sortedComments: AnyRec[] = [
+    ...orderedIds
+      .map(id => byId.get(id))
+      .filter((c): c is AnyRec => Boolean(c)),
+    ...comments.filter((c: AnyRec) => !orderedSet.has(String(c.id))),
+  ];
 
   const pickFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files || []);
