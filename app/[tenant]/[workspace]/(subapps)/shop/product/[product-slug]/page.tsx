@@ -222,6 +222,11 @@ function DetailSkeleton() {
             <div className="h-40 bg-ink-100 rounded-[14px] animate-pulse" />
           </div>
         </div>
+        <div className="flex gap-4 mt-8 mb-5">
+          <div className="h-9 w-28 bg-ink-100 rounded animate-pulse" />
+          <div className="h-9 w-28 bg-ink-100 rounded animate-pulse" />
+        </div>
+        <div className="h-32 max-w-[760px] rounded-[14px] bg-ink-100 animate-pulse" />
       </div>
     </div>
   );

@@ -227,7 +227,7 @@ function QuotationPreview({
   }).map(step => ({...step, label: i18n.t(step.label as string)}));
 
   return (
-    <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-7">
+    <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-7 self-start">
       <div className="flex items-start justify-between gap-4 mb-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-2">

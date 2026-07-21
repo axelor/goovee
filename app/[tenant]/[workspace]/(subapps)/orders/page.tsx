@@ -9,7 +9,7 @@ import {getCurrentPath} from '@/utils/current-path';
 import {DEFAULT_LIMIT, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
 import {PartnerKey} from '@/types';
-import {TableSkeleton} from '@/ui/components/table';
+import {SplitViewListSkeleton} from '@/ui/components/record-skeleton';
 import {getWhereClauseForEntity} from '@/utils/filters';
 
 // ---- LOCAL IMPORTS ---- //
@@ -104,7 +104,7 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   return (
-    <Suspense fallback={<TableSkeleton />}>
+    <Suspense fallback={<SplitViewListSkeleton />}>
       <Orders params={params} searchParams={searchParams} />
     </Suspense>
   );

@@ -500,6 +500,16 @@ export function AddressSelectionSkeleton() {
   );
 }
 
+export function CheckoutPaymentSkeleton() {
+  return (
+    <div className="bg-card text-card-foreground p-6 rounded-lg">
+      <Skeleton className="h-6 w-32" />
+      <Separator className="my-4" />
+      <Skeleton className="h-10 w-full rounded-lg" />
+    </div>
+  );
+}
+
 export function CheckoutSkeleton() {
   return (
     <>
@@ -508,18 +518,15 @@ export function CheckoutSkeleton() {
         <div>
           <div className="flex flex-col gap-6">
             <AddressSelectionSkeleton />
+            <AddressSelectionSkeleton />
             <CheckoutShippingSkeleton />
+            <CheckoutPaymentSkeleton />
           </div>
         </div>
         <div>
           <div className="flex flex-col gap-6">
             <CheckoutSummarySkeleton />
             <CheckoutTotalSkeleton />
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-8 w-full rounded-full" />
-              <Skeleton className="h-8 w-full rounded-full" />
-              <Skeleton className="h-8 w-full rounded-full" />
-            </div>
           </div>
         </div>
       </div>

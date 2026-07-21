@@ -247,7 +247,7 @@ function OrderPreview({order, detailHref}: {order: Order; detailHref: string}) {
   const compactJourney = [journey[0], journey[2], journey[3]];
 
   return (
-    <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-7">
+    <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-7 self-start">
       <div className="flex items-start justify-between gap-4 mb-5">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-2">

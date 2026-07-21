@@ -143,26 +143,28 @@ export function RecordDetailSkeleton({
               </section>
             )}
             {/* Products / lines card */}
-            <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-6">
-              <Skeleton className="h-6 w-32 mb-5" />
-              <div className="flex flex-col gap-4">
-                {Array.from({length: 3}).map((_, i) => (
-                  <div key={i} className="flex items-center gap-4">
-                    <Skeleton className="h-14 w-14 rounded-lg shrink-0" />
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <Skeleton className="h-4 w-48" />
-                      <Skeleton className="h-3 w-28" />
+            {variant === 'timeline' && (
+              <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-6">
+                <Skeleton className="h-6 w-32 mb-5" />
+                <div className="flex flex-col gap-4">
+                  {Array.from({length: 3}).map((_, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <Skeleton className="h-14 w-14 rounded-lg shrink-0" />
+                      <div className="flex-1 flex flex-col gap-1.5">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-3 w-28" />
+                      </div>
+                      <Skeleton className="h-4 w-16" />
                     </div>
-                    <Skeleton className="h-4 w-16" />
-                  </div>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           <div className="flex flex-col gap-7">
             <DetailCard rows={3} />
-            <DetailCard rows={4} />
+            {variant === 'timeline' && <DetailCard rows={4} />}
           </div>
         </div>
       </div>
