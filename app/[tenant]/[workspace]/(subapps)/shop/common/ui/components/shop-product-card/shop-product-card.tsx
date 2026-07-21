@@ -11,6 +11,7 @@ import {useToast} from '@/ui/hooks';
 import {getProductImageURL} from '@/utils/files';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
+import type {ComputedProduct} from '@/types';
 
 import {
   getCategoryGradient,
@@ -32,7 +33,7 @@ export function ShopProductCard({
   addedLabel,
   hidePriceAndPurchase,
 }: {
-  product: any;
+  product: ComputedProduct;
   category: ShopCategory | null;
   inStockLabel: string;
   outOfStockLabel: string;

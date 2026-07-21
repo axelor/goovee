@@ -28,6 +28,14 @@ import {findHomePageHeaderNews} from './(subapps)/news/common/orm/news';
 import {fetchLatestFiles} from './(subapps)/resources/common/orm/dms';
 import {DateDisplay} from './client';
 
+// Types derived from the finders that feed the home page (source of truth).
+type HomeApps = Awaited<
+  ReturnType<typeof import('@/orm/workspace').findSubapps>
+>;
+type HeroArticle = NonNullable<
+  Awaited<ReturnType<typeof findHomePageHeaderNews>>['news']
+>[number];
+
 export async function Home({
   client,
   user,
@@ -41,7 +49,7 @@ export async function Home({
   workspace: Workspace | Cloned<Workspace>;
   config: ShellConfig | Cloned<ShellConfig>;
   workspaceURI: string;
-  apps: any[];
+  apps: HomeApps;
 }) {
   const showNews =
     config.isHomepageDisplayNews &&
@@ -228,7 +236,7 @@ async function LatestNews({
         seeAllHref={`${workspaceURI}/${SUBAPP_CODES.news}`}
       />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
-        {news.slice(0, 3).map((article: any) => (
+        {news.slice(0, 3).map(article => (
           <HeroNewsCard
             key={article.id}
             article={article}
@@ -244,7 +252,7 @@ function HeroNewsCard({
   article,
   workspaceURI,
 }: {
-  article: any;
+  article: HeroArticle;
   workspaceURI: string;
 }) {
   const {slug, image, title, description, categorySet, publicationDateTime} =
@@ -340,7 +348,7 @@ async function EventsCard({
       emptyLabel={await t('No upcoming events')}
       hasItems={Boolean(events?.length)}>
       <ul className="flex flex-col gap-3">
-        {events?.map((event: any) => {
+        {events?.map(event => {
           const category = event.eventCategorySet?.[0];
           return (
             <li key={event.id}>

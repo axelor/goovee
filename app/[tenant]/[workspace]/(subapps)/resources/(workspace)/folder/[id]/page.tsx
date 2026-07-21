@@ -67,8 +67,8 @@ export default async function Page(props: {
 
   return (
     <DocsFolderView
-      folder={folder as any}
-      files={(files as any[]) ?? []}
+      folder={folder}
+      files={files ?? []}
       workspaceURI={workspaceURI}
       labels={labels}
     />

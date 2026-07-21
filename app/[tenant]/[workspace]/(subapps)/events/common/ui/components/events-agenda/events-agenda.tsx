@@ -29,7 +29,7 @@ export function EventsAgenda({
   magazineHref,
   searchAction,
 }: {
-  initialEvents: any[];
+  initialEvents: ListEvent[];
   workspaceURI: string;
   workspaceURL: string;
   magazineHref: string;
@@ -39,7 +39,7 @@ export function EventsAgenda({
   }) => Promise<ListEvent[]>;
 }) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<any[]>(initialEvents);
+  const [results, setResults] = useState<ListEvent[]>(initialEvents);
   const [searching, setSearching] = useState(false);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -251,11 +251,11 @@ function AgendaRow({
   workspaceURI,
   last,
 }: {
-  event: any;
+  event: ListEvent;
   workspaceURI: string;
   last: boolean;
 }) {
-  const start = new Date(event.eventStartDateTime);
+  const start = new Date(event.eventStartDateTime ?? '');
   const day = start.getDate();
   const monthAbbr = monthAbbrev(start);
   const time = formatHHmm(start);
@@ -320,13 +320,13 @@ function AgendaRow({
 
 // ---- Helpers ---- //
 
-type MonthGroup = {key: string; label: string; events: any[]};
+type MonthGroup = {key: string; label: string; events: ListEvent[]};
 
-function groupByMonth(events: any[]): MonthGroup[] {
+function groupByMonth(events: ListEvent[]): MonthGroup[] {
   const map = new Map<string, MonthGroup>();
   for (const event of events) {
     if (!event.eventStartDateTime) continue;
-    const start = new Date(event.eventStartDateTime);
+    const start = new Date(event.eventStartDateTime ?? '');
     const key = `${start.getFullYear()}-${start.getMonth()}`;
     let group = map.get(key);
     if (!group) {

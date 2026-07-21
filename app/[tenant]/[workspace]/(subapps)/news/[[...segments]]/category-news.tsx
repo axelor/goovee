@@ -62,8 +62,8 @@ export async function CategoryNews({
     },
   }).then(clone);
 
-  const articles = (result as any)?.news || [];
-  const pageInfo = (result as any)?.pageInfo;
+  const articles = result?.news || [];
+  const pageInfo = result?.pageInfo;
 
   return (
     <NewsEditorial articles={articles} heading={categoryTitle}>

@@ -60,7 +60,7 @@ export function NewsTopNav({categories = []}: {categories?: Category[]}) {
             searchKey="title"
             findQuery={() =>
               findSearchNews({workspaceURL})
-                .then((r: any) => (r?.error ? [] : r))
+                .then(r => ('error' in r ? [] : r))
                 .catch(() => [])
             }
             renderItem={SearchItem}

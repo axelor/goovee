@@ -69,14 +69,14 @@ export function Sidebar({
   }
 
   const toggle = () => setCollapsed(c => !c);
-  const redirect = (value: any) => router.push(value);
+  const redirect = (value: string) => router.push(value);
 
   const installedSubapps =
     subapps
-      ?.filter((app: any) => app.isInstalled)
+      ?.filter(app => app.isInstalled)
       .sort(
-        (app1: any, app2: any) =>
-          app1.orderForMySpaceMenu - app2.orderForMySpaceMenu,
+        (app1, app2) =>
+          (app1.orderForMySpaceMenu ?? 0) - (app2.orderForMySpaceMenu ?? 0),
       )
       .reverse() ?? [];
 
@@ -180,7 +180,7 @@ export function Sidebar({
               collapsed={collapsed}
             />
           )}
-          {installedSubapps.map(({code, name, icon, color}: any) => {
+          {installedSubapps.map(({code, name, icon, color}) => {
             const page = SUBAPP_PAGE[code as keyof typeof SUBAPP_PAGE] || '';
             const isExternalChat =
               code === SUBAPP_CODES.chat &&
@@ -196,8 +196,8 @@ export function Sidebar({
                 key={code}
                 href={href}
                 icon={icon || 'app'}
-                iconColor={color}
-                label={i18n.t(name)}
+                iconColor={color ?? undefined}
+                label={i18n.t(name ?? '')}
                 active={active}
                 collapsed={collapsed}
                 external={isExternalChat}

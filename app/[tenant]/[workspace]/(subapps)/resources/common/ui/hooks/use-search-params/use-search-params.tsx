@@ -21,12 +21,12 @@ export function useSearchParams() {
     ) => {
       const current = new URLSearchParams(Array.from(searchParams.entries()));
 
-      values.forEach(({key, value = ''}: any) => {
-        value = value && String(value)?.trim();
-        if (!value) {
+      values.forEach(({key, value}) => {
+        const trimmed = value != null ? String(value).trim() : '';
+        if (!trimmed) {
           current.delete(key);
         } else {
-          current.set(key, value);
+          current.set(key, trimmed);
         }
       });
 

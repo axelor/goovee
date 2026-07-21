@@ -17,7 +17,7 @@ import ArticleNews from './article-news';
 import {ArticleSkeleton} from '@/subapps/news/common/ui/components';
 
 export default async function Page(props: {
-  params: Promise<any>;
+  params: Promise<{tenant: string; workspace: string; segments?: string[]}>;
   searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
   const searchParams = await props.searchParams;

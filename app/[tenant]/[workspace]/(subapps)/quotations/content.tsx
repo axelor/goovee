@@ -43,7 +43,7 @@ const Content = ({quotations, pageInfo}: Props) => {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return quotations;
-    return quotations.filter((quote: any) =>
+    return quotations.filter(quote =>
       String(quote.saleOrderSeq || '')
         .toLowerCase()
         .includes(q),
@@ -51,13 +51,11 @@ const Content = ({quotations, pageInfo}: Props) => {
   }, [quotations, query]);
 
   const [selectedId, setSelectedId] = useState<string | null>(
-    () => (filtered[0] as any)?.id ?? (quotations[0] as any)?.id ?? null,
+    () => filtered[0]?.id ?? quotations[0]?.id ?? null,
   );
 
   const selected = useMemo(
-    () =>
-      (filtered.find((q: any) => q.id === selectedId) as any) ??
-      (filtered[0] as any),
+    () => filtered.find(q => q.id === selectedId) ?? filtered[0],
     [filtered, selectedId],
   );
 
@@ -100,11 +98,11 @@ const Content = ({quotations, pageInfo}: Props) => {
                   {i18n.t('No quotations found')}
                 </li>
               ) : (
-                filtered.map((q: any) => (
+                filtered.map(q => (
                   <QuotationItem
                     key={q.id}
                     quotation={q}
-                    selected={q.id === (selected as any)?.id}
+                    selected={q.id === selected?.id}
                     onSelect={() => setSelectedId(q.id)}
                     onOpen={() =>
                       router.push(
@@ -174,12 +172,12 @@ function QuotationItem({
   onSelect,
   onOpen,
 }: {
-  quotation: any;
+  quotation: Quotation;
   selected: boolean;
   onSelect: () => void;
   onOpen: () => void;
 }) {
-  const statusKey = getStatusKey(quotation.statusSelect);
+  const statusKey = getStatusKey(Number(quotation.statusSelect));
   const {status} = getStatus(quotation.statusSelect);
   return (
     <li>
@@ -202,7 +200,7 @@ function QuotationItem({
           </StatusPill>
         </div>
         <div className="flex items-center justify-between text-xs text-ink-500 tabular-nums">
-          <span>{formatDate(quotation.createdOn)}</span>
+          <span>{formatDate(quotation.createdOn ?? '')}</span>
           {quotation.displayInTaxTotal && (
             <span className="font-semibold text-ink-900">
               {quotation.displayInTaxTotal}
@@ -218,13 +216,13 @@ function QuotationPreview({
   quote,
   detailHref,
 }: {
-  quote: any;
+  quote: Quotation;
   detailHref: string;
 }) {
-  const statusKey = getStatusKey(quote.statusSelect);
+  const statusKey = getStatusKey(Number(quote.statusSelect));
   const {status} = getStatus(quote.statusSelect);
-  const tone = getQuoteTone(quote.statusSelect);
-  const journey = getQuoteJourney(quote.statusSelect, {
+  const tone = getQuoteTone(Number(quote.statusSelect));
+  const journey = getQuoteJourney(Number(quote.statusSelect), {
     createdAt: quote.createdOn ? formatDate(quote.createdOn) : undefined,
   }).map(step => ({...step, label: i18n.t(step.label as string)}));
 
@@ -262,7 +260,7 @@ function QuotationPreview({
         <PreviewField label={i18n.t('Status')} value={i18n.t(status)} />
         <PreviewField
           label={i18n.t('Created on')}
-          value={formatDate(quote.createdOn)}
+          value={formatDate(quote.createdOn ?? '')}
         />
         {quote.displayInTaxTotal && (
           <PreviewField

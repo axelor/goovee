@@ -96,35 +96,34 @@ async function Magazine({
   workspaceURI: string;
   workspaceURL: string;
 }) {
-  const [activeResult, pastResult, categories]: [any, any, any] =
-    await Promise.all([
-      findEvents({
-        limit: MAGAZINE_LIMIT,
-        page: 1,
-        categoryids: [],
-        eventType: EVENT_TYPE.ACTIVE,
-        workspaceURL: workspace.url,
-        client,
-        user,
-        orderBy: {eventStartDateTime: ORDER_BY.ASC},
-      }).then(clone),
-      findEvents({
-        limit: MAGAZINE_LIMIT,
-        page: 1,
-        categoryids: [],
-        eventType: EVENT_TYPE.PAST,
-        workspaceURL: workspace.url,
-        client,
-        user,
-        orderBy: {eventStartDateTime: ORDER_BY.DESC},
-      }).then(clone),
-      findEventCategories({workspaceURL: workspace.url, client, user}).then(
-        clone,
-      ),
-    ]);
+  const [activeResult, pastResult, categories] = await Promise.all([
+    findEvents({
+      limit: MAGAZINE_LIMIT,
+      page: 1,
+      categoryids: [],
+      eventType: EVENT_TYPE.ACTIVE,
+      workspaceURL: workspace.url,
+      client,
+      user,
+      orderBy: {eventStartDateTime: ORDER_BY.ASC},
+    }).then(clone),
+    findEvents({
+      limit: MAGAZINE_LIMIT,
+      page: 1,
+      categoryids: [],
+      eventType: EVENT_TYPE.PAST,
+      workspaceURL: workspace.url,
+      client,
+      user,
+      orderBy: {eventStartDateTime: ORDER_BY.DESC},
+    }).then(clone),
+    findEventCategories({workspaceURL: workspace.url, client, user}).then(
+      clone,
+    ),
+  ]);
 
-  const activeEvents: any[] = activeResult?.events ?? [];
-  const pastEvents: any[] = pastResult?.events ?? [];
+  const activeEvents = activeResult?.events ?? [];
+  const pastEvents = pastResult?.events ?? [];
 
   const [
     title,

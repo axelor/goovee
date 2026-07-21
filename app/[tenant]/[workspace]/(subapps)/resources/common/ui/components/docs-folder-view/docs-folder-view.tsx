@@ -14,6 +14,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {formatDateTime} from '@/lib/core/locale/formatters';
 
 import {DocFileIcon} from '../doc-file-icon';
+import type {DmsFile, FolderWithParent} from '@/subapps/resources/common/types';
 
 export interface DocsFolderViewLabels {
   rootCrumb: string;
@@ -36,14 +37,8 @@ export function DocsFolderView({
   workspaceURI,
   labels,
 }: {
-  folder: {
-    id: string;
-    fileName: string;
-    description?: string | null;
-    updatedOn?: string | Date | null;
-    parent?: {id: string; fileName: string} | null;
-  };
-  files: any[];
+  folder: FolderWithParent;
+  files: DmsFile[];
   workspaceURI: string;
   labels: DocsFolderViewLabels;
 }) {
@@ -153,7 +148,7 @@ export function DocsFolderView({
   );
 }
 
-function isNew(file: any, newCutoffMs: number): boolean {
+function isNew(file: DmsFile, newCutoffMs: number): boolean {
   const ts = file.createdOn ? new Date(file.createdOn).getTime() : NaN;
   if (Number.isNaN(ts)) return false;
   return Date.now() - ts < newCutoffMs;
@@ -164,7 +159,7 @@ function FileTable({
   labels,
   viewHref,
 }: {
-  files: any[];
+  files: DmsFile[];
   labels: DocsFolderViewLabels;
   viewHref: (id: string) => string;
 }) {
@@ -253,7 +248,7 @@ function FileGrid({
   labels,
   viewHref,
 }: {
-  files: any[];
+  files: DmsFile[];
   labels: DocsFolderViewLabels;
   viewHref: (id: string) => string;
 }) {

@@ -51,7 +51,7 @@ export default async function Layout({
   // Build the visible tree roots: entries whose parent is null OR whose parent
   // is not part of the fetched set (treat orphans as visible roots, since the
   // parent may live outside the current workspace's DMS scope).
-  const allCats = (categoriesTree as any[]) ?? [];
+  const allCats = categoriesTree ?? [];
   const allIds = new Set(allCats.map(c => c.id));
   const topLevel = allCats.filter(
     c => !c.parent || !c.parent.id || !allIds.has(c.parent.id),

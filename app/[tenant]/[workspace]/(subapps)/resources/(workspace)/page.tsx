@@ -85,7 +85,7 @@ async function HomeContent({
 
   return (
     <DocsHomeView
-      pinnedFolders={(pinnedFolders as any[]) ?? []}
+      pinnedFolders={pinnedFolders ?? []}
       workspaceURI={workspaceURI}
       labels={labels}
     />

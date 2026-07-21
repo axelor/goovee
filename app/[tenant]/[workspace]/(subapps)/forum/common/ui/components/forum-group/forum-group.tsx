@@ -71,12 +71,12 @@ export function ForumGroup({
   canPost = false,
   backHref,
 }: {
-  group: {id: any; name?: string | null};
+  group: {id: string; name?: string | null};
   groupMeta?: {memberCount: number; postCount: number};
   posts?: AnyRec[];
   scoreByPost?: Record<string, number>;
   isMember?: boolean;
-  memberRecordId?: any;
+  memberRecordId?: string | null;
   userId?: string;
   groups?: AnyRec[];
   canPost?: boolean;
@@ -112,7 +112,7 @@ export function ForumGroup({
             workspaceURI,
           })
         : await exitGroup({
-            id: memberRecordId,
+            id: memberRecordId ?? '',
             groupID: group.id,
             workspaceURL,
             workspaceURI,
@@ -122,7 +122,9 @@ export function ForumGroup({
         setJoined(!next);
         toast({
           variant: 'destructive',
-          title: i18n.t((res as any)?.message || 'An error occurred'),
+          title: i18n.t(
+            (res as {message?: string})?.message || 'An error occurred',
+          ),
         });
       } else {
         router.refresh();

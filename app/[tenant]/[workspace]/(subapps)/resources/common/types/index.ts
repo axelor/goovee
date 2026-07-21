@@ -1,3 +1,16 @@
+import type {Cloned} from '@/types/util';
+
+// Folder shapes derived from the DMS finders (type-only import, erased at build).
+export type PinnedFolder = Cloned<
+  Awaited<ReturnType<typeof import('../orm/dms').fetchPinnedFoldersWithMeta>>
+>[number];
+
+export type FolderWithParent = Cloned<
+  NonNullable<
+    Awaited<ReturnType<typeof import('../orm/dms').fetchFolderWithParent>>
+  >
+>;
+
 export interface DmsFile {
   id: string;
   version?: number | null;
@@ -35,6 +48,11 @@ export interface DmsFile {
     id?: string | null;
     version?: number | null;
     fileName?: string | null;
+    colorSelect?: string | null;
+    parent?: {
+      id?: string | null;
+      fileName?: string | null;
+    } | null;
   } | null;
 }
 

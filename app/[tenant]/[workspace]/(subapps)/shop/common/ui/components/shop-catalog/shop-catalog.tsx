@@ -6,6 +6,7 @@ import {MdSearch} from 'react-icons/md';
 
 import {cn} from '@/utils/css';
 import {i18n} from '@/locale';
+import type {ComputedProduct} from '@/types';
 
 import {
   ShopProductCard,
@@ -35,14 +36,14 @@ export interface ShopLabels {
 
 interface ShopCatalogProps {
   categories: ShopCategory[];
-  products: any[];
+  products: ComputedProduct[];
   labels: ShopLabels;
   hidePriceAndPurchase?: boolean;
 }
 
 type SortKey = 'featured' | 'price-asc' | 'price-desc' | 'name';
 
-function priceNumber(product: any): number {
+function priceNumber(product: ComputedProduct): number {
   const raw = product?.price?.displayPrimary ?? '';
   if (typeof raw !== 'string') return 0;
   // Strip non-digit / non-decimal chars (handles "1 234,56 €" or "1234.56€")
@@ -54,8 +55,8 @@ function priceNumber(product: any): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function productName(product: any): string {
-  return i18n.tattr(product?.product?.name ?? product?.name ?? '');
+function productName(product: ComputedProduct): string {
+  return i18n.tattr(product?.product?.name ?? '');
 }
 
 export function ShopCatalog({
@@ -122,7 +123,7 @@ export function ShopCatalog({
     if (activeCat !== 'all') {
       out = out.filter(p => {
         const portal = p?.product?.portalCategorySet ?? [];
-        return portal.some((c: any) => String(c?.id) === activeCat);
+        return portal.some(c => String(c?.id) === activeCat);
       });
     }
     if (stockOnly) {
@@ -264,20 +265,20 @@ export function ShopCatalog({
                 const portal = p?.product?.portalCategorySet ?? [];
                 const portalMatch =
                   activeCat !== 'all'
-                    ? portal.find((c: any) => String(c?.id) === activeCat)
+                    ? portal.find(c => String(c?.id) === activeCat)
                     : portal[0];
                 const primary = p?.product?.productCategory;
                 const candidate = portalMatch ?? portal[0] ?? primary ?? null;
                 const cat = candidate
                   ? (categoryById.get(String(candidate.id)) ?? {
                       id: candidate.id,
-                      name: candidate.name,
-                      slug: candidate.slug,
+                      name: candidate.name ?? null,
+                      slug: candidate.slug ?? null,
                     })
                   : null;
                 return (
                   <ShopProductCard
-                    key={p?.product?.id ?? p?.id}
+                    key={p?.product?.id}
                     product={p}
                     category={cat}
                     inStockLabel={labels.inStockBadge}

@@ -57,9 +57,9 @@ export default async function Page(props: {
   const {user} = access;
   const {client} = access.tenant;
   const userId = user?.id as string;
-  const workspace: any = clone(access.workspace);
+  const workspace = clone(access.workspace);
 
-  const memberGroups: any = userId
+  const memberGroups = userId
     ? await findGroupsByMembers({
         id: userId,
         orderBy: GROUPS_ORDER_BY,
@@ -68,7 +68,9 @@ export default async function Page(props: {
         user,
       })
     : [];
-  const memberGroupIDs = memberGroups.map((g: any) => g?.forumGroup?.id);
+  const memberGroupIDs = memberGroups
+    .map(g => g?.forumGroup?.id)
+    .filter((id): id is string => id != null);
 
   const {posts = []} = await findPosts({
     ids: [postId],
@@ -93,9 +95,7 @@ export default async function Page(props: {
     findUser({userId, client}).then(clone),
   ]);
 
-  const related = (recent as any[]).filter(
-    r => String(r.id) !== String(postId),
-  );
+  const related = recent.filter(r => String(r.id) !== String(postId));
   const relatedCounts = await findCommentCounts({
     postIds: related.map(r => r.id),
     client,

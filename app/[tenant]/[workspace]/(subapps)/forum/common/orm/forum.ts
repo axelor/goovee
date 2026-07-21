@@ -517,7 +517,7 @@ export async function findCommentCounts({
 
   const placeholders = postIds.map((_, i) => `$${i + 1}`).join(', ');
 
-  const rows: any = await client
+  const rows = (await client
     .$raw(
       `
       SELECT m.related_id AS "postId", COUNT(*)::int AS "count"
@@ -530,10 +530,10 @@ export async function findCommentCounts({
       `,
       ...postIds.map(id => Number(id)),
     )
-    .catch(() => []);
+    .catch(() => [])) as Array<{postId: string | number; count: number}>;
 
   const map: Record<string, number> = {};
-  (rows || []).forEach((r: any) => {
+  (rows || []).forEach(r => {
     map[String(r.postId)] = Number(r.count) || 0;
   });
   return map;

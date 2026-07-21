@@ -16,6 +16,7 @@ import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ComputedProduct} from '@/types';
 import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {getShopConfig, type ShopConfig} from '@/subapps/shop/common/orm/config';
@@ -48,7 +49,7 @@ async function Catalog({
     shouldHidePricesAndPurchase({user, config: workspaceConfig, client}),
   ]);
 
-  const allCategories = (categoriesRes as any[]) ?? [];
+  const allCategories = (categoriesRes as ShopCategory[]) ?? [];
 
   // Restore the pre-redesign scoping: the portal only exposes products that
   // belong to one of this workspace's portal categories (portalCategorySet).
@@ -71,9 +72,9 @@ async function Catalog({
       }).then(clone)
     : [];
 
-  const products: any[] = Array.isArray(productsRes)
-    ? productsRes
-    : ((productsRes as any)?.products ?? []);
+  const products: ComputedProduct[] = Array.isArray(productsRes)
+    ? (productsRes as ComputedProduct[])
+    : ((productsRes as {products?: ComputedProduct[]})?.products ?? []);
   // Keep only leaf categories that actually contain products in the portal —
   // the ORM filter clauses pivot through portalCategorySet (many-to-many),
   // not productCategory (the product's primary business category). Using

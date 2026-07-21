@@ -26,7 +26,7 @@ import {t} from '@/lib/core/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE} from '@/subapps/events/common/constants';
-import {findEvents} from '@/subapps/events/common/orm/event';
+import {findEvents, type ListEvent} from '@/subapps/events/common/orm/event';
 
 const FETCH_LIMIT = 200;
 
@@ -106,7 +106,7 @@ async function MyRegistrations({
   workspaceURI: string;
   filter: FilterKey;
 }) {
-  const [upcomingResult, pastResult]: [any, any] = await Promise.all([
+  const [upcomingResult, pastResult] = await Promise.all([
     findEvents({
       limit: FETCH_LIMIT,
       page: 1,
@@ -129,8 +129,8 @@ async function MyRegistrations({
     }).then(clone),
   ]);
 
-  const upcoming: any[] = upcomingResult?.events ?? [];
-  const past: any[] = pastResult?.events ?? [];
+  const upcoming = upcomingResult?.events ?? [];
+  const past = pastResult?.events ?? [];
   const list = filter === 'upcoming' ? upcoming : past;
   const next = upcoming[0];
 
@@ -276,7 +276,7 @@ function NextEventSpotlight({
   event,
   detailHref,
 }: {
-  event: any;
+  event: ListEvent;
   detailHref: string;
 }) {
   const {month, day, time} = formatDateParts(event.eventStartDateTime);
@@ -367,7 +367,7 @@ function RegistrationCard({
   detailHref,
   past,
 }: {
-  event: any;
+  event: ListEvent;
   detailHref: string;
   past: boolean;
 }) {

@@ -41,6 +41,20 @@ const formSchema = z.object({
   localization: z.string().optional(),
 });
 
+// Item types derived from the server actions (single source of truth).
+type WorkspacesResult = Awaited<ReturnType<typeof fetchWorkspaces>>;
+type LocalizationsResult = Awaited<ReturnType<typeof fetchLocalizations>>;
+type WorkspaceItem = NonNullable<
+  Extract<WorkspacesResult, {data: unknown}>['data']
+>[number];
+type LocalizationItem = NonNullable<
+  Extract<LocalizationsResult, {data: unknown}>['data']
+>[number];
+
+const isFulfilled = <T,>(
+  result: PromiseSettledResult<T>,
+): result is PromiseFulfilledResult<T> => result.status === 'fulfilled';
+
 export default function PreferencesForm() {
   const {data: session} = authClient.useSession();
   const user = session?.user;
@@ -51,8 +65,8 @@ export default function PreferencesForm() {
 
   const [loading, setLoading] = useState(true);
 
-  const [workspaces, setWorkspaces] = useState<any[]>([]);
-  const [localizations, setLocalizations] = useState<any[]>([]);
+  const [workspaces, setWorkspaces] = useState<WorkspaceItem[]>([]);
+  const [localizations, setLocalizations] = useState<LocalizationItem[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -95,11 +109,8 @@ export default function PreferencesForm() {
       ])
         .then(
           ([preferenceResponse, workspacesResponse, localizationsReponse]) => {
-            const isFullfilled = (response: any) =>
-              response.status === 'fulfilled';
-
-            if (isFullfilled(preferenceResponse)) {
-              const {value}: any = preferenceResponse;
+            if (isFulfilled(preferenceResponse)) {
+              const {value} = preferenceResponse;
 
               if (!('error' in value)) {
                 if (value.data) {
@@ -118,19 +129,19 @@ export default function PreferencesForm() {
               }
             }
 
-            if (isFullfilled(workspacesResponse)) {
-              const {value}: any = workspacesResponse;
+            if (isFulfilled(workspacesResponse)) {
+              const {value} = workspacesResponse;
 
               if (!('error' in value)) {
-                setWorkspaces(value.data);
+                setWorkspaces(value.data ?? []);
               }
             }
 
-            if (isFullfilled(localizationsReponse)) {
-              const {value}: any = localizationsReponse;
+            if (isFulfilled(localizationsReponse)) {
+              const {value} = localizationsReponse;
 
               if (!('error' in value)) {
-                setLocalizations(value.data);
+                setLocalizations(value.data ?? []);
               }
             }
           },
@@ -173,7 +184,7 @@ export default function PreferencesForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {workspaces.map((workspace: any) => (
+                      {workspaces.map(workspace => (
                         <SelectItem
                           value={workspace.id?.toString()}
                           key={workspace.id}>
@@ -205,7 +216,7 @@ export default function PreferencesForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {localizations.map((localization: any) => (
+                      {localizations.map(localization => (
                         <SelectItem
                           value={localization.id}
                           key={localization.id}>

@@ -18,7 +18,10 @@ import {SORT_TYPE, Comments, CommentsSkeleton} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
 import {QUOTATION_STATUS} from '@/subapps/quotations/common/constants/quotations';
-import type {QuotationDetail} from '@/subapps/quotations/common/types/quotations';
+import type {
+  QuotationDetail,
+  Product,
+} from '@/subapps/quotations/common/types/quotations';
 import {
   fetchComments,
   createComment,
@@ -52,22 +55,22 @@ const Content = ({
     saleOrderLineList = [],
     totalDiscount,
     statusSelect,
-  } = quotation as any;
+  } = quotation;
 
   const {workspaceURI, tenant} = useWorkspace();
 
   const {status} = getStatus(statusSelect);
-  const statusKey = getStatusKey(statusSelect);
-  const tone = getQuoteTone(statusSelect);
+  const statusKey = getStatusKey(Number(statusSelect));
+  const tone = getQuoteTone(Number(statusSelect));
   const isDraft = statusSelect === QUOTATION_STATUS.DRAFT_QUOTATION;
   const isCancelled = statusSelect === QUOTATION_STATUS.CANCELED_QUOTATION;
 
-  const journey = getQuoteJourney(statusSelect, {
+  const journey = getQuoteJourney(Number(statusSelect), {
     createdAt: createdOn ? formatDate(createdOn) : undefined,
   }).map(step => ({...step, label: i18n.t(step.label as string)}));
 
   const hideDiscount = saleOrderLineList?.every(
-    (item: any) => parseFloat(String(item.discountAmount)) === 0,
+    item => parseFloat(String(item.discountAmount)) === 0,
   );
   const lineCount = saleOrderLineList?.length ?? 0;
 
@@ -75,8 +78,8 @@ const Content = ({
     <div className="bg-ink-25 min-h-full">
       <Hero
         eyebrow={i18n.t('Quotation')}
-        title={saleOrderSeq}
-        externalReference={externalReference}
+        title={String(saleOrderSeq)}
+        externalReference={externalReference ?? undefined}
         statusKey={statusKey}
         statusLabel={i18n.t(status)}
         tone={
@@ -142,7 +145,7 @@ const Content = ({
                     {i18n.t('No records available')}
                   </li>
                 )}
-                {saleOrderLineList.map((line: any) => (
+                {saleOrderLineList.map(line => (
                   <ProductRow key={line.id} line={line} tenant={tenant} />
                 ))}
               </ul>
@@ -380,7 +383,13 @@ function SummaryRow({
   );
 }
 
-function AddressBlock({label, address}: {label: string; address: any}) {
+function AddressBlock({
+  label,
+  address,
+}: {
+  label: string;
+  address: QuotationDetail['deliveryAddress'] | null | undefined;
+}) {
   if (!address) {
     return (
       <div>
@@ -416,7 +425,7 @@ function AddressBlock({label, address}: {label: string; address: any}) {
   );
 }
 
-function ProductRow({line, tenant}: {line: any; tenant: any}) {
+function ProductRow({line, tenant}: {line: Product; tenant: string}) {
   const imageURL = getProductImageURL(line.product?.picture?.id, tenant, {
     noimage: true,
   });
@@ -443,7 +452,7 @@ function ProductRow({line, tenant}: {line: any; tenant: any}) {
         <p className="text-sm font-semibold text-ink-900 tabular-nums">
           {line.inTaxTotal}
         </p>
-        {parseFloat(line.discountAmount) > 0 && (
+        {parseFloat(String(line.discountAmount)) > 0 && (
           <p className="text-xs text-mint-700 tabular-nums">
             −{line.discountAmount}%
           </p>

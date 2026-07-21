@@ -10,6 +10,18 @@ import type {ShopCategory} from '@/subapps/shop/common/ui/components';
 
 const CATALOG_LIMIT = 500;
 
+// Minimal shapes this glue reads from the (loosely-typed) product/category ORM.
+type SidebarProductRow = {
+  product?: {
+    portalCategorySet?: Array<{id?: string | number}> | null;
+  } | null;
+};
+type SidebarCategoryRow = {
+  id: string | number;
+  name: string | null;
+  slug?: string | null;
+};
+
 export async function loadCatalogSidebarData({
   workspace,
   client,
@@ -37,9 +49,9 @@ export async function loadCatalogSidebarData({
     }).then(clone),
   ]);
 
-  const allProducts: any[] = Array.isArray(allProductsRes)
-    ? allProductsRes
-    : ((allProductsRes as any)?.products ?? []);
+  const allProducts: SidebarProductRow[] = Array.isArray(allProductsRes)
+    ? (allProductsRes as SidebarProductRow[])
+    : ((allProductsRes as {products?: SidebarProductRow[]})?.products ?? []);
 
   // Mirror the ORM where clause: products are exposed via portalCategorySet,
   // not productCategory. Categories with no products in portalCategorySet are
@@ -58,7 +70,7 @@ export async function loadCatalogSidebarData({
     }
   }
 
-  const allCategories = (allCategoriesRaw as any[]) ?? [];
+  const allCategories = (allCategoriesRaw as SidebarCategoryRow[]) ?? [];
   const categories: ShopCategory[] = allCategories
     .filter(c => categoriesWithProducts.has(String(c.id)))
     .map(c => ({id: c.id, name: c.name, slug: c.slug}));

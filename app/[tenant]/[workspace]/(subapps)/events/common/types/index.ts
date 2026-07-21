@@ -31,8 +31,8 @@ export type ListEvent = {
   isRegistered: boolean;
   id: string;
   version: number;
-  eventEndDateTime: Date | null;
-  eventStartDateTime: Date | null;
+  eventEndDateTime: Date | string | null;
+  eventStartDateTime: Date | string | null;
   eventAllDay: boolean | null;
   eventTitle: string | null;
   eventCategorySet:
@@ -51,7 +51,7 @@ export type ListEvent = {
         } | null;
       }[]
     | null;
-  registrationDeadlineDateTime: Date | null;
+  registrationDeadlineDateTime: Date | string | null;
   eventImage: {
     id: string;
     version: number;
@@ -71,6 +71,12 @@ export type ListEvent = {
       }[]
     | null;
   slug: string | null;
+  eventPlace?: string | null;
+  defaultPrice?: number | string | null;
+  eventProduct?: {
+    salePrice?: number | string | null;
+    saleCurrency?: {symbol?: string | null} | null;
+  } | null;
   _count?: string | undefined;
   _cursor?: string | undefined;
   _hasNext?: boolean | undefined;
@@ -107,10 +113,10 @@ export type EventConfigPartner = {
 export type EventConfig = {
   id: string;
   version: number;
-  eventEndDateTime: Date | null;
-  eventStartDateTime: Date | null;
+  eventEndDateTime: Date | string | null;
+  eventStartDateTime: Date | string | null;
   eventAllDay: boolean | null;
-  registrationDeadlineDateTime: Date | null;
+  registrationDeadlineDateTime: Date | string | null;
   eventAllowRegistration: boolean | null;
   eventAllowMultipleRegistrations: boolean | null;
   isPrivate: boolean | null;

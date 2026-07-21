@@ -5,6 +5,7 @@ import {MdClose, MdOutlineLocationOn} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
+import type {PartnerAddress} from '@/types';
 import {
   Button,
   Dialog,
@@ -38,7 +39,7 @@ export function AddressEditModal({
   kind: Kind;
   onClose: () => void;
   onSaved: () => void;
-  address?: any | null;
+  address?: PartnerAddress | null;
   countries?: Country[];
 }) {
   const {toast} = useToast();
@@ -53,7 +54,13 @@ export function AddressEditModal({
     address?.address?.townName ?? address?.address?.addressl6 ?? '',
   );
   const [country, setCountry] = useState<Country | null>(
-    address?.address?.country ?? null,
+    address?.address?.country
+      ? {
+          id: String(address.address.country.id),
+          name: address.address.country.name ?? '',
+          version: address.address.country.version,
+        }
+      : null,
   );
   const [contact, setContact] = useState<string>(
     address?.address?.companyName ?? '',
@@ -82,11 +89,11 @@ export function AddressEditModal({
     if (!valid || !country) return;
     setSubmitting(true);
 
-    const addressBody: any = {
-      id: address?.address?.id,
+    const addressBody = {
+      id: address?.address?.id != null ? String(address.address.id) : undefined,
       version: address?.address?.version,
       country: {
-        id: country.id,
+        id: String(country.id),
         name: country.name,
         version: country.version ?? 0,
       },
@@ -103,21 +110,26 @@ export function AddressEditModal({
     };
 
     try {
-      const result = isEdit
-        ? await updateAddress({
-            address: addressBody,
-            id: address.id,
-            version: address.version,
-            isInvoicingAddr: invoicing,
-            isDeliveryAddr: shipping,
-            isDefaultAddr: Boolean(address.isDefaultAddr),
-          })
-        : await createAddress({
-            address: addressBody,
-            isInvoicingAddr: invoicing,
-            isDeliveryAddr: shipping,
-            isDefaultAddr: false,
-          });
+      const result =
+        isEdit && address
+          ? await updateAddress({
+              address: {
+                ...addressBody,
+                id: String(address.address?.id ?? ''),
+                version: address.address?.version ?? 0,
+              },
+              id: String(address.id),
+              version: address.version ?? 0,
+              isInvoicingAddr: invoicing,
+              isDeliveryAddr: shipping,
+              isDefaultAddr: Boolean(address.isDefaultAddr),
+            })
+          : await createAddress({
+              address: addressBody,
+              isInvoicingAddr: invoicing,
+              isDeliveryAddr: shipping,
+              isDefaultAddr: false,
+            });
 
       if (result?.error) {
         toast({variant: 'destructive', description: result.message});
@@ -213,7 +225,7 @@ export function AddressEditModal({
             placeholder={i18n.t('Select a country')}
             labelClassName="mb-0"
             rootClassName="space-y-2"
-            onValueChange={(option: any) => setCountry(option)}
+            onValueChange={(option: Country) => setCountry(option)}
           />
           <Field label={i18n.t('Contact')}>
             <Input

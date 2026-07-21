@@ -17,6 +17,7 @@ import {Button, StatusPill} from '@/ui/components';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES, URL_PARAMS} from '@/constants';
+import type {PageInfo} from '@/types';
 import {cn} from '@/utils/css';
 import {formatDate} from '@/lib/core/locale/formatters';
 import type {StatusKey} from '@/ui/components';
@@ -28,16 +29,17 @@ import {
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
+import type {InvoiceListItem} from '@/subapps/invoices/common/types/invoices';
 import {extractAmount} from '@/subapps/invoices/common/utils/invoices';
 
 const TODAY = new Date();
 
-function isOverdue(invoice: any): boolean {
+function isOverdue(invoice: InvoiceListItem): boolean {
   if (!invoice?.isUnpaid || !invoice?.dueDate) return false;
   return new Date(invoice.dueDate) < TODAY;
 }
 
-function getInvoiceStatusKey(invoice: any): StatusKey {
+function getInvoiceStatusKey(invoice: InvoiceListItem): StatusKey {
   if (!invoice.isUnpaid) return 'paid';
   if (isOverdue(invoice)) return 'overdue';
   const remaining = extractAmount(invoice.amountRemaining?.value);
@@ -46,7 +48,7 @@ function getInvoiceStatusKey(invoice: any): StatusKey {
   return 'unpaid';
 }
 
-function getInvoiceStatusLabel(invoice: any): string {
+function getInvoiceStatusLabel(invoice: InvoiceListItem): string {
   if (!invoice.isUnpaid) return INVOICE_TYPE.PAID;
   if (isOverdue(invoice)) return 'Overdue';
   return INVOICE_TYPE.UNPAID;
@@ -58,8 +60,8 @@ export default function Content({
   config,
   invoiceType,
 }: {
-  invoices: any[];
-  pageInfo?: any;
+  invoices: InvoiceListItem[];
+  pageInfo?: PageInfo;
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   invoiceType: string;
 }) {
@@ -236,7 +238,7 @@ function InvoiceItem({
   onSelect,
   onOpen,
 }: {
-  invoice: any;
+  invoice: InvoiceListItem;
   selected: boolean;
   onSelect: () => void;
   onOpen: () => void;
@@ -271,7 +273,7 @@ function InvoiceItem({
             )}>
             {invoice.isUnpaid ? i18n.t('Due') : i18n.t('Paid')}{' '}
             {formatDate(
-              invoice.isUnpaid ? invoice.dueDate : invoice.invoiceDate,
+              invoice.isUnpaid ? invoice.dueDate : (invoice.invoiceDate ?? ''),
             )}
           </span>
           <span className="font-semibold text-ink-900">
@@ -290,7 +292,7 @@ function InvoicePreview({
   detailHref,
   allowInvoicePayment,
 }: {
-  invoice: any;
+  invoice: InvoiceListItem;
   detailHref: string;
   allowInvoicePayment: boolean;
 }) {
@@ -323,7 +325,7 @@ function InvoicePreview({
         <PreviewField
           label={invoice.isUnpaid ? i18n.t('Due on') : i18n.t('Paid on')}
           value={formatDate(
-            invoice.isUnpaid ? invoice.dueDate : invoice.invoiceDate,
+            invoice.isUnpaid ? invoice.dueDate : (invoice.invoiceDate ?? ''),
           )}
           tone={overdue ? 'overdue' : undefined}
         />

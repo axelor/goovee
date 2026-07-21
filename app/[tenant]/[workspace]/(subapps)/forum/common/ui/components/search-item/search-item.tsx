@@ -2,6 +2,8 @@
 
 import {MdOutlineForum} from 'react-icons/md';
 
+import type {SearchResult} from '@/subapps/forum/common/types/forum';
+
 function highlight(text: string, query?: string) {
   const t = text || '';
   const q = (query || '').trim();
@@ -24,7 +26,7 @@ export function SearchItem({
   onClick,
   query,
 }: {
-  result: any;
+  result: SearchResult;
   onClick: (result: {id: string; title: string}) => void;
   query?: string;
 }) {

@@ -747,9 +747,9 @@ export async function findSearchPosts({workspaceURL}: {workspaceURL: string}) {
   const {client} = access.tenant;
 
   const groups = await findGroups({workspaceURL, client, user}).then(clone);
-  const groupIDs = groups.map((g: any) => g.id);
+  const groupIDs = groups.map(g => g.id);
 
-  const memberGroups: any = user?.id
+  const memberGroups = user?.id
     ? await findGroupsByMembers({
         id: user.id,
         workspaceID: workspace.id!,
@@ -757,7 +757,9 @@ export async function findSearchPosts({workspaceURL}: {workspaceURL: string}) {
         user,
       })
     : [];
-  const memberGroupIDs = memberGroups.map((g: any) => g?.forumGroup?.id);
+  const memberGroupIDs = memberGroups
+    .map(g => g?.forumGroup?.id)
+    .filter((id): id is string => id != null);
 
   const {posts = []} = await findPosts({
     workspaceID: workspace.id!,
@@ -1220,7 +1222,7 @@ export async function toggleReaction({
           ...(target === 'post'
             ? {post: {select: {id}}}
             : {reactionComment: {select: {id}}}),
-        } as any,
+        },
         select: {reactionSelect: true},
       });
     } else if (existing.reactionSelect === value) {
@@ -1270,7 +1272,7 @@ export async function setBestReply({
   const {client, user} = ctx;
 
   const post = await client.aOSPortalForumPost.findOne({
-    where: {id: postId} as any,
+    where: {id: postId},
     select: {
       author: {id: true},
       bestReply: {id: true},
@@ -1279,21 +1281,20 @@ export async function setBestReply({
   if (!post) return {error: true as const, message: await t('Bad request')};
 
   // Only the post author may curate the best answer.
-  if (String((post as any).author?.id) !== String(user.id)) {
+  if (String(post.author?.id) !== String(user.id)) {
     return {error: true as const, message: await t('Unauthorized')};
   }
 
   // Toggle off when re-selecting the current best answer or clearing.
-  const unset =
-    !commentId || String((post as any).bestReply?.id) === String(commentId);
+  const unset = !commentId || String(post.bestReply?.id) === String(commentId);
 
   try {
     await client.aOSPortalForumPost.update({
       data: {
         id: postId,
-        version: (post as any).version,
-        bestReply: unset ? null : {select: {id: commentId}},
-      } as any,
+        version: post.version,
+        bestReply: !unset && commentId ? {select: {id: commentId}} : null,
+      },
       select: {id: true},
     });
   } catch (err) {
@@ -1320,13 +1321,13 @@ export async function setPostStatus({
   const {client, user} = ctx;
 
   const post = await client.aOSPortalForumPost.findOne({
-    where: {id: postId} as any,
+    where: {id: postId},
     select: {author: {id: true}},
   });
   if (!post) return {error: true as const, message: await t('Bad request')};
 
   // Only the post author may resolve/reopen the discussion.
-  if (String((post as any).author?.id) !== String(user.id)) {
+  if (String(post.author?.id) !== String(user.id)) {
     return {error: true as const, message: await t('Unauthorized')};
   }
 
@@ -1335,9 +1336,9 @@ export async function setPostStatus({
     await client.aOSPortalForumPost.update({
       data: {
         id: postId,
-        version: (post as any).version,
+        version: post.version,
         statusSelect: status,
-      } as any,
+      },
       select: {statusSelect: true},
     });
   } catch (err) {

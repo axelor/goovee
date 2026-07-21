@@ -9,6 +9,8 @@ export type Quotation = {
   saleOrderSeq: string | null;
   statusSelect: number | string;
   externalReference: string | null;
+  displayInTaxTotal?: string | null;
+  endOfValidityDate?: string | null;
 };
 
 export type ColumnProps = {
@@ -115,6 +117,8 @@ export type QuotationDetail = {
   saleOrderSeq: string | number;
   statusSelect: string | number;
   totalDiscount: number | string;
+  createdOn?: string | null;
+  externalReference?: string | null;
 };
 
 export type TotalProps = {

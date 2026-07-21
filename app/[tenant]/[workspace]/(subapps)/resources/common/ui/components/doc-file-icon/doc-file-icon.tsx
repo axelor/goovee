@@ -144,7 +144,7 @@ export function DocFileIcon({
         className,
       )}
       style={{width: size, height: size}}>
-      <Icon className="" style={{width: iconSize, height: iconSize} as any} />
+      <Icon className="" style={{width: iconSize, height: iconSize}} />
     </span>
   );
 }
@@ -198,7 +198,7 @@ export function FolderIcon({
         className,
       )}
       style={{width: size, height: size}}>
-      <MdFolder style={{width: iconSize, height: iconSize} as any} />
+      <MdFolder style={{width: iconSize, height: iconSize}} />
     </span>
   );
 }

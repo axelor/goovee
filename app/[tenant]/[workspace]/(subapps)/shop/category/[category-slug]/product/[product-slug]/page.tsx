@@ -12,6 +12,7 @@ import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 
 // ---- LOCAL IMPORTS ---- //
+import type {ComputedProduct} from '@/types';
 import {
   ShopProductDetail,
   type ShopCategory,
@@ -130,7 +131,7 @@ async function Detail({
     client,
     user,
   }).then(clone);
-  const allCategories = (allCategoriesRaw as any[]) ?? [];
+  const allCategories = (allCategoriesRaw as ShopCategory[]) ?? [];
   // Portal products are exposed through this workspace's portal categories;
   // scope every lookup so non-portal products can't be reached (incl. by URL).
   const portalCategoryIds = allCategories
@@ -166,9 +167,9 @@ async function Detail({
 
   if (!computed?.product) return redirect(`${workspaceURI}/shop`);
 
-  const allProducts: any[] = Array.isArray(allProductsRes)
-    ? allProductsRes
-    : ((allProductsRes as any)?.products ?? []);
+  const allProducts: ComputedProduct[] = Array.isArray(allProductsRes)
+    ? (allProductsRes as ComputedProduct[])
+    : ((allProductsRes as {products?: ComputedProduct[]})?.products ?? []);
 
   const categoriesWithProducts = new Set<string>();
   const countsByCat: Record<string, number> = {};
@@ -189,16 +190,14 @@ async function Detail({
     .map(c => ({id: c.id, name: c.name, slug: c.slug}));
 
   const currentPortalIds: string[] = (computed.product?.portalCategorySet ?? [])
-    .map((c: any) => String(c?.id ?? ''))
+    .map(c => String(c?.id ?? ''))
     .filter(Boolean);
   const related = currentPortalIds.length
     ? allProducts
         .filter(p => {
           if (p?.product?.id === computed.product?.id) return false;
           const portal = p?.product?.portalCategorySet ?? [];
-          return portal.some((c: any) =>
-            currentPortalIds.includes(String(c?.id)),
-          );
+          return portal.some(c => currentPortalIds.includes(String(c?.id)));
         })
         .slice(0, RELATED_LIMIT)
     : [];

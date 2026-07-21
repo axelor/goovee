@@ -201,7 +201,7 @@ function OrderItem({
   onSelect,
   onOpen,
 }: {
-  order: any;
+  order: Order;
   selected: boolean;
   onSelect: () => void;
   onOpen: () => void;
@@ -237,7 +237,7 @@ function OrderItem({
   );
 }
 
-function OrderPreview({order, detailHref}: {order: any; detailHref: string}) {
+function OrderPreview({order, detailHref}: {order: Order; detailHref: string}) {
   const statusKey = getStatusKey(order.statusSelect, order.deliveryState);
   const {status} = getStatus(order.statusSelect, order.deliveryState);
   const journey = getOrderJourney(order.statusSelect, order.deliveryState).map(

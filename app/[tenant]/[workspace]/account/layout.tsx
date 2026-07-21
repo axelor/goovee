@@ -41,7 +41,7 @@ export default async function Layout(props: {
   const adminContact =
     partner?.isContact &&
     partner.contactWorkspaceConfigSet?.find(
-      (c: any) =>
+      c =>
         c.portalWorkspace?.url === workspaceURL &&
         c?.partner?.id === user.mainPartnerId,
     )?.isAdmin;

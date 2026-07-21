@@ -7,6 +7,7 @@ import {IconType} from 'react-icons';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
+import type {PartnerAddress, PortalAddress} from '@/types';
 import {cn} from '@/utils/css';
 import {useToast} from '@/ui/hooks';
 import {
@@ -30,9 +31,13 @@ import {AddressEditModal} from '../address-edit-modal';
 
 type Country = {id: string; name: string; version?: number};
 type Kind = 'invoicing' | 'shipping';
-type Editing = {mode: 'new' | 'edit'; kind: Kind; address?: any} | null;
+type Editing = {
+  mode: 'new' | 'edit';
+  kind: Kind;
+  address?: PartnerAddress;
+} | null;
 
-function formatAddressLine(address: any): string {
+function formatAddressLine(address: PortalAddress | null | undefined): string {
   if (!address) return '';
   const street = address.streetName || address.addressl4 || '';
   const town = address.townName || address.addressl6 || '';
@@ -45,11 +50,11 @@ function formatAddressLine(address: any): string {
     .join(', ');
 }
 
-function getLabel(a: any): string {
+function getLabel(a: PartnerAddress): string {
   return a?.address?.addressl2 || a?.address?.department || i18n.t('Address');
 }
 
-function getContact(a: any): string {
+function getContact(a: PartnerAddress): string {
   const addr = a?.address;
   if (!addr) return '';
   return (
@@ -63,7 +68,7 @@ export function AddressBook({
   addresses = [],
   countries = [],
 }: {
-  addresses: any[];
+  addresses: PartnerAddress[];
   countries: Country[];
 }) {
   const router = useRouter();
@@ -190,10 +195,10 @@ function AddressSection({
   kind: Kind;
   icon: IconType;
   title: string;
-  addrs: any[];
+  addrs: PartnerAddress[];
   busyId: string | null;
   onAdd: () => void;
-  onEdit: (a: any) => void;
+  onEdit: (a: PartnerAddress) => void;
   onSetDefault: (id: string) => void;
   onDelete: (id: string) => void;
 }) {

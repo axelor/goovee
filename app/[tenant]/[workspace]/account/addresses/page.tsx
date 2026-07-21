@@ -65,14 +65,20 @@ export default async function Page(props: PageParams) {
     return (
       <AddressBook
         addresses={addresses || []}
-        countries={(countries as any) || []}
+        countries={(countries ?? []).map(c => ({id: c.id, name: c.name ?? ''}))}
       />
     );
   }
 
   // Checkout / quotation → existing address selection flow.
-  let data = {
-    recordId: null as any,
+  let data: {
+    recordId: string | null;
+    address: {
+      invoicingAddress: {id: string} | null;
+      deliveryAddress: {id: string} | null;
+    };
+  } = {
+    recordId: null,
     address: {invoicingAddress: null, deliveryAddress: null},
   };
 
@@ -91,7 +97,7 @@ export default async function Page(props: PageParams) {
         isContactAdmin,
         partnerKey: PartnerKey.CLIENT_PARTNER,
       });
-      const quotation: any = await findQuotation({
+      const quotation = await findQuotation({
         id: quotationId,
         client,
         params: {where},
@@ -122,9 +128,9 @@ export default async function Page(props: PageParams) {
           id: data.recordId,
           ...data.address,
         }}
-        invoicingAddresses={invoicingAddresses}
-        deliveryAddresses={deliveryAddresses}
-        countries={(countries as any) || []}
+        invoicingAddresses={invoicingAddresses ?? []}
+        deliveryAddresses={deliveryAddresses ?? []}
+        countries={(countries ?? []).map(c => ({id: c.id, name: c.name ?? ''}))}
         fromQuotation={fromQuotation}
         fromCheckout={fromCheckout}
         callbackURL={callbackURL}

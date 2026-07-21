@@ -71,7 +71,7 @@ function Avatar({
   size = 34,
 }: {
   name?: string | null;
-  pictureId?: any;
+  pictureId?: string | null;
   tenant: string;
   size?: number;
 }) {
@@ -212,7 +212,7 @@ function ForumMessage({
 }: {
   author?: string | null;
   meta?: string | null;
-  pictureId?: any;
+  pictureId?: string | null;
   tenant: string;
   body?: string | null;
   score: number;
@@ -435,7 +435,7 @@ export function ForumDetail({
   replyCount?: number;
   groupMeta?: {memberCount: number; postCount: number};
   related?: AnyRec[];
-  currentUser?: {name?: string | null; pictureId?: any} | null;
+  currentUser?: {name?: string | null; pictureId?: string | null} | null;
   canComment?: boolean;
   isAuthor?: boolean;
   backHref: string;

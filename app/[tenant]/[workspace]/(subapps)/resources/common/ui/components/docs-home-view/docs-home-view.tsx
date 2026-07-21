@@ -6,6 +6,7 @@ import {formatDateTime} from '@/lib/core/locale/formatters';
 import {cn} from '@/utils/css';
 
 import {FolderIcon} from '../doc-file-icon';
+import type {PinnedFolder} from '@/subapps/resources/common/types';
 
 export interface DocsHomeViewLabels {
   pinnedTitle: string;
@@ -22,7 +23,7 @@ export function DocsHomeView({
   workspaceURI,
   labels,
 }: {
-  pinnedFolders: any[];
+  pinnedFolders: PinnedFolder[];
   workspaceURI: string;
   labels: DocsHomeViewLabels;
 }) {
@@ -75,7 +76,7 @@ function PinnedFolderCard({
   workspaceURI,
   labels,
 }: {
-  folder: any;
+  folder: PinnedFolder;
   workspaceURI: string;
   labels: DocsHomeViewLabels;
 }) {

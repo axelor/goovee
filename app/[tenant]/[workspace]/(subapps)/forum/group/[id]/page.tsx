@@ -67,15 +67,12 @@ export default async function Page(props: {
 
   const groupId = params.id;
 
-  const group: any = await findGroupById(
-    groupId,
-    workspace.id,
-    client,
-    user,
-  ).then(clone);
+  const group = await findGroupById(groupId, workspace.id, client, user).then(
+    clone,
+  );
   if (!group) return notFound();
 
-  const memberGroups: any = userId
+  const memberGroups = userId
     ? await findGroupsByMembers({
         id: userId,
         orderBy: GROUPS_ORDER_BY,
@@ -84,9 +81,11 @@ export default async function Page(props: {
         user,
       })
     : [];
-  const memberGroupIDs = memberGroups.map((g: any) => g?.forumGroup?.id);
+  const memberGroupIDs = memberGroups
+    .map(g => g?.forumGroup?.id)
+    .filter((id): id is string => id != null);
   const memberRecord = memberGroups.find(
-    (g: any) => String(g?.forumGroup?.id) === String(groupId),
+    g => String(g?.forumGroup?.id) === String(groupId),
   );
 
   const groupMeta = await findGroupMeta({groupId, client});
@@ -102,7 +101,7 @@ export default async function Page(props: {
     memberGroupIDs,
   }).then(clone);
 
-  const postIds = posts.map((p: any) => p.id);
+  const postIds = posts.map(p => p.id);
   const replyCounts = await findCommentCounts({postIds, client});
   const reactions = await getReactionSummaries({
     client,
@@ -113,7 +112,7 @@ export default async function Page(props: {
   for (const [id, s] of Object.entries(reactions.post)) {
     scoreByPost[id] = s.score;
   }
-  const postsWithCounts = posts.map((p: any) => ({
+  const postsWithCounts = posts.map(p => ({
     ...p,
     replyCount: replyCounts[String(p.id)] ?? 0,
   }));
@@ -129,7 +128,7 @@ export default async function Page(props: {
       isMember={Boolean(memberRecord)}
       memberRecordId={memberRecord?.id}
       userId={userId}
-      groups={memberGroups.map((g: any) => g.forumGroup)}
+      groups={memberGroups.map(g => g.forumGroup)}
       canPost={Boolean(memberRecord)}
       backHref={forumBase}
     />

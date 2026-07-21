@@ -10,7 +10,10 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Link} from '@/ui/components/link';
 import {withBasePath} from '@/lib/core/path/base-path';
 
-type Article = any;
+// ---- LOCAL IMPORTS ---- //
+import type {NewsItem} from '@/subapps/news/common/types';
+
+type Article = NewsItem;
 
 /**
  * Magazine hub body — featured XL + 2 secondaries + grid. The sticky

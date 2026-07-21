@@ -36,12 +36,12 @@ interface ContentProps {
 
 const TODAY = new Date();
 
-function isOverdue(invoice: any): boolean {
+function isOverdue(invoice: Cloned<InvoiceType>): boolean {
   if (!invoice?.isUnpaid || !invoice?.dueDate) return false;
   return new Date(invoice.dueDate) < TODAY;
 }
 
-function getInvoiceStatusKey(invoice: any): StatusKey {
+function getInvoiceStatusKey(invoice: Cloned<InvoiceType>): StatusKey {
   if (!invoice.isUnpaid) return 'paid';
   if (isOverdue(invoice)) return 'overdue';
   const remaining = extractAmount(invoice.amountRemaining?.value);
@@ -50,7 +50,9 @@ function getInvoiceStatusKey(invoice: any): StatusKey {
   return 'unpaid';
 }
 
-function getInvoiceTone(invoice: any): 'mint' | 'overdue' | 'royal' {
+function getInvoiceTone(
+  invoice: Cloned<InvoiceType>,
+): 'mint' | 'overdue' | 'royal' {
   if (!invoice.isUnpaid) return 'mint';
   if (isOverdue(invoice)) return 'overdue';
   return 'royal';
@@ -62,7 +64,7 @@ export default function Content({
   workspaceURI,
   token,
 }: ContentProps) {
-  const {id, invoiceId, dueDate, invoiceDate, isUnpaid} = invoice as any;
+  const {id, invoiceId, dueDate, invoiceDate, isUnpaid} = invoice;
 
   const router = useRouter();
   const {toast} = useToast();
@@ -112,7 +114,7 @@ export default function Content({
     <div className="bg-ink-25 flex-1 min-h-0 flex flex-col">
       <Hero
         eyebrow={i18n.t('Invoice')}
-        title={invoiceId}
+        title={invoiceId ?? ''}
         statusKey={statusKey}
         statusLabel={i18n.t(statusLabel)}
         tone={tone}

@@ -26,7 +26,10 @@ import {
   getStatusKey,
   getOrderJourney,
 } from '@/subapps/orders/common/utils/orders';
-import type {DetailOrder} from '@/subapps/orders/common/types/orders';
+import type {
+  DetailOrder,
+  OrderAddress,
+} from '@/subapps/orders/common/types/orders';
 
 const Content = ({order}: {order: DetailOrder}) => {
   const {
@@ -129,7 +132,7 @@ const Content = ({order}: {order: DetailOrder}) => {
                     {i18n.t('No records available')}
                   </li>
                 )}
-                {saleOrderLineList.map((line: any) => (
+                {saleOrderLineList.map(line => (
                   <ProductRow key={line.id} line={line} tenant={tenant} />
                 ))}
               </ul>
@@ -188,7 +191,7 @@ const Content = ({order}: {order: DetailOrder}) => {
             {invoices?.length ? (
               <DocList
                 title={i18n.t(INVOICE)}
-                items={invoices.map((record: any) => ({
+                items={invoices.map(record => ({
                   id: record.id,
                   label: record.invoiceId,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
@@ -202,7 +205,7 @@ const Content = ({order}: {order: DetailOrder}) => {
             {customerDeliveries?.length ? (
               <DocList
                 title={i18n.t(CUSTOMER_DELIVERY)}
-                items={customerDeliveries.map((record: any) => ({
+                items={customerDeliveries.map(record => ({
                   id: record.id,
                   label: record.stockMoveSeq,
                   date: record.createdOn ? formatDate(record.createdOn) : '',
@@ -336,7 +339,13 @@ function SummaryRow({
   );
 }
 
-function AddressBlock({label, address}: {label: string; address: any}) {
+function AddressBlock({
+  label,
+  address,
+}: {
+  label: string;
+  address: OrderAddress | null | undefined;
+}) {
   if (!address) {
     return (
       <div>
@@ -372,7 +381,13 @@ function AddressBlock({label, address}: {label: string; address: any}) {
   );
 }
 
-function ProductRow({line, tenant}: {line: any; tenant: any}) {
+function ProductRow({
+  line,
+  tenant,
+}: {
+  line: NonNullable<DetailOrder['saleOrderLineList']>[number];
+  tenant: string;
+}) {
   const imageURL = getProductImageURL(line.product?.picture?.id, tenant, {
     noimage: true,
   });
@@ -399,7 +414,7 @@ function ProductRow({line, tenant}: {line: any; tenant: any}) {
         <p className="text-sm font-semibold text-ink-900 tabular-nums">
           {line.inTaxTotal}
         </p>
-        {parseFloat(line.discountAmount) > 0 && (
+        {parseFloat(String(line.discountAmount)) > 0 && (
           <p className="text-xs text-mint-700 tabular-nums">
             −{line.discountAmount}%
           </p>
@@ -414,7 +429,12 @@ function DocList({
   items,
 }: {
   title: string;
-  items: {id: any; label: string; date: string; downloadURL: string}[];
+  items: {
+    id: string;
+    label: string | null;
+    date: string;
+    downloadURL: string;
+  }[];
 }) {
   return (
     <Card>

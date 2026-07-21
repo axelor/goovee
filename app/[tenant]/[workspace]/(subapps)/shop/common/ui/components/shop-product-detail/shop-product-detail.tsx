@@ -19,6 +19,7 @@ import {
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
 import type {ShopCategory} from '@/subapps/shop/common/ui/components';
+import type {ComputedProduct} from '@/types';
 
 export interface ShopProductDetailLabels {
   categoriesTitle: string;
@@ -48,11 +49,11 @@ export interface ShopProductDetailLabels {
 }
 
 interface ShopProductDetailProps {
-  product: any;
+  product: ComputedProduct;
   categories: ShopCategory[];
   countsByCat: Record<string, number>;
   totalCount: number;
-  relatedProducts: any[];
+  relatedProducts: ComputedProduct[];
   labels: ShopProductDetailLabels;
   hidePriceAndPurchase?: boolean;
 }
@@ -82,7 +83,7 @@ export function ShopProductDetail({
   // The portal exposes products via portalCategorySet (many-to-many) — that's
   // the set the catalog actually filters on. Falls back to the primary
   // productCategory for products that bypass portal exposure.
-  const portalCategories: any[] = product?.portalCategorySet ?? [];
+  const portalCategories = product?.portalCategorySet ?? [];
   const cat = portalCategories[0] ?? product?.productCategory ?? null;
   const catName = cat?.name ?? null;
   const hue = getCategoryHue(catName);

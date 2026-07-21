@@ -113,10 +113,10 @@ export default async function Page(props: {
   }).then(clone);
 
   const replyCounts = await findCommentCounts({
-    postIds: posts.map((p: any) => p.id),
+    postIds: posts.map(p => p.id),
     client,
   });
-  const postsWithCounts = posts.map((p: any) => ({
+  const postsWithCounts = posts.map(p => ({
     ...p,
     replyCount: replyCounts[String(p.id)] ?? 0,
   }));
@@ -129,7 +129,7 @@ export default async function Page(props: {
   }).then(clone);
 
   const stats = {
-    discussions: (pageInfo as any)?.count ?? posts.length,
+    discussions: Number(pageInfo?.count ?? posts.length),
     groups: groups.length,
     myGroups: memberGroups.length,
   };
@@ -140,14 +140,14 @@ export default async function Page(props: {
         <div className="min-w-0">
           <ForumFeed
             posts={postsWithCounts}
-            groups={memberGroups.map((g: any) => g.forumGroup)}
+            groups={memberGroups.map(g => g.forumGroup)}
             canPost={Boolean($user?.id)}
           />
         </div>
         <aside className="lg:sticky lg:top-6 flex flex-col gap-5">
           <ForumSidebar
             stats={stats}
-            trending={(recent as any[]).map(r => ({id: r.id, title: r.title}))}
+            trending={recent.map(r => ({id: r.id, title: r.title}))}
           />
           <GroupControls
             memberGroups={memberGroups}

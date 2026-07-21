@@ -8,7 +8,7 @@ import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {Button, Loader} from '@/ui/components';
 import {ADDRESS_TYPE} from '@/constants';
-import type {PartnerAddress} from '@/types';
+import type {PartnerAddress, PortalAddress} from '@/types';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -188,7 +188,7 @@ export function AddressSelection({
   );
 }
 
-function AddressBlock({address}: {address: any}) {
+function AddressBlock({address}: {address: PortalAddress | null | undefined}) {
   if (!address) return null;
   return (
     <div className="text-sm leading-snug">

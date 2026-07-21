@@ -104,7 +104,7 @@ export function EventDetails({
   const isRegistrationAllow =
     eventAllowRegistration &&
     (user || allowGuests) &&
-    !hasRegistrationEnded(eventDetails as any);
+    !hasRegistrationEnded(eventDetails);
 
   const category = eventDetails.eventCategorySet?.[0];
   const days = daysUntil(eventDetails.eventStartDateTime);
@@ -316,7 +316,7 @@ export function EventDetails({
                   </Link>
                 ) : (
                   <div className="rounded-xl border border-ink-100 bg-ink-25 px-4 py-3 text-[13px] text-ink-600 text-center">
-                    {hasRegistrationEnded(eventDetails as any)
+                    {hasRegistrationEnded(eventDetails)
                       ? i18n.t('Registration is closed')
                       : i18n.t('Sign in to register')}
                   </div>

@@ -104,7 +104,7 @@ export function ForumFeed({
                 .catch(() => [])
             }
             renderItem={SearchItem}
-            onItemClick={(result: any) =>
+            onItemClick={(result: {id: string}) =>
               router.push(`${postBase}/${result.id}`)
             }
             onViewAll={(query: string) =>

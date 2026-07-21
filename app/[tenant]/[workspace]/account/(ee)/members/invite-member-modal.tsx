@@ -23,9 +23,17 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 
 // ---- LOCAL IMPORTS ---- //
 import {AccountToggle} from '../../common/ui/components';
-import {Authorization, Role} from '../../common/types';
+import {Authorization, Role, type InviteAppsConfig} from '../../common/types';
 import {sendInvites} from './invite/action';
 import {updateMemberApplication, updateMemberAuthentication} from './action';
+
+// Member shape derived from the ORM finder (type-only import, erased at build).
+type MembersResult = Awaited<
+  ReturnType<typeof import('../../common/orm/members').findMembers>
+>;
+type ContactMember = NonNullable<
+  NonNullable<Extract<MembersResult, {contacts: unknown}>['contacts']>[number]
+>;
 
 type AvailableApp = {
   id: string;
@@ -51,7 +59,7 @@ export function InviteMemberModal({
   onClose: () => void;
   onSaved: () => void;
   availableApps: AvailableApp[];
-  member?: any;
+  member?: ContactMember;
 }) {
   const {toast} = useToast();
   const {workspaceURL, workspaceURI} = useWorkspace();
@@ -60,9 +68,10 @@ export function InviteMemberModal({
   // Current member permissions keyed by app code (edit mode).
   const memberPerms: Record<string, Authorization> = useMemo(() => {
     const list = member?.contactWorkspaceConfig?.contactAppPermissionList || [];
-    return list.reduce((acc: Record<string, Authorization>, p: any) => {
+    return list.reduce<Record<string, Authorization>>((acc, p) => {
       if (p?.app?.code)
-        acc[p.app.code] = p.roleSelect ?? Authorization.restricted;
+        acc[p.app.code] =
+          (p.roleSelect as Authorization) ?? Authorization.restricted;
       return acc;
     }, {});
   }, [member]);
@@ -107,7 +116,7 @@ export function InviteMemberModal({
     );
 
   const handleInvite = async () => {
-    const apps = availableApps.reduce(
+    const apps = availableApps.reduce<InviteAppsConfig>(
       (acc, a) => ({
         ...acc,
         [a.code]: {
@@ -119,14 +128,13 @@ export function InviteMemberModal({
       {},
     );
 
-    const result =
-      (await sendInvites({
-        emails: emailInput,
-        role,
-        apps,
-        workspaceURL,
-        workspaceURI,
-      } as any)) || ({} as any);
+    const result = await sendInvites({
+      emails: emailInput,
+      role,
+      apps,
+      workspaceURL,
+      workspaceURI,
+    });
 
     if ('success' in result) {
       toast({
@@ -144,6 +152,7 @@ export function InviteMemberModal({
   };
 
   const handleSaveAccess = async () => {
+    if (!member) return;
     const ref = {id: member.id};
     for (const a of availableApps) {
       const desired = perms[a.code];
@@ -157,7 +166,7 @@ export function InviteMemberModal({
           member: ref,
           app,
           value: desired.access ? 'yes' : 'no',
-        } as any);
+        });
       }
 
       // Authorization only matters for scoped apps that keep access.
@@ -171,7 +180,7 @@ export function InviteMemberModal({
             member: ref,
             app,
             value: desired.level,
-          } as any);
+          });
         }
       }
     }

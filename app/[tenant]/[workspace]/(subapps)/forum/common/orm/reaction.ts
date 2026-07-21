@@ -1,6 +1,10 @@
 // ---- CORE IMPORTS ---- //
+import type {WhereOptions} from '@goovee/orm';
 import type {Client} from '@/goovee/.generated/client';
+import type {AOSPortalForumReaction} from '@/goovee/.generated/models';
 import {clone} from '@/utils';
+
+type ReactionWhere = WhereOptions<AOSPortalForumReaction>;
 
 export const REACTION_LIKE = 'like';
 export const REACTION_DISLIKE = 'dislike';
@@ -42,10 +46,10 @@ export async function getReactionSummaries({
   postIds.forEach(id => (result.post[String(id)] = emptySummary()));
   commentIds.forEach(id => (result.comment[String(id)] = emptySummary()));
 
-  const orFilters: any[] = [];
-  if (postIds.length) orFilters.push({post: {id: {in: postIds}}});
+  const orFilters: ReactionWhere[] = [];
+  if (postIds.length) orFilters.push({post: {id: {in: postIds.map(String)}}});
   if (commentIds.length)
-    orFilters.push({reactionComment: {id: {in: commentIds}}});
+    orFilters.push({reactionComment: {id: {in: commentIds.map(String)}}});
   if (!orFilters.length) return result;
 
   const rows = await client.aOSPortalForumReaction
@@ -53,7 +57,7 @@ export async function getReactionSummaries({
       where: {
         reactionSelect: {in: [REACTION_LIKE, REACTION_DISLIKE]},
         OR: orFilters,
-      } as any,
+      },
       select: {
         reactionSelect: true,
         post: {id: true},
@@ -63,7 +67,7 @@ export async function getReactionSummaries({
     })
     .then(clone);
 
-  for (const r of rows as any[]) {
+  for (const r of rows) {
     const bucketKey: 'post' | 'comment' | null = r.post?.id
       ? 'post'
       : r.reactionComment?.id
@@ -96,17 +100,17 @@ export async function findUserReaction({
   target: 'post' | 'comment';
   id: string | number;
   partnerId: string | number;
-}): Promise<{id: string; version: number; reactionSelect: string} | null> {
-  const where =
+}) {
+  const where: ReactionWhere =
     target === 'post'
-      ? {post: {id}, author: {id: partnerId}}
-      : {reactionComment: {id}, author: {id: partnerId}};
+      ? {post: {id: String(id)}, author: {id: String(partnerId)}}
+      : {reactionComment: {id: String(id)}, author: {id: String(partnerId)}};
 
   const rows = await client.aOSPortalForumReaction.find({
-    where: where as any,
+    where,
     select: {reactionSelect: true},
     take: 1,
   });
 
-  return (rows?.[0] as any) ?? null;
+  return rows?.[0] ?? null;
 }

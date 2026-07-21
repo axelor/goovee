@@ -50,7 +50,7 @@ type Tab = 'active' | 'past';
 
 export interface MagazineHubCategory {
   id: string;
-  name: string;
+  name: string | null;
   color?: string | null;
 }
 
@@ -63,8 +63,8 @@ export function MagazineHub({
   labels,
   searchAction,
 }: {
-  activeEvents: any[];
-  pastEvents: any[];
+  activeEvents: ListEvent[];
+  pastEvents: ListEvent[];
   categories: MagazineHubCategory[];
   workspaceURI: string;
   workspaceURL: string;
@@ -80,7 +80,7 @@ export function MagazineHub({
 
   // Global event search (ORM, like before the redesign) — dropdown of matches.
   const [search, setSearch] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<ListEvent[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -120,7 +120,7 @@ export function MagazineHub({
   const source = useMemo(() => {
     if (!hasFilters) return rawSource;
     return rawSource.filter(e =>
-      (e.eventCategorySet ?? []).some((c: any) => activeCats.has(c.id)),
+      (e.eventCategorySet ?? []).some(c => activeCats.has(String(c.id))),
     );
   }, [rawSource, activeCats, hasFilters]);
 
@@ -239,9 +239,12 @@ export function MagazineHub({
                             <div className="flex items-center gap-2 text-[11.5px] text-ink-500 mt-0.5">
                               {event.eventStartDateTime && (
                                 <span className="tabular-nums">
-                                  {formatDateTime(event.eventStartDateTime, {
-                                    dateFormat: 'MMMM D YYYY',
-                                  })}
+                                  {formatDateTime(
+                                    event.eventStartDateTime ?? '',
+                                    {
+                                      dateFormat: 'MMMM D YYYY',
+                                    },
+                                  )}
                                 </span>
                               )}
                               {event.eventCategorySet?.[0]?.name && (
@@ -409,10 +412,10 @@ export function MagazineHub({
 
 // ---- Helpers ---- //
 
-function getEventImageURL(event: any, workspaceURI: string): string {
+function getEventImageURL(event: ListEvent, workspaceURI: string): string {
   if (!event) return withBasePath(NO_IMAGE_URL);
   const categoryWithImage = event.eventCategorySet?.find(
-    (cat: any) => cat.thumbnailImage?.id || cat.image?.id,
+    cat => cat.thumbnailImage?.id || cat.image?.id,
   );
   if (categoryWithImage) {
     return withBasePath(
@@ -436,7 +439,7 @@ function daysUntil(date: string | Date | null | undefined): number | null {
   return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
 
-function getPrice(event: any): {value: number; display: string | null} {
+function getPrice(event: ListEvent): {value: number; display: string | null} {
   const raw = event?.defaultPrice ?? event?.eventProduct?.salePrice;
   if (raw == null) return {value: 0, display: null};
   const num = Number(raw);
@@ -454,7 +457,7 @@ function FeaturedCard({
   registeredBadge,
   isPast,
 }: {
-  event: any;
+  event: ListEvent;
   workspaceURI: string;
   ctaLabel: string;
   daysLabel: string;
@@ -523,7 +526,7 @@ function FeaturedCard({
           </h2>
           <div className="mt-3.5 flex flex-wrap items-center gap-2.5 text-[14.5px] text-white/90">
             <MdOutlineCalendarToday className="text-base" />
-            {formatDateTime(event.eventStartDateTime, {
+            {formatDateTime(event.eventStartDateTime ?? '', {
               dateFormat: 'MMMM D YYYY',
               timeFormat: ' · h:mmA',
             })}
@@ -581,7 +584,7 @@ function MagazineCard({
   registeredBadge,
   isPast,
 }: {
-  event: any;
+  event: ListEvent;
   workspaceURI: string;
   seeLabel: string;
   freeLabel: string;
@@ -638,7 +641,7 @@ function MagazineCard({
         <div className="flex flex-col gap-1 text-[12.5px] text-ink-600">
           <div className="flex items-center gap-1.5">
             <MdOutlineCalendarToday className="text-ink-400 text-sm" />
-            {formatDateTime(event.eventStartDateTime, {
+            {formatDateTime(event.eventStartDateTime ?? '', {
               dateFormat: 'MMMM D YYYY',
               timeFormat: ' · h:mmA',
             })}

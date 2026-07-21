@@ -12,6 +12,8 @@ import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
+import type {ComputedProduct, PartnerAddress, PortalAddress} from '@/types';
+import type {EnrichedCartItem} from '@/subapps/shop/common/types';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +55,8 @@ export interface ShopQuoteModalLabels {
 
 const ITEMS_PREVIEW_COUNT = 3;
 
+type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
+
 export function ShopQuoteModal({
   open,
   onOpenChange,
@@ -62,7 +66,7 @@ export function ShopQuoteModal({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  computedItems: any[];
+  computedItems: ResolvedCartItem[];
   quotationSubapp: boolean;
   labels: ShopQuoteModalLabels;
 }) {
@@ -107,12 +111,14 @@ export function ShopQuoteModal({
     }
     setSubmitting(true);
     try {
-      const res = await requestQuotation({cart, workspaceURL});
-      if ((res as any)?.data) {
+      const res = (await requestQuotation({cart, workspaceURL})) as {
+        data?: string;
+      };
+      if (res?.data) {
         toast({variant: 'success', title: labels.successTitle});
         clearCart();
         const redirectURL = quotationSubapp
-          ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${(res as any).data}`
+          ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`
           : `${workspaceURI}/${SUBAPP_CODES.shop}`;
         onOpenChange(false);
         router.replace(redirectURL);
@@ -196,7 +202,7 @@ export function ShopQuoteModal({
                 {labels.itemsTitle}
               </h3>
               <ul className="flex flex-col gap-2.5">
-                {previewItems.map((item: any) => (
+                {previewItems.map((item: ResolvedCartItem) => (
                   <QuoteItemRow
                     key={item.computedProduct.product.id}
                     item={item}
@@ -268,7 +274,13 @@ export function ShopQuoteModal({
   );
 }
 
-function QuoteItemRow({item, fmt}: {item: any; fmt: (n: number) => string}) {
+function QuoteItemRow({
+  item,
+  fmt,
+}: {
+  item: ResolvedCartItem;
+  fmt: (n: number) => string;
+}) {
   const {tenant} = useWorkspace();
   const product = item.computedProduct.product;
   const portalCat = product?.portalCategorySet?.[0];
@@ -327,7 +339,7 @@ function QuoteAddressPicker({
 }) {
   const {cart, updateAddress} = useCart();
   const {workspaceURL} = useWorkspace();
-  const [addresses, setAddresses] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -343,12 +355,12 @@ function QuoteAddressPicker({
           findDefaultDelivery({workspaceURL}),
         ]);
         if (cancelled) return;
-        const all = (list as any[]) ?? [];
+        const all = (list as PartnerAddress[] | null) ?? [];
         setAddresses(all);
         const cartId = cart?.deliveryAddress ?? cart?.invoicingAddress ?? null;
         const initial =
           (cartId && all.find(a => String(a.id) === String(cartId))) ||
-          (def as any) ||
+          (def as PartnerAddress | null) ||
           all[0] ||
           null;
         if (initial?.id) {
@@ -376,7 +388,7 @@ function QuoteAddressPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSelect = (addr: any) => {
+  const handleSelect = (addr: PartnerAddress) => {
     setSelectedId(String(addr.id));
     updateAddress({addressType: ADDRESS_TYPE.delivery, address: addr.id});
     updateAddress({addressType: ADDRESS_TYPE.invoicing, address: addr.id});
@@ -469,7 +481,7 @@ function QuoteAddressPicker({
   );
 }
 
-function AddressLines({address}: {address: any}) {
+function AddressLines({address}: {address: PortalAddress | null | undefined}) {
   if (!address) return null;
   return (
     <div className="text-[12.5px] leading-tight">

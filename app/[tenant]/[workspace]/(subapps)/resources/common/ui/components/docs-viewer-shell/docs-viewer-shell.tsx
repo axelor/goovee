@@ -8,6 +8,7 @@ import {formatDateTime} from '@/lib/core/locale/formatters';
 import {cn} from '@/utils/css';
 
 import {DocFileIcon} from '../doc-file-icon';
+import type {DmsFile} from '@/subapps/resources/common/types';
 
 export interface DocsViewerShellLabels {
   backLabel: string;
@@ -34,11 +35,11 @@ export function DocsViewerShell({
   labels,
   children,
 }: {
-  file: any;
+  file: DmsFile;
   workspaceURI: string;
   backHref: string;
   downloadHref: string | null;
-  siblings: any[];
+  siblings: DmsFile[];
   isNew: boolean;
   labels: DocsViewerShellLabels;
   children: React.ReactNode;
@@ -68,7 +69,7 @@ export function DocsViewerShell({
           <section
             className="rounded-[14px] overflow-hidden border border-ink-200 shadow-soft-md min-w-0"
             style={{background: '#3a4a63'}}>
-            <ViewerToolbar fileName={file.fileName} />
+            <ViewerToolbar fileName={file.fileName ?? ''} />
             <div className="bg-white">{children}</div>
           </section>
 
@@ -103,7 +104,7 @@ function TopBar({
   labels,
   fresh,
 }: {
-  file: any;
+  file: DmsFile;
   backHref: string;
   downloadHref: string | null;
   labels: DocsViewerShellLabels;
@@ -256,7 +257,7 @@ function SameFolderCard({
   workspaceURI,
   labels,
 }: {
-  siblings: any[];
+  siblings: DmsFile[];
   currentId: string;
   workspaceURI: string;
   labels: DocsViewerShellLabels;

@@ -12,6 +12,16 @@ import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
 import type {Cloned} from '@/types/util';
+import type {
+  CartItem,
+  ComputedProduct,
+  PartnerAddress,
+  PortalAddress,
+} from '@/types';
+import type {Subapp} from '@/orm/workspace';
+import type {EnrichedCartItem} from '@/subapps/shop/common/types';
+
+type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
 
 import {
   fetchDeliveryAddresses,
@@ -69,12 +79,14 @@ export function ShopCheckout({
   labels,
 }: {
   config: ShopConfig | Cloned<ShopConfig>;
-  orderSubapp?: any;
+  orderSubapp?: Subapp | null;
   labels: ShopCheckoutLabels;
 }) {
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
   const {cart} = useCart();
-  const [computedProducts, setComputedProducts] = useState<any[]>([]);
+  const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [shippingType, setShippingType] = useState<string>(
     SHIPPING_TYPE.REGULAR,
@@ -94,11 +106,14 @@ export function ShopCheckout({
       }
       try {
         const results = await Promise.all(
-          items.map((i: any) =>
+          items.map((i: CartItem) =>
             findProduct({id: String(i.product), workspaceURL}),
           ),
         );
-        if (!cancelled) setComputedProducts(results.filter(Boolean));
+        if (!cancelled)
+          setComputedProducts(
+            results.filter((p): p is ComputedProduct => Boolean(p)),
+          );
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -108,15 +123,15 @@ export function ShopCheckout({
     };
   }, [cart, workspaceURL]);
 
-  const items = useMemo<any[]>(() => {
-    return (cart?.items ?? [])
-      .map((i: any) => ({
+  const items = useMemo<ResolvedCartItem[]>(() => {
+    return ((cart?.items ?? []) as CartItem[])
+      .map(i => ({
         ...i,
         computedProduct: computedProducts.find(
           cp => Number(cp?.product?.id) === Number(i.product),
         ),
       }))
-      .filter((i: any) => i.computedProduct);
+      .filter((i): i is ResolvedCartItem => i.computedProduct != null);
   }, [cart?.items, computedProducts]);
 
   const subtotal = useMemo(() => {
@@ -244,7 +259,7 @@ export function ShopCheckout({
                   </h3>
                 </div>
                 <ul className="flex flex-col gap-3 px-[22px] py-3.5 border-b border-ink-100">
-                  {items.map((item: any) => (
+                  {items.map((item: ResolvedCartItem) => (
                     <SummaryRow
                       key={item.computedProduct.product.id}
                       item={item}
@@ -379,7 +394,7 @@ function SummaryRow({
   qtyPrefix,
   fmt,
 }: {
-  item: any;
+  item: ResolvedCartItem;
   tenant: string;
   qtyPrefix: string;
   fmt: (n: number) => string;
@@ -454,7 +469,7 @@ function CheckoutAddressPicker({
 }) {
   const {cart, updateAddress} = useCart();
   const {workspaceURL} = useWorkspace();
-  const [addresses, setAddresses] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -474,7 +489,7 @@ function CheckoutAddressPicker({
             : findDefaultDelivery({workspaceURL}),
         ]);
         if (cancelled) return;
-        const all = (list as any[]) ?? [];
+        const all = (list as PartnerAddress[] | null) ?? [];
         setAddresses(all);
 
         const cartId =
@@ -482,7 +497,7 @@ function CheckoutAddressPicker({
           null;
         const initial =
           (cartId && all.find(a => String(a.id) === String(cartId))) ||
-          (def as any) ||
+          (def as PartnerAddress | null) ||
           all[0] ||
           null;
 
@@ -502,7 +517,7 @@ function CheckoutAddressPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSelect = (addr: any) => {
+  const handleSelect = (addr: PartnerAddress) => {
     setSelectedId(String(addr.id));
     updateAddress({addressType: type, address: addr.id});
   };
@@ -581,7 +596,7 @@ function CheckoutAddressPicker({
   );
 }
 
-function AddressLines({address}: {address: any}) {
+function AddressLines({address}: {address: PortalAddress | null | undefined}) {
   if (!address) return null;
   return (
     <div className="text-[12.5px] leading-tight">

@@ -3,8 +3,11 @@ import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
-import {findWorkspace} from '@/orm/workspace';
+import {findWorkspace, type Workspace} from '@/orm/workspace';
 import {clone} from '@/utils';
+import type {Client} from '@/goovee/.generated/client';
+import type {User} from '@/types';
+import type {Cloned} from '@/types/util';
 import {workspacePathname} from '@/utils/workspace';
 import {ORDER_BY, SUBAPP_CODES} from '@/constants';
 import {manager} from '@/tenant';
@@ -61,13 +64,13 @@ async function AgendaData({
   workspaceURI,
   workspaceURL,
 }: {
-  workspace: any;
-  user: any;
-  client: any;
+  workspace: Workspace | Cloned<Workspace>;
+  user: User | null | undefined;
+  client: Client;
   workspaceURI: string;
   workspaceURL: string;
 }) {
-  const result: any = await findEvents({
+  const result = await findEvents({
     limit: FETCH_LIMIT,
     page: 1,
     categoryids: [],
@@ -78,9 +81,7 @@ async function AgendaData({
     orderBy: {eventStartDateTime: ORDER_BY.ASC},
   }).then(clone);
 
-  const events: any[] = (result?.events ?? []).filter(
-    (e: any) => e.eventStartDateTime,
-  );
+  const events = (result?.events ?? []).filter(e => e.eventStartDateTime);
 
   const magazineHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
 

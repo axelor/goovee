@@ -37,7 +37,7 @@ export async function Homepage({
     },
   }).then(clone);
 
-  const articles = (newsResult as any)?.news || [];
+  const articles = newsResult?.news || [];
 
   return <NewsEditorial articles={articles} />;
 }

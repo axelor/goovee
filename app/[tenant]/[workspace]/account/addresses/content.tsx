@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from '@/ui/components';
 import {i18n} from '@/locale';
+import type {PartnerAddress, PortalAddress} from '@/types';
 import {ADDRESS_TYPE, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
@@ -43,9 +44,9 @@ interface ContentProps {
       id: string;
     } | null;
   };
-  invoicingAddresses: any;
-  deliveryAddresses: any;
-  countries?: any[];
+  invoicingAddresses: PartnerAddress[];
+  deliveryAddresses: PartnerAddress[];
+  countries?: Array<{id: string; name: string; version?: number}>;
   fromQuotation?: boolean;
   fromCheckout?: boolean;
   callbackURL?: string;
@@ -61,13 +62,16 @@ function Content({
   callbackURL,
 }: ContentProps) {
   const [initiating, setInitiating] = useState(true);
-  const [selectedAddresses, setSelectedAddresses] = useState({
+  const [selectedAddresses, setSelectedAddresses] = useState<{
+    invoicing: PortalAddress | null;
+    delivery: PortalAddress | null;
+  }>({
     invoicing: null,
     delivery: null,
   });
   const [addressModal, setAddressModal] = useState<{
     kind: 'invoicing' | 'shipping';
-    address?: any;
+    address?: PartnerAddress;
   } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
@@ -86,7 +90,7 @@ function Content({
     });
   };
 
-  const handleEdit = (type: ADDRESS_TYPE, record: any) => {
+  const handleEdit = (type: ADDRESS_TYPE, record: PartnerAddress) => {
     setAddressModal({
       kind: type === ADDRESS_TYPE.invoicing ? 'invoicing' : 'shipping',
       address: record,
@@ -132,7 +136,10 @@ function Content({
     }
   };
 
-  const handleAddressSelection = (type: ADDRESS_TYPE, partnerAddress: any) => {
+  const handleAddressSelection = (
+    type: ADDRESS_TYPE,
+    partnerAddress: PartnerAddress,
+  ) => {
     if (fromCheckout) {
       updateAddress({addressType: type, address: partnerAddress?.id});
     }
@@ -161,8 +168,14 @@ function Content({
           subAppCode: SUBAPP_CODES.quotations,
           record: {
             id: quotationId,
-            deliveryAddress: deliveryAddress,
-            mainInvoicingAddress: invoicingAddress,
+            deliveryAddress: deliveryAddress as {
+              id: string;
+              formattedFullName: string;
+            },
+            mainInvoicingAddress: invoicingAddress as {
+              id: string;
+              formattedFullName: string;
+            },
           },
         });
 
@@ -200,7 +213,8 @@ function Content({
   };
 
   useEffect(() => {
-    let invoicingAddress: any, deliveryAddress: any;
+    let invoicingAddress: PortalAddress | null = null,
+      deliveryAddress: PortalAddress | null = null;
 
     if (fromQuotation) {
       invoicingAddress = quotation?.invoicingAddress || null;
@@ -317,7 +331,7 @@ function Content({
   );
 }
 
-function getLabel(address: any): string {
+function getLabel(address: PortalAddress | null | undefined): string {
   return (
     address?.addressl2 ||
     address?.department ||
@@ -327,7 +341,10 @@ function getLabel(address: any): string {
   );
 }
 
-function getContact(address: any, label: string): string {
+function getContact(
+  address: PortalAddress | null | undefined,
+  label: string,
+): string {
   const contact =
     address?.companyName ||
     [address?.firstName, address?.lastName].filter(Boolean).join(' ') ||
@@ -335,7 +352,7 @@ function getContact(address: any, label: string): string {
   return contact && contact !== label ? contact : '';
 }
 
-function formatAddressLine(address: any): string {
+function formatAddressLine(address: PortalAddress | null | undefined): string {
   if (!address) return '';
   const street = address.streetName || address.addressl4 || '';
   const town = address.townName || address.addressl6 || '';
@@ -365,12 +382,12 @@ function SelectableAddressSection({
   icon: IconType;
   title: string;
   type: ADDRESS_TYPE;
-  addresses: {id: string; isDefaultAddr?: boolean; address: any}[];
-  currentAddress?: {id?: string} | null;
+  addresses: PartnerAddress[];
+  currentAddress?: PortalAddress | null;
   isFromQuotation?: boolean;
   selectable?: boolean;
-  onSelect: (type: ADDRESS_TYPE, partnerAddress: any) => void;
-  onEdit: (type: ADDRESS_TYPE, record: any) => void;
+  onSelect: (type: ADDRESS_TYPE, partnerAddress: PartnerAddress) => void;
+  onEdit: (type: ADDRESS_TYPE, record: PartnerAddress) => void;
   onDelete: (id: string) => void;
   onDefault: (type: ADDRESS_TYPE, id: string, isDefault: boolean) => void;
   onAdd: (type: ADDRESS_TYPE) => void;

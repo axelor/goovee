@@ -47,9 +47,9 @@ export default async function Layout(props: {
       }).then(clone)
     : [];
 
-  const topCategories = (allCategories as any[])
+  const topCategories = allCategories
     .filter(c => !c?.parentCategory?.id)
-    .map(c => ({id: c.id, name: c.name, slug: c.slug}));
+    .map(c => ({id: String(c.id), name: c.name, slug: c.slug}));
 
   return (
     <div className="h-full flex flex-col">

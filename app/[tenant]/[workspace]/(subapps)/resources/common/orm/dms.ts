@@ -110,7 +110,7 @@ export async function fetchPinnedFoldersWithMeta({
       logoSelect: true,
       updatedOn: true,
     },
-    orderBy: {updatedOn: 'DESC'} as any,
+    orderBy: {updatedOn: ORDER_BY.DESC},
     take: 12,
   });
 
@@ -173,7 +173,7 @@ export async function fetchNewFiles({
         fileType: true,
       },
     },
-    orderBy: {createdOn: 'DESC'} as any,
+    orderBy: {createdOn: ORDER_BY.DESC},
     take,
   });
 
@@ -260,9 +260,7 @@ export async function searchFiles({
         parent: {id: true, fileName: true},
         metaFile: {fileType: true},
       },
-      orderBy: {
-        updatedOn: 'DESC',
-      } as any,
+      orderBy: {updatedOn: ORDER_BY.DESC},
       take,
     })
     .then(clone);

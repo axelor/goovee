@@ -41,32 +41,28 @@ export default async function Layout(props: {
   const {user} = access;
   const {client} = access.tenant;
 
-  const [categories, registeredResult, allTabLabel, mineTabLabel]: [
-    any,
-    any,
-    string,
-    string,
-  ] = await Promise.all([
-    findEventCategories({
-      workspaceURL: access.workspace.url,
-      client,
-      user,
-    }).then(clone),
-    user
-      ? findEvents({
-          limit: 200,
-          page: 1,
-          categoryids: [],
-          eventType: EVENT_TYPE.UPCOMING,
-          workspaceURL: access.workspace.url,
-          client,
-          user,
-          onlyRegisteredEvent: true,
-        }).then(clone)
-      : Promise.resolve({events: []}),
-    t('All events'),
-    t('My registrations'),
-  ]);
+  const [categories, registeredResult, allTabLabel, mineTabLabel] =
+    await Promise.all([
+      findEventCategories({
+        workspaceURL: access.workspace.url,
+        client,
+        user,
+      }).then(clone),
+      user
+        ? findEvents({
+            limit: 200,
+            page: 1,
+            categoryids: [],
+            eventType: EVENT_TYPE.UPCOMING,
+            workspaceURL: access.workspace.url,
+            client,
+            user,
+            onlyRegisteredEvent: true,
+          }).then(clone)
+        : Promise.resolve({events: []}),
+      t('All events'),
+      t('My registrations'),
+    ]);
 
   const registeredCount = (registeredResult?.events ?? []).length;
 

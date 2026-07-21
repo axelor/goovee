@@ -57,7 +57,9 @@ export default async function Page(props: {
     user,
   }).then(clone);
 
-  const match = (categories as any[])?.find(c => c.slug === slug);
+  const match = (
+    categories as Array<{id: string | number; slug?: string | null}>
+  )?.find(c => c.slug === slug);
 
   if (!match) return redirect(`${workspaceURI}/shop`);
   return redirect(

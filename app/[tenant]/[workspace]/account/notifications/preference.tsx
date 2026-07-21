@@ -84,13 +84,13 @@ export function Preference({
       </div>
       {!hideSubscription && preference?.activateNotification && (
         <div className="space-y-1 border-l-2 border-royal-border pl-4 ml-1">
-          {preference?.subscriptions?.map((subscription: any, i: number) => (
+          {preference?.subscriptions?.map((subscription, i) => (
             <div
               className="flex items-center justify-between gap-4 py-1"
               key={subscription?.id}>
               <p className="text-sm text-ink-700 mb-0">{subscription?.name}</p>
               <AccountToggle
-                aria-label={subscription?.name}
+                aria-label={subscription?.name ?? undefined}
                 checked={subscription.activateNotification}
                 onCheckedChange={e =>
                   changePreference(false)(e, subscription.id)

@@ -21,15 +21,19 @@ import {
   DocsViewerShell,
   type DocsViewerShellLabels,
 } from '@/subapps/resources/common/ui/components';
+import type {DmsFile} from '@/subapps/resources/common/types';
 
-function computeIsNew(createdOn: any, cutoffMs: number): boolean {
+function computeIsNew(
+  createdOn: string | Date | null | undefined,
+  cutoffMs: number,
+): boolean {
   if (!createdOn) return false;
   const ts = new Date(createdOn).getTime();
   if (Number.isNaN(ts)) return false;
   return Date.now() - ts < cutoffMs;
 }
 
-const viewer: Record<string, React.JSXElementConstructor<any>> = {
+const viewer: Record<string, React.JSXElementConstructor<{record: DmsFile}>> = {
   'application/pdf': PDFViewer,
   'image/jpeg': ImageViewer,
   'image/jpg': ImageViewer,
@@ -84,7 +88,7 @@ export default async function Page(props: {
   if (!file) return notFound();
 
   // Siblings: other files in the same parent folder
-  const parentId = (file as any).parent?.id;
+  const parentId = file.parent?.id;
   const siblings = parentId
     ? await fetchFiles({id: parentId, client, user}).then(clone)
     : [];
@@ -105,22 +109,22 @@ export default async function Page(props: {
     ? `${workspaceURI}/${SUBAPP_CODES.resources}/folder/${parentId}`
     : `${workspaceURI}/${SUBAPP_CODES.resources}`;
 
-  const fileMetaId = (file as any)?.metaFile?.id ?? null;
+  const fileMetaId = file?.metaFile?.id ?? null;
   const downloadHref = fileMetaId
     ? withBasePath(
         `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${fileMetaId}`,
       )
     : null;
 
-  const isNew = computeIsNew((file as any).createdOn, NEW_FILE_CUTOFF_MS);
+  const isNew = computeIsNew(file.createdOn, NEW_FILE_CUTOFF_MS);
 
   return (
     <DocsViewerShell
-      file={file as any}
+      file={file}
       workspaceURI={workspaceURI}
       backHref={backHref}
       downloadHref={downloadHref}
-      siblings={(siblings as any[]) ?? []}
+      siblings={siblings ?? []}
       isNew={isNew}
       labels={labels}>
       <Viewer record={file} />

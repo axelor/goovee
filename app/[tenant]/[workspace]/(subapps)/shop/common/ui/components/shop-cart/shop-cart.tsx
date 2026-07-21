@@ -18,12 +18,16 @@ import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
-import type {Product} from '@/types';
+import type {CartItem, ComputedProduct, Product} from '@/types';
 
+import type {EnrichedCartItem} from '@/subapps/shop/common/types';
 import {
   getCategoryGradient,
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
+
+// A cart item whose product has been resolved (kept after the filter below).
+type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
 import {findProduct} from '@/subapps/shop/common/actions/cart';
 import {ShopQuoteModal, type ShopQuoteModalLabels} from '../shop-quote-modal';
 
@@ -73,7 +77,9 @@ export function ShopCart({
   const {data: session} = authClient.useSession();
   const authenticated = !!session?.user?.id;
 
-  const [computedProducts, setComputedProducts] = useState<any[]>([]);
+  const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
 
   // Resolve each cart item against the API to get the computed product.
@@ -91,11 +97,14 @@ export function ShopCart({
       }
       try {
         const results = await Promise.all(
-          items.map((i: any) =>
+          items.map((i: CartItem) =>
             findProduct({id: String(i.product), workspaceURL}),
           ),
         );
-        if (!cancelled) setComputedProducts(results.filter(Boolean));
+        if (!cancelled)
+          setComputedProducts(
+            results.filter((p): p is ComputedProduct => Boolean(p)),
+          );
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -105,15 +114,15 @@ export function ShopCart({
     };
   }, [cart, workspaceURL]);
 
-  const items = useMemo<any[]>(() => {
-    return (cart?.items ?? [])
-      .map((i: any) => ({
+  const items = useMemo<ResolvedCartItem[]>(() => {
+    return ((cart?.items ?? []) as CartItem[])
+      .map(i => ({
         ...i,
         computedProduct: computedProducts.find(
           cp => Number(cp?.product?.id) === Number(i.product),
         ),
       }))
-      .filter((i: any) => i.computedProduct);
+      .filter((i): i is ResolvedCartItem => i.computedProduct != null);
   }, [cart?.items, computedProducts]);
 
   const subtotal = useMemo(() => {
@@ -140,7 +149,11 @@ export function ShopCart({
       .format(n)
       .concat(' ', currency);
 
-  const handleQty = async (productId: any, q: number, computedProduct: any) => {
+  const handleQty = async (
+    productId: string,
+    q: number,
+    computedProduct: ComputedProduct,
+  ) => {
     if (q < 1) return;
     await updateQuantity({
       productId,
@@ -207,7 +220,7 @@ export function ShopCart({
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
             {/* Items list */}
             <div className="flex flex-col gap-3">
-              {items.map((item: any) => (
+              {items.map((item: ResolvedCartItem) => (
                 <CartLine
                   key={item.computedProduct.product.id}
                   item={item}
@@ -322,7 +335,7 @@ function CartLine({
   unitSuffix,
   removeLabel,
 }: {
-  item: any;
+  item: ResolvedCartItem;
   tenant: string;
   workspaceURI: string;
   onQtyChange: (q: number) => Promise<void>;

@@ -76,14 +76,14 @@ export async function ArticleNews({
   }
 
   // "Discover next" strip — latest news excluding the current article.
-  const {news: moreNews = []}: any = await findNews({
+  const {news: moreNews = []} = await findNews({
     workspace,
     client,
     user,
     limit: 5,
     orderBy: {publicationDateTime: 'DESC'},
   }).then(clone);
-  const discoverNext = (moreNews as any[])
+  const discoverNext = moreNews
     .filter(a => a.slug !== newsObject.slug)
     .slice(0, 4);
 
@@ -174,7 +174,7 @@ export async function ArticleNews({
               {await t('Discover next')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[18px]">
-              {discoverNext.map((a: any) => (
+              {discoverNext.map(a => (
                 <NewsCard
                   key={a.slug}
                   id={a.slug}
