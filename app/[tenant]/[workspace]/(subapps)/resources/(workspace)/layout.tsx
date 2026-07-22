@@ -12,6 +12,7 @@ import {
   DocsSidebar,
   type DocsSidebarCategory,
 } from '@/subapps/resources/common/ui/components';
+import {FolderLogoIcon} from '@/subapps/resources/common/ui/components/folder-logo-icon';
 
 export default async function Layout({
   params: paramsPromise,
@@ -57,10 +58,29 @@ export default async function Layout({
     c => !c.parent || !c.parent.id || !allIds.has(c.parent.id),
   ) as DocsSidebarCategory[];
 
+  // The logoSelect → react-icons map lives in a server-only module, so the
+  // sidebar (a client component) receives each node's icon pre-rendered.
+  const withIcons = (
+    nodes: DocsSidebarCategory[],
+    depth = 0,
+  ): DocsSidebarCategory[] =>
+    nodes.map(node => ({
+      ...node,
+      icon: (
+        <FolderLogoIcon
+          logoSelect={node.logoSelect}
+          colorSelect={node.colorSelect}
+          size={depth === 0 ? 22 : 18}
+        />
+      ),
+      children: node.children && withIcons(node.children, depth + 1),
+    }));
+  const categories = withIcons(topLevel);
+
   return (
     <div className="flex flex-1 min-h-0 bg-ink-25">
       <DocsSidebar
-        categories={topLevel}
+        categories={categories}
         workspaceURI={workspaceURI}
         workspaceURL={workspaceURL}
         searchPlaceholder={searchPlaceholder}

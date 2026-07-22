@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState, type ReactNode} from 'react';
 import {Link} from '@/ui/components/link';
 import {usePathname} from 'next/navigation';
 import {MdExpandMore, MdHomeFilled, MdSearch} from 'react-icons/md';
@@ -16,6 +16,10 @@ export interface DocsSidebarCategory {
   fileName: string;
   colorSelect?: string | null;
   logoSelect?: string | null;
+  /* Pre-rendered <FolderLogoIcon> from the server layout — the logoSelect →
+     react-icons map is server-only, so the resolved element is passed in
+     instead of resolving it here. */
+  icon?: ReactNode;
   children?: DocsSidebarCategory[];
 }
 
@@ -301,7 +305,9 @@ function CategoryNode({
             'flex-1 min-w-0 flex items-center gap-2 px-1 py-1.5 font-semibold',
             textSize,
           )}>
-          <FolderIcon colorSelect={node.colorSelect} size={iconSize} />
+          {node.icon ?? (
+            <FolderIcon colorSelect={node.colorSelect} size={iconSize} />
+          )}
           <span className="flex-1 min-w-0 truncate">{node.fileName}</span>
         </Link>
       </div>
