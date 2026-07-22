@@ -248,7 +248,7 @@ export const CommentListItem = ({
             <TooltipComponent
               triggerText={`${i18n.t('Updated')} ${formatRelativeTime(parentMailMessage?.createdOn!)}`}
               tooltipText={formatDateTime(parentMailMessage?.createdOn!, {
-                dateFormat: 'MMMM DD YYYY,',
+                dateFormat: 'LL,',
                 timeFormat: ' h:mm a',
               })}
             />
@@ -360,7 +360,7 @@ export const CommentListItem = ({
           <TooltipComponent
             triggerText={formatRelativeTime(createdOn!)}
             tooltipText={formatDateTime(createdOn!, {
-              dateFormat: 'MMMM DD YYYY,',
+              dateFormat: 'LL,',
               timeFormat: ' h:mm a',
             })}
           />

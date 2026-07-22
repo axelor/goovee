@@ -15,7 +15,7 @@ import {isCommentEnabled} from '@/comments';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
-import {formatDateTime} from '@/lib/core/locale/formatters';
+import {formatDate, formatDateTime} from '@/lib/core/locale/formatters';
 import {InnerHTML} from '@/ui/components';
 import {Link} from '@/ui/components/link';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -29,21 +29,6 @@ import {
   isLoginNeededForRegistration,
 } from '@/subapps/events/common/utils';
 
-const MONTH_ABBREVIATIONS = [
-  'Jan',
-  'Fév',
-  'Mar',
-  'Avr',
-  'Mai',
-  'Juin',
-  'Juil',
-  'Août',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Déc',
-];
-
 function daysUntil(date: Date | string | null | undefined): number | null {
   if (!date) return null;
   const start = new Date(date).getTime();
@@ -52,24 +37,23 @@ function daysUntil(date: Date | string | null | undefined): number | null {
   return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
 
+// All date/time display goes through the shared dayjs formatter so it renders
+// in the viewer's timezone AND locale (client-side), and stays consistent with
+// the main date line (formatDateTime).
 function dateParts(date: Date | string | null | undefined): {
   month: string;
   day: string;
 } {
   if (!date) return {month: '—', day: '—'};
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return {month: '—', day: '—'};
-  return {
-    month: MONTH_ABBREVIATIONS[d.getMonth()].toUpperCase(),
-    day: String(d.getDate()),
-  };
+  const month = formatDate(date, {dateFormat: 'MMM'});
+  const day = formatDate(date, {dateFormat: 'D'});
+  if (!month || !day) return {month: '—', day: '—'};
+  return {month: month.replace('.', '').toUpperCase(), day};
 }
 
 function timeOnly(date: Date | string | null | undefined): string {
   if (!date) return '';
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return '';
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return formatDate(date, {dateFormat: 'HH:mm'});
 }
 
 export function EventDetails({
@@ -184,8 +168,8 @@ export function EventDetails({
                   <MdOutlineCalendarToday className="text-base" />
                   {eventDetails.eventStartDateTime &&
                     formatDateTime(eventDetails.eventStartDateTime, {
-                      dateFormat: 'MMMM D YYYY',
-                      timeFormat: ' · h:mmA',
+                      dateFormat: 'LL',
+                      timeFormat: ' · HH:mm',
                     })}
                   {endTime && (
                     <span className="tabular-nums text-white/85">

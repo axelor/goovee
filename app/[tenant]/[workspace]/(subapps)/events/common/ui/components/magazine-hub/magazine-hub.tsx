@@ -242,7 +242,7 @@ export function MagazineHub({
                                   {formatDateTime(
                                     event.eventStartDateTime ?? '',
                                     {
-                                      dateFormat: 'MMMM D YYYY',
+                                      dateFormat: 'LL',
                                     },
                                   )}
                                 </span>
@@ -527,8 +527,8 @@ function FeaturedCard({
           <div className="mt-3.5 flex flex-wrap items-center gap-2.5 text-[14.5px] text-white/90">
             <MdOutlineCalendarToday className="text-base" />
             {formatDateTime(event.eventStartDateTime ?? '', {
-              dateFormat: 'MMMM D YYYY',
-              timeFormat: ' · h:mmA',
+              dateFormat: 'LL',
+              timeFormat: ' · HH:mm',
             })}
             {event.eventPlace && (
               <>
@@ -642,8 +642,8 @@ function MagazineCard({
           <div className="flex items-center gap-1.5">
             <MdOutlineCalendarToday className="text-ink-400 text-sm" />
             {formatDateTime(event.eventStartDateTime ?? '', {
-              dateFormat: 'MMMM D YYYY',
-              timeFormat: ' · h:mmA',
+              dateFormat: 'LL',
+              timeFormat: ' · HH:mm',
             })}
           </div>
           {event.eventPlace && (

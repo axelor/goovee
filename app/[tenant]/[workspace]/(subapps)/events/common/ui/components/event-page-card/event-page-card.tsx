@@ -126,8 +126,8 @@ export const EventPageCard = ({eventDetails, config}: EventPageCardProps) => {
               {i18n.t('Registration deadline')}:{' '}
               <span className="font-normal text-destructive">
                 {formatDateTime(registrationDeadlineDateTime, {
-                  dateFormat: 'MMMM D YYYY,',
-                  timeFormat: ' h:mm a',
+                  dateFormat: 'LL,',
+                  timeFormat: ' HH:mm',
                 })}
               </span>
             </p>

@@ -13,6 +13,7 @@ import {
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
+import {formatDate} from '@/locale/formatters';
 import {Button} from '@/ui/components';
 import {SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
@@ -339,23 +340,18 @@ function groupByMonth(events: ListEvent[]): MonthGroup[] {
 }
 
 function monthLabel(date: Date): string {
-  return new Intl.DateTimeFormat('fr-FR', {month: 'long', year: 'numeric'})
-    .format(date)
-    .toUpperCase();
+  // Localized to the viewer via the shared dayjs formatter (client).
+  return formatDate(date, {dateFormat: 'MMMM YYYY'}).toUpperCase();
 }
 
 function monthAbbrev(date: Date): string {
-  return new Intl.DateTimeFormat('fr-FR', {month: 'long'})
-    .format(date)
-    .slice(0, 3)
-    .toUpperCase();
+  return formatDate(date, {dateFormat: 'MMM'}).replace('.', '').toUpperCase();
 }
 
 function formatHHmm(date: Date): string {
   if (Number.isNaN(date.getTime())) return '';
-  return `${String(date.getHours()).padStart(2, '0')}:${String(
-    date.getMinutes(),
-  ).padStart(2, '0')}`;
+  // Through the shared formatter for consistency with the rest of the app.
+  return formatDate(date, {dateFormat: 'HH:mm'});
 }
 
 function toISODate(date: Date): string {

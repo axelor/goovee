@@ -22,16 +22,16 @@ export const EventDateCard = ({
   useEffect(() => {
     if (startDate) {
       const startDateTime = formatDateTime(startDate, {
-        dateFormat: 'MMMM D YYYY -',
-        timeFormat: 'h:mmA',
+        dateFormat: 'LL -',
+        timeFormat: 'HH:mm',
       });
       setStartDateTime(startDateTime);
     }
 
     if (endDate && !eventAllDay) {
       const endDateTime = formatDateTime(endDate!, {
-        dateFormat: 'MMMM D YYYY -',
-        timeFormat: 'h:mmA',
+        dateFormat: 'LL -',
+        timeFormat: 'HH:mm',
       });
       setEndDateTime(endDateTime);
     }

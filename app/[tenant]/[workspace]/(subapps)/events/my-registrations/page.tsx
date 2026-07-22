@@ -27,6 +27,7 @@ import {t} from '@/lib/core/locale/server';
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE} from '@/subapps/events/common/constants';
 import {findEvents, type ListEvent} from '@/subapps/events/common/orm/event';
+import {EventLocalDate} from '@/subapps/events/common/ui/components/event-local-date';
 
 const FETCH_LIMIT = 200;
 
@@ -255,23 +256,6 @@ async function composeSubtitle(upcomingCount: number, pastCount: number) {
   return `${upcomingCount} ${upcomingTpl} · ${pastCount} ${pastTpl}`;
 }
 
-function formatDateParts(date: Date | string | null | undefined): {
-  month: string;
-  day: string;
-  time: string;
-} {
-  if (!date) return {month: '—', day: '—', time: ''};
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return {month: '—', day: '—', time: ''};
-  const month = new Intl.DateTimeFormat('fr-FR', {month: 'short'})
-    .format(d)
-    .replace('.', '')
-    .toUpperCase();
-  const day = String(d.getDate());
-  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  return {month, day, time};
-}
-
 function NextEventSpotlight({
   event,
   detailHref,
@@ -279,10 +263,6 @@ function NextEventSpotlight({
   event: ListEvent;
   detailHref: string;
 }) {
-  const {month, day, time} = formatDateParts(event.eventStartDateTime);
-  const endTime = event.eventEndDateTime
-    ? formatDateParts(event.eventEndDateTime).time
-    : '';
   const category = event.eventCategorySet?.[0];
 
   return (
@@ -297,13 +277,13 @@ function NextEventSpotlight({
           ★ Prochain RDV
         </div>
         <div className="text-[11px] font-bold uppercase tracking-[0.08em] opacity-85">
-          {month}
+          <EventLocalDate date={event.eventStartDateTime} part="month" />
         </div>
         <div className="text-[56px] font-extrabold leading-none tabular-nums mt-1">
-          {day}
+          <EventLocalDate date={event.eventStartDateTime} part="day" />
         </div>
         <div className="text-xs font-semibold opacity-85 tabular-nums mt-1">
-          {time}
+          <EventLocalDate date={event.eventStartDateTime} part="time" />
         </div>
       </div>
 
@@ -332,8 +312,15 @@ function NextEventSpotlight({
             <span className="inline-flex items-center gap-1.5">
               <MdOutlineSchedule className="text-ink-400 text-sm" />
               <span className="tabular-nums">
-                {time}
-                {endTime ? ` – ${endTime}` : ''}
+                <EventLocalDate date={event.eventStartDateTime} part="time" />
+                {event.eventEndDateTime ? (
+                  <>
+                    {' – '}
+                    <EventLocalDate date={event.eventEndDateTime} part="time" />
+                  </>
+                ) : (
+                  ''
+                )}
               </span>
             </span>
             {event.eventPlace && (
@@ -371,14 +358,6 @@ function RegistrationCard({
   detailHref: string;
   past: boolean;
 }) {
-  const {
-    month,
-    day,
-    time: startTime,
-  } = formatDateParts(event.eventStartDateTime);
-  const endTime = event.eventEndDateTime
-    ? formatDateParts(event.eventEndDateTime).time
-    : '';
   const category = event.eventCategorySet?.[0];
 
   return (
@@ -394,10 +373,10 @@ function RegistrationCard({
           past ? 'bg-ink-50 text-ink-600' : 'bg-royal-pale text-royal-dark',
         )}>
         <div className="text-[10px] font-bold uppercase tracking-[0.06em] opacity-70">
-          {month}
+          <EventLocalDate date={event.eventStartDateTime} part="month" />
         </div>
         <div className="text-[26px] font-extrabold leading-[1.05] tabular-nums">
-          {day}
+          <EventLocalDate date={event.eventStartDateTime} part="day" />
         </div>
       </div>
 
@@ -429,8 +408,15 @@ function RegistrationCard({
           <span className="inline-flex items-center gap-1">
             <MdOutlineSchedule className="text-ink-400" />
             <span className="tabular-nums">
-              {startTime}
-              {endTime ? ` – ${endTime}` : ''}
+              <EventLocalDate date={event.eventStartDateTime} part="time" />
+              {event.eventEndDateTime ? (
+                <>
+                  {' – '}
+                  <EventLocalDate date={event.eventEndDateTime} part="time" />
+                </>
+              ) : (
+                ''
+              )}
             </span>
           </span>
           {event.eventPlace && (

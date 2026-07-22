@@ -88,13 +88,13 @@ export const EventCard = ({event}: EventCardProps) => {
               )}
             </CardTitle>
             <CardDescription className="text-xs font-medium text-ink-500 tabular-nums">
-              {`${event.eventStartDateTime ? formatDateTime(event.eventStartDateTime, {dateFormat: 'MMMM D YYYY - ', timeFormat: 'h:mmA'}) : ''}
+              {`${event.eventStartDateTime ? formatDateTime(event.eventStartDateTime, {dateFormat: 'LL - ', timeFormat: 'HH:mm'}) : ''}
             ${event.eventEndDateTime && !event.eventAllDay ? i18n.t('to') : ''}
              ${
                event.eventEndDateTime && !event.eventAllDay
                  ? formatDateTime(event.eventEndDateTime, {
-                     dateFormat: 'MMMM D YYYY - ',
-                     timeFormat: 'h:mmA',
+                     dateFormat: 'LL - ',
+                     timeFormat: 'HH:mm',
                    })
                  : ''
              }

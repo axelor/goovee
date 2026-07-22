@@ -89,8 +89,8 @@ function Content({event}: ContentProps) {
               <span>
                 {event?.eventStartDateTime &&
                   formatDateTime(event.eventStartDateTime, {
-                    dateFormat: 'MMMM D YYYY',
-                    timeFormat: ' · h:mmA',
+                    dateFormat: 'LL',
+                    timeFormat: ' · HH:mm',
                   })}
                 {event?.eventEndDateTime && (
                   <>
@@ -99,8 +99,8 @@ function Content({event}: ContentProps) {
                       {i18n.t('to')}
                     </span>{' '}
                     {formatDateTime(event.eventEndDateTime, {
-                      dateFormat: 'MMMM D YYYY',
-                      timeFormat: ' · h:mmA',
+                      dateFormat: 'LL',
+                      timeFormat: ' · HH:mm',
                     })}
                   </>
                 )}
