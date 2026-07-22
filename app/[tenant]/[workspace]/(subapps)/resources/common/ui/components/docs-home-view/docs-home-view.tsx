@@ -5,7 +5,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {formatDateTime} from '@/lib/core/locale/formatters';
 import {cn} from '@/utils/css';
 
-import {FolderIcon} from '../doc-file-icon';
+import {FolderLogoIcon} from '../folder-logo-icon';
 import type {PinnedFolder} from '@/subapps/resources/common/types';
 
 export interface DocsHomeViewLabels {
@@ -93,7 +93,11 @@ function PinnedFolderCard({
         'hover:-translate-y-0.5 hover:shadow-soft-md',
       )}>
       <div className="flex items-start gap-3">
-        <FolderIcon colorSelect={folder.colorSelect} size={44} />
+        <FolderLogoIcon
+          logoSelect={folder.logoSelect}
+          colorSelect={folder.colorSelect}
+          size={44}
+        />
         <div className="flex-1 min-w-0">
           {parentName && (
             <div className="text-[10.5px] font-bold uppercase tracking-[0.06em] text-ink-500 mb-1 truncate">
