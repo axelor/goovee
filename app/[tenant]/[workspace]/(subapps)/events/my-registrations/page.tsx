@@ -180,7 +180,7 @@ async function MyRegistrations({
       {/* Filter tabs upcoming/past */}
       <div
         className={cn(
-          'inline-flex gap-0 p-1 bg-white border border-ink-100 rounded-[10px]',
+          'inline-flex gap-1 p-1 bg-white border border-ink-100 rounded-[10px]',
           filter === 'upcoming' && next ? 'mt-9 mb-[18px]' : 'mt-5 mb-[18px]',
         )}>
         {[
