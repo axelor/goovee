@@ -288,7 +288,7 @@ function NavItem({
       )}
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
-          <span className="shrink-0">
+          <span className="shrink-0 w-7 flex justify-center">
             <Icon
               name={icon}
               className="h-[18px] w-[18px]"
