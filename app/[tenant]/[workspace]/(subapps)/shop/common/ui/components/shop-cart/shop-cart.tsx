@@ -55,8 +55,6 @@ export interface ShopCartLabels {
   loading: string;
 }
 
-const VAT_RATE = 0.2;
-
 export function ShopCart({
   labels,
   modalLabels,
@@ -135,8 +133,8 @@ export function ShopCart({
     }
     return sum;
   }, [items]);
-  const vat = subtotal * VAT_RATE;
-  const total = subtotal + vat;
+  // No VAT line in the portal cart (parity with the checkout total).
+  const total = subtotal;
   const currency =
     items[0]?.computedProduct?.product?.saleCurrency?.symbol ?? '€';
 
@@ -251,7 +249,6 @@ export function ShopCart({
                   label={labels.subtotalHtLabel}
                   value={fmt(subtotal)}
                 />
-                <SummaryRow label={labels.vatLabel} value={fmt(vat)} />
                 <SummaryRow
                   label={labels.shippingLabel}
                   value={labels.shippingTbdValue}

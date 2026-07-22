@@ -515,6 +515,13 @@ export async function findEvents({
           },
         }),
         slug: true,
+        // Price fields so the list can tell free vs paid consistently with the
+        // detail page (otherwise every event fell back to "free").
+        defaultPrice: true,
+        eventProduct: {
+          salePrice: true,
+          saleCurrency: {symbol: true, numberOfDecimals: true},
+        },
       },
     })
     .then(events =>

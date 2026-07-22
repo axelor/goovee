@@ -1,3 +1,5 @@
+import type {BigDecimal} from '@goovee/orm';
+
 export type Subscription = {
   id: string;
   price: string;
@@ -72,10 +74,13 @@ export type ListEvent = {
     | null;
   slug: string | null;
   eventPlace?: string | null;
-  defaultPrice?: number | string | null;
+  defaultPrice?: BigDecimal | number | string | null;
   eventProduct?: {
-    salePrice?: number | string | null;
-    saleCurrency?: {symbol?: string | null} | null;
+    salePrice?: BigDecimal | number | string | null;
+    saleCurrency?: {
+      symbol?: string | null;
+      numberOfDecimals?: number | null;
+    } | null;
   } | null;
   _count?: string | undefined;
   _cursor?: string | undefined;
