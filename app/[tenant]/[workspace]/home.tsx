@@ -301,14 +301,14 @@ function HeroNewsCard({
           {title}
         </h3>
         {description && (
-          <p
+          <div
             className="m-0 text-[12.5px] text-white/85 line-clamp-2"
             style={{
               lineHeight: 1.5,
               textShadow: '0 1px 3px rgba(0,0,0,0.4)',
             }}>
             <InnerHTML content={description} />
-          </p>
+          </div>
         )}
         {publicationDateTime && (
           <div className="mt-2.5 text-[11px] font-semibold text-white/60">

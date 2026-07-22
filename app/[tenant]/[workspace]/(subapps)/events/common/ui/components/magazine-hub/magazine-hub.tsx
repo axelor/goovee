@@ -539,7 +539,7 @@ function FeaturedCard({
             )}
           </div>
           {event.eventDescription && (
-            <p
+            <div
               className="mt-4 mb-5 text-[14.5px] text-white/85 line-clamp-2"
               style={{lineHeight: 1.55}}>
               <InnerHTML
@@ -548,7 +548,7 @@ function FeaturedCard({
                   ' ',
                 )}
               />
-            </p>
+            </div>
           )}
           <span
             className={cn(
