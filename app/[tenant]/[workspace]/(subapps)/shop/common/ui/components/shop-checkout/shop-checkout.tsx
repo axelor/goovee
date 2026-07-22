@@ -43,8 +43,6 @@ const SHIPPING_PRICES: Record<string, number> = {
   [SHIPPING_TYPE.FAST]: 5,
 };
 
-const VAT_RATE = 0.2;
-
 export interface ShopCheckoutLabels {
   backToCart: string;
   step1: string;
@@ -143,9 +141,10 @@ export function ShopCheckout({
     }
     return sum;
   }, [items]);
-  const vat = subtotal * VAT_RATE;
   const shippingPrice = SHIPPING_PRICES[shippingType] ?? 0;
-  const total = subtotal + vat + shippingPrice;
+  // No VAT line in the portal checkout (parity with the pre-redesign total):
+  // the total is simply the items subtotal plus the chosen shipping.
+  const total = subtotal + shippingPrice;
   const currency =
     items[0]?.computedProduct?.product?.saleCurrency?.symbol ?? '€';
 
@@ -266,7 +265,6 @@ export function ShopCheckout({
                     label={labels.subtotalHtLabel}
                     value={fmt(subtotal)}
                   />
-                  <TotalsRow label={labels.vatLabel} value={fmt(vat)} />
                   <TotalsRow
                     label={labels.shippingLabel}
                     value={fmt(shippingPrice)}
@@ -513,12 +511,12 @@ function CheckoutAddressPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSelect = (addr: PartnerAddress) => {
-    setSelectedId(String(addr.id));
-    updateAddress({addressType: type, address: addr.id});
-  };
+  const selected =
+    addresses.find(a => String(a.id) === selectedId) ?? addresses[0] ?? null;
 
-  const newAddressHref = `${workspaceURI}/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
+  // "Change address" opens the standard address-selection page in checkout
+  // mode; on confirm it updates the cart and returns here via callbackURL.
+  const changeAddressHref = `${workspaceURI}/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
     `${workspaceURI}/${SUBAPP_CODES.shop}/cart/checkout`,
   )}`;
 
@@ -530,7 +528,7 @@ function CheckoutAddressPicker({
     );
   }
 
-  if (addresses.length === 0) {
+  if (addresses.length === 0 || !selected) {
     return (
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2.5 rounded-xl border border-ink-150 px-4 py-3.5 text-[13px] text-ink-700">
@@ -538,7 +536,7 @@ function CheckoutAddressPicker({
           {noneTitle}
         </div>
         <Link
-          href={newAddressHref}
+          href={changeAddressHref}
           className="self-start inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-royal-dark border border-royal-border text-[12.5px] font-semibold hover:bg-royal-pale transition-colors">
           <MdAdd className="text-base" />
           {newActionLabel}
@@ -547,46 +545,32 @@ function CheckoutAddressPicker({
     );
   }
 
+  const isDefault = !!(
+    selected.isDefaultDelivery || selected.isDefaultInvoicing
+  );
+
+  // Only the selected (default) address is shown; changing it happens on the
+  // dedicated selection page.
   return (
     <div className="flex flex-col gap-2.5">
-      {addresses.map(a => {
-        const active = String(a.id) === selectedId;
-        const isDefault = !!(a.isDefaultDelivery || a.isDefaultInvoicing);
-        return (
-          <label
-            key={a.id}
-            className={cn(
-              'flex items-start gap-3.5 px-4 py-3.5 rounded-xl cursor-pointer transition-colors',
-              active
-                ? 'border-[1.5px] border-royal bg-royal-pale/60'
-                : 'border border-ink-150 hover:border-ink-300',
-            )}>
-            <input
-              type="radio"
-              name={`checkout-address-${type}`}
-              checked={active}
-              onChange={() => handleSelect(a)}
-              className="w-4 h-4 mt-1 accent-royal cursor-pointer shrink-0"
-            />
-            <span className="grid place-items-center w-8 h-8 mt-0.5 rounded-lg bg-white border border-ink-100 text-royal shrink-0">
-              <MdPlace className="text-base" />
-            </span>
-            <div className="flex-1 min-w-0">
-              <AddressLines address={a.address} />
-            </div>
-            {isDefault && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-royal-dark border border-royal-border text-[10.5px] font-bold uppercase tracking-[0.04em] shrink-0 mt-1">
-                {defaultBadgeLabel}
-              </span>
-            )}
-          </label>
-        );
-      })}
+      <div className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl border-[1.5px] border-royal bg-royal-pale/60">
+        <span className="grid place-items-center w-8 h-8 mt-0.5 rounded-lg bg-white border border-ink-100 text-royal shrink-0">
+          <MdPlace className="text-base" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <AddressLines address={selected.address} />
+        </div>
+        {isDefault && (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-royal-dark border border-royal-border text-[10.5px] font-bold uppercase tracking-[0.04em] shrink-0 mt-1">
+            {defaultBadgeLabel}
+          </span>
+        )}
+      </div>
       <Link
-        href={newAddressHref}
-        className="self-start mt-1 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-royal-dark border border-royal-border text-[12.5px] font-semibold hover:bg-royal-pale transition-colors">
-        <MdAdd className="text-base" />
-        {newActionLabel}
+        href={changeAddressHref}
+        className="self-start inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-royal-dark border border-royal-border text-[12.5px] font-semibold hover:bg-royal-pale transition-colors">
+        <MdPlace className="text-base" />
+        {i18n.t('Change address')}
       </Link>
     </div>
   );

@@ -196,8 +196,17 @@ export function Comments(props: CommentsProps) {
 
     return (
       <div className="sticky bottom-4 flex items-start gap-3 rounded-2xl border border-ink-100 bg-white p-4 shadow-md transition-shadow focus-within:border-royal focus-within:shadow-[0_0_0_3px_rgba(21,84,181,0.12)]">
-        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-peach-avatar text-[11px] font-bold text-white">
-          {getInitials(session?.user?.name ?? session?.user?.email)}
+        <div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-peach-avatar text-[11px] font-bold text-white">
+          {session?.user?.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={session.user.image}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            getInitials(session?.user?.name ?? session?.user?.email)
+          )}
         </div>
         <div className="min-w-0 flex-1">{input}</div>
       </div>

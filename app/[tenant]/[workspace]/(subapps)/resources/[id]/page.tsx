@@ -109,10 +109,12 @@ export default async function Page(props: {
     ? `${workspaceURI}/${SUBAPP_CODES.resources}/folder/${parentId}`
     : `${workspaceURI}/${SUBAPP_CODES.resources}`;
 
-  const fileMetaId = file?.metaFile?.id ?? null;
-  const downloadHref = fileMetaId
+  // The download route resolves a DMS file by its own id (fetchFile), so the
+  // URL must carry the DMS file id — not the metaFile id. We still gate on the
+  // metaFile existing, since that is what actually gets streamed.
+  const downloadHref = file?.metaFile?.id
     ? withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${fileMetaId}`,
+        `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${file.id}`,
       )
     : null;
 

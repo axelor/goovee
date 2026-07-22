@@ -23,7 +23,9 @@ import {
 } from '@/ui/components/dialog';
 import {
   findDefaultDelivery,
+  findDefaultInvoicing,
   fetchDeliveryAddresses,
+  fetchInvoicingAddresses,
 } from '@/subapps/shop/common/actions/address';
 import {
   getCategoryGradient,
@@ -228,17 +230,32 @@ export function ShopQuoteModal({
               </div>
             </section>
 
-            {/* Address */}
-            <section>
-              <h3 className="m-0 mb-2.5 text-[11.5px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
-                {labels.addressTitle}
-              </h3>
-              <QuoteAddressPicker
-                defaultBadgeLabel={labels.addressDefaultBadge}
-                chooseAnotherLabel={labels.addressChooseAnother}
-                noneTitle={labels.addressNoneTitle}
-                loadingLabel={labels.addressLoading}
-              />
+            {/* Addresses — delivery and billing are chosen separately */}
+            <section className="flex flex-col gap-4">
+              <div>
+                <h3 className="m-0 mb-2.5 text-[11.5px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
+                  {i18n.t('Delivery address')}
+                </h3>
+                <QuoteAddressPicker
+                  type={ADDRESS_TYPE.delivery}
+                  defaultBadgeLabel={labels.addressDefaultBadge}
+                  chooseAnotherLabel={labels.addressChooseAnother}
+                  noneTitle={labels.addressNoneTitle}
+                  loadingLabel={labels.addressLoading}
+                />
+              </div>
+              <div>
+                <h3 className="m-0 mb-2.5 text-[11.5px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
+                  {i18n.t('Billing address')}
+                </h3>
+                <QuoteAddressPicker
+                  type={ADDRESS_TYPE.invoicing}
+                  defaultBadgeLabel={labels.addressDefaultBadge}
+                  chooseAnotherLabel={labels.addressChooseAnother}
+                  noneTitle={labels.addressNoneTitle}
+                  loadingLabel={labels.addressLoading}
+                />
+              </div>
             </section>
           </div>
 
@@ -327,11 +344,13 @@ function QuoteItemRow({
 }
 
 function QuoteAddressPicker({
+  type,
   defaultBadgeLabel,
   chooseAnotherLabel,
   noneTitle,
   loadingLabel,
 }: {
+  type: ADDRESS_TYPE;
   defaultBadgeLabel: string;
   chooseAnotherLabel: string;
   noneTitle: string;
@@ -344,20 +363,28 @@ function QuoteAddressPicker({
   const [picking, setPicking] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load delivery addresses once and seed selection. For a quote request we use
-  // a single address (same id for delivery + invoicing on the cart).
+  const isInvoicing = type === ADDRESS_TYPE.invoicing;
+
+  // Delivery and billing are picked independently (parity with the pre-redesign
+  // quote flow); this picker loads and updates only its own address type.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const [list, def] = await Promise.all([
-          fetchDeliveryAddresses({workspaceURL}),
-          findDefaultDelivery({workspaceURL}),
+          isInvoicing
+            ? fetchInvoicingAddresses({workspaceURL})
+            : fetchDeliveryAddresses({workspaceURL}),
+          isInvoicing
+            ? findDefaultInvoicing({workspaceURL})
+            : findDefaultDelivery({workspaceURL}),
         ]);
         if (cancelled) return;
         const all = (list as PartnerAddress[] | null) ?? [];
         setAddresses(all);
-        const cartId = cart?.deliveryAddress ?? cart?.invoicingAddress ?? null;
+        const cartId =
+          (isInvoicing ? cart?.invoicingAddress : cart?.deliveryAddress) ??
+          null;
         const initial =
           (cartId && all.find(a => String(a.id) === String(cartId))) ||
           (def as PartnerAddress | null) ||
@@ -365,17 +392,8 @@ function QuoteAddressPicker({
           null;
         if (initial?.id) {
           setSelectedId(String(initial.id));
-          if (cart?.deliveryAddress !== initial.id) {
-            updateAddress({
-              addressType: ADDRESS_TYPE.delivery,
-              address: initial.id,
-            });
-          }
-          if (cart?.invoicingAddress !== initial.id) {
-            updateAddress({
-              addressType: ADDRESS_TYPE.invoicing,
-              address: initial.id,
-            });
+          if (cartId !== initial.id) {
+            updateAddress({addressType: type, address: initial.id});
           }
         }
       } finally {
@@ -390,8 +408,7 @@ function QuoteAddressPicker({
 
   const handleSelect = (addr: PartnerAddress) => {
     setSelectedId(String(addr.id));
-    updateAddress({addressType: ADDRESS_TYPE.delivery, address: addr.id});
-    updateAddress({addressType: ADDRESS_TYPE.invoicing, address: addr.id});
+    updateAddress({addressType: type, address: addr.id});
     setPicking(false);
   };
 
@@ -425,7 +442,9 @@ function QuoteAddressPicker({
         </span>
         <div className="flex-1 min-w-0">
           <AddressLines address={current.address} />
-          {current.isDefaultDelivery || current.isDefaultInvoicing ? (
+          {(
+            isInvoicing ? current.isDefaultInvoicing : current.isDefaultDelivery
+          ) ? (
             <span className="inline-flex items-center mt-1.5 px-2 py-0.5 rounded-full bg-white text-royal-dark border border-royal-border text-[10.5px] font-bold uppercase tracking-[0.04em]">
               {defaultBadgeLabel}
             </span>
@@ -459,14 +478,16 @@ function QuoteAddressPicker({
                 )}>
                 <input
                   type="radio"
-                  name="quote-address"
+                  name={`quote-address-${type}`}
                   checked={active}
                   onChange={() => handleSelect(a)}
                   className="w-4 h-4 mt-0.5 accent-royal cursor-pointer shrink-0"
                 />
                 <div className="flex-1 min-w-0">
                   <AddressLines address={a.address} />
-                  {(a.isDefaultDelivery || a.isDefaultInvoicing) && (
+                  {(isInvoicing
+                    ? a.isDefaultInvoicing
+                    : a.isDefaultDelivery) && (
                     <span className="inline-flex items-center mt-1 px-1.5 py-px rounded bg-ink-50 text-ink-600 text-[10px] font-bold uppercase tracking-[0.04em]">
                       {defaultBadgeLabel}
                     </span>

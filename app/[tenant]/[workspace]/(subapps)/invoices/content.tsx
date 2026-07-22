@@ -143,7 +143,10 @@ export default function Content({
                     {i18n.t('Invoices')}
                   </h2>
                   <span className="text-xs text-ink-400 tabular-nums">
-                    {filtered.length} {i18n.t('items')}
+                    {query
+                      ? filtered.length
+                      : Number(pageInfo?.count ?? filtered.length)}{' '}
+                    {i18n.t('items')}
                   </span>
                 </div>
                 <div className="relative">

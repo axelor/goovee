@@ -195,7 +195,11 @@ export async function Home({
                 <h3 className="m-0 mb-3.5 text-lg font-bold tracking-[-0.015em] text-ink-900">
                   {await t('Useful links')}
                 </h3>
-                <HyperlinkGrid config={config} workspaceURI={workspaceURI} />
+                <HyperlinkGrid
+                  config={config}
+                  workspaceURI={workspaceURI}
+                  standalone={!hasContents}
+                />
               </aside>
             )}
           </div>
@@ -514,16 +518,26 @@ async function ResourcesCard({
 function HyperlinkGrid({
   config,
   workspaceURI,
+  standalone = false,
 }: {
   config: ShellConfig | Cloned<ShellConfig>;
   workspaceURI: string;
+  standalone?: boolean;
 }) {
   const hyperlinkList = config.hyperlinkList;
 
   if (!hyperlinkList?.length) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div
+      className={cn(
+        'grid gap-3',
+        // In the narrow sidebar: two columns. Standalone (only section on the
+        // page): cap each tile so the logos don't blow up to full width.
+        standalone
+          ? 'grid-cols-[repeat(auto-fill,minmax(96px,120px))]'
+          : 'grid-cols-2',
+      )}>
       {hyperlinkList.map(item => (
         <a
           key={item.id}

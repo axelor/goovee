@@ -25,6 +25,7 @@ import type {ID} from '@/types';
 import {
   Avatar,
   AvatarImage,
+  AvatarFallback,
   InnerHTML,
   Popover,
   PopoverContent,
@@ -328,13 +329,24 @@ export const CommentListItem = ({
       <div className="flex gap-2 justify-between items-center">
         <div className="flex items-center gap-2.5">
           {isConversation ? (
-            <div
-              className={cn(
-                'grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white',
-                isProvider ? 'bg-mint-logo' : 'bg-peach-avatar',
-              )}>
-              {getInitials(authorName)}
-            </div>
+            // Prefer the author's account profile picture; fall back to the
+            // coloured initials avatar when there is none (or it fails to load).
+            <Avatar className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
+              {partner?.picture?.id && (
+                <AvatarImage
+                  src={getPartnerImageURL(partner.picture.id, tenantId)}
+                  alt={authorName ?? ''}
+                  size={36}
+                />
+              )}
+              <AvatarFallback
+                className={cn(
+                  'grid h-9 w-9 place-items-center rounded-full text-[11px] font-bold text-white',
+                  isProvider ? 'bg-mint-logo' : 'bg-peach-avatar',
+                )}>
+                {getInitials(authorName)}
+              </AvatarFallback>
+            </Avatar>
           ) : subapp === SUBAPP_CODES.forum && partner?.picture ? (
             renderAvatar(
               partner?.picture?.id,

@@ -156,20 +156,8 @@ export function Sidebar({
           ))}
       </div>
 
-      {/* Section label — collapses smoothly so the icons glide up */}
-      <div
-        className={cn(
-          'px-[22px] overflow-hidden text-[11px] font-semibold uppercase tracking-[0.06em] text-white/55',
-          'transition-all duration-200 ease-out',
-          collapsed
-            ? 'max-h-0 opacity-0 pt-0 pb-0'
-            : 'max-h-12 opacity-100 pt-5 pb-2',
-        )}>
-        {i18n.t('Espace')}
-      </div>
-
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 pt-1">
+      <nav className="flex-1 overflow-y-auto px-3 pt-4">
         <TooltipProvider>
           {showHome && (
             <NavItem
@@ -275,7 +263,9 @@ function NavItem({
       className={cn(
         'group relative flex items-center rounded-lg mb-0.5',
         'text-[13.5px] transition-colors duration-150',
-        'gap-3 px-3 py-2.5',
+        // Fixed height so hiding the label on collapse doesn't shrink the row
+        // (which caused a small vertical jump of the icons).
+        'gap-3 px-3 h-10',
         active
           ? 'bg-white/[0.16] text-white font-semibold'
           : 'text-white/80 font-medium hover:bg-white/[0.08] hover:text-white',
