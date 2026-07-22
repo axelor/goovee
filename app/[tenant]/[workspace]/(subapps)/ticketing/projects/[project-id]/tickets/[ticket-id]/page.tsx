@@ -211,6 +211,7 @@ export default async function Page(props: {
               backHref={allTicketsURL}
               showCancel={config.isDisplayCancelBtn}
               showClose={config.isDisplayCloseBtn}
+              formFields={clone(config.ticketingFormFieldSet)}
             />
           </div>
         </div>

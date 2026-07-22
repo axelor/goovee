@@ -1,5 +1,6 @@
 'use client';
 
+import {useMemo} from 'react';
 import {Link} from '@/ui/components/link';
 import {MdArrowBack} from 'react-icons/md';
 
@@ -16,6 +17,8 @@ import {
   DialogTrigger,
 } from '@/ui/components';
 
+import {FIELDS} from '../../../constants';
+import type {TicketingConfig} from '../../../orm/config';
 import {Category, Priority, Status} from '../pills';
 import {useTicketDetails} from './ticket-details-provider';
 
@@ -23,15 +26,21 @@ interface CompactHeaderProps {
   backHref: string;
   showCancel?: boolean | null;
   showClose?: boolean | null;
+  formFields: TicketingConfig['ticketingFormFieldSet'];
 }
 
 export function TicketCompactHeader(props: CompactHeaderProps) {
-  const {backHref, showCancel, showClose} = props;
+  const {backHref, showCancel, showClose, formFields} = props;
   const {ticket, loading, handleCloseTicket, handleCancelTicket} =
     useTicketDetails();
   const isResolved = ticket.status?.isCompleted;
   const canClose = !isResolved && showClose;
   const canCancel = !isResolved && showCancel;
+
+  const visibleFields = useMemo(
+    () => new Set(formFields?.map(field => field.name)),
+    [formFields],
+  );
 
   return (
     <div>
@@ -51,9 +60,15 @@ export function TicketCompactHeader(props: CompactHeaderProps) {
             {ticket.name}
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Status name={ticket.status?.name} />
-            <Priority name={ticket.priority?.name} />
-            <Category name={ticket.projectTaskCategory?.name} />
+            {visibleFields.has(FIELDS.STATUS) && (
+              <Status name={ticket.status?.name} />
+            )}
+            {visibleFields.has(FIELDS.PRIORITY) && (
+              <Priority name={ticket.priority?.name} />
+            )}
+            {visibleFields.has(FIELDS.CATEGORY) && (
+              <Category name={ticket.projectTaskCategory?.name} />
+            )}
           </div>
         </div>
 

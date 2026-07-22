@@ -70,200 +70,212 @@ export function TicketSidebar(props: Props) {
       <form
         onSubmit={form.handleSubmit(value => handleSubmit(value))}
         className="flex flex-col gap-4">
-        <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-5">
-          <h3 className="text-sm font-bold uppercase tracking-[0.06em] text-ink-400 mb-4">
-            {i18n.t('Details')}
-          </h3>
+        {hasEditableFields && (
+          <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-5">
+            <h3 className="text-sm font-bold uppercase tracking-[0.06em] text-ink-400 mb-4">
+              {i18n.t('Details')}
+            </h3>
 
-          <dl className="flex flex-col gap-3 text-sm">
-            {allowedFields.has(FIELDS.CATEGORY) && (
-              <FormField
-                control={form.control}
-                name="category"
-                render={({field}) => (
-                  <FormItem className="flex flex-col gap-1.5 space-y-0">
-                    <FormLabel className="text-xs font-semibold text-ink-500 uppercase tracking-[0.04em]">
-                      {i18n.t('Category')}
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value?.toString()}>
-                      <FormControl>
-                        <SelectTrigger className="w-full h-9 border-ink-150">
-                          <SelectValue
-                            asChild
-                            placeholder={i18n.t('Select category')}>
-                            <Category
-                              name={
-                                categories.find(c => c.id == field.value)?.name
-                              }
+            <dl className="flex flex-col gap-3 text-sm">
+              {allowedFields.has(FIELDS.CATEGORY) && (
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({field}) => (
+                    <FormItem className="flex flex-col gap-1.5 space-y-0">
+                      <FormLabel className="text-xs font-semibold text-ink-500 uppercase tracking-[0.04em]">
+                        {i18n.t('Category')}
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className="w-full h-9 border-ink-150">
+                            <SelectValue
+                              asChild
+                              placeholder={i18n.t('Select category')}>
+                              <Category
+                                name={
+                                  categories.find(c => c.id == field.value)
+                                    ?.name
+                                }
+                              />
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map(category => (
+                            <SelectItem
+                              value={category.id.toString()}
+                              key={category.id}>
+                              <Category name={category.name} />
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {allowedFields.has(FIELDS.PRIORITY) && (
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({field}) => (
+                    <FormItem className="flex flex-col gap-1.5 space-y-0">
+                      <FormLabel className="text-xs font-semibold text-ink-500 uppercase tracking-[0.04em]">
+                        {i18n.t('Priority')}
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className="w-full h-9 border-ink-150">
+                            <SelectValue
+                              asChild
+                              placeholder={i18n.t('Select priority')}>
+                              <Priority
+                                name={
+                                  priorities.find(c => c.id == field.value)
+                                    ?.name
+                                }
+                              />
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {priorities.map(priority => (
+                            <SelectItem
+                              value={priority.id.toString()}
+                              key={priority.id}>
+                              <Priority name={priority.name} />
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              {allowedFields.has(FIELDS.MANAGED_BY) && (
+                <FormField
+                  control={form.control}
+                  name="managedBy"
+                  render={({field}) => (
+                    <FormItem className="flex flex-col gap-1.5 space-y-0">
+                      <FormLabel className="text-xs font-semibold text-ink-500 uppercase tracking-[0.04em]">
+                        {i18n.t('Managed by')}
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className="w-full h-9 border-ink-150">
+                            <SelectValue
+                              placeholder={i18n.t('Select Assignee')}
                             />
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map(category => (
-                          <SelectItem
-                            value={category.id.toString()}
-                            key={category.id}>
-                            <Category name={category.name} />
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            {allowedFields.has(FIELDS.PRIORITY) && (
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({field}) => (
-                  <FormItem className="flex flex-col gap-1.5 space-y-0">
-                    <FormLabel className="text-xs font-semibold text-ink-500 uppercase tracking-[0.04em]">
-                      {i18n.t('Priority')}
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value?.toString()}>
-                      <FormControl>
-                        <SelectTrigger className="w-full h-9 border-ink-150">
-                          <SelectValue
-                            asChild
-                            placeholder={i18n.t('Select priority')}>
-                            <Priority
-                              name={
-                                priorities.find(c => c.id == field.value)?.name
-                              }
-                            />
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {priorities.map(priority => (
-                          <SelectItem
-                            value={priority.id.toString()}
-                            key={priority.id}>
-                            <Priority name={priority.name} />
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            {allowedFields.has(FIELDS.MANAGED_BY) && (
-              <FormField
-                control={form.control}
-                name="managedBy"
-                render={({field}) => (
-                  <FormItem className="flex flex-col gap-1.5 space-y-0">
-                    <FormLabel className="text-xs font-semibold text-ink-500 uppercase tracking-[0.04em]">
-                      {i18n.t('Managed by')}
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value?.toString()}>
-                      <FormControl>
-                        <SelectTrigger className="w-full h-9 border-ink-150">
-                          <SelectValue
-                            placeholder={i18n.t('Select Assignee')}
-                          />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {contacts.map(contact => (
-                          <SelectItem
-                            value={contact.id.toString()}
-                            key={contact.id}>
-                            {contact.simpleFullName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {contacts.map(contact => (
+                            <SelectItem
+                              value={contact.id.toString()}
+                              key={contact.id}>
+                              {contact.simpleFullName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-            {hasEditableFields && (
-              <Button
-                size="sm"
-                type="submit"
-                variant="royal"
-                className="mt-2"
-                disabled={!form.formState.isDirty || loading}>
-                {i18n.t('Save Changes')}
-              </Button>
-            )}
-          </dl>
-        </section>
+              {hasEditableFields && (
+                <Button
+                  size="sm"
+                  type="submit"
+                  variant="royal"
+                  className="mt-2"
+                  disabled={!form.formState.isDirty || loading}>
+                  {i18n.t('Save Changes')}
+                </Button>
+              )}
+            </dl>
+          </section>
+        )}
 
-        <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-5">
-          <h3 className="text-sm font-bold uppercase tracking-[0.06em] text-ink-400 mb-4">
-            {i18n.t('Participants')}
-          </h3>
-          <dl className="flex flex-col gap-3 text-sm">
-            {allowedFields.has(FIELDS.CREATED_BY) && (
-              <PersonField
-                label={i18n.t('Created by')}
-                name={
-                  ticket.createdByContact?.simpleFullName ||
-                  ticket.project?.company?.name ||
-                  ''
-                }
-                gradient="peach"
-              />
-            )}
-            {allowedFields.has(FIELDS.CREATED_ON) && (
-              <Field label={i18n.t('Created on')}>
-                <span className="tabular-nums">
-                  {formatDate(ticket?.createdOn!)}
-                </span>
-              </Field>
-            )}
-            {allowedFields.has(FIELDS.ASSIGNMENT) && (
-              <PersonField
-                label={i18n.t('Assigned to')}
-                name={
-                  (isWithProvider(ticket.assignment)
-                    ? ticket.project?.company?.name
-                    : ticket.project?.clientPartner?.simpleFullName) || ''
-                }
-                gradient="mint"
-              />
-            )}
-            {showAssignment && (
-              <Button
-                size="sm"
-                type="button"
-                variant="royal-outline"
-                disabled={loading}
-                onClick={handleAssignment}
-                className="mt-1">
-                {i18n.t(
-                  'Assign to {0}',
-                  isWithProvider(ticket.assignment) ? client : company,
+        {(allowedFields.has(FIELDS.CREATED_BY) ||
+          allowedFields.has(FIELDS.CREATED_ON) ||
+          allowedFields.has(FIELDS.ASSIGNMENT) ||
+          showAssignment ||
+          (allowedFields.has(FIELDS.TASK_END_DATE) && ticket?.taskEndDate)) && (
+          <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-5">
+            <h3 className="text-sm font-bold uppercase tracking-[0.06em] text-ink-400 mb-4">
+              {i18n.t('Participants')}
+            </h3>
+            <dl className="flex flex-col gap-3 text-sm">
+              {allowedFields.has(FIELDS.CREATED_BY) && (
+                <PersonField
+                  label={i18n.t('Created by')}
+                  name={
+                    ticket.createdByContact?.simpleFullName ||
+                    ticket.project?.company?.name ||
+                    ''
+                  }
+                  gradient="peach"
+                />
+              )}
+              {allowedFields.has(FIELDS.CREATED_ON) && (
+                <Field label={i18n.t('Created on')}>
+                  <span className="tabular-nums">
+                    {formatDate(ticket?.createdOn!)}
+                  </span>
+                </Field>
+              )}
+              {allowedFields.has(FIELDS.ASSIGNMENT) && (
+                <PersonField
+                  label={i18n.t('Assigned to')}
+                  name={
+                    (isWithProvider(ticket.assignment)
+                      ? ticket.project?.company?.name
+                      : ticket.project?.clientPartner?.simpleFullName) || ''
+                  }
+                  gradient="mint"
+                />
+              )}
+              {showAssignment && (
+                <Button
+                  size="sm"
+                  type="button"
+                  variant="royal-outline"
+                  disabled={loading}
+                  onClick={handleAssignment}
+                  className="mt-1">
+                  {i18n.t(
+                    'Assign to {0}',
+                    isWithProvider(ticket.assignment) ? client : company,
+                  )}
+                </Button>
+              )}
+              {allowedFields.has(FIELDS.TASK_END_DATE) &&
+                ticket?.taskEndDate && (
+                  <Field label={i18n.t('Expected on')}>
+                    <span className="tabular-nums">
+                      {formatDate(ticket.taskEndDate)}
+                    </span>
+                  </Field>
                 )}
-              </Button>
-            )}
-            {allowedFields.has(FIELDS.TASK_END_DATE) && ticket?.taskEndDate && (
-              <Field label={i18n.t('Expected on')}>
-                <span className="tabular-nums">
-                  {formatDate(ticket.taskEndDate)}
-                </span>
-              </Field>
-            )}
-          </dl>
-        </section>
+            </dl>
+          </section>
+        )}
 
         {(allowedFields.has(FIELDS.PROGRESS) ||
-          allowedFields.has(FIELDS.TARGET_VERSION) ||
+          (allowedFields.has(FIELDS.TARGET_VERSION) &&
+            ticket.targetVersion?.title) ||
           (ticket.displayFinancialData &&
             ticket.invoicingType === INVOICING_TYPE.PACKAGE)) && (
           <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-5">
