@@ -160,13 +160,23 @@ export function InviteMemberModal({
       const app = {id: a.id, code: a.code};
 
       if (desired.access !== hadAccess) {
-        await updateMemberApplication({
+        const res = await updateMemberApplication({
           workspaceURL,
           workspaceURI,
           member: ref,
           app,
           value: desired.access ? 'yes' : 'no',
         });
+        // Surface a real failure instead of claiming success: some changes may
+        // already have applied, so refresh, but do not report success.
+        if (res && 'error' in res && res.error) {
+          toast({
+            variant: 'destructive',
+            title: res.message || i18n.t('An unexpected error occurred'),
+          });
+          onSaved();
+          return;
+        }
       }
 
       // Authorization only matters for scoped apps that keep access.
@@ -174,13 +184,21 @@ export function InviteMemberModal({
         const currentLevel = memberPerms[a.code];
         const justGranted = !hadAccess;
         if (justGranted || desired.level !== currentLevel) {
-          await updateMemberAuthentication({
+          const res = await updateMemberAuthentication({
             workspaceURL,
             workspaceURI,
             member: ref,
             app,
             value: desired.level,
           });
+          if (res && 'error' in res && res.error) {
+            toast({
+              variant: 'destructive',
+              title: res.message || i18n.t('An unexpected error occurred'),
+            });
+            onSaved();
+            return;
+          }
         }
       }
     }
