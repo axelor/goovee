@@ -1,16 +1,17 @@
 import {Suspense} from 'react';
-import {notFound} from 'next/navigation';
+import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {getSession} from '@/auth';
-import {findWorkspace, type Workspace} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {clone} from '@/utils';
 import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
+import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import {workspacePathname} from '@/utils/workspace';
-import {ORDER_BY, SUBAPP_CODES} from '@/constants';
-import {manager} from '@/tenant';
+import {getLoginURL} from '@/utils/url';
+import {getCurrentPath} from '@/utils/current-path';
+import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE} from '@/subapps/events/common/constants';
@@ -24,23 +25,38 @@ export default async function Page(context: {
   params: Promise<{tenant: string; workspace: string}>;
 }) {
   const params = await context.params;
-  const {tenant: tenantId} = params;
 
-  const session = await getSession();
-  const user = session?.user;
+  const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
-  const {workspaceURL, workspaceURI} = workspacePathname(params);
-
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return notFound();
-  const {client} = tenant;
-
-  const workspace = await findWorkspace({
-    user,
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.events,
     url: workspaceURL,
-    client,
-  }).then(clone);
-  if (!workspace) return notFound();
+    tenantId: tenant,
+    allowGuest: true,
+  });
+
+  if (!access.ok) {
+    if (
+      access.reason === 'workspace-not-found' ||
+      access.reason === 'app-not-installed'
+    ) {
+      notFound();
+    }
+    if (!access.user) {
+      redirect(
+        getLoginURL({
+          callbackurl: await getCurrentPath(),
+          workspaceURI,
+          [SEARCH_PARAMS.TENANT_ID]: tenant,
+        }),
+      );
+    }
+    unauthorized();
+  }
+
+  const {user} = access;
+  const {client} = access.tenant;
+  const workspace = clone(access.workspace);
 
   return (
     <main className="bg-ink-25 w-full flex-1 min-h-0 flex flex-col">

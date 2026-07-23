@@ -3,50 +3,43 @@
 import {headers} from 'next/headers';
 
 // ---- CORE IMPORTS ---- //
-import {manager} from '@/tenant';
-import {getSession} from '@/auth';
 import {ORDER_BY, SUBAPP_CODES} from '@/constants';
-import {findWorkspace, findSubappAccess} from '@/orm/workspace';
+import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
 import {EVENT_TYPE} from '@/subapps/events/common/constants';
+import {SearchEventsSchema} from '@/subapps/events/common/actions/validators';
 import {findEvents, type ListEvent} from '@/subapps/events/common/orm/event';
 
 const MIN_CHARS = 2;
 const SEARCH_LIMIT = 200;
 
-export async function searchEvents({
-  search,
-  workspaceURL,
-}: {
+export async function searchEvents(props: {
   search: string;
   workspaceURL: string;
 }): Promise<ListEvent[]> {
-  const q = search?.trim() ?? '';
-  if (q.length < MIN_CHARS || !workspaceURL) return [];
+  const parsed = SearchEventsSchema.safeParse(props);
+  if (!parsed.success) return [];
+  const {workspaceURL} = parsed.data;
+
+  const q = parsed.data.search.trim();
+  if (q.length < MIN_CHARS) return [];
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) return [];
 
-  const tenant = await manager.getTenant(tenantId);
-  if (!tenant) return [];
-  const {client} = tenant;
-
-  const session = await getSession();
-  const user = session?.user;
-
-  const subapp = await findSubappAccess({
+  const access = await ensureAccess({
     code: SUBAPP_CODES.events,
-    user,
     url: workspaceURL,
-    client,
+    tenantId,
+    allowGuest: true,
   });
-  if (!subapp) return [];
+  if (!access.ok) return [];
 
-  const workspace = await findWorkspace({user, url: workspaceURL, client});
-  if (!workspace) return [];
+  const {user} = access;
+  const {client} = access.tenant;
 
   const result = await findEvents({
     limit: SEARCH_LIMIT,

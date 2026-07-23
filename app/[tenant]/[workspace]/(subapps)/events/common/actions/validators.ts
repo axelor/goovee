@@ -16,6 +16,12 @@ export const GetAllEventsSchema = z.object({
 });
 export type GetAllEventsInput = z.infer<typeof GetAllEventsSchema>;
 
+export const SearchEventsSchema = z.object({
+  search: z.string(),
+  workspaceURL: WorkspaceURLSchema,
+});
+export type SearchEventsInput = z.infer<typeof SearchEventsSchema>;
+
 const SubscriptionSchema = z.object({
   id: IdSchema,
 });
