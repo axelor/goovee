@@ -85,6 +85,7 @@
   "An account for the same company exists already, please contact your admin": "An account for the same company exists already, please contact your admin",
   "An account with this email exists already": "An account with this email exists already",
   "An account with this email exists already - {0}": "An account with this email exists already - {0}",
+  "An address must be used for invoicing or delivery.": "An address must be used for invoicing or delivery.",
   "An administrator has access to all applications by default.": "An administrator has access to all applications by default.",
   "An error occurred": "An error occurred",
   "An error occurred while processing the payment.": "An error occurred while processing the payment.",

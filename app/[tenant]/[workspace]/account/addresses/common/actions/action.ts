@@ -46,6 +46,13 @@ export async function createAddress(data: CreateAddress) {
   const {address, isDeliveryAddr, isInvoicingAddr, isDefaultAddr} =
     validation.data;
 
+  if (!isDeliveryAddr && !isInvoicingAddr) {
+    return {
+      error: true,
+      message: await t('An address must be used for invoicing or delivery.'),
+    };
+  }
+
   const session = await getSession();
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -93,6 +100,13 @@ export async function updateAddress(data: UpdateAddress) {
 
   const {id, version, address, isDeliveryAddr, isInvoicingAddr, isDefaultAddr} =
     validation.data;
+
+  if (!isDeliveryAddr && !isInvoicingAddr) {
+    return {
+      error: true,
+      message: await t('An address must be used for invoicing or delivery.'),
+    };
+  }
 
   const session = await getSession();
   const tenantId = (await headers()).get(TENANT_HEADER);

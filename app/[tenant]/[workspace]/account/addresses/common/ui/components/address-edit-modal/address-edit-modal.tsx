@@ -75,7 +75,11 @@ export function AddressEditModal({
   );
   const [submitting, setSubmitting] = useState(false);
 
-  const valid = Boolean(label && streetName && zip && townName && country?.id);
+  // An address must be usable for at least one purpose, otherwise it is
+  // filtered out of every list/picker and becomes impossible to reach again.
+  const hasType = invoicing || shipping;
+  const valid =
+    Boolean(label && streetName && zip && townName && country?.id) && hasType;
 
   const computeFullName = () =>
     [streetName, zip, townName].filter(Boolean).join(' ').toUpperCase();
@@ -246,6 +250,11 @@ export function AddressEditModal({
               checked={shipping}
               onChange={setShipping}
             />
+            {!hasType && (
+              <p className="text-[12.5px] text-status-rejected-fg">
+                {i18n.t('An address must be used for invoicing or delivery.')}
+              </p>
+            )}
           </div>
         </div>
 

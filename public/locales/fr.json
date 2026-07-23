@@ -85,6 +85,7 @@
   "An account for the same company exists already, please contact your admin": "Un compte pour la même entreprise existe déjà, veuillez contacter votre admin",
   "An account with this email exists already": "Un compte avec cet email existe déjà",
   "An account with this email exists already - {0}": "Un compte avec cet email existe déjà - {0}",
+  "An address must be used for invoicing or delivery.": "Une adresse doit servir à la facturation ou à la livraison.",
   "An administrator has access to all applications by default.": "Un administrateur a accès à toutes les applications par défaut.",
   "An error occurred": "Une erreur s’est produite",
   "An error occurred while processing the payment.": "Une erreur s'est produite lors du traitement du paiement.",
