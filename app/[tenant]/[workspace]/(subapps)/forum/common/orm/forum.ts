@@ -388,9 +388,17 @@ export async function findMemberGroupById({
   if (!(id || groupID)) {
     return null;
   }
+
+  // A membership can only be operated on by its owner. Without this scope the
+  // caller could pass another user's group-member id and pin/leave/reconfigure
+  // their membership.
+  if (!user?.id) {
+    return null;
+  }
   const group = await client.aOSPortalForumGroupMember.findOne({
     where: {
       id,
+      member: {id: user.id},
       forumGroup: {
         workspace: {
           id: workspaceID,

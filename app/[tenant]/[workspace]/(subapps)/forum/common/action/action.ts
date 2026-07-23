@@ -40,7 +40,7 @@ import {
 } from '@/subapps/forum/common/orm/forum';
 import {
   getReactionSummaries,
-  findUserReaction,
+  findUserReactions,
   findReactionTargetPost,
   filterVisibleReactionTargets,
   isCommentOfPost,
@@ -1245,14 +1245,24 @@ export async function toggleReaction(input: {
     return {error: true as const, message: await t('Invalid target')};
   }
 
-  const existing = await findUserReaction({
+  const existingRows = await findUserReactions({
     client,
     target,
     id,
     partnerId: user.id,
   });
+  const existing = existingRows[0] ?? null;
 
   try {
+    // Self-heal any duplicate rows a past double-fire may have left, so the
+    // score can't stay inflated and no orphan reaction survives.
+    for (const dup of existingRows.slice(1)) {
+      await client.aOSPortalForumReaction.delete({
+        id: dup.id,
+        version: dup.version,
+      });
+    }
+
     if (!existing) {
       await client.aOSPortalForumReaction.create({
         data: {

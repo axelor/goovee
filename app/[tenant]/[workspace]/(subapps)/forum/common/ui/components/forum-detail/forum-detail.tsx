@@ -528,17 +528,28 @@ export function ForumDetail({
 
   const postSummary = reactions.post[String(post.id)] ?? EMPTY_SUMMARY;
 
+  // Guard against a double-click firing two concurrent toggleReaction calls for
+  // the same target: both would read "no existing reaction" and create a
+  // duplicate row (score +2 forever).
+  const votingRef = useRef(new Set<string>());
   const vote = useCallback(
     async (target: 'post' | 'comment', id: string, value: VoteValue) => {
-      const res = await toggleReaction({workspaceURL, target, id, value});
-      if ('summary' in res && res.summary) {
-        setReactions(prev => ({
-          ...prev,
-          [target]: {
-            ...prev[target],
-            [String(id)]: res.summary as ReactionSummary,
-          },
-        }));
+      const key = `${target}:${id}`;
+      if (votingRef.current.has(key)) return;
+      votingRef.current.add(key);
+      try {
+        const res = await toggleReaction({workspaceURL, target, id, value});
+        if ('summary' in res && res.summary) {
+          setReactions(prev => ({
+            ...prev,
+            [target]: {
+              ...prev[target],
+              [String(id)]: res.summary as ReactionSummary,
+            },
+          }));
+        }
+      } finally {
+        votingRef.current.delete(key);
       }
     },
     [workspaceURL],
@@ -759,11 +770,17 @@ export function ForumDetail({
                   withBasePath(
                     `${workspaceURI}/${SUBAPP_CODES.forum}/api/post/${post.id}/attachment/${fileId}`,
                   );
-                const images = (post.attachmentList as AnyRec[]).filter(
-                  (a: AnyRec) => a?.metaFile?.fileType?.startsWith('image'),
+                // Skip attachments whose metaFile is missing (deleted/orphaned
+                // file) — dereferencing a.metaFile.id below would otherwise
+                // crash the whole detail render.
+                const withFile = (post.attachmentList as AnyRec[]).filter(
+                  (a: AnyRec) => a?.metaFile?.id,
                 );
-                const files = (post.attachmentList as AnyRec[]).filter(
-                  (a: AnyRec) => !a?.metaFile?.fileType?.startsWith('image'),
+                const images = withFile.filter((a: AnyRec) =>
+                  a.metaFile.fileType?.startsWith('image'),
+                );
+                const files = withFile.filter(
+                  (a: AnyRec) => !a.metaFile.fileType?.startsWith('image'),
                 );
                 return (
                   <div className="mt-3 space-y-3">

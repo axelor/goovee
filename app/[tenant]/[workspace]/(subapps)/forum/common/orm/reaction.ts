@@ -228,7 +228,7 @@ export async function getReactionSummaries({
 }
 
 /** The current partner's existing reaction on a single target (for toggling). */
-export async function findUserReaction({
+export async function findUserReactions({
   client,
   target,
   id,
@@ -244,11 +244,12 @@ export async function findUserReaction({
       ? {post: {id: String(id)}, author: {id: String(partnerId)}}
       : {reactionComment: {id: String(id)}, author: {id: String(partnerId)}};
 
+  // Return every row (not just one): a past race may have left duplicates, and
+  // the caller collapses them so the score self-heals.
   const rows = await client.aOSPortalForumReaction.find({
     where,
     select: {reactionSelect: true},
-    take: 1,
   });
 
-  return rows?.[0] ?? null;
+  return rows ?? [];
 }
