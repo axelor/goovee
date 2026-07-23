@@ -42,7 +42,10 @@ export const ORDER_STATUS = {
   CLOSED: 4,
 };
 
+// SaleOrder.deliveryState selection (sale.order.delivery.state).
 export const ORDER_DELIVERY_STATUS = {
+  NOT_DELIVERED: 1,
+  PARTIALLY_DELIVERED: 2,
   DELIVERED: 3,
 };
 

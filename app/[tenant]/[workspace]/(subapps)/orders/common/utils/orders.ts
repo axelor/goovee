@@ -4,7 +4,6 @@ import type {StatusKey, TimelineStep} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {
-  CUSTOMERS_DELIVERY_STATUS,
   ORDER_DELIVERY_STATUS,
   ORDER_STATUS,
   ORDER_TYPE,
@@ -22,6 +21,12 @@ export function getStatus(
       return {
         status: ORDER_TYPE.DELIVERED,
         variant: 'primary',
+      };
+    }
+    if (deliveryState === ORDER_DELIVERY_STATUS.PARTIALLY_DELIVERED) {
+      return {
+        status: ORDER_TYPE.SHIPPED,
+        variant: 'purple',
       };
     }
     return {
@@ -49,7 +54,8 @@ export function getStatusKey(
 ): StatusKey {
   if (statusSelect === ORDER_STATUS.CONFIRMED) {
     if (deliveryState === ORDER_DELIVERY_STATUS.DELIVERED) return 'delivered';
-    if (deliveryState === CUSTOMERS_DELIVERY_STATUS.PLANNED) return 'shipped';
+    if (deliveryState === ORDER_DELIVERY_STATUS.PARTIALLY_DELIVERED)
+      return 'shipped';
     return 'confirmed';
   }
   if (statusSelect === ORDER_STATUS.CLOSED) return 'delivered';
@@ -71,7 +77,7 @@ export function getOrderJourney(
     statusSelect === ORDER_STATUS.CLOSED;
   const shipped =
     deliveryState === ORDER_DELIVERY_STATUS.DELIVERED ||
-    deliveryState === CUSTOMERS_DELIVERY_STATUS.PLANNED;
+    deliveryState === ORDER_DELIVERY_STATUS.PARTIALLY_DELIVERED;
   const delivered = deliveryState === ORDER_DELIVERY_STATUS.DELIVERED;
 
   return [
