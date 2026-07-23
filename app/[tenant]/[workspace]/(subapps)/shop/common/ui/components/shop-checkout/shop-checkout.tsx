@@ -11,6 +11,9 @@ import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
+import {computeTotal} from '@/utils/cart';
+import {calculateAdvanceAmount} from '@/utils/payment';
+import {formatNumber} from '@/lib/core/locale/formatters';
 import type {Cloned} from '@/types/util';
 import type {
   CartItem,
@@ -31,17 +34,11 @@ import {
 } from '@/subapps/shop/common/actions/address';
 import type {ShopConfig} from '@/subapps/shop/common/orm/config';
 import {ShopPayments} from '../shop-payments';
-import {SHIPPING_TYPE} from '@/subapps/shop/common/constants';
 import {
   getCategoryGradient,
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
 import {findProduct} from '@/subapps/shop/common/actions/cart';
-
-const SHIPPING_PRICES: Record<string, number> = {
-  [SHIPPING_TYPE.REGULAR]: 2,
-  [SHIPPING_TYPE.FAST]: 5,
-};
 
 export interface ShopCheckoutLabels {
   backToCart: string;
@@ -86,9 +83,6 @@ export function ShopCheckout({
     [],
   );
   const [loading, setLoading] = useState(true);
-  const [shippingType, setShippingType] = useState<string>(
-    SHIPPING_TYPE.REGULAR,
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -132,19 +126,40 @@ export function ShopCheckout({
       .filter((i): i is ResolvedCartItem => i.computedProduct != null);
   }, [cart?.items, computedProducts]);
 
-  const subtotal = useMemo(() => {
-    let sum = 0;
-    for (const item of items) {
-      // Numeric price rather than re-parsing the localized display string.
-      const n = Number(item.computedProduct?.price?.primary ?? 0);
-      if (Number.isFinite(n)) sum += n * Number(item.quantity ?? 0);
-    }
-    return sum;
-  }, [items]);
-  const shippingPrice = SHIPPING_PRICES[shippingType] ?? 0;
-  // No VAT line in the portal checkout (parity with the pre-redesign total):
-  // the total is simply the items subtotal plus the chosen shipping.
-  const total = subtotal + shippingPrice;
+  // Total through the shared pricing layer so the displayed amount matches what
+  // the server actually charges (currency scale, WT/ATI mode, advance payment).
+  const totals = useMemo(
+    () => computeTotal({cart: {items}, config}),
+    [items, config],
+  );
+  const total = Number(totals.total) || 0;
+  const totalScale = totals.scale.currency;
+  const totalSymbol = totals.currency.symbol;
+  const displayTotal = formatNumber(total, {
+    scale: totalScale,
+    currency: totalSymbol,
+    type: 'DECIMAL',
+  });
+
+  const advanceAmount = config?.payInAdvance
+    ? calculateAdvanceAmount({
+        amount: total,
+        percentage:
+          config.advancePaymentPercentage != null
+            ? Number(config.advancePaymentPercentage)
+            : undefined,
+        payInAdvance: config.payInAdvance,
+      })
+    : null;
+  const displayAdvance =
+    advanceAmount != null && advanceAmount !== total
+      ? formatNumber(advanceAmount, {
+          scale: totalScale,
+          currency: totalSymbol,
+          type: 'DECIMAL',
+        })
+      : null;
+
   const currency =
     items[0]?.computedProduct?.product?.saleCurrency?.symbol ?? '€';
 
@@ -221,29 +236,6 @@ export function ShopCheckout({
                   loadingLabel={labels.addressLoading}
                 />
               </SectionCard>
-
-              <SectionCard title={labels.shippingCardTitle}>
-                <div className="flex flex-col gap-2.5">
-                  <ShippingOption
-                    id={SHIPPING_TYPE.REGULAR}
-                    label={labels.shippingRegular}
-                    subtitle={labels.shippingRegularSubtitle}
-                    price={fmt(SHIPPING_PRICES[SHIPPING_TYPE.REGULAR])}
-                    displayPrices={displayPrices}
-                    checked={shippingType === SHIPPING_TYPE.REGULAR}
-                    onChange={() => setShippingType(SHIPPING_TYPE.REGULAR)}
-                  />
-                  <ShippingOption
-                    id={SHIPPING_TYPE.FAST}
-                    label={labels.shippingFast}
-                    subtitle={labels.shippingFastSubtitle}
-                    price={fmt(SHIPPING_PRICES[SHIPPING_TYPE.FAST])}
-                    displayPrices={displayPrices}
-                    checked={shippingType === SHIPPING_TYPE.FAST}
-                    onChange={() => setShippingType(SHIPPING_TYPE.FAST)}
-                  />
-                </div>
-              </SectionCard>
             </div>
 
             {/* Right sticky summary */}
@@ -259,7 +251,7 @@ export function ShopCheckout({
                     <SummaryRow
                       key={item.computedProduct.product.id}
                       item={item}
-                      tenant={tenant}
+                      tenant={String(tenant)}
                       qtyPrefix={labels.qtyPrefix}
                       fmt={fmt}
                       displayPrices={displayPrices}
@@ -269,22 +261,22 @@ export function ShopCheckout({
                 <div className="p-[22px]">
                   {displayPrices && (
                     <>
-                      <TotalsRow
-                        label={labels.subtotalHtLabel}
-                        value={fmt(subtotal)}
-                      />
-                      <TotalsRow
-                        label={labels.shippingLabel}
-                        value={fmt(shippingPrice)}
-                      />
-                      <div className="flex justify-between items-baseline pt-3 mt-2 border-t border-ink-100">
+                      <div className="flex justify-between items-baseline pt-1">
                         <span className="text-sm font-bold text-ink-900">
                           {labels.totalLabel}
                         </span>
                         <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
-                          {fmt(total)}
+                          {displayTotal}
                         </span>
                       </div>
+                      {displayAdvance && (
+                        <div className="mt-2 pt-2 border-t border-ink-100">
+                          <TotalsRow
+                            label={i18n.t('Advance Amount Due')}
+                            value={displayAdvance}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
                   {/* Payment sits right under the amount. */}
@@ -348,54 +340,6 @@ function SectionCard({
   );
 }
 
-function ShippingOption({
-  id,
-  label,
-  subtitle,
-  price,
-  displayPrices,
-  checked,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  subtitle: string;
-  price: string;
-  displayPrices?: boolean;
-  checked: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <label
-      htmlFor={`v3-ship-${id}`}
-      className={cn(
-        'flex items-center gap-3.5 px-4 py-3.5 rounded-xl cursor-pointer transition-colors',
-        checked
-          ? 'border-[1.5px] border-royal bg-royal-pale/60'
-          : 'border border-ink-150 hover:border-ink-300',
-      )}>
-      <input
-        id={`v3-ship-${id}`}
-        type="radio"
-        name="v3-shipping"
-        value={id}
-        checked={checked}
-        onChange={onChange}
-        className="w-4 h-4 accent-royal cursor-pointer"
-      />
-      <div className="flex-1 min-w-0">
-        <p className="m-0 text-sm font-semibold text-ink-900">{label}</p>
-        <p className="m-0 mt-0.5 text-xs text-ink-500">{subtitle}</p>
-      </div>
-      {displayPrices && (
-        <span className="text-sm font-bold text-ink-900 tabular-nums">
-          {price}
-        </span>
-      )}
-    </label>
-  );
-}
-
 function SummaryRow({
   item,
   tenant,
@@ -455,7 +399,7 @@ function SummaryRow({
   );
 }
 
-function TotalsRow({label, value}: {label: string; value: string}) {
+function TotalsRow({label, value}: {label: string; value: string | number}) {
   return (
     <div className="flex justify-between items-baseline py-1 text-[13.5px]">
       <span className="text-ink-500">{label}</span>

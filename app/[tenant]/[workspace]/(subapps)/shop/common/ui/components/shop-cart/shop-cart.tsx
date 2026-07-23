@@ -18,6 +18,8 @@ import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
+import {computeTotal} from '@/utils/cart';
+import {formatNumber} from '@/lib/core/locale/formatters';
 import type {CartItem, ComputedProduct, Product} from '@/types';
 
 import type {EnrichedCartItem} from '@/subapps/shop/common/types';
@@ -125,18 +127,14 @@ export function ShopCart({
       .filter((i): i is ResolvedCartItem => i.computedProduct != null);
   }, [cart?.items, computedProducts]);
 
-  const subtotal = useMemo(() => {
-    let sum = 0;
-    for (const item of items) {
-      // Use the numeric price rather than re-parsing the localized display
-      // string (which broke for locales where "," is a thousands separator).
-      const n = Number(item.computedProduct?.price?.primary ?? 0);
-      if (Number.isFinite(n)) sum += n * Number(item.quantity ?? 0);
-    }
-    return sum;
-  }, [items]);
-  // No VAT line in the portal cart (parity with the checkout total).
-  const total = subtotal;
+  // Total through the shared pricing layer so what the cart shows matches what
+  // the checkout debits (currency scale + WT/ATI mode), instead of a naive sum.
+  const totals = useMemo(() => computeTotal({cart: {items}}), [items]);
+  const displayTotal = formatNumber(Number(totals.total) || 0, {
+    scale: totals.scale.currency,
+    currency: totals.currency.symbol,
+    type: 'DECIMAL',
+  });
   const currency =
     items[0]?.computedProduct?.product?.saleCurrency?.symbol ?? '€';
 
@@ -249,25 +247,14 @@ export function ShopCart({
                   {labels.summaryTitle}
                 </h3>
                 {displayPrices && (
-                  <>
-                    <SummaryRow
-                      label={labels.subtotalHtLabel}
-                      value={fmt(subtotal)}
-                    />
-                    <SummaryRow
-                      label={labels.shippingLabel}
-                      value={labels.shippingTbdValue}
-                      muted
-                    />
-                    <div className="flex justify-between items-baseline pt-3.5 mt-2 border-t border-ink-100">
-                      <span className="text-sm font-bold text-ink-900">
-                        {labels.totalLabel}
-                      </span>
-                      <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
-                        {fmt(total)}
-                      </span>
-                    </div>
-                  </>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-sm font-bold text-ink-900">
+                      {labels.totalLabel}
+                    </span>
+                    <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
+                      {displayTotal}
+                    </span>
+                  </div>
                 )}
 
                 {authenticated && !hideCheckout && (
@@ -440,28 +427,5 @@ function CartLine({
         </button>
       </div>
     </article>
-  );
-}
-
-function SummaryRow({
-  label,
-  value,
-  muted,
-}: {
-  label: string;
-  value: string;
-  muted?: boolean;
-}) {
-  return (
-    <div className="flex justify-between items-baseline py-1 text-[13.5px]">
-      <span className="text-ink-500">{label}</span>
-      <span
-        className={cn(
-          'font-semibold tabular-nums',
-          muted ? 'text-ink-500 text-[12px] font-normal' : 'text-ink-900',
-        )}>
-        {value}
-      </span>
-    </div>
   );
 }
