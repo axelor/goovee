@@ -41,7 +41,7 @@ import {
 import {
   getReactionSummaries,
   findUserReaction,
-  type VoteValue,
+  findReactionTargetPost,
 } from '@/subapps/forum/common/orm/reaction';
 import {
   FORUM_POST_ATTACHMENT_PURPOSE,
@@ -60,6 +60,7 @@ import {
   AddPostSchema,
   FetchPostsSchema,
   FetchGroupsByMembersSchema,
+  ToggleReactionSchema,
   type PinGroupInput,
   type ExitGroupInput,
   type JoinGroupInput,
@@ -1159,6 +1160,7 @@ async function resolveForumContext(workspaceURL: string) {
     error: false as const,
     client: access.tenant.client,
     user: access.user,
+    workspace: access.workspace,
   };
 }
 
@@ -1191,20 +1193,34 @@ export async function reactionSummary({
   });
 }
 
-export async function toggleReaction({
-  workspaceURL,
-  target,
-  id,
-  value,
-}: {
+export async function toggleReaction(input: {
   workspaceURL: string;
   target: 'post' | 'comment';
   id: string;
-  value: VoteValue;
+  value: 'like' | 'dislike';
 }) {
+  const parsed = ToggleReactionSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true as const, message: z.prettifyError(parsed.error)};
+  }
+  const {workspaceURL, target, id, value} = parsed.data;
+
   const ctx = await resolveForumContext(workspaceURL);
   if (ctx.error) return ctx;
-  const {client, user} = ctx;
+  const {client, user, workspace} = ctx;
+
+  // Scope the target to this workspace and to a group the user may see, so a
+  // reaction can't be written to posts/comments elsewhere in the tenant.
+  const targetPost = await findReactionTargetPost({
+    client,
+    target,
+    id,
+    workspaceId: workspace.id,
+    user,
+  });
+  if (!targetPost) {
+    return {error: true as const, message: await t('Invalid target')};
+  }
 
   const existing = await findUserReaction({
     client,

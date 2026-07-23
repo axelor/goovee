@@ -2,9 +2,62 @@
 import type {WhereOptions} from '@goovee/orm';
 import type {Client} from '@/goovee/.generated/client';
 import type {AOSPortalForumReaction} from '@/goovee/.generated/models';
+import type {User} from '@/types';
+import {filterPrivate} from '@/orm/filter';
 import {clone} from '@/utils';
 
 type ReactionWhere = WhereOptions<AOSPortalForumReaction>;
+
+// Comments are mail messages linked to their forum post via relatedId/relatedModel.
+const FORUM_POST_MODEL = 'com.axelor.apps.portal.db.ForumPost';
+
+/**
+ * Resolves the forum post a reaction target belongs to, scoped to `workspaceId`
+ * and to groups the user is allowed to see — returns null when the target isn't
+ * reachable. Prevents reacting to posts/comments in other workspaces or in
+ * private groups the user cannot access (IDOR).
+ */
+export async function findReactionTargetPost({
+  client,
+  target,
+  id,
+  workspaceId,
+  user,
+}: {
+  client: Client;
+  target: 'post' | 'comment';
+  id: string | number;
+  workspaceId: string;
+  user?: User;
+}) {
+  let postId: string | null = null;
+
+  if (target === 'post') {
+    postId = String(id);
+  } else {
+    const comment = await client.aOSMailMessage.findOne({
+      where: {id: String(id)},
+      select: {relatedId: true, relatedModel: true},
+    });
+    if (!comment || comment.relatedModel !== FORUM_POST_MODEL) return null;
+    postId = comment.relatedId != null ? String(comment.relatedId) : null;
+  }
+
+  if (!postId) return null;
+
+  const post = await client.aOSPortalForumPost.findOne({
+    where: {
+      id: postId,
+      forumGroup: {
+        workspace: {id: workspaceId},
+        AND: [filterPrivate({user})],
+      },
+    },
+    select: {id: true},
+  });
+
+  return post ?? null;
+}
 
 export const REACTION_LIKE = 'like';
 export const REACTION_DISLIKE = 'dislike';

@@ -134,3 +134,11 @@ export const FetchGroupsByMembersSchema = z.object({
 export type FetchGroupsByMembersInput = z.input<
   typeof FetchGroupsByMembersSchema
 >;
+
+export const ToggleReactionSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  target: z.enum(['post', 'comment']),
+  id: IdSchema,
+  value: z.enum(['like', 'dislike']),
+});
+export type ToggleReaction = z.infer<typeof ToggleReactionSchema>;
