@@ -20,6 +20,7 @@ export type InvoiceListItem = {
     formattedValue: string | number | null | undefined;
   };
   isUnpaid: boolean;
+  isPartiallyPaid: boolean;
 };
 
 export type PaymentListItem = {

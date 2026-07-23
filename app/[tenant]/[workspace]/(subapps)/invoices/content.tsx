@@ -30,7 +30,6 @@ import {
 } from '@/subapps/invoices/common/constants/invoices';
 import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import type {InvoiceListItem} from '@/subapps/invoices/common/types/invoices';
-import {extractAmount} from '@/subapps/invoices/common/utils/invoices';
 
 const TODAY = new Date();
 
@@ -42,9 +41,9 @@ function isOverdue(invoice: InvoiceListItem): boolean {
 function getInvoiceStatusKey(invoice: InvoiceListItem): StatusKey {
   if (!invoice.isUnpaid) return 'paid';
   if (isOverdue(invoice)) return 'overdue';
-  const remaining = extractAmount(invoice.amountRemaining?.value);
-  const total = extractAmount(invoice.inTaxTotal);
-  if (remaining > 0 && remaining < total) return 'partial';
+  // Computed server-side from raw amounts — comparing the localized inTaxTotal
+  // string here broke in comma-decimal locales.
+  if (invoice.isPartiallyPaid) return 'partial';
   return 'unpaid';
 }
 

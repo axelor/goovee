@@ -79,10 +79,18 @@ export const findInvoices = async ({
     const currencySymbol = currency?.symbol || DEFAULT_CURRENCY_SYMBOL;
     const scale = currency?.numberOfDecimals || DEFAULT_CURRENCY_SCALE;
     const isUnpaid = Number(amountRemaining) !== 0;
+    // Compute "partially paid" here from the raw numeric values. Doing it in
+    // the UI meant comparing a localized string (inTaxTotal) against a raw
+    // number, which broke in comma-decimal locales (every unpaid invoice read
+    // as partial).
+    const remainingRaw = Number(amountRemaining ?? 0);
+    const totalRaw = Number(inTaxTotal ?? 0);
+    const isPartiallyPaid = remainingRaw > 0 && remainingRaw < totalRaw;
 
     invoices.push({
       ...invoice,
       isUnpaid,
+      isPartiallyPaid,
       exTaxTotal: await formatNumber(String(exTaxTotal), {
         scale,
         currency: currencySymbol,
