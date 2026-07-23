@@ -145,6 +145,7 @@ export type ToggleReaction = z.infer<typeof ToggleReactionSchema>;
 
 export const FindSearchPostsSchema = z.object({
   workspaceURL: WorkspaceURLSchema,
+  search: z.string().trim().optional(),
 });
 
 export const ReactionSummarySchema = z.object({

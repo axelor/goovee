@@ -734,12 +734,15 @@ export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
   });
 }
 
-export async function findSearchPosts(input: {workspaceURL: string}) {
+export async function findSearchPosts(input: {
+  workspaceURL: string;
+  search?: string;
+}) {
   const parsed = FindSearchPostsSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {workspaceURL} = parsed.data;
+  const {workspaceURL, search} = parsed.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
@@ -780,6 +783,7 @@ export async function findSearchPosts(input: {workspaceURL: string}) {
     memberGroupIDs,
     client,
     user,
+    search,
     limit: 50,
   }).then(clone);
 

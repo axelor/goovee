@@ -3,7 +3,7 @@
 import {useState} from 'react';
 import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
-import {MdAdd, MdChatBubbleOutline} from 'react-icons/md';
+import {MdAdd, MdChatBubbleOutline, MdClose} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -47,6 +47,7 @@ export function ForumFeed({
   const {searchParams, update} = useSearchParams();
   const router = useRouter();
   const activeSort = searchParams.get('sort') || 'new';
+  const activeSearch = searchParams.get('search') ?? '';
   const [composerOpen, setComposerOpen] = useState(false);
 
   const postBase = `${workspaceURI}/${SUBAPP_CODES.forum}/post`;
@@ -98,8 +99,8 @@ export function ForumFeed({
             variant="compact"
             placeholder={i18n.t('Search a discussion…')}
             searchKey="title"
-            findQuery={() =>
-              findSearchPosts({workspaceURL})
+            findQuery={({query}: {query: string}) =>
+              findSearchPosts({workspaceURL, search: query})
                 .then((r: any) => (r?.error ? [] : r))
                 .catch(() => [])
             }
@@ -113,6 +114,25 @@ export function ForumFeed({
           />
         </div>
       </div>
+
+      {/* Active search filter — with a control to clear it */}
+      {activeSearch && (
+        <div className="flex items-center gap-2 text-[13px] text-ink-600">
+          <span>
+            {i18n.t('Results for')}{' '}
+            <strong className="text-ink-900">“{activeSearch}”</strong>
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              update([{key: 'search', value: ''}], {scroll: false})
+            }
+            className="inline-flex items-center gap-1 rounded-full border border-ink-150 px-2.5 py-1 text-[12.5px] font-semibold text-ink-700 hover:bg-ink-25">
+            <MdClose className="size-3.5" />
+            {i18n.t('Clear')}
+          </button>
+        </div>
+      )}
 
       {/* Posts */}
       {posts.length === 0 ? (
