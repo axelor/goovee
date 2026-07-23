@@ -15,19 +15,24 @@ import {
   MdKeyboardArrowDown,
   MdAttachFile,
   MdClose,
+  MdRefresh,
 } from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {formatRelativeTime} from '@/locale/formatters';
-import {getPartnerImageURL} from '@/utils/files';
+import {getPartnerImageURL, getFileSizeText} from '@/utils/files';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {RichTextViewer} from '@/ui/components';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useComments} from '@/comments/hooks';
-import {SORT_TYPE, COMMENT_ATTACHMENT_PURPOSE} from '@/comments/constants';
+import {
+  SORT_TYPE,
+  COMMENT_ATTACHMENT_PURPOSE,
+  MAX_FILE_SIZE,
+} from '@/comments/constants';
 import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import {useToast} from '@/ui/hooks/use-toast';
 
@@ -447,7 +452,13 @@ export function ForumDetail({
   // comment feature to be enabled (mirrors server enforcement in createComment).
   const canWriteComment = canComment && commentsEnabled;
   const {toast} = useToast();
-  const {uploads, upload, remove: removeUpload} = useStagedUpload({tenant});
+  const {
+    uploads,
+    upload,
+    retry,
+    remove: removeUpload,
+    isUploading,
+  } = useStagedUpload({tenant});
   const [draft, setDraft] = useState('');
   const [files, setFiles] = useState<{file: File; uploadId: string}[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -581,8 +592,25 @@ export function ForumDetail({
 
   const pickFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files || []);
-    if (picked.length) {
-      const staged = picked.map(file => {
+    /* Reject oversized files client-side before staging, so the user sees the
+     * limit immediately instead of after the whole file has streamed to the
+     * server. Mirrors the shared CommentInput dropzone's maxSize gate. */
+    const withinLimit = picked.filter(file => {
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          variant: 'destructive',
+          title: i18n.t(
+            '{0} exceeds the {1} limit',
+            file.name,
+            getFileSizeText(MAX_FILE_SIZE),
+          ),
+        });
+        return false;
+      }
+      return true;
+    });
+    if (withinLimit.length) {
+      const staged = withinLimit.map(file => {
         const {ids} = upload(file, {purpose: COMMENT_ATTACHMENT_PURPOSE});
         return {file, uploadId: ids[0]};
       });
@@ -591,12 +619,11 @@ export function ForumDetail({
     e.target.value = '';
   };
 
-  const removeFile = (index: number) =>
-    setFiles(prev => {
-      const target = prev[index];
-      if (target) removeUpload(target.uploadId);
-      return prev.filter((_, i) => i !== index);
-    });
+  const removeFile = (index: number) => {
+    const target = files[index];
+    if (target) removeUpload(target.uploadId);
+    setFiles(prev => prev.filter((_, itemIndex) => itemIndex !== index));
+  };
 
   const submit = async () => {
     const text = draft.trim();
@@ -604,7 +631,7 @@ export function ForumDetail({
 
     const attachments: {title: string; description: string; token: string}[] =
       [];
-    for (const {file, uploadId} of files) {
+    for (const {uploadId} of files) {
       const token = uploads.find(item => item.id === uploadId)?.token;
       if (!token) {
         toast({
@@ -613,7 +640,11 @@ export function ForumDetail({
         });
         return;
       }
-      attachments.push({title: file.name, description: '', token});
+      /* Leave the title empty so the server keeps the staged file's original
+       * name and extension. `redeemAttachments` treats a non-empty title as a
+       * bare name and re-appends the extension, so passing `file.name` here
+       * would double it (e.g. report.html -> report.html.html). */
+      attachments.push({title: '', description: '', token});
     }
 
     await onCreate({
@@ -625,6 +656,14 @@ export function ForumDetail({
     setDraft('');
     setFiles([]);
   };
+
+  /* Single source of truth for whether the reply can be posted, shared by the
+   * Post reply button and the Enter-to-send handler so they never drift. */
+  const canSubmit =
+    canWriteComment &&
+    !creating &&
+    !isUploading &&
+    (!!draft.trim() || !!files.length);
 
   return (
     <div className="bg-ink-25 min-h-full">
@@ -845,6 +884,15 @@ export function ForumDetail({
                   <textarea
                     value={draft}
                     onChange={e => setDraft(e.target.value)}
+                    onKeyDown={e => {
+                      /* Enter submits, Shift+Enter inserts a newline. Mirrors
+                       * the shared CommentInput and only fires when the reply
+                       * can actually be posted. */
+                      if (e.key === 'Enter' && !e.shiftKey && canSubmit) {
+                        e.preventDefault();
+                        submit();
+                      }
+                    }}
                     placeholder={
                       canWriteComment
                         ? i18n.t('Write a reply…')
@@ -875,29 +923,64 @@ export function ForumDetail({
                         className="w-[30px] h-[30px] rounded-md grid place-items-center text-ink-500 hover:bg-ink-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent">
                         <MdAttachFile className="size-4" />
                       </button>
-                      {files.map((f, i) => (
-                        <span
-                          key={i}
-                          className="inline-flex items-center gap-1 max-w-[180px] pl-2.5 pr-1 py-1 rounded-full bg-ink-25 border border-ink-150 text-[11.5px] text-ink-700">
-                          <span className="truncate">{f.file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeFile(i)}
-                            aria-label={i18n.t('Remove')}
-                            className="shrink-0 grid place-items-center size-4 rounded-full text-ink-500 hover:bg-ink-150 hover:text-ink-800 transition-colors">
-                            <MdClose className="size-3" />
-                          </button>
-                        </span>
-                      ))}
+                      {files.map((f, i) => {
+                        const uploadItem = uploads.find(
+                          item => item.id === f.uploadId,
+                        );
+                        const isFailed =
+                          uploadItem?.status === 'error' ||
+                          uploadItem?.status === 'aborted';
+                        const isPending =
+                          uploadItem?.status === 'queued' ||
+                          uploadItem?.status === 'uploading';
+                        return (
+                          <span
+                            key={i}
+                            className={`relative inline-flex items-center gap-1 max-w-[180px] overflow-hidden pl-2.5 pr-1 py-1 rounded-full border text-[11.5px] ${
+                              isFailed
+                                ? 'bg-destructive-light border-destructive/30 text-destructive'
+                                : 'bg-ink-25 border-ink-150 text-ink-700'
+                            }`}>
+                            {isPending && (
+                              <span
+                                aria-hidden
+                                className="pointer-events-none absolute inset-y-0 left-0 bg-success/20 transition-[width] duration-200 ease-out"
+                                style={{width: `${uploadItem?.progress ?? 0}%`}}
+                              />
+                            )}
+                            <span className="relative truncate">
+                              {f.file.name}
+                            </span>
+                            {isPending && (
+                              <span className="relative shrink-0 tabular-nums text-success-dark">
+                                {uploadItem?.progress ?? 0}%
+                              </span>
+                            )}
+                            {isFailed && (
+                              <button
+                                type="button"
+                                onClick={() => retry(f.uploadId)}
+                                aria-label={i18n.t('Retry')}
+                                title={i18n.t('Retry')}
+                                className="relative shrink-0 grid place-items-center size-4 rounded-full text-destructive hover:bg-destructive/10 transition-colors">
+                                <MdRefresh className="size-3" />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => removeFile(i)}
+                              aria-label={i18n.t('Remove')}
+                              className="relative shrink-0 grid place-items-center size-4 rounded-full text-ink-500 hover:bg-ink-150 hover:text-ink-800 transition-colors">
+                              <MdClose className="size-3" />
+                            </button>
+                          </span>
+                        );
+                      })}
                     </div>
                     <button
                       type="button"
                       onClick={submit}
-                      disabled={
-                        !canWriteComment ||
-                        creating ||
-                        (!draft.trim() && !files.length)
-                      }
+                      disabled={!canSubmit}
                       className="shrink-0 inline-flex items-center gap-1.5 px-[18px] py-2.5 rounded-[10px] bg-royal text-white text-[13px] font-bold shadow-[0_1px_2px_rgba(13,30,75,0.15),0_4px_12px_rgba(13,30,75,0.12)] hover:bg-royal-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                       {i18n.t('Post reply')}
                       <MdArrowForward className="size-3.5" />
