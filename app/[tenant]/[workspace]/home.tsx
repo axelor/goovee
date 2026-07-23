@@ -491,17 +491,17 @@ async function ResourcesCard({
                 <p className="text-[12.5px] font-semibold text-ink-900 truncate">
                   {file.fileName}
                 </p>
-                <p className="text-[10.5px] text-ink-500 tabular-nums">
-                  {file.metaFile?.sizeText || '--'}
+                <div className="flex items-center gap-1 text-[10.5px] text-ink-500 tabular-nums">
+                  <span>{file.metaFile?.sizeText || '--'}</span>
                   {file.metaFile?.createdOn && (
                     <>
-                      {' · '}
+                      <span>·</span>
                       <Suspense>
                         <DateDisplay date={file.metaFile.createdOn} />
                       </Suspense>
                     </>
                   )}
-                </p>
+                </div>
               </div>
             </Link>
           </li>
