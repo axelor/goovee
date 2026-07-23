@@ -54,7 +54,7 @@ export function Sidebar({
 }) {
   const {data: session} = authClient.useSession();
   const [collapsed, setCollapsed] = useState(false);
-  const {workspaceURI} = useWorkspace();
+  const {workspaceURI, workspaceID} = useWorkspace();
   const env = useEnvironment();
   const mattermostUrl = env?.GOOVEE_PUBLIC_MATTERMOST_HOST || '';
   const pathname = usePathname();
@@ -81,7 +81,12 @@ export function Sidebar({
       .reverse() ?? [];
 
   const hasMultipleWorkspaces = (workspaces?.length ?? 0) > 1;
-  const workspaceName: string = workspaces?.[0]?.name || 'Goovee';
+  // The brand block, switcher label and footer all show the *current*
+  // workspace — match it by id (fall back to URL), not the first in the list.
+  const currentWorkspace =
+    workspaces?.find(w => String(w.id) === String(workspaceID)) ??
+    workspaces?.find(w => toWorkspaceURI(w.url ?? '') === workspaceURI);
+  const workspaceName: string = currentWorkspace?.name || 'Goovee';
 
   const isHomeActive = pathname === workspaceURI;
   const isAccountActive = pathname?.startsWith(`${workspaceURI}/account`);
