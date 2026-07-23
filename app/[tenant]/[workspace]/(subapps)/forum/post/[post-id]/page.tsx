@@ -9,6 +9,8 @@ import {getCurrentPath} from '@/utils/current-path';
 import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
+import {isCommentEnabled} from '@/comments';
+import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
 import {
   findCommentCounts,
@@ -58,6 +60,11 @@ export default async function Page(props: {
   const {client} = access.tenant;
   const userId = user?.id as string;
   const workspace = clone(access.workspace);
+
+  const config = await getForumConfig(access.workspace.config.id, client);
+  const commentsEnabled = config
+    ? isCommentEnabled({subapp: SUBAPP_CODES.forum, config})
+    : false;
 
   const memberGroups = userId
     ? await findGroupsByMembers({
@@ -121,6 +128,7 @@ export default async function Page(props: {
         pictureId: ($user as any)?.picture?.id,
       }}
       canComment={Boolean(post.isMember)}
+      commentsEnabled={commentsEnabled}
       isAuthor={Boolean(userId) && String(post.author?.id) === String(userId)}
       backHref={forumBase}
     />

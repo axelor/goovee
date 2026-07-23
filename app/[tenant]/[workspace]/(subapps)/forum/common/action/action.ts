@@ -42,6 +42,8 @@ import {
   getReactionSummaries,
   findUserReaction,
   findReactionTargetPost,
+  filterVisibleReactionTargets,
+  isCommentOfPost,
 } from '@/subapps/forum/common/orm/reaction';
 import {
   FORUM_POST_ATTACHMENT_PURPOSE,
@@ -61,6 +63,10 @@ import {
   FetchPostsSchema,
   FetchGroupsByMembersSchema,
   ToggleReactionSchema,
+  FindSearchPostsSchema,
+  ReactionSummarySchema,
+  SetBestReplySchema,
+  SetPostStatusSchema,
   type PinGroupInput,
   type ExitGroupInput,
   type JoinGroupInput,
@@ -523,7 +529,7 @@ export async function addPost(input: AddPostInput) {
     });
 
     if (!('error' in subscribers)) {
-      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${group.id}?searchid=${post.id}#post-${post.id}`;
+      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
 
       const notificationRecievers = subscribers.filter(
         sub => sub.member?.id !== user.id, // exclude the post author
@@ -728,7 +734,13 @@ export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
   });
 }
 
-export async function findSearchPosts({workspaceURL}: {workspaceURL: string}) {
+export async function findSearchPosts(input: {workspaceURL: string}) {
+  const parsed = FindSearchPostsSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true, message: z.prettifyError(parsed.error)};
+  }
+  const {workspaceURL} = parsed.data;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
     return {error: true, message: await t('TenantId is required')};
@@ -872,7 +884,7 @@ export const createComment: CreateComment = async props => {
         });
 
         if (!('error' in subscribers)) {
-          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
+          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
 
           const notificationRecievers = subscribers.filter(
             sub => sub.member?.id !== user.id, // exclude the commenter
@@ -903,7 +915,7 @@ export const createComment: CreateComment = async props => {
                     ),
                     body: comment.note ?? '',
                     url: withBasePath(
-                      `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                      `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
                     ),
                     tag: NotificationTag.forumReply(parentComment.id),
                   },
@@ -960,7 +972,7 @@ export const createComment: CreateComment = async props => {
                       ),
                       body: comment.note ?? '',
                       url: withBasePath(
-                        `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
+                        `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
                       ),
                       tag: NotificationTag.forumPostComment(post.id),
                     },
@@ -1164,18 +1176,19 @@ async function resolveForumContext(workspaceURL: string) {
   };
 }
 
-export async function reactionSummary({
-  workspaceURL,
-  postIds = [],
-  commentIds = [],
-}: {
+export async function reactionSummary(input: {
   workspaceURL?: string;
   postIds?: Array<string | number>;
   commentIds?: Array<string | number>;
 }) {
   const empty = {post: {}, comment: {}};
+
+  const parsed = ReactionSummarySchema.safeParse(input);
+  if (!parsed.success) return empty;
+  const {workspaceURL, postIds, commentIds} = parsed.data;
+
   const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId || !workspaceURL) return empty;
+  if (!tenantId) return empty;
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
@@ -1185,10 +1198,20 @@ export async function reactionSummary({
   });
   if (!access.ok) return empty;
 
-  return getReactionSummaries({
+  // Only aggregate ids whose (parent) post is reachable in this workspace, so
+  // counts can't be read for arbitrary posts/comments across the tenant.
+  const scoped = await filterVisibleReactionTargets({
     client: access.tenant.client,
     postIds,
     commentIds,
+    workspaceId: access.workspace.id,
+    user: access.user,
+  });
+
+  return getReactionSummaries({
+    client: access.tenant.client,
+    postIds: scoped.postIds,
+    commentIds: scoped.commentIds,
     partnerId: access.user?.id,
   });
 }
@@ -1274,21 +1297,29 @@ export async function toggleReaction(input: {
   return {success: true as const, summary};
 }
 
-export async function setBestReply({
-  workspaceURL,
-  postId,
-  commentId,
-}: {
+export async function setBestReply(input: {
   workspaceURL: string;
   postId: string;
   commentId: string | null;
 }) {
+  const parsed = SetBestReplySchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true as const, message: z.prettifyError(parsed.error)};
+  }
+  const {workspaceURL, postId, commentId} = parsed.data;
+
   const ctx = await resolveForumContext(workspaceURL);
   if (ctx.error) return ctx;
-  const {client, user} = ctx;
+  const {client, user, workspace} = ctx;
 
   const post = await client.aOSPortalForumPost.findOne({
-    where: {id: postId},
+    where: {
+      id: postId,
+      forumGroup: {
+        workspace: {id: workspace.id},
+        AND: [filterPrivate({user})],
+      },
+    },
     select: {
       author: {id: true},
       bestReply: {id: true},
@@ -1299,6 +1330,11 @@ export async function setBestReply({
   // Only the post author may curate the best answer.
   if (String(post.author?.id) !== String(user.id)) {
     return {error: true as const, message: await t('Unauthorized')};
+  }
+
+  // The chosen reply must actually be a comment of this post.
+  if (commentId && !(await isCommentOfPost({client, commentId, postId}))) {
+    return {error: true as const, message: await t('Invalid target')};
   }
 
   // Toggle off when re-selecting the current best answer or clearing.
@@ -1323,21 +1359,29 @@ export async function setBestReply({
   };
 }
 
-export async function setPostStatus({
-  workspaceURL,
-  postId,
-  resolved,
-}: {
+export async function setPostStatus(input: {
   workspaceURL: string;
   postId: string;
   resolved: boolean;
 }) {
+  const parsed = SetPostStatusSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true as const, message: z.prettifyError(parsed.error)};
+  }
+  const {workspaceURL, postId, resolved} = parsed.data;
+
   const ctx = await resolveForumContext(workspaceURL);
   if (ctx.error) return ctx;
-  const {client, user} = ctx;
+  const {client, user, workspace} = ctx;
 
   const post = await client.aOSPortalForumPost.findOne({
-    where: {id: postId},
+    where: {
+      id: postId,
+      forumGroup: {
+        workspace: {id: workspace.id},
+        AND: [filterPrivate({user})],
+      },
+    },
     select: {author: {id: true}},
   });
   if (!post) return {error: true as const, message: await t('Bad request')};

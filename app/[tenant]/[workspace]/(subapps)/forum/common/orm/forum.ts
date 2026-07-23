@@ -525,7 +525,8 @@ export async function findCommentCounts({
       WHERE m.related_model = 'com.axelor.apps.portal.db.ForumPost'
         AND m.related_id IN (${placeholders})
         AND m.parent_mail_message IS NULL
-        AND m.note IS NOT NULL AND m.note <> ''
+        AND (m.public_body IS NOT NULL OR m.is_public_note = TRUE)
+        AND m.archived IS NOT TRUE
       GROUP BY m.related_id
       `,
       ...postIds.map(id => Number(id)),

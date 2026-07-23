@@ -428,6 +428,7 @@ export function ForumDetail({
   related = [],
   currentUser,
   canComment = false,
+  commentsEnabled = true,
   isAuthor = false,
   backHref,
 }: {
@@ -437,10 +438,14 @@ export function ForumDetail({
   related?: AnyRec[];
   currentUser?: {name?: string | null; pictureId?: string | null} | null;
   canComment?: boolean;
+  commentsEnabled?: boolean;
   isAuthor?: boolean;
   backHref: string;
 }) {
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  // Voting only needs membership; writing comments also needs the workspace's
+  // comment feature to be enabled (mirrors server enforcement in createComment).
+  const canWriteComment = canComment && commentsEnabled;
   const {toast} = useToast();
   const {uploads, upload, remove: removeUpload} = useStagedUpload({tenant});
   const [draft, setDraft] = useState('');
@@ -702,7 +707,7 @@ export function ForumDetail({
               myVote={postSummary.myVote}
               onVote={v => vote('post', String(post.id), v)}
               canVote={canComment}
-              canReply={canComment}
+              canReply={canWriteComment}
               onReply={text => onCreate({data: {text, attachments: []}})}
               isOriginal
             />
@@ -800,7 +805,7 @@ export function ForumDetail({
                     onVote={v => vote('comment', String(c.id), v)}
                     canVote={canComment}
                     nestedReplies={c.childMailMessages || []}
-                    canReply={canComment}
+                    canReply={canWriteComment}
                     onReply={text =>
                       onCreate({data: {text, attachments: []}, parent: c.id})
                     }
@@ -841,12 +846,14 @@ export function ForumDetail({
                     value={draft}
                     onChange={e => setDraft(e.target.value)}
                     placeholder={
-                      canComment
+                      canWriteComment
                         ? i18n.t('Write a reply…')
-                        : i18n.t('Join the group to comment')
+                        : commentsEnabled
+                          ? i18n.t('Join the group to comment')
+                          : i18n.t('Comments are disabled')
                     }
                     rows={3}
-                    disabled={!canComment || creating}
+                    disabled={!canWriteComment || creating}
                     className="w-full border border-ink-150 rounded-[10px] px-3 py-2.5 text-[13.5px] resize-y outline-none text-ink-800 focus:border-royal transition-colors disabled:bg-ink-25 disabled:cursor-not-allowed box-border"
                   />
                   <div className="flex justify-between items-center gap-3 mt-2.5">
@@ -857,11 +864,11 @@ export function ForumDetail({
                         multiple
                         className="hidden"
                         onChange={pickFiles}
-                        disabled={!canComment}
+                        disabled={!canWriteComment}
                       />
                       <button
                         type="button"
-                        disabled={!canComment}
+                        disabled={!canWriteComment}
                         onClick={() => fileInputRef.current?.click()}
                         aria-label={i18n.t('Attach files')}
                         title={i18n.t('Attach files')}
@@ -887,7 +894,7 @@ export function ForumDetail({
                       type="button"
                       onClick={submit}
                       disabled={
-                        !canComment ||
+                        !canWriteComment ||
                         creating ||
                         (!draft.trim() && !files.length)
                       }

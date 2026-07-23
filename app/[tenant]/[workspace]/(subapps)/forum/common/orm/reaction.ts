@@ -9,7 +9,7 @@ import {clone} from '@/utils';
 type ReactionWhere = WhereOptions<AOSPortalForumReaction>;
 
 // Comments are mail messages linked to their forum post via relatedId/relatedModel.
-const FORUM_POST_MODEL = 'com.axelor.apps.portal.db.ForumPost';
+export const FORUM_POST_MODEL = 'com.axelor.apps.portal.db.ForumPost';
 
 /**
  * Resolves the forum post a reaction target belongs to, scoped to `workspaceId`
@@ -57,6 +57,91 @@ export async function findReactionTargetPost({
   });
 
   return post ?? null;
+}
+
+/**
+ * Keeps only the post/comment ids whose (parent) post is in `workspaceId` and
+ * in a group the user may see. Used to scope reaction-summary aggregates so
+ * they can't be read for arbitrary ids elsewhere in the tenant.
+ */
+export async function filterVisibleReactionTargets({
+  client,
+  postIds,
+  commentIds,
+  workspaceId,
+  user,
+}: {
+  client: Client;
+  postIds: Array<string | number>;
+  commentIds: Array<string | number>;
+  workspaceId: string;
+  user?: User;
+}): Promise<{postIds: string[]; commentIds: string[]}> {
+  const scopePosts = async (ids: string[]): Promise<Set<string>> => {
+    if (!ids.length) return new Set();
+    const rows = await client.aOSPortalForumPost.find({
+      where: {
+        id: {in: ids},
+        forumGroup: {
+          workspace: {id: workspaceId},
+          AND: [filterPrivate({user})],
+        },
+      },
+      select: {id: true},
+    });
+    return new Set((rows ?? []).map(r => String(r.id)));
+  };
+
+  const postIdStrs = postIds.map(String);
+  const visiblePostIds = await scopePosts(postIdStrs);
+
+  let allowedCommentIds: string[] = [];
+  if (commentIds.length) {
+    const comments = await client.aOSMailMessage.find({
+      where: {id: {in: commentIds.map(String)}, relatedModel: FORUM_POST_MODEL},
+      select: {id: true, relatedId: true},
+    });
+    const parentIds = [
+      ...new Set(
+        (comments ?? [])
+          .map(c => (c.relatedId != null ? String(c.relatedId) : ''))
+          .filter(Boolean),
+      ),
+    ];
+    const visibleParents = await scopePosts(parentIds);
+    allowedCommentIds = (comments ?? [])
+      .filter(
+        c => c.relatedId != null && visibleParents.has(String(c.relatedId)),
+      )
+      .map(c => String(c.id));
+  }
+
+  return {
+    postIds: postIdStrs.filter(id => visiblePostIds.has(id)),
+    commentIds: allowedCommentIds,
+  };
+}
+
+/** True when `commentId` is a comment (mail message) of the given forum post. */
+export async function isCommentOfPost({
+  client,
+  commentId,
+  postId,
+}: {
+  client: Client;
+  commentId: string | number;
+  postId: string | number;
+}): Promise<boolean> {
+  const comment = await client.aOSMailMessage.findOne({
+    where: {id: String(commentId)},
+    select: {relatedId: true, relatedModel: true},
+  });
+  return (
+    !!comment &&
+    comment.relatedModel === FORUM_POST_MODEL &&
+    comment.relatedId != null &&
+    String(comment.relatedId) === String(postId)
+  );
 }
 
 export const REACTION_LIKE = 'like';

@@ -142,3 +142,25 @@ export const ToggleReactionSchema = z.object({
   value: z.enum(['like', 'dislike']),
 });
 export type ToggleReaction = z.infer<typeof ToggleReactionSchema>;
+
+export const FindSearchPostsSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+});
+
+export const ReactionSummarySchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  postIds: z.array(IdSchema).optional().default([]),
+  commentIds: z.array(IdSchema).optional().default([]),
+});
+
+export const SetBestReplySchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  postId: IdSchema,
+  commentId: IdSchema.nullable(),
+});
+
+export const SetPostStatusSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  postId: IdSchema,
+  resolved: z.boolean(),
+});
