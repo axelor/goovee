@@ -56,6 +56,7 @@ interface ShopProductDetailProps {
   relatedProducts: ComputedProduct[];
   labels: ShopProductDetailLabels;
   hidePriceAndPurchase?: boolean;
+  displayPrices?: boolean;
 }
 
 export function ShopProductDetail({
@@ -66,6 +67,7 @@ export function ShopProductDetail({
   relatedProducts,
   labels,
   hidePriceAndPurchase = false,
+  displayPrices = false,
 }: ShopProductDetailProps) {
   const {workspaceURI, tenant} = useWorkspace();
   const {updateQuantity, getProductQuantity} = useCart();
@@ -295,21 +297,28 @@ export function ShopProductDetail({
                 </div>
               )}
 
-              {/* Price card — hidden for guests / users without a pricelist */}
+              {/* Price card — hidden for guests / users without a pricelist.
+                  The price itself is further gated by the workspace's
+                  displayPrices flag; quantity + add-to-cart stay available so a
+                  hide-prices workspace can still sell. */}
               {!hidePriceAndPurchase && (
                 <div className="mt-[22px] p-5 rounded-[14px] bg-white border border-ink-100 shadow-xs">
-                  <div className="flex items-baseline gap-2.5">
-                    <span className="text-[32px] font-extrabold text-ink-900 tracking-[-0.02em] tabular-nums">
-                      {price?.displayPrimary ?? '—'}
-                    </span>
-                    <span className="text-[13px] font-semibold text-ink-500">
-                      {labels.htSuffix}
-                    </span>
-                  </div>
-                  {price?.displayTwoPrices && price?.displaySecondary && (
-                    <div className="text-[13px] text-ink-500 mt-0.5 tabular-nums">
-                      {price.displaySecondary} {labels.ttcSuffix}
-                    </div>
+                  {displayPrices && (
+                    <>
+                      <div className="flex items-baseline gap-2.5">
+                        <span className="text-[32px] font-extrabold text-ink-900 tracking-[-0.02em] tabular-nums">
+                          {price?.displayPrimary ?? '—'}
+                        </span>
+                        <span className="text-[13px] font-semibold text-ink-500">
+                          {labels.htSuffix}
+                        </span>
+                      </div>
+                      {price?.displayTwoPrices && price?.displaySecondary && (
+                        <div className="text-[13px] text-ink-500 mt-0.5 tabular-nums">
+                          {price.displaySecondary} {labels.ttcSuffix}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   <div className="flex items-center gap-3 mt-[18px]">
@@ -450,7 +459,7 @@ export function ShopProductDetail({
                         <div className="text-[12.5px] font-bold text-ink-900 leading-[1.3] min-h-[32px] line-clamp-2">
                           {i18n.tattr(rProduct.name)}
                         </div>
-                        {!hidePriceAndPurchase && (
+                        {displayPrices && !hidePriceAndPurchase && (
                           <div className="text-sm font-extrabold text-ink-900 mt-1.5 tabular-nums">
                             {r?.price?.displayPrimary ?? '—'}
                           </div>

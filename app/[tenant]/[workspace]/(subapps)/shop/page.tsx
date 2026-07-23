@@ -97,6 +97,7 @@ async function Catalog({
       products={products}
       labels={labels}
       hidePriceAndPurchase={hidePriceAndPurchase}
+      displayPrices={Boolean(workspaceConfig.displayPrices)}
     />
   );
 }

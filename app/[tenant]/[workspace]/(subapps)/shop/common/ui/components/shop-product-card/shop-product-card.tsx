@@ -32,6 +32,7 @@ export function ShopProductCard({
   addToCartLabel,
   addedLabel,
   hidePriceAndPurchase,
+  displayPrices,
 }: {
   product: ComputedProduct;
   category: ShopCategory | null;
@@ -40,6 +41,7 @@ export function ShopProductCard({
   addToCartLabel: string;
   addedLabel: string;
   hidePriceAndPurchase?: boolean;
+  displayPrices?: boolean;
 }) {
   const {tenant, workspaceURI} = useWorkspace();
   const {updateQuantity, getProductQuantity} = useCart();
@@ -129,7 +131,9 @@ export function ShopProductCard({
         )}
         <div className="mt-auto pt-2 border-t border-ink-100 flex items-center justify-between gap-2">
           <div className="text-base font-extrabold text-ink-900 tabular-nums">
-            {price?.displayPrimary ?? '—'}
+            {displayPrices && !hidePriceAndPurchase
+              ? (price?.displayPrimary ?? '—')
+              : null}
           </div>
           <div className="flex items-center gap-1.5">
             <span

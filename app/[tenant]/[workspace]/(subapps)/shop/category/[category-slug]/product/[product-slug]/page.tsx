@@ -211,6 +211,7 @@ async function Detail({
       relatedProducts={clone(related)}
       labels={labels}
       hidePriceAndPurchase={hidePriceAndPurchase}
+      displayPrices={Boolean(workspaceConfig.displayPrices)}
     />
   );
 }

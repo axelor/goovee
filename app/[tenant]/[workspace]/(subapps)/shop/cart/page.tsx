@@ -82,6 +82,7 @@ async function CartView({
       hideRequestQuotation={!config?.requestQuotation}
       hideCheckout={!config?.confirmOrder}
       quotationSubapp={Boolean(quotationSubapp)}
+      displayPrices={Boolean(config?.displayPrices)}
     />
   );
 }

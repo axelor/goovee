@@ -13,6 +13,7 @@ export default function Content({
   hideRequestQuotation,
   hideCheckout,
   quotationSubapp,
+  displayPrices,
 }: {
   tenant: string;
   labels: ShopCartLabels;
@@ -20,6 +21,7 @@ export default function Content({
   hideRequestQuotation: boolean;
   hideCheckout: boolean;
   quotationSubapp: boolean;
+  displayPrices?: boolean;
 }) {
   return (
     <ShopCart
@@ -28,6 +30,7 @@ export default function Content({
       hideRequestQuotation={hideRequestQuotation}
       hideCheckout={hideCheckout}
       quotationSubapp={quotationSubapp}
+      displayPrices={displayPrices}
     />
   );
 }

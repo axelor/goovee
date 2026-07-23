@@ -39,6 +39,7 @@ interface ShopCatalogProps {
   products: ComputedProduct[];
   labels: ShopLabels;
   hidePriceAndPurchase?: boolean;
+  displayPrices?: boolean;
 }
 
 type SortKey = 'featured' | 'price-asc' | 'price-desc' | 'name';
@@ -64,6 +65,7 @@ export function ShopCatalog({
   products,
   labels,
   hidePriceAndPurchase,
+  displayPrices,
 }: ShopCatalogProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -286,6 +288,7 @@ export function ShopCatalog({
                     addToCartLabel={labels.addToCartLabel}
                     addedLabel={labels.addedLabel}
                     hidePriceAndPurchase={hidePriceAndPurchase}
+                    displayPrices={displayPrices}
                   />
                 );
               })}

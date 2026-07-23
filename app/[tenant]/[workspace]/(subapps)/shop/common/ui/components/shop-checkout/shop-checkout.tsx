@@ -159,6 +159,9 @@ export function ShopCheckout({
 
   const cartHref = `${workspaceURI}/${SUBAPP_CODES.shop}/cart`;
   const confirmOrder = !!config?.confirmOrder;
+  // Workspaces configured to hide prices must not surface any amount, even
+  // inside the checkout summary (parity with the pre-redesign gate).
+  const displayPrices = Boolean(config?.displayPrices);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-ink-25">
@@ -226,6 +229,7 @@ export function ShopCheckout({
                     label={labels.shippingRegular}
                     subtitle={labels.shippingRegularSubtitle}
                     price={fmt(SHIPPING_PRICES[SHIPPING_TYPE.REGULAR])}
+                    displayPrices={displayPrices}
                     checked={shippingType === SHIPPING_TYPE.REGULAR}
                     onChange={() => setShippingType(SHIPPING_TYPE.REGULAR)}
                   />
@@ -234,6 +238,7 @@ export function ShopCheckout({
                     label={labels.shippingFast}
                     subtitle={labels.shippingFastSubtitle}
                     price={fmt(SHIPPING_PRICES[SHIPPING_TYPE.FAST])}
+                    displayPrices={displayPrices}
                     checked={shippingType === SHIPPING_TYPE.FAST}
                     onChange={() => setShippingType(SHIPPING_TYPE.FAST)}
                   />
@@ -257,26 +262,31 @@ export function ShopCheckout({
                       tenant={tenant}
                       qtyPrefix={labels.qtyPrefix}
                       fmt={fmt}
+                      displayPrices={displayPrices}
                     />
                   ))}
                 </ul>
                 <div className="p-[22px]">
-                  <TotalsRow
-                    label={labels.subtotalHtLabel}
-                    value={fmt(subtotal)}
-                  />
-                  <TotalsRow
-                    label={labels.shippingLabel}
-                    value={fmt(shippingPrice)}
-                  />
-                  <div className="flex justify-between items-baseline pt-3 mt-2 border-t border-ink-100">
-                    <span className="text-sm font-bold text-ink-900">
-                      {labels.totalLabel}
-                    </span>
-                    <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
-                      {fmt(total)}
-                    </span>
-                  </div>
+                  {displayPrices && (
+                    <>
+                      <TotalsRow
+                        label={labels.subtotalHtLabel}
+                        value={fmt(subtotal)}
+                      />
+                      <TotalsRow
+                        label={labels.shippingLabel}
+                        value={fmt(shippingPrice)}
+                      />
+                      <div className="flex justify-between items-baseline pt-3 mt-2 border-t border-ink-100">
+                        <span className="text-sm font-bold text-ink-900">
+                          {labels.totalLabel}
+                        </span>
+                        <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
+                          {fmt(total)}
+                        </span>
+                      </div>
+                    </>
+                  )}
                   {/* Payment sits right under the amount. */}
                   {confirmOrder && (
                     <div className="mt-4">
@@ -343,6 +353,7 @@ function ShippingOption({
   label,
   subtitle,
   price,
+  displayPrices,
   checked,
   onChange,
 }: {
@@ -350,6 +361,7 @@ function ShippingOption({
   label: string;
   subtitle: string;
   price: string;
+  displayPrices?: boolean;
   checked: boolean;
   onChange: () => void;
 }) {
@@ -375,9 +387,11 @@ function ShippingOption({
         <p className="m-0 text-sm font-semibold text-ink-900">{label}</p>
         <p className="m-0 mt-0.5 text-xs text-ink-500">{subtitle}</p>
       </div>
-      <span className="text-sm font-bold text-ink-900 tabular-nums">
-        {price}
-      </span>
+      {displayPrices && (
+        <span className="text-sm font-bold text-ink-900 tabular-nums">
+          {price}
+        </span>
+      )}
     </label>
   );
 }
@@ -387,11 +401,13 @@ function SummaryRow({
   tenant,
   qtyPrefix,
   fmt,
+  displayPrices,
 }: {
   item: ResolvedCartItem;
   tenant: string;
   qtyPrefix: string;
   fmt: (n: number) => string;
+  displayPrices?: boolean;
 }) {
   const product = item.computedProduct.product;
   const portalCat = product?.portalCategorySet?.[0];
@@ -430,9 +446,11 @@ function SummaryRow({
           {qtyPrefix} {qty}
         </div>
       </div>
-      <span className="text-[13px] font-bold text-ink-900 tabular-nums">
-        {fmt(lineTotal)}
-      </span>
+      {displayPrices && (
+        <span className="text-[13px] font-bold text-ink-900 tabular-nums">
+          {fmt(lineTotal)}
+        </span>
+      )}
     </li>
   );
 }

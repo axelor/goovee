@@ -61,12 +61,14 @@ export function ShopCart({
   hideRequestQuotation,
   hideCheckout,
   quotationSubapp,
+  displayPrices,
 }: {
   labels: ShopCartLabels;
   modalLabels: ShopQuoteModalLabels;
   hideRequestQuotation: boolean;
   hideCheckout: boolean;
   quotationSubapp: boolean;
+  displayPrices?: boolean;
 }) {
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
@@ -235,6 +237,7 @@ export function ShopCart({
                   fmt={fmt}
                   unitSuffix={labels.unitSuffix}
                   removeLabel={labels.removeLabel}
+                  displayPrices={displayPrices}
                 />
               ))}
             </div>
@@ -245,23 +248,27 @@ export function ShopCart({
                 <h3 className="m-0 mb-4 text-base font-bold text-ink-900">
                   {labels.summaryTitle}
                 </h3>
-                <SummaryRow
-                  label={labels.subtotalHtLabel}
-                  value={fmt(subtotal)}
-                />
-                <SummaryRow
-                  label={labels.shippingLabel}
-                  value={labels.shippingTbdValue}
-                  muted
-                />
-                <div className="flex justify-between items-baseline pt-3.5 mt-2 border-t border-ink-100">
-                  <span className="text-sm font-bold text-ink-900">
-                    {labels.totalLabel}
-                  </span>
-                  <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
-                    {fmt(total)}
-                  </span>
-                </div>
+                {displayPrices && (
+                  <>
+                    <SummaryRow
+                      label={labels.subtotalHtLabel}
+                      value={fmt(subtotal)}
+                    />
+                    <SummaryRow
+                      label={labels.shippingLabel}
+                      value={labels.shippingTbdValue}
+                      muted
+                    />
+                    <div className="flex justify-between items-baseline pt-3.5 mt-2 border-t border-ink-100">
+                      <span className="text-sm font-bold text-ink-900">
+                        {labels.totalLabel}
+                      </span>
+                      <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
+                        {fmt(total)}
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 {authenticated && !hideCheckout && (
                   <Link
@@ -316,6 +323,7 @@ export function ShopCart({
           computedItems={items}
           quotationSubapp={quotationSubapp}
           labels={modalLabels}
+          displayPrices={displayPrices}
         />
       )}
     </div>
@@ -331,6 +339,7 @@ function CartLine({
   fmt,
   unitSuffix,
   removeLabel,
+  displayPrices,
 }: {
   item: ResolvedCartItem;
   tenant: string;
@@ -340,6 +349,7 @@ function CartLine({
   fmt: (n: number) => string;
   unitSuffix: string;
   removeLabel: string;
+  displayPrices?: boolean;
 }) {
   const product = item.computedProduct.product;
   const price = item.computedProduct.price;
@@ -407,16 +417,20 @@ function CartLine({
               +
             </button>
           </div>
-          <span className="text-xs text-ink-500 tabular-nums">
-            {price?.displayPrimary ?? '—'} {unitSuffix}
-          </span>
+          {displayPrices && (
+            <span className="text-xs text-ink-500 tabular-nums">
+              {price?.displayPrimary ?? '—'} {unitSuffix}
+            </span>
+          )}
         </div>
       </div>
 
       <div className="flex flex-col items-end gap-2.5">
-        <span className="text-lg font-extrabold text-ink-900 tabular-nums">
-          {fmt(lineTotal)}
-        </span>
+        {displayPrices && (
+          <span className="text-lg font-extrabold text-ink-900 tabular-nums">
+            {fmt(lineTotal)}
+          </span>
+        )}
         <button
           type="button"
           onClick={onRemove}

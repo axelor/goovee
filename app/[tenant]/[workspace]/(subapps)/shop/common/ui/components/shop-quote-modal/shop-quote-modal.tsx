@@ -65,12 +65,14 @@ export function ShopQuoteModal({
   computedItems,
   quotationSubapp,
   labels,
+  displayPrices,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   computedItems: ResolvedCartItem[];
   quotationSubapp: boolean;
   labels: ShopQuoteModalLabels;
+  displayPrices?: boolean;
 }) {
   const {workspaceURI, workspaceURL} = useWorkspace();
   const {cart, clearCart} = useCart();
@@ -209,6 +211,7 @@ export function ShopQuoteModal({
                     key={item.computedProduct.product.id}
                     item={item}
                     fmt={fmt}
+                    displayPrices={displayPrices}
                   />
                 ))}
               </ul>
@@ -217,17 +220,19 @@ export function ShopQuoteModal({
                   {labels.moreItemsPrefix} {overflow} {labels.moreItemsSuffix}
                 </p>
               )}
-              <div className="mt-3.5 flex items-baseline justify-between bg-ink-25 border border-ink-100 rounded-lg px-3.5 py-2.5">
-                <span className="text-[12.5px] font-bold uppercase tracking-[0.04em] text-ink-700">
-                  {labels.estimatedTotalLabel}
-                </span>
-                <span className="text-[18px] font-extrabold text-ink-900 tabular-nums">
-                  {fmt(subtotalHt)}{' '}
-                  <span className="text-[12px] font-semibold text-ink-500">
-                    {labels.htSuffix}
+              {displayPrices && (
+                <div className="mt-3.5 flex items-baseline justify-between bg-ink-25 border border-ink-100 rounded-lg px-3.5 py-2.5">
+                  <span className="text-[12.5px] font-bold uppercase tracking-[0.04em] text-ink-700">
+                    {labels.estimatedTotalLabel}
                   </span>
-                </span>
-              </div>
+                  <span className="text-[18px] font-extrabold text-ink-900 tabular-nums">
+                    {fmt(subtotalHt)}{' '}
+                    <span className="text-[12px] font-semibold text-ink-500">
+                      {labels.htSuffix}
+                    </span>
+                  </span>
+                </div>
+              )}
             </section>
 
             {/* Addresses — delivery and billing are chosen separately */}
@@ -294,9 +299,11 @@ export function ShopQuoteModal({
 function QuoteItemRow({
   item,
   fmt,
+  displayPrices,
 }: {
   item: ResolvedCartItem;
   fmt: (n: number) => string;
+  displayPrices?: boolean;
 }) {
   const {tenant} = useWorkspace();
   const product = item.computedProduct.product;
@@ -333,12 +340,16 @@ function QuoteItemRow({
           {i18n.tattr(product.name)}
         </div>
         <div className="text-[11.5px] text-ink-500 tabular-nums">
-          {qty} × {item.computedProduct?.price?.displayPrimary ?? '—'}
+          {displayPrices
+            ? `${qty} × ${item.computedProduct?.price?.displayPrimary ?? '—'}`
+            : qty}
         </div>
       </div>
-      <span className="text-[13px] font-bold text-ink-900 tabular-nums shrink-0">
-        {fmt(lineTotal)}
-      </span>
+      {displayPrices && (
+        <span className="text-[13px] font-bold text-ink-900 tabular-nums shrink-0">
+          {fmt(lineTotal)}
+        </span>
+      )}
     </li>
   );
 }
