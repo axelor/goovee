@@ -4,10 +4,17 @@ import {Suspense} from 'react';
 import Image from 'next/image';
 
 // ---- CORE IMPORTS ---- //
-import {NO_IMAGE_URL, ORDER_BY, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
+import {
+  DEFAULT_LOGO_URL,
+  IMAGE_URL,
+  NO_IMAGE_URL,
+  ORDER_BY,
+  SUBAPP_CODES,
+  SUBAPP_PAGE,
+} from '@/constants';
 import {parseCommentContent} from '@/lib/core/comments';
 import {t} from '@/lib/core/locale/server';
-import type {User} from '@/types';
+import type {User, OverlayColor} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 import {Icon} from '@/ui/components/icon';
@@ -17,6 +24,7 @@ import {FileIcon} from '@/ui/components/file-icon';
 import {cn} from '@/utils/css';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
+import {HeroSearch} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ----//
 import type {ShellConfig} from './orm/config';
@@ -35,30 +43,6 @@ type HomeApps = Awaited<
 type HeroArticle = NonNullable<
   Awaited<ReturnType<typeof findHomePageHeaderNews>>['news']
 >[number];
-
-// Overlay tint applied over a configured hero background image, keyed by the
-// workspace's homepageHeroOverlayColorSelect (mirrors the shared Banner map).
-const HERO_OVERLAY: Record<string, string> = {
-  default: 'bg-transparent',
-  red: 'bg-red-500/50',
-  pink: 'bg-pink-500/50',
-  purple: 'bg-purple-500/50',
-  deeppurple: 'bg-purple-900/50',
-  indigo: 'bg-indigo-500/50',
-  blue: 'bg-blue-500/50',
-  lightblue: 'bg-sky-500/50',
-  cyan: 'bg-cyan-500/50',
-  teal: 'bg-teal-500/50',
-  green: 'bg-green-500/50',
-  lightgreen: 'bg-green-300/50',
-  lime: 'bg-lime-500/50',
-  yellow: 'bg-yellow-500/50',
-  amber: 'bg-amber-500/50',
-  orange: 'bg-orange-500/50',
-  deeporange: 'bg-orange-600/50',
-  brown: 'bg-amber-700/50',
-  grey: 'bg-gray-500/50',
-};
 
 export async function Home({
   client,
@@ -103,110 +87,31 @@ export async function Home({
     config.homepageHeroDescription ||
     (await t('Catalogue, orders, support and events on a single portal'));
 
-  // Workspace-configured hero: background image + overlay tint + logo. When no
-  // image is configured we fall back to the decorative gradient below.
+  // Configurable hero banner (background image + overlay + logo), rendered via
+  // the shared HeroSearch/Banner exactly as it was before the redesign.
   const heroImageURL = config.homepageHeroBgImage?.id
     ? withBasePath(`${workspaceURI}/api/home/hero/background`)
-    : null;
-  const overlayClass =
-    HERO_OVERLAY[config.homepageHeroOverlayColorSelect ?? 'default'] ??
-    'bg-transparent';
+    : withBasePath(IMAGE_URL);
   const logoId = workspace.logo?.id || config.company?.logo?.id;
   const logoURL = logoId
     ? withBasePath(`${workspaceURI}/api/workspace/logo/image`)
-    : null;
+    : withBasePath(DEFAULT_LOGO_URL);
 
   return (
     <div className="bg-ink-25 flex flex-col flex-1 min-h-0">
-      {/* Hero welcome */}
-      <section
-        className="relative overflow-hidden text-white bg-royal-dark"
-        style={{padding: '56px 32px 64px'}}>
-        {heroImageURL ? (
-          <>
-            {/* Workspace-configured background image */}
-            <Image
-              src={heroImageURL}
-              alt=""
-              fill
-              priority
-              className="object-cover z-0"
-              sizes="100vw"
-            />
-            {/* Readability scrim + the workspace's configured overlay tint */}
-            <div aria-hidden className="absolute inset-0 z-0 bg-royal-dark/45" />
-            <div
-              aria-hidden
-              className={cn('absolute inset-0 z-0', overlayClass)}
-            />
-          </>
-        ) : (
-          <>
-            {/* Decorative fallback: gradient + dot grid + waves */}
-            <div
-              aria-hidden
-              className="absolute inset-0 z-0"
-              style={{
-                background:
-                  'linear-gradient(135deg, hsl(var(--royal-dark)) 0%, hsl(var(--royal)) 100%)',
-              }}
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 z-0 opacity-40"
-              style={{
-                background:
-                  'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.10) 1px, transparent 1px)',
-                backgroundSize: '22px 22px',
-              }}
-            />
-            <svg
-              aria-hidden
-              viewBox="0 0 1200 400"
-              preserveAspectRatio="none"
-              className="absolute inset-0 z-0 w-full h-full opacity-50">
-              <path
-                d="M0,80 Q300,260 600,200 T1200,180 L1200,400 L0,400 Z"
-                fill="none"
-                stroke="rgba(127,182,255,0.18)"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M0,120 Q300,280 600,240 T1200,220 L1200,400 L0,400 Z"
-                fill="none"
-                stroke="rgba(127,182,255,0.14)"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M0,160 Q300,310 600,290 T1200,260 L1200,400 L0,400 Z"
-                fill="none"
-                stroke="rgba(127,182,255,0.10)"
-                strokeWidth="1.5"
-              />
-            </svg>
-          </>
-        )}
-
-        <div className="relative z-10 max-w-[1280px] mx-auto flex flex-col items-center text-center">
-          {logoURL && (
-            <div className="relative w-40 h-16 mb-4">
-              <Image
-                src={logoURL}
-                alt={workspace.name || ''}
-                fill
-                className="object-contain"
-                sizes="160px"
-              />
-            </div>
-          )}
-          <h1 className="m-0 text-[38px] font-extrabold tracking-[-0.025em] leading-[1.15]">
-            {welcomeTitle}
-          </h1>
-          <p className="mt-3 text-[17px] text-white/85 max-w-2xl">
-            {welcomeSubtitle}
-          </p>
-        </div>
-      </section>
+      {/* Hero welcome — configurable banner via the shared HeroSearch/Banner */}
+      <HeroSearch
+        title={welcomeTitle}
+        description={welcomeSubtitle}
+        image={heroImageURL}
+        background={
+          (config.homepageHeroOverlayColorSelect as OverlayColor) || 'default'
+        }
+        blendMode={config.homepageHeroOverlayColorSelect ? 'overlay' : 'normal'}
+        groupImg={logoURL}
+        groupImgClassName="object-contain"
+        groupClassName="w-24 aspect-[2/1] mb-2"
+      />
 
       <div className="max-w-[1280px] w-full mx-auto px-8 py-10">
         {showNews && (
