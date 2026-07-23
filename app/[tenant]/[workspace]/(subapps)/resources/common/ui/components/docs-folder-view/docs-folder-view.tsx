@@ -11,6 +11,7 @@ import {
 
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
+import {withBasePath} from '@/lib/core/path/base-path';
 import {formatDateTime} from '@/lib/core/locale/formatters';
 
 import {DocFileIcon} from '../doc-file-icon';
@@ -49,6 +50,14 @@ export function DocsFolderView({
     `${workspaceURI}/${SUBAPP_CODES.resources}/folder/${id}`;
   const viewHref = (id: string) =>
     `${workspaceURI}/${SUBAPP_CODES.resources}/${id}`;
+  // Real download endpoint (streams the file), gated on the DMS file actually
+  // having a metaFile — the row action used to just re-open the viewer.
+  const downloadHref = (file: DmsFile) =>
+    file.metaFile?.id
+      ? withBasePath(
+          `${workspaceURI}/${SUBAPP_CODES.resources}/api/file/${file.id}`,
+        )
+      : null;
 
   const lastUpdated = useMemo(() => {
     let max = folder.updatedOn ? new Date(folder.updatedOn).getTime() : 0;
@@ -140,7 +149,12 @@ export function DocsFolderView({
           </p>
         </div>
       ) : view === 'list' ? (
-        <FileTable files={files} labels={labels} viewHref={viewHref} />
+        <FileTable
+          files={files}
+          labels={labels}
+          viewHref={viewHref}
+          downloadHref={downloadHref}
+        />
       ) : (
         <FileGrid files={files} labels={labels} viewHref={viewHref} />
       )}
@@ -158,10 +172,12 @@ function FileTable({
   files,
   labels,
   viewHref,
+  downloadHref,
 }: {
   files: DmsFile[];
   labels: DocsFolderViewLabels;
   viewHref: (id: string) => string;
+  downloadHref: (file: DmsFile) => string | null;
 }) {
   return (
     <div className="bg-white border border-ink-100 rounded-2xl shadow-xs overflow-hidden">
@@ -226,13 +242,16 @@ function FileTable({
                   {sizeValue}
                 </td>
                 <td className="px-[18px] py-3 text-right">
-                  <Link
-                    href={viewHref(file.id)}
-                    aria-label="Download"
-                    onClick={e => e.stopPropagation()}
-                    className="inline-grid place-items-center w-[30px] h-[30px] rounded-md bg-royal-pale text-royal hover:bg-royal-border transition-colors">
-                    <MdDownload className="text-sm" />
-                  </Link>
+                  {downloadHref(file) && (
+                    <a
+                      href={downloadHref(file)!}
+                      download
+                      aria-label="Download"
+                      onClick={e => e.stopPropagation()}
+                      className="inline-grid place-items-center w-[30px] h-[30px] rounded-md bg-royal-pale text-royal hover:bg-royal-border transition-colors">
+                      <MdDownload className="text-sm" />
+                    </a>
+                  )}
                 </td>
               </tr>
             );

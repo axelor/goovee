@@ -82,9 +82,7 @@ export default function ResourceForm({
         title: i18n.t('Category created successfully.'),
       });
       router.refresh();
-      router.push(
-        `${workspaceURI}/resources/categories?id=${result?.data?.id}`,
-      );
+      router.push(`${workspaceURI}/resources/folder/${result?.data?.id}`);
     } else {
       toast({
         variant: 'destructive',

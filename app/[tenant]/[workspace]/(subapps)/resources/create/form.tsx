@@ -107,7 +107,7 @@ export default function ResourceForm({parent}: {parent: DmsFile}) {
       });
       resetUploads();
       router.refresh();
-      router.push(`${workspaceURI}/resources/categories?id=${parent?.id}`);
+      router.push(`${workspaceURI}/resources/folder/${parent?.id}`);
     } else {
       toast({
         variant: 'destructive',
