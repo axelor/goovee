@@ -101,7 +101,7 @@ export async function ArticleNews({
 
   return (
     <div className="bg-ink-25 min-h-full">
-      <NewsArticleHero article={newsObject} workspace={workspace} />
+      <NewsArticleHero article={newsObject} config={config} />
 
       <div className="container mx-auto grid grid-cols-1 gap-6 py-8 mb-20 lg:mb-0">
         {!directRoute && (

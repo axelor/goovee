@@ -18,7 +18,6 @@ import {cn} from '@/utils/css';
 import {getFormatString} from '@/subapps/news/common/utils';
 import type {NewsItem} from '@/subapps/news/common/types';
 import type {NewsConfig} from '@/subapps/news/common/orm/config';
-import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 
 function initials(name?: string) {
@@ -33,10 +32,10 @@ function initials(name?: string) {
 
 export function NewsArticleHero({
   article,
-  workspace,
+  config,
 }: {
   article: NewsItem;
-  workspace: Workspace | Cloned<Workspace>;
+  config: NewsConfig | Cloned<NewsConfig>;
 }) {
   const {workspaceURI, tenant} = useWorkspace();
   const newsBase = `${workspaceURI}/${SUBAPP_CODES.news}`;
@@ -44,7 +43,7 @@ export function NewsArticleHero({
     isShowPublicationAuthor,
     isShowPublicationDate,
     isShowPublicationTime,
-  } = (workspace?.config ?? {}) as Partial<NewsConfig>;
+  } = config ?? {};
 
   const src = article?.image?.id
     ? withBasePath(`${newsBase}/api/news/${article.slug}/image?isFullView=true`)
