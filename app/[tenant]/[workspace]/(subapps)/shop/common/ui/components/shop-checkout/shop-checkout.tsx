@@ -426,12 +426,15 @@ function CheckoutAddressPicker({
   const {cart, updateAddress} = useCart();
   const {workspaceURL} = useWorkspace();
   const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
+  const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(
+    null,
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isInvoicing = type === ADDRESS_TYPE.invoicing;
 
-  // Load the addresses for this address type and seed the matching cart field.
+  // Load the addresses for this address type once.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -445,24 +448,8 @@ function CheckoutAddressPicker({
             : findDefaultDelivery({workspaceURL}),
         ]);
         if (cancelled) return;
-        const all = (list as PartnerAddress[] | null) ?? [];
-        setAddresses(all);
-
-        const cartId =
-          (isInvoicing ? cart?.invoicingAddress : cart?.deliveryAddress) ??
-          null;
-        const initial =
-          (cartId && all.find(a => String(a.id) === String(cartId))) ||
-          (def as PartnerAddress | null) ||
-          all[0] ||
-          null;
-
-        if (initial?.id) {
-          setSelectedId(String(initial.id));
-          if (cartId !== initial.id) {
-            updateAddress({addressType: type, address: initial.id});
-          }
-        }
+        setAddresses((list as PartnerAddress[] | null) ?? []);
+        setDefaultAddress((def as PartnerAddress | null) ?? null);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -472,6 +459,28 @@ function CheckoutAddressPicker({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const cartId =
+    (isInvoicing ? cart?.invoicingAddress : cart?.deliveryAddress) ?? null;
+
+  // Seed the cart's address only once both the addresses and the cart itself
+  // have loaded, and never overwrite an address the cart already holds.
+  // Reading the cart at mount time (empty deps) meant that returning from a
+  // Stripe redirect — cart still hydrating — clobbered the chosen delivery
+  // address with the default.
+  useEffect(() => {
+    if (loading || !cart) return;
+    if (cartId) {
+      setSelectedId(String(cartId));
+      return;
+    }
+    const initial = defaultAddress || addresses[0] || null;
+    if (initial?.id) {
+      setSelectedId(String(initial.id));
+      updateAddress({addressType: type, address: initial.id});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, cart, cartId, addresses, defaultAddress]);
 
   const selected =
     addresses.find(a => String(a.id) === selectedId) ?? addresses[0] ?? null;
