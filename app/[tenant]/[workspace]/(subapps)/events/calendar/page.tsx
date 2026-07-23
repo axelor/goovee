@@ -114,31 +114,47 @@ async function AgendaData({
 
 function AgendaSkeleton() {
   return (
-    <div className="max-w-[960px] mx-auto px-8 pt-8 pb-14">
-      <div className="h-9 w-56 bg-ink-100 rounded mb-2 animate-pulse" />
-      <div className="h-4 w-80 bg-ink-100 rounded mb-6 animate-pulse" />
-      <div className="h-12 w-full bg-ink-100 rounded-xl mb-3 animate-pulse" />
-      <div className="h-14 w-full bg-ink-100 rounded-xl mb-6 animate-pulse" />
-      {[0, 1].map(g => (
-        <div key={g} className="mb-7">
-          <div className="h-3 w-24 bg-ink-100 rounded mb-3 animate-pulse" />
-          <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden">
-            {[0, 1, 2].map(i => (
-              <div
-                key={i}
-                className="grid grid-cols-[68px_1fr_auto] gap-[18px] items-center px-5 py-4 border-b border-ink-100 last:border-b-0">
-                <div className="h-14 bg-ink-100 rounded-xl animate-pulse" />
-                <div className="flex flex-col gap-2">
-                  <div className="h-4 w-24 bg-ink-100 rounded animate-pulse" />
-                  <div className="h-4 w-52 bg-ink-100 rounded animate-pulse" />
-                  <div className="h-3 w-40 bg-ink-100 rounded animate-pulse" />
-                </div>
-                <div className="h-4 w-16 bg-ink-100 rounded animate-pulse" />
-              </div>
-            ))}
+    <div className="bg-ink-25 min-h-full">
+      <div className="max-w-[960px] mx-auto px-8 pt-8 pb-14">
+        {/* Header */}
+        <div className="flex items-end justify-between gap-4 mb-[18px]">
+          <div>
+            <div className="h-9 w-56 bg-ink-100 rounded mb-2 animate-pulse" />
+            <div className="h-4 w-80 bg-ink-100 rounded animate-pulse" />
           </div>
+          <div className="h-9 w-36 bg-ink-100 rounded-md shrink-0 animate-pulse" />
         </div>
-      ))}
+
+        {/* Search */}
+        <div className="h-11 w-full bg-ink-100 rounded-xl mb-3 animate-pulse" />
+
+        {/* Date filter bar */}
+        <div className="h-14 w-full bg-ink-100 rounded-xl mb-[22px] animate-pulse" />
+
+        {/* Groups */}
+        <div className="flex flex-col gap-7">
+          {[0, 1].map(g => (
+            <div key={g}>
+              <div className="h-3 w-24 bg-ink-100 rounded mb-3 animate-pulse" />
+              <div className="bg-white border border-ink-100 rounded-2xl shadow-xs overflow-hidden">
+                {[0, 1, 2].map(i => (
+                  <div
+                    key={i}
+                    className="grid grid-cols-[68px_1fr_auto] gap-[18px] items-center px-5 py-4 border-b border-ink-100 last:border-b-0">
+                    <div className="h-14 bg-ink-100 rounded-xl animate-pulse" />
+                    <div className="flex flex-col gap-2">
+                      <div className="h-4 w-24 bg-ink-100 rounded animate-pulse" />
+                      <div className="h-4 w-52 bg-ink-100 rounded animate-pulse" />
+                      <div className="h-3 w-40 bg-ink-100 rounded animate-pulse" />
+                    </div>
+                    <div className="h-4 w-16 bg-ink-100 rounded animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
