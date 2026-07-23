@@ -247,12 +247,20 @@ export async function assignAddressDefault(
   const userId = getPartnerId(session.user);
 
   try {
-    const result = await assignDefaultAddress({
-      partnerId: userId,
-      partnerAddressId: id,
-      kind,
-      client,
-    }).then(clone);
+    /* assignDefaultAddress does multiple writes (mark the address as the
+       delivery/invoicing type + unset the previous default + set the new
+       default + partner fiscal update), so we wrap it in a transaction to keep
+       them atomic — mirroring updateDefaultAddress. */
+    const result = await client
+      .$transaction(txClient =>
+        assignDefaultAddress({
+          partnerId: userId,
+          partnerAddressId: id,
+          kind,
+          client: txClient,
+        }),
+      )
+      .then(clone);
 
     if (!result) {
       return {error: true, message: await t('Error updating default address')};
