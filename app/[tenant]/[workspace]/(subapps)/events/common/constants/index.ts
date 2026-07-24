@@ -80,4 +80,7 @@ export enum EVENT_STATUS {
 
 export const URL_PARAMS = {
   isPaid: 'isPaid',
+  type: 'type',
+  category: 'category',
+  page: 'page',
 };

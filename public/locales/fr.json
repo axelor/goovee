@@ -823,6 +823,7 @@
   "Page": "Page",
   "Page Not Found!": "Page non trouvée !",
   "Page not available": "Page non disponible",
+  "Page {0} of {1}": "Page {0} sur {1}",
   "Paid": "Payé",
   "Paid amount {0} is not equal to expected amount {1}": "Le montant payé {0} n'est pas égal au montant attendu {1}",
   "Paid invoices": "Factures payées",

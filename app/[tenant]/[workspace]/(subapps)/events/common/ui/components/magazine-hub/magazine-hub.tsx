@@ -1,10 +1,12 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useState} from 'react';
 import Image from 'next/image';
 import {
   MdArrowForward,
   MdCheckCircle,
+  MdChevronLeft,
+  MdChevronRight,
   MdFilterList,
   MdFormatListBulleted,
   MdOutlineCalendarToday,
@@ -18,7 +20,9 @@ import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
 import {formatDateTime} from '@/locale/formatters';
 import {cn} from '@/utils/css';
 import {Link} from '@/ui/components/link';
+import {useSearchParams} from '@/ui/hooks';
 import {withBasePath} from '@/lib/core/path/base-path';
+import type {PageInfo} from '@/types';
 import type {ListEvent} from '@/subapps/events/common/orm/event';
 
 export interface MagazineHubLabels {
@@ -55,16 +59,24 @@ export interface MagazineHubCategory {
 }
 
 export function MagazineHub({
-  activeEvents,
-  pastEvents,
+  events,
+  pageInfo,
+  currentType,
+  currentCategory,
+  activeCount,
+  pastCount,
   categories,
   workspaceURI,
   workspaceURL,
   labels,
   searchAction,
 }: {
-  activeEvents: ListEvent[];
-  pastEvents: ListEvent[];
+  events: ListEvent[];
+  pageInfo?: PageInfo;
+  currentType: Tab;
+  currentCategory: string | null;
+  activeCount: number;
+  pastCount: number;
   categories: MagazineHubCategory[];
   workspaceURI: string;
   workspaceURL: string;
@@ -74,9 +86,8 @@ export function MagazineHub({
     workspaceURL: string;
   }) => Promise<ListEvent[]>;
 }) {
-  const [tab, setTab] = useState<Tab>('active');
+  const {update} = useSearchParams();
   const [filterOpen, setFilterOpen] = useState(false);
-  const [activeCats, setActiveCats] = useState<Set<string>>(new Set());
 
   // Global event search (ORM, like before the redesign) — dropdown of matches.
   const [search, setSearch] = useState('');
@@ -113,32 +124,45 @@ export function MagazineHub({
     };
   }, [search, searchAction, workspaceURL]);
 
-  const isPast = tab === 'past';
-  const rawSource = isPast ? pastEvents : activeEvents;
-  const hasFilters = activeCats.size > 0;
+  const isPast = currentType === 'past';
+  const hasFilters = !!currentCategory;
+  const page = Number(pageInfo?.page ?? 1);
+  const pages = Number(pageInfo?.pages ?? 1);
 
-  const source = useMemo(() => {
-    if (!hasFilters) return rawSource;
-    return rawSource.filter(e =>
-      (e.eventCategorySet ?? []).some(c => activeCats.has(String(c.id))),
-    );
-  }, [rawSource, activeCats, hasFilters]);
-
-  const featured = source[0] ?? null;
-  const grid = source.slice(1);
+  // The editorial "featured" hero only leads the first page; deeper pages put
+  // every event in the grid.
+  const featured = page <= 1 ? (events[0] ?? null) : null;
+  const grid = page <= 1 ? events.slice(1) : events;
 
   const agendaHref = `${workspaceURI}/${SUBAPP_CODES.events}/calendar`;
 
-  const toggleCat = (id: string) => {
-    setActiveCats(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const selectTab = (key: Tab) =>
+    update(
+      [
+        {key: 'type', value: key === 'past' ? 'past' : ''},
+        {key: 'page', value: ''},
+      ],
+      {scroll: false},
+    );
 
-  const clearFilters = () => setActiveCats(new Set());
+  // Single-select category; clicking the active one clears it.
+  const selectCat = (id: string) =>
+    update(
+      [
+        {key: 'category', value: currentCategory === id ? '' : id},
+        {key: 'page', value: ''},
+      ],
+      {scroll: false},
+    );
+
+  const clearFilters = () =>
+    update([
+      {key: 'category', value: ''},
+      {key: 'page', value: ''},
+    ]);
+
+  const goToPage = (n: number) =>
+    update([{key: 'page', value: n <= 1 ? '' : String(n)}], {scroll: false});
 
   return (
     <div className="py-8 container mx-auto max-w-[1280px]">
@@ -148,9 +172,9 @@ export function MagazineHub({
           {labels.title}
         </h1>
         <p className="mt-1 text-sm text-ink-500">
-          {activeEvents.length}{' '}
-          {activeEvents.length > 1 ? labels.upcomingDates : labels.upcomingDate}{' '}
-          · {pastEvents.length} {labels.pastCount}
+          {activeCount}{' '}
+          {activeCount > 1 ? labels.upcomingDates : labels.upcomingDate} ·{' '}
+          {pastCount} {labels.pastCount}
         </p>
       </header>
 
@@ -160,20 +184,20 @@ export function MagazineHub({
           {
             key: 'active' as const,
             label: labels.activeTab,
-            count: activeEvents.length,
+            count: activeCount,
           },
           {
             key: 'past' as const,
             label: labels.pastTab,
-            count: pastEvents.length,
+            count: pastCount,
           },
         ].map(t => {
-          const active = tab === t.key;
+          const active = currentType === t.key;
           return (
             <button
               key={t.key}
               type="button"
-              onClick={() => setTab(t.key)}
+              onClick={() => selectTab(t.key)}
               className={cn(
                 'inline-flex items-center gap-2 px-1 py-3 text-[14.5px] font-bold border-b-[2.5px] -mb-px transition-colors',
                 active
@@ -297,7 +321,7 @@ export function MagazineHub({
               {labels.filtersLabel}
               {hasFilters && (
                 <span className="ml-1 inline-grid place-items-center min-w-[18px] h-[18px] px-[5px] rounded-full bg-royal text-white text-[11px] font-extrabold tabular-nums">
-                  {activeCats.size}
+                  1
                 </span>
               )}
             </button>
@@ -331,15 +355,16 @@ export function MagazineHub({
                   </div>
                   <div className="p-1.5 max-h-[280px] overflow-y-auto">
                     {categories.map(c => {
-                      const on = activeCats.has(c.id);
+                      const on = currentCategory === c.id;
                       return (
                         <label
                           key={c.id}
                           className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer text-[13px] text-ink-800 hover:bg-ink-25">
                           <input
-                            type="checkbox"
+                            type="radio"
+                            name="event-category"
                             checked={on}
-                            onChange={() => toggleCat(c.id)}
+                            onChange={() => selectCat(c.id)}
                             className="w-4 h-4 cursor-pointer flex-shrink-0 accent-royal"
                           />
                           <span
@@ -366,7 +391,9 @@ export function MagazineHub({
         </div>
       </div>
 
-      {/* Featured */}
+      {/* Featured hero — only on page 1. The empty state shows only when there
+          are genuinely no events, not on deeper pages where the hero is
+          intentionally omitted and everything lives in the grid. */}
       {featured ? (
         <FeaturedCard
           event={featured}
@@ -377,13 +404,13 @@ export function MagazineHub({
           registeredBadge={labels.registeredBadge}
           isPast={isPast}
         />
-      ) : (
+      ) : events.length === 0 ? (
         <div className="bg-white rounded-xl border border-ink-100 shadow-xs p-12 text-center">
           <p className="text-base font-semibold text-ink-700">
             {isPast ? labels.emptyPast : labels.emptyActive}
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Grid */}
       {grid.length > 0 && (
@@ -405,6 +432,31 @@ export function MagazineHub({
             ))}
           </div>
         </section>
+      )}
+
+      {/* Pagination over the full dataset */}
+      {pages > 1 && (
+        <div className="mt-10 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            disabled={page <= 1}
+            onClick={() => goToPage(page - 1)}
+            className="inline-flex items-center gap-1 h-9 px-3 rounded-md border border-ink-150 bg-white text-sm font-semibold text-ink-700 hover:bg-ink-25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+            <MdChevronLeft className="text-base" />
+            {i18n.t('Previous')}
+          </button>
+          <span className="px-2 text-[13px] text-ink-600 tabular-nums">
+            {i18n.t('Page {0} of {1}', String(page), String(pages))}
+          </span>
+          <button
+            type="button"
+            disabled={page >= pages}
+            onClick={() => goToPage(page + 1)}
+            className="inline-flex items-center gap-1 h-9 px-3 rounded-md border border-ink-150 bg-white text-sm font-semibold text-ink-700 hover:bg-ink-25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+            {i18n.t('Next')}
+            <MdChevronRight className="text-base" />
+          </button>
+        </div>
       )}
     </div>
   );

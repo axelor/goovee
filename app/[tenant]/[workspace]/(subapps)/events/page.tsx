@@ -29,8 +29,10 @@ const MAGAZINE_LIMIT = 13; // 1 featured + 12 in the grid (max)
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
+  searchParams: Promise<{type?: string; category?: string; page?: string}>;
 }) {
   const params = await props.params;
+  const searchParams = await props.searchParams;
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
@@ -77,6 +79,9 @@ export default async function Page(props: {
           client={client}
           workspaceURI={workspaceURI}
           workspaceURL={workspaceURL}
+          type={searchParams?.type === 'past' ? 'past' : 'active'}
+          category={searchParams?.category || null}
+          page={Number(searchParams?.page) || 1}
         />
       </Suspense>
     </main>
@@ -89,41 +94,59 @@ async function Magazine({
   client,
   workspaceURI,
   workspaceURL,
+  type,
+  category,
+  page,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
   workspaceURI: string;
   workspaceURL: string;
+  type: 'active' | 'past';
+  category: string | null;
+  page: number;
 }) {
-  const [activeResult, pastResult, categories] = await Promise.all([
+  const isPast = type === 'past';
+  const categoryids = category ? [category] : [];
+
+  // Server-driven: fetch the current tab's page (with category filter), plus a
+  // count-only query for the other tab so both tab badges stay accurate over
+  // the full dataset (not just the first page).
+  const [currentResult, otherResult, categories] = await Promise.all([
     findEvents({
       limit: MAGAZINE_LIMIT,
+      page,
+      categoryids,
+      eventType: isPast ? EVENT_TYPE.PAST : EVENT_TYPE.ACTIVE,
+      workspaceURL: workspace.url,
+      client,
+      user,
+      orderBy: {
+        eventStartDateTime: isPast ? ORDER_BY.DESC : ORDER_BY.ASC,
+      },
+    }).then(clone),
+    findEvents({
+      limit: 1,
       page: 1,
-      categoryids: [],
-      eventType: EVENT_TYPE.ACTIVE,
+      categoryids,
+      eventType: isPast ? EVENT_TYPE.ACTIVE : EVENT_TYPE.PAST,
       workspaceURL: workspace.url,
       client,
       user,
       orderBy: {eventStartDateTime: ORDER_BY.ASC},
-    }).then(clone),
-    findEvents({
-      limit: MAGAZINE_LIMIT,
-      page: 1,
-      categoryids: [],
-      eventType: EVENT_TYPE.PAST,
-      workspaceURL: workspace.url,
-      client,
-      user,
-      orderBy: {eventStartDateTime: ORDER_BY.DESC},
     }).then(clone),
     findEventCategories({workspaceURL: workspace.url, client, user}).then(
       clone,
     ),
   ]);
 
-  const activeEvents = activeResult?.events ?? [];
-  const pastEvents = pastResult?.events ?? [];
+  const events = currentResult?.events ?? [];
+  const pageInfo = currentResult?.pageInfo;
+  const currentCount = Number(pageInfo?.count ?? 0);
+  const otherCount = Number(otherResult?.pageInfo?.count ?? 0);
+  const activeTotal = isPast ? otherCount : currentCount;
+  const pastTotal = isPast ? currentCount : otherCount;
 
   const [
     title,
@@ -200,8 +223,12 @@ async function Magazine({
 
   return (
     <MagazineHub
-      activeEvents={activeEvents}
-      pastEvents={pastEvents}
+      events={events}
+      pageInfo={pageInfo}
+      currentType={type}
+      currentCategory={category}
+      activeCount={activeTotal}
+      pastCount={pastTotal}
       categories={categories ?? []}
       workspaceURI={workspaceURI}
       workspaceURL={workspaceURL}
