@@ -139,7 +139,12 @@ export default function Content({
             </>
           )
         }
-        backHref={`${workspaceURI}/${SUBAPP_CODES.invoices}${token ? `?token=${token}` : ''}`}
+        backHref={
+          // A token scopes the viewer to this one invoice — the list requires
+          // a real session, so sending a token viewer there is a login wall.
+          // Omit the back link entirely for token viewers.
+          token ? undefined : `${workspaceURI}/${SUBAPP_CODES.invoices}`
+        }
         actions={
           <Button asChild variant="ink-outline" size="sm">
             <a
@@ -201,7 +206,7 @@ function Hero({
   statusLabel: string;
   tone: 'mint' | 'overdue' | 'royal';
   meta: React.ReactNode;
-  backHref: string;
+  backHref?: string;
   actions?: React.ReactNode;
 }) {
   const gradient =
@@ -224,11 +229,13 @@ function Hero({
         gradient,
       )}>
       <div className="max-w-[1280px] mx-auto">
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-1.5 text-[13px] text-ink-500 hover:text-ink-700 mb-6">
-          <MdArrowBack className="text-sm" /> {i18n.t('Back')}
-        </Link>
+        {backHref && (
+          <Link
+            href={backHref}
+            className="inline-flex items-center gap-1.5 text-[13px] text-ink-500 hover:text-ink-700 mb-6">
+            <MdArrowBack className="text-sm" /> {i18n.t('Back')}
+          </Link>
+        )}
 
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div className="min-w-0">
