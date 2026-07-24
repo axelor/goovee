@@ -53,9 +53,7 @@ export default async function Layout(props: {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="hidden lg:block">
-        <NewsTopNav categories={topCategories} />
-      </div>
+      <NewsTopNav categories={topCategories} />
       <div className="flex-1 mb-4 md:mb-10">{children}</div>
       <MobileMenuCategory categories={allCategories} />
     </div>

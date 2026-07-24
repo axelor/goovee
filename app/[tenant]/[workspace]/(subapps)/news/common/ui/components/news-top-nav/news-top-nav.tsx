@@ -40,7 +40,9 @@ export function NewsTopNav({categories = []}: {categories?: Category[]}) {
   return (
     <div className="sticky top-0 z-20 bg-white border-b border-ink-100">
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4">
-        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+        {/* Category pills — desktop only; on mobile they live in the floating
+            MobileMenuCategory, so we don't duplicate them here. */}
+        <div className="hidden lg:flex gap-2 overflow-x-auto no-scrollbar">
           <Pill href={newsBase} active={!activeSlug}>
             {i18n.t('All')}
           </Pill>
@@ -53,7 +55,7 @@ export function NewsTopNav({categories = []}: {categories?: Category[]}) {
             </Pill>
           ))}
         </div>
-        <div className="hidden md:block w-[260px] shrink-0">
+        <div className="w-full lg:w-[260px] shrink-0">
           <Search
             variant="compact"
             placeholder={i18n.t('Search an article…')}

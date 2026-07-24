@@ -260,7 +260,6 @@ export async function CommentsWrapper({
           hideTopBorder
           hideCloseComments
           showRepliesInMainThread
-          disableReply
           trackingField="publicBody"
           commentField="note"
           createComment={createComment}
