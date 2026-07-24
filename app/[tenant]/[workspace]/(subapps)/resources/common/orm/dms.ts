@@ -411,6 +411,7 @@ export async function fetchFolderWithParent({
       colorSelect: true,
       logoSelect: true,
       updatedOn: true,
+      permissionSelect: true,
       parent: {fileName: true, id: true},
     },
   });

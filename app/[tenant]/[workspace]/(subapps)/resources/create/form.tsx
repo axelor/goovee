@@ -61,7 +61,15 @@ const formSchema = z.object({
     }),
 });
 
-export default function ResourceForm({parent}: {parent: DmsFile}) {
+export default function ResourceForm({
+  parent,
+  onSuccess,
+}: {
+  parent: Pick<DmsFile, 'id' | 'fileName'>;
+  // When provided (modal usage), called after a successful upload instead of
+  // navigating away — the caller closes the modal and refreshes the list.
+  onSuccess?: () => void;
+}) {
   const {toast} = useToast();
   const router = useRouter();
   const {tenant, workspaceURI, workspaceURL} = useWorkspace();
@@ -107,7 +115,11 @@ export default function ResourceForm({parent}: {parent: DmsFile}) {
       });
       resetUploads();
       router.refresh();
-      router.push(`${workspaceURI}/resources/folder/${parent?.id}`);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(`${workspaceURI}/resources/folder/${parent?.id}`);
+      }
     } else {
       toast({
         variant: 'destructive',

@@ -3,7 +3,11 @@
 import {useMemo, useState} from 'react';
 import {Link} from '@/ui/components/link';
 import {
+  MdAdd,
   MdChevronRight,
+  MdClose,
+  MdCloudUpload,
+  MdCreateNewFolder,
   MdDownload,
   MdGridView,
   MdViewList,
@@ -13,8 +17,13 @@ import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {formatDateTime} from '@/lib/core/locale/formatters';
+import {i18n} from '@/locale';
+import {Dialog, DialogContent, DialogTitle} from '@/ui/components';
 
 import {DocFileIcon} from '../doc-file-icon';
+import ResourceForm from '@/subapps/resources/create/form';
+import CreateFolderForm from '@/subapps/resources/categories/create/form';
+import {COLORS, ICONS} from '@/subapps/resources/common/constants';
 import type {DmsFile, FolderWithParent} from '@/subapps/resources/common/types';
 
 export interface DocsFolderViewLabels {
@@ -30,6 +39,8 @@ export interface DocsFolderViewLabels {
   newCutoffMs: number;
   emptyTitle: string;
   emptySubtitle: string;
+  addLabel: string;
+  newFolderLabel: string;
 }
 
 export function DocsFolderView({
@@ -37,13 +48,21 @@ export function DocsFolderView({
   files,
   workspaceURI,
   labels,
+  uploadParent,
+  folderParent,
 }: {
   folder: FolderWithParent;
   files: DmsFile[];
   workspaceURI: string;
   labels: DocsFolderViewLabels;
+  // Each present only when the user may perform that action into this folder;
+  // opens a modal instead of navigating to a separate create page.
+  uploadParent?: {id: string; fileName?: string | null} | null;
+  folderParent?: {id: string; fileName?: string | null} | null;
 }) {
   const [view, setView] = useState<'list' | 'grid'>('list');
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [folderOpen, setFolderOpen] = useState(false);
 
   const docsRoot = `${workspaceURI}/${SUBAPP_CODES.resources}`;
   const folderHref = (id: string) =>
@@ -115,27 +134,48 @@ export function DocsFolderView({
           </p>
         </div>
 
-        {/* List / Grid toggle */}
-        <div className="inline-flex p-1 rounded-lg bg-white border border-ink-150">
-          {(['list', 'grid'] as const).map(v => {
-            const Icon = v === 'list' ? MdViewList : MdGridView;
-            const active = view === v;
-            return (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setView(v)}
-                aria-label={v === 'list' ? 'List view' : 'Grid view'}
-                className={cn(
-                  'w-8 h-[30px] rounded-md grid place-items-center transition-colors',
-                  active
-                    ? 'bg-royal text-white'
-                    : 'bg-transparent text-ink-600 hover:bg-ink-25',
-                )}>
-                <Icon className="text-sm" />
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-2.5">
+          {folderParent && (
+            <button
+              type="button"
+              onClick={() => setFolderOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] bg-white text-ink-700 border border-ink-150 text-[13.5px] font-bold hover:bg-ink-25 transition-colors">
+              <MdCreateNewFolder className="size-4" />
+              {labels.newFolderLabel}
+            </button>
+          )}
+          {uploadParent && (
+            <button
+              type="button"
+              onClick={() => setUploadOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] bg-royal text-white text-[13.5px] font-bold shadow-[0_1px_2px_rgba(13,30,75,0.15),0_4px_12px_rgba(13,30,75,0.12)] hover:bg-royal-dark transition-colors">
+              <MdAdd className="size-4" />
+              {labels.addLabel}
+            </button>
+          )}
+
+          {/* List / Grid toggle */}
+          <div className="inline-flex p-1 rounded-lg bg-white border border-ink-150">
+            {(['list', 'grid'] as const).map(v => {
+              const Icon = v === 'list' ? MdViewList : MdGridView;
+              const active = view === v;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setView(v)}
+                  aria-label={v === 'list' ? 'List view' : 'Grid view'}
+                  className={cn(
+                    'w-8 h-[30px] rounded-md grid place-items-center transition-colors',
+                    active
+                      ? 'bg-royal text-white'
+                      : 'bg-transparent text-ink-600 hover:bg-ink-25',
+                  )}>
+                  <Icon className="text-sm" />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </header>
 
@@ -157,6 +197,101 @@ export function DocsFolderView({
         />
       ) : (
         <FileGrid files={files} labels={labels} viewHref={viewHref} />
+      )}
+
+      {uploadParent && (
+        <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+          <DialogContent
+            className="max-w-[560px] p-0 gap-0 overflow-hidden"
+            hideClose>
+            {/* Royal gradient header — matches the account/forum modals. */}
+            <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-royal-dark to-royal px-6 py-[22px] text-white">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-50"
+                style={{
+                  backgroundImage:
+                    'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 1px)',
+                  backgroundSize: '18px 18px',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setUploadOpen(false)}
+                aria-label={i18n.t('Close')}
+                className="absolute right-4 top-4 z-10 grid size-8 place-items-center rounded-lg bg-white/15 text-white transition-colors hover:bg-white/25">
+                <MdClose className="size-4" />
+              </button>
+              <div className="relative flex items-center gap-3.5">
+                <div className="grid size-11 shrink-0 place-items-center rounded-[11px] bg-white/[0.18]">
+                  <MdCloudUpload className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <DialogTitle className="text-[19px] font-extrabold tracking-[-0.015em] text-white">
+                    {labels.addLabel}
+                  </DialogTitle>
+                  <p className="mt-0.5 truncate text-[13px] text-white/85">
+                    {folder.fileName}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5 max-h-[70vh] overflow-y-auto">
+              <ResourceForm
+                parent={uploadParent}
+                onSuccess={() => setUploadOpen(false)}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {folderParent && (
+        <Dialog open={folderOpen} onOpenChange={setFolderOpen}>
+          <DialogContent
+            className="max-w-[560px] p-0 gap-0 overflow-hidden"
+            hideClose>
+            <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-royal-dark to-royal px-6 py-[22px] text-white">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-50"
+                style={{
+                  backgroundImage:
+                    'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 1px)',
+                  backgroundSize: '18px 18px',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setFolderOpen(false)}
+                aria-label={i18n.t('Close')}
+                className="absolute right-4 top-4 z-10 grid size-8 place-items-center rounded-lg bg-white/15 text-white transition-colors hover:bg-white/25">
+                <MdClose className="size-4" />
+              </button>
+              <div className="relative flex items-center gap-3.5">
+                <div className="grid size-11 shrink-0 place-items-center rounded-[11px] bg-white/[0.18]">
+                  <MdCreateNewFolder className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <DialogTitle className="text-[19px] font-extrabold tracking-[-0.015em] text-white">
+                    {labels.newFolderLabel}
+                  </DialogTitle>
+                  <p className="mt-0.5 truncate text-[13px] text-white/85">
+                    {folder.fileName}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5 max-h-[70vh] overflow-y-auto">
+              <CreateFolderForm
+                parent={folderParent}
+                colors={COLORS}
+                icons={ICONS}
+                onSuccess={() => setFolderOpen(false)}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

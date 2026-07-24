@@ -14,7 +14,7 @@ import {
   fetchFiles,
   fetchFolderWithParent,
 } from '@/subapps/resources/common/orm/dms';
-import {NEW_FILE_CUTOFF_MS} from '@/subapps/resources/common/constants';
+import {ACTION, NEW_FILE_CUTOFF_MS} from '@/subapps/resources/common/constants';
 import {
   DocsFolderView,
   type DocsFolderViewLabels,
@@ -65,12 +65,23 @@ export default async function Page(props: {
 
   if (!folder) return notFound();
 
+  // Entry buttons are server-gated too (the actions enforce permission), and
+  // mirror the baseline: document upload needs write OR upload, folder creation
+  // needs write.
+  const parentRef = {id, fileName: folder.fileName};
+  const canUpload =
+    folder.permissionSelect === ACTION.WRITE ||
+    folder.permissionSelect === ACTION.UPLOAD;
+  const canCreateFolder = folder.permissionSelect === ACTION.WRITE;
+
   return (
     <DocsFolderView
       folder={folder}
       files={files ?? []}
       workspaceURI={workspaceURI}
       labels={labels}
+      uploadParent={canUpload ? parentRef : null}
+      folderParent={canCreateFolder ? parentRef : null}
     />
   );
 }
@@ -88,6 +99,8 @@ async function buildLabels(): Promise<DocsFolderViewLabels> {
     newBadge,
     emptyTitle,
     emptySubtitle,
+    addLabel,
+    newFolderLabel,
   ] = await Promise.all([
     t('Documents'),
     t('documents'),
@@ -100,6 +113,8 @@ async function buildLabels(): Promise<DocsFolderViewLabels> {
     t('New'),
     t('No documents yet'),
     t('This folder is empty for now.'),
+    t('Add a document'),
+    t('New folder'),
   ]);
 
   return {
@@ -115,5 +130,7 @@ async function buildLabels(): Promise<DocsFolderViewLabels> {
     newCutoffMs: NEW_FILE_CUTOFF_MS,
     emptyTitle,
     emptySubtitle,
+    addLabel,
+    newFolderLabel,
   };
 }

@@ -29,7 +29,7 @@ import {useToast} from '@/ui/hooks/use-toast';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';
 import {i18n} from '@/locale';
-import {DynamicIcon} from '@/ui/components/dynamic-icon';
+import {FolderLogoIcon} from '@/subapps/resources/common/ui/components/folder-logo-icon/folder-logo-icon';
 
 // ---- LOCAL IMPORTS ---- //
 import {create} from './action';
@@ -47,10 +47,14 @@ export default function ResourceForm({
   parent,
   colors,
   icons,
+  onSuccess,
 }: {
-  parent: DmsFile;
+  parent: Pick<DmsFile, 'id' | 'fileName'>;
   colors: typeof COLORS;
   icons: typeof ICONS;
+  // When provided (modal usage), called after a successful create instead of
+  // navigating away.
+  onSuccess?: () => void;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const {toast} = useToast();
@@ -82,11 +86,15 @@ export default function ResourceForm({
         title: i18n.t('Category created successfully.'),
       });
       router.refresh();
-      router.push(`${workspaceURI}/resources/folder/${result?.data?.id}`);
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push(`${workspaceURI}/resources/folder/${result?.data?.id}`);
+      }
     } else {
       toast({
         variant: 'destructive',
-        title: i18n.t('Error creating category'),
+        title: result.message || i18n.t('Error creating category'),
       });
     }
   };
@@ -152,22 +160,26 @@ export default function ResourceForm({
             <FormItem>
               <FormLabel>{i18n.t('Icon')}</FormLabel>
               <FormControl>
-                <div className="border rounded-lg p-6 flex gap-6 flex-wrap">
-                  {icons.map((icon, i) => {
-                    return (
-                      <DynamicIcon
-                        key={i}
-                        icon={icon}
-                        className={cn(
-                          'h-6 w-6 text-main-black shrink-0 cursor-pointer',
-                          {
-                            'text-green-700': field.value === icon,
-                          },
-                        )}
-                        onClick={() => field.onChange(icon)}
+                <div className="border rounded-lg p-4 flex gap-2.5 flex-wrap max-h-[220px] overflow-y-auto">
+                  {icons.map((icon, i) => (
+                    <button
+                      type="button"
+                      key={i}
+                      onClick={() => field.onChange(icon)}
+                      aria-label={icon}
+                      className={cn(
+                        'rounded-lg p-0.5 transition-shadow',
+                        field.value === icon
+                          ? 'ring-2 ring-royal'
+                          : 'ring-1 ring-transparent hover:ring-ink-200',
+                      )}>
+                      <FolderLogoIcon
+                        logoSelect={icon}
+                        colorSelect={form.watch('color')}
+                        size={22}
                       />
-                    );
-                  })}
+                    </button>
+                  ))}
                 </div>
               </FormControl>
             </FormItem>
