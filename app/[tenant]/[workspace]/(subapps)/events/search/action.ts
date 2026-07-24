@@ -9,7 +9,6 @@ import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
 
 // ---- LOCAL IMPORTS ---- //
-import {EVENT_TYPE} from '@/subapps/events/common/constants';
 import {SearchEventsSchema} from '@/subapps/events/common/actions/validators';
 import {findEvents, type ListEvent} from '@/subapps/events/common/orm/event';
 
@@ -46,7 +45,7 @@ export async function searchEvents(props: {
     page: 1,
     categoryids: [],
     search: q,
-    eventType: EVENT_TYPE.ACTIVE,
+    // No eventType filter: search must reach past events too, not just active.
     workspaceURL,
     client,
     user,

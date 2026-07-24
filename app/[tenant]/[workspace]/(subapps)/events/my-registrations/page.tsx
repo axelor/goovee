@@ -31,7 +31,7 @@ import {EventLocalDate} from '@/subapps/events/common/ui/components/event-local-
 
 const FETCH_LIMIT = 200;
 
-type FilterKey = 'upcoming' | 'past';
+type FilterKey = 'upcoming' | 'ongoing' | 'past';
 
 export default async function Page(context: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -77,7 +77,11 @@ export default async function Page(context: {
   const workspace = clone(access.workspace);
 
   const filter: FilterKey =
-    searchParams.filter === 'past' ? 'past' : 'upcoming';
+    searchParams.filter === 'past'
+      ? 'past'
+      : searchParams.filter === 'ongoing'
+        ? 'ongoing'
+        : 'upcoming';
 
   return (
     <main className="bg-ink-25 w-full flex-1 min-h-0 flex flex-col">
@@ -107,12 +111,22 @@ async function MyRegistrations({
   workspaceURI: string;
   filter: FilterKey;
 }) {
-  const [upcomingResult, pastResult] = await Promise.all([
+  const [upcomingResult, ongoingResult, pastResult] = await Promise.all([
     findEvents({
       limit: FETCH_LIMIT,
       page: 1,
       categoryids: [],
       eventType: EVENT_TYPE.UPCOMING,
+      workspaceURL: workspace.url,
+      client,
+      user,
+      onlyRegisteredEvent: true,
+    }).then(clone),
+    findEvents({
+      limit: FETCH_LIMIT,
+      page: 1,
+      categoryids: [],
+      eventType: EVENT_TYPE.ONGOING,
       workspaceURL: workspace.url,
       client,
       user,
@@ -131,8 +145,10 @@ async function MyRegistrations({
   ]);
 
   const upcoming = upcomingResult?.events ?? [];
+  const ongoing = ongoingResult?.events ?? [];
   const past = pastResult?.events ?? [];
-  const list = filter === 'upcoming' ? upcoming : past;
+  const list =
+    filter === 'upcoming' ? upcoming : filter === 'ongoing' ? ongoing : past;
   const next = upcoming[0];
 
   const baseHref = `${workspaceURI}/${SUBAPP_CODES.events}/my-registrations`;
@@ -142,20 +158,26 @@ async function MyRegistrations({
     title,
     subtitle,
     upcomingTab,
+    ongoingTab,
     pastTab,
     emptyUpcomingTitle,
+    emptyOngoingTitle,
     emptyPastTitle,
     emptyUpcomingSubtitle,
+    emptyOngoingSubtitle,
     emptyPastSubtitle,
     seeAllLabel,
   ] = await Promise.all([
     t('My registrations'),
     composeSubtitle(upcoming.length, past.length),
     t('Upcoming'),
+    t('Ongoing'),
     t('History'),
     t('No registration yet'),
+    t('No ongoing events'),
     t('No past events'),
     t('Browse upcoming events and register in one click.'),
+    t('Events happening right now will appear here.'),
     t('Your past events will appear here.'),
     t('See all events'),
   ]);
@@ -190,11 +212,16 @@ async function MyRegistrations({
             label: upcomingTab,
             count: upcoming.length,
           },
+          {
+            key: 'ongoing' as const,
+            label: ongoingTab,
+            count: ongoing.length,
+          },
           {key: 'past' as const, label: pastTab, count: past.length},
         ].map(tab => {
           const isActive = filter === tab.key;
           const href =
-            tab.key === 'past' ? `${baseHref}?filter=past` : baseHref;
+            tab.key === 'upcoming' ? baseHref : `${baseHref}?filter=${tab.key}`;
           return (
             <Link
               key={tab.key}
@@ -223,9 +250,19 @@ async function MyRegistrations({
       {/* List */}
       {list.length === 0 ? (
         <EmptyState
-          title={filter === 'upcoming' ? emptyUpcomingTitle : emptyPastTitle}
+          title={
+            filter === 'upcoming'
+              ? emptyUpcomingTitle
+              : filter === 'ongoing'
+                ? emptyOngoingTitle
+                : emptyPastTitle
+          }
           subtitle={
-            filter === 'upcoming' ? emptyUpcomingSubtitle : emptyPastSubtitle
+            filter === 'upcoming'
+              ? emptyUpcomingSubtitle
+              : filter === 'ongoing'
+                ? emptyOngoingSubtitle
+                : emptyPastSubtitle
           }
           ctaHref={filter === 'upcoming' ? allEventsHref : undefined}
           ctaLabel={seeAllLabel}
