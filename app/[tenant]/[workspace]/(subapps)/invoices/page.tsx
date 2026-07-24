@@ -29,7 +29,7 @@ async function Invoices({
   };
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {limit, page, type} = searchParams;
+  const {limit, page, type, search} = searchParams;
   const invoiceType = type ?? INVOICE.UNPAID;
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
@@ -68,16 +68,21 @@ async function Invoices({
 
   const {role, isContactAdmin} = access.subapp;
 
-  const invoicesWhereClause = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.PARTNER,
-  });
+  const searchTerm = search?.trim();
+
+  const where = {
+    ...getWhereClauseForEntity({
+      user,
+      role,
+      isContactAdmin,
+      partnerKey: PartnerKey.PARTNER,
+    }),
+    ...(searchTerm ? {invoiceId: {like: `%${searchTerm}%`}} : {}),
+  };
 
   const result = await findInvoices({
     params: {
-      where: invoicesWhereClause,
+      where,
       page,
       limit: limit ? Number(limit) : DEFAULT_LIMIT,
     },

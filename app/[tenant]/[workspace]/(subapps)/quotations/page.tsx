@@ -60,16 +60,21 @@ async function Quotations({
   const {user, subapp} = access;
   const {client} = access.tenant;
 
-  const {limit, page} = searchParams;
+  const {limit, page, search} = searchParams;
 
   const {role, isContactAdmin} = subapp;
 
-  const where = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.CLIENT_PARTNER,
-  });
+  const searchTerm = search?.trim();
+
+  const where = {
+    ...getWhereClauseForEntity({
+      user,
+      role,
+      isContactAdmin,
+      partnerKey: PartnerKey.CLIENT_PARTNER,
+    }),
+    ...(searchTerm ? {saleOrderSeq: {like: `%${searchTerm}%`}} : {}),
+  };
 
   const queryParams = {
     where,

@@ -25,7 +25,7 @@ async function Orders({
   params: {tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {limit, page, type} = searchParams;
+  const {limit, page, type, search} = searchParams;
 
   const orderType = (type ?? ORDER.ONGOING) as OrderType;
 
@@ -66,12 +66,17 @@ async function Orders({
 
   const {role, isContactAdmin} = access.subapp;
 
-  const where = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.CLIENT_PARTNER,
-  });
+  const searchTerm = search?.trim();
+
+  const where = {
+    ...getWhereClauseForEntity({
+      user,
+      role,
+      isContactAdmin,
+      partnerKey: PartnerKey.CLIENT_PARTNER,
+    }),
+    ...(searchTerm ? {saleOrderSeq: {like: `%${searchTerm}%`}} : {}),
+  };
 
   const isCompleted = orderType === ORDER.COMPLETED;
 

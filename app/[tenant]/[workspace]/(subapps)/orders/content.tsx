@@ -16,6 +16,7 @@ import {i18n} from '@/locale';
 import {SUBAPP_CODES, URL_PARAMS} from '@/constants';
 import {cn} from '@/utils/css';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {useSearchQuery} from '@/ui/hooks';
 import {formatDate} from '@/lib/core/locale/formatters';
 import type {PageInfo} from '@/types';
 
@@ -38,25 +39,16 @@ const Content = ({orders, pageInfo, orderType}: ContentProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {workspaceURI} = useWorkspace();
-  const [query, setQuery] = useState('');
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return orders;
-    return orders.filter(o =>
-      String(o.saleOrderSeq || '')
-        .toLowerCase()
-        .includes(q),
-    );
-  }, [orders, query]);
+  const [input, setInput] = useSearchQuery();
 
   const [selectedId, setSelectedId] = useState<string | null>(
-    () => filtered[0]?.id ?? orders[0]?.id ?? null,
+    () => orders[0]?.id ?? null,
   );
 
   const selected = useMemo(
-    () => filtered.find(o => o.id === selectedId) ?? filtered[0],
-    [filtered, selectedId],
+    () => orders.find(o => o.id === selectedId) ?? orders[0],
+    [orders, selectedId],
   );
 
   const setPage = (next: number) => {
@@ -105,31 +97,28 @@ const Content = ({orders, pageInfo, orderType}: ContentProps) => {
                     {i18n.t('Orders')}
                   </h2>
                   <span className="text-xs text-ink-400 tabular-nums">
-                    {query
-                      ? filtered.length
-                      : Number(pageInfo?.count ?? filtered.length)}{' '}
-                    {i18n.t('items')}
+                    {Number(pageInfo?.count ?? orders.length)} {i18n.t('items')}
                   </span>
                 </div>
                 <div className="relative">
                   <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-royal text-base" />
                   <input
                     type="search"
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
                     placeholder={i18n.t('Search an order')}
                     className="w-full pl-9 pr-3 py-2 rounded-lg bg-royal-pale/60 border border-royal-border text-sm placeholder:text-ink-400 outline-none focus:border-royal focus:bg-royal-pale focus:shadow-[0_0_0_3px_rgba(21,84,181,0.12)] transition"
                   />
                 </div>
               </header>
               <ul className="flex-1 overflow-y-auto px-2 pb-2">
-                {filtered.length === 0 ? (
+                {orders.length === 0 ? (
                   <li className="py-10 text-center text-sm text-ink-400 flex flex-col items-center gap-2">
                     <MdOutlineInbox className="text-3xl text-ink-300" />
                     {i18n.t('No orders found')}
                   </li>
                 ) : (
-                  filtered.map(o => (
+                  orders.map(o => (
                     <OrderItem
                       key={o.id}
                       order={o}

@@ -3,6 +3,7 @@ export {useResponsive, useMediaQuery} from './use-responsive';
 export {useAppLang} from './use-app-lang';
 export {useToast} from './use-toast';
 export {useSearchParams} from './use-search-params';
+export {useSearchQuery} from './use-search-query';
 export {useSortBy} from './use-sort-by';
 export {useCountDown} from './use-count-down';
 export {useNavigationVisibility} from './use-navigation-visibility';
