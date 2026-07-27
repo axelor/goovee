@@ -96,6 +96,16 @@ export function EventDetails({
   const startTime = timeOnly(eventDetails.eventStartDateTime);
   const endTime = timeOnly(eventDetails.eventEndDateTime);
   const {month, day} = dateParts(eventDetails.eventStartDateTime);
+  // All-day events carry no meaningful time; multi-day events span more than one
+  // calendar day and must show the end date, not just an end time.
+  const isAllDay = Boolean(eventDetails.eventAllDay);
+  const startDay = eventDetails.eventStartDateTime
+    ? formatDate(eventDetails.eventStartDateTime, {dateFormat: 'YYYY-MM-DD'})
+    : '';
+  const endDay = eventDetails.eventEndDateTime
+    ? formatDate(eventDetails.eventEndDateTime, {dateFormat: 'YYYY-MM-DD'})
+    : '';
+  const isMultiDay = Boolean(endDay && endDay !== startDay);
 
   const eventsRootHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
   const registerHref = `${eventsRootHref}/${eventDetails?.slug}/register`;
@@ -167,14 +177,36 @@ export function EventDetails({
                 <span className="inline-flex items-center gap-1.5">
                   <MdOutlineCalendarToday className="text-base" />
                   {eventDetails.eventStartDateTime &&
-                    formatDateTime(eventDetails.eventStartDateTime, {
-                      dateFormat: 'LL',
-                      timeFormat: ' · HH:mm',
-                    })}
-                  {endTime && (
+                    (isAllDay
+                      ? formatDate(eventDetails.eventStartDateTime, {
+                          dateFormat: 'LL',
+                        })
+                      : formatDateTime(eventDetails.eventStartDateTime, {
+                          dateFormat: 'LL',
+                          timeFormat: ' · HH:mm',
+                        }))}
+                  {isMultiDay && eventDetails.eventEndDateTime ? (
+                    <span className="tabular-nums text-white/85">
+                      {' – '}
+                      {isAllDay
+                        ? formatDate(eventDetails.eventEndDateTime, {
+                            dateFormat: 'LL',
+                          })
+                        : formatDateTime(eventDetails.eventEndDateTime, {
+                            dateFormat: 'LL',
+                            timeFormat: ' · HH:mm',
+                          })}
+                    </span>
+                  ) : !isAllDay && endTime ? (
                     <span className="tabular-nums text-white/85">
                       {' '}
                       – {endTime}
+                    </span>
+                  ) : null}
+                  {isAllDay && !isMultiDay && (
+                    <span className="text-white/85">
+                      {' '}
+                      · {i18n.t('All day')}
                     </span>
                   )}
                 </span>
@@ -261,8 +293,14 @@ export function EventDetails({
                     {i18n.t('Registration')}
                   </div>
                   <div className="text-[13px] text-white/90 mt-1 tabular-nums">
-                    {startTime}
-                    {endTime ? ` – ${endTime}` : ''}
+                    {isAllDay ? (
+                      i18n.t('All day')
+                    ) : (
+                      <>
+                        {startTime}
+                        {endTime ? ` – ${endTime}` : ''}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

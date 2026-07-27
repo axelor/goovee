@@ -319,9 +319,11 @@ function NextEventSpotlight({
         <div className="text-[56px] font-extrabold leading-none tabular-nums mt-1">
           <EventLocalDate date={event.eventStartDateTime} part="day" />
         </div>
-        <div className="text-xs font-semibold opacity-85 tabular-nums mt-1">
-          <EventLocalDate date={event.eventStartDateTime} part="time" />
-        </div>
+        {!event.eventAllDay && (
+          <div className="text-xs font-semibold opacity-85 tabular-nums mt-1">
+            <EventLocalDate date={event.eventStartDateTime} part="time" />
+          </div>
+        )}
       </div>
 
       <div className="p-[22px_26px] flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -346,20 +348,25 @@ function NextEventSpotlight({
             {event.eventTitle}
           </h2>
           <div className="mt-2 flex flex-wrap gap-[18px] text-[13px] text-ink-600">
-            <span className="inline-flex items-center gap-1.5">
-              <MdOutlineSchedule className="text-ink-400 text-sm" />
-              <span className="tabular-nums">
-                <EventLocalDate date={event.eventStartDateTime} part="time" />
-                {event.eventEndDateTime ? (
-                  <>
-                    {' – '}
-                    <EventLocalDate date={event.eventEndDateTime} part="time" />
-                  </>
-                ) : (
-                  ''
-                )}
+            {!event.eventAllDay && (
+              <span className="inline-flex items-center gap-1.5">
+                <MdOutlineSchedule className="text-ink-400 text-sm" />
+                <span className="tabular-nums">
+                  <EventLocalDate date={event.eventStartDateTime} part="time" />
+                  {event.eventEndDateTime ? (
+                    <>
+                      {' – '}
+                      <EventLocalDate
+                        date={event.eventEndDateTime}
+                        part="time"
+                      />
+                    </>
+                  ) : (
+                    ''
+                  )}
+                </span>
               </span>
-            </span>
+            )}
             {event.eventPlace && (
               <span className="inline-flex items-center gap-1.5">
                 <MdOutlinePlace className="text-ink-400 text-sm" />
@@ -442,20 +449,22 @@ function RegistrationCard({
           {event.eventTitle}
         </h3>
         <div className="mt-1.5 flex flex-wrap gap-[14px] text-xs text-ink-600">
-          <span className="inline-flex items-center gap-1">
-            <MdOutlineSchedule className="text-ink-400" />
-            <span className="tabular-nums">
-              <EventLocalDate date={event.eventStartDateTime} part="time" />
-              {event.eventEndDateTime ? (
-                <>
-                  {' – '}
-                  <EventLocalDate date={event.eventEndDateTime} part="time" />
-                </>
-              ) : (
-                ''
-              )}
+          {!event.eventAllDay && (
+            <span className="inline-flex items-center gap-1">
+              <MdOutlineSchedule className="text-ink-400" />
+              <span className="tabular-nums">
+                <EventLocalDate date={event.eventStartDateTime} part="time" />
+                {event.eventEndDateTime ? (
+                  <>
+                    {' – '}
+                    <EventLocalDate date={event.eventEndDateTime} part="time" />
+                  </>
+                ) : (
+                  ''
+                )}
+              </span>
             </span>
-          </span>
+          )}
           {event.eventPlace && (
             <span className="inline-flex items-center gap-1">
               <MdOutlinePlace className="text-ink-400" />

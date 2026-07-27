@@ -14,9 +14,12 @@ type Part = 'month' | 'day' | 'time';
 export function EventLocalDate({
   date,
   part,
+  allDay = false,
 }: {
   date: string | Date | null | undefined;
   part: Part;
+  // All-day events have no meaningful clock time; rendering it shows "00:00".
+  allDay?: boolean;
 }) {
   if (!date) return <>{part === 'time' ? '' : '—'}</>;
 
@@ -29,7 +32,8 @@ export function EventLocalDate({
     return <>{formatDate(date, {dateFormat: 'D'}) || '—'}</>;
   }
 
-  // time
+  // time — suppressed for all-day events (no phantom 00:00)
+  if (allDay) return <></>;
   return <>{formatDate(date, {dateFormat: 'HH:mm'})}</>;
 }
 

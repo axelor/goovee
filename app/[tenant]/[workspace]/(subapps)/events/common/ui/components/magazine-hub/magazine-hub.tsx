@@ -17,7 +17,7 @@ import {
 import {i18n} from '@/locale';
 import {Button, InnerHTML} from '@/ui/components';
 import {NO_IMAGE_URL, SUBAPP_CODES} from '@/constants';
-import {formatDateTime} from '@/locale/formatters';
+import {formatDate, formatDateTime} from '@/locale/formatters';
 import {cn} from '@/utils/css';
 import {Link} from '@/ui/components/link';
 import {useSearchParams} from '@/ui/hooks';
@@ -578,10 +578,12 @@ function FeaturedCard({
           </h2>
           <div className="mt-3.5 flex flex-wrap items-center gap-2.5 text-[14.5px] text-white/90">
             <MdOutlineCalendarToday className="text-base" />
-            {formatDateTime(event.eventStartDateTime ?? '', {
-              dateFormat: 'LL',
-              timeFormat: ' · HH:mm',
-            })}
+            {event.eventAllDay
+              ? formatDate(event.eventStartDateTime ?? '', {dateFormat: 'LL'})
+              : formatDateTime(event.eventStartDateTime ?? '', {
+                  dateFormat: 'LL',
+                  timeFormat: ' · HH:mm',
+                })}
             {event.eventPlace && (
               <>
                 <span className="text-white/50">·</span>
@@ -693,10 +695,12 @@ function MagazineCard({
         <div className="flex flex-col gap-1 text-[12.5px] text-ink-600">
           <div className="flex items-center gap-1.5">
             <MdOutlineCalendarToday className="text-ink-400 text-sm" />
-            {formatDateTime(event.eventStartDateTime ?? '', {
-              dateFormat: 'LL',
-              timeFormat: ' · HH:mm',
-            })}
+            {event.eventAllDay
+              ? formatDate(event.eventStartDateTime ?? '', {dateFormat: 'LL'})
+              : formatDateTime(event.eventStartDateTime ?? '', {
+                  dateFormat: 'LL',
+                  timeFormat: ' · HH:mm',
+                })}
           </div>
           {event.eventPlace && (
             <div className="flex items-center gap-1.5">
