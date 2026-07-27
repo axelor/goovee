@@ -94,25 +94,57 @@ export function ShopCatalog({
     [router, searchParams],
   );
 
-  // Compute counts per category from the full product list (unfiltered).
-  // The portal exposes products via product.portalCategorySet (many-to-many),
-  // not via the primary productCategory — we mirror that here so counts and
-  // the filter stay consistent with the ORM where clause.
+  // Each category mapped to the set of itself + all its descendants. Portal
+  // categories are a tree, so selecting a parent must include products that
+  // only live in its children (otherwise a parent shows the empty state).
+  const descendantsByCat = useMemo(() => {
+    const childrenOf = new Map<string, string[]>();
+    for (const c of categories) {
+      const pid = c.parent?.id;
+      if (pid != null) {
+        const key = String(pid);
+        const arr = childrenOf.get(key) ?? [];
+        arr.push(String(c.id));
+        childrenOf.set(key, arr);
+      }
+    }
+    const map = new Map<string, Set<string>>();
+    for (const c of categories) {
+      const root = String(c.id);
+      const set = new Set<string>([root]);
+      const stack = [root];
+      while (stack.length) {
+        const cur = stack.pop()!;
+        for (const child of childrenOf.get(cur) ?? []) {
+          if (!set.has(child)) {
+            set.add(child);
+            stack.push(child);
+          }
+        }
+      }
+      map.set(root, set);
+    }
+    return map;
+  }, [categories]);
+
+  // Counts per category, rolled up through descendants (each product counted
+  // once per subtree), so a parent reflects everything under it.
   const countsByCat = useMemo(() => {
     const map = new Map<string, number>();
     map.set('all', products.length);
-    for (const p of products) {
-      const portal = p?.product?.portalCategorySet ?? [];
-      const seen = new Set<string>();
-      for (const c of portal) {
-        const id = String(c?.id ?? '');
-        if (!id || seen.has(id)) continue;
-        seen.add(id);
-        map.set(id, (map.get(id) ?? 0) + 1);
+    for (const c of categories) {
+      const id = String(c.id);
+      const desc = descendantsByCat.get(id);
+      if (!desc) continue;
+      let n = 0;
+      for (const p of products) {
+        const portal = p?.product?.portalCategorySet ?? [];
+        if (portal.some(pc => desc.has(String(pc?.id)))) n++;
       }
+      map.set(id, n);
     }
     return map;
-  }, [products]);
+  }, [products, categories, descendantsByCat]);
 
   const categoryById = useMemo(() => {
     const map = new Map<string, ShopCategory>();
@@ -123,9 +155,10 @@ export function ShopCatalog({
   const filtered = useMemo(() => {
     let out = products;
     if (activeCat !== 'all') {
+      const desc = descendantsByCat.get(activeCat) ?? new Set([activeCat]);
       out = out.filter(p => {
         const portal = p?.product?.portalCategorySet ?? [];
-        return portal.some(c => String(c?.id) === activeCat);
+        return portal.some(c => desc.has(String(c?.id)));
       });
     }
     if (stockOnly) {
@@ -152,7 +185,7 @@ export function ShopCatalog({
         break;
     }
     return out;
-  }, [products, activeCat, stockOnly, urlSearch, urlSort]);
+  }, [products, activeCat, stockOnly, urlSearch, urlSort, descendantsByCat]);
 
   const title =
     activeCat === 'all'
@@ -172,18 +205,20 @@ export function ShopCatalog({
           active={activeCat === 'all'}
           onClick={() => setParam({cat: null})}
         />
-        {categories.map(c => {
-          const active = activeCat === String(c.id);
-          return (
-            <CategoryNavButton
-              key={c.id}
-              label={c.name ?? '—'}
-              count={countsByCat.get(String(c.id)) ?? 0}
-              active={active}
-              onClick={() => setParam({cat: String(c.id)})}
-            />
-          );
-        })}
+        {categories
+          .filter(c => (countsByCat.get(String(c.id)) ?? 0) > 0)
+          .map(c => {
+            const active = activeCat === String(c.id);
+            return (
+              <CategoryNavButton
+                key={c.id}
+                label={c.name ?? '—'}
+                count={countsByCat.get(String(c.id)) ?? 0}
+                active={active}
+                onClick={() => setParam({cat: String(c.id)})}
+              />
+            );
+          })}
 
         <h2 className="m-0 mt-7 mb-3 text-[12px] font-extrabold uppercase tracking-[0.06em] text-ink-700">
           {labels.availabilityTitle}

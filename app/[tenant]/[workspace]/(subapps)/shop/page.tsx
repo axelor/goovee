@@ -75,21 +75,17 @@ async function Catalog({
   const products: ComputedProduct[] = Array.isArray(productsRes)
     ? (productsRes as ComputedProduct[])
     : ((productsRes as {products?: ComputedProduct[]})?.products ?? []);
-  // Keep only leaf categories that actually contain products in the portal —
-  // the ORM filter clauses pivot through portalCategorySet (many-to-many),
-  // not productCategory (the product's primary business category). Using
-  // productCategory here would surface categories that look populated but
-  // resolve to 0 products when clicked.
-  const categoriesWithProducts = new Set<string>();
-  for (const p of products) {
-    const portal = p?.product?.portalCategorySet ?? [];
-    for (const c of portal) {
-      if (c?.id) categoriesWithProducts.add(String(c.id));
-    }
-  }
-  const categories: ShopCategory[] = allCategories
-    .filter(c => categoriesWithProducts.has(String(c.id)))
-    .map(c => ({id: c.id, name: c.name, slug: c.slug}));
+  // Pass the full category tree (with parent links) so the catalog can
+  // aggregate a parent's descendants: selecting a parent — whether from the
+  // sidebar, a legacy link or the mobile menu — must include products that
+  // only live in its child categories. The catalog hides categories whose
+  // rolled-up product count is 0, so empties never surface.
+  const categories: ShopCategory[] = allCategories.map(c => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    parent: (c as ShopCategory).parent ?? null,
+  }));
 
   return (
     <ShopCatalog

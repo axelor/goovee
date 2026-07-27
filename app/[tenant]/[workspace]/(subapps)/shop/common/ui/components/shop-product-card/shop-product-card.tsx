@@ -22,6 +22,9 @@ export interface ShopCategory {
   id: string | number;
   name: string | null;
   slug?: string | null;
+  // Portal categories form a tree; the parent link lets the catalog aggregate a
+  // parent's descendants when filtering.
+  parent?: {id: string | number} | null;
 }
 
 export function ShopProductCard({
