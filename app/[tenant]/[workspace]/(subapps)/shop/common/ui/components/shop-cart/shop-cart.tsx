@@ -103,10 +103,22 @@ export function ShopCart({
             findProduct({id: String(i.product), workspaceURL}),
           ),
         );
-        if (!cancelled)
-          setComputedProducts(
-            results.filter((p): p is ComputedProduct => Boolean(p)),
-          );
+        if (cancelled) return;
+        const resolved = results.filter((p): p is ComputedProduct =>
+          Boolean(p),
+        );
+        setComputedProducts(resolved);
+
+        // Auto-remove cart items whose product no longer resolves (unavailable),
+        // as the pre-redesign cart did. Otherwise they stay hidden in the cart
+        // yet are still submitted with the order/quote, and an all-unavailable
+        // cart can never be checked out.
+        const resolvedIds = new Set(
+          resolved.map(cp => String(cp?.product?.id)),
+        );
+        items
+          .filter((i: CartItem) => !resolvedIds.has(String(i.product)))
+          .forEach((i: CartItem) => removeItem(i.product));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -114,7 +126,7 @@ export function ShopCart({
     return () => {
       cancelled = true;
     };
-  }, [cart, workspaceURL]);
+  }, [cart, workspaceURL, removeItem]);
 
   const items = useMemo<ResolvedCartItem[]>(() => {
     return ((cart?.items ?? []) as CartItem[])
