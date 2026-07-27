@@ -65,6 +65,15 @@ export function AddressEditModal({
   const [contact, setContact] = useState<string>(
     address?.address?.companyName ?? '',
   );
+  // First/last name were dropped by the redesign, so editing a legacy address
+  // wiped them (the update writes undefined). Keep capturing and persisting
+  // them so the stored name no longer drifts.
+  const [firstName, setFirstName] = useState<string>(
+    address?.address?.firstName ?? '',
+  );
+  const [lastName, setLastName] = useState<string>(
+    address?.address?.lastName ?? '',
+  );
   // Usage flags (which section the address belongs to). Pre-checked by the
   // section the modal was opened from for a new address.
   const [invoicing, setInvoicing] = useState<boolean>(
@@ -108,6 +117,8 @@ export function AddressEditModal({
       townName,
       streetName,
       companyName: contact || undefined,
+      firstName: firstName || undefined,
+      lastName: lastName || undefined,
       department: label,
       fullName: computeFullName(),
       formattedFullName: formattedFullName(),
@@ -204,6 +215,20 @@ export function AddressEditModal({
               placeholder={i18n.t('E.g. Head office — Nice')}
             />
           </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={i18n.t('First name')}>
+              <Input
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+              />
+            </Field>
+            <Field label={i18n.t('Last name')}>
+              <Input
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+              />
+            </Field>
+          </div>
           <Field label={i18n.t('Address')}>
             <Input
               value={streetName}
