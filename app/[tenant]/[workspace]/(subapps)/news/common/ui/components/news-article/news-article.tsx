@@ -157,9 +157,6 @@ export function NewsArticleBody({article}: {article: NewsItem}) {
               #{cat.name}
             </span>
           )}
-          <span className="px-2.5 py-1 rounded-md bg-ink-50 text-ink-700 text-[11.5px] font-semibold">
-            #atlas
-          </span>
         </div>
         {article?.author?.simpleFullName && (
           <div className="flex items-center gap-2.5">
@@ -169,9 +166,6 @@ export function NewsArticleBody({article}: {article: NewsItem}) {
             <div>
               <div className="text-[13.5px] font-bold text-ink-900">
                 {article.author.simpleFullName}
-              </div>
-              <div className="text-[11.5px] text-ink-500">
-                {i18n.t('Atlas Industries')}
               </div>
             </div>
           </div>
