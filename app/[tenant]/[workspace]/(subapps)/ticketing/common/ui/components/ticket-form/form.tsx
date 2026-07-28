@@ -315,7 +315,7 @@ export function TicketForm(props: TicketFormProps) {
                 type="submit"
                 className="w-30"
                 variant="royal"
-                disabled={success || !form.formState.isValid}>
+                disabled={success}>
                 {i18n.t('Create a ticket')}
               </Button>
             </div>
