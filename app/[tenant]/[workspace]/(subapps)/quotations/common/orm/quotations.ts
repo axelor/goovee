@@ -123,6 +123,8 @@ export async function findQuotation({
     where: whereClause,
     select: {
       saleOrderSeq: true,
+      externalReference: true,
+      createdOn: true,
       endOfValidityDate: true,
       exTaxTotal: true,
       statusSelect: true,
