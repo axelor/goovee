@@ -1,6 +1,9 @@
 'use client';
 
-import {useMemo, useState} from 'react';
+import {useMemo} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {z} from 'zod';
 import {MdClose, MdOutlineLocationOn} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
@@ -27,6 +30,12 @@ import {
 type Country = {id: string; name: string; version?: number};
 type Kind = 'invoicing' | 'shipping';
 
+const CountrySchema = z.object({
+  id: z.string().min(1),
+  name: z.string(),
+  version: z.number().nullish(),
+});
+
 export function AddressEditModal({
   open,
   kind,
@@ -45,72 +54,102 @@ export function AddressEditModal({
   const {toast} = useToast();
   const isEdit = Boolean(address);
 
-  const [label, setLabel] = useState<string>(address?.address?.addressl2 ?? '');
-  const [streetName, setStreetName] = useState<string>(
-    address?.address?.streetName ?? address?.address?.addressl4 ?? '',
+  /* Built here rather than at module scope so the messages are translated with
+   * the locale the viewer actually has. */
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          label: z.string().trim().min(1, i18n.t('Address label is required')),
+          firstName: z.string(),
+          lastName: z.string(),
+          streetName: z
+            .string()
+            .trim()
+            .min(1, i18n.t('Street name is required')),
+          zip: z.string().trim().min(1, i18n.t('Zip code is required')),
+          townName: z.string().trim().min(1, i18n.t('Town name is required')),
+          /* superRefine rather than refine: refine would narrow the parsed type
+           * to a non-null country, leaving the form's input and output types
+           * disagreeing about the empty state the field starts in. */
+          country: CountrySchema.nullable().superRefine((value, ctx) => {
+            if (value) return;
+            ctx.addIssue({
+              code: 'custom',
+              message: i18n.t('Country is required'),
+            });
+          }),
+          contact: z.string(),
+          invoicing: z.boolean(),
+          shipping: z.boolean(),
+        })
+        /* An address must be usable for at least one purpose, otherwise it is
+         * filtered out of every list and picker and cannot be reached again. */
+        .refine(values => values.invoicing || values.shipping, {
+          message: i18n.t('An address must be used for invoicing or delivery.'),
+          path: ['invoicing'],
+        }),
+    [],
   );
-  const [zip, setZip] = useState<string>(address?.address?.zip ?? '');
-  const [townName, setTownName] = useState<string>(
-    address?.address?.townName ?? address?.address?.addressl6 ?? '',
-  );
-  const [country, setCountry] = useState<Country | null>(
-    address?.address?.country
-      ? {
-          id: String(address.address.country.id),
-          name: address.address.country.name ?? '',
-          version: address.address.country.version,
-        }
-      : null,
-  );
-  const [contact, setContact] = useState<string>(
-    address?.address?.companyName ?? '',
-  );
-  // First/last name were dropped by the redesign, so editing a legacy address
-  // wiped them (the update writes undefined). Keep capturing and persisting
-  // them so the stored name no longer drifts.
-  const [firstName, setFirstName] = useState<string>(
-    address?.address?.firstName ?? '',
-  );
-  const [lastName, setLastName] = useState<string>(
-    address?.address?.lastName ?? '',
-  );
-  // Usage flags (which section the address belongs to). Pre-checked by the
-  // section the modal was opened from for a new address.
-  const [invoicing, setInvoicing] = useState<boolean>(
-    isEdit ? Boolean(address?.isInvoicingAddr) : kind === 'invoicing',
-  );
-  const [shipping, setShipping] = useState<boolean>(
-    isEdit ? Boolean(address?.isDeliveryAddr) : kind === 'shipping',
-  );
-  const [submitting, setSubmitting] = useState(false);
 
-  // An address must be usable for at least one purpose, otherwise it is
-  // filtered out of every list/picker and becomes impossible to reach again.
-  const hasType = invoicing || shipping;
-  const valid =
-    Boolean(label && streetName && zip && townName && country?.id) && hasType;
+  type FormValues = z.infer<typeof schema>;
 
-  const computeFullName = () =>
-    [streetName, zip, townName].filter(Boolean).join(' ').toUpperCase();
-  const formattedFullName = () =>
-    [streetName, zip, townName, country?.name]
-      .filter(Boolean)
-      .join('\n')
-      .toUpperCase();
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      label: address?.address?.addressl2 ?? '',
+      /* First and last name are captured so editing a legacy address does not
+       * drop the stored name. */
+      firstName: address?.address?.firstName ?? '',
+      lastName: address?.address?.lastName ?? '',
+      streetName:
+        address?.address?.streetName ?? address?.address?.addressl4 ?? '',
+      zip: address?.address?.zip ?? '',
+      townName: address?.address?.townName ?? address?.address?.addressl6 ?? '',
+      country: address?.address?.country
+        ? {
+            id: String(address.address.country.id),
+            name: address.address.country.name ?? '',
+            version: address.address.country.version,
+          }
+        : null,
+      contact: address?.address?.companyName ?? '',
+      /* A new address is pre-checked for the section it was opened from. */
+      invoicing: isEdit
+        ? Boolean(address?.isInvoicingAddr)
+        : kind === 'invoicing',
+      shipping: isEdit ? Boolean(address?.isDeliveryAddr) : kind === 'shipping',
+    },
+  });
 
-  const handleSave = async () => {
-    if (!valid || !country) return;
-    setSubmitting(true);
+  const {errors, isSubmitting} = form.formState;
+  const country = form.watch('country');
+  const invoicing = form.watch('invoicing');
+  const shipping = form.watch('shipping');
+
+  const handleSave = async (values: FormValues) => {
+    if (!values.country) return;
+
+    const streetName = values.streetName;
+    const zip = values.zip;
+    const townName = values.townName;
+    const computeFullName = () =>
+      [streetName, zip, townName].filter(Boolean).join(' ').toUpperCase();
+    const formattedFullName = () =>
+      [streetName, zip, townName, values.country?.name]
+        .filter(Boolean)
+        .join('\n')
+        .toUpperCase();
 
     const addressBody = {
       id: address?.address?.id != null ? String(address.address.id) : undefined,
       version: address?.address?.version,
       country: {
-        id: String(country.id),
-        name: country.name,
-        version: country.version ?? 0,
+        id: String(values.country.id),
+        name: values.country.name,
+        version: values.country.version ?? 0,
       },
-      addressl2: label,
+      addressl2: values.label,
       addressl4: streetName,
       addressl6: townName,
       zip,
@@ -118,10 +157,10 @@ export function AddressEditModal({
       streetName,
       /* null, not undefined: the ORM saves a partial entity, so an undefined
        * field is left untouched and clearing one would keep the stored value. */
-      companyName: contact || null,
-      firstName: firstName || null,
-      lastName: lastName || null,
-      department: label,
+      companyName: values.contact || null,
+      firstName: values.firstName || null,
+      lastName: values.lastName || null,
+      department: values.label,
       fullName: computeFullName(),
       formattedFullName: formattedFullName(),
     };
@@ -137,20 +176,19 @@ export function AddressEditModal({
               },
               id: String(address.id),
               version: address.version ?? 0,
-              isInvoicingAddr: invoicing,
-              isDeliveryAddr: shipping,
+              isInvoicingAddr: values.invoicing,
+              isDeliveryAddr: values.shipping,
               isDefaultAddr: Boolean(address.isDefaultAddr),
             })
           : await createAddress({
               address: addressBody,
-              isInvoicingAddr: invoicing,
-              isDeliveryAddr: shipping,
+              isInvoicingAddr: values.invoicing,
+              isDeliveryAddr: values.shipping,
               isDefaultAddr: false,
             });
 
       if (result?.error) {
         toast({variant: 'destructive', description: result.message});
-        setSubmitting(false);
         return;
       }
 
@@ -165,8 +203,6 @@ export function AddressEditModal({
         variant: 'destructive',
         title: i18n.t('Something went wrong while saving the address'),
       });
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -209,109 +245,132 @@ export function AddressEditModal({
           </div>
         </div>
 
-        <div className="px-6 py-5 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
-          <Field label={i18n.t('Address label')}>
-            <Input
-              value={label}
-              onChange={e => setLabel(e.target.value)}
-              placeholder={i18n.t('E.g. Head office — Nice')}
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={i18n.t('First name')}>
+        <form onSubmit={form.handleSubmit(handleSave)} noValidate>
+          <div className="px-6 py-5 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+            <Field
+              label={i18n.t('Address label')}
+              error={errors.label?.message}>
               <Input
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
+                {...form.register('label')}
+                placeholder={i18n.t('E.g. Head office — Nice')}
               />
             </Field>
-            <Field label={i18n.t('Last name')}>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={i18n.t('First name')}>
+                <Input {...form.register('firstName')} />
+              </Field>
+              <Field label={i18n.t('Last name')}>
+                <Input {...form.register('lastName')} />
+              </Field>
+            </div>
+            <Field label={i18n.t('Address')} error={errors.streetName?.message}>
               <Input
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
+                {...form.register('streetName')}
+                placeholder={i18n.t('Street name and number')}
               />
             </Field>
-          </div>
-          <Field label={i18n.t('Address')}>
-            <Input
-              value={streetName}
-              onChange={e => setStreetName(e.target.value)}
-              placeholder={i18n.t('Street name and number')}
-            />
-          </Field>
-          <div className="grid grid-cols-[1fr_2fr] gap-3">
-            <Field label={i18n.t('Zip code')}>
-              <Input value={zip} onChange={e => setZip(e.target.value)} />
-            </Field>
-            <Field label={i18n.t('Town name')}>
+            <div className="grid grid-cols-[1fr_2fr] gap-3">
+              <Field label={i18n.t('Zip code')} error={errors.zip?.message}>
+                <Input {...form.register('zip')} />
+              </Field>
+              <Field
+                label={i18n.t('Town name')}
+                error={errors.townName?.message}>
+                <Input {...form.register('townName')} />
+              </Field>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <DropdownSelector
+                options={countryOptions}
+                selectedValue={country?.id}
+                label={i18n.t('Country')}
+                placeholder={i18n.t('Select a country')}
+                labelClassName="mb-0"
+                rootClassName="space-y-2"
+                hasError={Boolean(errors.country)}
+                onValueChange={(option: Country) =>
+                  form.setValue('country', option, {shouldValidate: true})
+                }
+              />
+              <FieldError message={errors.country?.message} />
+            </div>
+            <Field label={i18n.t('Contact')}>
               <Input
-                value={townName}
-                onChange={e => setTownName(e.target.value)}
+                {...form.register('contact')}
+                placeholder={i18n.t('Contact name')}
               />
             </Field>
-          </div>
-          <DropdownSelector
-            options={countryOptions}
-            selectedValue={country?.id}
-            label={i18n.t('Country')}
-            placeholder={i18n.t('Select a country')}
-            labelClassName="mb-0"
-            rootClassName="space-y-2"
-            onValueChange={(option: Country) => setCountry(option)}
-          />
-          <Field label={i18n.t('Contact')}>
-            <Input
-              value={contact}
-              onChange={e => setContact(e.target.value)}
-              placeholder={i18n.t('Contact name')}
-            />
-          </Field>
 
-          <div className="border-t border-ink-100 pt-4 flex flex-col gap-3">
-            <ToggleRow
-              label={i18n.t('Use for invoicing')}
-              checked={invoicing}
-              onChange={setInvoicing}
-            />
-            <ToggleRow
-              label={i18n.t('Use for delivery')}
-              checked={shipping}
-              onChange={setShipping}
-            />
-            {!hasType && (
-              <p className="text-[12.5px] text-status-rejected-fg">
-                {i18n.t('An address must be used for invoicing or delivery.')}
-              </p>
-            )}
+            <div className="border-t border-ink-100 pt-4 flex flex-col gap-3">
+              <ToggleRow
+                label={i18n.t('Use for invoicing')}
+                checked={invoicing}
+                onChange={value =>
+                  form.setValue('invoicing', value, {shouldValidate: true})
+                }
+              />
+              <ToggleRow
+                label={i18n.t('Use for delivery')}
+                checked={shipping}
+                onChange={value =>
+                  form.setValue('shipping', value, {shouldValidate: true})
+                }
+              />
+              {!invoicing && !shipping && (
+                <FieldError
+                  message={i18n.t(
+                    'An address must be used for invoicing or delivery.',
+                  )}
+                />
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-ink-100">
-          <Button
-            variant="royal-outline"
-            onClick={onClose}
-            disabled={submitting}>
-            {i18n.t('Cancel')}
-          </Button>
-          <Button
-            variant="royal"
-            onClick={handleSave}
-            disabled={!valid || submitting}>
-            {i18n.t('Save')}
-          </Button>
-        </div>
+          <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-ink-100">
+            <Button
+              type="button"
+              variant="royal-outline"
+              onClick={onClose}
+              disabled={isSubmitting}>
+              {i18n.t('Cancel')}
+            </Button>
+            {/* Not gated on validity: pressing Save is how the form reports
+                which fields still need filling. */}
+            <Button type="submit" variant="royal" disabled={isSubmitting}>
+              {i18n.t('Save')}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
 }
 
-function Field({label, children}: {label: string; children: React.ReactNode}) {
+function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <Label className="text-[13px] font-semibold text-ink-800 mb-0">
         {label}
       </Label>
       {children}
+      <FieldError message={error} />
     </div>
+  );
+}
+
+function FieldError({message}: {message?: string}) {
+  if (!message) return null;
+
+  return (
+    <p className="text-[12.5px] text-status-rejected-fg mb-0">{message}</p>
   );
 }
 

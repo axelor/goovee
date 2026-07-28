@@ -56,6 +56,7 @@
   "Address information": "Informations sur l’adresse",
   "Address information saved successfully!": "Adresse enregistrée avec succès !",
   "Address label": "Libellé de l'adresse",
+  "Address label is required": "Le libellé de l'adresse est requis",
   "Address name": "Nom de l’adresse",
   "Address precision": "Précision de l’adresse",
   "Addresses": "Adresses",
