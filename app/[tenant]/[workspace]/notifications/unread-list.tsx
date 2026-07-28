@@ -62,20 +62,45 @@ function notifType(tag?: string | null) {
   return {Icon: MdOutlineNotifications, cls: 'bg-royal-pale text-royal'};
 }
 
-const PERIODS = ['Today', 'This week', 'Older'] as const;
+const PERIODS = ['Today', 'Previous 7 days', 'Older'] as const;
 
-function periodOf(date?: Date | string | null): (typeof PERIODS)[number] {
+type Period = (typeof PERIODS)[number];
+
+/* Each label is translated from a literal so the extractor can see it. Passing
+ * the period straight to i18n.t() resolves fine at runtime, but leaves the
+ * strings invisible to `pnpm missing-tr`, so a renamed or added label silently
+ * falls back to its English source until someone edits the locale files. */
+function periodLabel(period: Period): string {
+  switch (period) {
+    case 'Today':
+      return i18n.t('Today');
+    case 'Previous 7 days':
+      return i18n.t('Previous 7 days');
+    case 'Older':
+      return i18n.t('Older');
+  }
+}
+
+function periodOf(date?: Date | string | null): Period {
   if (!date) return 'Older';
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return 'Older';
+  const createdAt = new Date(date);
+  if (Number.isNaN(createdAt.getTime())) return 'Older';
   const now = new Date();
+  /* Both boundaries come from the date constructor so they land on real local
+   * midnights. Subtracting a flat 6 * 24h from today would drift by an hour
+   * either side of a DST change, misfiling anything near the cutoff. */
   const startToday = new Date(
     now.getFullYear(),
     now.getMonth(),
     now.getDate(),
   ).getTime();
-  if (d.getTime() >= startToday) return 'Today';
-  if (d.getTime() >= startToday - 6 * 24 * 60 * 60 * 1000) return 'This week';
+  const startWindow = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 6,
+  ).getTime();
+  if (createdAt.getTime() >= startToday) return 'Today';
+  if (createdAt.getTime() >= startWindow) return 'Previous 7 days';
   return 'Older';
 }
 
@@ -195,7 +220,7 @@ export function UnreadNotificationsList() {
           {groups.map(group => (
             <div key={group.label}>
               <div className="mb-2.5 pl-1 text-[11.5px] font-bold uppercase tracking-[0.05em] text-ink-400">
-                {i18n.t(group.label)}
+                {periodLabel(group.label)}
               </div>
               <div className="overflow-hidden rounded-2xl border border-ink-100 bg-white shadow-xs">
                 {group.items.map((n, i) => (
