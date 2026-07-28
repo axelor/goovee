@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useMemo} from 'react';
+import {useCallback} from 'react';
 import {Link} from '@/ui/components/link';
 import type {Cloned} from '@/types/util';
 import {useRouter} from 'next/navigation';
@@ -25,7 +25,10 @@ import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
 import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
 import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
-import {extractAmount} from '@/subapps/invoices/common/utils/invoices';
+import {
+  extractAmount,
+  isInvoiceOverdue,
+} from '@/subapps/invoices/common/utils/invoices';
 
 interface ContentProps {
   invoice: Cloned<InvoiceType>;
@@ -34,27 +37,33 @@ interface ContentProps {
   token?: string;
 }
 
-const TODAY = new Date();
-
-function isOverdue(invoice: Cloned<InvoiceType>): boolean {
-  if (!invoice?.isUnpaid || !invoice?.dueDate) return false;
-  return new Date(invoice.dueDate) < TODAY;
-}
-
 function getInvoiceStatusKey(invoice: Cloned<InvoiceType>): StatusKey {
   if (!invoice.isUnpaid) return 'paid';
-  if (isOverdue(invoice)) return 'overdue';
+  if (isInvoiceOverdue(invoice)) return 'overdue';
   const remaining = extractAmount(invoice.amountRemaining?.value);
   const total = extractAmount(invoice.inTaxTotal);
   if (remaining > 0 && remaining < total) return 'partial';
   return 'unpaid';
 }
 
+// Written as literals so the keys stay visible to the extractor.
+function getInvoiceStatusLabel({
+  isUnpaid,
+  overdue,
+}: {
+  isUnpaid: boolean;
+  overdue: boolean;
+}): string {
+  if (!isUnpaid) return i18n.t('Paid');
+  if (overdue) return i18n.t('Overdue');
+  return i18n.t('Unpaid');
+}
+
 function getInvoiceTone(
   invoice: Cloned<InvoiceType>,
 ): 'mint' | 'overdue' | 'royal' {
   if (!invoice.isUnpaid) return 'mint';
-  if (isOverdue(invoice)) return 'overdue';
+  if (isInvoiceOverdue(invoice)) return 'overdue';
   return 'royal';
 }
 
@@ -72,13 +81,8 @@ export default function Content({
   const invoiceType = isUnpaid ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
   const statusKey = getInvoiceStatusKey(invoice);
   const tone = getInvoiceTone(invoice);
-  const overdue = isOverdue(invoice);
-
-  const statusLabel = useMemo(() => {
-    if (!isUnpaid) return INVOICE_TYPE.PAID;
-    if (overdue) return 'Overdue';
-    return INVOICE_TYPE.UNPAID;
-  }, [isUnpaid, overdue]);
+  const overdue = isInvoiceOverdue(invoice);
+  const statusLabel = getInvoiceStatusLabel({isUnpaid, overdue});
 
   const handlePaymentUpdate = useCallback(
     (status: PaymentUpdateStatus) => {
@@ -116,7 +120,7 @@ export default function Content({
         eyebrow={i18n.t('Invoice')}
         title={invoiceId ?? ''}
         statusKey={statusKey}
-        statusLabel={i18n.t(statusLabel)}
+        statusLabel={statusLabel}
         tone={tone}
         meta={
           isUnpaid ? (

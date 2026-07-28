@@ -26,32 +26,26 @@ import type {StatusKey} from '@/ui/components';
 // ---- LOCAL IMPORTS ---- //
 import {
   INVOICE_TAB_ITEMS,
-  INVOICE_TYPE,
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
 import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import type {InvoiceListItem} from '@/subapps/invoices/common/types/invoices';
-
-const TODAY = new Date();
-
-function isOverdue(invoice: InvoiceListItem): boolean {
-  if (!invoice?.isUnpaid || !invoice?.dueDate) return false;
-  return new Date(invoice.dueDate) < TODAY;
-}
+import {isInvoiceOverdue} from '@/subapps/invoices/common/utils/invoices';
 
 function getInvoiceStatusKey(invoice: InvoiceListItem): StatusKey {
   if (!invoice.isUnpaid) return 'paid';
-  if (isOverdue(invoice)) return 'overdue';
+  if (isInvoiceOverdue(invoice)) return 'overdue';
   // Computed server-side from raw amounts — comparing the localized inTaxTotal
   // string here broke in comma-decimal locales.
   if (invoice.isPartiallyPaid) return 'partial';
   return 'unpaid';
 }
 
+// Written as literals so the keys stay visible to the extractor.
 function getInvoiceStatusLabel(invoice: InvoiceListItem): string {
-  if (!invoice.isUnpaid) return INVOICE_TYPE.PAID;
-  if (isOverdue(invoice)) return 'Overdue';
-  return INVOICE_TYPE.UNPAID;
+  if (!invoice.isUnpaid) return i18n.t('Paid');
+  if (isInvoiceOverdue(invoice)) return i18n.t('Overdue');
+  return i18n.t('Unpaid');
 }
 
 export default function Content({
@@ -237,7 +231,7 @@ function InvoiceItem({
 }) {
   const statusKey = getInvoiceStatusKey(invoice);
   const statusLabel = getInvoiceStatusLabel(invoice);
-  const overdue = isOverdue(invoice);
+  const overdue = isInvoiceOverdue(invoice);
   return (
     <li>
       <button
@@ -255,7 +249,7 @@ function InvoiceItem({
             {invoice.invoiceId}
           </span>
           <StatusPill status={statusKey} size="sm">
-            {i18n.t(statusLabel)}
+            {statusLabel}
           </StatusPill>
         </div>
         <div className="flex items-center justify-between text-xs tabular-nums">
@@ -290,7 +284,7 @@ function InvoicePreview({
 }) {
   const statusKey = getInvoiceStatusKey(invoice);
   const statusLabel = getInvoiceStatusLabel(invoice);
-  const overdue = isOverdue(invoice);
+  const overdue = isInvoiceOverdue(invoice);
 
   return (
     <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-7 flex flex-col self-start">
@@ -301,7 +295,7 @@ function InvoicePreview({
               {i18n.t('Invoice')}
             </span>
             <StatusPill status={statusKey} size="sm">
-              {i18n.t(statusLabel)}
+              {statusLabel}
             </StatusPill>
           </div>
           <h2 className="text-2xl font-bold text-ink-900 tabular-nums">
