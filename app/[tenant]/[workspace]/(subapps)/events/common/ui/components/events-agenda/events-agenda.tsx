@@ -20,6 +20,10 @@ import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import type {ListEvent} from '@/subapps/events/common/orm/event';
+import {
+  formatEventSchedule,
+  isMultiDayEvent,
+} from '@/subapps/events/common/utils/schedule';
 
 type QuickRange = {key: string; label: string; from: string; to: string};
 
@@ -259,7 +263,12 @@ function AgendaRow({
   const start = new Date(event.eventStartDateTime ?? '');
   const day = start.getDate();
   const monthAbbr = monthAbbrev(start);
-  const time = formatHHmm(start);
+  /* The date block anchors on the first day, so a multi-day event carries its
+   * span in the meta row instead of a start time, which on its own would read
+   * as a single-day event. All-day events have no meaningful clock time. */
+  const isMultiDay = isMultiDayEvent(event);
+  const dateRange = isMultiDay ? formatEventSchedule(event) : '';
+  const time = isMultiDay || event.eventAllDay ? '' : formatHHmm(start);
   const cat = event.eventCategorySet?.[0];
   const detailHref = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
 
@@ -296,7 +305,13 @@ function AgendaRow({
         <div className="text-base font-bold text-ink-900 tracking-[-0.01em] truncate">
           {event.eventTitle}
         </div>
-        <div className="flex gap-4 mt-1.5 text-[12.5px] text-ink-500 min-w-0">
+        {/* Wraps so a date span does not squeeze the place name to nothing */}
+        <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1.5 text-[12.5px] text-ink-500 min-w-0">
+          {dateRange && (
+            <span className="inline-flex items-center gap-1.5 shrink-0">
+              <MdCalendarToday className="text-[13px]" /> {dateRange}
+            </span>
+          )}
           {time && (
             <span className="inline-flex items-center gap-1.5 shrink-0">
               <MdOutlineAccessTime className="text-[13px]" /> {time}

@@ -93,9 +93,7 @@ export function EventDetails({
   /* Registration can be unavailable for three independent reasons, and they
    * need different messages: an event that takes no registrations at all, a
    * deadline that has passed, and an open registration that requires a login.
-   * Testing only the deadline tells a signed-in user to sign in. The disabled
-   * case reuses the wording validateRegistration() returns for the same flag
-   * in common/actions/validation.ts. */
+   * The disabled case reuses the wording the server rejects it with. */
   const registrationNotice = !eventAllowRegistration
     ? i18n.t('Registration not started for this event')
     : registrationEnded

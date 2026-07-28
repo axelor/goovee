@@ -2,12 +2,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import type {Cloned} from '@/types/util';
 import {Suspense} from 'react';
 import {Link} from '@/ui/components/link';
-import {
-  MdArrowForward,
-  MdCheckCircle,
-  MdOutlinePlace,
-  MdOutlineSchedule,
-} from 'react-icons/md';
+import {MdArrowForward, MdCheckCircle, MdOutlinePlace} from 'react-icons/md';
 
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
@@ -28,6 +23,7 @@ import {t} from '@/lib/core/locale/server';
 import {EVENT_TYPE} from '@/subapps/events/common/constants';
 import {findEvents, type ListEvent} from '@/subapps/events/common/orm/event';
 import {EventLocalDate} from '@/subapps/events/common/ui/components/event-local-date';
+import {EventSchedule} from '@/subapps/events/common/ui/components/event-schedule';
 
 const FETCH_LIMIT = 200;
 
@@ -348,25 +344,13 @@ function NextEventSpotlight({
             {event.eventTitle}
           </h2>
           <div className="mt-2 flex flex-wrap gap-[18px] text-[13px] text-ink-600">
-            {!event.eventAllDay && (
-              <span className="inline-flex items-center gap-1.5">
-                <MdOutlineSchedule className="text-ink-400 text-sm" />
-                <span className="tabular-nums">
-                  <EventLocalDate date={event.eventStartDateTime} part="time" />
-                  {event.eventEndDateTime ? (
-                    <>
-                      {' – '}
-                      <EventLocalDate
-                        date={event.eventEndDateTime}
-                        part="time"
-                      />
-                    </>
-                  ) : (
-                    ''
-                  )}
-                </span>
-              </span>
-            )}
+            <EventSchedule
+              startDateTime={event.eventStartDateTime}
+              endDateTime={event.eventEndDateTime}
+              allDay={event.eventAllDay}
+              className="gap-1.5"
+              iconClassName="text-ink-400 text-sm"
+            />
             {event.eventPlace && (
               <span className="inline-flex items-center gap-1.5">
                 <MdOutlinePlace className="text-ink-400 text-sm" />
@@ -449,22 +433,13 @@ function RegistrationCard({
           {event.eventTitle}
         </h3>
         <div className="mt-1.5 flex flex-wrap gap-[14px] text-xs text-ink-600">
-          {!event.eventAllDay && (
-            <span className="inline-flex items-center gap-1">
-              <MdOutlineSchedule className="text-ink-400" />
-              <span className="tabular-nums">
-                <EventLocalDate date={event.eventStartDateTime} part="time" />
-                {event.eventEndDateTime ? (
-                  <>
-                    {' – '}
-                    <EventLocalDate date={event.eventEndDateTime} part="time" />
-                  </>
-                ) : (
-                  ''
-                )}
-              </span>
-            </span>
-          )}
+          <EventSchedule
+            startDateTime={event.eventStartDateTime}
+            endDateTime={event.eventEndDateTime}
+            allDay={event.eventAllDay}
+            className="gap-1"
+            iconClassName="text-ink-400"
+          />
           {event.eventPlace && (
             <span className="inline-flex items-center gap-1">
               <MdOutlinePlace className="text-ink-400" />
