@@ -289,7 +289,7 @@ async function composeSubtitle(upcomingCount: number, pastCount: number) {
   return `${upcomingCount} ${upcomingTpl} · ${pastCount} ${pastTpl}`;
 }
 
-function NextEventSpotlight({
+async function NextEventSpotlight({
   event,
   detailHref,
 }: {
@@ -307,7 +307,7 @@ function NextEventSpotlight({
             'linear-gradient(135deg, hsl(var(--mint-500)) 0%, hsl(var(--mint-700)) 100%)',
         }}>
         <div className="absolute top-[14px] left-[14px] right-[14px] text-left text-[10px] font-bold uppercase tracking-[0.1em] text-white/85">
-          ★ Prochain RDV
+          ★ {await t('Next up')}
         </div>
         <div className="text-[11px] font-bold uppercase tracking-[0.08em] opacity-85">
           <EventLocalDate date={event.eventStartDateTime} part="month" />
@@ -337,7 +337,7 @@ function NextEventSpotlight({
           )}
           <div className="mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-mint-50 text-mint-700 text-[10.5px] font-bold">
-              <MdCheckCircle className="text-xs" /> Inscrit
+              <MdCheckCircle className="text-xs" /> {await t('Registered')}
             </span>
           </div>
           <h2 className="m-0 text-[22px] font-bold tracking-[-0.015em] text-ink-900 leading-snug">
@@ -377,7 +377,7 @@ function NextEventSpotlight({
   );
 }
 
-function RegistrationCard({
+async function RegistrationCard({
   event,
   detailHref,
   past,
@@ -421,11 +421,11 @@ function RegistrationCard({
           )}
           {past ? (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-ink-100 text-ink-600 text-[10.5px] font-bold">
-              Terminé
+              {await t('Past')}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-mint-50 text-mint-700 text-[10.5px] font-bold">
-              <MdCheckCircle className="text-[10px]" /> Confirmé
+              <MdCheckCircle className="text-[10px]" /> {await t('Confirmed')}
             </span>
           )}
         </div>
@@ -451,17 +451,8 @@ function RegistrationCard({
 
       <div className="hidden md:flex flex-col gap-1.5 items-stretch">
         <Button asChild variant="royal" size="sm" className="whitespace-nowrap">
-          <Link href={detailHref}>Détails</Link>
+          <Link href={detailHref}>{await t('Details')}</Link>
         </Button>
-        {past && (
-          <Button
-            variant="ink-outline"
-            size="sm"
-            className="whitespace-nowrap"
-            disabled>
-            Attestation
-          </Button>
-        )}
       </div>
     </article>
   );
