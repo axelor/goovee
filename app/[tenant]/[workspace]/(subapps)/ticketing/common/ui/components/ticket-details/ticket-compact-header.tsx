@@ -53,9 +53,11 @@ export function TicketCompactHeader(props: CompactHeaderProps) {
 
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400 mb-1">
-            {i18n.t('Ticket')} #{ticket?.id}
-          </p>
+          {visibleFields.has(FIELDS.ID) && (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400 mb-1">
+              {i18n.t('Ticket')} #{ticket?.id}
+            </p>
+          )}
           <h1 className="text-2xl font-bold text-ink-900 tracking-[-0.01em] leading-tight">
             {ticket.name}
           </h1>
