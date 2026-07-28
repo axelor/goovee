@@ -60,7 +60,7 @@ export const fetchQuotations = async ({
     },
   ]);
 
-  const quotations = await client.aOSOrder
+  const $quotations = await client.aOSOrder
     .find({
       where: whereClause,
       take: limit ? Number(limit) : undefined,
@@ -72,12 +72,37 @@ export const fetchQuotations = async ({
         deliveryState: true,
         createdOn: true,
         externalReference: true,
+        endOfValidityDate: true,
+        inTaxTotal: true,
+        currency: {
+          numberOfDecimals: true,
+          symbol: true,
+        },
       },
     })
     .catch(() => []);
 
+  const quotations = await Promise.all(
+    $quotations.map(async quotation => {
+      const {currency, inTaxTotal} = quotation;
+
+      /* Without a currency there is no scale or symbol to write the amount
+       * with, so the row is kept and the list leaves the total out. */
+      if (!currency) return {...quotation, displayInTaxTotal: null};
+
+      return {
+        ...quotation,
+        displayInTaxTotal: await formatNumber(String(inTaxTotal ?? 0), {
+          scale: Number(currency.numberOfDecimals) || DEFAULT_CURRENCY_SCALE,
+          currency: currency.symbol || DEFAULT_CURRENCY_SYMBOL,
+          type: 'DECIMAL',
+        }),
+      };
+    }),
+  );
+
   const pageInfo = getPageInfo({
-    count: quotations?.[0]?._count,
+    count: $quotations?.[0]?._count,
     page,
     limit,
   });
