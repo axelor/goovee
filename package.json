@@ -149,7 +149,6 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@ast-grep/napi": "^0.42.1",
     "@prettier/plugin-xml": "^3.4.2",
     "@serwist/cli": "^9.5.7",
     "@swc-node/register": "^1.11.1",
