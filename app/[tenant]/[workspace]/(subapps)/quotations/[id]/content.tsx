@@ -445,7 +445,8 @@ function ProductRow({line, tenant}: {line: Product; tenant: string}) {
           {line.productName}
         </p>
         <p className="text-xs text-ink-500 mt-0.5 tabular-nums">
-          {line.qty} {line.unit?.name || ''} · {line.priceDiscounted}
+          {line.qty} {line.unit?.name || ''}
+          {line.priceDiscounted && <> · {line.priceDiscounted}</>}
         </p>
       </div>
       <div className="text-right shrink-0">

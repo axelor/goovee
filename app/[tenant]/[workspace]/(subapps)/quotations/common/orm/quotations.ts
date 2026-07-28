@@ -82,19 +82,17 @@ export const fetchQuotations = async ({
     })
     .catch(() => []);
 
+  /* Written here rather than in the page so a quotation's total reads the same
+   * in the list as it does on its detail, down to the scale and the symbol. */
   const quotations = await Promise.all(
     $quotations.map(async quotation => {
       const {currency, inTaxTotal} = quotation;
 
-      /* Without a currency there is no scale or symbol to write the amount
-       * with, so the row is kept and the list leaves the total out. */
-      if (!currency) return {...quotation, displayInTaxTotal: null};
-
       return {
         ...quotation,
         displayInTaxTotal: await formatNumber(String(inTaxTotal ?? 0), {
-          scale: Number(currency.numberOfDecimals) || DEFAULT_CURRENCY_SCALE,
-          currency: currency.symbol || DEFAULT_CURRENCY_SYMBOL,
+          scale: currency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE,
+          currency: currency?.symbol || DEFAULT_CURRENCY_SYMBOL,
           type: 'DECIMAL',
         }),
       };
@@ -222,13 +220,17 @@ export async function findQuotation({
 
   const {currency, saleOrderLineList, exTaxTotal, inTaxTotal} = quotation;
 
-  const currencySymbol = currency!.symbol || DEFAULT_CURRENCY_SYMBOL;
-  const scale = Number(currency!.numberOfDecimals) || DEFAULT_CURRENCY_SCALE;
+  /* An order can be stored without a currency, and every amount column is
+   * nullable, so each one is read through a default — otherwise the page either
+   * throws on the missing currency or prints "null" where a total belongs.
+   * The scale takes ?? so a currency with no decimals keeps none. */
+  const currencySymbol = currency?.symbol || DEFAULT_CURRENCY_SYMBOL;
+  const scale = currency?.numberOfDecimals ?? DEFAULT_CURRENCY_SCALE;
 
   const totalDiscountAmount = (saleOrderLineList ?? []).reduce(
     (total, {exTaxTotal, discountAmount}) => {
-      const exTax = parseFloat(String(exTaxTotal));
-      const discountPercent = parseFloat(String(discountAmount));
+      const exTax = parseFloat(String(exTaxTotal ?? 0));
+      const discountPercent = parseFloat(String(discountAmount ?? 0));
       const discountValue = (exTax * discountPercent) / 100;
       return total + discountValue;
     },
@@ -236,7 +238,7 @@ export async function findQuotation({
   );
 
   const totalExTax = (saleOrderLineList ?? []).reduce((total, {exTaxTotal}) => {
-    return total + parseFloat(String(exTaxTotal));
+    return total + parseFloat(String(exTaxTotal ?? 0));
   }, 0);
 
   const totalDiscountPercent =
@@ -249,22 +251,23 @@ export async function findQuotation({
   for (const list of saleOrderLineList || []) {
     const line = {
       ...list,
-      qty: await formatNumber(String(list.qty), {scale, type: 'DECIMAL'}),
-      priceDiscounted: await formatNumber(String(list.priceDiscounted), {
+      qty: await formatNumber(String(list.qty ?? 0), {scale, type: 'DECIMAL'}),
+      /* Left null rather than defaulted: a zero total is a coherent statement,
+       * but a zero unit price next to a real line total is not. */
+      priceDiscounted: await formatNumber(
+        list.priceDiscounted == null ? null : String(list.priceDiscounted),
+        {scale, currency: currencySymbol, type: 'DECIMAL'},
+      ),
+      exTaxTotal: await formatNumber(String(list.exTaxTotal ?? 0), {
         scale,
         currency: currencySymbol,
         type: 'DECIMAL',
       }),
-      exTaxTotal: await formatNumber(String(list.exTaxTotal), {
-        scale,
-        currency: currencySymbol,
-        type: 'DECIMAL',
-      }),
-      discountAmount: await formatNumber(String(list.discountAmount), {
+      discountAmount: await formatNumber(String(list.discountAmount ?? 0), {
         scale,
         type: 'DECIMAL',
       }),
-      inTaxTotal: await formatNumber(String(list.inTaxTotal), {
+      inTaxTotal: await formatNumber(String(list.inTaxTotal ?? 0), {
         scale,
         currency: currencySymbol,
         type: 'DECIMAL',
@@ -272,7 +275,7 @@ export async function findQuotation({
       taxLineSet: await Promise.all(
         (list.taxLineSet ?? []).map(async taxLine => ({
           ...taxLine,
-          value: await formatNumber(String(taxLine.value), {
+          value: await formatNumber(String(taxLine.value ?? 0), {
             scale,
             type: 'DECIMAL',
           }),
@@ -284,12 +287,12 @@ export async function findQuotation({
 
   return {
     ...quotation,
-    displayExTaxTotal: await formatNumber(String(exTaxTotal), {
+    displayExTaxTotal: await formatNumber(String(exTaxTotal ?? 0), {
       scale,
       currency: currencySymbol,
       type: 'DECIMAL',
     }),
-    displayInTaxTotal: await formatNumber(String(inTaxTotal), {
+    displayInTaxTotal: await formatNumber(String(inTaxTotal ?? 0), {
       scale,
       currency: currencySymbol,
       type: 'DECIMAL',

@@ -34,7 +34,7 @@ export type Product = {
   qty: string | number;
   exTaxTotal: string;
   discountAmount: string | number;
-  priceDiscounted: string;
+  priceDiscounted: string | null;
   inTaxTotal: string;
   unit: {
     name: string;
