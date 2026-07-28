@@ -129,7 +129,7 @@ export function Sidebar({
                       {workspaceName}
                     </span>
                     <span className="text-[11px] text-white/55">
-                      {i18n.t('Portail clients')}
+                      {i18n.t('Client portal')}
                     </span>
                   </div>
                 </SelectValue>
@@ -154,7 +154,7 @@ export function Sidebar({
                   {workspaceName}
                 </span>
                 <span className="text-[11px] text-white/55">
-                  {i18n.t('Portail clients')}
+                  {i18n.t('Client portal')}
                 </span>
               </div>
             </Link>
