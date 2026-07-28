@@ -81,6 +81,8 @@ export async function Home({
     config.isHomepageDisplayHyperlinks &&
     (config.hyperlinkList?.length ?? 0) > 0;
 
+  const usefulLinksTitle = await t('Useful links');
+
   const welcomeTitle =
     config.homepageHeroTitle || (await t('Welcome to your client portal'));
   const welcomeSubtitle =
@@ -125,16 +127,8 @@ export async function Home({
           </Suspense>
         )}
 
-        {(hasContents || showHyperlinks) && (
-          <div
-            className={cn(
-              'grid grid-cols-1 gap-6 mt-11',
-              hasContents && showHyperlinks
-                ? 'lg:grid-cols-[1fr_1fr_1fr_240px]'
-                : hasContents
-                  ? 'lg:grid-cols-3'
-                  : '',
-            )}>
+        {hasContents && (
+          <div className="grid grid-cols-1 gap-6 mt-11 lg:grid-cols-3">
             {showEvents && (
               <Suspense fallback={<ContentCardSkeleton />}>
                 <EventsCard
@@ -165,15 +159,16 @@ export async function Home({
                 />
               </Suspense>
             )}
-            {showHyperlinks && (
-              <aside>
-                <h3 className="m-0 mb-3.5 text-lg font-bold tracking-[-0.015em] text-ink-900">
-                  {await t('Useful links')}
-                </h3>
-                <HyperlinkGrid config={config} workspaceURI={workspaceURI} />
-              </aside>
-            )}
           </div>
+        )}
+
+        {showHyperlinks && (
+          /* Named so the block stays a landmark: an unnamed section is not
+           * exposed as a region, and this row used to be an aside. */
+          <section className="mt-11" aria-label={usefulLinksTitle}>
+            <SectionHeader title={usefulLinksTitle} />
+            <HyperlinkGrid config={config} workspaceURI={workspaceURI} />
+          </section>
         )}
 
         <div className="lg:hidden h-20" />
