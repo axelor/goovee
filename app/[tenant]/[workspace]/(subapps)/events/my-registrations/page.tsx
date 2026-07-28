@@ -2,7 +2,13 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 import type {Cloned} from '@/types/util';
 import {Suspense} from 'react';
 import {Link} from '@/ui/components/link';
-import {MdArrowForward, MdCheckCircle, MdOutlinePlace} from 'react-icons/md';
+import {
+  MdArrowForward,
+  MdCheckCircle,
+  MdChevronLeft,
+  MdChevronRight,
+  MdOutlinePlace,
+} from 'react-icons/md';
 
 // ---- CORE IMPORTS ----//
 import {ensureAccess} from '@/lib/core/access/ensure-access';
@@ -15,23 +21,81 @@ import type {Client} from '@/goovee/.generated/client';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import {Button} from '@/ui/components';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {cn} from '@/utils/css';
 import {t} from '@/lib/core/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
-import {EVENT_TYPE} from '@/subapps/events/common/constants';
+import {EVENT_TYPE, LIMIT} from '@/subapps/events/common/constants';
 import {findEvents, type ListEvent} from '@/subapps/events/common/orm/event';
 import {EventLocalDate} from '@/subapps/events/common/ui/components/event-local-date';
 import {EventSchedule} from '@/subapps/events/common/ui/components/event-schedule';
 
-const FETCH_LIMIT = 200;
-
 type FilterKey = 'upcoming' | 'ongoing' | 'past';
+
+/* Each tab is a different slice of the same registrations, ordered so the
+ * nearest event leads: ascending for what is still to come, descending for what
+ * has passed. Without an explicit order findEvents falls back to descending,
+ * which puts the furthest-away event first. */
+const TAB_QUERY: Record<FilterKey, {eventType: string; order: string}> = {
+  upcoming: {eventType: EVENT_TYPE.UPCOMING, order: ORDER_BY.ASC},
+  ongoing: {eventType: EVENT_TYPE.ONGOING, order: ORDER_BY.ASC},
+  past: {eventType: EVENT_TYPE.PAST, order: ORDER_BY.DESC},
+};
+
+type Filters = {
+  page: number;
+  query: string;
+  categoryIds: string[];
+  /* The raw parameter, so links can carry the filter the user chose, alongside
+   * the parts findEvents actually filters on. */
+  date: string;
+  day?: number;
+  month?: number;
+  year?: number;
+};
+
+/* A page far beyond the data still reaches the database as an OFFSET, and a
+ * large enough one overflows a bigint there, so the accepted range is capped
+ * rather than merely required to be positive. */
+const MAX_PAGE = 10_000;
+
+function readFilters(searchParams: {
+  page?: string;
+  query?: string;
+  category?: string | string[];
+  date?: string;
+}): Filters {
+  const page = Math.trunc(Number(searchParams.page));
+  const date = searchParams.date ? new Date(searchParams.date) : undefined;
+  const hasDate = date != null && !Number.isNaN(date.getTime());
+
+  return {
+    page: Number.isSafeInteger(page) && page > 0 && page <= MAX_PAGE ? page : 1,
+    query: searchParams.query?.trim() || '',
+    /* Ids go straight into an id filter, so anything non-numeric would reach
+     * the database as a malformed bigint. */
+    categoryIds: searchParams.category
+      ? [searchParams.category].flat().filter(id => /^\d+$/.test(id))
+      : [],
+    date: hasDate ? searchParams.date! : '',
+    /* A date-only string parses as UTC midnight, so it has to be read back with
+     * UTC getters or a server behind UTC resolves it to the previous day. */
+    day: hasDate ? date.getUTCDate() : undefined,
+    month: hasDate ? date.getUTCMonth() + 1 : undefined,
+    year: hasDate ? date.getUTCFullYear() : undefined,
+  };
+}
 
 export default async function Page(context: {
   params: Promise<{tenant: string; workspace: string}>;
-  searchParams: Promise<{filter?: string}>;
+  searchParams: Promise<{
+    filter?: string;
+    page?: string;
+    query?: string;
+    category?: string | string[];
+    date?: string;
+  }>;
 }) {
   const params = await context.params;
   const searchParams = await context.searchParams;
@@ -79,10 +143,15 @@ export default async function Page(context: {
         ? 'ongoing'
         : 'upcoming';
 
+  const filters = readFilters(searchParams);
+
   return (
     <main className="bg-ink-25 w-full flex-1 min-h-0 flex flex-col">
-      <Suspense fallback={<MyRegistrationsSkeleton />}>
+      <Suspense
+        key={`${filter}-${filters.page}-${filters.query}-${filters.categoryIds.join()}-${filters.date}`}
+        fallback={<MyRegistrationsSkeleton />}>
         <MyRegistrations
+          filters={filters}
           workspace={workspace}
           user={user}
           client={client}
@@ -100,55 +169,92 @@ async function MyRegistrations({
   client,
   workspaceURI,
   filter,
+  filters,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   user?: User;
   client: Client;
   workspaceURI: string;
   filter: FilterKey;
+  filters: Filters;
 }) {
+  /* Only the visible tab needs its events. The other two need a total for their
+   * badge, and pageInfo.count is the count of the whole filtered set rather
+   * than of the rows returned, so a single row is enough to read it. */
+  const fetchTab = (tab: FilterKey) => {
+    const isActive = tab === filter;
+
+    return findEvents({
+      limit: isActive ? LIMIT : 1,
+      page: isActive ? filters.page : 1,
+      search: filters.query,
+      categoryids: filters.categoryIds,
+      day: filters.day,
+      month: filters.month,
+      year: filters.year,
+      eventType: TAB_QUERY[tab].eventType,
+      orderBy: {eventStartDateTime: TAB_QUERY[tab].order},
+      workspaceURL: workspace.url,
+      client,
+      user,
+      onlyRegisteredEvent: true,
+    }).then(clone);
+  };
+
   const [upcomingResult, ongoingResult, pastResult] = await Promise.all([
-    findEvents({
-      limit: FETCH_LIMIT,
-      page: 1,
-      categoryids: [],
-      eventType: EVENT_TYPE.UPCOMING,
-      workspaceURL: workspace.url,
-      client,
-      user,
-      onlyRegisteredEvent: true,
-    }).then(clone),
-    findEvents({
-      limit: FETCH_LIMIT,
-      page: 1,
-      categoryids: [],
-      eventType: EVENT_TYPE.ONGOING,
-      workspaceURL: workspace.url,
-      client,
-      user,
-      onlyRegisteredEvent: true,
-    }).then(clone),
-    findEvents({
-      limit: FETCH_LIMIT,
-      page: 1,
-      categoryids: [],
-      eventType: EVENT_TYPE.PAST,
-      workspaceURL: workspace.url,
-      client,
-      user,
-      onlyRegisteredEvent: true,
-    }).then(clone),
+    fetchTab('upcoming'),
+    fetchTab('ongoing'),
+    fetchTab('past'),
   ]);
 
-  const upcoming = upcomingResult?.events ?? [];
-  const ongoing = ongoingResult?.events ?? [];
-  const past = pastResult?.events ?? [];
-  const list =
-    filter === 'upcoming' ? upcoming : filter === 'ongoing' ? ongoing : past;
-  const next = upcoming[0];
+  const counts = {
+    upcoming: Number(upcomingResult?.pageInfo?.count ?? 0),
+    ongoing: Number(ongoingResult?.pageInfo?.count ?? 0),
+    past: Number(pastResult?.pageInfo?.count ?? 0),
+  };
+
+  const activeResult =
+    filter === 'upcoming'
+      ? upcomingResult
+      : filter === 'ongoing'
+        ? ongoingResult
+        : pastResult;
+
+  const list = activeResult?.events ?? [];
+  const pages = Number(activeResult?.pageInfo?.pages ?? 1);
+  /* The spotlight leads the first page only; deeper pages are a plain list. */
+  const next =
+    filter === 'upcoming' && filters.page === 1 ? list[0] : undefined;
 
   const baseHref = `${workspaceURI}/${SUBAPP_CODES.events}/my-registrations`;
   const allEventsHref = `${workspaceURI}/${SUBAPP_CODES.events}`;
+
+  /* Links keep whatever the user is filtering by. Switching tab returns to the
+   * first page, since a page number only means something within one tab. */
+  const hrefFor = ({tab, page}: {tab?: FilterKey; page?: number} = {}) => {
+    const target = tab ?? filter;
+    const params = new URLSearchParams();
+
+    if (target !== 'upcoming') params.set('filter', target);
+    if (filters.query) params.set('query', filters.query);
+    for (const categoryId of filters.categoryIds) {
+      params.append('category', categoryId);
+    }
+    if (filters.date) params.set('date', filters.date);
+    if (page && page > 1) params.set('page', String(page));
+
+    const search = params.toString();
+    return search ? `${baseHref}?${search}` : baseHref;
+  };
+
+  /* Past the last page the query returns no rows, and with no rows there is no
+   * total to read either — the counts would fall back to zero and the pager
+   * would disappear, stranding the user. Bookmarking page 2 and returning after
+   * the events have moved into the past is enough to land here, so send them
+   * back to the first page of the same filters instead. */
+  if (list.length === 0 && filters.page > 1) {
+    redirect(hrefFor({page: 1}));
+  }
 
   const [
     title,
@@ -165,7 +271,7 @@ async function MyRegistrations({
     seeAllLabel,
   ] = await Promise.all([
     t('My registrations'),
-    composeSubtitle(upcoming.length, past.length),
+    composeSubtitle(counts.upcoming, counts.past),
     t('Upcoming'),
     t('Ongoing'),
     t('History'),
@@ -189,7 +295,7 @@ async function MyRegistrations({
       </header>
 
       {/* Spotlight next event */}
-      {filter === 'upcoming' && next && (
+      {next && (
         <NextEventSpotlight
           event={next}
           detailHref={`${workspaceURI}/${SUBAPP_CODES.events}/${next.slug}`}
@@ -200,24 +306,23 @@ async function MyRegistrations({
       <div
         className={cn(
           'inline-flex gap-1 p-1 bg-white border border-ink-100 rounded-[10px]',
-          filter === 'upcoming' && next ? 'mt-9 mb-[18px]' : 'mt-5 mb-[18px]',
+          next ? 'mt-9 mb-[18px]' : 'mt-5 mb-[18px]',
         )}>
         {[
           {
             key: 'upcoming' as const,
             label: upcomingTab,
-            count: upcoming.length,
+            count: counts.upcoming,
           },
           {
             key: 'ongoing' as const,
             label: ongoingTab,
-            count: ongoing.length,
+            count: counts.ongoing,
           },
-          {key: 'past' as const, label: pastTab, count: past.length},
+          {key: 'past' as const, label: pastTab, count: counts.past},
         ].map(tab => {
           const isActive = filter === tab.key;
-          const href =
-            tab.key === 'upcoming' ? baseHref : `${baseHref}?filter=${tab.key}`;
+          const href = hrefFor({tab: tab.key});
           return (
             <Link
               key={tab.key}
@@ -274,6 +379,67 @@ async function MyRegistrations({
             />
           ))}
         </div>
+      )}
+
+      {pages > 1 && (
+        <Pager
+          page={filters.page}
+          pages={pages}
+          hrefFor={targetPage => hrefFor({page: targetPage})}
+        />
+      )}
+    </div>
+  );
+}
+
+async function Pager({
+  page,
+  pages,
+  hrefFor,
+}: {
+  page: number;
+  pages: number;
+  hrefFor: (page: number) => string;
+}) {
+  const [previousLabel, nextLabel, positionLabel] = await Promise.all([
+    t('Previous'),
+    t('Next'),
+    t('Page {0} of {1}', String(page), String(pages)),
+  ]);
+
+  const stepClassName =
+    'inline-flex items-center gap-1 h-9 px-3 rounded-md border border-ink-150 bg-white text-sm font-semibold text-ink-700 transition-colors';
+
+  return (
+    <div className="mt-8 flex items-center justify-center gap-2">
+      {page > 1 ? (
+        <Link
+          href={hrefFor(page - 1)}
+          className={cn(stepClassName, 'hover:bg-ink-25')}>
+          <MdChevronLeft className="text-base" />
+          {previousLabel}
+        </Link>
+      ) : (
+        <span aria-disabled className={cn(stepClassName, 'opacity-40')}>
+          <MdChevronLeft className="text-base" />
+          {previousLabel}
+        </span>
+      )}
+      <span className="px-2 text-[13px] text-ink-600 tabular-nums">
+        {positionLabel}
+      </span>
+      {page < pages ? (
+        <Link
+          href={hrefFor(page + 1)}
+          className={cn(stepClassName, 'hover:bg-ink-25')}>
+          {nextLabel}
+          <MdChevronRight className="text-base" />
+        </Link>
+      ) : (
+        <span aria-disabled className={cn(stepClassName, 'opacity-40')}>
+          {nextLabel}
+          <MdChevronRight className="text-base" />
+        </span>
       )}
     </div>
   );
