@@ -9,6 +9,8 @@ import {
   Button,
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogTitle,
   Input,
   Label,
   Select,
@@ -80,7 +82,7 @@ export function InviteMemberModal({
     isEdit ? (member?.emailAddress?.address ?? '') : '',
   );
   const [emailInput, setEmailInput] = useState<string>('');
-  const [role, setRole] = useState<Role>(
+  const [role, setRole] = useState<Role.user | Role.admin>(
     isEdit && member?.contactWorkspaceConfig?.isAdmin ? Role.admin : Role.user,
   );
   const [perms, setPerms] = useState<Record<string, Perm>>(() =>
@@ -237,12 +239,14 @@ export function InviteMemberModal({
             <MdPersonOutline className="size-5" />
           </span>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-extrabold text-ink-900 tracking-[-0.01em] mb-0">
+            {/* Radix wires the dialog's accessible name and description from
+                these, so a plain heading here leaves the modal unnamed. */}
+            <DialogTitle className="text-lg font-extrabold text-ink-900 tracking-[-0.01em] mb-0">
               {title}
-            </h3>
-            <p className="text-[12.5px] text-ink-500 mb-0">
+            </DialogTitle>
+            <DialogDescription className="text-[12.5px] text-ink-500 mb-0">
               {i18n.t('Set access application by application')}
-            </p>
+            </DialogDescription>
           </div>
           <button
             type="button"
@@ -268,7 +272,7 @@ export function InviteMemberModal({
             <Field label={i18n.t('Role')}>
               <Select
                 value={role}
-                onValueChange={v => setRole(v as Role)}
+                onValueChange={v => setRole(v as Role.user | Role.admin)}
                 disabled={isEdit}>
                 <SelectTrigger>
                   <SelectValue />

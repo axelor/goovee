@@ -6,7 +6,13 @@ import {MdAdd, MdOutlineEdit, MdDeleteOutline} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import {Button, Dialog, DialogContent} from '@/ui/components';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/ui/components';
 import {useToast} from '@/ui/hooks';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';
@@ -291,12 +297,14 @@ export default function Content({
           <DialogContent className="max-w-[420px]">
             <div className="flex flex-col gap-4 p-1">
               <div>
-                <h3 className="text-base font-bold text-ink-900">
+                {/* Radix wires the dialog's accessible name and description
+                    from these, so a plain heading leaves it unnamed. */}
+                <DialogTitle className="text-base font-bold text-ink-900">
                   {confirm.kind === 'member'
                     ? i18n.t('Remove member')
                     : i18n.t('Revoke invitation')}
-                </h3>
-                <p className="mt-1.5 text-[13.5px] text-ink-600">
+                </DialogTitle>
+                <DialogDescription className="mt-1.5 text-[13.5px] text-ink-600">
                   {confirm.kind === 'member'
                     ? i18n.t(
                         'Remove {0} from this workspace? They will lose access immediately.',
@@ -306,7 +314,7 @@ export default function Content({
                         'Revoke the invitation sent to {0}?',
                         confirm.label,
                       )}
-                </p>
+                </DialogDescription>
               </div>
               <div className="flex justify-end gap-2.5">
                 <Button
