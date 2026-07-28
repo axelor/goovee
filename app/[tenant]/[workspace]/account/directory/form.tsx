@@ -66,7 +66,7 @@ export default function Form({
   const {workspaceURL, tenant} = useWorkspace();
   const {upload} = useStagedUpload({tenant});
   const mainPartner = partner.mainPartner;
-  const companyDataSource: any = isAdminContact
+  const companyDataSource = isAdminContact
     ? mainPartner
     : isPartner
       ? partner
@@ -142,8 +142,8 @@ export default function Form({
   const websiteValue = companyDataSource?.webSite || '';
   const addressList = companyDataSource?.partnerAddressList || [];
   const defaultAddress =
-    addressList.find((a: any) => a.isInvoicingAddr && a.isDefaultAddr) ||
-    addressList.find((a: any) => a.isDefaultAddr) ||
+    addressList.find(entry => entry.isInvoicingAddr && entry.isDefaultAddr) ||
+    addressList.find(entry => entry.isDefaultAddr) ||
     addressList[0];
   const addressValue = (defaultAddress?.address?.formattedFullName || '')
     .split('\n')
