@@ -87,8 +87,11 @@ const AddressObjectSchema = z.object({
   streetName: z.string().min(1),
   zip: z.string().min(1),
   townName: z.string().min(1),
-  lastName: z.string().optional(),
-  companyName: z.string().optional(),
+  /* nullish, not optional: clearing one of these has to reach the database as
+   * null, because an undefined field is left at its stored value. */
+  firstName: z.string().nullish(),
+  lastName: z.string().nullish(),
+  companyName: z.string().nullish(),
   fullName: z.string().optional(),
   formattedFullName: z.string().optional(),
   city: z
@@ -104,7 +107,6 @@ const AddressObjectSchema = z.object({
   addressl4: z.string().optional(),
   addressl5: z.string().optional(),
   addressl6: z.string().optional(),
-  firstName: z.string().optional(),
   countrySubDivision: z.string().optional(),
   department: z.string().optional(),
 });

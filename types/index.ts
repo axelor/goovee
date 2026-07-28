@@ -156,9 +156,11 @@ export interface Address extends Model {
   townName?: string;
   zip?: string;
   streetName?: string;
-  firstName?: string;
-  lastName?: string;
-  companyName?: string;
+  /* null is how these reach the database when the user clears them; undefined
+   * would leave the stored value in place. */
+  firstName?: string | null;
+  lastName?: string | null;
+  companyName?: string | null;
   fullName?: string;
   formattedFullName?: string;
   countrySubDivision?: string;

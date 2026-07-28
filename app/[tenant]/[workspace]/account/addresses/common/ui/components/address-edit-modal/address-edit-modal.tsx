@@ -116,9 +116,11 @@ export function AddressEditModal({
       zip,
       townName,
       streetName,
-      companyName: contact || undefined,
-      firstName: firstName || undefined,
-      lastName: lastName || undefined,
+      /* null, not undefined: the ORM saves a partial entity, so an undefined
+       * field is left untouched and clearing one would keep the stored value. */
+      companyName: contact || null,
+      firstName: firstName || null,
+      lastName: lastName || null,
       department: label,
       fullName: computeFullName(),
       formattedFullName: formattedFullName(),
