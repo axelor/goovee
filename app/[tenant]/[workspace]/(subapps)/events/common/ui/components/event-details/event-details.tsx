@@ -85,10 +85,22 @@ export function EventDetails({
   const allowGuests =
     allowGuestEventRegistration && !isLoginNeededForRegistration(eventDetails);
 
+  const registrationEnded = hasRegistrationEnded(eventDetails);
+
   const isRegistrationAllow =
-    eventAllowRegistration &&
-    (user || allowGuests) &&
-    !hasRegistrationEnded(eventDetails);
+    eventAllowRegistration && (user || allowGuests) && !registrationEnded;
+
+  /* Registration can be unavailable for three independent reasons, and they
+   * need different messages: an event that takes no registrations at all, a
+   * deadline that has passed, and an open registration that requires a login.
+   * Testing only the deadline tells a signed-in user to sign in. The disabled
+   * case reuses the wording validateRegistration() returns for the same flag
+   * in common/actions/validation.ts. */
+  const registrationNotice = !eventAllowRegistration
+    ? i18n.t('Registration not started for this event')
+    : registrationEnded
+      ? i18n.t('Registration is closed')
+      : i18n.t('Sign in to register');
 
   const category = eventDetails.eventCategorySet?.[0];
   const days = daysUntil(eventDetails.eventStartDateTime);
@@ -338,9 +350,7 @@ export function EventDetails({
                   </Link>
                 ) : (
                   <div className="rounded-xl border border-ink-100 bg-ink-25 px-4 py-3 text-[13px] text-ink-600 text-center">
-                    {hasRegistrationEnded(eventDetails)
-                      ? i18n.t('Registration is closed')
-                      : i18n.t('Sign in to register')}
+                    {registrationNotice}
                   </div>
                 )}
               </div>
