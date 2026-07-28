@@ -30,6 +30,14 @@ import {
 type Country = {id: string; name: string; version?: number};
 type Kind = 'invoicing' | 'shipping';
 
+/* Reported back on a create so the caller can act on the new address, which
+ * of the two uses it was saved for included — that is decided in this form. */
+export type SavedAddress = {
+  id: string;
+  isInvoicingAddr: boolean;
+  isDeliveryAddr: boolean;
+};
+
 const CountrySchema = z.object({
   id: z.string().min(1),
   name: z.string(),
@@ -47,7 +55,7 @@ export function AddressEditModal({
   open: boolean;
   kind: Kind;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (created: SavedAddress | null) => void;
   address?: PartnerAddress | null;
   countries?: Country[];
 }) {
@@ -196,7 +204,18 @@ export function AddressEditModal({
         variant: 'success',
         title: i18n.t('Address information saved successfully!'),
       });
-      onSaved();
+      /* Only a create is reported back: on an edit the caller already holds the
+       * record, and re-claiming it would move a selection the user did not
+       * touch. */
+      const created =
+        !isEdit && 'data' in result && result.data
+          ? {
+              id: String(result.data.id),
+              isInvoicingAddr: values.invoicing,
+              isDeliveryAddr: values.shipping,
+            }
+          : null;
+      onSaved(created);
       onClose();
     } catch (error) {
       toast({

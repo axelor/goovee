@@ -1,1 +1,1 @@
-export {AddressEditModal} from './address-edit-modal';
+export {AddressEditModal, type SavedAddress} from './address-edit-modal';

@@ -27,7 +27,10 @@ import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
-import {AddressEditModal} from '@/app/[tenant]/[workspace]/account/addresses/common/ui/components';
+import {
+  AddressEditModal,
+  type SavedAddress,
+} from '@/app/[tenant]/[workspace]/account/addresses/common/ui/components';
 import {
   confirmAddresses,
   deleteAddress,
@@ -144,6 +147,29 @@ function Content({
       updateAddress({addressType: type, address: partnerAddress?.id});
     }
     setSelectedAddresses(prev => ({...prev, [type]: partnerAddress.address}));
+  };
+
+  const handleSaved = (created: SavedAddress | null) => {
+    /* A new address becomes the checkout selection by reaching the cart, the
+     * same way picking an existing card does. It is claimed for the section it
+     * was created from when it can be used there, and for the other one
+     * otherwise — an address restricted to a single use is not listed in the
+     * other section at all. */
+    if (fromCheckout && created) {
+      const claimForDelivery =
+        addressModal?.kind === 'shipping'
+          ? created.isDeliveryAddr
+          : !created.isInvoicingAddr;
+
+      updateAddress({
+        addressType: claimForDelivery
+          ? ADDRESS_TYPE.delivery
+          : ADDRESS_TYPE.invoicing,
+        address: created.id,
+      });
+    }
+
+    router.refresh();
   };
 
   const handleQuotationConfirm = () => {
@@ -295,10 +321,7 @@ function Content({
           address={addressModal.address ?? null}
           countries={countries}
           onClose={() => setAddressModal(null)}
-          onSaved={() => {
-            setAddressModal(null);
-            router.refresh();
-          }}
+          onSaved={handleSaved}
         />
       )}
 
