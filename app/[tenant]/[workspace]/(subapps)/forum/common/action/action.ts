@@ -32,6 +32,7 @@ import {withBasePath} from '@/lib/core/path/base-path';
 
 //----LOCAL IMPORTS -----//
 import {
+  findCommentCounts,
   findGroupById,
   findGroups,
   findGroupsByMembers,
@@ -686,7 +687,7 @@ export async function fetchPosts(input: FetchPostsInput) {
   const {user, workspace} = access;
   const {client} = access.tenant;
 
-  return await findPosts({
+  const {posts, pageInfo} = await findPosts({
     sort,
     limit,
     page,
@@ -697,6 +698,27 @@ export async function fetchPosts(input: FetchPostsInput) {
     groupIDs,
     memberGroupIDs,
   }).then(clone);
+
+  // The page enriches the first page with reply counts and reaction scores
+  // after findPosts; do the same here so infinite-scroll pages render
+  // identical cards (otherwise loaded posts show 0 replies / 0 votes).
+  const postIds = posts.map(p => p.id);
+  const [replyCounts, reactions] = await Promise.all([
+    findCommentCounts({postIds, client}),
+    getReactionSummaries({client, postIds, partnerId: user?.id}),
+  ]);
+
+  const scoreByPost: Record<string, number> = {};
+  for (const [id, summary] of Object.entries(reactions.post)) {
+    scoreByPost[id] = summary.score;
+  }
+
+  const postsWithCounts = posts.map(p => ({
+    ...p,
+    replyCount: replyCounts[String(p.id)] ?? 0,
+  }));
+
+  return {posts: postsWithCounts, scoreByPost, pageInfo};
 }
 
 export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {

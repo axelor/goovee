@@ -90,7 +90,7 @@ export default async function Page(props: {
 
   const groupMeta = await findGroupMeta({groupId, client});
 
-  const {posts = []} = await findPostsByGroupId({
+  const {posts = [], pageInfo} = await findPostsByGroupId({
     id: groupId,
     workspaceID: workspace.id,
     sort: searchParams?.sort,
@@ -124,6 +124,8 @@ export default async function Page(props: {
       group={{id: group.id, name: group.name}}
       groupMeta={groupMeta}
       posts={postsWithCounts}
+      pageInfo={pageInfo}
+      memberGroupIDs={memberGroupIDs}
       scoreByPost={scoreByPost}
       isMember={Boolean(memberRecord)}
       memberRecordId={memberRecord?.id}

@@ -140,6 +140,9 @@ export default async function Page(props: {
         <div className="min-w-0">
           <ForumFeed
             posts={postsWithCounts}
+            pageInfo={pageInfo}
+            groupIDs={groupIDs}
+            memberGroupIDs={memberGroupIDs}
             groups={memberGroups.map(g => g.forumGroup)}
             canPost={Boolean($user?.id)}
           />

@@ -14,11 +14,13 @@ import {SUBAPP_CODES} from '@/constants';
 import {Search} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useSearchParams} from '@/ui/hooks';
+import {PageInfo} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {UploadPost} from '../upload-post';
 import {SearchItem} from '../search-item';
 import {findSearchPosts} from '@/subapps/forum/common/action/action';
+import {useInfinitePosts} from '@/subapps/forum/common/ui/hooks/use-infinite-posts';
 
 type Post = any;
 
@@ -35,11 +37,17 @@ function stripHtml(html?: string) {
 }
 
 export function ForumFeed({
-  posts = [],
+  posts: initialPosts = [],
+  pageInfo,
+  groupIDs = [],
+  memberGroupIDs = [],
   groups = [],
   canPost = false,
 }: {
   posts?: Post[];
+  pageInfo?: PageInfo;
+  groupIDs?: string[];
+  memberGroupIDs?: string[];
   groups?: any[];
   canPost?: boolean;
 }) {
@@ -49,6 +57,13 @@ export function ForumFeed({
   const activeSort = searchParams.get('sort') || 'new';
   const activeSearch = searchParams.get('search') ?? '';
   const [composerOpen, setComposerOpen] = useState(false);
+
+  const {posts, sentinelRef, hasMore} = useInfinitePosts({
+    initialPosts,
+    pageInfo,
+    groupIDs,
+    memberGroupIDs,
+  });
 
   const postBase = `${workspaceURI}/${SUBAPP_CODES.forum}/post`;
 
@@ -201,6 +216,16 @@ export function ForumFeed({
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {/* Infinite scroll sentinel — loads the next page as it scrolls in */}
+      {hasMore && (
+        <div
+          ref={sentinelRef}
+          className="flex items-center justify-center py-6">
+          <span className="size-6 rounded-full border-2 border-ink-200 border-t-royal animate-spin" />
+          <span className="sr-only">{i18n.t('Loading more discussions…')}</span>
         </div>
       )}
 

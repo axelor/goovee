@@ -18,10 +18,12 @@ import {getPartnerImageURL} from '@/utils/files';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useSearchParams, useToast} from '@/ui/hooks';
+import {PageInfo} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {UploadPost} from '../upload-post';
 import {exitGroup, joinGroup} from '@/subapps/forum/common/action/action';
+import {useInfinitePosts} from '@/subapps/forum/common/ui/hooks/use-infinite-posts';
 
 type AnyRec = any;
 
@@ -62,8 +64,10 @@ function stripHtml(html?: string) {
 export function ForumGroup({
   group,
   groupMeta = {memberCount: 0, postCount: 0},
-  posts = [],
-  scoreByPost = {},
+  posts: initialPosts = [],
+  pageInfo,
+  memberGroupIDs = [],
+  scoreByPost: initialScoreByPost = {},
   isMember = false,
   memberRecordId,
   userId,
@@ -74,6 +78,8 @@ export function ForumGroup({
   group: {id: string; name?: string | null};
   groupMeta?: {memberCount: number; postCount: number};
   posts?: AnyRec[];
+  pageInfo?: PageInfo;
+  memberGroupIDs?: string[];
   scoreByPost?: Record<string, number>;
   isMember?: boolean;
   memberRecordId?: string | null;
@@ -91,6 +97,14 @@ export function ForumGroup({
   const [joined, setJoined] = useState(isMember);
   const [pending, setPending] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
+
+  const {posts, scoreByPost, sentinelRef, hasMore} = useInfinitePosts({
+    initialPosts,
+    pageInfo,
+    initialScoreByPost,
+    groupIDs: [group.id],
+    memberGroupIDs,
+  });
 
   const activeSort = searchParams.get('sort') || 'new';
   const postBase = `${workspaceURI}/${SUBAPP_CODES.forum}/post`;
@@ -311,6 +325,18 @@ export function ForumGroup({
               <MdAdd className="size-4" />
               {i18n.t('New discussion')}
             </button>
+          </div>
+        )}
+
+        {/* Infinite scroll sentinel — loads the next page as it scrolls in */}
+        {hasMore && (
+          <div
+            ref={sentinelRef}
+            className="flex items-center justify-center py-6">
+            <span className="size-6 rounded-full border-2 border-ink-200 border-t-royal animate-spin" />
+            <span className="sr-only">
+              {i18n.t('Loading more discussions…')}
+            </span>
           </div>
         )}
       </div>
