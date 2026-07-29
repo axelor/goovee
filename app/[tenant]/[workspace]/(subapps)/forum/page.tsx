@@ -13,6 +13,7 @@ import {User} from '@/types';
 // ---- LOCAL IMPORTS ---- //
 import {GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
 import {
+  countPosts,
   findCommentCounts,
   findGroups,
   findGroupsByMembers,
@@ -79,6 +80,14 @@ export default async function Page(props: {
 
   const groupIDs = groups.map(group => group.id);
 
+  // Feed group filter: `groups` (repeated query param) narrows the feed to the
+  // visible groups it names; empty means all.
+  const requestedGroups = new Set(
+    ([] as string[]).concat(searchParams?.groups ?? []),
+  );
+  const selectedGroupIDs = groupIDs.filter(id => requestedGroups.has(id));
+  const feedGroupIDs = selectedGroupIDs.length ? selectedGroupIDs : groupIDs;
+
   const memberGroups = (
     userId
       ? await findGroupsByMembers({
@@ -106,7 +115,7 @@ export default async function Page(props: {
     search: searchParams?.search,
     limit: searchParams?.limit ? Number(searchParams.limit) : DEFAULT_LIMIT,
     workspaceID: workspace?.id!,
-    groupIDs,
+    groupIDs: feedGroupIDs,
     client,
     user,
     memberGroupIDs,
@@ -128,8 +137,16 @@ export default async function Page(props: {
     limit: 3,
   }).then(clone);
 
+  // Community total stays a true total, independent of the feed group filter.
+  const totalDiscussions = await countPosts({
+    workspaceID: workspace?.id!,
+    groupIDs,
+    client,
+    user,
+  });
+
   const stats = {
-    discussions: Number(pageInfo?.count ?? posts.length),
+    discussions: totalDiscussions,
     groups: groups.length,
     myGroups: memberGroups.length,
   };
@@ -141,7 +158,7 @@ export default async function Page(props: {
           <ForumFeed
             posts={postsWithCounts}
             pageInfo={pageInfo}
-            groupIDs={groupIDs}
+            groupIDs={feedGroupIDs}
             memberGroupIDs={memberGroupIDs}
             groups={memberGroups.map(g => g.forumGroup)}
             canPost={Boolean($user?.id)}

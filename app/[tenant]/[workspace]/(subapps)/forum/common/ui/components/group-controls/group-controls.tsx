@@ -1,15 +1,21 @@
 'use client';
-import {useOptimistic, useRef, useTransition} from 'react';
+import {
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
 import {Link} from '@/ui/components/link';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {User} from '@/types';
-import {Skeleton} from '@/ui/components';
+import {Checkbox, Skeleton} from '@/ui/components';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {useToast} from '@/ui/hooks';
+import {useSearchParams, useToast} from '@/ui/hooks';
 
 // ---- LOCAL IMPORTS ---- //
 import {Group, MemberGroup} from '@/subapps/forum/common/types/forum';
@@ -43,6 +49,8 @@ function GroupRow({
   href,
   bold = false,
   isMember,
+  checked = false,
+  onToggleFilter,
   onJoin,
   onLeave,
 }: {
@@ -50,11 +58,19 @@ function GroupRow({
   href: string;
   bold?: boolean;
   isMember: boolean;
+  checked?: boolean;
+  onToggleFilter?: () => void;
   onJoin?: () => void;
   onLeave?: () => void;
 }) {
   return (
     <div className="flex items-center gap-2.5 py-2">
+      <Checkbox
+        checked={checked}
+        onCheckedChange={() => onToggleFilter?.()}
+        aria-label={i18n.t('Filter the feed by {0}', name || '')}
+        className="shrink-0"
+      />
       <Link
         href={href}
         className="group/row flex items-center gap-2.5 flex-1 min-w-0">
@@ -111,7 +127,38 @@ export function GroupControls({
   const isLoggedIn = !!user?.id;
   const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
+  const {searchParams, update} = useSearchParams();
   const [, startTransition] = useTransition();
+
+  // Feed group filter, written to the `groups` query param. The ref mirrors the
+  // selection synchronously so fast clicks accumulate (the URL lags behind the
+  // navigation); the effect resyncs from the URL when it actually changes.
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    () => new Set(searchParams.getAll('groups')),
+  );
+  const selectedRef = useRef(selectedIds);
+
+  useEffect(() => {
+    const fromUrl = new Set(searchParams.getAll('groups'));
+    selectedRef.current = fromUrl;
+    setSelectedIds(fromUrl);
+  }, [searchParams]);
+
+  const toggleFilter = (groupId: string) => {
+    if (!groupId) return;
+    const next = new Set(selectedRef.current);
+    if (next.has(groupId)) next.delete(groupId);
+    else next.add(groupId);
+    selectedRef.current = next;
+    setSelectedIds(next);
+    update([{key: 'groups', value: [...next]}], {scroll: false});
+  };
+  const clearFilter = () => {
+    const empty = new Set<string>();
+    selectedRef.current = empty;
+    setSelectedIds(empty);
+    update([{key: 'groups', value: []}], {scroll: false});
+  };
 
   // Ref-based guard prevents double-clicks without any re-render that
   // could interfere with the RSC transition.
@@ -212,9 +259,19 @@ export function GroupControls({
 
   return (
     <div className="bg-white border border-ink-100 rounded-[14px] p-4">
-      <h3 className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-ink-500 mb-3">
-        {i18n.t('My groups')}
-      </h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-ink-500 mb-0">
+          {i18n.t('My groups')}
+        </h3>
+        {selectedIds.size > 0 && (
+          <button
+            type="button"
+            onClick={clearFilter}
+            className="text-[11px] font-bold text-royal hover:text-royal-dark transition-colors">
+            {i18n.t('Clear filter')}
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col">
         {isLoggedIn &&
@@ -225,6 +282,8 @@ export function GroupControls({
               href={groupHref(g.forumGroup?.id)}
               bold={i === 0}
               isMember
+              checked={selectedIds.has(String(g.forumGroup?.id))}
+              onToggleFilter={() => toggleFilter(String(g.forumGroup?.id))}
               onLeave={() => handleExit(g)}
             />
           ))}
@@ -235,6 +294,8 @@ export function GroupControls({
             name={g.name}
             href={groupHref(g.id)}
             isMember={false}
+            checked={selectedIds.has(String(g.id))}
+            onToggleFilter={() => toggleFilter(String(g.id))}
             onJoin={() => handleJoin(g)}
           />
         ))}

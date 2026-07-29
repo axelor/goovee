@@ -289,6 +289,45 @@ export async function findPosts({
   return {posts, pageInfo};
 }
 
+/**
+ * Total post count across the given groups, mirroring findPosts' visibility
+ * scoping (workspace + private + archived). Used for the community
+ * "Discussions" stat, which must stay a true total independent of the feed's
+ * group filter.
+ */
+export async function countPosts({
+  workspaceID,
+  groupIDs = [],
+  client,
+  user,
+  archived = false,
+}: {
+  workspaceID: Workspace['id'];
+  groupIDs?: ID[];
+  client: Client;
+  user?: User;
+  archived?: boolean;
+}): Promise<number> {
+  if (!workspaceID) return 0;
+
+  const archivedFilter = getArchivedFilter({archived});
+
+  const count = await client.aOSPortalForumPost
+    .count({
+      where: {
+        AND: [archivedFilter],
+        forumGroup: {
+          workspace: {id: workspaceID},
+          ...(groupIDs.length ? {id: {in: groupIDs}} : {}),
+          AND: [filterPrivate({user}), archivedFilter],
+        },
+      },
+    })
+    .catch(() => 0);
+
+  return Number(count) || 0;
+}
+
 export async function findPostsByGroupId({
   id,
   workspaceID,
