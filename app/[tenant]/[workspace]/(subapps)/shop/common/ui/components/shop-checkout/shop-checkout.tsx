@@ -38,6 +38,7 @@ import {
   getCategoryGradient,
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
+import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 import {findProduct} from '@/subapps/shop/common/actions/cart';
 
 export interface ShopCheckoutLabels {
@@ -389,6 +390,12 @@ function SummaryRow({
         <div className="text-[11px] text-ink-500">
           {qtyPrefix} {qty}
         </div>
+        {displayPrices && (
+          <PriceWarning
+            errorMessage={item.computedProduct.errorMessage}
+            className="text-[10.5px]"
+          />
+        )}
       </div>
       {displayPrices && (
         <span className="text-[13px] font-bold text-ink-900 tabular-nums">

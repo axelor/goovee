@@ -19,6 +19,7 @@ import {
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
 import type {ShopCategory} from '@/subapps/shop/common/ui/components';
+import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 import type {ComputedProduct} from '@/types';
 
 export interface ShopProductDetailLabels {
@@ -318,6 +319,10 @@ export function ShopProductDetail({
                           {price.displaySecondary} {labels.ttcSuffix}
                         </div>
                       )}
+                      <PriceWarning
+                        errorMessage={computedProduct?.errorMessage}
+                        className="mt-1.5 text-[12.5px]"
+                      />
                     </>
                   )}
 
@@ -460,9 +465,15 @@ export function ShopProductDetail({
                           {i18n.tattr(rProduct.name)}
                         </div>
                         {displayPrices && !hidePriceAndPurchase && (
-                          <div className="text-sm font-extrabold text-ink-900 mt-1.5 tabular-nums">
-                            {r?.price?.displayPrimary ?? '—'}
-                          </div>
+                          <>
+                            <div className="text-sm font-extrabold text-ink-900 mt-1.5 tabular-nums">
+                              {r?.price?.displayPrimary ?? '—'}
+                            </div>
+                            <PriceWarning
+                              errorMessage={r?.errorMessage}
+                              className="mt-1 text-[10px]"
+                            />
+                          </>
                         )}
                       </div>
                     </Link>

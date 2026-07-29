@@ -27,6 +27,7 @@ import {
   getCategoryGradient,
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
+import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 
 // A cart item whose product has been resolved (kept after the filter below).
 type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
@@ -422,6 +423,12 @@ function CartLine({
             </span>
           )}
         </div>
+        {displayPrices && (
+          <PriceWarning
+            errorMessage={item.computedProduct.errorMessage}
+            className="mt-1.5 text-[11px]"
+          />
+        )}
       </div>
 
       <div className="flex flex-col items-end gap-2.5">

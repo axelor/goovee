@@ -17,6 +17,7 @@ import {
   getCategoryGradient,
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
+import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
 
 export interface ShopCategory {
   id: string | number;
@@ -133,10 +134,18 @@ export function ShopProductCard({
           <div className="text-[10.5px] text-ink-500 font-mono">{p.code}</div>
         )}
         <div className="mt-auto pt-2 border-t border-ink-100 flex items-center justify-between gap-2">
-          <div className="text-base font-extrabold text-ink-900 tabular-nums">
-            {displayPrices && !hidePriceAndPurchase
-              ? (price?.displayPrimary ?? '—')
-              : null}
+          <div>
+            <div className="text-base font-extrabold text-ink-900 tabular-nums">
+              {displayPrices && !hidePriceAndPurchase
+                ? (price?.displayPrimary ?? '—')
+                : null}
+            </div>
+            {displayPrices && !hidePriceAndPurchase && (
+              <PriceWarning
+                errorMessage={product?.errorMessage}
+                className="mt-0.5 text-[10px]"
+              />
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             <span

@@ -23,6 +23,7 @@ export {
   CheckoutSkeleton,
 } from './skeleton';
 export {OrderAlert} from './order-alert';
+export {PriceWarning} from './price-warning';
 export {ShopProductCard} from './shop-product-card';
 export type {ShopCategory} from './shop-product-card';
 export {ShopCatalog} from './shop-catalog';
