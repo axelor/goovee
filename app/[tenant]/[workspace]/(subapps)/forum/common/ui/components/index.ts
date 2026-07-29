@@ -16,5 +16,6 @@ export {NotificationHeader} from './notification-header';
 export {GroupControls, GroupControlsSkeleton} from './group-controls';
 export {ForumFeed} from './forum-feed';
 export {ForumSidebar} from './forum-sidebar';
+export {ForumAside} from './forum-aside';
 export {ForumDetail} from './forum-detail';
 export {ForumGroup} from './forum-group';

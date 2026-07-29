@@ -21,11 +21,7 @@ import {
   findRecentlyActivePosts,
   findUser,
 } from '@/subapps/forum/common/orm/forum';
-import {
-  ForumFeed,
-  ForumSidebar,
-  GroupControls,
-} from '@/subapps/forum/common/ui/components';
+import {ForumFeed, ForumAside} from '@/subapps/forum/common/ui/components';
 import {Group, MemberGroup} from '@/subapps/forum/common/types/forum';
 
 export default async function Page(props: {
@@ -165,15 +161,12 @@ export default async function Page(props: {
           />
         </div>
         <aside className="lg:sticky lg:top-6 flex flex-col gap-5">
-          <ForumSidebar
+          <ForumAside
             stats={stats}
             trending={recent.map(r => ({id: r.id, title: r.title}))}
-          />
-          <GroupControls
             memberGroups={memberGroups}
             nonMemberGroups={nonMemberGroups}
             user={$user}
-            selectedGroup={null}
           />
         </aside>
       </div>

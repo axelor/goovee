@@ -1,12 +1,7 @@
 'use client';
-import {
-  useEffect,
-  useOptimistic,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import {useEffect, useOptimistic, useRef, useState, useTransition} from 'react';
 import {Link} from '@/ui/components/link';
+import {useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -117,17 +112,20 @@ export function GroupControls({
   memberGroups,
   nonMemberGroups,
   user,
+  onMemberCountChange,
 }: {
   memberGroups: MemberGroup[];
   nonMemberGroups: Group[];
   user: User | null;
   selectedGroup?: Group | null;
+  onMemberCountChange?: (count: number) => void;
 }) {
   const userId = user?.id as string;
   const isLoggedIn = !!user?.id;
   const {workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
   const {searchParams, update} = useSearchParams();
+  const router = useRouter();
   const [, startTransition] = useTransition();
 
   // Feed group filter, written to the `groups` query param. The ref mirrors the
@@ -225,6 +223,10 @@ export function GroupControls({
           variant: 'destructive',
           title: i18n.t(response?.message || 'An error occurred'),
         });
+      } else {
+        // Reconcile the server-rendered base so the optimistic list (and the
+        // "My groups" count mirrored from it) settle on the real value.
+        router.refresh();
       }
     });
   };
@@ -247,6 +249,8 @@ export function GroupControls({
           variant: 'destructive',
           title: i18n.t(response?.message || 'An error occurred'),
         });
+      } else {
+        router.refresh();
       }
     });
   };
@@ -254,6 +258,12 @@ export function GroupControls({
   const memberList = groups.member || [];
   const nonMemberList = groups.nonMember || [];
   const isEmpty = memberList.length === 0 && nonMemberList.length === 0;
+
+  // The "My groups" stat lives in a sibling (the sidebar); lift the member
+  // count up so it reflects this optimistic list, not a stale server value.
+  useEffect(() => {
+    onMemberCountChange?.(memberList.length);
+  }, [memberList.length, onMemberCountChange]);
   const groupHref = (groupId: any) =>
     `${workspaceURI}/${SUBAPP_CODES.forum}/group/${groupId}`;
 
