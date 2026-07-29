@@ -58,7 +58,11 @@ export function ShopProductCard({
   // not display a rupture badge even though the item is technically unavailable.
   const outOfStock =
     !!p?.outOfStockConfig?.outOfStock && !!p?.outOfStockConfig?.showMessage;
-  const canBuy = !!p?.outOfStockConfig?.canBuy && !hidePriceAndPurchase;
+  /* Only the product's own availability. A reader who may not buy at all is
+   * handled by leaving the control out, the way the product page does — a
+   * disabled button says nothing about why it cannot be used, whereas the badge
+   * beside it does explain being out of stock. */
+  const canBuy = !!p?.outOfStockConfig?.canBuy;
 
   const [adding, setAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
@@ -78,7 +82,7 @@ export function ShopProductCard({
     // product detail when the user hits the add-to-cart button.
     e.preventDefault();
     e.stopPropagation();
-    if (!canBuy || adding) return;
+    if (hidePriceAndPurchase || !canBuy || adding) return;
     setAdding(true);
     try {
       const existing = await getProductQuantity(p.id);
@@ -157,27 +161,29 @@ export function ShopProductCard({
               )}>
               {outOfStock ? outOfStockLabel : inStockLabel}
             </span>
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={!canBuy || adding}
-              aria-label={justAdded ? addedLabel : addToCartLabel}
-              title={justAdded ? addedLabel : addToCartLabel}
-              className={cn(
-                'inline-grid place-items-center w-9 h-9 rounded-lg transition-colors shrink-0',
-                !canBuy
-                  ? 'bg-ink-100 text-ink-400 cursor-not-allowed'
-                  : justAdded
-                    ? 'bg-mint-50 text-mint-700'
-                    : 'bg-royal text-white hover:bg-royal-dark',
-                canBuy && adding && 'opacity-70 cursor-not-allowed',
-              )}>
-              {justAdded ? (
-                <MdCheck className="text-base" />
-              ) : (
-                <MdAddShoppingCart className="text-base" />
-              )}
-            </button>
+            {!hidePriceAndPurchase && (
+              <button
+                type="button"
+                onClick={handleAdd}
+                disabled={!canBuy || adding}
+                aria-label={justAdded ? addedLabel : addToCartLabel}
+                title={justAdded ? addedLabel : addToCartLabel}
+                className={cn(
+                  'inline-grid place-items-center w-9 h-9 rounded-lg transition-colors shrink-0',
+                  !canBuy
+                    ? 'bg-ink-100 text-ink-400 cursor-not-allowed'
+                    : justAdded
+                      ? 'bg-mint-50 text-mint-700'
+                      : 'bg-royal text-white hover:bg-royal-dark',
+                  canBuy && adding && 'opacity-70 cursor-not-allowed',
+                )}>
+                {justAdded ? (
+                  <MdCheck className="text-base" />
+                ) : (
+                  <MdAddShoppingCart className="text-base" />
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
