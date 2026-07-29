@@ -49,8 +49,7 @@ export function useInfinitePosts<T extends {id: string | number}>({
   // Refresh when the query changes — in an effect (after the nav commits), not
   // in the click handler, which would race the push.
   const queryKey =
-    [...searchParams.getAll('groups')].sort().join(',') +
-    `|${sort}|${search}`;
+    [...searchParams.getAll('groups')].sort().join(',') + `|${sort}|${search}`;
   const firstQueryRef = useRef(true);
   useEffect(() => {
     if (firstQueryRef.current) {

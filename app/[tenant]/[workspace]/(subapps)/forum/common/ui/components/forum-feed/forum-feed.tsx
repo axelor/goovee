@@ -19,6 +19,7 @@ import {PageInfo} from '@/types';
 // ---- LOCAL IMPORTS ---- //
 import {UploadPost} from '../upload-post';
 import {SearchItem} from '../search-item';
+import {PostImages} from '../post-images';
 import {findSearchPosts} from '@/subapps/forum/common/action/action';
 import {useInfinitePosts} from '@/subapps/forum/common/ui/hooks/use-infinite-posts';
 
@@ -185,6 +186,7 @@ export function ForumFeed({
                     {stripHtml(post.content)}
                   </p>
                 )}
+                <PostImages post={post} workspaceURI={workspaceURI} />
                 <div className="mt-3 flex items-center gap-2.5 text-[12px] text-ink-500">
                   <span className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-br from-ink-300 to-ink-500 grid place-items-center text-white text-[10px] font-bold shrink-0">
                     {avatar ? (

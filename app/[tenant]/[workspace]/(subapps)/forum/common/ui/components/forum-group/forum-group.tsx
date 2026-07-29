@@ -22,6 +22,7 @@ import {PageInfo} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
 import {UploadPost} from '../upload-post';
+import {PostImages} from '../post-images';
 import {exitGroup, joinGroup} from '@/subapps/forum/common/action/action';
 import {useInfinitePosts} from '@/subapps/forum/common/ui/hooks/use-infinite-posts';
 
@@ -273,6 +274,7 @@ export function ForumGroup({
                         {stripHtml(post.content)}
                       </p>
                     )}
+                    <PostImages post={post} workspaceURI={workspaceURI} />
                     <div className="mt-3 flex items-center gap-3.5 text-[12px] text-ink-500 flex-wrap">
                       <span className="inline-flex items-center gap-1.5">
                         <span className="w-[22px] h-[22px] rounded-full overflow-hidden bg-gradient-to-br from-ink-300 to-ink-500 grid place-items-center text-white text-[9px] font-bold shrink-0">
