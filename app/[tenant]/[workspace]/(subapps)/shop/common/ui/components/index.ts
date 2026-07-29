@@ -24,6 +24,7 @@ export {
 } from './skeleton';
 export {OrderAlert} from './order-alert';
 export {PriceWarning} from './price-warning';
+export {ShopQuantityStepper} from './shop-quantity-stepper';
 export {ShopProductCard} from './shop-product-card';
 export type {ShopCategory} from './shop-product-card';
 export {ShopCatalog} from './shop-catalog';

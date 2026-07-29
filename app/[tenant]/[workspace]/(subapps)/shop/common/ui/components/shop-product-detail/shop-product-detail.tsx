@@ -20,6 +20,7 @@ import {
 } from '@/subapps/shop/common/utils/category-style';
 import type {ShopCategory} from '@/subapps/shop/common/ui/components';
 import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
+import {ShopQuantityStepper} from '@/subapps/shop/common/ui/components/shop-quantity-stepper';
 import type {ComputedProduct} from '@/types';
 
 export interface ShopProductDetailLabels {
@@ -327,27 +328,11 @@ export function ShopProductDetail({
                   )}
 
                   <div className="flex items-center gap-3 mt-[18px]">
-                    <div className="flex items-center border border-ink-150 rounded-[10px] overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => setQty(q => Math.max(1, q - 1))}
-                        aria-label="Decrement"
-                        className="w-9 h-[42px] grid place-items-center text-lg font-semibold text-ink-900 hover:bg-ink-25 transition-colors">
-                        −
-                      </button>
-                      <div
-                        className="w-12 text-center text-sm font-bold text-ink-900 tabular-nums"
-                        aria-label={labels.quantityLabel}>
-                        {qty}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setQty(q => q + 1)}
-                        aria-label="Increment"
-                        className="w-9 h-[42px] grid place-items-center text-lg font-semibold text-ink-900 hover:bg-ink-25 transition-colors">
-                        +
-                      </button>
-                    </div>
+                    <ShopQuantityStepper
+                      value={qty}
+                      onChange={setQty}
+                      label={labels.quantityLabel}
+                    />
                     <button
                       type="button"
                       onClick={handleAdd}

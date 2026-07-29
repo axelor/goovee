@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import Image from 'next/image';
 import {Link} from '@/ui/components/link';
 import {MdAdd, MdArrowBack, MdCheck, MdPlace} from 'react-icons/md';
@@ -84,6 +84,10 @@ export function ShopCheckout({
     [],
   );
   const [loading, setLoading] = useState(true);
+  /* Mirrors what has been resolved. The check below reads it instead of the
+   * state so this effect never depends on a value it also writes, which would
+   * make it re-trigger itself on every pass. */
+  const resolvedRef = useRef<ComputedProduct[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -92,21 +96,39 @@ export function ShopCheckout({
       const items = cart.items ?? [];
       if (!items.length) {
         if (!cancelled) {
+          resolvedRef.current = [];
           setComputedProducts([]);
           setLoading(false);
         }
         return;
       }
+      /* Picking an address writes to the cart, so without this the summary
+       * would re-price every line each time one is chosen. */
+      const alreadyResolved = new Set(
+        resolvedRef.current.map(computed => String(computed?.product?.id)),
+      );
+      if (
+        items.every((cartItem: CartItem) =>
+          alreadyResolved.has(String(cartItem.product)),
+        )
+      ) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
       try {
         const results = await Promise.all(
           items.map((i: CartItem) =>
             findProduct({id: String(i.product), workspaceURL}),
           ),
         );
-        if (!cancelled)
-          setComputedProducts(
-            results.filter((p): p is ComputedProduct => Boolean(p)),
+        if (!cancelled) {
+          const resolved = results.filter((p): p is ComputedProduct =>
+            Boolean(p),
           );
+          resolvedRef.current = resolved;
+          setComputedProducts(resolved);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

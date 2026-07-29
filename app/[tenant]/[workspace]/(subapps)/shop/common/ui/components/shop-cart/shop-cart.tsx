@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import Image from 'next/image';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
@@ -28,6 +28,7 @@ import {
   getCategoryHue,
 } from '@/subapps/shop/common/utils/category-style';
 import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
+import {ShopQuantityStepper} from '@/subapps/shop/common/ui/components/shop-quantity-stepper';
 
 // A cart item whose product has been resolved (kept after the filter below).
 type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
@@ -84,6 +85,10 @@ export function ShopCart({
     [],
   );
   const [loading, setLoading] = useState(true);
+  /* Mirrors what has been resolved. The check below reads it instead of the
+   * state so this effect never depends on a value it also writes, which would
+   * make it re-trigger itself on every pass. */
+  const resolvedRef = useRef<ComputedProduct[]>([]);
 
   // Resolve each cart item against the API to get the computed product.
   useEffect(() => {
@@ -93,11 +98,29 @@ export function ShopCart({
       const items = cart.items ?? [];
       if (!items.length) {
         if (!cancelled) {
+          resolvedRef.current = [];
           setComputedProducts([]);
           setLoading(false);
         }
         return;
       }
+      /* Which products are in the cart is the only thing that decides whether
+       * anything needs resolving. Changing a quantity leaves that set alone, so
+       * without this the cart would spend one request per line on every keypress
+       * in a quantity field — and each round of results can drop a line through
+       * the removal below. */
+      const alreadyResolved = new Set(
+        resolvedRef.current.map(computed => String(computed?.product?.id)),
+      );
+      if (
+        items.every((cartItem: CartItem) =>
+          alreadyResolved.has(String(cartItem.product)),
+        )
+      ) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
       try {
         const results = await Promise.all(
           items.map((i: CartItem) =>
@@ -108,6 +131,7 @@ export function ShopCart({
         const resolved = results.filter((p): p is ComputedProduct =>
           Boolean(p),
         );
+        resolvedRef.current = resolved;
         setComputedProducts(resolved);
 
         // Auto-remove cart items whose product no longer resolves (unavailable),
@@ -398,25 +422,14 @@ function CartLine({
           </div>
         )}
         <div className="flex items-center gap-3">
-          <div className="flex items-center border border-ink-150 rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => onQtyChange(Math.max(1, qty - 1))}
-              className="w-[30px] h-8 grid place-items-center text-base font-semibold text-ink-900 hover:bg-ink-25 transition-colors"
-              aria-label="Decrement">
-              −
-            </button>
-            <div className="w-9 text-center text-[13px] font-bold text-ink-900 tabular-nums">
-              {qty}
-            </div>
-            <button
-              type="button"
-              onClick={() => onQtyChange(qty + 1)}
-              className="w-[30px] h-8 grid place-items-center text-base font-semibold text-ink-900 hover:bg-ink-25 transition-colors"
-              aria-label="Increment">
-              +
-            </button>
-          </div>
+          {/* Named after the product: a cart of ten lines otherwise reads out
+              as ten fields all called "Quantity". */}
+          <ShopQuantityStepper
+            value={qty}
+            onChange={onQtyChange}
+            size="sm"
+            label={`${i18n.t('Quantity')} — ${i18n.tattr(product.name)}`}
+          />
           {displayPrices && (
             <span className="text-xs text-ink-500 tabular-nums">
               {price?.displayPrimary ?? '—'} {unitSuffix}
