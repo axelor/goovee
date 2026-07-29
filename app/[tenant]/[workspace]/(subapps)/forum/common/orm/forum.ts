@@ -605,7 +605,12 @@ export async function findGroupMeta({
       .count({where: {forumGroup: {id: groupId}}})
       .catch(() => 0),
     client.aOSPortalForumPost
-      .count({where: {forumGroup: {id: groupId}}})
+      .count({
+        where: {
+          forumGroup: {id: groupId},
+          ...getArchivedFilter({archived: false}),
+        },
+      })
       .catch(() => 0),
   ]);
 
