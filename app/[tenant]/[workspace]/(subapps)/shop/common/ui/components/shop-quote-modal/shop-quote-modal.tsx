@@ -3,9 +3,16 @@
 import {useEffect, useMemo, useState} from 'react';
 import Image from 'next/image';
 import {useRouter} from 'next/navigation';
-import {MdClose, MdDescription, MdExpandMore, MdPlace} from 'react-icons/md';
+import {
+  MdAdd,
+  MdClose,
+  MdDescription,
+  MdExpandMore,
+  MdPlace,
+} from 'react-icons/md';
 
-import {SUBAPP_CODES, ADDRESS_TYPE} from '@/constants';
+import {SUBAPP_CODES, SUBAPP_PAGE, ADDRESS_TYPE} from '@/constants';
+import {Link} from '@/ui/components/link';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {useToast} from '@/ui/hooks';
@@ -45,6 +52,7 @@ export interface ShopQuoteModalLabels {
   addressTitle: string;
   addressDefaultBadge: string;
   addressChooseAnother: string;
+  addressNewAction: string;
   addressNoneTitle: string;
   addressLoading: string;
   cancel: string;
@@ -139,6 +147,17 @@ export function ShopQuoteModal({
 
   const previewItems = computedItems.slice(0, ITEMS_PREVIEW_COUNT);
   const overflow = Math.max(0, computedItems.length - ITEMS_PREVIEW_COUNT);
+
+  /* Leaving for the addresses page closes this modal, so it comes back to the
+   * cart and the request is started again from there. `checkout=true` is what
+   * puts that page in picking mode and has it write the choice to the cart. */
+  const addressesHref = `${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?checkout=true&callbackURL=${encodeURIComponent(
+    `${workspaceURI}/${SUBAPP_CODES.shop}/cart`,
+  )}`;
+
+  const addressesReady = Boolean(
+    cart?.invoicingAddress && cart?.deliveryAddress,
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -246,8 +265,10 @@ export function ShopQuoteModal({
                   type={ADDRESS_TYPE.delivery}
                   defaultBadgeLabel={labels.addressDefaultBadge}
                   chooseAnotherLabel={labels.addressChooseAnother}
+                  newActionLabel={labels.addressNewAction}
                   noneTitle={labels.addressNoneTitle}
                   loadingLabel={labels.addressLoading}
+                  addressesHref={addressesHref}
                 />
               </div>
               <div>
@@ -258,8 +279,10 @@ export function ShopQuoteModal({
                   type={ADDRESS_TYPE.invoicing}
                   defaultBadgeLabel={labels.addressDefaultBadge}
                   chooseAnotherLabel={labels.addressChooseAnother}
+                  newActionLabel={labels.addressNewAction}
                   noneTitle={labels.addressNoneTitle}
                   loadingLabel={labels.addressLoading}
+                  addressesHref={addressesHref}
                 />
               </div>
             </section>
@@ -267,6 +290,14 @@ export function ShopQuoteModal({
 
           {/* Footer */}
           <footer className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-ink-100 bg-ink-25 shrink-0">
+            {/* Stated in the footer as well as on the button, because a
+                disabled control shows no tooltip on a touch screen and is not
+                announced with one either. */}
+            {!addressesReady && (
+              <p className="m-0 mr-auto text-[12px] font-semibold text-status-pending-fg">
+                {labels.addressMissing}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => onOpenChange(false)}
@@ -277,7 +308,10 @@ export function ShopQuoteModal({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={submitting}
+              /* Offering the action while an address is missing only earns the
+                 user a rejection; the way forward is the link above it. */
+              disabled={submitting || !addressesReady}
+              title={addressesReady ? undefined : labels.addressMissing}
               className={cn(
                 'inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-sm font-bold text-white',
                 'bg-royal hover:bg-royal-dark transition-colors',
@@ -365,14 +399,18 @@ function QuoteAddressPicker({
   type,
   defaultBadgeLabel,
   chooseAnotherLabel,
+  newActionLabel,
   noneTitle,
   loadingLabel,
+  addressesHref,
 }: {
   type: ADDRESS_TYPE;
   defaultBadgeLabel: string;
   chooseAnotherLabel: string;
+  newActionLabel: string;
   noneTitle: string;
   loadingLabel: string;
+  addressesHref: string;
 }) {
   const {cart, updateAddress} = useCart();
   const {workspaceURL} = useWorkspace();
@@ -403,9 +441,16 @@ function QuoteAddressPicker({
         const cartId =
           (isInvoicing ? cart?.invoicingAddress : cart?.deliveryAddress) ??
           null;
+        /* Every candidate is looked up in the list that is actually shown: a
+         * default address that this section cannot use would otherwise be
+         * written to the cart while the picker reports having none, which lets
+         * the request go out against an address the user never saw. */
+        const defaultAddress = def as PartnerAddress | null;
         const initial =
-          (cartId && all.find(a => String(a.id) === String(cartId))) ||
-          (def as PartnerAddress | null) ||
+          all.find(address => String(address.id) === String(cartId)) ||
+          all.find(
+            address => String(address.id) === String(defaultAddress?.id),
+          ) ||
           all[0] ||
           null;
         if (initial?.id) {
@@ -413,6 +458,12 @@ function QuoteAddressPicker({
           if (cartId !== initial.id) {
             updateAddress({addressType: type, address: initial.id});
           }
+        } else if (cartId) {
+          /* There is no address of this type any more — the one the cart still
+           * points at was deleted or is no longer used for it. Left in place it
+           * would keep the request submittable against an address this section
+           * reports as missing. */
+          updateAddress({addressType: type, address: null});
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -443,11 +494,17 @@ function QuoteAddressPicker({
 
   if (!current) {
     return (
-      <div className="rounded-xl bg-royal-pale/60 border border-royal-border px-4 py-3.5 text-[13px] text-ink-700">
+      <div className="rounded-xl bg-royal-pale/60 border border-royal-border px-4 py-3.5 text-[13px] text-ink-700 flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
           <MdPlace className="text-base text-royal shrink-0" />
           {noneTitle}
         </div>
+        <Link
+          href={addressesHref}
+          className="self-start inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-royal-dark border border-royal-border text-[12.5px] font-semibold hover:bg-royal-pale transition-colors">
+          <MdAdd className="text-base" />
+          {newActionLabel}
+        </Link>
       </div>
     );
   }
@@ -468,7 +525,7 @@ function QuoteAddressPicker({
             </span>
           ) : null}
         </div>
-        {addresses.length > 1 && (
+        {addresses.length > 1 ? (
           <button
             type="button"
             onClick={() => setPicking(p => !p)}
@@ -481,6 +538,15 @@ function QuoteAddressPicker({
               )}
             />
           </button>
+        ) : (
+          /* With a single address on file there is nothing to choose between,
+             so the way out is to go and add one. */
+          <Link
+            href={addressesHref}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-royal-dark text-[12px] font-bold hover:bg-white transition-colors shrink-0">
+            <MdAdd className="text-sm" />
+            {newActionLabel}
+          </Link>
         )}
       </div>
       {picking && addresses.length > 1 && (
@@ -514,6 +580,14 @@ function QuoteAddressPicker({
               </label>
             );
           })}
+          {/* The list is also where someone whose address is not in it needs a
+              way out, so the route to the addresses page ends it. */}
+          <Link
+            href={addressesHref}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-royal-dark text-[12.5px] font-bold hover:bg-ink-25 transition-colors">
+            <MdAdd className="text-base" />
+            {newActionLabel}
+          </Link>
         </div>
       )}
     </div>

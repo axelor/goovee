@@ -327,12 +327,23 @@ export function ShopCart({
                 <div className="bg-ink-25 border border-ink-100 rounded-xl p-3.5 flex items-center gap-2.5 text-[12.5px] text-ink-600">
                   <MdDescription className="text-base text-royal shrink-0" />
                   <span className="flex-1">{labels.quoteBannerTitle}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuoteModalOpen(true)}
-                    className="text-royal font-bold hover:text-royal-dark whitespace-nowrap">
-                    {labels.quoteBannerCta}
-                  </button>
+                  {authenticated ? (
+                    <button
+                      type="button"
+                      onClick={() => setQuoteModalOpen(true)}
+                      className="text-royal font-bold hover:text-royal-dark whitespace-nowrap">
+                      {labels.quoteBannerCta}
+                    </button>
+                  ) : (
+                    /* A quote request is refused for a guest, and the addresses
+                       it asks for live behind the account, so signing in comes
+                       first rather than a form that cannot be sent. */
+                    <Link
+                      href={loginHref}
+                      className="text-royal font-bold hover:text-royal-dark whitespace-nowrap">
+                      {labels.quoteBannerCta}
+                    </Link>
+                  )}
                 </div>
               )}
             </aside>
