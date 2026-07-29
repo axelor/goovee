@@ -38,6 +38,7 @@ import {useToast} from '@/ui/hooks/use-toast';
 
 // ---- LOCAL IMPORTS ---- //
 import {COMMENTS_PER_LOAD} from '@/subapps/forum/common/constants';
+import {AttachmentViewer} from '../attachment-viewer';
 import {
   fetchComments,
   createComment,
@@ -785,23 +786,13 @@ export function ForumDetail({
                 return (
                   <div className="mt-3 space-y-3">
                     {images.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {images.map((a: AnyRec) => (
-                          <a
-                            key={a.metaFile.id}
-                            href={attUrl(a.metaFile.id)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block overflow-hidden rounded-[10px] border border-ink-150">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={attUrl(a.metaFile.id)}
-                              alt={a.metaFile.fileName ?? ''}
-                              className="w-full h-32 object-cover"
-                            />
-                          </a>
-                        ))}
-                      </div>
+                      <AttachmentViewer
+                        images={images.map((a: AnyRec) => ({
+                          id: a.metaFile.id,
+                          url: attUrl(a.metaFile.id),
+                          name: a.metaFile.fileName,
+                        }))}
+                      />
                     )}
                     {files.length > 0 && (
                       <div className="flex flex-col gap-1.5">
