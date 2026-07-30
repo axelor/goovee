@@ -140,11 +140,13 @@ export async function AttachmentListWrapper({
 
 export async function RelatedNewsWrapper({
   workspace,
+  config,
   client,
   slug,
   navigatingPathFrom,
 }: {
   workspace: Workspace | Cloned<Workspace>;
+  config: NewsConfig | Cloned<NewsConfig>;
   client: Client;
   slug: string;
   navigatingPathFrom: string;
@@ -170,6 +172,7 @@ export async function RelatedNewsWrapper({
       items={relatedNewsSet}
       width="w-full"
       navigatingPathFrom={navigatingPathFrom}
+      config={config}
     />
   );
 }
@@ -177,12 +180,14 @@ export async function RelatedNewsWrapper({
 export async function RecommendedNewsWrapper({
   navigatingPathFrom,
   isRecommendationEnable,
+  config,
   workspaceURL,
   tenantId,
   categoryIds,
 }: {
   navigatingPathFrom: string;
   isRecommendationEnable: boolean;
+  config: NewsConfig | Cloned<NewsConfig>;
   workspaceURL: string;
   tenantId: string;
   categoryIds: string[];
@@ -208,6 +213,7 @@ export async function RecommendedNewsWrapper({
       items={newsResult}
       width="w-full"
       navigatingPathFrom={navigatingPathFrom}
+      config={config}
     />
   );
 }

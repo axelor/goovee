@@ -14,19 +14,25 @@ import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
+import type {Cloned} from '@/types/util';
 
 export const FeedList = ({
   title,
   items,
   width,
   navigatingPathFrom,
+  config,
 }: {
   title: string;
   items: NewsItem[];
   width?: string;
   navigatingPathFrom: string;
+  config: NewsConfig | Cloned<NewsConfig>;
 }) => {
   const {workspaceURI} = useWorkspace();
+  const {isShowPublicationDate} = config;
+
   return (
     <div
       className={`bg-white p-4 rounded-xl border border-ink-100 shadow-xs h-max ${
@@ -65,9 +71,11 @@ export const FeedList = ({
                   <div className="font-bold text-sm text-ink-900 leading-snug line-clamp-1">
                     {title}
                   </div>
-                  <div className="font-medium text-[11px] text-ink-400">
-                    {formatRelativeTime(publicationDateTime)}
-                  </div>
+                  {isShowPublicationDate && (
+                    <div className="font-medium text-[11px] text-ink-400">
+                      {formatRelativeTime(publicationDateTime)}
+                    </div>
+                  )}
                 </div>
                 <div className="bg-royal-pale group-hover:bg-royal rounded-lg w-8 h-8 flex items-center justify-center shrink-0 transition-colors">
                   <MdChevronRight className="text-royal group-hover:text-white text-lg transition-colors" />

@@ -55,7 +55,7 @@ export default async function Layout(props: {
      which is that tall and hides at lg — as ticketing, directory and website do. */
   return (
     <div className="h-full flex flex-col mb-[72px] lg:mb-0">
-      <NewsTopNav categories={topCategories} />
+      <NewsTopNav categories={topCategories} config={clone(config)} />
       <div className="flex-1 mb-4 md:mb-10">{children}</div>
       <MobileMenuCategory categories={allCategories} />
     </div>

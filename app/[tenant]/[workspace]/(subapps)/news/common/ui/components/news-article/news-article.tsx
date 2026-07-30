@@ -43,7 +43,7 @@ export function NewsArticleHero({
     isShowPublicationAuthor,
     isShowPublicationDate,
     isShowPublicationTime,
-  } = config ?? {};
+  } = config;
 
   const src = article?.image?.id
     ? withBasePath(`${newsBase}/api/news/${article.slug}/image?isFullView=true`)
@@ -125,8 +125,19 @@ export function NewsArticleHero({
   );
 }
 
-export function NewsArticleBody({article}: {article: NewsItem}) {
+export function NewsArticleBody({
+  article,
+  config,
+}: {
+  article: NewsItem;
+  config: NewsConfig | Cloned<NewsConfig>;
+}) {
+  const {isShowPublicationAuthor} = config;
+
   const cat = article?.categorySet?.[0];
+  const authorName = article?.author?.simpleFullName;
+  const showAuthor = isShowPublicationAuthor && !!authorName;
+  const showFooter = showAuthor || !!cat?.name;
 
   return (
     <article className="bg-white border border-ink-100 rounded-2xl shadow-xs p-6 lg:p-[40px_48px]">
@@ -150,27 +161,29 @@ export function NewsArticleBody({article}: {article: NewsItem}) {
       )}
 
       {/* Footer */}
-      <div className="mt-9 pt-6 border-t border-ink-100 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-1.5">
+      {showFooter && (
+        <div className="mt-9 pt-6 border-t border-ink-100 flex items-center justify-between gap-4 flex-wrap">
           {cat?.name && (
-            <span className="px-2.5 py-1 rounded-md bg-ink-50 text-ink-700 text-[11.5px] font-semibold">
-              #{cat.name}
-            </span>
+            <div className="flex gap-1.5">
+              <span className="px-2.5 py-1 rounded-md bg-ink-50 text-ink-700 text-[11.5px] font-semibold">
+                #{cat.name}
+              </span>
+            </div>
           )}
-        </div>
-        {article?.author?.simpleFullName && (
-          <div className="flex items-center gap-2.5">
-            <span className="w-10 h-10 rounded-full grid place-items-center text-white text-xs font-bold bg-gradient-to-br from-ink-300 to-ink-500">
-              {initials(article.author.simpleFullName)}
-            </span>
-            <div>
-              <div className="text-[13.5px] font-bold text-ink-900">
-                {article.author.simpleFullName}
+          {showAuthor && (
+            <div className="flex items-center gap-2.5">
+              <span className="w-10 h-10 rounded-full grid place-items-center text-white text-xs font-bold bg-gradient-to-br from-ink-300 to-ink-500">
+                {initials(authorName)}
+              </span>
+              <div>
+                <div className="text-[13.5px] font-bold text-ink-900">
+                  {authorName}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </article>
   );
 }

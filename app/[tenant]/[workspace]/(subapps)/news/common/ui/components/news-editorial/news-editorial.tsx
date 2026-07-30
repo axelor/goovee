@@ -12,6 +12,8 @@ import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
+import type {Cloned} from '@/types/util';
 
 type Article = NewsItem;
 
@@ -23,13 +25,16 @@ type Article = NewsItem;
 export function NewsEditorial({
   articles = [],
   heading,
+  config,
   children,
 }: {
   articles?: Article[];
   heading?: string;
+  config: NewsConfig | Cloned<NewsConfig>;
   children?: React.ReactNode;
 }) {
   const {workspaceURI} = useWorkspace();
+  const {isShowPublicationAuthor, isShowPublicationDate} = config;
 
   const featured = articles[0];
   const secondaries = articles.slice(1, 3);
@@ -44,7 +49,10 @@ export function NewsEditorial({
       : withBasePath(NO_IMAGE_URL);
   const catLabel = (a: Article) => a?.categorySet?.[0]?.name || '';
   const meta = (a: Article) =>
-    [a?.author?.simpleFullName, formatRelativeTime(a?.publicationDateTime)]
+    [
+      isShowPublicationAuthor ? a?.author?.simpleFullName : null,
+      isShowPublicationDate ? formatRelativeTime(a?.publicationDateTime) : null,
+    ]
       .filter(Boolean)
       .join(' · ');
 
@@ -75,9 +83,11 @@ export function NewsEditorial({
                   <h2 className="text-2xl lg:text-[30px] font-extrabold tracking-[-0.025em] leading-[1.15] [text-shadow:0_2px_12px_rgba(0,0,0,0.4)]">
                     {featured.title}
                   </h2>
-                  <div className="mt-2.5 text-[13px] text-white/85">
-                    {meta(featured)}
-                  </div>
+                  {meta(featured) && (
+                    <div className="mt-2.5 text-[13px] text-white/85">
+                      {meta(featured)}
+                    </div>
+                  )}
                 </div>
               </div>
             </Link>
@@ -107,9 +117,11 @@ export function NewsEditorial({
                   <h3 className="text-[15px] font-bold text-ink-900 leading-snug line-clamp-3">
                     {a.title}
                   </h3>
-                  <div className="mt-auto text-[11.5px] text-ink-500">
-                    {formatRelativeTime(a.publicationDateTime)}
-                  </div>
+                  {isShowPublicationDate && (
+                    <div className="mt-auto text-[11.5px] text-ink-500">
+                      {formatRelativeTime(a.publicationDateTime)}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}
@@ -151,9 +163,11 @@ export function NewsEditorial({
                         {a.description}
                       </p>
                     )}
-                    <div className="mt-auto pt-2 text-[11.5px] text-ink-500">
-                      {meta(a)}
-                    </div>
+                    {meta(a) && (
+                      <div className="mt-auto pt-2 text-[11.5px] text-ink-500">
+                        {meta(a)}
+                      </div>
+                    )}
                   </div>
                 </Link>
               ))}

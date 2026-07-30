@@ -9,21 +9,27 @@ import {BadgeList, Skeleton} from '@/ui/components';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
+import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
+import type {Cloned} from '@/types/util';
 
 export const NewsCard = ({
   news,
   id,
   navigatingPathFrom,
+  config,
 }: {
   news: NewsItem;
   id: string;
   navigatingPathFrom: string;
+  config: NewsConfig | Cloned<NewsConfig>;
 }) => {
   const {publicationDateTime, title, image, categorySet, slug} = news;
   const {workspaceURI} = useWorkspace();
+  const {isShowPublicationDate} = config;
 
   return (
     <Link
@@ -51,12 +57,20 @@ export const NewsCard = ({
           labelClassName="rounded-full font-semibold text-[10px] px-2 py-0.5"
           rootClassName="gap-1.5"
         />
-        <h3 className="font-bold text-base text-ink-900 leading-snug line-clamp-2 mt-auto">
+        {/* The title only takes the leftover space when a date follows it;
+            without one it would otherwise be pushed to the card's bottom. */}
+        <h3
+          className={cn(
+            'font-bold text-base text-ink-900 leading-snug line-clamp-2',
+            isShowPublicationDate && 'mt-auto',
+          )}>
           {title}
         </h3>
-        <p className="font-medium text-xs text-ink-400 mt-auto">
-          {formatRelativeTime(publicationDateTime)}
-        </p>
+        {isShowPublicationDate && (
+          <p className="font-medium text-xs text-ink-400 mt-auto">
+            {formatRelativeTime(publicationDateTime)}
+          </p>
+        )}
       </div>
     </Link>
   );

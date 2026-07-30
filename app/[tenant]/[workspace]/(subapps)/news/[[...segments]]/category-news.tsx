@@ -10,6 +10,7 @@ import type {Workspace} from '@/orm/workspace';
 import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import {
   findCategoryTitleBySlugName,
   findNewsByCategory,
@@ -22,11 +23,13 @@ const CATEGORY_LIMIT = 12;
 
 export async function CategoryNews({
   workspace,
+  config,
   client,
   page,
   slug,
 }: {
   workspace: Workspace | Cloned<Workspace>;
+  config: NewsConfig | Cloned<NewsConfig>;
   client: Client;
   segments?: string[];
   page?: number;
@@ -57,7 +60,9 @@ export async function CategoryNews({
     params: {
       select: {
         description: true,
-        author: {simpleFullName: true},
+        ...(config.isShowPublicationAuthor
+          ? {author: {simpleFullName: true}}
+          : {}),
       },
     },
   }).then(clone);
@@ -66,7 +71,7 @@ export async function CategoryNews({
   const pageInfo = result?.pageInfo;
 
   return (
-    <NewsEditorial articles={articles} heading={categoryTitle}>
+    <NewsEditorial articles={articles} heading={categoryTitle} config={config}>
       {articles.length === 0 ? (
         <div className="py-16 text-center font-medium text-ink-500">
           {await t(NO_NEWS_AVAILABLE)}

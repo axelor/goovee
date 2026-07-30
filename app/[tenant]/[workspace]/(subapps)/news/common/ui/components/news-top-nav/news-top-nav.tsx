@@ -13,15 +13,30 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 // ---- LOCAL IMPORTS ---- //
 import {SearchItem} from '../search-item';
 import {findSearchNews} from '@/subapps/news/common/actions/action';
+import type {NewsItem} from '@/subapps/news/common/types';
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
+import type {Cloned} from '@/types/util';
 
 type Category = {id: string; name: string; slug: string};
+
+type SearchItemProps = {
+  result: NewsItem;
+  onClick: (slug: string) => void;
+  query?: string;
+};
 
 /**
  * Sticky category-pills + search nav. Lives in the news layout so it stays
  * mounted across hub <-> category navigations — only the article list (the
  * page) re-renders. Hidden on the article detail (which has its own hero).
  */
-export function NewsTopNav({categories = []}: {categories?: Category[]}) {
+export function NewsTopNav({
+  categories = [],
+  config,
+}: {
+  categories?: Category[];
+  config: NewsConfig | Cloned<NewsConfig> | null;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const {workspaceURI, workspaceURL} = useWorkspace();
@@ -36,6 +51,12 @@ export function NewsTopNav({categories = []}: {categories?: Category[]}) {
 
   const onSearchClick = (slug: string) =>
     router.push(`${newsBase}/${SUBAPP_PAGE.article}/${slug}`);
+
+  /* Search renders the item component itself, so the workspace's publication
+     flags have to be bound here rather than passed through Search. */
+  const renderSearchItem = (props: SearchItemProps) => (
+    <SearchItem {...props} config={config} />
+  );
 
   return (
     <div className="sticky top-0 z-20 bg-white border-b border-ink-100">
@@ -65,7 +86,7 @@ export function NewsTopNav({categories = []}: {categories?: Category[]}) {
                 .then(r => ('error' in r ? [] : r))
                 .catch(() => [])
             }
-            renderItem={SearchItem}
+            renderItem={renderSearchItem}
             onItemClick={onSearchClick}
           />
         </div>

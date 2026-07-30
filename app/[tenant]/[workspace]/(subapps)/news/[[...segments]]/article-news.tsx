@@ -61,10 +61,14 @@ export async function ArticleNews({
     params: {
       select: {
         content: true,
-        author: {
-          simpleFullName: true,
-          picture: {id: true},
-        },
+        ...(config.isShowPublicationAuthor
+          ? {
+              author: {
+                simpleFullName: true,
+                picture: {id: true},
+              },
+            }
+          : {}),
       },
     },
   }).then(clone);
@@ -122,13 +126,14 @@ export async function ArticleNews({
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
           {/* Article */}
-          <NewsArticleBody article={newsObject} />
+          <NewsArticleBody article={newsObject} config={config} />
 
           {/* Sidebar */}
           <aside className="w-full flex flex-col gap-4 lg:sticky lg:top-6">
             <Suspense fallback={<FeedListSkeleton width="w-full" />}>
               <RelatedNewsWrapper
                 workspace={workspace}
+                config={config}
                 client={client}
                 slug={newsObject.slug}
                 navigatingPathFrom={navigatingPathFromURL}
@@ -146,6 +151,7 @@ export async function ArticleNews({
             <Suspense fallback={<FeedListSkeleton width="w-full" />}>
               <RecommendedNewsWrapper
                 isRecommendationEnable={isRecommendationEnable}
+                config={config}
                 navigatingPathFrom={navigatingPathFromURL}
                 workspaceURL={workspaceURL}
                 tenantId={tenantId}
@@ -186,6 +192,7 @@ export async function ArticleNews({
                   id={a.slug}
                   news={a}
                   navigatingPathFrom={SUBAPP_CODES.news}
+                  config={config}
                 />
               ))}
             </div>

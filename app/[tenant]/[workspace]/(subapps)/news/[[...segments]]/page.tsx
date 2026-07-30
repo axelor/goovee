@@ -96,6 +96,7 @@ export default async function Page(props: {
   return (
     <CategoryNews
       workspace={clone(access.workspace)}
+      config={clone(config)}
       client={client}
       page={Number(page)}
       segments={segments}

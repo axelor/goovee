@@ -10,6 +10,8 @@ import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import type {NewsItem} from '@/subapps/news/common/types';
+import type {NewsConfig} from '@/subapps/news/common/orm/config';
+import type {Cloned} from '@/types/util';
 
 function highlight(text: string, query?: string) {
   const t = text || '';
@@ -32,13 +34,16 @@ export function SearchItem({
   result,
   onClick,
   query,
+  config,
 }: {
   result: NewsItem;
   onClick: (slug: string) => void;
   query?: string;
+  config: NewsConfig | Cloned<NewsConfig> | null;
 }) {
   const {slug, title, categorySet, image, publicationDateTime} = result;
   const {workspaceURI} = useWorkspace();
+  const {isShowPublicationDate} = config ?? {};
 
   const src = image?.id
     ? withBasePath(
@@ -64,7 +69,7 @@ export function SearchItem({
         <div className="text-[13px] font-semibold text-ink-900 leading-snug line-clamp-2">
           {highlight(title, query)}
         </div>
-        {publicationDateTime && (
+        {isShowPublicationDate && publicationDateTime && (
           <div className="text-[11px] text-ink-400 mt-0.5">
             {formatRelativeTime(publicationDateTime)}
           </div>

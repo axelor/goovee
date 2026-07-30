@@ -32,14 +32,19 @@ export async function Homepage({
     params: {
       select: {
         description: true,
-        author: {simpleFullName: true},
+        /* Not selected at all when the workspace hides the author, so the
+           name never reaches the browser — hiding it in the markup alone
+           would still ship it in the payload. */
+        ...(config.isShowPublicationAuthor
+          ? {author: {simpleFullName: true}}
+          : {}),
       },
     },
   }).then(clone);
 
   const articles = newsResult?.news || [];
 
-  return <NewsEditorial articles={articles} />;
+  return <NewsEditorial articles={articles} config={config} />;
 }
 
 export default Homepage;
