@@ -8,7 +8,7 @@ import type {Client} from '@/goovee/.generated/client';
 import type {Workspace} from '@/orm/workspace';
 import type {Cloned} from '@/types/util';
 import type {User} from '@/types';
-import {CommentsSkeleton} from '@/lib/core/comments';
+import {CommentsSkeleton, isCommentEnabled} from '@/lib/core/comments';
 import {t} from '@/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
@@ -98,12 +98,16 @@ export async function ArticleNews({
   const directRoute = !slicedSegments?.length;
 
   const isRecommendationEnable = config.enableRecommendedNews || false;
+  const isCommentEnable = isCommentEnabled({
+    subapp: SUBAPP_CODES.news,
+    config,
+  });
 
   return (
     <div className="bg-ink-25 min-h-full">
       <NewsArticleHero article={newsObject} config={config} />
 
-      <div className="container mx-auto grid grid-cols-1 gap-6 py-8 mb-20 lg:mb-0">
+      <div className="container mx-auto grid grid-cols-1 gap-6 py-8">
         {!directRoute && (
           <Suspense fallback={<BreadcrumbsSkeleton />}>
             <BreadcrumbsWrapper
@@ -156,16 +160,18 @@ export async function ArticleNews({
         </div>
 
         {/* Comments */}
-        <Suspense fallback={<CommentsSkeleton />}>
+        {isCommentEnable && (
           <div className="bg-white rounded-xl border border-ink-100 shadow-xs p-6">
-            <CommentsWrapper
-              news={newsObject}
-              config={config}
-              user={user}
-              workspaceURI={workspaceURI}
-            />
+            <Suspense fallback={<CommentsSkeleton />}>
+              <CommentsWrapper
+                news={newsObject}
+                config={config}
+                user={user}
+                workspaceURI={workspaceURI}
+              />
+            </Suspense>
           </div>
-        </Suspense>
+        )}
 
         {/* Discover next */}
         {discoverNext.length > 0 && (

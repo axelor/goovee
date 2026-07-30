@@ -51,8 +51,10 @@ export default async function Layout(props: {
     .filter(c => !c?.parentCategory?.id)
     .map(c => ({id: String(c.id), name: c.name, slug: c.slug}));
 
+  /* mb-[72px] holds the subapp clear of the workspace's fixed mobile menu bar,
+     which is that tall and hides at lg — as ticketing, directory and website do. */
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col mb-[72px] lg:mb-0">
       <NewsTopNav categories={topCategories} />
       <div className="flex-1 mb-4 md:mb-10">{children}</div>
       <MobileMenuCategory categories={allCategories} />

@@ -28,12 +28,7 @@ import {
   RELATED_FILES,
   RELATED_NEWS,
 } from '@/subapps/news/common/constants';
-import {
-  Comments,
-  COMMENTS,
-  isCommentEnabled,
-  SORT_TYPE,
-} from '@/lib/core/comments';
+import {Comments, COMMENTS, SORT_TYPE} from '@/lib/core/comments';
 import {
   createComment,
   fetchComments,
@@ -229,46 +224,37 @@ export async function CommentsWrapper({
   workspaceURI: string;
 }) {
   const title = await t(COMMENTS);
-
-  const enableComment = isCommentEnabled({
-    subapp: SUBAPP_CODES.news,
-    config,
-  });
   const isDisabled = !user ? true : false;
 
-  if (!enableComment) {
-    return null;
-  }
-
+  /* The caller decides whether comments are shown and owns the card around
+     them, so the fallback it suspends on sits inside that card too. */
   return (
-    <div className="w-full mb-24 lg:mb-4">
-      <div className="p-4 bg-white flex flex-col gap-4 rounded-lg">
-        <div>
-          <div className="text-xl font-semibold">{title}</div>
-        </div>
-
-        <Comments
-          variant="conversation"
-          recordId={news.id}
-          subapp={SUBAPP_CODES.news}
-          disabled={isDisabled}
-          inputPosition="bottom"
-          sortBy={SORT_TYPE.old}
-          showCommentsByDefault
-          hideCommentsHeader
-          hideSortBy
-          hideTopBorder
-          hideCloseComments
-          showRepliesInMainThread
-          trackingField="publicBody"
-          commentField="note"
-          createComment={createComment}
-          fetchComments={fetchComments}
-          attachmentDownloadUrl={withBasePath(
-            `${workspaceURI}/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`,
-          )}
-        />
+    <div className="flex flex-col gap-4">
+      <div>
+        <div className="text-xl font-semibold">{title}</div>
       </div>
+
+      <Comments
+        variant="conversation"
+        recordId={news.id}
+        subapp={SUBAPP_CODES.news}
+        disabled={isDisabled}
+        inputPosition="bottom"
+        sortBy={SORT_TYPE.old}
+        showCommentsByDefault
+        hideCommentsHeader
+        hideSortBy
+        hideTopBorder
+        hideCloseComments
+        showRepliesInMainThread
+        trackingField="publicBody"
+        commentField="note"
+        createComment={createComment}
+        fetchComments={fetchComments}
+        attachmentDownloadUrl={withBasePath(
+          `${workspaceURI}/${SUBAPP_CODES.news}/api/comments/attachments/${news.id}`,
+        )}
+      />
     </div>
   );
 }
