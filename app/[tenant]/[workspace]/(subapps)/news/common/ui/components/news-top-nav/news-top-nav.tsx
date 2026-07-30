@@ -81,8 +81,8 @@ export function NewsTopNav({
             variant="compact"
             placeholder={i18n.t('Search an article…')}
             searchKey="title"
-            findQuery={() =>
-              findSearchNews({workspaceURL})
+            findQuery={({query}: {query: string}) =>
+              findSearchNews({workspaceURL, search: query})
                 .then(r => ('error' in r ? [] : r))
                 .catch(() => [])
             }

@@ -7,6 +7,7 @@ export const HEADER_NEWS_LIMIT = 3;
 export const ASIDE_NEWS_LIMIT = 4;
 export const FOOTER_NEWS_LIMIT = 5;
 export const NEWS_FEED_LIMIT = 4;
+export const SEARCH_NEWS_LIMIT = 10;
 
 // Button Labels
 export const SUBSCRIBE = 'SUBSCRIBE';

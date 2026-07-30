@@ -23,7 +23,6 @@ export const Search = ({
   onItemClick,
   onSearch,
   forceClose,
-  onFilter,
   onFocus,
   onKeyDown,
   variant = 'hero',
@@ -36,7 +35,6 @@ export const Search = ({
   onItemClick?: any;
   onSearch?: any;
   forceClose?: boolean;
-  onFilter?: any;
   onFocus?: any;
   onKeyDown?: any;
   variant?: 'hero' | 'compact';
@@ -55,17 +53,27 @@ export const Search = ({
   /* eslint-disable react-hooks/use-memo */
   const debouncedFindQuery = useCallback(
     debounce(async (query: string) => {
+      /* Compared against the raw query throughout, since that is what the
+         input holds — a trimmed comparison would drop a fresh result the
+         moment someone typed a trailing space. */
+      const term = query.trim();
       try {
-        if (query) {
-          const results = await findQuery({query});
-          setResults(results);
-        } else {
+        if (!term) {
           setResults([]);
+          return;
         }
+        const results = await findQuery({query: term});
+        /* A newer query was typed while this one was in flight, so these
+           results are stale — drop them rather than let a slow response for
+           an earlier query overwrite the newer one. */
+        if (searchRef.current !== query) return;
+        setResults(results);
       } catch (error) {
         console.error('Error fetching search results:', error);
       } finally {
-        setLoading(false);
+        if (searchRef.current === query) {
+          setLoading(false);
+        }
       }
     }, 500),
     [findQuery],
@@ -80,6 +88,7 @@ export const Search = ({
   const handleClear = () => {
     setSearch('');
     setResults([]);
+    searchRef.current = '';
     onSearch && onSearch('');
   };
 
@@ -97,7 +106,10 @@ export const Search = ({
                 : 'border-input',
             ),
         )}
-        filter={onFilter}>
+        /* The caller's action filters on the server, so cmdk must not filter
+           again: a result matched on a field other than searchKey (a post's
+           body, an article's description) would otherwise be hidden here. */
+        shouldFilter={false}>
         <div className="relative">
           <CommandInput
             placeholder={placeholder || i18n.t('Search here')}

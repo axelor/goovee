@@ -3,6 +3,7 @@ import {TenantIdSchema, WorkspaceURLSchema} from '@/utils/validators';
 
 export const FindSearchNewsSchema = z.object({
   workspaceURL: WorkspaceURLSchema,
+  search: z.string().optional(),
 });
 export type FindSearchNewsInput = z.infer<typeof FindSearchNewsSchema>;
 
