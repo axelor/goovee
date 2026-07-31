@@ -12,7 +12,7 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {getCityName} from '@/utils';
 import {getProductImageURL} from '@/utils/files';
-import {formatDate} from '@/lib/core/locale/formatters';
+import {formatDate, formatDateTime} from '@/lib/core/locale/formatters';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
@@ -37,6 +37,7 @@ const Content = ({order}: {order: DetailOrder}) => {
     exTaxTotal,
     inTaxTotal,
     createdOn,
+    confirmationDateTime,
     shipmentMode,
     statusSelect,
     deliveryState,
@@ -54,7 +55,9 @@ const Content = ({order}: {order: DetailOrder}) => {
   const statusKey = getStatusKey(statusSelect, deliveryState);
   const journey = getOrderJourney(statusSelect, deliveryState, {
     orderedAt: createdOn ? formatDate(createdOn) : undefined,
-    confirmedAt: createdOn ? formatDate(createdOn) : undefined,
+    confirmedAt: confirmationDateTime
+      ? formatDateTime(confirmationDateTime)
+      : undefined,
     deliveredAt: undefined,
   });
 

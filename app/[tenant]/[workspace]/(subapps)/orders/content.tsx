@@ -235,8 +235,6 @@ function OrderPreview({order, detailHref}: {order: Order; detailHref: string}) {
   const journey = getOrderJourney(order.statusSelect, order.deliveryState).map(
     step => ({...step, label: i18n.t(step.label as string)}),
   );
-  // Horizontal timeline shows 3 stages (skip "confirmed" to compact).
-  const compactJourney = [journey[0], journey[2], journey[3]];
 
   return (
     <section className="bg-white rounded-xl border border-ink-100 shadow-xs p-7 self-start">
@@ -260,7 +258,7 @@ function OrderPreview({order, detailHref}: {order: Order; detailHref: string}) {
       </div>
 
       <div className="bg-ink-25 rounded-lg p-5 mb-6">
-        <StatusTimeline steps={compactJourney} />
+        <StatusTimeline steps={journey} />
       </div>
 
       <dl className="grid grid-cols-3 gap-6 text-sm">

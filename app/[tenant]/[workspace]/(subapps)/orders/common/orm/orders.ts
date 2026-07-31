@@ -168,6 +168,7 @@ export async function findOrder({
       inTaxTotal: true,
       exTaxTotal: true,
       createdOn: true,
+      confirmationDateTime: true,
       statusSelect: true,
       deliveryState: true,
       shipmentMode: {name: true},
