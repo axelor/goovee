@@ -394,6 +394,7 @@ function ProductRow({
   const imageURL = getProductImageURL(line.product?.picture?.id, tenant, {
     noimage: true,
   });
+  const taxValue = line.taxLineSet?.[0]?.value;
   return (
     <li className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
       <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-ink-50 shrink-0">
@@ -416,6 +417,15 @@ function ProductRow({
       <div className="text-right shrink-0">
         <p className="text-sm font-semibold text-ink-900 tabular-nums">
           {line.inTaxTotal}
+        </p>
+        <p className="text-xs text-ink-500 mt-0.5 tabular-nums">
+          {i18n.t('Total WT')} {line.exTaxTotal}
+          {taxValue != null && (
+            <>
+              {' · '}
+              {i18n.t('Tax')} {taxValue}%
+            </>
+          )}
         </p>
         {parseFloat(String(line.discountAmount)) > 0 && (
           <p className="text-xs text-mint-700 tabular-nums">
