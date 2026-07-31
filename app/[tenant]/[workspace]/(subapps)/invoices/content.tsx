@@ -9,6 +9,7 @@ import {
   MdChevronRight,
   MdOutlineInbox,
   MdOutlineReceiptLong,
+  MdOutlineWarningAmber,
   MdSearch,
 } from 'react-icons/md';
 
@@ -25,6 +26,8 @@ import type {StatusKey} from '@/ui/components';
 
 // ---- LOCAL IMPORTS ---- //
 import {
+  HEADING,
+  INVOICE,
   INVOICE_TAB_ITEMS,
   INVOICE_PAYMENT_OPTIONS,
 } from '@/subapps/invoices/common/constants/invoices';
@@ -118,6 +121,13 @@ export default function Content({
       </div>
 
       <div className="w-full max-w-[1280px] mx-auto px-8 py-6 flex-1 min-h-0 flex flex-col">
+        {invoiceType === INVOICE.UNPAID &&
+          Number(pageInfo?.count ?? invoices.length) > 0 && (
+            <div className="mb-4 flex items-center gap-2.5 rounded-lg border border-status-rejected-fg/20 bg-status-rejected-bg px-4 py-2.5 text-[13px] font-medium text-status-rejected-fg">
+              <MdOutlineWarningAmber className="size-4 shrink-0" />
+              {i18n.t(HEADING)}
+            </div>
+          )}
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 flex-1 min-h-0">
           {/* Left — list */}
           <aside className="flex flex-col gap-3 min-h-[480px] lg:min-h-0">

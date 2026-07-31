@@ -82,14 +82,13 @@ export function getQuoteJourney(
   const converted = statusSelect === QUOTATION_STATUS.COMPLETED;
 
   if (cancelled) {
+    // A cancelled quote can't tell us whether it was sent before cancellation
+    // (the status was overwritten), so keep two reached steps — created then
+    // cancelled — rather than a "Quote sent" step left pending after a checked
+    // terminal step.
     return [
       {label: 'Quote created', state: 'done', meta: meta?.createdAt},
-      {
-        label: 'Quote sent',
-        state: sent ? 'done' : 'upcoming',
-        meta: sent ? meta?.sentAt : undefined,
-      },
-      {label: 'Refused', state: 'done', meta: meta?.answeredAt},
+      {label: 'Cancelled', state: 'done', meta: meta?.answeredAt},
     ];
   }
 
