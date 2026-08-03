@@ -1,6 +1,6 @@
 'use client';
 
-import {Fragment, useState} from 'react';
+import {Fragment, useEffect, useRef, useState} from 'react';
 import type {Cloned} from '@/types/util';
 import Image from 'next/image';
 import {useRouter, usePathname, useSearchParams} from 'next/navigation';
@@ -208,9 +208,46 @@ export default function Header({
   const shouldDisplayIcons = visible && !loading;
   const showCartIcon = showCart && shouldDisplayIcons;
   const isFixedHeader = config.isFixedHeader;
+  const headerRef = useRef<HTMLDivElement | null>(null);
+
+  /* Publishes how much room the header permanently takes at the top of the
+     viewport, so anything that pins itself below it can say so in CSS. Zero
+     when the header scrolls away, since it then takes no room at all. The
+     header is more than one row deep and its height depends on the user, the
+     workspace navigation and the viewport, so it has to be measured rather
+     than assumed. */
+  useEffect(() => {
+    const root = document.documentElement;
+    const property = '--goovee-sticky-header';
+
+    if (!isFixedHeader) {
+      root.style.setProperty(property, '0px');
+      return () => root.style.removeProperty(property);
+    }
+
+    const header = headerRef.current;
+    if (!header) return;
+
+    const publish = () =>
+      root.style.setProperty(
+        property,
+        `${Math.round(header.getBoundingClientRect().height)}px`,
+      );
+
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(header);
+
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty(property);
+    };
+  }, [isFixedHeader]);
 
   return (
-    <div className={cn(isFixedHeader && 'sticky top-0 z-50', 'bg-white')}>
+    <div
+      ref={headerRef}
+      className={cn(isFixedHeader && 'sticky top-0 z-50', 'bg-white')}>
       <div
         className={cn(
           'h-16 bg-white text-ink-900 px-7 flex items-center gap-4',

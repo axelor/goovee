@@ -86,35 +86,22 @@ export function ShopCatalog({
     [router, searchParams],
   );
 
-  // Each category mapped to the set of itself + all its descendants. Portal
-  // categories are a tree, so selecting a parent must include products that
-  // only live in its children (otherwise a parent shows the empty state).
+  /* Each category mapped to the set of itself and everything under it, walked
+     down the `items` the query already nested. Selecting a parent must include
+     products that live only in its children, or the parent shows as empty. */
   const descendantsByCat = useMemo(() => {
-    const childrenOf = new Map<string, string[]>();
-    for (const c of categories) {
-      const pid = c.parent?.id;
-      if (pid != null) {
-        const key = String(pid);
-        const arr = childrenOf.get(key) ?? [];
-        arr.push(String(c.id));
-        childrenOf.set(key, arr);
-      }
-    }
     const map = new Map<string, Set<string>>();
-    for (const c of categories) {
-      const root = String(c.id);
-      const set = new Set<string>([root]);
-      const stack = [root];
+    for (const category of categories) {
+      const ids = new Set<string>();
+      const stack: ShopCategory[] = [category];
       while (stack.length) {
-        const cur = stack.pop()!;
-        for (const child of childrenOf.get(cur) ?? []) {
-          if (!set.has(child)) {
-            set.add(child);
-            stack.push(child);
-          }
-        }
+        const current = stack.pop()!;
+        const id = String(current.id);
+        if (ids.has(id)) continue;
+        ids.add(id);
+        for (const child of current.items ?? []) stack.push(child);
       }
-      map.set(root, set);
+      map.set(String(category.id), ids);
     }
     return map;
   }, [categories]);
@@ -144,6 +131,35 @@ export function ShopCatalog({
     return map;
   }, [categories]);
 
+  /* The sidebar lists the tree the mobile slide-out already shows, one row per
+     category with its rolled-up count. Empty categories drop out with their
+     whole subtree — a parent's count includes its descendants, so a parent at
+     zero cannot hide a child that has products. A category whose parent is not
+     in the list is treated as a root, so filtering out a parent never makes its
+     children disappear. */
+  const categoryRows = useMemo(() => {
+    /* A root is a category whose parent is not in the workspace's set, so a
+       parent hidden by access or archiving does not take its children with
+       it. Every other category is reached through its parent's `items`. */
+    const roots = categories.filter(category => {
+      const parentId = category.parent?.id;
+      return parentId == null || !categoryById.has(String(parentId));
+    });
+
+    const rows: {category: ShopCategory; depth: number}[] = [];
+    const addLevel = (level: ShopCategory[], depth: number) => {
+      for (const category of level) {
+        const id = String(category.id);
+        if ((countsByCat.get(id) ?? 0) === 0) continue;
+        rows.push({category, depth});
+        addLevel(category.items ?? [], depth + 1);
+      }
+    };
+    addLevel(roots, 0);
+
+    return rows;
+  }, [categories, categoryById, countsByCat]);
+
   const filtered = useMemo(() => {
     let out = products;
     if (activeCat !== 'all') {
@@ -171,44 +187,61 @@ export function ShopCatalog({
   return (
     <div className="flex h-full min-h-[calc(100vh-4rem)] bg-ink-25">
       {/* Sidebar — replaced below lg by the slide-out in the mobile menu bar,
-          which carries the same categories and availability filter. */}
-      <aside className="hidden lg:block w-[260px] shrink-0 bg-white border-r border-ink-100 px-[18px] py-5 overflow-y-auto">
-        <h2 className="m-0 mb-3.5 text-[12px] font-extrabold uppercase tracking-[0.06em] text-ink-700">
-          {labels.categoriesTitle}
-        </h2>
-        <CategoryNavButton
-          label={labels.allProducts}
-          count={countsByCat.get('all') ?? 0}
-          active={activeCat === 'all'}
-          onClick={() => setParam({cat: null})}
-        />
-        {categories
-          .filter(c => (countsByCat.get(String(c.id)) ?? 0) > 0)
-          .map(c => {
-            const active = activeCat === String(c.id);
-            return (
+          which carries the same categories and availability filter. The column
+          itself spans the page so its background and border do, while the
+          filters inside it stay put and scroll on their own: a long category
+          list would otherwise push the availability filter below the fold and
+          scroll out of reach along with the rest of the page. */}
+      <aside className="hidden lg:block w-[260px] shrink-0 bg-white border-r border-ink-100">
+        {/* Pinned below whatever the header actually occupies, which it
+            publishes itself. Before it has, nothing is pinned yet and zero is
+            the right answer. */}
+        <div className="sticky top-[var(--goovee-sticky-header,0px)] max-h-[calc(100vh-var(--goovee-sticky-header,0px))] px-[18px] py-5 overflow-y-auto">
+          <h2 className="m-0 mb-3.5 text-[12px] font-extrabold uppercase tracking-[0.06em] text-ink-700">
+            {labels.categoriesTitle}
+          </h2>
+          {/* A list carrying each row's level, so the nesting is not conveyed by
+            indentation alone — it has to reach a reader who cannot see it. */}
+          {/* role="list" is not redundant: WebKit drops the list role once the
+            markers are removed, and with it the levels below. */}
+          <ul role="list" className="list-none m-0 p-0">
+            <li aria-level={1}>
               <CategoryNavButton
-                key={c.id}
-                label={c.name ?? '—'}
-                count={countsByCat.get(String(c.id)) ?? 0}
-                active={active}
-                onClick={() => setParam({cat: String(c.id)})}
+                label={labels.allProducts}
+                count={countsByCat.get('all') ?? 0}
+                active={activeCat === 'all'}
+                onClick={() => setParam({cat: null})}
               />
-            );
-          })}
+            </li>
+            {categoryRows.map(({category, depth}) => {
+              const id = String(category.id);
+              return (
+                <li key={id} aria-level={depth + 1}>
+                  <CategoryNavButton
+                    label={category.name ?? '—'}
+                    count={countsByCat.get(id) ?? 0}
+                    active={activeCat === id}
+                    depth={depth}
+                    onClick={() => setParam({cat: id})}
+                  />
+                </li>
+              );
+            })}
+          </ul>
 
-        <h2 className="m-0 mt-7 mb-3 text-[12px] font-extrabold uppercase tracking-[0.06em] text-ink-700">
-          {labels.availabilityTitle}
-        </h2>
-        <label className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer text-[13px] hover:bg-ink-25 transition-colors">
-          <input
-            type="checkbox"
-            checked={stockOnly}
-            onChange={() => setParam({stock: stockOnly ? null : '1'})}
-            className="w-4 h-4 accent-royal cursor-pointer"
-          />
-          <span className="flex-1 text-ink-800">{labels.inStockOnly}</span>
-        </label>
+          <h2 className="m-0 mt-7 mb-3 text-[12px] font-extrabold uppercase tracking-[0.06em] text-ink-700">
+            {labels.availabilityTitle}
+          </h2>
+          <label className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer text-[13px] hover:bg-ink-25 transition-colors">
+            <input
+              type="checkbox"
+              checked={stockOnly}
+              onChange={() => setParam({stock: stockOnly ? null : '1'})}
+              className="w-4 h-4 accent-royal cursor-pointer"
+            />
+            <span className="flex-1 text-ink-800">{labels.inStockOnly}</span>
+          </label>
+        </div>
       </aside>
 
       {/* Main pane */}
@@ -324,28 +357,42 @@ export function ShopCatalog({
   );
 }
 
+/* One step per level of nesting. Spelled out rather than computed so Tailwind
+   emits them, and the left padding is never set by a shorthand as well — two
+   utilities for the same edge would resolve by emit order, not by depth. */
+const CATEGORY_INDENT = ['pl-2.5', 'pl-6', 'pl-10', 'pl-14'] as const;
+
 function CategoryNavButton({
   label,
   count,
   active,
+  depth = 0,
   onClick,
 }: {
   label: string;
   count: number;
   active: boolean;
+  depth?: number;
   onClick: () => void;
 }) {
+  const indent = CATEGORY_INDENT[Math.min(depth, CATEGORY_INDENT.length - 1)];
+
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg mb-0.5 text-left text-[13px] transition-colors',
+        'w-full flex items-center gap-2.5 pr-2.5 py-2 rounded-lg mb-0.5 text-left text-[13px] transition-colors',
+        indent,
         active
           ? 'bg-royal-pale border border-royal-border text-royal-dark font-semibold'
           : 'bg-transparent border border-transparent text-ink-700 font-medium hover:bg-ink-25',
       )}>
-      <span className="flex-1 min-w-0 truncate">{label}</span>
+      {/* Indenting eats into the 260px sidebar, so a deep name is truncated
+          and would otherwise be unreadable. */}
+      <span className="flex-1 min-w-0 truncate" title={label}>
+        {label}
+      </span>
       <span
         className={cn(
           'text-[11px] tabular-nums shrink-0',

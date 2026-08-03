@@ -109,21 +109,14 @@ async function Catalog({
   const products: ComputedProduct[] = Array.isArray(productsRes)
     ? (productsRes as ComputedProduct[])
     : ((productsRes as {products?: ComputedProduct[]})?.products ?? []);
-  // Pass the full category tree (with parent links) so the catalog can
-  // aggregate a parent's descendants: selecting a parent — whether from the
-  // sidebar, a legacy link or the mobile menu — must include products that
-  // only live in its child categories. The catalog hides categories whose
-  // rolled-up product count is 0, so empties never surface.
-  const categories: ShopCategory[] = allCategories.map(c => ({
-    id: c.id,
-    name: c.name,
-    slug: c.slug,
-    parent: (c as ShopCategory).parent ?? null,
-  }));
 
+  /* Handed over as the query built it — each category already carries its
+     children in `items`, and its parent link. The catalogue needs both: the
+     tree to list the categories, and the descendants of the selected one so
+     that picking a parent includes products living only in its children. */
   return (
     <ShopCatalog
-      categories={categories}
+      categories={allCategories}
       products={products}
       labels={labels}
       sortOptions={sortOptions}

@@ -23,9 +23,11 @@ export interface ShopCategory {
   id: string | number;
   name: string | null;
   slug?: string | null;
-  // Portal categories form a tree; the parent link lets the catalog aggregate a
-  // parent's descendants when filtering.
+  /* Portal categories form a tree. The query already nests each category under
+     its parent, so the catalogue reads `items` rather than rebuilding the tree;
+     `parent` tells it which categories are roots. */
   parent?: {id: string | number} | null;
+  items?: ShopCategory[];
 }
 
 export function ShopProductCard({
