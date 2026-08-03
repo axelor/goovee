@@ -1,5 +1,5 @@
 import type {Cloned} from '@/types/util';
-import type {OrderByOptions} from '@goovee/orm';
+import type {OrderByOptions, WhereOptions} from '@goovee/orm';
 
 // ---- CORE IMPORTS ---- //
 import {aosClient} from '@/service';
@@ -248,6 +248,106 @@ const getWhereClause = ({
   return whereClause;
 };
 
+/* What the stock location says can be had, plus whatever is not stock-managed,
+   which has no stock to run out of. Shared so the product list and the sidebar
+   counts cannot drift apart on what "available" means. */
+const getInStockClause = (availableStockProductsIds: string[]) => ({
+  OR: [
+    ...(availableStockProductsIds.length
+      ? [{id: {in: availableStockProductsIds}}]
+      : []),
+    {stockManaged: {eq: false}},
+  ],
+});
+
+/* An unset policy hides out-of-stock products, so the fallback lives here
+   rather than in each caller. */
+const getOutOfStockAction = (
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>,
+) =>
+  workspaceConfig.noMoreStockSelect ??
+  OUT_OF_STOCK_TYPE.HIDE_PRODUCT_CANNOT_BUY;
+
+/* How many products sit directly in each portal category, counted by the
+ * database in one query. The catalogue's sidebar used to count the products it
+ * had already fetched, which only worked while it fetched every one of them.
+ * Counts are of the whole catalogue, so they do not move as the reader narrows
+ * the list by search or availability — but they do respect the workspace's own
+ * choice to hide out-of-stock products, which is not the reader's to make: a
+ * count has to describe the same catalogue the list shows. */
+export async function countProductsByPortalCategory({
+  workspace,
+  workspaceConfig,
+  client,
+  user,
+  categoryids,
+}: {
+  workspace: Workspace | Cloned<Workspace>;
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>;
+  client: Client;
+  user?: User;
+  categoryids?: (string | number)[];
+}): Promise<{counts: Record<string, number>; total: number}> {
+  /* Without categories to scope by, the clause would drop its only workspace
+     boundary and count every sellable product in the tenant. */
+  if (!(workspace && client && workspaceConfig && categoryids?.length)) {
+    return {counts: {}, total: 0};
+  }
+
+  const inScope = getWhereClause({workspace, user, categoryids});
+  const hidesOutOfStock =
+    getOutOfStockAction(workspaceConfig) ===
+    OUT_OF_STOCK_TYPE.HIDE_PRODUCT_CANNOT_BUY;
+  const {defaultStockLocation, outOfStockQty} = workspaceConfig;
+
+  const availableStockProductsIds =
+    hidesOutOfStock && defaultStockLocation
+      ? await findProductsFromStockLocation({
+          client,
+          workspace,
+          workspaceConfig,
+          categoryids,
+          user,
+          outOfStockQty: outOfStockQty != null ? Number(outOfStockQty) : null,
+        })
+      : [];
+
+  const where = (
+    hidesOutOfStock
+      ? {AND: [{...inScope}, getInStockClause(availableStockProductsIds)]}
+      : inScope
+  ) as WhereOptions<AOSProduct>;
+
+  /* Resolved to ids first, on purpose. The count is not a distinct one, and
+     every relation in the scope clause — the privacy filter joins two
+     many-to-many sets — multiplies a product's rows, so counting against that
+     clause would report a product once per joined row. Narrowing to ids leaves
+     the categories as the only join, which is exactly one row per product and
+     category, and the ids themselves are the catalogue total. */
+  const inScopeIds = (
+    await client.aOSProduct.find({where, select: {id: true}})
+  ).map(product => product.id);
+
+  if (!inScopeIds.length) return {counts: {}, total: 0};
+
+  const grouped = await client.aOSProduct.aggregate({
+    count: {id: true},
+    groupBy: {portalCategorySet: {id: true}},
+    where: {
+      id: {in: inScopeIds},
+      portalCategorySet: {id: {in: categoryids}},
+    },
+  });
+
+  const counts: Record<string, number> = {};
+  for (const row of grouped) {
+    const categoryId = row.groupBy.portalCategorySet.id;
+    counts[String(categoryId)] = Number(row.count.id);
+  }
+
+  return {counts, total: inScopeIds.length};
+}
+
 function getSortOrder(sort?: string): OrderByOptions<AOSProduct> {
   switch (sort) {
     case 'byMostExpensive':
@@ -272,6 +372,7 @@ export async function findProducts({
   search,
   sort,
   categoryids,
+  inStockOnly,
   page = DEFAULT_PAGE,
   limit,
   workspace,
@@ -286,6 +387,10 @@ export async function findProducts({
   search?: string;
   sort?: string;
   categoryids?: (string | number)[];
+  /* Keeps only what can be bought now, using the same stock filter the
+     hide-out-of-stock policy applies, so the caller does not need a second
+     idea of what being in stock means. */
+  inStockOnly?: boolean;
   page?: string | number;
   limit?: string | number;
   workspace?: Workspace | Cloned<Workspace>;
@@ -301,16 +406,11 @@ export async function findProducts({
   const orderBy = getSortOrder(sort);
   const skip = limit ? getSkip(limit, page) : undefined;
 
-  const {
-    priceAfterLogin,
-    defaultStockLocation,
-    noMoreStockSelect,
-    outOfStockQty,
-  } = workspaceConfig || {};
+  const {priceAfterLogin, defaultStockLocation, outOfStockQty} =
+    workspaceConfig || {};
 
   const fromWS = priceAfterLogin === 'fromWS';
-  const outOfStockAction =
-    noMoreStockSelect ?? OUT_OF_STOCK_TYPE.HIDE_PRODUCT_CANNOT_BUY;
+  const outOfStockAction = getOutOfStockAction(workspaceConfig);
 
   const hidePrices = await (async () => {
     const {hidePriceForEmptyPricelist} = workspaceConfig || {};
@@ -340,8 +440,15 @@ export async function findProducts({
   let $products: RawProduct[] = [];
 
   try {
-    const isHideOutOfStockProducts =
+    const hidesOutOfStock =
       outOfStockAction === OUT_OF_STOCK_TYPE.HIDE_PRODUCT_CANNOT_BUY;
+
+    /* The reader's availability filter narrows the query the same way the hide
+       policy does, but it must not also decide what may be bought: only the
+       policy that hides out-of-stock products can take everything it returns
+       as available. Under any other policy the rows are still judged one by
+       one, so the filter cannot turn an unbuyable product into a buyable one. */
+    const filterOutOfStock = inStockOnly || hidesOutOfStock;
 
     const availableStockProductsIds = defaultStockLocation
       ? await findProductsFromStockLocation({
@@ -355,36 +462,16 @@ export async function findProducts({
         })
       : [];
 
-    if (isHideOutOfStockProducts) {
-      const updatedFilters = {
-        AND: [
-          {
-            ...$filters,
-          },
-          {
-            OR: [
-              ...(availableStockProductsIds?.length
-                ? [
-                    {
-                      id: {
-                        in: availableStockProductsIds,
-                      },
-                    },
-                  ]
-                : []),
-              {
-                stockManaged: {
-                  eq: false,
-                },
-              },
-            ],
-          },
-        ],
-      };
+    const stockFilters = filterOutOfStock
+      ? {
+          AND: [{...$filters}, getInStockClause(availableStockProductsIds)],
+        }
+      : $filters;
 
+    if (hidesOutOfStock) {
       $products = (await client.aOSProduct
         .find({
-          where: updatedFilters,
+          where: stockFilters,
           orderBy,
           take: limit !== undefined ? Number(limit) : undefined,
           ...(skip ? {skip} : {}),
@@ -403,7 +490,7 @@ export async function findProducts({
     } else {
       $products = (await client.aOSProduct
         .find({
-          where: $filters,
+          where: stockFilters,
           orderBy,
           take: limit !== undefined ? Number(limit) : undefined,
           ...(skip ? {skip} : {}),

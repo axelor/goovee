@@ -33,12 +33,14 @@ export function MobileCategories({categories = []}: {categories?: Category[]}) {
   /* On the catalogue the other filters have to survive the change, so every
      control merges into the current query. From a deeper page there is
      nothing to keep and we go to the catalogue instead. Closing the sheet is
-     what makes the change visible — the list it acts on sits behind it. */
+     what makes the change visible — the list it acts on sits behind it.
+     Narrowing always returns to the first page, since the reader's current one
+     may not exist in the shorter result. */
   const applyToCatalog = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(
       isCatalog ? searchParams.toString() : '',
     );
-    for (const [key, value] of Object.entries(updates)) {
+    for (const [key, value] of Object.entries({...updates, page: null})) {
       if (value === null) params.delete(key);
       else params.set(key, value);
     }

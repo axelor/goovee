@@ -2,9 +2,10 @@
 
 import {useCallback, useMemo, useState, useTransition} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
-import {MdSearch} from 'react-icons/md';
+import {MdChevronLeft, MdChevronRight, MdSearch} from 'react-icons/md';
 
 import {cn} from '@/utils/css';
+import {getPaginationButtons} from '@/utils/pagination';
 import {i18n} from '@/locale';
 import type {ComputedProduct} from '@/types';
 
@@ -44,10 +45,15 @@ interface ShopCatalogProps {
   defaultSort?: string;
   hidePriceAndPurchase?: boolean;
   displayPrices?: boolean;
-}
-
-function productName(product: ComputedProduct): string {
-  return i18n.tattr(product?.product?.name ?? '');
+  /* Counted over the whole catalogue by the query, so they stay put as the
+     reader narrows the list. Keyed by category id. */
+  categoryCounts: Record<string, number>;
+  /* Everything in the catalogue, for the "all products" row. */
+  catalogueTotal: number;
+  /* How many the current filters match, which is what the heading reports. */
+  totalProducts: number;
+  page: number;
+  totalPages: number;
 }
 
 export function ShopCatalog({
@@ -59,6 +65,11 @@ export function ShopCatalog({
   defaultSort,
   hidePriceAndPurchase,
   displayPrices,
+  categoryCounts,
+  catalogueTotal,
+  totalProducts,
+  page,
+  totalPages,
 }: ShopCatalogProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -86,44 +97,43 @@ export function ShopCatalog({
     [router, searchParams],
   );
 
-  /* Each category mapped to the set of itself and everything under it, walked
-     down the `items` the query already nested. Selecting a parent must include
-     products that live only in its children, or the parent shows as empty. */
-  const descendantsByCat = useMemo(() => {
-    const map = new Map<string, Set<string>>();
-    for (const category of categories) {
-      const ids = new Set<string>();
-      const stack: ShopCategory[] = [category];
-      while (stack.length) {
-        const current = stack.pop()!;
-        const id = String(current.id);
-        if (ids.has(id)) continue;
-        ids.add(id);
-        for (const child of current.items ?? []) stack.push(child);
-      }
-      map.set(String(category.id), ids);
-    }
-    return map;
-  }, [categories]);
+  /* Only when the term actually changed: blurring or re-submitting an
+     unchanged box would otherwise send the reader back to the first page. */
+  const submitSearch = () => {
+    const term = searchInput.trim();
+    if (term === urlSearch) return;
+    setFilter({q: term || null});
+  };
 
-  // Counts per category, rolled up through descendants (each product counted
-  // once per subtree), so a parent reflects everything under it.
+  /* Narrowing the list changes how many pages there are, so the reader goes
+     back to the first one rather than landing past the end of the result. */
+  const setFilter = useCallback(
+    (updates: Record<string, string | null>) =>
+      setParam({...updates, page: null}),
+    [setParam],
+  );
+
+  /* Each category's own count plus everything under it, walked down the
+     `items` the query already nested, so a parent reflects its whole subtree.
+     The visited check keeps a malformed tree from looping. */
   const countsByCat = useMemo(() => {
     const map = new Map<string, number>();
-    map.set('all', products.length);
-    for (const c of categories) {
-      const id = String(c.id);
-      const desc = descendantsByCat.get(id);
-      if (!desc) continue;
-      let n = 0;
-      for (const p of products) {
-        const portal = p?.product?.portalCategorySet ?? [];
-        if (portal.some(pc => desc.has(String(pc?.id)))) n++;
-      }
-      map.set(id, n);
-    }
+
+    const rollUp = (category: ShopCategory, seen: Set<string>): number => {
+      const id = String(category.id);
+      if (seen.has(id)) return 0;
+      seen.add(id);
+
+      let total = categoryCounts[id] ?? 0;
+      for (const child of category.items ?? []) total += rollUp(child, seen);
+
+      map.set(id, total);
+      return total;
+    };
+
+    for (const category of categories) rollUp(category, new Set());
     return map;
-  }, [products, categories, descendantsByCat]);
+  }, [categories, categoryCounts]);
 
   const categoryById = useMemo(() => {
     const map = new Map<string, ShopCategory>();
@@ -160,25 +170,6 @@ export function ShopCatalog({
     return rows;
   }, [categories, categoryById, countsByCat]);
 
-  const filtered = useMemo(() => {
-    let out = products;
-    if (activeCat !== 'all') {
-      const desc = descendantsByCat.get(activeCat) ?? new Set([activeCat]);
-      out = out.filter(p => {
-        const portal = p?.product?.portalCategorySet ?? [];
-        return portal.some(c => desc.has(String(c?.id)));
-      });
-    }
-    if (stockOnly) {
-      out = out.filter(p => !p?.product?.outOfStockConfig?.outOfStock);
-    }
-    if (urlSearch.trim()) {
-      const q = urlSearch.trim().toLowerCase();
-      out = out.filter(p => productName(p).toLowerCase().includes(q));
-    }
-    return out;
-  }, [products, activeCat, stockOnly, urlSearch, descendantsByCat]);
-
   const title =
     activeCat === 'all'
       ? labels.defaultPageTitle
@@ -208,9 +199,9 @@ export function ShopCatalog({
             <li aria-level={1}>
               <CategoryNavButton
                 label={labels.allProducts}
-                count={countsByCat.get('all') ?? 0}
+                count={catalogueTotal}
                 active={activeCat === 'all'}
-                onClick={() => setParam({cat: null})}
+                onClick={() => setFilter({cat: null})}
               />
             </li>
             {categoryRows.map(({category, depth}) => {
@@ -222,7 +213,7 @@ export function ShopCatalog({
                     count={countsByCat.get(id) ?? 0}
                     active={activeCat === id}
                     depth={depth}
-                    onClick={() => setParam({cat: id})}
+                    onClick={() => setFilter({cat: id})}
                   />
                 </li>
               );
@@ -236,7 +227,7 @@ export function ShopCatalog({
             <input
               type="checkbox"
               checked={stockOnly}
-              onChange={() => setParam({stock: stockOnly ? null : '1'})}
+              onChange={() => setFilter({stock: stockOnly ? null : '1'})}
               className="w-4 h-4 accent-royal cursor-pointer"
             />
             <span className="flex-1 text-ink-800">{labels.inStockOnly}</span>
@@ -253,8 +244,8 @@ export function ShopCatalog({
                 {title}
               </h1>
               <p className="mt-1 text-[13.5px] text-ink-500 tabular-nums">
-                {filtered.length}{' '}
-                {filtered.length === 1
+                {totalProducts}{' '}
+                {totalProducts === 1
                   ? labels.productLabel
                   : labels.productsLabel}
               </p>
@@ -264,14 +255,14 @@ export function ShopCatalog({
               <form
                 onSubmit={e => {
                   e.preventDefault();
-                  setParam({q: searchInput.trim() || null});
+                  submitSearch();
                 }}
                 className="flex items-center gap-2 px-3 py-[9px] rounded-[10px] bg-white border border-ink-150 w-[240px]">
                 <MdSearch className="text-royal text-sm shrink-0" />
                 <input
                   value={searchInput}
                   onChange={e => setSearchInput(e.target.value)}
-                  onBlur={() => setParam({q: searchInput.trim() || null})}
+                  onBlur={submitSearch}
                   placeholder={labels.searchPlaceholder}
                   className="flex-1 min-w-0 bg-transparent border-none outline-none text-[13px] text-ink-800 placeholder:text-ink-400"
                 />
@@ -286,7 +277,7 @@ export function ShopCatalog({
                      changes once the server answers. */
                   disabled={sorting}
                   onChange={event =>
-                    setParam({
+                    setFilter({
                       sort:
                         event.target.value === defaultSort
                           ? null
@@ -304,7 +295,7 @@ export function ShopCatalog({
             </div>
           </header>
 
-          {filtered.length === 0 ? (
+          {products.length === 0 ? (
             <div className="bg-white border border-ink-100 rounded-2xl px-6 py-14 text-center shadow-xs">
               <p className="text-[15px] font-semibold text-ink-700">
                 {labels.emptyTitle}
@@ -315,7 +306,7 @@ export function ShopCatalog({
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {filtered.map(p => {
+              {products.map(p => {
                 // Pick a portal category for the card badge — prefer the
                 // currently active filter, otherwise the first one. Fall back
                 // to the primary productCategory if portalCategorySet is empty
@@ -351,9 +342,108 @@ export function ShopCatalog({
               })}
             </div>
           )}
+
+          {totalPages > 1 && (
+            <CataloguePagination
+              page={page}
+              totalPages={totalPages}
+              disabled={sorting}
+              onPage={next =>
+                setParam({page: next === 1 ? null : String(next)})
+              }
+            />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+/* Page one is the bare URL, so a shared link to the top of the catalogue does
+   not carry a parameter that says what it already is. */
+function CataloguePagination({
+  page,
+  totalPages,
+  disabled,
+  onPage,
+}: {
+  page: number;
+  totalPages: number;
+  disabled: boolean;
+  onPage: (page: number) => void;
+}) {
+  const buttons = getPaginationButtons({currentPage: page, totalPages});
+
+  return (
+    <nav
+      aria-label={i18n.t('Pagination')}
+      className="mt-8 flex items-center justify-center gap-1.5">
+      <PageButton
+        label={i18n.t('Previous')}
+        disabled={disabled || page <= 1}
+        onClick={() => onPage(page - 1)}>
+        <MdChevronLeft className="size-4" />
+      </PageButton>
+
+      {buttons.map((value, index) =>
+        typeof value === 'string' ? (
+          <span
+            key={`gap-${index}`}
+            aria-hidden
+            className="px-1 text-[13px] text-ink-400">
+            {value}
+          </span>
+        ) : (
+          <PageButton
+            key={value}
+            label={`${i18n.t('Page')} ${value}`}
+            active={value === page}
+            disabled={disabled}
+            onClick={() => onPage(value)}>
+            {value}
+          </PageButton>
+        ),
+      )}
+
+      <PageButton
+        label={i18n.t('Next')}
+        disabled={disabled || page >= totalPages}
+        onClick={() => onPage(page + 1)}>
+        <MdChevronRight className="size-4" />
+      </PageButton>
+    </nav>
+  );
+}
+
+function PageButton({
+  label,
+  active,
+  disabled,
+  onClick,
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  disabled: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-current={active ? 'page' : undefined}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        'min-w-9 h-9 px-2 grid place-items-center rounded-[10px] border text-[13px] font-semibold tabular-nums transition-colors',
+        'disabled:opacity-40 disabled:cursor-not-allowed',
+        active
+          ? 'bg-royal text-white border-royal'
+          : 'bg-white text-ink-800 border-ink-150 hover:bg-ink-25',
+      )}>
+      {children}
+    </button>
   );
 }
 

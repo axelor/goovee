@@ -8,7 +8,7 @@ import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {DEFAULT_LIMIT, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {t} from '@/locale/server';
 import type {TenantConfig} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
@@ -21,7 +21,10 @@ import {
   DEFAULT_SORT_OPTION,
   SORT_BY_OPTIONS,
 } from '@/subapps/shop/common/constants';
-import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
+import {
+  countProductsByPortalCategory,
+  findProducts,
+} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {getShopConfig, type ShopConfig} from '@/subapps/shop/common/orm/config';
 import {findCategories} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/categories';
@@ -33,7 +36,28 @@ import {
   type ShopSortOption,
 } from '@/app/[tenant]/[workspace]/(subapps)/shop/common/ui/components';
 
-const CATALOG_LIMIT = 500;
+/* One screenful of the three-column grid. */
+const PRODUCTS_PER_PAGE = DEFAULT_LIMIT;
+
+/* A category and everything under it, walked down the `items` the query nested.
+   Rolled-up counts and the category filter both need the same set. */
+function collectSubtreeIds(
+  categories: ShopCategory[],
+  rootId: string,
+): string[] {
+  const ids = new Set<string>();
+  const stack = categories.filter(category => String(category.id) === rootId);
+
+  while (stack.length) {
+    const current = stack.pop()!;
+    const id = String(current.id);
+    if (ids.has(id)) continue;
+    ids.add(id);
+    for (const child of current.items ?? []) stack.push(child);
+  }
+
+  return [...ids];
+}
 
 /* The workspace decides which of the orderings it offers. Ordering is left to
  * the query so it runs on the stored values rather than on formatted prices. */
@@ -59,6 +83,10 @@ async function Catalog({
   config,
   workspaceConfig,
   sort,
+  category,
+  search,
+  inStockOnly,
+  page,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
@@ -66,6 +94,10 @@ async function Catalog({
   config: TenantConfig;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
   sort?: string;
+  category?: string;
+  search?: string;
+  inStockOnly: boolean;
+  page: number;
 }) {
   const [categoriesRes, labels, hidePriceAndPurchase, sortOptions] =
     await Promise.all([
@@ -92,23 +124,46 @@ async function Catalog({
     .map(c => c?.id)
     .filter((id): id is string | number => id != null);
 
-  const productsRes = portalCategoryIds.length
-    ? await findProducts({
-        workspace,
-        client,
-        user,
-        config,
-        workspaceConfig,
-        page: 1,
-        limit: CATALOG_LIMIT,
-        sort: activeSort,
-        categoryids: portalCategoryIds,
-      }).then(clone)
-    : [];
+  /* Selecting a category means its whole subtree, so the query is given every
+     id below the chosen one — otherwise a parent looks empty when its products
+     live in its children. With nothing chosen the scope is the workspace. */
+  const selectedCategoryIds = category
+    ? collectSubtreeIds(allCategories, category)
+    : portalCategoryIds;
 
-  const products: ComputedProduct[] = Array.isArray(productsRes)
-    ? (productsRes as ComputedProduct[])
-    : ((productsRes as {products?: ComputedProduct[]})?.products ?? []);
+  const [productsRes, categoryCounts] = await Promise.all([
+    selectedCategoryIds.length
+      ? findProducts({
+          workspace,
+          client,
+          user,
+          config,
+          workspaceConfig,
+          page,
+          limit: PRODUCTS_PER_PAGE,
+          sort: activeSort,
+          search,
+          inStockOnly,
+          categoryids: selectedCategoryIds,
+        }).then(clone)
+      : null,
+    countProductsByPortalCategory({
+      workspace,
+      workspaceConfig,
+      client,
+      user,
+      categoryids: portalCategoryIds,
+    }),
+  ]);
+
+  /* The web-service pricing path can drop a product it cannot price, so the
+     rows it returns are nullable even though it filters them out. */
+  const products: ComputedProduct[] = (productsRes?.products ?? []).filter(
+    (product): product is ComputedProduct => product != null,
+  );
+  const pageInfo = productsRes?.pageInfo;
+  const totalProducts = Number(pageInfo?.count ?? 0);
+  const totalPages = Number(pageInfo?.pages ?? 1) || 1;
 
   /* Handed over as the query built it — each category already carries its
      children in `items`, and its parent link. The catalogue needs both: the
@@ -124,6 +179,11 @@ async function Catalog({
       defaultSort={defaultSort}
       hidePriceAndPurchase={hidePriceAndPurchase}
       displayPrices={Boolean(workspaceConfig.displayPrices)}
+      categoryCounts={categoryCounts.counts}
+      catalogueTotal={categoryCounts.total}
+      totalProducts={totalProducts}
+      page={page}
+      totalPages={totalPages}
     />
   );
 }
@@ -187,12 +247,14 @@ function CatalogSkeleton() {
         <div className="h-8 w-64 bg-ink-100 rounded mb-2 animate-pulse" />
         <div className="h-4 w-32 bg-ink-100 rounded mb-6 animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-          {[0, 1, 2, 3, 4, 5].map(i => (
-            <div
-              key={i}
-              className="h-[260px] bg-white rounded-xl border border-ink-100 animate-pulse"
-            />
-          ))}
+          {Array.from({length: PRODUCTS_PER_PAGE}, (_, index) => index).map(
+            index => (
+              <div
+                key={index}
+                className="h-[260px] bg-white rounded-xl border border-ink-100 animate-pulse"
+              />
+            ),
+          )}
         </div>
       </div>
     </div>
@@ -207,8 +269,22 @@ export default async function Page(props: {
     props.params,
     props.searchParams,
   ]);
-  const sort =
-    typeof searchParams.sort === 'string' ? searchParams.sort : undefined;
+  const readParam = (key: string) =>
+    typeof searchParams[key] === 'string' ? searchParams[key] : undefined;
+
+  const sort = readParam('sort');
+  const category = readParam('cat');
+  const search = readParam('q')?.trim() || undefined;
+  const inStockOnly = readParam('stock') === '1';
+  /* A whole, sane page number: a fractional or enormous value would otherwise
+     reach the query as an offset and either return the wrong slice or exceed
+     what the database can take. */
+  const requestedPage = Math.floor(Number(readParam('page')));
+  const page =
+    Number.isSafeInteger(requestedPage) && requestedPage > 1
+      ? requestedPage
+      : 1;
+
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
@@ -256,6 +332,10 @@ export default async function Page(props: {
           config={config}
           workspaceConfig={workspaceConfig}
           sort={sort}
+          category={category}
+          search={search}
+          inStockOnly={inStockOnly}
+          page={page}
         />
       </Suspense>
       <OrderAlert />
