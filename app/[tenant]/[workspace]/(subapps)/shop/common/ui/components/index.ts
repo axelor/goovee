@@ -28,7 +28,7 @@ export {ShopQuantityStepper} from './shop-quantity-stepper';
 export {ShopProductCard} from './shop-product-card';
 export type {ShopCategory} from './shop-product-card';
 export {ShopCatalog} from './shop-catalog';
-export type {ShopLabels} from './shop-catalog';
+export type {ShopLabels, ShopSortOption} from './shop-catalog';
 export {ShopProductDetail} from './shop-product-detail';
 export type {ShopProductDetailLabels} from './shop-product-detail';
 export {ShopSidebar} from './shop-sidebar';

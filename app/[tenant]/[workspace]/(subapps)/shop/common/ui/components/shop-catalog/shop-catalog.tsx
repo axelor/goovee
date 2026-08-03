@@ -22,10 +22,6 @@ export interface ShopLabels {
   productsLabel: string;
   productLabel: string;
   searchPlaceholder: string;
-  sortRelevance: string;
-  sortPriceAsc: string;
-  sortPriceDesc: string;
-  sortName: string;
   inStockBadge: string;
   outOfStockBadge: string;
   addToCartLabel: string;
@@ -34,26 +30,20 @@ export interface ShopLabels {
   emptySubtitle: string;
 }
 
+export interface ShopSortOption {
+  value: string;
+  label: string;
+}
+
 interface ShopCatalogProps {
   categories: ShopCategory[];
   products: ComputedProduct[];
   labels: ShopLabels;
+  sortOptions: ShopSortOption[];
+  activeSort?: string;
+  defaultSort?: string;
   hidePriceAndPurchase?: boolean;
   displayPrices?: boolean;
-}
-
-type SortKey = 'featured' | 'price-asc' | 'price-desc' | 'name';
-
-function priceNumber(product: ComputedProduct): number {
-  const raw = product?.price?.displayPrimary ?? '';
-  if (typeof raw !== 'string') return 0;
-  // Strip non-digit / non-decimal chars (handles "1 234,56 €" or "1234.56€")
-  const cleaned = raw.replace(/[^\d.,-]/g, '').replace(/\s/g, '');
-  const normalised = cleaned
-    .replace(/\.(?=\d{3}(?:[^\d]|$))/g, '')
-    .replace(',', '.');
-  const n = Number(normalised);
-  return Number.isFinite(n) ? n : 0;
 }
 
 function productName(product: ComputedProduct): string {
@@ -64,16 +54,18 @@ export function ShopCatalog({
   categories,
   products,
   labels,
+  sortOptions,
+  activeSort,
+  defaultSort,
   hidePriceAndPurchase,
   displayPrices,
 }: ShopCatalogProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [, startTransition] = useTransition();
+  const [sorting, startTransition] = useTransition();
 
   const activeCat = searchParams.get('cat') ?? 'all';
   const stockOnly = searchParams.get('stock') === '1';
-  const urlSort = (searchParams.get('sort') as SortKey) || 'featured';
   const urlSearch = searchParams.get('q') ?? '';
 
   // Local search input — debounced into URL to avoid a server round-trip per keystroke.
@@ -168,24 +160,8 @@ export function ShopCatalog({
       const q = urlSearch.trim().toLowerCase();
       out = out.filter(p => productName(p).toLowerCase().includes(q));
     }
-    switch (urlSort) {
-      case 'price-asc':
-        out = [...out].sort((a, b) => priceNumber(a) - priceNumber(b));
-        break;
-      case 'price-desc':
-        out = [...out].sort((a, b) => priceNumber(b) - priceNumber(a));
-        break;
-      case 'name':
-        out = [...out].sort((a, b) =>
-          productName(a).localeCompare(productName(b)),
-        );
-        break;
-      default:
-        // featured / relevance — keep server order
-        break;
-    }
     return out;
-  }, [products, activeCat, stockOnly, urlSearch, urlSort, descendantsByCat]);
+  }, [products, activeCat, stockOnly, urlSearch, descendantsByCat]);
 
   const title =
     activeCat === 'all'
@@ -267,19 +243,31 @@ export function ShopCatalog({
                   className="flex-1 min-w-0 bg-transparent border-none outline-none text-[13px] text-ink-800 placeholder:text-ink-400"
                 />
               </form>
-              <select
-                value={urlSort}
-                onChange={e =>
-                  setParam({
-                    sort: e.target.value === 'featured' ? null : e.target.value,
-                  })
-                }
-                className="px-3 py-[9px] rounded-[10px] bg-white border border-ink-150 text-[13px] font-semibold text-ink-800 cursor-pointer">
-                <option value="featured">{labels.sortRelevance}</option>
-                <option value="price-asc">{labels.sortPriceAsc}</option>
-                <option value="price-desc">{labels.sortPriceDesc}</option>
-                <option value="name">{labels.sortName}</option>
-              </select>
+              {/* Only the orderings the workspace turned on. Choosing the
+                  default drops the parameter rather than spelling it out. */}
+              {sortOptions.length > 1 && (
+                <select
+                  value={activeSort ?? ''}
+                  aria-label={i18n.t('Sort by')}
+                  /* Ordering is done by the query now, so the list only
+                     changes once the server answers. */
+                  disabled={sorting}
+                  onChange={event =>
+                    setParam({
+                      sort:
+                        event.target.value === defaultSort
+                          ? null
+                          : event.target.value,
+                    })
+                  }
+                  className="px-3 py-[9px] rounded-[10px] bg-white border border-ink-150 text-[13px] font-semibold text-ink-800 cursor-pointer disabled:opacity-60 disabled:cursor-wait">
+                  {sortOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </header>
 

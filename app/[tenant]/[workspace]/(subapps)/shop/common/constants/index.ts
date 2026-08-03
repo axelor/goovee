@@ -25,6 +25,11 @@ export const SORT_BY_OPTIONS = [
   },
 ] as const;
 
+/* The catalogue opens A-Z when the workspace offers that ordering, so it reads
+   the same as a workspace that configured no ordering at all — the query falls
+   back to the same one. Otherwise the first ordering the workspace offers. */
+export const DEFAULT_SORT_OPTION = 'byAToZ';
+
 export const SHIPPING_TYPE = {
   REGULAR: 'regular',
   FAST: 'fast',

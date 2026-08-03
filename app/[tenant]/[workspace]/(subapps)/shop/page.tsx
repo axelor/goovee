@@ -17,6 +17,10 @@ import type {Workspace} from '@/orm/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import type {ComputedProduct} from '@/types';
+import {
+  DEFAULT_SORT_OPTION,
+  SORT_BY_OPTIONS,
+} from '@/subapps/shop/common/constants';
 import {findProducts} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/orm/product';
 import {shouldHidePricesAndPurchase} from '@/orm/product';
 import {getShopConfig, type ShopConfig} from '@/subapps/shop/common/orm/config';
@@ -26,9 +30,27 @@ import {
   ShopCatalog,
   type ShopCategory,
   type ShopLabels,
+  type ShopSortOption,
 } from '@/app/[tenant]/[workspace]/(subapps)/shop/common/ui/components';
 
 const CATALOG_LIMIT = 500;
+
+/* The workspace decides which of the orderings it offers. Ordering is left to
+ * the query so it runs on the stored values rather than on formatted prices. */
+async function buildSortOptions(
+  workspaceConfig: ShopConfig | Cloned<ShopConfig>,
+): Promise<ShopSortOption[]> {
+  const enabled = SORT_BY_OPTIONS.filter(option =>
+    Boolean(workspaceConfig[option.value]),
+  );
+
+  return Promise.all(
+    enabled.map(async option => ({
+      value: option.value,
+      label: await t(option.label),
+    })),
+  );
+}
 
 async function Catalog({
   workspace,
@@ -36,18 +58,29 @@ async function Catalog({
   user,
   config,
   workspaceConfig,
+  sort,
 }: {
   workspace: Workspace | Cloned<Workspace>;
   client: Client;
   user: User | undefined;
   config: TenantConfig;
   workspaceConfig: ShopConfig | Cloned<ShopConfig>;
+  sort?: string;
 }) {
-  const [categoriesRes, labels, hidePriceAndPurchase] = await Promise.all([
-    findCategories({workspace, client, user}).then(clone),
-    buildLabels(),
-    shouldHidePricesAndPurchase({user, config: workspaceConfig, client}),
-  ]);
+  const [categoriesRes, labels, hidePriceAndPurchase, sortOptions] =
+    await Promise.all([
+      findCategories({workspace, client, user}).then(clone),
+      buildLabels(),
+      shouldHidePricesAndPurchase({user, config: workspaceConfig, client}),
+      buildSortOptions(workspaceConfig),
+    ]);
+
+  const defaultSort =
+    sortOptions.find(option => option.value === DEFAULT_SORT_OPTION)?.value ??
+    sortOptions[0]?.value;
+
+  const activeSort =
+    sortOptions.find(option => option.value === sort)?.value ?? defaultSort;
 
   const allCategories = (categoriesRes as ShopCategory[]) ?? [];
 
@@ -68,6 +101,7 @@ async function Catalog({
         workspaceConfig,
         page: 1,
         limit: CATALOG_LIMIT,
+        sort: activeSort,
         categoryids: portalCategoryIds,
       }).then(clone)
     : [];
@@ -92,6 +126,9 @@ async function Catalog({
       categories={categories}
       products={products}
       labels={labels}
+      sortOptions={sortOptions}
+      activeSort={activeSort}
+      defaultSort={defaultSort}
       hidePriceAndPurchase={hidePriceAndPurchase}
       displayPrices={Boolean(workspaceConfig.displayPrices)}
     />
@@ -108,10 +145,6 @@ async function buildLabels(): Promise<ShopLabels> {
     productsLabel,
     productLabel,
     searchPlaceholder,
-    sortRelevance,
-    sortPriceAsc,
-    sortPriceDesc,
-    sortName,
     inStockBadge,
     outOfStockBadge,
     addToCartLabel,
@@ -127,10 +160,6 @@ async function buildLabels(): Promise<ShopLabels> {
     t('products'),
     t('product'),
     t('Search…'),
-    t('Relevance'),
-    t('Price ascending'),
-    t('Price descending'),
-    t('Name A-Z'),
     t('In stock'),
     t('Out of stock'),
     t('Add to cart'),
@@ -148,10 +177,6 @@ async function buildLabels(): Promise<ShopLabels> {
     productsLabel,
     productLabel,
     searchPlaceholder,
-    sortRelevance,
-    sortPriceAsc,
-    sortPriceDesc,
-    sortName,
     inStockBadge,
     outOfStockBadge,
     addToCartLabel,
@@ -183,8 +208,14 @@ function CatalogSkeleton() {
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
+  searchParams: Promise<{[key: string]: string | string[] | undefined}>;
 }) {
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+  const sort =
+    typeof searchParams.sort === 'string' ? searchParams.sort : undefined;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
@@ -231,6 +262,7 @@ export default async function Page(props: {
           user={user}
           config={config}
           workspaceConfig={workspaceConfig}
+          sort={sort}
         />
       </Suspense>
       <OrderAlert />
