@@ -219,7 +219,7 @@ async function Detail({
 function DetailSkeleton() {
   return (
     <div className="flex h-full min-h-[calc(100vh-4rem)] bg-ink-25">
-      <div className="w-[260px] shrink-0 bg-white border-r border-ink-100 px-[18px] py-5" />
+      <div className="hidden lg:block w-[260px] shrink-0 bg-white border-r border-ink-100 px-[18px] py-5" />
       <div className="flex-1 px-8 py-6">
         <div className="h-4 w-64 bg-ink-100 rounded mb-4 animate-pulse" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

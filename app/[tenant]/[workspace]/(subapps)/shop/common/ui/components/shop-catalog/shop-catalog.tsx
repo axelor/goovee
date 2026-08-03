@@ -194,8 +194,9 @@ export function ShopCatalog({
 
   return (
     <div className="flex h-full min-h-[calc(100vh-4rem)] bg-ink-25">
-      {/* Sidebar */}
-      <aside className="w-[260px] shrink-0 bg-white border-r border-ink-100 px-[18px] py-5 overflow-y-auto">
+      {/* Sidebar — replaced below lg by the slide-out in the mobile menu bar,
+          which carries the same categories and availability filter. */}
+      <aside className="hidden lg:block w-[260px] shrink-0 bg-white border-r border-ink-100 px-[18px] py-5 overflow-y-auto">
         <h2 className="m-0 mb-3.5 text-[12px] font-extrabold uppercase tracking-[0.06em] text-ink-700">
           {labels.categoriesTitle}
         </h2>
