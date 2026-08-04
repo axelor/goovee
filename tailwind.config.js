@@ -46,7 +46,6 @@ module.exports = {
           DEFAULT: 'hsl(var(--success))',
           foreground: 'hsl(var(--success-foreground))',
           dark: 'hsl(var(--success-dark))',
-          light: 'hsl(var(--success-light))',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
