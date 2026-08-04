@@ -59,7 +59,7 @@ export default async function Page(props: {
 
   const [folder, files, labels] = await Promise.all([
     fetchFolderWithParent({id, workspaceURL, client, user}).then(clone),
-    fetchFiles({id, client, user}).then(clone),
+    fetchFiles({id, client, user, workspaceURL}).then(clone),
     buildLabels(),
   ]);
 

@@ -121,6 +121,10 @@ export async function fetchPinnedFoldersWithMeta({
         where: {
           isDirectory: {ne: true},
           parent: {id: folder.id},
+          // A file's workspace membership is independent of its parent folder,
+          // so scope the count to this workspace or it can tally files from
+          // another one that happen to hang under the same folder.
+          workspaceSet: {url: workspaceURL},
           AND: [
             filterPrivate({user}),
             {OR: [{archived: false}, {archived: null}]},
@@ -185,12 +189,16 @@ export async function fetchFiles({
   user,
   client,
   archived,
+  workspaceURL,
 }: {
   id: string;
   user?: User;
   client: Client;
   archived?: boolean;
+  workspaceURL: string;
 }) {
+  if (!workspaceURL) return [];
+
   const files = await client.aOSDMSFile.find({
     where: {
       isDirectory: {
@@ -198,6 +206,12 @@ export async function fetchFiles({
       },
       parent: {
         id,
+      },
+      // Sibling files are scoped by parent, but a file's workspace membership is
+      // independent of its parent, so gate on the workspace too — otherwise a
+      // file from another workspace under the same folder would be listed.
+      workspaceSet: {
+        url: workspaceURL,
       },
       AND: [
         filterPrivate({user}),

@@ -90,7 +90,7 @@ export default async function Page(props: {
   // Siblings: other files in the same parent folder
   const parentId = file.parent?.id;
   const siblings = parentId
-    ? await fetchFiles({id: parentId, client, user}).then(clone)
+    ? await fetchFiles({id: parentId, client, user, workspaceURL}).then(clone)
     : [];
 
   const labels = await buildLabels();
