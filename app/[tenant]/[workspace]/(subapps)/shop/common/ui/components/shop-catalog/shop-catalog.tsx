@@ -187,7 +187,7 @@ export function ShopCatalog({
         {/* Pinned below whatever the header actually occupies, which it
             publishes itself. Before it has, nothing is pinned yet and zero is
             the right answer. */}
-        <div className="sticky top-[var(--goovee-sticky-header,0px)] max-h-[calc(100vh-var(--goovee-sticky-header,0px))] px-[18px] py-5 overflow-y-auto">
+        <div className="sticky top-[var(--goovee-sticky-header,0px)] max-h-[calc(100vh-var(--goovee-header-height,0px))] px-[18px] py-5 overflow-y-auto">
           <h2 className="m-0 mb-3.5 text-[12px] font-extrabold uppercase tracking-[0.06em] text-ink-700">
             {labels.categoriesTitle}
           </h2>

@@ -36,7 +36,11 @@ export interface DocsSidebarProps {
   }) => Promise<DocumentSearchResult[]>;
 }
 
-export function DocsSidebar({
+/* Container-agnostic on purpose: the desktop column and the mobile slide-out
+   show the same search, home link and folder tree, so the tree's expand state
+   and search filter live here once rather than in each shell. The container
+   supplies the flex column the tree stretches into. */
+export function DocsSidebarContent({
   categories,
   workspaceURI,
   workspaceURL,
@@ -143,7 +147,7 @@ export function DocsSidebar({
   const isSearching = !!search.trim();
 
   return (
-    <aside className="w-[280px] shrink-0 bg-white border-r border-ink-100 flex flex-col">
+    <>
       {/* Search */}
       <div className="px-[18px] pt-[18px] pb-3 border-b border-ink-100">
         <div className="flex items-center gap-2 px-3 py-[9px] rounded-[10px] bg-royal-pale/60 border border-royal-border">
@@ -159,7 +163,7 @@ export function DocsSidebar({
 
       {/* Global file search results */}
       {hasQuery && (
-        <div className="px-3 pt-3 border-b border-ink-100 pb-3">
+        <div className="min-h-0 px-3 pt-3 border-b border-ink-100 pb-3">
           <div className="rounded-lg border border-ink-100 overflow-hidden">
             <div className="px-3 py-1.5 bg-ink-25 text-[10.5px] font-extrabold tracking-[0.06em] uppercase text-ink-500 flex items-center gap-2">
               {i18n.t('Files')}
@@ -228,7 +232,7 @@ export function DocsSidebar({
       </div>
 
       {/* Tree */}
-      <div className="flex-1 px-3 pt-2 pb-5 overflow-y-auto">
+      <div className="flex-1 min-h-0 px-3 pt-2 pb-5 overflow-y-auto">
         <div className="text-[10.5px] font-extrabold tracking-[0.06em] uppercase text-ink-500 px-2 py-1.5">
           {categoriesLabel}
         </div>
@@ -246,6 +250,22 @@ export function DocsSidebar({
                 workspaceURI={workspaceURI}
               />
             ))}
+      </div>
+    </>
+  );
+}
+
+/* The column only exists from lg up; below that the same content is reached
+   from the slide-out in the mobile menu bar. It spans the page so its
+   background and border do, while the content inside stays put and the folder
+   tree scrolls on its own — a deep tree would otherwise scroll away with the
+   page, and the tree's own overflow could never engage without a bounded
+   height to stretch into. */
+export function DocsSidebar(props: DocsSidebarProps) {
+  return (
+    <aside className="hidden lg:block w-[280px] shrink-0 bg-white border-r border-ink-100">
+      <div className="sticky top-[var(--goovee-sticky-header,0px)] max-h-[calc(100vh-var(--goovee-header-height,0px))] flex flex-col">
+        <DocsSidebarContent {...props} />
       </div>
     </aside>
   );

@@ -210,29 +210,31 @@ export default function Header({
   const isFixedHeader = config.isFixedHeader;
   const headerRef = useRef<HTMLDivElement | null>(null);
 
-  /* Publishes how much room the header permanently takes at the top of the
-     viewport, so anything that pins itself below it can say so in CSS. Zero
-     when the header scrolls away, since it then takes no room at all. The
-     header is more than one row deep and its height depends on the user, the
-     workspace navigation and the viewport, so it has to be measured rather
-     than assumed. */
+  /* Publishes the header's size in CSS so nothing downstream has to assume it.
+     The header is more than one row deep and its height depends on the user,
+     the workspace navigation and the viewport, so it can only be measured.
+
+     Two values, because they answer different questions. The height is how much
+     of the screen the header takes up, which is true whether or not it is
+     pinned — anything sizing itself against the remaining space wants this. The
+     pin offset is how far down the viewport a pinned element has to start to
+     clear it, which is nothing when the header scrolls away with the page. */
   useEffect(() => {
     const root = document.documentElement;
-    const property = '--goovee-sticky-header';
-
-    if (!isFixedHeader) {
-      root.style.setProperty(property, '0px');
-      return () => root.style.removeProperty(property);
-    }
+    const heightProperty = '--goovee-header-height';
+    const pinProperty = '--goovee-sticky-header';
 
     const header = headerRef.current;
     if (!header) return;
 
-    const publish = () =>
+    const publish = () => {
+      const height = Math.round(header.getBoundingClientRect().height);
+      root.style.setProperty(heightProperty, `${height}px`);
       root.style.setProperty(
-        property,
-        `${Math.round(header.getBoundingClientRect().height)}px`,
+        pinProperty,
+        isFixedHeader ? `${height}px` : '0px',
       );
+    };
 
     publish();
     const observer = new ResizeObserver(publish);
@@ -240,7 +242,8 @@ export default function Header({
 
     return () => {
       observer.disconnect();
-      root.style.removeProperty(property);
+      root.style.removeProperty(heightProperty);
+      root.style.removeProperty(pinProperty);
     };
   }, [isFixedHeader]);
 

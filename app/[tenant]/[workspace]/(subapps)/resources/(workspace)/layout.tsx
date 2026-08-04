@@ -13,6 +13,7 @@ import {
   type DocsSidebarCategory,
 } from '@/subapps/resources/common/ui/components';
 import {FolderLogoIcon} from '@/subapps/resources/common/ui/components/folder-logo-icon';
+import MobileMenuFolders from '@/subapps/resources/mobile-menu-folders';
 
 export default async function Layout({
   params: paramsPromise,
@@ -78,8 +79,19 @@ export default async function Layout({
   const categories = withIcons(topLevel);
 
   return (
-    <div className="flex flex-1 min-h-0 bg-ink-25">
+    /* Always at least a screenful, so the folder column's background and
+       border reach the bottom even when a folder holds a single file. */
+    <div className="flex flex-1 min-h-[calc(100vh-var(--goovee-header-height,0px))] bg-ink-25">
       <DocsSidebar
+        categories={categories}
+        workspaceURI={workspaceURI}
+        workspaceURL={workspaceURL}
+        searchPlaceholder={searchPlaceholder}
+        homeLabel={homeLabel}
+        categoriesLabel={categoriesLabel}
+        searchAction={searchDocuments}
+      />
+      <MobileMenuFolders
         categories={categories}
         workspaceURI={workspaceURI}
         workspaceURL={workspaceURL}
