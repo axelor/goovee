@@ -57,12 +57,11 @@ import {
   PinGroupSchema,
   ExitGroupSchema,
   JoinGroupSchema,
-  AddGroupNotificationSchema,
+  SaveGroupNotificationsSchema,
   GetSubscribersByGroupSchema,
   FindMediaSchema,
   AddPostSchema,
   FetchPostsSchema,
-  FetchGroupsByMembersSchema,
   ToggleReactionSchema,
   FindSearchPostsSchema,
   ReactionSummarySchema,
@@ -71,12 +70,11 @@ import {
   type PinGroupInput,
   type ExitGroupInput,
   type JoinGroupInput,
-  type AddGroupNotificationInput,
+  type SaveGroupNotificationsInput,
   type GetSubscribersByGroupInput,
   type FindMediaInput,
   type AddPostInput,
   type FetchPostsInput,
-  type FetchGroupsByMembersInput,
   type PostAttachmentInput,
 } from '@/subapps/forum/common/validators';
 
@@ -349,31 +347,20 @@ export async function joinGroup({
   }
 }
 
-export async function addGroupNotification({
-  id,
-  groupID,
-  notificationType,
-  workspaceURL,
-  workspaceURI,
-}: AddGroupNotificationInput) {
-  const parsed = AddGroupNotificationSchema.safeParse({
-    id,
-    groupID,
-    notificationType,
-    workspaceURL,
-    workspaceURI,
-  });
+export async function saveGroupNotifications(
+  input: SaveGroupNotificationsInput,
+): Promise<
+  {success: true} | {error: true; message: string; failedIds?: string[]}
+> {
+  const parsed = SaveGroupNotificationsSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
+  const {prefs, workspaceURL, workspaceURI} = parsed.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
-
   if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
+    return {error: true, message: await t('TenantId is required')};
   }
 
   const access = await ensureAccess({
@@ -389,42 +376,49 @@ export async function addGroupNotification({
   const {user, workspace} = access;
   const {client} = access.tenant;
 
-  const memberGroup = await findMemberGroupById({
-    id,
-    groupID,
-    workspaceID: workspace.id,
-    client,
-    user,
-  });
+  // Each membership is re-read before writing: that lookup is scoped to the
+  // caller, so it is what prevents writing another user's preferences.
+  const failedIds: string[] = [];
+  for (const {id, groupID, notificationType} of prefs) {
+    const memberGroup = await findMemberGroupById({
+      id,
+      groupID,
+      workspaceID: workspace.id,
+      client,
+      user,
+    });
 
-  if (!memberGroup) {
-    return {
-      error: true,
-      message: await t('Member not part of the group'),
-    };
-  }
+    if (!memberGroup) {
+      failedIds.push(String(id));
+      continue;
+    }
 
-  try {
-    const response = await client.aOSPortalForumGroupMember
-      .update({
+    try {
+      await client.aOSPortalForumGroupMember.update({
         data: {
           id: memberGroup.id,
           version: memberGroup.version,
           notificationSelect: notificationType,
         },
         select: {id: true},
-      })
-      .then(clone);
+      });
+    } catch (error) {
+      console.error('error >>>', error);
+      failedIds.push(String(id));
+    }
+  }
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
-    return {success: true, data: response};
-  } catch (error) {
-    console.error('error >>>', error);
+  revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+
+  if (failedIds.length) {
     return {
       error: true,
-      message: await t('Some error occurred'),
+      message: await t('Some settings could not be saved'),
+      failedIds,
     };
   }
+
+  return {success: true};
 }
 
 export async function addPost(input: AddPostInput) {
@@ -719,41 +713,6 @@ export async function fetchPosts(input: FetchPostsInput) {
   }));
 
   return {posts: postsWithCounts, scoreByPost, pageInfo};
-}
-
-export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
-  const parsed = FetchGroupsByMembersSchema.safeParse(input);
-  if (!parsed.success) {
-    return {error: true, message: z.prettifyError(parsed.error)};
-  }
-  const {id, searchKey, orderBy, workspaceURL} = parsed.data;
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
-  const access = await ensureAccess({
-    code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
-    allowGuest: false,
-  });
-  if (!access.ok) {
-    return {error: true, message: await accessMessage(access.reason)};
-  }
-
-  return await findGroupsByMembers({
-    id,
-    searchKey,
-    orderBy,
-    workspaceID: access.workspace.id,
-    client: access.tenant.client,
-    user: access.user,
-  });
 }
 
 export async function findSearchPosts(input: {

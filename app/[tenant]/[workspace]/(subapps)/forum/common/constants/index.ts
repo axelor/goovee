@@ -12,10 +12,8 @@ import {ORDER_BY} from '@/constants';
 // ---- LOCAL IMPORTS ---- //
 import type {Level} from '@/subapps/forum/common/types/forum';
 
-export const GROUPS = 'Groups';
 export const MEMBER = 'Member';
 export const OTHER_GROUPS = 'Other groups';
-export const SEARCH_HERE = 'Search here';
 export const DISABLED_SEARCH_PLACEHOLDER = 'You must log in to be able to post';
 export const MARK_AS_READ = 'Mark as read';
 export const PIN = 'Pin';
@@ -43,22 +41,9 @@ export const UPLOAD = 'Upload';
 export const FILE_TITLE = 'File Title';
 export const SELECT_A_GROUP = 'Select a group';
 export const ENTER_TITLE = 'Enter Title';
-export const MANAGE_NOTIFICATIONS = 'Manage notifications';
-export const SORT_BY = 'Sort By';
 export const SEE_MORE = 'See more';
 export const SEE_LESS = 'See less';
 export const JOIN_GROUP_TO_COMMENT = 'Join the group to comment';
-
-export const GROUP_SORT_BY = [
-  {
-    id: 'ASC',
-    title: 'A-Z',
-  },
-  {
-    id: 'DESC',
-    title: 'Z-A',
-  },
-];
 
 export const FORUM_CONTENT = {
   POSTS: 'posts',
@@ -106,28 +91,35 @@ export const NOTIFICATION_VALUES = {
   ALL_ON_MY_POST: 'allOnMyPost',
   NEW_COMMENTS_ON_MY_POST: 'newCommentsOnMyPost',
   NONE: 'none',
-};
+} as const;
 
-export const NOTIFICATIONS_OPTIONS = [
+export type NotificationValue =
+  (typeof NOTIFICATION_VALUES)[keyof typeof NOTIFICATION_VALUES];
+
+export const NOTIFICATIONS_OPTIONS: {
+  id: number;
+  title: string;
+  value: NotificationValue;
+}[] = [
   {
     id: 1,
     title: 'All new posts and new comments',
-    value: 'all',
+    value: NOTIFICATION_VALUES.ALL,
   },
   {
     id: 2,
     title: 'All new posts and new comments on my posts',
-    value: 'allOnMyPost',
+    value: NOTIFICATION_VALUES.ALL_ON_MY_POST,
   },
   {
     id: 3,
     title: 'Only new comments on my posts',
-    value: 'newCommentsOnMyPost',
+    value: NOTIFICATION_VALUES.NEW_COMMENTS_ON_MY_POST,
   },
   {
     id: 4,
     title: 'No notifications',
-    value: 'none',
+    value: NOTIFICATION_VALUES.NONE,
   },
 ];
 
