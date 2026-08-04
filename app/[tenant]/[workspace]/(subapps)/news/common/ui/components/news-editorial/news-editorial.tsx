@@ -12,6 +12,7 @@ import {Link} from '@/ui/components/link';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
+import {NewsFeatured} from '@/subapps/news/common/ui/components/news-featured';
 import type {NewsItem} from '@/subapps/news/common/types';
 import type {NewsConfig} from '@/subapps/news/common/orm/config';
 import type {Cloned} from '@/types/util';
@@ -29,6 +30,7 @@ export function NewsEditorial({
   config,
   children,
   publisher,
+  featured,
 }: {
   articles?: Article[];
   heading?: string;
@@ -37,14 +39,21 @@ export function NewsEditorial({
   /* Publisher name woven into the empty-state sentence — the workspace's own
      name, so the copy reads right whichever portal is being browsed. */
   publisher?: string;
+  /* Passing this (even as an empty array) switches the body into hub mode: the
+     "Featured" rail stands in for the asymmetric hero and every article flows
+     into the grid below. Category pages leave it undefined and keep the hero. */
+  featured?: Article[];
 }) {
   const {workspaceURI} = useWorkspace();
   const {isShowPublicationAuthor, isShowPublicationDate} = config;
 
+  const hubMode = featured !== undefined;
+  const hasFeatured = !!featured?.length;
+
   /* Hub-only empty state: a category listing that happens to be empty passes its
      own heading and children (its "No news available." message), so leave those
      alone and only stand in for the bare hub with nothing published. */
-  if (!articles.length && !heading && children == null) {
+  if (!articles.length && !hasFeatured && !heading && children == null) {
     return (
       <div className="bg-ink-25 min-h-full">
         <div className="mx-auto max-w-[560px] px-8 pb-20 pt-24 text-center">
@@ -69,9 +78,12 @@ export function NewsEditorial({
     );
   }
 
-  const featured = articles[0];
+  const heroArticle = articles[0];
   const secondaries = articles.slice(1, 3);
   const rest = articles.slice(3);
+  // In hub mode the Featured rail owns the top of the page, so the grid carries
+  // every article; category pages keep the hero and grid only what follows it.
+  const gridArticles = hubMode ? articles : rest;
 
   const newsBase = `${workspaceURI}/${SUBAPP_CODES.news}`;
   const articleHref = (a: Article) =>
@@ -92,83 +104,87 @@ export function NewsEditorial({
   return (
     <div className="bg-ink-25 min-h-full flex flex-col flex-1">
       <div className="max-w-[1280px] w-full mx-auto px-4 lg:px-8 py-8 pb-14">
-        {/* Hero: featured XL + 2 secondaries */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5 mb-8">
-          {featured && (
-            <Link
-              href={articleHref(featured)}
-              className="group bg-white border border-ink-100 rounded-[18px] overflow-hidden shadow-md transition-transform hover:-translate-y-0.5">
-              <div className="relative h-[300px] lg:h-[360px]">
-                <Image
-                  src={imageURL(featured)}
-                  alt={featured.title}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width:1024px) 760px, 100vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/85" />
-                {catLabel(featured) && (
-                  <span className="absolute top-[18px] left-[18px] px-3 py-[5px] rounded-full bg-white text-royal-dark text-[10.5px] font-extrabold uppercase tracking-[0.06em]">
-                    {catLabel(featured)}
-                  </span>
-                )}
-                <div className="absolute left-6 right-6 bottom-[22px] text-white">
-                  <h2 className="text-2xl lg:text-[30px] font-extrabold tracking-[-0.025em] leading-[1.15] [text-shadow:0_2px_12px_rgba(0,0,0,0.4)]">
-                    {featured.title}
-                  </h2>
-                  {meta(featured) && (
-                    <div className="mt-2.5 text-[13px] text-white/85">
-                      {meta(featured)}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Link>
-          )}
-
-          <div className="flex flex-col gap-4">
-            {secondaries.map(a => (
+        {hubMode ? (
+          <NewsFeatured articles={featured} config={config} />
+        ) : (
+          /* Hero: featured XL + 2 secondaries */
+          <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5 mb-8">
+            {heroArticle && (
               <Link
-                key={a.slug}
-                href={articleHref(a)}
-                className="group bg-white border border-ink-100 rounded-[14px] overflow-hidden grid grid-cols-2 flex-1 transition-transform hover:-translate-y-0.5 min-h-[150px]">
-                <div className="relative">
+                href={articleHref(heroArticle)}
+                className="group bg-white border border-ink-100 rounded-[18px] overflow-hidden shadow-md transition-transform hover:-translate-y-0.5">
+                <div className="relative h-[300px] lg:h-[360px]">
                   <Image
-                    src={imageURL(a)}
-                    alt={a.title}
+                    src={imageURL(heroArticle)}
+                    alt={heroArticle.title}
                     fill
                     className="object-cover"
-                    sizes="240px"
+                    sizes="(min-width:1024px) 760px, 100vw"
                   />
-                </div>
-                <div className="p-[18px] flex flex-col gap-2">
-                  {catLabel(a) && (
-                    <span className="self-start px-2 py-0.5 rounded bg-royal-pale text-royal-dark text-[10px] font-extrabold tracking-[0.04em]">
-                      {catLabel(a)}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/85" />
+                  {catLabel(heroArticle) && (
+                    <span className="absolute top-[18px] left-[18px] px-3 py-[5px] rounded-full bg-white text-royal-dark text-[10.5px] font-extrabold uppercase tracking-[0.06em]">
+                      {catLabel(heroArticle)}
                     </span>
                   )}
-                  <h3 className="text-[15px] font-bold text-ink-900 leading-snug line-clamp-3">
-                    {a.title}
-                  </h3>
-                  {isShowPublicationDate && (
-                    <div className="mt-auto text-[11.5px] text-ink-500">
-                      {formatRelativeTime(a.publicationDateTime)}
-                    </div>
-                  )}
+                  <div className="absolute left-6 right-6 bottom-[22px] text-white">
+                    <h2 className="text-2xl lg:text-[30px] font-extrabold tracking-[-0.025em] leading-[1.15] [text-shadow:0_2px_12px_rgba(0,0,0,0.4)]">
+                      {heroArticle.title}
+                    </h2>
+                    {meta(heroArticle) && (
+                      <div className="mt-2.5 text-[13px] text-white/85">
+                        {meta(heroArticle)}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Link>
-            ))}
+            )}
+
+            <div className="flex flex-col gap-4">
+              {secondaries.map(a => (
+                <Link
+                  key={a.slug}
+                  href={articleHref(a)}
+                  className="group bg-white border border-ink-100 rounded-[14px] overflow-hidden grid grid-cols-2 flex-1 transition-transform hover:-translate-y-0.5 min-h-[150px]">
+                  <div className="relative">
+                    <Image
+                      src={imageURL(a)}
+                      alt={a.title}
+                      fill
+                      className="object-cover"
+                      sizes="240px"
+                    />
+                  </div>
+                  <div className="p-[18px] flex flex-col gap-2">
+                    {catLabel(a) && (
+                      <span className="self-start px-2 py-0.5 rounded bg-royal-pale text-royal-dark text-[10px] font-extrabold tracking-[0.04em]">
+                        {catLabel(a)}
+                      </span>
+                    )}
+                    <h3 className="text-[15px] font-bold text-ink-900 leading-snug line-clamp-3">
+                      {a.title}
+                    </h3>
+                    {isShowPublicationDate && (
+                      <div className="mt-auto text-[11.5px] text-ink-500">
+                        {formatRelativeTime(a.publicationDateTime)}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* More news */}
-        {rest.length > 0 && (
+        {gridArticles.length > 0 && (
           <>
             <h2 className="mb-[18px] text-lg font-bold tracking-[-0.015em] text-ink-900">
               {heading || i18n.t('More news')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px]">
-              {rest.map(a => (
+              {gridArticles.map(a => (
                 <Link
                   key={a.slug}
                   href={articleHref(a)}
