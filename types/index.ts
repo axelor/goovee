@@ -205,12 +205,6 @@ export type ComputedProduct = {
   errorMessage?: string;
 };
 
-export type MetaFile = {
-  id: ID;
-  fileName: string;
-  fileType?: string;
-};
-
 export type Category = {
   name: string;
   slug: string;

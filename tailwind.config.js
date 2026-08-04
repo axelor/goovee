@@ -301,8 +301,6 @@ module.exports = {
         xs: 'var(--sh-xs)',
         'soft-sm': 'var(--sh-sm)',
         'soft-md': 'var(--sh-md)',
-        'soft-lg': 'var(--sh-lg)',
-        'soft-xl': 'var(--sh-xl)',
       },
       backgroundImage: {
         'royal-gradient':
