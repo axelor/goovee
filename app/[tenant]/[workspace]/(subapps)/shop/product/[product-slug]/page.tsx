@@ -69,6 +69,11 @@ export async function generateMetadata(props: {
     .map(c => c?.id)
     .filter((id): id is string | number => id != null);
 
+  // No categories means no catalogue to resolve against; without this guard the
+  // empty id list drops the category clause and the lookup matches any sellable
+  // product in the tenant by slug — the leak this scoping exists to prevent.
+  if (!portalCategoryIds.length) return null;
+
   const computed = await findProductBySlug({
     slug: productSlug,
     workspace: access.workspace,
@@ -141,6 +146,11 @@ async function Detail({
   const portalCategoryIds = allCategories
     .map(c => c?.id)
     .filter((id): id is string | number => id != null);
+
+  // Same guard as the metadata path: with no categories the slug lookup would
+  // otherwise resolve any sellable product in the tenant and render its full
+  // detail page, so send the reader back to the shop instead.
+  if (!portalCategoryIds.length) return redirect(`${workspaceURI}/shop`);
 
   const [computed, allProductsRes, labels, hidePriceAndPurchase] =
     await Promise.all([
