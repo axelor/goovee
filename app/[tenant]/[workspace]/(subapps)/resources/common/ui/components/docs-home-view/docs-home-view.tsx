@@ -110,7 +110,16 @@ function PinnedFolderCard({
         </div>
         <MdArrowForward className="text-ink-300 text-sm shrink-0 group-hover:text-royal transition-colors mt-1" />
       </div>
-      <div className="flex items-center justify-between pt-3 border-t border-ink-100 text-[12px] text-ink-500">
+      {folder.description && (
+        <p
+          title={folder.description}
+          className="m-0 text-[12.5px] leading-[1.45] text-ink-600 line-clamp-2 break-words">
+          {folder.description}
+        </p>
+      )}
+      {/* Held at the bottom so the cards in a row line their footers up
+          whatever length the descriptions above them run to. */}
+      <div className="mt-auto flex items-center justify-between pt-3 border-t border-ink-100 text-[12px] text-ink-500">
         <span className="tabular-nums">
           {itemCount}{' '}
           {itemCount === 1 ? labels.documentsLabelOne : labels.documentsLabel}

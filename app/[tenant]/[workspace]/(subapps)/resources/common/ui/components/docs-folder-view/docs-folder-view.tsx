@@ -119,6 +119,11 @@ export function DocsFolderView({
           <h1 className="m-0 text-[26px] font-extrabold text-ink-900 tracking-[-0.025em] leading-tight">
             {folder.fileName}
           </h1>
+          {folder.description && (
+            <p className="mt-1.5 max-w-[68ch] text-[13.5px] leading-[1.5] text-ink-600 break-words">
+              {folder.description}
+            </p>
+          )}
           <p className="mt-1 text-[13px] text-ink-500">
             {files.length}{' '}
             {files.length === 1
@@ -341,6 +346,7 @@ function FileTable({
             const sizeValue = file.metaFile?.sizeText ?? '—';
             const author =
               file.createdBy?.fullName ?? file.createdBy?.name ?? '—';
+            const description = file.metaFile?.description;
             return (
               <tr
                 key={file.id}
@@ -351,20 +357,42 @@ function FileTable({
                 <td className="px-[18px] py-3">
                   <Link
                     href={viewHref(file.id)}
-                    className="flex items-center gap-3 min-w-0">
+                    className={cn(
+                      'flex gap-3 min-w-0',
+                      description
+                        ? 'items-center xl:items-start'
+                        : 'items-center',
+                    )}>
                     <DocFileIcon
                       fileType={file.metaFile?.fileType}
                       fileName={file.fileName}
                       size={32}
                     />
-                    <span className="font-semibold text-ink-900 truncate">
-                      {file.fileName}
-                    </span>
-                    {fresh && (
-                      <span className="inline-flex items-center px-1.5 py-px rounded bg-mint-50 text-mint-700 text-[9.5px] font-extrabold uppercase tracking-[0.06em] shrink-0">
-                        {labels.newBadge}
+                    <span className="flex flex-col min-w-0">
+                      <span className="flex items-center gap-3 min-w-0">
+                        <span className="font-semibold text-ink-900 truncate">
+                          {file.fileName}
+                        </span>
+                        {fresh && (
+                          <span className="inline-flex items-center px-1.5 py-px rounded bg-mint-50 text-mint-700 text-[9.5px] font-extrabold uppercase tracking-[0.06em] shrink-0">
+                            {labels.newBadge}
+                          </span>
+                        )}
                       </span>
-                    )}
+                      {description && (
+                        /* Held back until the window is wide enough to seat it.
+                           The document column cannot shrink below the width this
+                           cap asks for, and the table's wrapper hides whatever
+                           overflows, so on a narrower window the line costs the
+                           size column and the download button their place. The
+                           grid and the viewer carry it at every width. */
+                        <span
+                          title={description}
+                          className="mt-0.5 max-w-[400px] hidden xl:block text-[12px] leading-snug text-ink-500 truncate">
+                          {description}
+                        </span>
+                      )}
+                    </span>
                   </Link>
                 </td>
                 <td className="px-[18px] py-3 text-ink-700">{author}</td>
@@ -412,6 +440,7 @@ function FileGrid({
         const fresh = isNew(file, labels.newCutoffMs);
         const dateValue = file.metaFile?.updatedOn ?? file.createdOn;
         const author = file.createdBy?.fullName ?? file.createdBy?.name ?? '—';
+        const description = file.metaFile?.description;
         return (
           <Link
             key={file.id}
@@ -438,15 +467,24 @@ function FileGrid({
               <div className="text-[13.5px] font-bold text-ink-900 leading-snug line-clamp-2">
                 {file.fileName}
               </div>
-              <div className="mt-1 text-[11.5px] text-ink-500 tabular-nums truncate">
-                {author} · {file.metaFile?.sizeText ?? '—'}
-                {dateValue && (
-                  <>
-                    {' · '}
-                    {formatDateTime(dateValue, {dateFormat: 'DD/MM/YYYY'})}
-                  </>
-                )}
-              </div>
+              {description && (
+                <div
+                  title={description}
+                  className="mt-1 text-[12px] leading-snug text-ink-500 line-clamp-2 break-words">
+                  {description}
+                </div>
+              )}
+            </div>
+            {/* Held at the bottom so the cards in a row line their dates up
+                whatever length the descriptions above them run to. */}
+            <div className="mt-auto text-[11.5px] text-ink-500 tabular-nums truncate">
+              {author} · {file.metaFile?.sizeText ?? '—'}
+              {dateValue && (
+                <>
+                  {' · '}
+                  {formatDateTime(dateValue, {dateFormat: 'DD/MM/YYYY'})}
+                </>
+              )}
             </div>
           </Link>
         );

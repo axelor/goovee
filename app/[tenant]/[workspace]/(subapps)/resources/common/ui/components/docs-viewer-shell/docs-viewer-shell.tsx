@@ -76,6 +76,7 @@ export function DocsViewerShell({
           {/* Sticky sidebar */}
           <aside className="lg:sticky lg:top-5 flex flex-col gap-3.5">
             <DetailsCard
+              description={file.metaFile?.description}
               author={author}
               category={category?.fileName}
               folder={folder?.fileName}
@@ -189,6 +190,7 @@ function ViewerToolbar({fileName}: {fileName: string}) {
 }
 
 function DetailsCard({
+  description,
   author,
   category,
   folder,
@@ -197,6 +199,7 @@ function DetailsCard({
   publishedOn,
   labels,
 }: {
+  description?: string | null;
   author: string;
   category?: string | null;
   folder?: string | null;
@@ -210,6 +213,15 @@ function DetailsCard({
       <div className="px-4 py-3 border-b border-ink-100 text-[11px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
         {labels.detailsTitle}
       </div>
+      {/* Unlabelled and in full: the rows below are label and value pairs, and
+          this is the one place with the room to show the whole text. */}
+      {description && (
+        <div className="px-4 py-3 border-b border-ink-100">
+          <p className="m-0 text-[12.5px] leading-[1.55] text-ink-700 break-words">
+            {description}
+          </p>
+        </div>
+      )}
       <dl className="divide-y divide-ink-100 text-[12.5px]">
         <Row label={labels.authorLabel} value={author} />
         {category && <Row label={labels.categoryLabel} value={category} />}
