@@ -8,6 +8,7 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {t} from '@/locale/server';
 import {SUBAPP_CODES} from '@/constants';
+import {toWorkspaceURI} from '@/utils/workspace';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {TENANT_HEADER} from '@/proxy';
@@ -171,7 +172,9 @@ export async function upload(input: UploadInput) {
       });
     });
 
-    revalidatePath(`${workspaceURL}/${SUBAPP_CODES.resources}/categories`);
+    revalidatePath(
+      `${toWorkspaceURI(workspaceURL, process.env.GOOVEE_PUBLIC_HOST)}/${SUBAPP_CODES.resources}/folder/${parentId}`,
+    );
   } catch (err) {
     return {
       error: true,
