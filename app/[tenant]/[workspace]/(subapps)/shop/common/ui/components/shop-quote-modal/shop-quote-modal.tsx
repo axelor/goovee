@@ -11,7 +11,7 @@ import {
   MdPlace,
 } from 'react-icons/md';
 
-import {SUBAPP_CODES, SUBAPP_PAGE, ADDRESS_TYPE} from '@/constants';
+import {SUBAPP_CODES, SUBAPP_PAGE, ADDRESS_TYPE, MAIN_PRICE} from '@/constants';
 import {Link} from '@/ui/components/link';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
@@ -49,6 +49,7 @@ export interface ShopQuoteModalLabels {
   moreItemsSuffix: string;
   estimatedTotalLabel: string;
   htSuffix: string;
+  ttcSuffix: string;
   addressTitle: string;
   addressDefaultBadge: string;
   addressChooseAnother: string;
@@ -97,14 +98,22 @@ export function ShopQuoteModal({
     }
   }, [open]);
 
-  const subtotalHt = useMemo(() => {
+  /* Sums the leading price, which is tax-inclusive or not depending on the
+   * workspace's mainPrice setting — so the caption is derived from the same
+   * setting instead of always claiming the figure excludes tax. */
+  const estimatedSubtotal = useMemo(() => {
     let sum = 0;
     for (const item of computedItems) {
-      const n = Number(item.computedProduct?.price?.primary ?? 0);
-      if (Number.isFinite(n)) sum += n * Number(item.quantity ?? 0);
+      const amount = Number(item.computedProduct?.price?.primary ?? 0);
+      if (Number.isFinite(amount)) sum += amount * Number(item.quantity ?? 0);
     }
     return sum;
   }, [computedItems]);
+
+  const estimatedSubtotalTaxSuffix =
+    computedItems[0]?.computedProduct?.price?.mainPrice === MAIN_PRICE.ATI
+      ? labels.ttcSuffix
+      : labels.htSuffix;
 
   const currency =
     computedItems[0]?.computedProduct?.product?.saleCurrency?.symbol ?? '€';
@@ -246,9 +255,9 @@ export function ShopQuoteModal({
                     {labels.estimatedTotalLabel}
                   </span>
                   <span className="text-[18px] font-extrabold text-ink-900 tabular-nums">
-                    {fmt(subtotalHt)}{' '}
+                    {fmt(estimatedSubtotal)}{' '}
                     <span className="text-[12px] font-semibold text-ink-500">
-                      {labels.htSuffix}
+                      {estimatedSubtotalTaxSuffix}
                     </span>
                   </span>
                 </div>

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import {Link} from '@/ui/components/link';
 import {MdChevronRight, MdShoppingCart} from 'react-icons/md';
 
-import {SUBAPP_CODES} from '@/constants';
+import {MAIN_PRICE, SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {useToast} from '@/ui/hooks';
@@ -77,6 +77,18 @@ export function ShopProductDetail({
 
   const product = computedProduct?.product;
   const price = computedProduct?.price;
+
+  /* getPrice() decides which of the two amounts leads from the workspace's
+   * mainPrice setting, so the caption has to follow the same setting or it
+   * contradicts the figure it sits next to. Read the tax-inclusive and
+   * tax-exclusive amounts directly rather than the pre-composed
+   * displayPrimary/displaySecondary, which already carry an ATI/WT unit and
+   * would print the mode twice. */
+  const isAtiLeading = price?.mainPrice === MAIN_PRICE.ATI;
+  const primaryPrice = isAtiLeading ? price?.displayAti : price?.displayWt;
+  const secondaryPrice = isAtiLeading ? price?.displayWt : price?.displayAti;
+  const primaryTaxSuffix = isAtiLeading ? labels.ttcSuffix : labels.htSuffix;
+  const secondaryTaxSuffix = isAtiLeading ? labels.htSuffix : labels.ttcSuffix;
 
   const [qty, setQty] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -310,15 +322,15 @@ export function ShopProductDetail({
                     <>
                       <div className="flex items-baseline gap-2.5">
                         <span className="text-[32px] font-extrabold text-ink-900 tracking-[-0.02em] tabular-nums">
-                          {price?.displayPrimary ?? '—'}
+                          {primaryPrice ?? '—'}
                         </span>
                         <span className="text-[13px] font-semibold text-ink-500">
-                          {labels.htSuffix}
+                          {primaryTaxSuffix}
                         </span>
                       </div>
-                      {price?.displayTwoPrices && price?.displaySecondary && (
+                      {price?.displayTwoPrices && secondaryPrice && (
                         <div className="text-[13px] text-ink-500 mt-0.5 tabular-nums">
-                          {price.displaySecondary} {labels.ttcSuffix}
+                          {secondaryPrice} {secondaryTaxSuffix}
                         </div>
                       )}
                       <PriceWarning
