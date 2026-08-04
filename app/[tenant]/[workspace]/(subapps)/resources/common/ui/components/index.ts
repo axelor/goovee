@@ -1,15 +1,3 @@
-export {
-  CategoriesSkeleton,
-  ResourceListSkeleton,
-  ExplorerSkeleton,
-} from './skeleton';
-export {
-  DocFileIcon,
-  FolderIcon,
-  getFileVisual,
-  getFolderToneClasses,
-} from './doc-file-icon';
-export type {FileTone, FileVisual} from './doc-file-icon';
 export {DocsSidebar, DocsSidebarContent} from './docs-sidebar';
 export type {DocsSidebarCategory, DocsSidebarProps} from './docs-sidebar';
 export {DocsHomeView} from './docs-home-view';

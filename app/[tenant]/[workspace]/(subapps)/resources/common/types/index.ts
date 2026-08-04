@@ -56,12 +56,3 @@ export interface DmsFile {
   } | null;
 }
 
-export type ExplorerCategory = {
-  id: string;
-  parent?: {id: string} | null;
-  fileName?: string | null;
-  logoSelect?: string | null;
-  colorSelect?: string | null;
-  children: ExplorerCategory[];
-  _parent: string[];
-};

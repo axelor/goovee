@@ -20,7 +20,7 @@ export const ROUTES = {
 
 // ---- Grouped lateral rail (8 original tabs, design "AccountV3Rail") ----
 
-export type AccountTabKey =
+type AccountTabKey =
   | 'personal'
   | 'preferences'
   | 'password'

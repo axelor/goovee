@@ -50,5 +50,3 @@ export function FolderLogoIcon({
     </span>
   );
 }
-
-export default FolderLogoIcon;
