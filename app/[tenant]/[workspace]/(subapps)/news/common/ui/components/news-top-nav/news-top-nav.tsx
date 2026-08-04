@@ -52,7 +52,13 @@ export function NewsTopNav({
   const {workspaceURI, workspaceURL} = useWorkspace();
 
   const newsBase = `${workspaceURI}/${SUBAPP_CODES.news}`;
-  const segments = pathname.split('/').filter(Boolean);
+  // Only look at the path *after* the news base, so a tenant or workspace segment
+  // that happens to be "article" or equal to a category slug can't hide the nav
+  // or light up the wrong pill.
+  const newsPath = pathname.startsWith(newsBase)
+    ? pathname.slice(newsBase.length)
+    : '';
+  const segments = newsPath.split('/').filter(Boolean);
 
   // Hide on the article detail page.
   if (segments.includes(SUBAPP_PAGE.article)) return null;

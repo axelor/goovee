@@ -31,6 +31,7 @@ export function NewsEditorial({
   children,
   publisher,
   featured,
+  page,
 }: {
   articles?: Article[];
   heading?: string;
@@ -43,12 +44,17 @@ export function NewsEditorial({
      "Featured" rail stands in for the asymmetric hero and every article flows
      into the grid below. Category pages leave it undefined and keep the hero. */
   featured?: Article[];
+  /* Category pagination — the hero only makes sense on the first page, so later
+     pages drop it and lay every article out in the grid. */
+  page?: number;
 }) {
   const {workspaceURI} = useWorkspace();
   const {isShowPublicationAuthor, isShowPublicationDate} = config;
 
   const hubMode = featured !== undefined;
   const hasFeatured = !!featured?.length;
+  // The asymmetric hero belongs to the first page of a category only.
+  const showHero = !hubMode && (page ?? 1) <= 1;
 
   /* Hub-only empty state: a category listing that happens to be empty passes its
      own heading and children (its "No news available." message), so leave those
@@ -81,9 +87,9 @@ export function NewsEditorial({
   const heroArticle = articles[0];
   const secondaries = articles.slice(1, 3);
   const rest = articles.slice(3);
-  // In hub mode the Featured rail owns the top of the page, so the grid carries
-  // every article; category pages keep the hero and grid only what follows it.
-  const gridArticles = hubMode ? articles : rest;
+  // The hero (page 1 of a category) skims off the first three; without it — the
+  // hub, or a later category page — every article flows into the grid.
+  const gridArticles = showHero ? rest : articles;
 
   const newsBase = `${workspaceURI}/${SUBAPP_CODES.news}`;
   const articleHref = (a: Article) =>
@@ -104,9 +110,14 @@ export function NewsEditorial({
   return (
     <div className="bg-ink-25 min-h-full flex flex-col flex-1">
       <div className="max-w-[1280px] w-full mx-auto px-4 lg:px-8 py-8 pb-14">
+        {!hubMode && heading && (
+          <h1 className="mb-6 text-[26px] font-extrabold tracking-[-0.025em] text-ink-900">
+            {heading}
+          </h1>
+        )}
         {hubMode ? (
           <NewsFeatured articles={featured} config={config} />
-        ) : (
+        ) : showHero ? (
           /* Hero: featured XL + 2 secondaries */
           <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-5 mb-8">
             {heroArticle && (
@@ -175,14 +186,16 @@ export function NewsEditorial({
               ))}
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* More news */}
         {gridArticles.length > 0 && (
           <>
-            <h2 className="mb-[18px] text-lg font-bold tracking-[-0.015em] text-ink-900">
-              {heading || i18n.t('More news')}
-            </h2>
+            {hubMode && (
+              <h2 className="mb-[18px] text-lg font-bold tracking-[-0.015em] text-ink-900">
+                {i18n.t('More news')}
+              </h2>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[18px]">
               {gridArticles.map(a => (
                 <Link

@@ -71,7 +71,11 @@ export async function CategoryNews({
   const pageInfo = result?.pageInfo;
 
   return (
-    <NewsEditorial articles={articles} heading={categoryTitle} config={config}>
+    <NewsEditorial
+      articles={articles}
+      heading={categoryTitle}
+      config={config}
+      page={page}>
       {articles.length === 0 ? (
         <div className="py-16 text-center font-medium text-ink-500">
           {await t(NO_NEWS_AVAILABLE)}
