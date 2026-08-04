@@ -30,12 +30,9 @@ interface CategoryNode extends OrmCategoryEntry {
 
 // ---- LOCAL IMPORTS ---- //
 import {
-  ASIDE_NEWS_LIMIT,
   DEFAULT_NEWS_ASIDE_LIMIT,
   DEFAULT_PAGE,
-  FOOTER_NEWS_LIMIT,
   HEADER_NEWS_LIMIT,
-  NEWS_FEED_LIMIT,
 } from '@/subapps/news/common/constants';
 import {getArchivedFilter} from '@/subapps/news/common/utils';
 import type {
@@ -43,8 +40,6 @@ import type {
   NewsResponse,
   RawNewsCategory,
 } from '@/subapps/news/common/types';
-
-const PAGE_LIMT = ASIDE_NEWS_LIMIT + FOOTER_NEWS_LIMIT + NEWS_FEED_LIMIT;
 
 const EMPTY_NEWS_RESPONSE: NewsResponse = {
   news: [],
@@ -57,7 +52,7 @@ const EMPTY_NEWS_RESPONSE: NewsResponse = {
   },
 };
 
-export async function findNonArchivedNewsCategories({
+async function findNonArchivedNewsCategories({
   workspace,
   user,
   client,
@@ -152,7 +147,6 @@ export async function findNews({
   user,
   archived = false,
   params,
-  skip,
 }: {
   id?: string | number;
   orderBy?: OrderBy;
@@ -166,7 +160,6 @@ export async function findNews({
   user?: User;
   archived?: boolean;
   params?: NewsQueryParams;
-  skip?: number;
 }): Promise<NewsResponse> {
   if (!workspace) {
     return EMPTY_NEWS_RESPONSE;
@@ -187,7 +180,7 @@ export async function findNews({
       .filter(id => nonarchivedcategoryids?.includes(id));
   }
 
-  const $skip = skip ? skip : limit ? getSkip(limit, page) : undefined;
+  const $skip = limit ? getSkip(limit, page) : undefined;
 
   const whereClause = {
     ...(id
@@ -297,34 +290,6 @@ export async function findNewsImageBySlug({
   if (isFullView) {
     return news?.image?.id;
   }
-  return news?.thumbnailImage?.id || news?.image?.id;
-}
-
-export async function findCategoryImageBySlug({
-  slug,
-  workspace,
-  client,
-  user,
-}: {
-  slug: string;
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-}): Promise<string | undefined> {
-  if (!workspace) return;
-
-  const news = await client.aOSPortalNewsCategory.findOne({
-    where: {
-      slug,
-      workspace: {id: workspace.id},
-      ...filterPrivate({user}),
-    },
-    select: {
-      image: {id: true},
-      thumbnailImage: {id: true},
-    },
-  });
-
   return news?.thumbnailImage?.id || news?.image?.id;
 }
 
@@ -460,7 +425,6 @@ export async function findNewsByCategory({
   client,
   user,
   params,
-  skip,
 }: {
   orderBy?: OrderBy;
   isFeaturedNews?: boolean;
@@ -471,7 +435,6 @@ export async function findNewsByCategory({
   client: Client;
   user?: User;
   params?: NewsQueryParams;
-  skip?: number;
 }) {
   const categories = await findCategories({
     showAllCategories: true,
@@ -514,7 +477,6 @@ export async function findNewsByCategory({
     client,
     user,
     params,
-    skip,
   });
 }
 
@@ -542,234 +504,6 @@ export async function findHomePageHeaderNews({
     },
   }).then(clone);
   return result;
-}
-
-export async function findHomePageFeaturedNews({
-  workspace,
-  client,
-  user,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-}) {
-  const result = await findNews({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: DEFAULT_NEWS_ASIDE_LIMIT,
-    params: {
-      where: {
-        isFeaturedNews: true,
-      },
-    },
-  }).then(clone);
-  return result;
-}
-
-export async function findHomePageAsideNews({
-  workspace,
-  client,
-  user,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-}) {
-  const result = await findNews({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: ASIDE_NEWS_LIMIT,
-    skip: HEADER_NEWS_LIMIT,
-  }).then(clone);
-  return result;
-}
-
-export async function findHomePageFooterNews({
-  workspace,
-  client,
-  user,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-}) {
-  const result = await findNews({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: FOOTER_NEWS_LIMIT,
-    skip: HEADER_NEWS_LIMIT + ASIDE_NEWS_LIMIT,
-  }).then(clone);
-  return result;
-}
-
-export async function findCategoryPageHeaderNews({
-  workspace,
-  client,
-  user,
-  slug,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  slug: string;
-}) {
-  const result = await findNewsByCategory({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: HEADER_NEWS_LIMIT,
-    slug,
-  }).then(clone);
-
-  return result;
-}
-
-export async function findCategoryPageFeaturedNews({
-  workspace,
-  client,
-  user,
-  slug,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  slug: string;
-}) {
-  const result = await findNewsByCategory({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: DEFAULT_NEWS_ASIDE_LIMIT,
-    slug,
-    params: {
-      where: {
-        isFeaturedNews: true,
-      },
-    },
-  }).then(clone);
-
-  return result;
-}
-export async function findCategoryAsideNews({
-  workspace,
-  client,
-  user,
-  slug,
-  page = DEFAULT_PAGE,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  slug: string;
-  page?: number;
-}) {
-  const skip =
-    page === DEFAULT_PAGE
-      ? HEADER_NEWS_LIMIT
-      : HEADER_NEWS_LIMIT + PAGE_LIMT * (page - 1);
-
-  const result = await findNewsByCategory({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: ASIDE_NEWS_LIMIT,
-    skip,
-    slug,
-  }).then(clone);
-
-  return result;
-}
-
-export async function findCategoryFooterNews({
-  workspace,
-  client,
-  user,
-  slug,
-  page = DEFAULT_PAGE,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  slug: string;
-  page?: number;
-}) {
-  const skip =
-    page === DEFAULT_PAGE
-      ? HEADER_NEWS_LIMIT + ASIDE_NEWS_LIMIT
-      : HEADER_NEWS_LIMIT + PAGE_LIMT * (page - 1) + ASIDE_NEWS_LIMIT;
-
-  const result = await findNewsByCategory({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: FOOTER_NEWS_LIMIT,
-    skip,
-    slug,
-  }).then(clone);
-
-  return result;
-}
-
-export async function findCategoryBottomFeedNews({
-  workspace,
-  client,
-  user,
-  slug,
-  page = DEFAULT_PAGE,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  slug: string;
-  page?: number;
-}) {
-  const skip =
-    page === DEFAULT_PAGE
-      ? HEADER_NEWS_LIMIT + ASIDE_NEWS_LIMIT + FOOTER_NEWS_LIMIT
-      : HEADER_NEWS_LIMIT +
-        ASIDE_NEWS_LIMIT +
-        FOOTER_NEWS_LIMIT +
-        PAGE_LIMT * (page - 1);
-
-  const result = await findNewsByCategory({
-    orderBy: {publicationDateTime: ORDER_BY.DESC},
-    workspace,
-    client,
-    user,
-    limit: ASIDE_NEWS_LIMIT,
-    skip,
-    slug,
-  }).then(clone);
-
-  return result;
-}
-
-export async function findNewsCount({
-  workspace,
-  client,
-  user,
-  slug,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  slug?: string;
-}) {
-  if (!workspace) return null;
-
-  const {news} =
-    (await findNews({workspace, client, user, slug, limit: 1})) ?? {};
-  return news?.length ?? 0;
 }
 
 export async function findNewsAttachments({
@@ -890,23 +624,4 @@ export async function findNewsRelatedNews({
 
   const [{relatedNewsSet = []} = {}] = (response as NewsResponse)?.news ?? [];
   return relatedNewsSet ?? [];
-}
-
-export async function findNewsByCategoryCount({
-  workspace,
-  client,
-  user,
-  slug,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  slug?: string;
-}) {
-  if (!workspace) return null;
-
-  const {news} =
-    (await findNewsByCategory({workspace, client, user, slug, limit: 1})) ?? {};
-
-  return news?.length ?? 0;
 }

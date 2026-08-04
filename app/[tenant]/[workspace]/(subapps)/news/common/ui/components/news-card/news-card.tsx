@@ -5,7 +5,7 @@ import Image from 'next/image';
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {formatRelativeTime} from '@/locale/formatters';
-import {BadgeList, Skeleton} from '@/ui/components';
+import {BadgeList} from '@/ui/components';
 import {NO_IMAGE_URL, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {Link} from '@/ui/components/link';
@@ -73,30 +73,6 @@ export const NewsCard = ({
         )}
       </div>
     </Link>
-  );
-};
-
-export const NewsCardSkeleton = ({count = 3}: {count?: number}) => {
-  return (
-    <div className="grid gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-5 !shadow-none">
-      {[...Array(count)].map((_, index) => (
-        <div key={index} className="bg-white rounded-lg flex flex-col">
-          <Skeleton className="w-full h-[150px] rounded-t-lg" />
-
-          <div className="py-2 px-4 flex flex-col justify-between flex-grow gap-2">
-            <div className="flex gap-2">
-              <Skeleton className="h-3 w-10 rounded-full" />
-              <Skeleton className="h-3 w-8 rounded-full" />
-            </div>
-
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-2/3" />
-
-            <Skeleton className="h-3 w-1/4 mt-2" />
-          </div>
-        </div>
-      ))}
-    </div>
   );
 };
 
