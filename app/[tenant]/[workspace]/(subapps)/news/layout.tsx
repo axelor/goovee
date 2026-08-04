@@ -47,9 +47,29 @@ export default async function Layout(props: {
       }).then(clone)
     : [];
 
+  // Group children under their parent so the desktop nav can offer a second,
+  // contextual row of subcategories — the mobile menu already gets the tree.
+  const childrenByParent = new Map<
+    string,
+    {id: string; name: string; slug: string}[]
+  >();
+  allCategories.forEach(c => {
+    const parentId = c?.parentCategory?.id;
+    if (!parentId) return;
+    const key = String(parentId);
+    const siblings = childrenByParent.get(key) ?? [];
+    siblings.push({id: String(c.id), name: c.name, slug: c.slug});
+    childrenByParent.set(key, siblings);
+  });
+
   const topCategories = allCategories
     .filter(c => !c?.parentCategory?.id)
-    .map(c => ({id: String(c.id), name: c.name, slug: c.slug}));
+    .map(c => ({
+      id: String(c.id),
+      name: c.name,
+      slug: c.slug,
+      children: childrenByParent.get(String(c.id)) ?? [],
+    }));
 
   /* mb-[72px] holds the subapp clear of the workspace's fixed mobile menu bar,
      which is that tall and hides at lg — as ticketing, directory and website do. */
