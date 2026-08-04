@@ -22,15 +22,6 @@ export const PostAttachmentSchema = z.object({
 });
 export type PostAttachmentInput = z.infer<typeof PostAttachmentSchema>;
 
-export const PinGroupSchema = z.object({
-  isPin: z.boolean(),
-  id: IdSchema,
-  groupID: IdSchema,
-  workspaceURL: WorkspaceURLSchema,
-  workspaceURI: WorkspaceURISchema,
-});
-export type PinGroupInput = z.infer<typeof PinGroupSchema>;
-
 export const ExitGroupSchema = z.object({
   id: IdSchema,
   groupID: IdSchema,
@@ -80,13 +71,6 @@ export const GetSubscribersByGroupSchema = z.object({
 export type GetSubscribersByGroupInput = z.infer<
   typeof GetSubscribersByGroupSchema
 >;
-
-export const FindMediaSchema = z.object({
-  id: IdSchema,
-  workspaceURL: WorkspaceURLSchema,
-  archived: z.boolean().optional(),
-});
-export type FindMediaInput = z.infer<typeof FindMediaSchema>;
 
 export const AddPostSchema = z.object({
   group: z.object({id: IdSchema}),

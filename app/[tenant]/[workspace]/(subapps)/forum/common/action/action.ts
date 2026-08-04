@@ -52,14 +52,11 @@ import {
 } from '@/subapps/forum/common/constants';
 import {sendEmailNotifications} from '@/subapps/forum/common/utils/mail';
 import {ContentType, MemberGroup} from '@/subapps/forum/common/types/forum';
-import {getArchivedFilter} from '@/subapps/forum/common/utils';
 import {
-  PinGroupSchema,
   ExitGroupSchema,
   JoinGroupSchema,
   SaveGroupNotificationsSchema,
   GetSubscribersByGroupSchema,
-  FindMediaSchema,
   AddPostSchema,
   FetchPostsSchema,
   ToggleReactionSchema,
@@ -67,12 +64,10 @@ import {
   ReactionSummarySchema,
   SetBestReplySchema,
   SetPostStatusSchema,
-  type PinGroupInput,
   type ExitGroupInput,
   type JoinGroupInput,
   type SaveGroupNotificationsInput,
   type GetSubscribersByGroupInput,
-  type FindMediaInput,
   type AddPostInput,
   type FetchPostsInput,
   type PostAttachmentInput,
@@ -105,92 +100,6 @@ async function redeemAttachments({
   }
 
   return redeemed;
-}
-
-export async function pinGroup({
-  isPin,
-  id,
-  groupID,
-  workspaceURL,
-  workspaceURI,
-}: PinGroupInput) {
-  const parsed = PinGroupSchema.safeParse({
-    isPin,
-    id,
-    groupID,
-    workspaceURL,
-    workspaceURI,
-  });
-  if (!parsed.success) {
-    return {error: true, message: z.prettifyError(parsed.error)};
-  }
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
-  const access = await ensureAccess({
-    code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
-    allowGuest: false,
-  });
-  if (!access.ok) {
-    return {error: true, message: await accessMessage(access.reason)};
-  }
-
-  const {user, workspace} = access;
-  const {client} = access.tenant;
-
-  const memberGroup = await findMemberGroupById({
-    id,
-    groupID,
-    workspaceID: workspace.id,
-    client,
-    user,
-  });
-
-  if (!memberGroup) {
-    return {
-      error: true,
-      message: await t('Member group not found.'),
-    };
-  }
-
-  try {
-    const result = await client.aOSPortalForumGroupMember
-      .update({
-        data: {
-          id: memberGroup.id,
-          version: memberGroup.version,
-          forumGroup: {
-            select: {
-              id: memberGroup?.forumGroup?.id,
-            },
-          },
-          isPin,
-        },
-        select: {id: true},
-      })
-      .then(clone);
-
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
-    return {
-      success: true,
-      data: result,
-    };
-  } catch (error) {
-    console.error('error >>>', error);
-    return {
-      error: true,
-      message: await t('Some error occurred'),
-    };
-  }
 }
 
 export async function exitGroup({
@@ -585,64 +494,6 @@ export async function addPost(input: AddPostInput) {
       message: await t('Failed to create post'),
     };
   }
-}
-
-export async function findMedia({
-  id,
-  workspaceURL,
-  archived = false,
-}: FindMediaInput) {
-  const parsed = FindMediaSchema.safeParse({id, workspaceURL, archived});
-  if (!parsed.success) {
-    return {error: true, message: z.prettifyError(parsed.error)};
-  }
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
-  const access = await ensureAccess({
-    code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
-    allowGuest: true,
-  });
-  if (!access.ok) {
-    return {error: true, message: await accessMessage(access.reason)};
-  }
-
-  const {user} = access;
-  const {client} = access.tenant;
-
-  return await client.aOSPortalForumPost
-    .find({
-      where: {
-        ...(id
-          ? {
-              forumGroup: {
-                id,
-                AND: [filterPrivate({user}), getArchivedFilter({archived})],
-              },
-            }
-          : {}),
-      },
-      select: {
-        attachmentList: {
-          select: {
-            title: true,
-            metaFile: {
-              fileName: true,
-              fileType: true,
-            },
-          },
-        },
-      },
-    })
-    .then(clone);
 }
 
 export async function fetchPosts(input: FetchPostsInput) {
