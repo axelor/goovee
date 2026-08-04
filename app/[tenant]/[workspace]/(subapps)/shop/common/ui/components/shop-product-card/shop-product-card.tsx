@@ -146,6 +146,14 @@ export function ShopProductCard({
                 ? (price?.displayPrimary ?? '—')
                 : null}
             </div>
+            {displayPrices &&
+              !hidePriceAndPurchase &&
+              price?.displayTwoPrices &&
+              price?.displaySecondary && (
+                <div className="text-[10.5px] text-ink-500 tabular-nums">
+                  {price.displaySecondary}
+                </div>
+              )}
             {displayPrices && !hidePriceAndPurchase && (
               <PriceWarning
                 errorMessage={product?.errorMessage}

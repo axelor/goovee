@@ -444,6 +444,12 @@ function CartLine({
           {displayPrices && (
             <span className="text-xs text-ink-500 tabular-nums">
               {price?.displayPrimary ?? '—'} {unitSuffix}
+              {price?.displayTwoPrices && price?.displaySecondary && (
+                <span className="ml-1.5 text-ink-500">
+                  {' '}
+                  ({price.displaySecondary})
+                </span>
+              )}
             </span>
           )}
         </div>
