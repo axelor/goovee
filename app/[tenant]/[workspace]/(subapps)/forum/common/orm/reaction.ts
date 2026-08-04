@@ -9,7 +9,7 @@ import {clone} from '@/utils';
 type ReactionWhere = WhereOptions<AOSPortalForumReaction>;
 
 // Comments are mail messages linked to their forum post via relatedId/relatedModel.
-export const FORUM_POST_MODEL = 'com.axelor.apps.portal.db.ForumPost';
+const FORUM_POST_MODEL = 'com.axelor.apps.portal.db.ForumPost';
 
 /**
  * Resolves the forum post a reaction target belongs to, scoped to `workspaceId`
@@ -144,8 +144,8 @@ export async function isCommentOfPost({
   );
 }
 
-export const REACTION_LIKE = 'like';
-export const REACTION_DISLIKE = 'dislike';
+const REACTION_LIKE = 'like';
+const REACTION_DISLIKE = 'dislike';
 
 export type VoteValue = 'like' | 'dislike';
 

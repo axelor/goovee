@@ -1,8 +1,3 @@
-import {IconType} from 'react-icons';
-
-// ---- CORE IMPORTS ---- //
-import {PageInfo} from '@/types';
-
 export type ID = string;
 export type Version = number;
 
@@ -11,13 +6,7 @@ export interface Model {
   version: Version;
 }
 
-export interface TextAlignment {
-  name: 'left' | 'center' | 'right' | 'justify';
-  icon: IconType;
-}
-export type Level = 1 | 2 | 3 | 4 | 5 | 6;
-
-export interface Attachment {
+interface Attachment {
   id?: ID;
   title?: string;
   metaFile: Partial<MetaFile> & {fileType?: string};
@@ -36,29 +25,6 @@ export interface SearchResult {
   forumGroup: {id: ID; name: string};
   label: string;
 }
-
-export interface FilePreview {
-  id?: string;
-  url?: string;
-  name?: string;
-  type?: string;
-}
-
-export type PostsContentProps = {
-  posts: Post[];
-  pageInfo: PageInfo;
-};
-export type MediaContentProps = {
-  groupId: string;
-};
-
-export type Tab<P = {}> = {
-  id: number;
-  key: string;
-  title: string;
-  icon: IconType;
-  component: React.ComponentType<P>;
-};
 
 export type MetaFile = {
   id: ID;

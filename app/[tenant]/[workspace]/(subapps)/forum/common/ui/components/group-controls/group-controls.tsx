@@ -6,7 +6,7 @@ import {useRouter} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {User} from '@/types';
-import {Checkbox, Skeleton} from '@/ui/components';
+import {Checkbox} from '@/ui/components';
 import {cn} from '@/utils/css';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
@@ -297,20 +297,3 @@ export function GroupControls({
 }
 
 export default GroupControls;
-
-export function GroupControlsSkeleton() {
-  return (
-    <div className="bg-white border border-ink-100 rounded-[14px] p-4">
-      <Skeleton className="h-3 w-24 mb-4" />
-      <div className="flex flex-col gap-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex items-center gap-2.5">
-            <Skeleton className="rounded-lg size-[26px] shrink-0" />
-            <Skeleton className="h-3.5 flex-1" />
-            <Skeleton className="h-5 w-16 rounded-full shrink-0" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}

@@ -933,7 +933,7 @@ export const fetchComments: FetchComments = async props => {
   }
 };
 
-export const getSubscribersByGroup = async ({
+const getSubscribersByGroup = async ({
   groupID,
   workspaceURL,
 }: GetSubscribersByGroupInput) => {

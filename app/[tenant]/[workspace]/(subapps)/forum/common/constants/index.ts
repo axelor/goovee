@@ -1,34 +1,9 @@
-import {
-  CiTextAlignCenter,
-  CiTextAlignJustify,
-  CiTextAlignLeft,
-  CiTextAlignRight,
-} from 'react-icons/ci';
-import {MdOutlineArticle} from 'react-icons/md';
-
 // ---- CORE IMPORTS ---- //
 import {ORDER_BY} from '@/constants';
 
-// ---- LOCAL IMPORTS ---- //
-import type {Level} from '@/subapps/forum/common/types/forum';
-
-export const MEMBER = 'Member';
-export const OTHER_GROUPS = 'Other groups';
-export const DISABLED_SEARCH_PLACEHOLDER = 'You must log in to be able to post';
-export const MARK_AS_READ = 'Mark as read';
 export const PIN = 'Pin';
 export const REMOVE_PIN = 'Remove pin';
-export const NOTIFICATIONS = 'Notifications';
-export const LEAVE_THIS_GROUP = 'Leave this group';
-export const ASK_TO_JOIN = 'Ask to join the group';
-export const START_A_POST = 'Start a post';
-export const JOIN_GROUP_TO_POST = 'Join group to start posting.';
-export const TITLE = 'Title';
-export const CHOOSE_GROUP = 'Chose in which group you want to post';
-export const CONTENT = 'Content';
-export const PUBLISH = 'Publish';
 export const PUBLISHING = 'Publishing...';
-export const MAKE_A_NEW_POST = 'Make a new post';
 export const CLICK_HERE_DRAG_DROP =
   'Click here to select your image or drag & drop';
 export const CLICK_HERE_DRAG_DROP_FILE =
@@ -39,16 +14,6 @@ export const ALERTNATE_TEXT = 'Alternate Text';
 export const OUT_OF = 'out of';
 export const UPLOAD = 'Upload';
 export const FILE_TITLE = 'File Title';
-export const SELECT_A_GROUP = 'Select a group';
-export const ENTER_TITLE = 'Enter Title';
-export const SEE_MORE = 'See more';
-export const SEE_LESS = 'See less';
-export const JOIN_GROUP_TO_COMMENT = 'Join the group to comment';
-
-export const FORUM_CONTENT = {
-  POSTS: 'posts',
-  MEDIA: 'media',
-};
 
 export const MENU = [
   {id: 1, name: 'Homepage', link: ''},
@@ -57,33 +22,6 @@ export const MENU = [
     name: 'Forum notifications',
     link: '/manage-notifications',
   },
-  // {id: 3, name: 'My profile', link: '/profile'},
-];
-
-export const TAB_TITLES = [
-  {
-    id: 1,
-    key: FORUM_CONTENT.POSTS,
-    title: 'Posts',
-    icon: MdOutlineArticle,
-  },
-  // Commenting this cause it is not needed in V1
-  // {
-  //   id: 2,
-  //   key: 'media',
-  //   title: 'Media',
-  //   icon: MdOutlinePermMedia,
-  //   component: MediaContent,
-  // },
-];
-
-export const HEADING_LEVEL: Level[] = [1, 2, 3, 4, 5, 6];
-
-export const TEXT_ALIGNMENT = [
-  {name: 'left', icon: CiTextAlignLeft},
-  {name: 'center', icon: CiTextAlignCenter},
-  {name: 'right', icon: CiTextAlignRight},
-  {name: 'justify', icon: CiTextAlignJustify},
 ];
 
 export const NOTIFICATION_VALUES = {
