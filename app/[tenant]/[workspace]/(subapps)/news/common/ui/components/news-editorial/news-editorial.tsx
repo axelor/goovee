@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import {MdOutlineNewspaper} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -27,14 +28,46 @@ export function NewsEditorial({
   heading,
   config,
   children,
+  publisher,
 }: {
   articles?: Article[];
   heading?: string;
   config: NewsConfig | Cloned<NewsConfig>;
   children?: React.ReactNode;
+  /* Publisher name woven into the empty-state sentence — the workspace's own
+     name, so the copy reads right whichever portal is being browsed. */
+  publisher?: string;
 }) {
   const {workspaceURI} = useWorkspace();
   const {isShowPublicationAuthor, isShowPublicationDate} = config;
+
+  /* Hub-only empty state: a category listing that happens to be empty passes its
+     own heading and children (its "No news available." message), so leave those
+     alone and only stand in for the bare hub with nothing published. */
+  if (!articles.length && !heading && children == null) {
+    return (
+      <div className="bg-ink-25 min-h-full">
+        <div className="mx-auto max-w-[560px] px-8 pb-20 pt-24 text-center">
+          <div className="mx-auto mb-[26px] grid size-24 place-items-center rounded-[20px] border border-ink-150 bg-white shadow-[0_2px_8px_rgba(15,19,25,0.04)]">
+            <MdOutlineNewspaper className="size-[34px] text-[#c6d8f1]" />
+          </div>
+          <h1 className="text-2xl font-bold leading-[1.3] tracking-[-0.02em] text-ink-900">
+            {i18n.t('No news yet')}
+          </h1>
+          <p className="mx-auto mt-2.5 max-w-[420px] text-[14.5px] leading-[1.65] text-ink-500">
+            {publisher
+              ? i18n.t(
+                  'Upcoming posts from {0} will appear here as soon as they are published.',
+                  publisher,
+                )
+              : i18n.t(
+                  'Upcoming posts will appear here as soon as they are published.',
+                )}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const featured = articles[0];
   const secondaries = articles.slice(1, 3);

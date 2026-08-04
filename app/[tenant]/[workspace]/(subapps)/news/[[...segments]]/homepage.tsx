@@ -44,7 +44,13 @@ export async function Homepage({
 
   const articles = newsResult?.news || [];
 
-  return <NewsEditorial articles={articles} config={config} />;
+  return (
+    <NewsEditorial
+      articles={articles}
+      config={config}
+      publisher={workspace?.name ?? undefined}
+    />
+  );
 }
 
 export default Homepage;
