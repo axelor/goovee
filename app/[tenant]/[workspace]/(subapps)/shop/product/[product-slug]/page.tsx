@@ -56,6 +56,19 @@ export async function generateMetadata(props: {
   );
   if (!workspaceConfig) return null;
 
+  // Scope the lookup to this workspace's portal categories, exactly as the page
+  // body does. Without it the title and description leak for any sellable
+  // product in the tenant, reachable by slug alone even from another workspace.
+  const allCategories =
+    ((await findCategories({
+      workspace: access.workspace,
+      client,
+      user,
+    }).then(clone)) as ShopCategory[]) ?? [];
+  const portalCategoryIds = allCategories
+    .map(c => c?.id)
+    .filter((id): id is string | number => id != null);
+
   const computed = await findProductBySlug({
     slug: productSlug,
     workspace: access.workspace,
@@ -63,6 +76,7 @@ export async function generateMetadata(props: {
     user,
     client,
     config,
+    categoryids: portalCategoryIds,
   });
   if (!computed?.product) return null;
 
