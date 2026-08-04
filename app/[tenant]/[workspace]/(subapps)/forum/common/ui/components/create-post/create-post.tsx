@@ -37,6 +37,7 @@ import {
 } from '@/subapps/forum/common/ui/components';
 import {addPost} from '@/subapps/forum/common/action/action';
 import {Group} from '@/subapps/forum/common/types/forum';
+import {groupColorClass} from '@/subapps/forum/common/utils/group-color';
 
 /* Each attachment carries the client-side `uploadId` of its staged upload; the
  * single-use token is read from the upload state at submit. */
@@ -62,28 +63,6 @@ enum ModalType {
   None = 'none',
   Image = 'image',
   File = 'file',
-}
-
-// Group records carry no color — derive a stable pastille color from the name.
-const PASTILLE_COLORS = [
-  'palette-indigo',
-  'palette-blue',
-  'palette-purple',
-  'palette-teal',
-  'palette-cyan',
-  'palette-green',
-  'palette-orange',
-  'palette-pink',
-  'palette-red',
-  'palette-deeppurple',
-];
-
-function groupColorClass(name = ''): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  }
-  return `bg-${PASTILLE_COLORS[hash % PASTILLE_COLORS.length]}`;
 }
 
 function stripHtml(html?: string) {

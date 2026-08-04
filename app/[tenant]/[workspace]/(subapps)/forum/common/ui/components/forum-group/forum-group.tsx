@@ -25,6 +25,7 @@ import {UploadPost} from '../upload-post';
 import {PostImages} from '../post-images';
 import {exitGroup, joinGroup} from '@/subapps/forum/common/action/action';
 import {useInfinitePosts} from '@/subapps/forum/common/ui/hooks/use-infinite-posts';
+import {groupColorClass} from '@/subapps/forum/common/utils/group-color';
 
 type AnyRec = any;
 
@@ -32,28 +33,6 @@ const SORTS = [
   {key: 'new', label: 'Recent'},
   {key: 'popular', label: 'Popular'},
 ];
-
-// Group records carry no color — derive a stable pastille color from the name.
-const PASTILLE_COLORS = [
-  'palette-indigo',
-  'palette-blue',
-  'palette-purple',
-  'palette-teal',
-  'palette-cyan',
-  'palette-green',
-  'palette-orange',
-  'palette-pink',
-  'palette-red',
-  'palette-deeppurple',
-];
-
-function groupColorClass(name = ''): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  }
-  return `bg-${PASTILLE_COLORS[hash % PASTILLE_COLORS.length]}`;
-}
 
 function stripHtml(html?: string) {
   return (html || '')

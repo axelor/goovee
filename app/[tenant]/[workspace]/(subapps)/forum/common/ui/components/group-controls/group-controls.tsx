@@ -15,29 +15,7 @@ import {useSearchParams, useToast} from '@/ui/hooks';
 // ---- LOCAL IMPORTS ---- //
 import {Group, MemberGroup} from '@/subapps/forum/common/types/forum';
 import {exitGroup, joinGroup} from '@/subapps/forum/common/action/action';
-
-// Group records carry no color/emoji — derive a stable pastille color from the
-// group name out of the safelisted Axelor palette.
-const PASTILLE_COLORS = [
-  'palette-indigo',
-  'palette-blue',
-  'palette-purple',
-  'palette-teal',
-  'palette-cyan',
-  'palette-green',
-  'palette-orange',
-  'palette-pink',
-  'palette-red',
-  'palette-deeppurple',
-];
-
-function groupColorClass(name = ''): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  }
-  return `bg-${PASTILLE_COLORS[hash % PASTILLE_COLORS.length]}`;
-}
+import {groupColorClass} from '@/subapps/forum/common/utils/group-color';
 
 function GroupRow({
   name,
