@@ -11,24 +11,6 @@ export const ORDER_TAB_ITEMS = [
   },
 ];
 
-export const PRODUCT_COLUMNS = [
-  {key: 'productName', label: 'Product number'},
-  {key: 'qty', label: 'Quantity'},
-  {key: 'unit', label: 'Unit'},
-  {key: 'price', label: 'Unit Price Wt'},
-  {key: 'exTaxTotal', label: 'Total Wt'},
-  {key: 'tax', label: 'Tax'},
-  {key: 'discountAmount', label: 'Discount'},
-  {key: 'inTaxTotal', label: 'Total ATI'},
-];
-
-export const PRODUCT_CARD_COLUMNS = [
-  {key: 'productName', label: 'Product number'},
-  {key: 'qty', label: 'Quantity'},
-  {key: 'inTaxTotal', label: 'Total ATI'},
-  {key: 'dropdown', label: ''},
-];
-
 export const ORDER_TYPE = {
   CONFIRMED: 'Confirmed',
   SHIPPED: 'Shipped',
@@ -61,7 +43,6 @@ export const CUSTOMERS_DELIVERY_STATUS = {
 };
 
 export const INVOICE = 'Invoice';
-export const ORDER_NUMBER = 'Order number';
 export const CUSTOMER_DELIVERY = 'Customer delivery';
 export const DOWNLOAD_PDF = 'Download pdf';
 
