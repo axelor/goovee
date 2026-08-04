@@ -103,17 +103,21 @@ export default async function Page(props: {
   ]);
 
   const related = recent.filter(r => String(r.id) !== String(postId));
-  const relatedCounts = await findCommentCounts({
-    postIds: related.map(r => r.id),
-    client,
-  });
+
+  /* Reply counts are only rendered when the workspace has comments enabled, so
+   * skip both count queries entirely when it does not. */
+  const relatedCounts = commentsEnabled
+    ? await findCommentCounts({postIds: related.map(r => r.id), client})
+    : {};
   const relatedWithCounts = related.map(r => ({
     ...r,
     replyCount: relatedCounts[String(r.id)] ?? 0,
   }));
 
-  const replyCount =
-    (await findCommentCounts({postIds: [postId], client}))[String(postId)] ?? 0;
+  const replyCount = commentsEnabled
+    ? ((await findCommentCounts({postIds: [postId], client}))[String(postId)] ??
+      0)
+    : 0;
 
   const forumBase = `${workspaceURI}/${SUBAPP_CODES.forum}`;
 

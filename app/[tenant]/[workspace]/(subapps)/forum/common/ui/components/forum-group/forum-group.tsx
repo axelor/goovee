@@ -53,6 +53,7 @@ export function ForumGroup({
   userId,
   groups = [],
   canPost = false,
+  commentsEnabled,
   backHref,
 }: {
   group: {id: string; name?: string | null};
@@ -66,6 +67,7 @@ export function ForumGroup({
   userId?: string;
   groups?: AnyRec[];
   canPost?: boolean;
+  commentsEnabled: boolean;
   backHref: string;
 }) {
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
@@ -272,10 +274,12 @@ export function ForumGroup({
                           <strong className="text-ink-700">{author}</strong>
                         )}
                       </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <MdOutlineForum className="size-3.5" />
-                        {i18n.t('{0} replies', String(post.replyCount ?? 0))}
-                      </span>
+                      {commentsEnabled && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <MdOutlineForum className="size-3.5" />
+                          {i18n.t('{0} replies', String(post.replyCount ?? 0))}
+                        </span>
+                      )}
                       {date && <span>· {formatRelativeTime(date)}</span>}
                     </div>
                   </div>

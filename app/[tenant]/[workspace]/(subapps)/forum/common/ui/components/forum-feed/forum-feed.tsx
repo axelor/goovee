@@ -49,6 +49,7 @@ export function ForumFeed({
   memberGroupIDs = [],
   groups = [],
   canPost = false,
+  commentsEnabled,
 }: {
   posts?: Post[];
   pageInfo?: PageInfo;
@@ -56,6 +57,7 @@ export function ForumFeed({
   memberGroupIDs?: string[];
   groups?: any[];
   canPost?: boolean;
+  commentsEnabled: boolean;
 }) {
   const {workspaceURI, workspaceURL, tenant} = useWorkspace();
   const {searchParams, update} = useSearchParams();
@@ -218,11 +220,15 @@ export function ForumFeed({
                   {author && (
                     <span className="font-semibold text-ink-700">{author}</span>
                   )}
-                  <span className="text-ink-300">·</span>
-                  <span className="inline-flex items-center gap-1">
-                    <MdChatBubbleOutline className="size-3.5" />
-                    {i18n.t('{0} replies', String(post.replyCount ?? 0))}
-                  </span>
+                  {commentsEnabled && (
+                    <>
+                      <span className="text-ink-300">·</span>
+                      <span className="inline-flex items-center gap-1">
+                        <MdChatBubbleOutline className="size-3.5" />
+                        {i18n.t('{0} replies', String(post.replyCount ?? 0))}
+                      </span>
+                    </>
+                  )}
                   {date && (
                     <>
                       <span className="text-ink-300">·</span>

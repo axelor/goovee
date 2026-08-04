@@ -208,6 +208,7 @@ function ForumMessage({
   canVote = false,
   nestedReplies = [],
   canReply = false,
+  repliesAvailable = true,
   onReply,
   isOriginal = false,
   isBestAnswer = false,
@@ -227,6 +228,7 @@ function ForumMessage({
   canVote?: boolean;
   nestedReplies?: AnyRec[];
   canReply?: boolean;
+  repliesAvailable?: boolean;
   onReply?: (text: string) => Promise<void> | void;
   isOriginal?: boolean;
   isBestAnswer?: boolean;
@@ -332,17 +334,22 @@ function ForumMessage({
             />
             <CommentFiles attachments={attachments} urlFor={attachmentUrl} />
             <div className="flex items-center gap-4 mt-3 text-[12.5px] text-ink-600">
-              <button
-                type="button"
-                onClick={() => setReplyOpen(o => !o)}
-                disabled={!canReply}
-                className={cn(
-                  'inline-flex items-center gap-1.5 font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
-                  replyOpen ? 'text-royal' : 'hover:text-royal',
-                )}>
-                <MdReply className="size-3.5" />
-                {i18n.t('Reply')}
-              </button>
+              {/* Disabled means "you cannot reply yet" (join the group first);
+                  a workspace with replies switched off drops the control
+                  entirely rather than offering something inert. */}
+              {repliesAvailable && (
+                <button
+                  type="button"
+                  onClick={() => setReplyOpen(open => !open)}
+                  disabled={!canReply}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed',
+                    replyOpen ? 'text-royal' : 'hover:text-royal',
+                  )}>
+                  <MdReply className="size-3.5" />
+                  {i18n.t('Reply')}
+                </button>
+              )}
               {canMarkBest && (
                 <button
                   type="button"
@@ -434,7 +441,7 @@ export function ForumDetail({
   related = [],
   currentUser,
   canComment = false,
-  commentsEnabled = true,
+  commentsEnabled,
   isAuthor = false,
   backHref,
 }: {
@@ -444,7 +451,7 @@ export function ForumDetail({
   related?: AnyRec[];
   currentUser?: {name?: string | null; pictureId?: string | null} | null;
   canComment?: boolean;
-  commentsEnabled?: boolean;
+  commentsEnabled: boolean;
   isAuthor?: boolean;
   backHref: string;
 }) {
@@ -470,6 +477,7 @@ export function ForumDetail({
       recordId: post.id,
       subapp: SUBAPP_CODES.forum,
       limit: COMMENTS_PER_LOAD,
+      enabled: commentsEnabled,
       fetchComments,
       createComment,
     });
@@ -735,10 +743,12 @@ export function ForumDetail({
                 </div>
               </div>
               <div className="mt-2 flex items-center gap-3.5 text-[12.5px] text-ink-500 flex-wrap">
-                <span className="inline-flex items-center gap-1.5">
-                  <MdOutlineForum className="size-3.5" />
-                  {i18n.t('{0} replies', String(replyTotal))}
-                </span>
+                {commentsEnabled && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MdOutlineForum className="size-3.5" />
+                    {i18n.t('{0} replies', String(replyTotal))}
+                  </span>
+                )}
                 <span className="inline-flex items-center gap-1.5">
                   <MdAutoAwesome className="size-3.5 text-mint-500" />
                   {i18n.t('{0} votes', String(postVotes))}
@@ -759,6 +769,7 @@ export function ForumDetail({
               onVote={v => vote('post', String(post.id), v)}
               canVote={canComment}
               canReply={canWriteComment}
+              repliesAvailable={commentsEnabled}
               onReply={text => onCreate({data: {text, attachments: []}})}
               isOriginal
             />
@@ -814,189 +825,203 @@ export function ForumDetail({
                 );
               })()}
 
-            {/* Replies header */}
-            <div className="flex items-center gap-2.5 mt-6 mb-3.5">
-              <h2 className="text-[15px] font-bold text-ink-900">
-                {i18n.t('{0} replies', String(replyTotal))}
-              </h2>
-              <div className="flex-1 h-px bg-ink-100" />
-              <span className="text-[12px] text-ink-500">
-                {i18n.t('Sort:')}{' '}
-                <strong className="text-ink-700">
-                  {i18n.t('Most helpful')}
-                </strong>
-              </span>
-            </div>
-
-            {/* Replies */}
-            <div className="flex flex-col gap-3">
-              {sortedComments.map((c: AnyRec) => {
-                const author =
-                  c.partner?.simpleFullName ||
-                  c.partner?.name ||
-                  c.createdBy?.fullName;
-                return (
-                  <ForumMessage
-                    key={c.id}
-                    author={author}
-                    meta={c.createdOn ? formatRelativeTime(c.createdOn) : null}
-                    pictureId={c.partner?.picture?.id}
-                    tenant={tenant}
-                    body={c.note || c.body}
-                    score={
-                      (reactions.comment[String(c.id)] ?? EMPTY_SUMMARY).score
-                    }
-                    myVote={
-                      (reactions.comment[String(c.id)] ?? EMPTY_SUMMARY).myVote
-                    }
-                    onVote={v => vote('comment', String(c.id), v)}
-                    canVote={canComment}
-                    nestedReplies={c.childMailMessages || []}
-                    canReply={canWriteComment}
-                    onReply={text =>
-                      onCreate({data: {text, attachments: []}, parent: c.id})
-                    }
-                    isBestAnswer={String(c.id) === String(bestReplyId)}
-                    canMarkBest={isAuthor}
-                    onMarkBest={() => markBest(String(c.id))}
-                    attachments={c.mailMessageFileList}
-                    attachmentUrl={commentAttUrl}
-                  />
-                );
-              })}
-              {comments.length === 0 && (
-                <div className="bg-white border border-ink-100 rounded-xl shadow-xs py-10 text-center text-[13px] text-ink-500">
-                  {i18n.t('No reply yet. Start the conversation!')}
+            {/* The whole reply thread — header, replies and composer — belongs
+                to the workspace's comment feature, so it goes away with it
+                rather than only being made read-only. */}
+            {commentsEnabled && (
+              <>
+                {/* Replies header */}
+                <div className="flex items-center gap-2.5 mt-6 mb-3.5">
+                  <h2 className="text-[15px] font-bold text-ink-900">
+                    {i18n.t('{0} replies', String(replyTotal))}
+                  </h2>
+                  <div className="flex-1 h-px bg-ink-100" />
+                  <span className="text-[12px] text-ink-500">
+                    {i18n.t('Sort:')}{' '}
+                    <strong className="text-ink-700">
+                      {i18n.t('Most helpful')}
+                    </strong>
+                  </span>
                 </div>
-              )}
-              {hasMore && (
-                <button
-                  type="button"
-                  onClick={loadMore}
-                  className="self-center mt-1 px-4 py-2 rounded-lg text-[13px] font-semibold text-royal-dark bg-royal-pale border border-royal-border hover:bg-royal-pale/70 transition-colors">
-                  {i18n.t('Load more replies')}
-                </button>
-              )}
-            </div>
 
-            {/* Reply composer */}
-            <div className="mt-5 bg-white border border-ink-100 rounded-xl shadow-xs p-4">
-              <div className="flex gap-3">
-                <Avatar
-                  name={currentUser?.name}
-                  pictureId={currentUser?.pictureId}
-                  tenant={tenant}
-                  size={36}
-                />
-                <div className="flex-1 min-w-0">
-                  <textarea
-                    value={draft}
-                    onChange={e => setDraft(e.target.value)}
-                    onKeyDown={e => {
-                      /* Enter submits, Shift+Enter inserts a newline. Mirrors
-                       * the shared CommentInput and only fires when the reply
-                       * can actually be posted. */
-                      if (e.key === 'Enter' && !e.shiftKey && canSubmit) {
-                        e.preventDefault();
-                        submit();
-                      }
-                    }}
-                    placeholder={
-                      canWriteComment
-                        ? i18n.t('Write a reply…')
-                        : commentsEnabled
-                          ? i18n.t('Join the group to comment')
-                          : i18n.t('Comments are disabled')
-                    }
-                    rows={3}
-                    disabled={!canWriteComment || creating}
-                    className="w-full border border-ink-150 rounded-[10px] px-3 py-2.5 text-[13.5px] resize-y outline-none text-ink-800 focus:border-royal transition-colors disabled:bg-ink-25 disabled:cursor-not-allowed box-border"
-                  />
-                  <div className="flex justify-between items-center gap-3 mt-2.5">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        className="hidden"
-                        onChange={pickFiles}
-                        disabled={!canWriteComment}
+                {/* Replies */}
+                <div className="flex flex-col gap-3">
+                  {sortedComments.map((c: AnyRec) => {
+                    const author =
+                      c.partner?.simpleFullName ||
+                      c.partner?.name ||
+                      c.createdBy?.fullName;
+                    return (
+                      <ForumMessage
+                        key={c.id}
+                        author={author}
+                        meta={
+                          c.createdOn ? formatRelativeTime(c.createdOn) : null
+                        }
+                        pictureId={c.partner?.picture?.id}
+                        tenant={tenant}
+                        body={c.note || c.body}
+                        score={
+                          (reactions.comment[String(c.id)] ?? EMPTY_SUMMARY)
+                            .score
+                        }
+                        myVote={
+                          (reactions.comment[String(c.id)] ?? EMPTY_SUMMARY)
+                            .myVote
+                        }
+                        onVote={v => vote('comment', String(c.id), v)}
+                        canVote={canComment}
+                        nestedReplies={c.childMailMessages || []}
+                        canReply={canWriteComment}
+                        onReply={text =>
+                          onCreate({
+                            data: {text, attachments: []},
+                            parent: c.id,
+                          })
+                        }
+                        isBestAnswer={String(c.id) === String(bestReplyId)}
+                        canMarkBest={isAuthor}
+                        onMarkBest={() => markBest(String(c.id))}
+                        attachments={c.mailMessageFileList}
+                        attachmentUrl={commentAttUrl}
                       />
-                      <button
-                        type="button"
-                        disabled={!canWriteComment}
-                        onClick={() => fileInputRef.current?.click()}
-                        aria-label={i18n.t('Attach files')}
-                        title={i18n.t('Attach files')}
-                        className="w-[30px] h-[30px] rounded-md grid place-items-center text-ink-500 hover:bg-ink-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent">
-                        <MdAttachFile className="size-4" />
-                      </button>
-                      {files.map((f, i) => {
-                        const uploadItem = uploads.find(
-                          item => item.id === f.uploadId,
-                        );
-                        const isFailed =
-                          uploadItem?.status === 'error' ||
-                          uploadItem?.status === 'aborted';
-                        const isPending =
-                          uploadItem?.status === 'queued' ||
-                          uploadItem?.status === 'uploading';
-                        return (
-                          <span
-                            key={i}
-                            className={`relative inline-flex items-center gap-1 max-w-[180px] overflow-hidden pl-2.5 pr-1 py-1 rounded-full border text-[11.5px] ${
-                              isFailed
-                                ? 'bg-destructive-light border-destructive/30 text-destructive'
-                                : 'bg-ink-25 border-ink-150 text-ink-700'
-                            }`}>
-                            {isPending && (
-                              <span
-                                aria-hidden
-                                className="pointer-events-none absolute inset-y-0 left-0 bg-success/20 transition-[width] duration-200 ease-out"
-                                style={{width: `${uploadItem?.progress ?? 0}%`}}
-                              />
-                            )}
-                            <span className="relative truncate">
-                              {f.file.name}
-                            </span>
-                            {isPending && (
-                              <span className="relative shrink-0 tabular-nums text-success-dark">
-                                {uploadItem?.progress ?? 0}%
-                              </span>
-                            )}
-                            {isFailed && (
-                              <button
-                                type="button"
-                                onClick={() => retry(f.uploadId)}
-                                aria-label={i18n.t('Retry')}
-                                title={i18n.t('Retry')}
-                                className="relative shrink-0 grid place-items-center size-4 rounded-full text-destructive hover:bg-destructive/10 transition-colors">
-                                <MdRefresh className="size-3" />
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => removeFile(i)}
-                              aria-label={i18n.t('Remove')}
-                              className="relative shrink-0 grid place-items-center size-4 rounded-full text-ink-500 hover:bg-ink-150 hover:text-ink-800 transition-colors">
-                              <MdClose className="size-3" />
-                            </button>
-                          </span>
-                        );
-                      })}
+                    );
+                  })}
+                  {comments.length === 0 && (
+                    <div className="bg-white border border-ink-100 rounded-xl shadow-xs py-10 text-center text-[13px] text-ink-500">
+                      {i18n.t('No reply yet. Start the conversation!')}
                     </div>
+                  )}
+                  {hasMore && (
                     <button
                       type="button"
-                      onClick={submit}
-                      disabled={!canSubmit}
-                      className="shrink-0 inline-flex items-center gap-1.5 px-[18px] py-2.5 rounded-[10px] bg-royal text-white text-[13px] font-bold shadow-[0_1px_2px_rgba(13,30,75,0.15),0_4px_12px_rgba(13,30,75,0.12)] hover:bg-royal-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                      {i18n.t('Post reply')}
-                      <MdArrowForward className="size-3.5" />
+                      onClick={loadMore}
+                      className="self-center mt-1 px-4 py-2 rounded-lg text-[13px] font-semibold text-royal-dark bg-royal-pale border border-royal-border hover:bg-royal-pale/70 transition-colors">
+                      {i18n.t('Load more replies')}
                     </button>
+                  )}
+                </div>
+
+                {/* Reply composer */}
+                <div className="mt-5 bg-white border border-ink-100 rounded-xl shadow-xs p-4">
+                  <div className="flex gap-3">
+                    <Avatar
+                      name={currentUser?.name}
+                      pictureId={currentUser?.pictureId}
+                      tenant={tenant}
+                      size={36}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <textarea
+                        value={draft}
+                        onChange={e => setDraft(e.target.value)}
+                        onKeyDown={e => {
+                          /* Enter submits, Shift+Enter inserts a newline. Mirrors
+                           * the shared CommentInput and only fires when the reply
+                           * can actually be posted. */
+                          if (e.key === 'Enter' && !e.shiftKey && canSubmit) {
+                            e.preventDefault();
+                            submit();
+                          }
+                        }}
+                        placeholder={
+                          canWriteComment
+                            ? i18n.t('Write a reply…')
+                            : i18n.t('Join the group to comment')
+                        }
+                        rows={3}
+                        disabled={!canWriteComment || creating}
+                        className="w-full border border-ink-150 rounded-[10px] px-3 py-2.5 text-[13.5px] resize-y outline-none text-ink-800 focus:border-royal transition-colors disabled:bg-ink-25 disabled:cursor-not-allowed box-border"
+                      />
+                      <div className="flex justify-between items-center gap-3 mt-2.5">
+                        <div className="flex items-center gap-2 flex-wrap min-w-0">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={pickFiles}
+                            disabled={!canWriteComment}
+                          />
+                          <button
+                            type="button"
+                            disabled={!canWriteComment}
+                            onClick={() => fileInputRef.current?.click()}
+                            aria-label={i18n.t('Attach files')}
+                            title={i18n.t('Attach files')}
+                            className="w-[30px] h-[30px] rounded-md grid place-items-center text-ink-500 hover:bg-ink-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent">
+                            <MdAttachFile className="size-4" />
+                          </button>
+                          {files.map((f, i) => {
+                            const uploadItem = uploads.find(
+                              item => item.id === f.uploadId,
+                            );
+                            const isFailed =
+                              uploadItem?.status === 'error' ||
+                              uploadItem?.status === 'aborted';
+                            const isPending =
+                              uploadItem?.status === 'queued' ||
+                              uploadItem?.status === 'uploading';
+                            return (
+                              <span
+                                key={i}
+                                className={`relative inline-flex items-center gap-1 max-w-[180px] overflow-hidden pl-2.5 pr-1 py-1 rounded-full border text-[11.5px] ${
+                                  isFailed
+                                    ? 'bg-destructive-light border-destructive/30 text-destructive'
+                                    : 'bg-ink-25 border-ink-150 text-ink-700'
+                                }`}>
+                                {isPending && (
+                                  <span
+                                    aria-hidden
+                                    className="pointer-events-none absolute inset-y-0 left-0 bg-success/20 transition-[width] duration-200 ease-out"
+                                    style={{
+                                      width: `${uploadItem?.progress ?? 0}%`,
+                                    }}
+                                  />
+                                )}
+                                <span className="relative truncate">
+                                  {f.file.name}
+                                </span>
+                                {isPending && (
+                                  <span className="relative shrink-0 tabular-nums text-success-dark">
+                                    {uploadItem?.progress ?? 0}%
+                                  </span>
+                                )}
+                                {isFailed && (
+                                  <button
+                                    type="button"
+                                    onClick={() => retry(f.uploadId)}
+                                    aria-label={i18n.t('Retry')}
+                                    title={i18n.t('Retry')}
+                                    className="relative shrink-0 grid place-items-center size-4 rounded-full text-destructive hover:bg-destructive/10 transition-colors">
+                                    <MdRefresh className="size-3" />
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(i)}
+                                  aria-label={i18n.t('Remove')}
+                                  className="relative shrink-0 grid place-items-center size-4 rounded-full text-ink-500 hover:bg-ink-150 hover:text-ink-800 transition-colors">
+                                  <MdClose className="size-3" />
+                                </button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={submit}
+                          disabled={!canSubmit}
+                          className="shrink-0 inline-flex items-center gap-1.5 px-[18px] py-2.5 rounded-[10px] bg-royal text-white text-[13px] font-bold shadow-[0_1px_2px_rgba(13,30,75,0.15),0_4px_12px_rgba(13,30,75,0.12)] hover:bg-royal-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                          {i18n.t('Post reply')}
+                          <MdArrowForward className="size-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -1040,7 +1065,12 @@ export function ForumDetail({
                     value={formatRelativeTime(date)}
                   />
                 )}
-                <StatRow label={i18n.t('Replies')} value={String(replyTotal)} />
+                {commentsEnabled && (
+                  <StatRow
+                    label={i18n.t('Replies')}
+                    value={String(replyTotal)}
+                  />
+                )}
                 <StatRow label={i18n.t('Votes')} value={String(postVotes)} />
                 <StatRow
                   label={i18n.t('Status')}
@@ -1074,9 +1104,11 @@ export function ForumDetail({
                       <div className="text-[12.5px] font-semibold text-ink-900 leading-snug line-clamp-2 group-hover:text-royal transition-colors">
                         {r.title}
                       </div>
-                      <div className="text-[11px] text-ink-500 mt-0.5">
-                        {i18n.t('{0} replies', String(r.replyCount ?? 0))}
-                      </div>
+                      {commentsEnabled && (
+                        <div className="text-[11px] text-ink-500 mt-0.5">
+                          {i18n.t('{0} replies', String(r.replyCount ?? 0))}
+                        </div>
+                      )}
                     </Link>
                   ))}
                 </div>

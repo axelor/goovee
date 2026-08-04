@@ -544,12 +544,21 @@ export async function fetchPosts(input: FetchPostsInput) {
     memberGroupIDs,
   }).then(clone);
 
-  // The page enriches the first page with reply counts and reaction scores
-  // after findPosts; do the same here so infinite-scroll pages render
-  // identical cards (otherwise loaded posts show 0 replies / 0 votes).
+  /* The page enriches the first page with reply counts and reaction scores
+   * after findPosts; do the same here so infinite-scroll pages render
+   * identical cards (otherwise loaded posts show 0 replies / 0 votes).
+   * Reply counts are skipped when the workspace has comments turned off,
+   * matching the first page, which does not render them either. */
+  const config = await getForumConfig(access.workspace.config.id, client);
+  const commentsEnabled = config
+    ? isCommentEnabled({subapp: SUBAPP_CODES.forum, config})
+    : false;
+
   const postIds = posts.map(p => p.id);
   const [replyCounts, reactions] = await Promise.all([
-    findCommentCounts({postIds, client}),
+    commentsEnabled
+      ? findCommentCounts({postIds, client})
+      : Promise.resolve<Record<string, number>>({}),
     getReactionSummaries({client, postIds, partnerId: user?.id}),
   ]);
 

@@ -2,6 +2,7 @@ import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {isCommentEnabled} from '@/comments';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
@@ -117,10 +118,16 @@ export default async function Page(props: {
     memberGroupIDs,
   }).then(clone);
 
-  const replyCounts = await findCommentCounts({
-    postIds: posts.map(p => p.id),
-    client,
+  const commentsEnabled = isCommentEnabled({
+    subapp: SUBAPP_CODES.forum,
+    config,
   });
+
+  /* Reply counts are only rendered when the workspace has comments enabled, so
+   * skip the count query entirely when it does not. */
+  const replyCounts = commentsEnabled
+    ? await findCommentCounts({postIds: posts.map(p => p.id), client})
+    : {};
   const postsWithCounts = posts.map(p => ({
     ...p,
     replyCount: replyCounts[String(p.id)] ?? 0,
@@ -158,6 +165,7 @@ export default async function Page(props: {
             memberGroupIDs={memberGroupIDs}
             groups={memberGroups.map(g => g.forumGroup)}
             canPost={Boolean($user?.id)}
+            commentsEnabled={commentsEnabled}
           />
         </div>
         <aside className="lg:sticky lg:top-6 flex flex-col gap-5">
