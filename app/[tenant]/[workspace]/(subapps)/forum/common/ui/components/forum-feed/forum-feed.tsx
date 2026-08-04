@@ -3,7 +3,12 @@
 import {useState} from 'react';
 import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
-import {MdAdd, MdChatBubbleOutline, MdClose} from 'react-icons/md';
+import {
+  MdAdd,
+  MdChatBubbleOutline,
+  MdClose,
+  MdOutlineNotifications,
+} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -77,14 +82,24 @@ export function ForumFeed({
             {i18n.t('Community forum')}
           </h1>
         </div>
-        <button
-          type="button"
-          onClick={() => setComposerOpen(true)}
-          disabled={!canPost}
-          className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] bg-royal text-white text-[13.5px] font-bold shadow-[0_1px_2px_rgba(13,30,75,0.15),0_4px_12px_rgba(13,30,75,0.12)] hover:bg-royal-dark disabled:opacity-50 disabled:cursor-not-allowed">
-          <MdAdd className="size-4" />
-          {i18n.t('New discussion')}
-        </button>
+        <div className="flex items-center gap-2.5">
+          {/* Desktop path to the notification settings — the page was otherwise
+              only reachable from the mobile menu. */}
+          <Link
+            href={`${workspaceURI}/${SUBAPP_CODES.forum}/manage-notifications`}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] border border-ink-150 text-ink-700 text-[13.5px] font-bold hover:bg-ink-25 transition-colors">
+            <MdOutlineNotifications className="size-4" />
+            <span className="hidden sm:inline">{i18n.t('Notifications')}</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setComposerOpen(true)}
+            disabled={!canPost}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-[10px] bg-royal text-white text-[13.5px] font-bold shadow-[0_1px_2px_rgba(13,30,75,0.15),0_4px_12px_rgba(13,30,75,0.12)] hover:bg-royal-dark disabled:opacity-50 disabled:cursor-not-allowed">
+            <MdAdd className="size-4" />
+            {i18n.t('New discussion')}
+          </button>
+        </div>
       </div>
 
       {/* Sort bar */}
