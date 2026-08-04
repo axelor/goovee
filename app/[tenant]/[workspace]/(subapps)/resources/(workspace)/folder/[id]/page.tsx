@@ -65,14 +65,18 @@ export default async function Page(props: {
 
   if (!folder) return notFound();
 
-  // Entry buttons are server-gated too (the actions enforce permission), and
-  // mirror the baseline: document upload needs write OR upload, folder creation
-  // needs write.
+  /* Entry buttons are server-gated too (the actions enforce permission), and
+     mirror the baseline: document upload needs write OR upload, folder creation
+     needs write. A folder's permission says what may be done to it, not who may
+     do it, so being signed in is a separate condition — this page admits
+     guests, and both actions refuse them. */
   const parentRef = {id, fileName: folder.fileName};
   const canUpload =
-    folder.permissionSelect === ACTION.WRITE ||
-    folder.permissionSelect === ACTION.UPLOAD;
-  const canCreateFolder = folder.permissionSelect === ACTION.WRITE;
+    Boolean(user) &&
+    (folder.permissionSelect === ACTION.WRITE ||
+      folder.permissionSelect === ACTION.UPLOAD);
+  const canCreateFolder =
+    Boolean(user) && folder.permissionSelect === ACTION.WRITE;
 
   return (
     <DocsFolderView

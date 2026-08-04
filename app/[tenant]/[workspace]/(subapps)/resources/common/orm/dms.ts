@@ -8,81 +8,6 @@ import {ORDER_BY} from '@/constants';
 // ---- LOCAL IMPORTS ---- //
 import {COLORS, ICONS} from '@/subapps/resources/common/constants';
 
-type FetchFoldersParams = {
-  where?: {
-    isHomepage?: boolean;
-    AND?: object[];
-  };
-  take?: number;
-};
-
-export async function fetchFolders({
-  workspaceURL,
-  client,
-  params,
-  user,
-  archived,
-}: {
-  params?: FetchFoldersParams;
-  client: Client;
-  workspaceURL: string;
-  user?: User;
-  archived?: boolean;
-}) {
-  if (!workspaceURL) return [];
-
-  const folders = await client.aOSDMSFile.find({
-    where: {
-      isDirectory: true,
-      workspaceSet: {
-        url: workspaceURL,
-      },
-      ...(params?.where || {}),
-      AND: [
-        filterPrivate({user}),
-        archived
-          ? {archived: true}
-          : {OR: [{archived: false}, {archived: null}]},
-        ...(params?.where?.AND || []),
-      ],
-    },
-    select: {
-      fileName: true,
-      parent: {id: true},
-      contentType: true,
-      description: true,
-      colorSelect: true,
-      logoSelect: true,
-    },
-    orderBy: {
-      updatedOn: ORDER_BY.DESC,
-    },
-    take: params?.take,
-  });
-
-  return folders;
-}
-
-export async function fetchLatestFolders({
-  workspaceURL,
-  client,
-  user,
-}: {
-  workspaceURL: string;
-  client: Client;
-  user?: User;
-}) {
-  return fetchFolders({
-    workspaceURL,
-    client,
-    user,
-    params: {
-      where: {isHomepage: true},
-      take: 10,
-    },
-  });
-}
-
 export async function fetchPinnedFoldersWithMeta({
   workspaceURL,
   client,
@@ -137,51 +62,6 @@ export async function fetchPinnedFoldersWithMeta({
   );
 
   return result;
-}
-
-export async function fetchNewFiles({
-  workspaceURL,
-  client,
-  user,
-  sinceDays = 14,
-  take = 10,
-}: {
-  workspaceURL: string;
-  client: Client;
-  user?: User;
-  sinceDays?: number;
-  take?: number;
-}) {
-  if (!workspaceURL) return [];
-
-  const cutoff = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
-
-  const files = await client.aOSDMSFile.find({
-    where: {
-      isDirectory: {ne: true},
-      workspaceSet: {url: workspaceURL},
-      createdOn: {ge: cutoff},
-      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
-    },
-    select: {
-      fileName: true,
-      parent: {fileName: true},
-      createdBy: {name: true, fullName: true},
-      createdOn: true,
-      metaFile: {
-        sizeText: true,
-        createdOn: true,
-        updatedOn: true,
-        fileName: true,
-        fileSize: true,
-        fileType: true,
-      },
-    },
-    orderBy: {createdOn: ORDER_BY.DESC},
-    take,
-  });
-
-  return files;
 }
 
 export async function fetchFiles({

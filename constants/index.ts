@@ -131,7 +131,6 @@ export const DATE_FORMATS = {
  */
 
 export const BANNER_TITLES = {
-  resources: 'app-resources',
   news: 'app-news',
   events: 'app-events',
   forum: 'app-forum',
