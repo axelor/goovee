@@ -31,8 +31,6 @@ export {ShopCatalog} from './shop-catalog';
 export type {ShopLabels, ShopSortOption} from './shop-catalog';
 export {ShopProductDetail} from './shop-product-detail';
 export type {ShopProductDetailLabels} from './shop-product-detail';
-export {ShopSidebar} from './shop-sidebar';
-export type {ShopSidebarLabels} from './shop-sidebar';
 export {ShopCart} from './shop-cart';
 export type {ShopCartLabels} from './shop-cart';
 export {ShopCheckout} from './shop-checkout';
