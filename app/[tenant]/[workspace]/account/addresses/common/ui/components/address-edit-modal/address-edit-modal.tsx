@@ -75,6 +75,7 @@ export function AddressEditModal({
             .string()
             .trim()
             .min(1, i18n.t('Street name is required')),
+          addressAddition: z.string(),
           zip: z.string().trim().min(1, i18n.t('Zip code is required')),
           townName: z.string().trim().min(1, i18n.t('Town name is required')),
           /* superRefine rather than refine: refine would narrow the parsed type
@@ -105,13 +106,17 @@ export function AddressEditModal({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      label: address?.address?.addressl2 ?? '',
+      /* The label lives in `department`; legacy rows kept it in addressl2 too,
+       * so read either. */
+      label: address?.address?.addressl2 || address?.address?.department || '',
       /* First and last name are captured so editing a legacy address does not
        * drop the stored name. */
       firstName: address?.address?.firstName ?? '',
       lastName: address?.address?.lastName ?? '',
       streetName:
         address?.address?.streetName ?? address?.address?.addressl4 ?? '',
+      /* Address precisions / addition — the AFNOR L3 line the redesign dropped. */
+      addressAddition: address?.address?.addressl3 ?? '',
       zip: address?.address?.zip ?? '',
       townName: address?.address?.townName ?? address?.address?.addressl6 ?? '',
       country: address?.address?.country
@@ -141,13 +146,24 @@ export function AddressEditModal({
     const streetName = values.streetName;
     const zip = values.zip;
     const townName = values.townName;
-    const computeFullName = () =>
-      [streetName, zip, townName].filter(Boolean).join(' ').toUpperCase();
+    const addressAddition = values.addressAddition;
+
+    /* AOS lays a postal address out as AFNOR lines L2..L6 and builds fullName by
+     * joining them with single spaces, uppercased (AddressServiceImpl.
+     * computeFullName). We write straight through the ORM, bypassing the AOS
+     * Java save that would regenerate these — so replicate it here, or the stored
+     * fullName drifts from what AOS produces. L6 is the "zip city" line. */
+    const addressL6 = [zip, townName].filter(Boolean).join(' ');
+    const lines = [
+      '', // L2 — recipient; left empty (the Goovee label lives in department)
+      addressAddition, // L3 — address precisions / addition
+      streetName, // L4 — number and street
+      '', // L5 — distribution precisions (unused)
+      addressL6, // L6 — zip and city
+    ];
+    const computeFullName = () => lines.filter(Boolean).join(' ').toUpperCase();
     const formattedFullName = () =>
-      [streetName, zip, townName, values.country?.name]
-        .filter(Boolean)
-        .join('\n')
-        .toUpperCase();
+      [...lines, values.country?.name].filter(Boolean).join('\n').toUpperCase();
 
     const addressBody = {
       id: address?.address?.id != null ? String(address.address.id) : undefined,
@@ -157,9 +173,13 @@ export function AddressEditModal({
         name: values.country.name,
         version: values.country.version ?? 0,
       },
-      addressl2: values.label,
+      /* AFNOR lines feeding fullName. addressl2 is cleared so a legacy label
+       * stored there no longer leaks into fullName; the label lives in
+       * `department`, where the address book reads it from. */
+      addressl2: '',
+      addressl3: addressAddition,
       addressl4: streetName,
-      addressl6: townName,
+      addressl6: addressL6,
       zip,
       townName,
       streetName,
@@ -286,6 +306,12 @@ export function AddressEditModal({
               <Input
                 {...form.register('streetName')}
                 placeholder={i18n.t('Street name and number')}
+              />
+            </Field>
+            <Field label={i18n.t('Address addition')}>
+              <Input
+                {...form.register('addressAddition')}
+                placeholder={i18n.t('Building, floor, unit… (optional)')}
               />
             </Field>
             <div className="grid grid-cols-[1fr_2fr] gap-3">

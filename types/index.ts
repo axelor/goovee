@@ -84,6 +84,7 @@ export interface PortalAddress {
   id?: string | number | null;
   version?: number;
   addressl2?: string | null;
+  addressl3?: string | null;
   addressl4?: string | null;
   addressl6?: string | null;
   zip?: string | null;
