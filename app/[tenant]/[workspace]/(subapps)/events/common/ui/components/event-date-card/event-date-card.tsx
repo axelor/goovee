@@ -9,7 +9,7 @@ import {i18n} from '@/locale';
 import {formatDateTime} from '@/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
-import {EventDateCardProps} from '@/subapps/events/common/ui/components';
+import type {EventDateCardProps} from './types';
 
 export const EventDateCard = ({
   startDate,

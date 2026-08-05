@@ -36,5 +36,3 @@ export function EventLocalDate({
   if (allDay) return <></>;
   return <>{formatDate(date, {dateFormat: 'HH:mm'})}</>;
 }
-
-export default EventLocalDate;

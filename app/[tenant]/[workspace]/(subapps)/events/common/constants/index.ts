@@ -10,9 +10,6 @@ export const REGISTER_TO_EVENT = 'Register to the event';
 export const REGISTER_TAG = '#Registered';
 
 export const MY_REGISTRATIONS = 'My registrations';
-export const NO_EVENT = 'No event';
-export const NO_RESULT_FOUND = 'No events found';
-export const SOME_WENT_WRONG = 'Something went wrong';
 export const EVENTS = {
   MY_REGISTRATIONS: 'my-registrations',
 };
