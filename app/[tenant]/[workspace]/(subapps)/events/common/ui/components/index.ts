@@ -1,6 +1,3 @@
-export {Logo} from './logo';
-export {Navbar} from './navbar';
-
 export {EventDateCard} from './event-date-card';
 
 export type {EventPageCardProps} from './event-page-card';
