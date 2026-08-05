@@ -1,8 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {ORDER_BY} from '@/constants';
 
-export const PIN = 'Pin';
-export const REMOVE_PIN = 'Remove pin';
 export const PUBLISHING = 'Publishing...';
 export const CLICK_HERE_DRAG_DROP =
   'Click here to select your image or drag & drop';
