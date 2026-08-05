@@ -180,6 +180,24 @@ export function ShopProductDetail({
       ? `${workspaceURI}/${SUBAPP_CODES.shop}/category/${categorySlug}/product/${slug}`
       : `${workspaceURI}/${SUBAPP_CODES.shop}/product/${slug}`;
 
+  /* Related products are picked for sharing *any* category with this one, so
+     this product's own category often does not contain them — routing them
+     through it would land on a category/product pair the shop cannot resolve.
+     Link each one through a category it actually belongs to, preferring one
+     this workspace exposes, since portalCategorySet may also name categories
+     belonging to another workspace. */
+  const workspaceCategoryIds = new Set(categories.map(c => String(c.id)));
+  const relatedHref = (relatedProduct: {
+    slug: string;
+    portalCategorySet?: {id: string | number; slug?: string | null}[] | null;
+    productCategory?: {slug?: string | null} | null;
+  }) => {
+    const portal = relatedProduct?.portalCategorySet ?? [];
+    const exposed = portal.find(c => workspaceCategoryIds.has(String(c?.id)));
+    const candidate = exposed ?? portal[0] ?? relatedProduct?.productCategory;
+    return productHref(relatedProduct.slug, candidate?.slug);
+  };
+
   return (
     <div className="flex h-full min-h-[calc(100vh-4rem)] bg-ink-25">
       {/* Same sidebar as the catalogue, so the two pages stay consistent.
@@ -435,7 +453,7 @@ export function ShopProductDetail({
                   return (
                     <Link
                       key={rProduct.id}
-                      href={productHref(rProduct.slug, cat?.slug)}
+                      href={relatedHref(rProduct)}
                       className={cn(
                         'group bg-white border border-ink-100 rounded-xl overflow-hidden',
                         'flex flex-col transition-all duration-150',
