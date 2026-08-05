@@ -2,14 +2,6 @@
 
 export {ShopPayments} from './shop-payments';
 export {
-  CategoriesSkeleton,
-  ProductCardSkeleton,
-  BreadcrumbsSkeleton,
-  ProductListColorFilterSkeleton,
-  ProductListBrandFilterSkeleon,
-  ProductListSkeleton,
-  ThumbsCarouselSkeleton,
-  ProductViewSkeleton,
   CartItemSkeleton,
   CartItemsSkeleton,
   CartSummarySkeleton,
