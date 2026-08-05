@@ -90,7 +90,7 @@ export function NewsFeatured({
 
       <div
         ref={railRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pt-1">
+        className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {articles.map(a => (
           <Link
             key={a.slug}
