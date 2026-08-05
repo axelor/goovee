@@ -1,9 +1,8 @@
 'use client';
 
-import {Fragment, useState} from 'react';
+import {useState} from 'react';
 import SwiperClass from 'swiper';
 import {Swiper, SwiperSlide} from 'swiper/react';
-import {Pagination} from 'swiper/modules';
 import {FreeMode, Navigation, Thumbs} from 'swiper/modules';
 
 import {Skeleton} from '@/ui/components/skeleton';
@@ -19,65 +18,6 @@ export function CategoriesSkeleton({count = 5}) {
       ))}
     </div>
   );
-}
-
-export function CarouselSkeleton({count = 5}) {
-  const images = Array.from({length: count});
-
-  return (
-    <Swiper
-      modules={[Pagination]}
-      pagination={{
-        type: 'bullets',
-        clickable: true,
-        bulletActiveClass: '[&>div]:bg-black',
-        horizontalClass: '!bottom-[4.375rem]',
-        renderBullet: (index, className) =>
-          `<div class="${className} h-3 w-3 rounded-full bg-transparent border border-black inline-flex items-center justify-center">
-        <div class="h-2 w-2 rounded-full"></div>
-      </div>`,
-      }}>
-      {images.map((_, i) => {
-        return (
-          <SwiperSlide key={i} className="max-w-full">
-            <div className="flex items-center relative bg-center bg-no-repeat bg-cover h-[750px] p-4 md:p-20">
-              <div className="absolute top-0 left-0 w-full h-full bg-black/[.15]" />
-              <div className="space-y-4 md:w-1/2 z-20">
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-4 w-60" />
-                <Skeleton className="h-6 w-32" />
-              </div>
-              <div className="absolute left-0 top-0 right-0 bottom-0 z-10 bg-[linear-gradient(90deg,_#FFF_14.57%,_rgba(255,255,255,0.00)_98.91%)]"></div>
-            </div>
-          </SwiperSlide>
-        );
-      })}
-    </Swiper>
-  );
-}
-
-export function FeaturedCategoriesSkeleton({
-  categoryCount = 3,
-  productCount = 4,
-}) {
-  const categories = Array.from({length: categoryCount});
-  const products = Array.from({length: productCount});
-
-  return categories?.map((c, i) => (
-    <Fragment key={i}>
-      <div className="flex justify-between items-center">
-        <Skeleton className="h-6 w-44" />
-        <div className="flex gap-2 px-3 py-4 cursor-pointer">
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {products.map((p, j) => {
-          return <ProductCardSkeleton key={j} />;
-        })}
-      </div>
-    </Fragment>
-  ));
 }
 
 export function ProductCardSkeleton() {

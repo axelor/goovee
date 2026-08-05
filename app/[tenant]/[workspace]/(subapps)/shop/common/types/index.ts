@@ -21,15 +21,6 @@ export type CheckoutCart = {
   deliveryAddress?: string | number | null;
 };
 
-export type FeaturedCategory = {
-  id: string | number;
-  name: string | null;
-  slug: string | null;
-  products?: ComputedProduct[];
-  parentProductCategory?: {id: string} | null;
-  productList?: Array<{id: string}>;
-};
-
 export type MetaFieldWithValue = ModelField & {value: unknown};
 
 export type FieldValueItem = {

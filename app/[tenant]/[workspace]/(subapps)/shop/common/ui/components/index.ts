@@ -3,8 +3,6 @@
 export {ShopPayments} from './shop-payments';
 export {
   CategoriesSkeleton,
-  CarouselSkeleton,
-  FeaturedCategoriesSkeleton,
   ProductCardSkeleton,
   BreadcrumbsSkeleton,
   ProductListColorFilterSkeleton,
