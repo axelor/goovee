@@ -183,19 +183,22 @@ export function ShopProductDetail({
   /* Related products are picked for sharing *any* category with this one, so
      this product's own category often does not contain them — routing them
      through it would land on a category/product pair the shop cannot resolve.
-     Link each one through a category it actually belongs to, preferring one
-     this workspace exposes, since portalCategorySet may also name categories
-     belonging to another workspace. */
+     Link each one through a category it actually belongs to and that this
+     workspace exposes, since portalCategorySet may also name categories
+     belonging to another workspace.
+
+     When no such category is found, fall through to the category-free product
+     URL rather than guessing one: that route is not category-scoped, so it
+     always resolves, whereas any other category would send the reader back to
+     the shop. */
   const workspaceCategoryIds = new Set(categories.map(c => String(c.id)));
   const relatedHref = (relatedProduct: {
     slug: string;
     portalCategorySet?: {id: string | number; slug?: string | null}[] | null;
-    productCategory?: {slug?: string | null} | null;
   }) => {
     const portal = relatedProduct?.portalCategorySet ?? [];
     const exposed = portal.find(c => workspaceCategoryIds.has(String(c?.id)));
-    const candidate = exposed ?? portal[0] ?? relatedProduct?.productCategory;
-    return productHref(relatedProduct.slug, candidate?.slug);
+    return productHref(relatedProduct.slug, exposed?.slug);
   };
 
   return (
