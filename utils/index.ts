@@ -12,10 +12,6 @@ export function scale(n: number | string, s: number = DEFAULT_SCALE) {
   return n && Number(n).toFixed(s);
 }
 
-export function capitalise(text: string) {
-  return text && text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 export function formatPrice(
   num: number | string,
   currency: string = DEFAULT_CURRENCY_SYMBOL,

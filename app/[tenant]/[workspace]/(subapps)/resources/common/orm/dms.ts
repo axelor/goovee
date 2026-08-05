@@ -5,9 +5,6 @@ import {filterPrivate} from '@/orm/filter';
 import type {Client} from '@/goovee/.generated/client';
 import {ORDER_BY} from '@/constants';
 
-// ---- LOCAL IMPORTS ---- //
-import {COLORS, ICONS} from '@/subapps/resources/common/constants';
-
 export async function fetchPinnedFoldersWithMeta({
   workspaceURL,
   client,
@@ -311,14 +308,6 @@ export async function fetchFolderWithParent({
   });
 
   return folder;
-}
-
-export async function fetchColors() {
-  return COLORS;
-}
-
-export async function fetchIcons() {
-  return ICONS;
 }
 
 export async function fetchExplorerCategories({
