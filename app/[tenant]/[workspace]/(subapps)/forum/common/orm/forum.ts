@@ -392,7 +392,6 @@ export async function findGroupById(
     },
     select: {
       name: true,
-      description: true,
       image: {
         fileName: true,
       },

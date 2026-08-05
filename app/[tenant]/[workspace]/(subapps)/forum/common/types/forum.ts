@@ -37,7 +37,6 @@ export interface Image extends Model {
 
 export interface Group extends Model {
   name: string;
-  description?: string;
   image?: Image;
 }
 
