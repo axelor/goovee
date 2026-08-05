@@ -30,9 +30,4 @@ export const SORT_BY_OPTIONS = [
    back to the same one. Otherwise the first ordering the workspace offers. */
 export const DEFAULT_SORT_OPTION = 'byAToZ';
 
-export const SHIPPING_TYPE = {
-  REGULAR: 'regular',
-  FAST: 'fast',
-};
-
 export const ORDER_SUCCESS_PARAM = 'order_success';
