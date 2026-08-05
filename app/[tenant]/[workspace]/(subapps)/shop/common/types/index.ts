@@ -1,5 +1,4 @@
 import type {Cart, CartItem, ComputedProduct} from '@/types';
-import type {ModelField} from '@/orm/model-fields';
 
 export type Breadcrumb = {id: string | number; name: string};
 
@@ -21,22 +20,4 @@ export type CheckoutCart = {
   deliveryAddress?: string | number | null;
 };
 
-export type MetaFieldWithValue = ModelField & {value: unknown};
-
-export type FieldValueItem = {
-  id?: string;
-  fileName?: string;
-  fileType?: string;
-  value?: FieldValueItem;
-  [key: string]: unknown;
-};
-
 export type SortOption = {value: string; label: string};
-
-export type FileAttr = {
-  id?: string | number;
-  fileName?: unknown;
-  fileType?: unknown;
-  fileSize?: unknown;
-  filePath?: unknown;
-};

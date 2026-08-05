@@ -60,7 +60,6 @@ export interface Product extends Model {
   displaySalePrice: string;
   displayCostPrice: string;
   allowCustomNote?: boolean;
-  productAttrs: string;
   outOfStockConfig?: {
     canBuy: boolean;
     noMoreStockSelect: number;

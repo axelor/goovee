@@ -36,7 +36,6 @@ type RawProduct = {
   salePrice: number | null;
   featured: number | null;
   createdOn: string | null;
-  productAttrs: string | null;
   allowCustomNote: boolean | null;
   _count?: string;
   saleCurrency: {symbol: string | null} | null;
@@ -118,7 +117,6 @@ const getProductFields = ({
     picture: {
       id: true,
     },
-    productAttrs: true,
     allowCustomNote: true,
     portalImageList: {
       select: {
