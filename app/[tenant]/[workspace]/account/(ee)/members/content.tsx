@@ -31,7 +31,11 @@ type AvailableApp = {
   code: string;
   authorization?: boolean;
 };
-type Editing = {mode: 'invite' | 'edit'; member?: any} | null;
+type Editing = {
+  mode: 'invite' | 'edit' | 'edit-invite';
+  member?: any;
+  invite?: any;
+} | null;
 
 type Invite = Awaited<
   ReturnType<typeof import('../../common/orm/invites').findInvites>
@@ -259,6 +263,17 @@ export default function Content({
                         RoleLabel[isAdminInvite ? Role.admin : Role.user],
                       )}
                     </span>
+                    {canInviteMembers && !isAdminInvite && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditing({mode: 'edit-invite', invite: inv})
+                        }
+                        className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-royal hover:text-royal-dark">
+                        <MdOutlineEdit className="size-4" />
+                        {i18n.t('Manage')}
+                      </button>
+                    )}
                     <button
                       type="button"
                       aria-label={i18n.t('Revoke invitation')}
@@ -286,6 +301,7 @@ export default function Content({
           open
           mode={editing.mode}
           member={editing.member}
+          invite={editing.invite}
           availableApps={availableApps}
           onClose={() => setEditing(null)}
           onSaved={() => router.refresh()}

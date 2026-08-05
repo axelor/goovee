@@ -27,7 +27,12 @@ import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {AccountToggle} from '../../common/ui/components';
 import {Authorization, Role, type InviteAppsConfig} from '../../common/types';
 import {sendInvites} from './invite/action';
-import {updateMemberApplication, updateMemberAuthentication} from './action';
+import {
+  updateMemberApplication,
+  updateMemberAuthentication,
+  updateInviteApplication,
+  updateInviteAuthentication,
+} from './action';
 
 // Member shape derived from the ORM finder (type-only import, erased at build).
 type MembersResult = Awaited<
@@ -37,6 +42,12 @@ type ContactMember = NonNullable<
   NonNullable<Extract<MembersResult, {contacts: unknown}>['contacts']>[number]
 >;
 
+// Pending-invitation shape from its ORM finder (type-only, erased at build).
+type InvitesResult = Awaited<
+  ReturnType<typeof import('../../common/orm/invites').findInvites>
+>;
+type PendingInvite = NonNullable<InvitesResult[number]>;
+
 type AvailableApp = {
   id: string;
   name: string;
@@ -44,7 +55,7 @@ type AvailableApp = {
   authorization?: boolean;
 };
 type Perm = {access: boolean; level: Authorization};
-type Mode = 'invite' | 'edit';
+type Mode = 'invite' | 'edit' | 'edit-invite';
 
 const EMAIL_RE = /\S+@\S+\.\S+/;
 
@@ -55,6 +66,7 @@ export function InviteMemberModal({
   onSaved,
   availableApps,
   member,
+  invite,
 }: {
   mode: Mode;
   open: boolean;
@@ -62,12 +74,16 @@ export function InviteMemberModal({
   onSaved: () => void;
   availableApps: AvailableApp[];
   member?: ContactMember;
+  invite?: PendingInvite;
 }) {
   const {toast} = useToast();
   const {workspaceURL, workspaceURI} = useWorkspace();
-  const isEdit = mode === 'edit';
+  const isEditMember = mode === 'edit';
+  const isEditInvite = mode === 'edit-invite';
+  const isEdit = isEditMember || isEditInvite;
 
-  // Current member permissions keyed by app code (edit mode).
+  // Current permissions keyed by app code (edit modes). A member carries them on
+  // contactWorkspaceConfig; a pending invite carries them on its own config.
   const memberPerms: Record<string, Authorization> = useMemo(() => {
     const list = member?.contactWorkspaceConfig?.contactAppPermissionList || [];
     return list.reduce<Record<string, Authorization>>((acc, p) => {
@@ -78,21 +94,43 @@ export function InviteMemberModal({
     }, {});
   }, [member]);
 
+  const invitePerms: Record<string, Authorization> = useMemo(() => {
+    const list =
+      invite?.contactAppPermissionList?.[0]?.contactAppPermissionList || [];
+    return list.reduce<Record<string, Authorization>>((acc, p: any) => {
+      if (p?.app?.code)
+        acc[p.app.code] =
+          (p.roleSelect as Authorization) ?? Authorization.restricted;
+      return acc;
+    }, {});
+  }, [invite]);
+
+  const currentPerms = isEditInvite ? invitePerms : memberPerms;
+
   const [email] = useState<string>(
-    isEdit ? (member?.emailAddress?.address ?? '') : '',
+    isEditInvite
+      ? (invite?.emailAddress?.address ?? '')
+      : isEditMember
+        ? (member?.emailAddress?.address ?? '')
+        : '',
   );
   const [emailInput, setEmailInput] = useState<string>('');
-  const [role, setRole] = useState<Role.user | Role.admin>(
-    isEdit && member?.contactWorkspaceConfig?.isAdmin ? Role.admin : Role.user,
-  );
+  const [role, setRole] = useState<Role.user | Role.admin>(() => {
+    const admin = isEditInvite
+      ? Boolean(invite?.contactAppPermissionList?.[0]?.isAdmin)
+      : isEditMember
+        ? Boolean(member?.contactWorkspaceConfig?.isAdmin)
+        : false;
+    return admin ? Role.admin : Role.user;
+  });
   const [perms, setPerms] = useState<Record<string, Perm>>(() =>
     Object.fromEntries(
       availableApps.map(a => [
         a.code,
         {
-          access: isEdit ? a.code in memberPerms : false,
+          access: isEdit ? a.code in currentPerms : false,
           level: isEdit
-            ? (memberPerms[a.code] ?? Authorization.restricted)
+            ? (currentPerms[a.code] ?? Authorization.restricted)
             : Authorization.restricted,
         },
       ]),
@@ -104,7 +142,13 @@ export function InviteMemberModal({
   const enabledCount = availableApps.filter(a => perms[a.code]?.access).length;
   const allOn =
     enabledCount === availableApps.length && availableApps.length > 0;
-  const valid = isEdit || EMAIL_RE.test(emailInput);
+  const invitedEmails = emailInput
+    .split(',')
+    .map(e => e.trim())
+    .filter(Boolean);
+  const valid =
+    isEdit ||
+    (invitedEmails.length > 0 && invitedEmails.every(e => EMAIL_RE.test(e)));
 
   const setAccess = (code: string, v: boolean) =>
     setPerms(p => ({...p, [code]: {...p[code], access: v}}));
@@ -210,11 +254,67 @@ export function InviteMemberModal({
     onClose();
   };
 
+  const handleSaveInviteAccess = async () => {
+    if (!invite) return;
+    const ref = {id: invite.id};
+    for (const a of availableApps) {
+      const desired = perms[a.code];
+      const hadAccess = a.code in invitePerms;
+      const app = {id: a.id, code: a.code};
+
+      if (desired.access !== hadAccess) {
+        const res = await updateInviteApplication({
+          workspaceURL,
+          workspaceURI,
+          invite: ref,
+          app,
+          value: desired.access ? 'yes' : 'no',
+        });
+        if (res && 'error' in res && res.error) {
+          toast({
+            variant: 'destructive',
+            title: res.message || i18n.t('An unexpected error occurred'),
+          });
+          onSaved();
+          return;
+        }
+      }
+
+      // Authorization only matters for scoped apps that keep access.
+      if (desired.access && a.authorization) {
+        const currentLevel = invitePerms[a.code];
+        const justGranted = !hadAccess;
+        if (justGranted || desired.level !== currentLevel) {
+          const res = await updateInviteAuthentication({
+            workspaceURL,
+            workspaceURI,
+            invite: ref,
+            app,
+            value: desired.level,
+          });
+          if (res && 'error' in res && res.error) {
+            toast({
+              variant: 'destructive',
+              title: res.message || i18n.t('An unexpected error occurred'),
+            });
+            onSaved();
+            return;
+          }
+        }
+      }
+    }
+
+    toast({variant: 'success', title: i18n.t('Access updated successfully.')});
+    onSaved();
+    onClose();
+  };
+
   const handleSubmit = async () => {
     if (submitting || !valid) return;
     setSubmitting(true);
     try {
-      if (isEdit) await handleSaveAccess();
+      if (isEditInvite) await handleSaveInviteAccess();
+      else if (isEditMember) await handleSaveAccess();
       else await handleInvite();
     } catch (e) {
       toast({
@@ -226,8 +326,11 @@ export function InviteMemberModal({
     }
   };
 
+  const subjectLabel = isEditInvite
+    ? (invite?.emailAddress?.address ?? '')
+    : member?.fullName || member?.name || '';
   const title = isEdit
-    ? i18n.t('Access for {0}', member?.fullName || member?.name || '')
+    ? i18n.t('Access for {0}', subjectLabel)
     : i18n.t('Invite a member');
 
   return (
@@ -260,14 +363,27 @@ export function InviteMemberModal({
         <div className="px-6 py-6 overflow-y-auto flex flex-col gap-5">
           {/* Identity */}
           <div className="grid grid-cols-1 sm:grid-cols-[1.6fr_1fr] gap-3.5">
-            <Field label={i18n.t('Member email')}>
+            <Field
+              label={
+                isEdit ? i18n.t('Member email') : i18n.t('Member email(s)')
+              }>
               <Input
                 type="email"
+                multiple={!isEdit}
                 value={currentEmail}
                 disabled={isEdit}
                 onChange={e => setEmailInput(e.target.value)}
-                placeholder={i18n.t('firstname.name@company.com')}
+                placeholder={
+                  isEdit
+                    ? i18n.t('firstname.name@company.com')
+                    : i18n.t('alice@company.com, bob@company.com')
+                }
               />
+              {!isEdit && (
+                <p className="text-[11.5px] text-ink-500">
+                  {i18n.t('Separate multiple addresses with commas.')}
+                </p>
+              )}
             </Field>
             <Field label={i18n.t('Role')}>
               <Select
