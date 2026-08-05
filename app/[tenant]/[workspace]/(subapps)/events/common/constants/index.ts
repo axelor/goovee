@@ -6,8 +6,6 @@ export const PORTAL_PARTICIPANT_MODEL =
 export const CONTACT_ATTRS = 'contactAttrs';
 export const SUCCESS_REGISTER_MESSAGE =
   'You have been successfully registered to this event.';
-export const CATEGORIES = 'Categories';
-
 export const REGISTER_TO_EVENT = 'Register to the event';
 export const REGISTER_TAG = '#Registered';
 
@@ -52,19 +50,6 @@ export const MY_REGISTRATION_TAB_ITEMS = [
     id: '1',
     title: 'Ongoing events',
     label: EVENT_TYPE.ONGOING,
-  },
-  {
-    id: '2',
-    title: 'Past events',
-    label: EVENT_TYPE.PAST,
-  },
-];
-
-export const EVENT_TAB_ITEMS = [
-  {
-    id: '1',
-    title: 'Active events',
-    label: EVENT_TYPE.ACTIVE,
   },
   {
     id: '2',

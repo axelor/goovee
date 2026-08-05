@@ -4,15 +4,16 @@
 import {InnerHTML} from '@/ui/components/inner-html';
 import {DATE_FORMATS} from '@/constants';
 import {formatDate} from '@/locale/formatters';
+import type {Cloned} from '@/types/util';
 
 // ---- LOCAL IMPORTS ---- //
-import type {ListEvent} from '@/subapps/events/common/ui/components/events/types';
+import type {ListEvent} from '@/subapps/events/common/types';
 
 export const SearchItem = ({
   result,
   onClick,
 }: {
-  result: ListEvent;
+  result: Cloned<ListEvent>;
   onClick: (slug: string | null) => void;
 }) => {
   const {eventTitle, eventStartDateTime, eventDescription, slug} = result;

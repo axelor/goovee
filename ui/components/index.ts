@@ -1,7 +1,7 @@
 export {Logo} from './logo';
 export {Account} from './account';
 export {TabContent} from './tab-content';
-export {StyledTabs, Tabs, TabsContent, TabsList, TabsTrigger} from './tabs';
+export {Tabs, TabsContent, TabsList, TabsTrigger} from './tabs';
 export {Tag} from './tag';
 export {Loader} from './loader';
 export {Portal} from './portal';
