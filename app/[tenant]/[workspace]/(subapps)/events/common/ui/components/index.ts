@@ -20,7 +20,6 @@ export type {CustomSelectProps} from './custom-select';
 export {EventDetails} from './event-details';
 
 export {MobileMenuCategory} from './mobile-menu-category';
-export {SearchItem} from './search-item';
 export {EventNavbar} from './event-navbar';
 export {SubscriptionsView} from './subscriptions-view';
 export {SubscriptionsPriceView} from './subscriptions-price-view';
