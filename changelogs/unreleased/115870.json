@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the events sub-app",
+  "type": "change",
+  "description": "The events hub, calendar, event detail and registrations views have been redesigned with the new design system, including a new magazine-style homepage and an agenda calendar view.",
+  "scope": ["events"]
+}

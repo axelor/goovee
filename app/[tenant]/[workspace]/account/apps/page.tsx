@@ -6,9 +6,12 @@ import {findWorkspace, findSubapps} from '@/orm/workspace';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/lib/core/tenant';
+import {t} from '@/lib/core/locale/server';
 
 // ---- LOCAL IMPORTS ---- //
 import Content from './content';
+import SettingsContent from '../settings/content';
+import {SectionHeader} from '../common/ui/components';
 
 export default async function Account(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -43,8 +46,19 @@ export default async function Account(props: {
   });
 
   return (
-    <div className="bg-white p-2 lg:p-0 lg:bg-inherit">
-      <Content subapps={subapps} />
+    <div className="flex flex-col gap-6">
+      <SectionHeader
+        eyebrow={await t('Team')}
+        title={await t('My apps')}
+        description={await t('Enable or hide applications in the side menu.')}
+      />
+      <div className="bg-white border border-ink-100 rounded-xl shadow-xs p-6">
+        <Content subapps={subapps} />
+      </div>
+
+      <div className="bg-white border border-destructive/30 rounded-xl shadow-xs p-6">
+        <SettingsContent workspace={workspace} />
+      </div>
     </div>
   );
 }

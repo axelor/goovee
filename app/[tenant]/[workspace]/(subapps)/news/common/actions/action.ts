@@ -26,7 +26,10 @@ import {NotificationTag} from '@/pwa/tags';
 
 // ---- LOCAL IMPORTS ---- //
 import {findNews} from '@/subapps/news/common/orm/news';
-import {DEFAULT_NEWS_ASIDE_LIMIT} from '@/subapps/news/common/constants';
+import {
+  DEFAULT_NEWS_ASIDE_LIMIT,
+  SEARCH_NEWS_LIMIT,
+} from '@/subapps/news/common/constants';
 import {
   FindRecommendedNewsSchema,
   FindSearchNewsSchema,
@@ -34,11 +37,19 @@ import {
   type FindSearchNewsInput,
 } from '@/subapps/news/common/validators';
 
-export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
-  const parsed = FindSearchNewsSchema.safeParse({workspaceURL});
+export async function findSearchNews({
+  workspaceURL,
+  search,
+}: FindSearchNewsInput) {
+  const parsed = FindSearchNewsSchema.safeParse({workspaceURL, search});
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
+
+  /* An empty term is not a match-everything search — without this the
+     dropdown would present the latest articles as if they were hits. */
+  const searchTerm = parsed.data.search?.trim();
+  if (!searchTerm) return [];
 
   const tenantId = (await headers()).get(TENANT_HEADER);
 
@@ -70,10 +81,22 @@ export async function findSearchNews({workspaceURL}: FindSearchNewsInput) {
     };
   }
 
+  /* Matched and capped by the database: the dropdown used to load every
+     article in the workspace and filter them in the browser. */
   const {news} = await findNews({
     workspace: access.workspace,
     client,
     user,
+    limit: SEARCH_NEWS_LIMIT,
+    orderBy: {publicationDateTime: ORDER_BY.DESC},
+    params: {
+      where: {
+        OR: [
+          {title: {like: `%${searchTerm}%`}},
+          {description: {like: `%${searchTerm}%`}},
+        ],
+      },
+    },
   }).then(clone);
 
   return news;

@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the data layer (schema, ORM & shared types)",
+  "type": "change",
+  "description": "Added schema, ORM helpers and shared type fields (forum reactions, address book defaults, partner and product data) supporting the redesigned sub-app screens.",
+  "scope": ["core"]
+}

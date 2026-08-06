@@ -1,5 +1,13 @@
 import {redirect} from 'next/navigation';
 
-export default function Page() {
-  redirect('/shop');
+// ---- CORE IMPORTS ---- //
+import {workspacePathname} from '@/utils/workspace';
+
+export default async function Page(props: {
+  params: Promise<{tenant: string; workspace: string}>;
+}) {
+  const params = await props.params;
+  const {workspaceURI} = workspacePathname(params);
+
+  redirect(`${workspaceURI}/shop`);
 }

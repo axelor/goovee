@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the resources sub-app",
+  "type": "change",
+  "description": "The resources sub-app has been redesigned as a documentation-style file browser, with a folder sidebar, home and folder grid/list views, and a dedicated document viewer.",
+  "scope": ["resources"]
+}

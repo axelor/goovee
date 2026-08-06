@@ -1,15 +1,17 @@
 import {notFound} from 'next/navigation';
 import {uniqBy} from 'lodash-es';
 
-// ---- CORE IMPORT ---- //
+// ---- CORE IMPORTS ---- //
 import {getSession} from '@/auth';
 import {PartnerTypeMap, findGooveeUserByEmail} from '@/orm/partner';
 import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/lib/core/tenant';
+import {t} from '@/lib/core/locale/server';
 
-// ---- LOCAL IMPORT ---- //
+// ---- LOCAL IMPORTS ---- //
 import Form from './form';
 import {Role} from '../common/types';
+import {SectionHeader} from '../common/ui/components';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -98,8 +100,17 @@ export default async function Page(props: {
   };
 
   return (
-    <div className="bg-white p-2 lg:p-0 lg:bg-inherit">
-      <Form settings={settings as any} partners={partners} />
+    <div className="flex flex-col gap-6">
+      <SectionHeader
+        eyebrow={await t('Account')}
+        title={await t('Personal settings')}
+        description={await t(
+          'Company information shown across your workspace.',
+        )}
+      />
+      <div className="bg-white border border-ink-100 rounded-xl shadow-xs p-6">
+        <Form settings={settings as any} partners={partners} />
+      </div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {cache} from 'react';
 import {filterPrivate} from '@/orm/filter';
-import type {Cloned} from '@/types/util';
 import type {Client} from '@/goovee/.generated/client';
 import type {User, Category} from '@/types';
 import type {Workspace} from '@/orm/workspace';
@@ -74,50 +73,3 @@ async function loadCategories(
    ensures the cache hits even when call sites hold differently-cloned
    workspace references. */
 export const findCategories = cache(loadCategories);
-
-export async function findFeaturedCategories({
-  workspace,
-  client,
-  user,
-  archived,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  archived?: boolean;
-}) {
-  if (!(workspace && client)) return [];
-
-  const categories = await client.aOSProductCategory.find({
-    where: {
-      portalWorkspace: {
-        id: workspace.id,
-      },
-      isFeatured: true,
-      AND: [
-        filterPrivate({user}),
-        archived
-          ? {archived: true}
-          : {OR: [{archived: false}, {archived: null}]},
-      ],
-    },
-    select: {
-      name: true,
-      parentProductCategory: {id: true},
-      productList: {
-        where: {
-          homepage: true,
-        },
-        orderBy: {
-          featured: 'DESC',
-        },
-        select: {
-          id: true,
-        },
-      },
-      slug: true,
-    },
-  });
-
-  return categories;
-}

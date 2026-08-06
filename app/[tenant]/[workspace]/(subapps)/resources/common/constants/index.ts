@@ -15,6 +15,11 @@ export const MAX_RESOURCE_FILES = 10;
  * aOSDMSFile rows are created. */
 export const RESOURCE_DMS_UPLOAD_PURPOSE = 'resources:dms';
 
+/* How recently a file must have been created to be badged as new, in the
+   folder's table and grid views and on the document page. */
+const NEW_FILE_CUTOFF_DAYS = 1;
+export const NEW_FILE_CUTOFF_MS = NEW_FILE_CUTOFF_DAYS * 24 * 60 * 60 * 1000;
+
 export const COLORS = [
   {
     label: 'Red',

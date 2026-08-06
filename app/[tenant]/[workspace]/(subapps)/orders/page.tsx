@@ -9,7 +9,7 @@ import {getCurrentPath} from '@/utils/current-path';
 import {DEFAULT_LIMIT, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {clone} from '@/utils';
 import {PartnerKey} from '@/types';
-import {TableSkeleton} from '@/ui/components/table';
+import {SplitViewListSkeleton} from '@/ui/components/record-skeleton';
 import {getWhereClauseForEntity} from '@/utils/filters';
 
 // ---- LOCAL IMPORTS ---- //
@@ -25,7 +25,7 @@ async function Orders({
   params: {tenant: string; workspace: string};
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {limit, page, type} = searchParams;
+  const {limit, page, type, search} = searchParams;
 
   const orderType = (type ?? ORDER.ONGOING) as OrderType;
 
@@ -66,12 +66,17 @@ async function Orders({
 
   const {role, isContactAdmin} = access.subapp;
 
-  const where = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.CLIENT_PARTNER,
-  });
+  const searchTerm = search?.trim();
+
+  const where = {
+    ...getWhereClauseForEntity({
+      user,
+      role,
+      isContactAdmin,
+      partnerKey: PartnerKey.CLIENT_PARTNER,
+    }),
+    ...(searchTerm ? {saleOrderSeq: {like: `%${searchTerm}%`}} : {}),
+  };
 
   const isCompleted = orderType === ORDER.COMPLETED;
 
@@ -104,7 +109,7 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   return (
-    <Suspense fallback={<TableSkeleton />}>
+    <Suspense fallback={<SplitViewListSkeleton />}>
       <Orders params={params} searchParams={searchParams} />
     </Suspense>
   );

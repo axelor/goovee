@@ -29,17 +29,15 @@ export function PaginationContent({
 
   return (
     pages > DEFAULT_PAGE && (
-      <div className="mb-12 md:mb-0">
-        <Pagination
-          page={page}
-          pages={pages}
-          disablePrev={!hasPrev}
-          disableNext={!hasNext}
-          onPrev={handlePreviousPage}
-          onNext={handleNextPage}
-          onPage={handlePage}
-        />
-      </div>
+      <Pagination
+        page={page}
+        pages={pages}
+        disablePrev={!hasPrev}
+        disableNext={!hasNext}
+        onPrev={handlePreviousPage}
+        onNext={handleNextPage}
+        onPage={handlePage}
+      />
     )
   );
 }

@@ -27,6 +27,14 @@ export type UseCommentsProps = {
   limit?: number;
   newCommentOnTop?: boolean;
   showRepliesInMainThread?: boolean;
+  /**
+   * Whether the workspace has comments turned on. Callers that hide their
+   * comment section rather than unmounting it pass `false` so the initial load
+   * is skipped — `fetchComments` refuses when the feature is off, and the
+   * refusal would otherwise surface as an error toast on a page that shows no
+   * comments at all.
+   */
+  enabled?: boolean;
   fetchComments: FetchComments;
   createComment: CreateComment;
 };
@@ -38,6 +46,7 @@ export function useComments(props: UseCommentsProps) {
     limit,
     newCommentOnTop,
     showRepliesInMainThread,
+    enabled = true,
     fetchComments,
     createComment,
   } = props;
@@ -167,8 +176,9 @@ export function useComments(props: UseCommentsProps) {
   );
 
   useEffect(() => {
+    if (!enabled) return;
     loadComments();
-  }, [loadComments]);
+  }, [loadComments, enabled]);
 
   return useMemo(
     () => ({

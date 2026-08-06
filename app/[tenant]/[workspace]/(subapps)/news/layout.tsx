@@ -7,6 +7,7 @@ import {SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import MobileMenuCategory from '@/subapps/news/mobile-menu-category';
+import {NewsTopNav} from '@/subapps/news/common/ui/components';
 import {findCategories} from '@/subapps/news/common/orm/news';
 
 export default async function Layout(props: {
@@ -46,9 +47,36 @@ export default async function Layout(props: {
       }).then(clone)
     : [];
 
+  // Group children under their parent so the desktop nav can offer a second,
+  // contextual row of subcategories — the mobile menu already gets the tree.
+  const childrenByParent = new Map<
+    string,
+    {id: string; name: string; slug: string}[]
+  >();
+  allCategories.forEach(c => {
+    const parentId = c?.parentCategory?.id;
+    if (!parentId) return;
+    const key = String(parentId);
+    const siblings = childrenByParent.get(key) ?? [];
+    siblings.push({id: String(c.id), name: c.name, slug: c.slug});
+    childrenByParent.set(key, siblings);
+  });
+
+  const topCategories = allCategories
+    .filter(c => !c?.parentCategory?.id)
+    .map(c => ({
+      id: String(c.id),
+      name: c.name,
+      slug: c.slug,
+      children: childrenByParent.get(String(c.id)) ?? [],
+    }));
+
+  /* mb-[72px] holds the subapp clear of the workspace's fixed mobile menu bar,
+     which is that tall and hides at lg — as ticketing, directory and website do. */
   return (
-    <div className="mb-4 md:mb-10 h-full">
-      {children}
+    <div className="h-full flex flex-col mb-[72px] lg:mb-0">
+      <NewsTopNav categories={topCategories} config={clone(config)} />
+      <div className="flex-1 mb-4 md:mb-10">{children}</div>
       <MobileMenuCategory categories={allCategories} />
     </div>
   );

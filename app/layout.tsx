@@ -3,7 +3,10 @@
 // which would freeze env values and break runtime injection across environments.
 export const dynamic = 'force-dynamic';
 
-import {Poppins as FontSans} from 'next/font/google';
+import {
+  Plus_Jakarta_Sans as FontSans,
+  JetBrains_Mono as FontMono,
+} from 'next/font/google';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
@@ -30,9 +33,18 @@ import 'swiper/css/thumbs';
 
 const fontSans = FontSans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   style: ['normal'],
   variable: '--font-sans',
+  display: 'swap',
+});
+
+const fontMono = FontMono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  style: ['normal'],
+  variable: '--font-mono',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -83,7 +95,8 @@ export default async function RootLayout({
         <head>
           <meta name="mobile-web-app-capable" content="yes" />
         </head>
-        <body className={fontSans.className}>
+        <body
+          className={`${fontSans.variable} ${fontMono.variable} ${fontSans.className}`}>
           <Environment value={env}>
             <Locale>
               <SerwistProvider

@@ -36,7 +36,8 @@ export async function findPendingHubPispPayments({
       mode: PaymentOption.hubpisp,
       status: CONTEXT_STATUS.pending,
       AND: [
-        {data: {path: 'id', eq: entityId}},
+        /* data.id is stored as a JSON string; without an explicit type the ORM infers Int for numeric-looking values and the jsonpath never matches. */
+        {data: {path: 'id', eq: entityId, type: 'String'}},
         {data: {path: 'resourceId', ne: null}},
         {data: {path: 'amount', ne: null}},
       ],

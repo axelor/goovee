@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the directory sub-app",
+  "type": "change",
+  "description": "The directory listing and entry detail pages have been restyled with the new design system, including reworked card surfaces, filter bar and contact cards.",
+  "scope": ["directory"]
+}

@@ -22,19 +22,6 @@ export const isSameDay = (date1: Date, date2: Date) => {
   );
 };
 
-export const dateIsExist = (dateToCheck: Date, datesArray: Date[]) => {
-  const formattedDateToCheck = new Date(dateToCheck).toISOString();
-
-  for (const date of datesArray) {
-    const formattedDate = new Date(date).toISOString();
-    if (formattedDate === formattedDateToCheck) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
 export function formatToTwoDigits(val: string | number) {
   return String(val).padStart(2, '0');
 }
