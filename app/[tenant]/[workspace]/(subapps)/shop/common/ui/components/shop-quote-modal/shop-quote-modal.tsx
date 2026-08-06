@@ -13,13 +13,14 @@ import {
 
 import {SUBAPP_CODES, SUBAPP_PAGE, ADDRESS_TYPE, MAIN_PRICE} from '@/constants';
 import {Link} from '@/ui/components/link';
+import {AddressLines} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {useToast} from '@/ui/hooks';
 import {i18n} from '@/locale';
 import {getProductImageURL} from '@/utils/files';
 import {cn} from '@/utils/css';
-import type {ComputedProduct, PartnerAddress, PortalAddress} from '@/types';
+import type {ComputedProduct, PartnerAddress} from '@/types';
 import type {EnrichedCartItem} from '@/subapps/shop/common/types';
 import {
   Dialog,
@@ -525,7 +526,10 @@ function QuoteAddressPicker({
           <MdPlace className="text-base" />
         </span>
         <div className="flex-1 min-w-0">
-          <AddressLines address={current.address} />
+          <AddressLines
+            formattedFullName={current.address?.formattedFullName}
+            lineClassName="truncate"
+          />
           {(
             isInvoicing ? current.isDefaultInvoicing : current.isDefaultDelivery
           ) ? (
@@ -577,7 +581,10 @@ function QuoteAddressPicker({
                   className="w-4 h-4 mt-0.5 accent-royal cursor-pointer shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <AddressLines address={a.address} />
+                  <AddressLines
+                    formattedFullName={a.address?.formattedFullName}
+                    lineClassName="truncate"
+                  />
                   {(isInvoicing
                     ? a.isDefaultInvoicing
                     : a.isDefaultDelivery) && (
@@ -598,28 +605,6 @@ function QuoteAddressPicker({
             {newActionLabel}
           </Link>
         </div>
-      )}
-    </div>
-  );
-}
-
-function AddressLines({address}: {address: PortalAddress | null | undefined}) {
-  if (!address) return null;
-  return (
-    <div className="text-[12.5px] leading-tight">
-      {address.addressl2 && (
-        <p className="m-0 text-[13px] font-bold text-ink-900 truncate">
-          {address.addressl2}
-        </p>
-      )}
-      {address.addressl4 && (
-        <p className="m-0 text-ink-700 truncate">{address.addressl4}</p>
-      )}
-      {address.addressl6 && (
-        <p className="m-0 text-ink-700 truncate">{address.addressl6}</p>
-      )}
-      {address.country?.name && (
-        <p className="m-0 text-ink-500 truncate">{address.country.name}</p>
       )}
     </div>
   );

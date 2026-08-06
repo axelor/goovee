@@ -64,18 +64,10 @@ export type QuotationDetail = {
   };
   deliveryAddress: {
     id: ID;
-    addressl4: string;
-    addressl6: string;
-    zip: string;
-    country: {
-      id: ID;
-      name: string;
-    };
-    fullName?: string;
-    formattedFullName?: string;
-    firstName?: string;
-    lastName?: string;
-    companyName?: string;
+    formattedFullName: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    companyName: string | null;
   };
   endOfValidityDate: string | null | undefined;
   exTaxTotal: string;
@@ -85,18 +77,10 @@ export type QuotationDetail = {
   displayInTaxTotal: string;
   mainInvoicingAddress: {
     id: ID;
-    addressl4: string;
-    addressl6: string;
-    zip: string;
-    country: {
-      id: ID;
-      name: string;
-    };
-    fullName?: string;
-    formattedFullName?: string;
-    firstName?: string;
-    lastName?: string;
-    companyName?: string;
+    formattedFullName: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    companyName: string | null;
   };
   saleOrderLineList: Product[];
   saleOrderSeq: string | number;

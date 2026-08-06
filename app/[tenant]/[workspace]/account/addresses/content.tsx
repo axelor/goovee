@@ -17,6 +17,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  formatAddressLine,
 } from '@/ui/components';
 import {i18n} from '@/locale';
 import type {PartnerAddress, PortalAddress} from '@/types';
@@ -375,19 +376,6 @@ function getContact(
   return contact && contact !== label ? contact : '';
 }
 
-function formatAddressLine(address: PortalAddress | null | undefined): string {
-  if (!address) return '';
-  const street = address.streetName || address.addressl4 || '';
-  const town = address.townName || address.addressl6 || '';
-  return [
-    street,
-    [address.zip, town].filter(Boolean).join(' '),
-    address.country?.name,
-  ]
-    .filter(Boolean)
-    .join(', ');
-}
-
 function SelectableAddressSection({
   icon: Icon,
   title,
@@ -478,7 +466,7 @@ function SelectableAddressSection({
               </div>
 
               <div className="text-[13px] text-ink-700 leading-relaxed">
-                {formatAddressLine(address)}
+                {formatAddressLine(address?.formattedFullName)}
               </div>
               {contact && (
                 <div className="text-xs text-ink-500 mt-1.5">{contact}</div>

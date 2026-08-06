@@ -3,6 +3,7 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import Image from 'next/image';
 import {Link} from '@/ui/components/link';
+import {AddressLines} from '@/ui/components';
 import {MdAdd, MdArrowBack, MdCheck, MdPlace} from 'react-icons/md';
 
 import {SUBAPP_CODES, ADDRESS_TYPE} from '@/constants';
@@ -15,12 +16,7 @@ import {computeTotal} from '@/utils/cart';
 import {calculateAdvanceAmount} from '@/utils/payment';
 import {formatNumber} from '@/lib/core/locale/formatters';
 import type {Cloned} from '@/types/util';
-import type {
-  CartItem,
-  ComputedProduct,
-  PartnerAddress,
-  PortalAddress,
-} from '@/types';
+import type {CartItem, ComputedProduct, PartnerAddress} from '@/types';
 import type {Subapp} from '@/orm/workspace';
 import type {EnrichedCartItem} from '@/subapps/shop/common/types';
 
@@ -558,7 +554,10 @@ function CheckoutAddressPicker({
           <MdPlace className="text-base" />
         </span>
         <div className="flex-1 min-w-0">
-          <AddressLines address={selected.address} />
+          <AddressLines
+            formattedFullName={selected.address?.formattedFullName}
+            lineClassName="truncate"
+          />
         </div>
         {isDefault && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-royal-dark border border-royal-border text-[10.5px] font-bold uppercase tracking-[0.04em] shrink-0 mt-1">
@@ -572,28 +571,6 @@ function CheckoutAddressPicker({
         <MdPlace className="text-base" />
         {i18n.t('Change address')}
       </Link>
-    </div>
-  );
-}
-
-function AddressLines({address}: {address: PortalAddress | null | undefined}) {
-  if (!address) return null;
-  return (
-    <div className="text-[12.5px] leading-tight">
-      {address.addressl2 && (
-        <p className="m-0 text-[13px] font-bold text-ink-900 truncate">
-          {address.addressl2}
-        </p>
-      )}
-      {address.addressl4 && (
-        <p className="m-0 text-ink-700 truncate">{address.addressl4}</p>
-      )}
-      {address.addressl6 && (
-        <p className="m-0 text-ink-700 truncate">{address.addressl6}</p>
-      )}
-      {address.country?.name && (
-        <p className="m-0 text-ink-500 truncate">{address.country.name}</p>
-      )}
     </div>
   );
 }

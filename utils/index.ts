@@ -27,11 +27,6 @@ export function isNumeric(str: string) {
   return !isNaN(Number(str)) && !isNaN(parseFloat(str));
 }
 
-export function getCityName(addressl6?: string | null) {
-  const city = addressl6?.split(' ').pop();
-  return city;
-}
-
 export function getFormattedValue(
   value: string,
   unit: number,

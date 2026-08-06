@@ -6,9 +6,9 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {i18n} from '@/locale';
 import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
-import {Button, Loader} from '@/ui/components';
+import {AddressLines, Button, Loader} from '@/ui/components';
 import {ADDRESS_TYPE} from '@/constants';
-import type {PartnerAddress, PortalAddress} from '@/types';
+import type {PartnerAddress} from '@/types';
 import {Link} from '@/ui/components/link';
 
 // ---- LOCAL IMPORTS ---- //
@@ -155,7 +155,10 @@ export function AddressSelection({
           <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-ink-400">
             {i18n.t('Invoicing and delivery address')}
           </h3>
-          <AddressBlock address={deliveryAddress?.address} />
+          <AddressLines
+            className="text-sm leading-snug"
+            formattedFullName={deliveryAddress?.address?.formattedFullName}
+          />
           <LinkButton>{i18n.t('Choose another address')}</LinkButton>
         </div>
       ) : (
@@ -172,7 +175,10 @@ export function AddressSelection({
               </h3>
               {address ? (
                 <>
-                  <AddressBlock address={address} />
+                  <AddressLines
+                    className="text-sm leading-snug"
+                    formattedFullName={address.formattedFullName}
+                  />
                   <LinkButton>{i18n.t('Choose another address')}</LinkButton>
                 </>
               ) : (
@@ -185,20 +191,6 @@ export function AddressSelection({
         </div>
       )}
     </section>
-  );
-}
-
-function AddressBlock({address}: {address: PortalAddress | null | undefined}) {
-  if (!address) return null;
-  return (
-    <div className="text-sm leading-snug">
-      <p className="font-bold text-base text-ink-900">{address.addressl2}</p>
-      {address.addressl4 && <p className="text-ink-700">{address.addressl4}</p>}
-      {address.addressl6 && <p className="text-ink-700">{address.addressl6}</p>}
-      {address.country?.name && (
-        <p className="text-ink-500 mt-0.5">{address.country.name}</p>
-      )}
-    </div>
   );
 }
 

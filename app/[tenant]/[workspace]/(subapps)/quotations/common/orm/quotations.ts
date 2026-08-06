@@ -153,13 +153,6 @@ export async function findQuotation({
       statusSelect: true,
       inTaxTotal: true,
       mainInvoicingAddress: {
-        zip: true,
-        addressl4: true,
-        addressl6: true,
-        country: {
-          name: true,
-        },
-        fullName: true,
         formattedFullName: true,
         firstName: true,
         lastName: true,
@@ -172,13 +165,6 @@ export async function findQuotation({
         name: true,
       },
       deliveryAddress: {
-        zip: true,
-        addressl4: true,
-        addressl6: true,
-        country: {
-          name: true,
-        },
-        fullName: true,
         formattedFullName: true,
         firstName: true,
         lastName: true,

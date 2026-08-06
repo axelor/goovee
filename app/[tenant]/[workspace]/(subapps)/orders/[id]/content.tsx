@@ -5,12 +5,16 @@ import Image from 'next/image';
 import {MdArrowBack, MdOutlineFileDownload} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {Button, StatusPill, StatusTimeline} from '@/ui/components';
+import {
+  AddressLines,
+  Button,
+  StatusPill,
+  StatusTimeline,
+} from '@/ui/components';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {SUBAPP_CODES} from '@/constants';
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
-import {getCityName} from '@/utils';
 import {getProductImageURL} from '@/utils/files';
 import {formatDate, formatDateTime} from '@/lib/core/locale/formatters';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -359,7 +363,6 @@ function AddressBlock({
       </div>
     );
   }
-  const city = getCityName(address.addressl6);
   const name = [address.firstName, address.lastName].filter(Boolean).join(' ');
   return (
     <div>
@@ -373,13 +376,10 @@ function AddressBlock({
           {address.companyName}
         </p>
       )}
-      <p className="text-sm text-ink-600 leading-snug mt-1">
-        {address.addressl4}
-        {city ? <>, {city}</> : null}
-        {address.zip ? <>, {address.zip}</> : null}
-        {address.country?.name ? <br /> : null}
-        {address.country?.name}
-      </p>
+      <AddressLines
+        className="text-sm text-ink-600 leading-snug mt-1"
+        formattedFullName={address.formattedFullName}
+      />
     </div>
   );
 }

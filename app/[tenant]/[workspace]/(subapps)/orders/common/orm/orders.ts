@@ -175,16 +175,16 @@ export async function findOrder({
       clientPartner: {fullName: true},
       company: {name: true},
       mainInvoicingAddress: {
-        zip: true,
-        addressl4: true,
-        addressl6: true,
-        country: {name: true},
+        formattedFullName: true,
+        firstName: true,
+        lastName: true,
+        companyName: true,
       },
       deliveryAddress: {
-        zip: true,
-        addressl4: true,
-        addressl6: true,
-        country: {name: true},
+        formattedFullName: true,
+        firstName: true,
+        lastName: true,
+        companyName: true,
       },
       saleOrderLineList: {
         select: {

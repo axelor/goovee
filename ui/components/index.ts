@@ -197,6 +197,7 @@ export {RichTextEditor} from './rich-text-editor';
 export {RichTextViewer} from './rich-text-editor/rich-text-viewer';
 export {DropdownToggle} from './dropdown-toggle';
 export {InnerHTML} from './inner-html';
+export {AddressLines, formatAddressLine} from './address-lines';
 export {
   Tooltip,
   TooltipTrigger,

@@ -8,16 +8,11 @@ import {ORDER} from '@/subapps/orders/common/constants/orders';
 import {findOrder, findOrders} from '../orm/orders';
 
 export type OrderAddress = {
-  id?: ID;
-  zip?: string | null;
-  addressl4?: string | null;
-  addressl6?: string | null;
-  country?: {name: string | null} | null;
-  fullName?: string | null;
-  formattedFullName?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  companyName?: string | null;
+  id: ID;
+  formattedFullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  companyName: string | null;
 };
 
 export type OrderType = (typeof ORDER)[keyof typeof ORDER];

@@ -7,7 +7,8 @@ import {IconType} from 'react-icons';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
-import type {PartnerAddress, PortalAddress} from '@/types';
+import type {PartnerAddress} from '@/types';
+import {formatAddressLine} from '@/ui/components';
 import {cn} from '@/utils/css';
 import {useToast} from '@/ui/hooks';
 import {
@@ -36,19 +37,6 @@ type Editing = {
   kind: Kind;
   address?: PartnerAddress;
 } | null;
-
-function formatAddressLine(address: PortalAddress | null | undefined): string {
-  if (!address) return '';
-  const street = address.streetName || address.addressl4 || '';
-  const town = address.townName || address.addressl6 || '';
-  return [
-    street,
-    [address.zip, town].filter(Boolean).join(' '),
-    address.country?.name,
-  ]
-    .filter(Boolean)
-    .join(', ');
-}
 
 function getLabel(a: PartnerAddress): string {
   return a?.address?.addressl2 || a?.address?.department || i18n.t('Address');
@@ -243,7 +231,7 @@ function AddressSection({
               </div>
 
               <div className="text-[13px] text-ink-700 leading-relaxed">
-                {formatAddressLine(a.address)}
+                {formatAddressLine(a.address?.formattedFullName)}
               </div>
               {contact && (
                 <div className="text-xs text-ink-500 mt-1.5">{contact}</div>
