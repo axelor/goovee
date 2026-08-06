@@ -187,7 +187,7 @@ export default async function Layout(props: {
               showCart={showCart}
             />
             <div className="flex flex-col flex-grow min-h-0">
-              <div className="flex-grow">{children}</div>
+              <div className="flex flex-col flex-grow min-h-0">{children}</div>
               <Footer config={clone(config)} />
             </div>
           </div>

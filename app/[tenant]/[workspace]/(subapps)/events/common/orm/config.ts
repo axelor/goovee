@@ -8,10 +8,6 @@ import {commentConfigSelect, paymentConfigSelect} from '@/orm/workspace';
 
 const eventsConfigSelect = {
   allowGuestEventRegistration: true,
-  eventHeroBgImage: {id: true},
-  eventHeroDescription: true,
-  eventHeroOverlayColorSelect: true,
-  eventHeroTitle: true,
   isCompanyOrAddressRequired: true,
   nonPublicEmailNotFoundMessage: true,
   ...paymentConfigSelect,

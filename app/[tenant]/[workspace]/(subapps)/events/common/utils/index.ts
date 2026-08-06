@@ -11,13 +11,10 @@ import icalgen, {
 import type {Participant} from '@/subapps/events/common/actions/validators';
 import type {ErrorResponse} from '@/types/action';
 import {extractCustomData} from '@/ui/form';
-import {isSameDay} from '@/utils/date';
 
 // ---- LOCAL IMPORTS ---- //
-import type {Cloned} from '@/types/util';
 import type {FullEvent} from '@/subapps/events/common/orm/event';
 import type {
-  ListEvent,
   PartnerAddress,
   UserWithAddress,
 } from '@/subapps/events/common/types';
@@ -33,45 +30,6 @@ type IcsEvent = Pick<
   | 'eventEndDateTime'
 >;
 import {endOfDay} from 'date-fns';
-
-export const datesBetweenTwoDates = (data: Cloned<ListEvent>[]): Date[] => {
-  const Dates: Date[] = [];
-
-  data.forEach(event => {
-    if (!event.eventStartDateTime) return;
-    const startDate = new Date(event.eventStartDateTime);
-
-    if (event.eventAllDay) {
-      Dates.push(
-        new Date(
-          startDate.getFullYear(),
-          startDate.getMonth(),
-          startDate.getDate(),
-        ),
-      );
-      return;
-    }
-
-    if (!event.eventEndDateTime) return;
-    const endDate = new Date(event.eventEndDateTime);
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      Dates.push(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
-    }
-    Dates.push(
-      new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()),
-    );
-  });
-
-  const uniqueDates = Dates.filter(
-    (date, index, self) => index === self.findIndex(d => isSameDay(d, date)),
-  );
-
-  return uniqueDates;
-};
 
 export function error(message: string): ErrorResponse {
   return {
@@ -212,19 +170,6 @@ export function isEventPrivate(event: {
 }): boolean {
   return !!event.isPrivate;
 }
-export const getTabItems = (
-  tabs: {
-    id: string;
-    title: string;
-    label: string;
-  }[],
-  isLarge: boolean,
-) => {
-  return isLarge
-    ? tabs
-    : tabs.map(item => ({...item, title: item.title.split(' ')[0]}));
-};
-
 export function hasRegistrationEnded(event: {
   registrationDeadlineDateTime: Date | string | null;
 }): boolean {

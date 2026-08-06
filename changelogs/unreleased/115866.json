@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the shop sub-app",
+  "type": "change",
+  "description": "The shop catalog, product detail, cart and checkout views have been redesigned with the new design system, consolidating catalog browsing, product presentation and the checkout flow into dedicated components.",
+  "scope": ["shop"]
+}

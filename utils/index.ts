@@ -12,10 +12,6 @@ export function scale(n: number | string, s: number = DEFAULT_SCALE) {
   return n && Number(n).toFixed(s);
 }
 
-export function capitalise(text: string) {
-  return text && text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 export function formatPrice(
   num: number | string,
   currency: string = DEFAULT_CURRENCY_SYMBOL,
@@ -29,11 +25,6 @@ export function formatPrice(
 export function isNumeric(str: string) {
   if (typeof str != 'string') return false;
   return !isNaN(Number(str)) && !isNaN(parseFloat(str));
-}
-
-export function getCityName(addressl6?: string | null) {
-  const city = addressl6?.split(' ').pop();
-  return city;
 }
 
 export function getFormattedValue(

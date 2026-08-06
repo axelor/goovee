@@ -237,7 +237,7 @@ const routes = {
   [SUBAPP_CODES.news]: ({url, slug}: {url: string; slug: string}) =>
     `${url}/${[SUBAPP_CODES.news]}/${slug}`,
   [SUBAPP_CODES.resources]: ({url, id}: {url: string; id: string}) =>
-    `${url}/${[SUBAPP_CODES.resources]}/categories?id=${id}`,
+    `${url}/${[SUBAPP_CODES.resources]}/folder/${id}`,
   [SUBAPP_CODES.forum]: ({url, id}: {url: string; id: string}) =>
     `${url}/${[SUBAPP_CODES.forum]}/group/${id}`,
   [SUBAPP_CODES.ticketing]: ({

@@ -1,3 +1,7 @@
+// ---- CORE IMPORTS ---- //
+import type {ReactNode} from 'react';
+import type {StatusKey, TimelineStep} from '@/ui/components';
+
 // ---- LOCAL IMPORTS ---- //
 import {
   ORDER_DELIVERY_STATUS,
@@ -19,6 +23,12 @@ export function getStatus(
         variant: 'primary',
       };
     }
+    if (deliveryState === ORDER_DELIVERY_STATUS.PARTIALLY_DELIVERED) {
+      return {
+        status: ORDER_TYPE.SHIPPED,
+        variant: 'purple',
+      };
+    }
     return {
       status: ORDER_TYPE.CONFIRMED,
       variant: 'yellow',
@@ -34,4 +44,62 @@ export function getStatus(
       variant: 'default',
     };
   }
+}
+
+// ---- New design system mappers ---- //
+
+export function getStatusKey(
+  statusSelect: number,
+  deliveryState: number,
+): StatusKey {
+  if (statusSelect === ORDER_STATUS.CONFIRMED) {
+    if (deliveryState === ORDER_DELIVERY_STATUS.DELIVERED) return 'delivered';
+    if (deliveryState === ORDER_DELIVERY_STATUS.PARTIALLY_DELIVERED)
+      return 'shipped';
+    return 'confirmed';
+  }
+  if (statusSelect === ORDER_STATUS.CLOSED) return 'delivered';
+  return 'draft';
+}
+
+export function getOrderJourney(
+  statusSelect: number,
+  deliveryState: number,
+  meta?: {
+    orderedAt?: ReactNode;
+    confirmedAt?: ReactNode;
+    shippedAt?: ReactNode;
+    deliveredAt?: ReactNode;
+  },
+): TimelineStep[] {
+  const confirmed =
+    statusSelect === ORDER_STATUS.CONFIRMED ||
+    statusSelect === ORDER_STATUS.CLOSED;
+  const shipped =
+    deliveryState === ORDER_DELIVERY_STATUS.DELIVERED ||
+    deliveryState === ORDER_DELIVERY_STATUS.PARTIALLY_DELIVERED;
+  const delivered = deliveryState === ORDER_DELIVERY_STATUS.DELIVERED;
+
+  return [
+    {
+      label: 'Order placed',
+      state: 'done',
+      meta: meta?.orderedAt,
+    },
+    {
+      label: 'Confirmed',
+      state: confirmed ? 'done' : 'current',
+      meta: confirmed ? meta?.confirmedAt : undefined,
+    },
+    {
+      label: 'Prepared and shipped',
+      state: shipped ? 'done' : confirmed ? 'current' : 'upcoming',
+      meta: shipped ? meta?.shippedAt : undefined,
+    },
+    {
+      label: 'Delivered',
+      state: delivered ? 'done' : shipped ? 'current' : 'upcoming',
+      meta: delivered ? meta?.deliveredAt : undefined,
+    },
+  ];
 }

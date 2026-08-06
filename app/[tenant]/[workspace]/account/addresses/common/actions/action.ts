@@ -18,6 +18,7 @@ import {
   createPartnerAddress,
   updatePartnerAddress,
   deletePartnerAddress,
+  assignDefaultAddress,
 } from '@/orm/address';
 import {manager} from '@/tenant';
 import {
@@ -44,6 +45,13 @@ export async function createAddress(data: CreateAddress) {
 
   const {address, isDeliveryAddr, isInvoicingAddr, isDefaultAddr} =
     validation.data;
+
+  if (!isDeliveryAddr && !isInvoicingAddr) {
+    return {
+      error: true,
+      message: await t('An address must be used for invoicing or delivery.'),
+    };
+  }
 
   const session = await getSession();
   const tenantId = (await headers()).get(TENANT_HEADER);
@@ -92,6 +100,13 @@ export async function updateAddress(data: UpdateAddress) {
 
   const {id, version, address, isDeliveryAddr, isInvoicingAddr, isDefaultAddr} =
     validation.data;
+
+  if (!isDeliveryAddr && !isInvoicingAddr) {
+    return {
+      error: true,
+      message: await t('An address must be used for invoicing or delivery.'),
+    };
+  }
 
   const session = await getSession();
   const tenantId = (await headers()).get(TENANT_HEADER);
@@ -211,6 +226,64 @@ export async function deleteAddress(data: z.infer<typeof IdSchema>) {
       error: true,
       message: await t('Error deleting address'),
     };
+  }
+}
+
+const AssignAddressDefaultSchema = z.object({
+  id: IdSchema,
+  kind: z.enum(['invoicing', 'delivery']),
+});
+
+export async function assignAddressDefault(
+  data: z.infer<typeof AssignAddressDefaultSchema>,
+) {
+  const validation = AssignAddressDefaultSchema.safeParse(data);
+
+  if (!validation.success) {
+    return {error: true, message: z.prettifyError(validation.error)};
+  }
+
+  const {id, kind} = validation.data;
+
+  const session = await getSession();
+  const tenantId = (await headers()).get(TENANT_HEADER);
+
+  if (!(session?.user && tenantId)) {
+    return {error: true, message: await t('Unauthorized')};
+  }
+
+  const tenant = await manager.getTenant(tenantId);
+  if (!tenant) {
+    return {error: true, message: await t('Bad request')};
+  }
+  const {client} = tenant;
+
+  const userId = getPartnerId(session.user);
+
+  try {
+    /* assignDefaultAddress does multiple writes (mark the address as the
+       delivery/invoicing type + unset the previous default + set the new
+       default + partner fiscal update), so we wrap it in a transaction to keep
+       them atomic — mirroring updateDefaultAddress. */
+    const result = await client
+      .$transaction(txClient =>
+        assignDefaultAddress({
+          partnerId: userId,
+          partnerAddressId: id,
+          kind,
+          client: txClient,
+        }),
+      )
+      .then(clone);
+
+    if (!result) {
+      return {error: true, message: await t('Error updating default address')};
+    }
+
+    return {success: true, data: result};
+  } catch (error) {
+    console.error('Assign default address error >>>', error);
+    return {error: true, message: await t('Error updating default address')};
   }
 }
 

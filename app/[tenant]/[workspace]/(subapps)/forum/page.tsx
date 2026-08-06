@@ -1,33 +1,29 @@
 import {notFound, redirect, unauthorized} from 'next/navigation';
-import {Suspense} from 'react';
 
 // ---- CORE IMPORTS ---- //
 import {ensureAccess} from '@/lib/core/access/ensure-access';
+import {isCommentEnabled} from '@/comments';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
-import {isCommentEnabled} from '@/comments';
+import {SEARCH_PARAMS, SUBAPP_CODES, DEFAULT_LIMIT} from '@/constants';
 import {User} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
-import {FORUM_CONTENT, GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
+import {GROUPS_ORDER_BY} from '@/subapps/forum/common/constants';
 import {
+  countPosts,
+  findCommentCounts,
   findGroups,
   findGroupsByMembers,
+  findPosts,
+  findRecentlyActivePosts,
   findUser,
 } from '@/subapps/forum/common/orm/forum';
-import {
-  Tabs,
-  Hero,
-  GroupControls,
-  ThreadListSkeleton,
-} from '@/subapps/forum/common/ui/components';
-import {ComposePost} from '@/subapps/forum/common/ui/components';
+import {ForumFeed, ForumAside} from '@/subapps/forum/common/ui/components';
 import {Group, MemberGroup} from '@/subapps/forum/common/types/forum';
-import {PostsContent} from './post-content';
 
 export default async function Page(props: {
   params: Promise<{type: string; tenant: string; workspace: string}>;
@@ -35,8 +31,6 @@ export default async function Page(props: {
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
-
-  const type = searchParams?.type || FORUM_CONTENT.POSTS;
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
@@ -73,11 +67,6 @@ export default async function Page(props: {
   const config = await getForumConfig(access.workspace.config.id, client);
   if (!config) return notFound();
 
-  const enableComment = isCommentEnabled({
-    subapp: SUBAPP_CODES.forum,
-    config,
-  });
-
   const workspace = clone(access.workspace);
 
   const groups = await findGroups({
@@ -87,6 +76,14 @@ export default async function Page(props: {
   }).then(clone);
 
   const groupIDs = groups.map(group => group.id);
+
+  // Feed group filter: `groups` (repeated query param) narrows the feed to the
+  // visible groups it names; empty means all.
+  const requestedGroups = new Set(
+    ([] as string[]).concat(searchParams?.groups ?? []),
+  );
+  const selectedGroupIDs = groupIDs.filter(id => requestedGroups.has(id));
+  const feedGroupIDs = selectedGroupIDs.length ? selectedGroupIDs : groupIDs;
 
   const memberGroups = (
     userId
@@ -108,43 +105,78 @@ export default async function Page(props: {
     return !memberGroupIDs?.includes(group.id);
   }) as Group[];
 
-  const $user = (await findUser({
-    userId,
+  const $user = (await findUser({userId, client}).then(clone)) as User;
+
+  const {posts = [], pageInfo} = await findPosts({
+    sort: searchParams?.sort,
+    search: searchParams?.search,
+    limit: searchParams?.limit ? Number(searchParams.limit) : DEFAULT_LIMIT,
+    workspaceID: workspace?.id!,
+    groupIDs: feedGroupIDs,
     client,
-  }).then(clone)) as User;
+    user,
+    memberGroupIDs,
+  }).then(clone);
+
+  const commentsEnabled = isCommentEnabled({
+    subapp: SUBAPP_CODES.forum,
+    config,
+  });
+
+  /* Reply counts are only rendered when the workspace has comments enabled, so
+   * skip the count query entirely when it does not. */
+  const replyCounts = commentsEnabled
+    ? await findCommentCounts({postIds: posts.map(p => p.id), client})
+    : {};
+  const postsWithCounts = posts.map(p => ({
+    ...p,
+    replyCount: replyCounts[String(p.id)] ?? 0,
+  }));
+
+  const recent = await findRecentlyActivePosts({
+    workspaceID: workspace?.id!,
+    client,
+    user,
+    limit: 3,
+  }).then(clone);
+
+  // Community total stays a true total, independent of the feed group filter.
+  const totalDiscussions = await countPosts({
+    workspaceID: workspace?.id!,
+    groupIDs,
+    client,
+    user,
+  });
+
+  const stats = {
+    discussions: totalDiscussions,
+    groups: groups.length,
+    myGroups: memberGroups.length,
+  };
 
   return (
-    <div className="flex flex-col h-full flex-1">
-      <div className="hidden lg:block">{/* <NavMenu items={MENU} /> */}</div>
-      <Hero selectedGroup={null} config={clone(config)} />
-      <div className="container py-6 mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
-        <GroupControls
-          memberGroups={memberGroups}
-          nonMemberGroups={nonMemberGroups}
-          user={$user}
-          selectedGroup={null}
-        />
-        <div className="col-span-2">
-          <ComposePost
-            user={$user}
-            memberGroups={memberGroups}
-            selectedGroup={null}
+    <div className="bg-ink-25 min-h-full">
+      <div className="container py-8 mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start mb-20 lg:mb-0">
+        <div className="min-w-0">
+          <ForumFeed
+            posts={postsWithCounts}
+            pageInfo={pageInfo}
+            groupIDs={feedGroupIDs}
+            memberGroupIDs={memberGroupIDs}
+            groups={memberGroups.map(g => g.forumGroup)}
+            canPost={Boolean($user?.id)}
+            commentsEnabled={commentsEnabled}
           />
-          <Tabs activeTab={type} />
-          <Suspense fallback={<ThreadListSkeleton />}>
-            {type === FORUM_CONTENT.POSTS && (
-              <PostsContent
-                searchParams={searchParams}
-                workspace={workspace}
-                enableComment={enableComment}
-                groupIDs={groupIDs}
-                memberGroupIDs={memberGroupIDs}
-                user={user ?? null}
-                client={client}
-              />
-            )}
-          </Suspense>
         </div>
+        <aside className="lg:sticky lg:top-6 flex flex-col gap-5">
+          <ForumAside
+            stats={stats}
+            trending={recent.map(r => ({id: r.id, title: r.title}))}
+            memberGroups={memberGroups}
+            nonMemberGroups={nonMemberGroups}
+            user={$user}
+          />
+        </aside>
       </div>
     </div>
   );

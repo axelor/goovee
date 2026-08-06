@@ -1,0 +1,611 @@
+'use client';
+
+import {useEffect, useMemo, useState} from 'react';
+import Image from 'next/image';
+import {useRouter} from 'next/navigation';
+import {
+  MdAdd,
+  MdClose,
+  MdDescription,
+  MdExpandMore,
+  MdPlace,
+} from 'react-icons/md';
+
+import {SUBAPP_CODES, SUBAPP_PAGE, ADDRESS_TYPE, MAIN_PRICE} from '@/constants';
+import {Link} from '@/ui/components/link';
+import {AddressLines} from '@/ui/components';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {useCart} from '@/app/[tenant]/[workspace]/cart-context';
+import {useToast} from '@/ui/hooks';
+import {i18n} from '@/locale';
+import {getProductImageURL} from '@/utils/files';
+import {cn} from '@/utils/css';
+import type {ComputedProduct, PartnerAddress} from '@/types';
+import type {EnrichedCartItem} from '@/subapps/shop/common/types';
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+} from '@/ui/components/dialog';
+import {
+  findDefaultDelivery,
+  findDefaultInvoicing,
+  fetchDeliveryAddresses,
+  fetchInvoicingAddresses,
+} from '@/subapps/shop/common/actions/address';
+import {
+  getCategoryGradient,
+  getCategoryHue,
+} from '@/subapps/shop/common/utils/category-style';
+import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
+import {requestQuotation} from '@/subapps/shop/common/actions/cart';
+
+export interface ShopQuoteModalLabels {
+  headerTitle: string;
+  headerSubtitle: string;
+  itemsTitle: string;
+  moreItemsPrefix: string;
+  moreItemsSuffix: string;
+  estimatedTotalLabel: string;
+  htSuffix: string;
+  ttcSuffix: string;
+  addressTitle: string;
+  addressDefaultBadge: string;
+  addressChooseAnother: string;
+  addressNewAction: string;
+  addressNoneTitle: string;
+  addressLoading: string;
+  cancel: string;
+  submit: string;
+  closeLabel: string;
+  addressMissing: string;
+  successTitle: string;
+  errorTitle: string;
+  submitting: string;
+}
+
+const ITEMS_PREVIEW_COUNT = 3;
+
+type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
+
+export function ShopQuoteModal({
+  open,
+  onOpenChange,
+  computedItems,
+  quotationSubapp,
+  labels,
+  displayPrices,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  computedItems: ResolvedCartItem[];
+  quotationSubapp: boolean;
+  labels: ShopQuoteModalLabels;
+  displayPrices?: boolean;
+}) {
+  const {workspaceURI, workspaceURL} = useWorkspace();
+  const {cart, clearCart} = useCart();
+  const {toast} = useToast();
+  const router = useRouter();
+
+  const [submitting, setSubmitting] = useState(false);
+
+  // Reset state each time the modal opens so we start fresh.
+  useEffect(() => {
+    if (open) {
+      setSubmitting(false);
+    }
+  }, [open]);
+
+  /* Sums the leading price, which is tax-inclusive or not depending on the
+   * workspace's mainPrice setting — so the caption is derived from the same
+   * setting instead of always claiming the figure excludes tax. */
+  const estimatedSubtotal = useMemo(() => {
+    let sum = 0;
+    for (const item of computedItems) {
+      const amount = Number(item.computedProduct?.price?.primary ?? 0);
+      if (Number.isFinite(amount)) sum += amount * Number(item.quantity ?? 0);
+    }
+    return sum;
+  }, [computedItems]);
+
+  const estimatedSubtotalTaxSuffix =
+    computedItems[0]?.computedProduct?.price?.mainPrice === MAIN_PRICE.ATI
+      ? labels.ttcSuffix
+      : labels.htSuffix;
+
+  const currency =
+    computedItems[0]?.computedProduct?.product?.saleCurrency?.symbol ?? '€';
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(undefined, {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+      .format(n)
+      .concat(' ', currency);
+
+  const handleSubmit = async () => {
+    if (!(cart?.invoicingAddress && cart?.deliveryAddress)) {
+      toast({variant: 'destructive', title: labels.addressMissing});
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = (await requestQuotation({cart, workspaceURL})) as {
+        data?: string;
+      };
+      if (res?.data) {
+        toast({variant: 'success', title: labels.successTitle});
+        clearCart();
+        const redirectURL = quotationSubapp
+          ? `${workspaceURI}/${SUBAPP_CODES.quotations}/${res.data}`
+          : `${workspaceURI}/${SUBAPP_CODES.shop}`;
+        onOpenChange(false);
+        router.replace(redirectURL);
+      } else {
+        toast({variant: 'destructive', title: labels.errorTitle});
+        setSubmitting(false);
+      }
+    } catch {
+      toast({variant: 'destructive', title: labels.errorTitle});
+      setSubmitting(false);
+    }
+  };
+
+  const previewItems = computedItems.slice(0, ITEMS_PREVIEW_COUNT);
+  const overflow = Math.max(0, computedItems.length - ITEMS_PREVIEW_COUNT);
+
+  /* Leaving for the addresses page closes this modal, so it comes back to the
+   * cart and the request is started again from there. `checkout=true` is what
+   * puts that page in picking mode and has it write the choice to the cart. */
+  const addressesHref = `${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}?checkout=true&callbackURL=${encodeURIComponent(
+    `${workspaceURI}/${SUBAPP_CODES.shop}/cart`,
+  )}`;
+
+  const addressesReady = Boolean(
+    cart?.invoicingAddress && cart?.deliveryAddress,
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogContent
+          className={cn(
+            'fixed left-[50%] top-[50%] z-50 grid w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%]',
+            'p-0 border-0 bg-white rounded-2xl shadow-soft-md overflow-hidden',
+            'data-[state=open]:animate-in data-[state=closed]:animate-out',
+            'data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',
+            'max-h-[90vh] flex flex-col',
+          )}
+          hideClose>
+          <DialogTitle className="sr-only">{labels.headerTitle}</DialogTitle>
+
+          {/* Gradient header */}
+          <header
+            className="relative text-white px-6 py-5 shrink-0"
+            style={{
+              background:
+                'linear-gradient(135deg, hsl(var(--royal-dark)) 0%, hsl(var(--royal)) 100%)',
+            }}>
+            <svg
+              viewBox="0 0 600 200"
+              preserveAspectRatio="none"
+              aria-hidden
+              className="absolute inset-0 w-full h-full opacity-[0.12]">
+              <g fill="#fff">
+                {Array.from({length: 60}).map((_, i) => {
+                  const x = (i * 53) % 600;
+                  const y = ((i * 31) % 200) + 8;
+                  return <circle key={i} cx={x} cy={y} r="1.4" />;
+                })}
+              </g>
+            </svg>
+            <div className="relative flex items-center gap-3.5">
+              <span
+                className="grid place-items-center w-11 h-11 rounded-xl bg-white/15"
+                style={{border: '1px solid rgba(255,255,255,0.25)'}}>
+                <MdDescription className="text-lg" />
+              </span>
+              <div>
+                <h2 className="m-0 text-lg font-extrabold tracking-[-0.015em]">
+                  {labels.headerTitle}
+                </h2>
+                <p className="m-0 mt-0.5 text-[12.5px] text-white/85">
+                  {labels.headerSubtitle}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                aria-label={labels.closeLabel}
+                className="ml-auto shrink-0 w-8 h-8 rounded-full grid place-items-center bg-white/15 hover:bg-white/25 transition-colors text-white">
+                <MdClose className="text-base" />
+              </button>
+            </div>
+          </header>
+
+          {/* Body scroll */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+            {/* Items recap */}
+            <section>
+              <h3 className="m-0 mb-2.5 text-[11.5px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
+                {labels.itemsTitle}
+              </h3>
+              <ul className="flex flex-col gap-2.5">
+                {previewItems.map((item: ResolvedCartItem) => (
+                  <QuoteItemRow
+                    key={item.computedProduct.product.id}
+                    item={item}
+                    fmt={fmt}
+                    displayPrices={displayPrices}
+                  />
+                ))}
+              </ul>
+              {overflow > 0 && (
+                <p className="m-0 mt-2 text-[12px] text-ink-500">
+                  {labels.moreItemsPrefix} {overflow} {labels.moreItemsSuffix}
+                </p>
+              )}
+              {displayPrices && (
+                <div className="mt-3.5 flex items-baseline justify-between bg-ink-25 border border-ink-100 rounded-lg px-3.5 py-2.5">
+                  <span className="text-[12.5px] font-bold uppercase tracking-[0.04em] text-ink-700">
+                    {labels.estimatedTotalLabel}
+                  </span>
+                  <span className="text-[18px] font-extrabold text-ink-900 tabular-nums">
+                    {fmt(estimatedSubtotal)}{' '}
+                    <span className="text-[12px] font-semibold text-ink-500">
+                      {estimatedSubtotalTaxSuffix}
+                    </span>
+                  </span>
+                </div>
+              )}
+            </section>
+
+            {/* Addresses — delivery and billing are chosen separately */}
+            <section className="flex flex-col gap-4">
+              <div>
+                <h3 className="m-0 mb-2.5 text-[11.5px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
+                  {i18n.t('Delivery address')}
+                </h3>
+                <QuoteAddressPicker
+                  type={ADDRESS_TYPE.delivery}
+                  defaultBadgeLabel={labels.addressDefaultBadge}
+                  chooseAnotherLabel={labels.addressChooseAnother}
+                  newActionLabel={labels.addressNewAction}
+                  noneTitle={labels.addressNoneTitle}
+                  loadingLabel={labels.addressLoading}
+                  addressesHref={addressesHref}
+                />
+              </div>
+              <div>
+                <h3 className="m-0 mb-2.5 text-[11.5px] font-extrabold uppercase tracking-[0.06em] text-ink-500">
+                  {i18n.t('Billing address')}
+                </h3>
+                <QuoteAddressPicker
+                  type={ADDRESS_TYPE.invoicing}
+                  defaultBadgeLabel={labels.addressDefaultBadge}
+                  chooseAnotherLabel={labels.addressChooseAnother}
+                  newActionLabel={labels.addressNewAction}
+                  noneTitle={labels.addressNoneTitle}
+                  loadingLabel={labels.addressLoading}
+                  addressesHref={addressesHref}
+                />
+              </div>
+            </section>
+          </div>
+
+          {/* Footer */}
+          <footer className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-ink-100 bg-ink-25 shrink-0">
+            {/* Stated in the footer as well as on the button, because a
+                disabled control shows no tooltip on a touch screen and is not
+                announced with one either. */}
+            {!addressesReady && (
+              <p className="m-0 mr-auto text-[12px] font-semibold text-status-pending-fg">
+                {labels.addressMissing}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+              className="px-5 py-2.5 rounded-[10px] bg-white text-ink-700 border border-ink-150 text-sm font-semibold hover:bg-ink-25 transition-colors disabled:opacity-60">
+              {labels.cancel}
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              /* Offering the action while an address is missing only earns the
+                 user a rejection; the way forward is the link above it. */
+              disabled={submitting || !addressesReady}
+              title={addressesReady ? undefined : labels.addressMissing}
+              className={cn(
+                'inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-sm font-bold text-white',
+                'bg-royal hover:bg-royal-dark transition-colors',
+                'disabled:opacity-70 disabled:cursor-not-allowed',
+              )}
+              style={{
+                boxShadow:
+                  '0 1px 2px rgba(13,30,75,0.15), 0 4px 12px rgba(13,30,75,0.12)',
+              }}>
+              <MdDescription className="text-base" />
+              {submitting ? labels.submitting : labels.submit}
+            </button>
+          </footer>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
+  );
+}
+
+function QuoteItemRow({
+  item,
+  fmt,
+  displayPrices,
+}: {
+  item: ResolvedCartItem;
+  fmt: (n: number) => string;
+  displayPrices?: boolean;
+}) {
+  const {tenant} = useWorkspace();
+  const product = item.computedProduct.product;
+  const portalCat = product?.portalCategorySet?.[0];
+  const productCat = product?.productCategory;
+  const cat = portalCat ?? productCat ?? null;
+  const catName = cat?.name ?? null;
+  const hue = getCategoryHue(catName);
+
+  const imageId = product?.thumbnailImage?.id || product?.images?.[0];
+  const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
+
+  const unitNum = Number(item.computedProduct?.price?.primary ?? 0);
+  const qty = Number(item.quantity ?? 0);
+  const lineTotal = Number.isFinite(unitNum) ? unitNum * qty : 0;
+
+  return (
+    <li className="flex items-center gap-3">
+      <div
+        className="w-11 h-11 rounded-lg overflow-hidden grid place-items-center relative shrink-0"
+        style={imageURL ? undefined : {background: getCategoryGradient(hue)}}>
+        {imageURL ? (
+          <Image
+            src={imageURL}
+            alt={i18n.tattr(product.name)}
+            fill
+            className="object-cover"
+            sizes="44px"
+          />
+        ) : null}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[13px] font-semibold text-ink-900 truncate">
+          {i18n.tattr(product.name)}
+        </div>
+        <div className="text-[11.5px] text-ink-500 tabular-nums">
+          {displayPrices
+            ? `${qty} × ${item.computedProduct?.price?.displayPrimary ?? '—'}`
+            : qty}
+        </div>
+        {displayPrices && (
+          <PriceWarning
+            errorMessage={item.computedProduct?.errorMessage}
+            className="text-[10.5px]"
+          />
+        )}
+      </div>
+      {displayPrices && (
+        <span className="text-[13px] font-bold text-ink-900 tabular-nums shrink-0">
+          {fmt(lineTotal)}
+        </span>
+      )}
+    </li>
+  );
+}
+
+function QuoteAddressPicker({
+  type,
+  defaultBadgeLabel,
+  chooseAnotherLabel,
+  newActionLabel,
+  noneTitle,
+  loadingLabel,
+  addressesHref,
+}: {
+  type: ADDRESS_TYPE;
+  defaultBadgeLabel: string;
+  chooseAnotherLabel: string;
+  newActionLabel: string;
+  noneTitle: string;
+  loadingLabel: string;
+  addressesHref: string;
+}) {
+  const {cart, updateAddress} = useCart();
+  const {workspaceURL} = useWorkspace();
+  const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const isInvoicing = type === ADDRESS_TYPE.invoicing;
+
+  // Delivery and billing are picked independently (parity with the pre-redesign
+  // quote flow); this picker loads and updates only its own address type.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [list, def] = await Promise.all([
+          isInvoicing
+            ? fetchInvoicingAddresses({workspaceURL})
+            : fetchDeliveryAddresses({workspaceURL}),
+          isInvoicing
+            ? findDefaultInvoicing({workspaceURL})
+            : findDefaultDelivery({workspaceURL}),
+        ]);
+        if (cancelled) return;
+        const all = (list as PartnerAddress[] | null) ?? [];
+        setAddresses(all);
+        const cartId =
+          (isInvoicing ? cart?.invoicingAddress : cart?.deliveryAddress) ??
+          null;
+        /* Every candidate is looked up in the list that is actually shown: a
+         * default address that this section cannot use would otherwise be
+         * written to the cart while the picker reports having none, which lets
+         * the request go out against an address the user never saw. */
+        const defaultAddress = def as PartnerAddress | null;
+        const initial =
+          all.find(address => String(address.id) === String(cartId)) ||
+          all.find(
+            address => String(address.id) === String(defaultAddress?.id),
+          ) ||
+          all[0] ||
+          null;
+        if (initial?.id) {
+          setSelectedId(String(initial.id));
+          if (cartId !== initial.id) {
+            updateAddress({addressType: type, address: initial.id});
+          }
+        } else if (cartId) {
+          /* There is no address of this type any more — the one the cart still
+           * points at was deleted or is no longer used for it. Left in place it
+           * would keep the request submittable against an address this section
+           * reports as missing. */
+          updateAddress({addressType: type, address: null});
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSelect = (addr: PartnerAddress) => {
+    setSelectedId(String(addr.id));
+    updateAddress({addressType: type, address: addr.id});
+    setPicking(false);
+  };
+
+  const current =
+    addresses.find(a => String(a.id) === selectedId) ?? addresses[0] ?? null;
+
+  if (loading) {
+    return (
+      <div className="rounded-xl bg-royal-pale/60 border border-royal-border px-4 py-3.5 text-[12.5px] text-ink-500">
+        {loadingLabel}…
+      </div>
+    );
+  }
+
+  if (!current) {
+    return (
+      <div className="rounded-xl bg-royal-pale/60 border border-royal-border px-4 py-3.5 text-[13px] text-ink-700 flex flex-col gap-3">
+        <div className="flex items-center gap-2.5">
+          <MdPlace className="text-base text-royal shrink-0" />
+          {noneTitle}
+        </div>
+        <Link
+          href={addressesHref}
+          className="self-start inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-royal-dark border border-royal-border text-[12.5px] font-semibold hover:bg-royal-pale transition-colors">
+          <MdAdd className="text-base" />
+          {newActionLabel}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl bg-royal-pale/60 border border-royal-border overflow-hidden">
+      <div className="flex items-start gap-3 px-4 py-3.5">
+        <span className="grid place-items-center w-8 h-8 rounded-lg bg-white border border-royal-border text-royal shrink-0">
+          <MdPlace className="text-base" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <AddressLines
+            formattedFullName={current.address?.formattedFullName}
+            lineClassName="truncate"
+          />
+          {(
+            isInvoicing ? current.isDefaultInvoicing : current.isDefaultDelivery
+          ) ? (
+            <span className="inline-flex items-center mt-1.5 px-2 py-0.5 rounded-full bg-white text-royal-dark border border-royal-border text-[10.5px] font-bold uppercase tracking-[0.04em]">
+              {defaultBadgeLabel}
+            </span>
+          ) : null}
+        </div>
+        {addresses.length > 1 ? (
+          <button
+            type="button"
+            onClick={() => setPicking(p => !p)}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-royal-dark text-[12px] font-bold hover:bg-white transition-colors shrink-0">
+            {chooseAnotherLabel}
+            <MdExpandMore
+              className={cn(
+                'text-sm transition-transform',
+                picking && 'rotate-180',
+              )}
+            />
+          </button>
+        ) : (
+          /* With a single address on file there is nothing to choose between,
+             so the way out is to go and add one. */
+          <Link
+            href={addressesHref}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-royal-dark text-[12px] font-bold hover:bg-white transition-colors shrink-0">
+            <MdAdd className="text-sm" />
+            {newActionLabel}
+          </Link>
+        )}
+      </div>
+      {picking && addresses.length > 1 && (
+        <div className="border-t border-royal-border bg-white max-h-[200px] overflow-y-auto p-1.5">
+          {addresses.map(a => {
+            const active = String(a.id) === selectedId;
+            return (
+              <label
+                key={a.id}
+                className={cn(
+                  'flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors',
+                  active ? 'bg-royal-pale' : 'hover:bg-ink-25',
+                )}>
+                <input
+                  type="radio"
+                  name={`quote-address-${type}`}
+                  checked={active}
+                  onChange={() => handleSelect(a)}
+                  className="w-4 h-4 mt-0.5 accent-royal cursor-pointer shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <AddressLines
+                    formattedFullName={a.address?.formattedFullName}
+                    lineClassName="truncate"
+                  />
+                  {(isInvoicing
+                    ? a.isDefaultInvoicing
+                    : a.isDefaultDelivery) && (
+                    <span className="inline-flex items-center mt-1 px-1.5 py-px rounded bg-ink-50 text-ink-600 text-[10px] font-bold uppercase tracking-[0.04em]">
+                      {defaultBadgeLabel}
+                    </span>
+                  )}
+                </div>
+              </label>
+            );
+          })}
+          {/* The list is also where someone whose address is not in it needs a
+              way out, so the route to the addresses page ends it. */}
+          <Link
+            href={addressesHref}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-royal-dark text-[12.5px] font-bold hover:bg-ink-25 transition-colors">
+            <MdAdd className="text-base" />
+            {newActionLabel}
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}

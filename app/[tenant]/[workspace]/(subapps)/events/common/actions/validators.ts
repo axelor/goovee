@@ -2,19 +2,10 @@ import {z} from 'zod';
 import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
 import {PaymentOption} from '@/types';
 
-export const GetAllEventsSchema = z.object({
-  limit: z.number().optional(),
-  page: z.number().optional(),
-  categories: z.array(z.string()).optional(),
-  search: z.string().optional(),
-  day: z.union([z.string(), z.number()]).optional(),
-  month: z.number().optional(),
-  year: z.number().optional(),
-  dates: z.array(z.date()).optional(),
+export const SearchEventsSchema = z.object({
+  search: z.string(),
   workspaceURL: WorkspaceURLSchema,
-  onlyRegisteredEvent: z.boolean().optional(),
 });
-export type GetAllEventsInput = z.infer<typeof GetAllEventsSchema>;
 
 const SubscriptionSchema = z.object({
   id: IdSchema,

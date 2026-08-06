@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the design system foundation",
+  "type": "change",
+  "description": "Added the new design tokens, fonts and shared UI primitives (status pill, status timeline, record skeletons) plus the FR/EN translation keys underpinning the portal UI redesign.",
+  "scope": ["core"]
+}

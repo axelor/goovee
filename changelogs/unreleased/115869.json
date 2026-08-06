@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the news sub-app",
+  "type": "change",
+  "description": "The news homepage, category and article views have been redesigned with the new design system, consolidating the editorial feed and article detail into new components.",
+  "scope": ["news"]
+}

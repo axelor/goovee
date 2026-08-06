@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the forum sub-app",
+  "type": "change",
+  "description": "The forum feed, group and post detail views have been redesigned with the new design system, and post reactions (voting) have been added to thread detail.",
+  "scope": ["forum"]
+}

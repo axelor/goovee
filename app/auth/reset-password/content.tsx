@@ -4,6 +4,7 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
+import {MdArrowBack, MdArrowForward, MdVpnKey} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -12,16 +13,20 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/ui/components/form';
-import {Input} from '@/ui/components/input';
-import {Label} from '@/ui/components/label';
-import {Button} from '@/ui/components/button';
 import {SEARCH_PARAMS} from '@/constants';
 import {useToast} from '@/ui/hooks';
 import {authClient} from '@/lib/auth-client';
 import {Link} from '@/ui/components/link';
+
+// ---- LOCAL IMPORTS ---- //
+import {
+  AuthShell,
+  AuthField,
+  AuthInput,
+  authButtonClass,
+} from '../common/ui/auth-shell';
 
 const formSchema = z.object({
   email: z.email().min(1, 'Email is required'),
@@ -37,9 +42,7 @@ export default function Content() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-    },
+    defaultValues: {email: ''},
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -68,43 +71,68 @@ export default function Content() {
   };
 
   return (
-    <div className="container space-y-6 mt-8 md:!w-3/4 xl:!w-1/2">
-      <h1 className="text-[2rem] font-bold">{i18n.t('Reset Password')}</h1>
-      <div className="bg-white py-4 px-6 space-y-4">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({field}) => (
-                <FormItem>
-                  <FormLabel>{i18n.t('Email')}*</FormLabel>
+    <AuthShell>
+      <Link
+        href={`/auth/login?${searchQuery}`}
+        className="mb-6 inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-500 transition-colors hover:text-royal">
+        <MdArrowBack className="size-4" />
+        {i18n.t('Back to login')}
+      </Link>
+
+      <div className="mb-[18px] grid size-[52px] place-items-center rounded-[13px] bg-royal-pale text-royal">
+        <MdVpnKey className="size-6" />
+      </div>
+
+      <h2 className="text-[24px] font-extrabold tracking-[-0.02em] text-ink-900">
+        {i18n.t('Forgot password?')}
+      </h2>
+      <p className="mt-2 mb-6 text-sm leading-[1.55] text-ink-500">
+        {i18n.t(
+          'Enter the email associated with your account, we will send you a verification code.',
+        )}
+      </p>
+
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col gap-[18px]">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({field}) => (
+              <FormItem className="space-y-0">
+                <AuthField label={i18n.t('Email')} required>
                   <FormControl>
-                    <Input
-                      {...field}
-                      value={field.value}
+                    <AuthInput
+                      type="email"
                       placeholder={i18n.t('Enter email')}
+                      {...field}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button variant="success" className="w-full">
-              {i18n.t('Submit')}
-            </Button>
-          </form>
-        </Form>
+                </AuthField>
+                <FormMessage className="mt-1.5" />
+              </FormItem>
+            )}
+          />
 
-        <div className="flex items-center">
-          <Label className="mr-2 mb-0 inline-flex">
-            {i18n.t('Remember password')} ?
-          </Label>
-          <Link href={`/auth/login?${searchQuery}`} className="text-success">
-            {i18n.t('Log In')}
-          </Link>
-        </div>
-      </div>
-    </div>
+          <button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className={authButtonClass}>
+            {i18n.t('Send the code')}
+            <MdArrowForward className="size-4" />
+          </button>
+
+          <div className="text-center text-[13.5px] text-ink-500">
+            {i18n.t('You remember?')}{' '}
+            <Link
+              href={`/auth/login?${searchQuery}`}
+              className="font-bold text-royal hover:underline">
+              {i18n.t('Log In')}
+            </Link>
+          </div>
+        </form>
+      </Form>
+    </AuthShell>
   );
 }

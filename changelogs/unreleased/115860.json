@@ -1,0 +1,6 @@
+{
+  "title": "Redesign the workspace chrome",
+  "type": "change",
+  "description": "The header, sidebar, homepage and root layout have been redesigned with the new design system, including a profile menu, a gradient hero banner and reworked content cards.",
+  "scope": ["core"]
+}

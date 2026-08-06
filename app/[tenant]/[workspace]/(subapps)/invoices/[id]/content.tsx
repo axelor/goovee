@@ -1,15 +1,19 @@
 'use client';
 
 import {useCallback} from 'react';
+import {Link} from '@/ui/components/link';
 import type {Cloned} from '@/types/util';
 import {useRouter} from 'next/navigation';
+import {MdArrowBack, MdOutlineFileDownload} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
-import {Separator, Container, Chip} from '@/ui/components';
+import {Button, StatusPill} from '@/ui/components';
 import {i18n} from '@/locale';
 import {SUBAPP_CODES} from '@/constants';
+import {cn} from '@/utils/css';
 import {formatDate} from '@/lib/core/locale/formatters';
 import {useToast} from '@/ui/hooks';
+import type {StatusKey} from '@/ui/components';
 import {
   PaymentUpdateStatus,
   PAYMENT_UPDATE_STATUS,
@@ -21,12 +25,46 @@ import {Invoice, Total} from '@/subapps/invoices/common/ui/components';
 import {INVOICE_TYPE} from '@/subapps/invoices/common/constants/invoices';
 import type {InvoicesConfig} from '@/subapps/invoices/common/orm/config';
 import type {Invoice as InvoiceType} from '@/subapps/invoices/common/types/invoices';
+import {
+  extractAmount,
+  isInvoiceOverdue,
+} from '@/subapps/invoices/common/utils/invoices';
 
 interface ContentProps {
   invoice: Cloned<InvoiceType>;
   config: InvoicesConfig | Cloned<InvoicesConfig>;
   workspaceURI: string;
   token?: string;
+}
+
+function getInvoiceStatusKey(invoice: Cloned<InvoiceType>): StatusKey {
+  if (!invoice.isUnpaid) return 'paid';
+  if (isInvoiceOverdue(invoice)) return 'overdue';
+  const remaining = extractAmount(invoice.amountRemaining?.value);
+  const total = extractAmount(invoice.inTaxTotal);
+  if (remaining > 0 && remaining < total) return 'partial';
+  return 'unpaid';
+}
+
+// Written as literals so the keys stay visible to the extractor.
+function getInvoiceStatusLabel({
+  isUnpaid,
+  overdue,
+}: {
+  isUnpaid: boolean;
+  overdue: boolean;
+}): string {
+  if (!isUnpaid) return i18n.t('Paid');
+  if (overdue) return i18n.t('Overdue');
+  return i18n.t('Unpaid');
+}
+
+function getInvoiceTone(
+  invoice: Cloned<InvoiceType>,
+): 'mint' | 'overdue' | 'royal' {
+  if (!invoice.isUnpaid) return 'mint';
+  if (isInvoiceOverdue(invoice)) return 'overdue';
+  return 'royal';
 }
 
 export default function Content({
@@ -41,6 +79,10 @@ export default function Content({
   const {toast} = useToast();
 
   const invoiceType = isUnpaid ? INVOICE_TYPE.UNPAID : INVOICE_TYPE.PAID;
+  const statusKey = getInvoiceStatusKey(invoice);
+  const tone = getInvoiceTone(invoice);
+  const overdue = isInvoiceOverdue(invoice);
+  const statusLabel = getInvoiceStatusLabel({isUnpaid, overdue});
 
   const handlePaymentUpdate = useCallback(
     (status: PaymentUpdateStatus) => {
@@ -73,51 +115,153 @@ export default function Content({
   );
 
   return (
-    <Container title={`${i18n.t('Invoice number')} ${invoiceId}`}>
-      <div className="bg-card text-card-foreground flex md:block flex-col md:flex-row px-6 py-4 rounded-lg">
-        <h4 className="text-xl font-medium mb-0">{i18n.t('Informations')}</h4>
-        <Separator className="my-2" />
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <h5 className="text-sm font-medium mb-0">{i18n.t('Status')}:</h5>
-            <Chip
-              value={i18n.t(invoiceType)}
-              className="font-normal text-[0.625rem] px-2 py-1"
-              variant={isUnpaid ? 'destructive' : 'success'}
+    <div className="bg-ink-25 flex-1 min-h-0 flex flex-col">
+      <Hero
+        eyebrow={i18n.t('Invoice')}
+        title={invoiceId ?? ''}
+        statusKey={statusKey}
+        statusLabel={statusLabel}
+        tone={tone}
+        meta={
+          isUnpaid ? (
+            <>
+              {i18n.t('Due on')}{' '}
+              <strong
+                className={cn(
+                  'tabular-nums',
+                  overdue ? 'text-status-overdue-fg' : 'text-ink-900',
+                )}>
+                {formatDate(dueDate || '')}
+              </strong>
+            </>
+          ) : (
+            <>
+              {i18n.t('Paid on')}{' '}
+              <strong className="text-ink-900 tabular-nums">
+                {formatDate(invoiceDate || '')}
+              </strong>
+            </>
+          )
+        }
+        backHref={
+          // A token scopes the viewer to this one invoice — the list requires
+          // a real session, so sending a token viewer there is a login wall.
+          // Omit the back link entirely for token viewers.
+          token ? undefined : `${workspaceURI}/${SUBAPP_CODES.invoices}`
+        }
+        actions={
+          <Button asChild variant="ink-outline" size="sm">
+            <a
+              href={withBasePath(
+                `${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
+              )}>
+              <MdOutlineFileDownload className="text-base mr-1" />
+              {i18n.t('Download invoice')}
+            </a>
+          </Button>
+        }
+      />
+
+      <div className="w-full max-w-[1280px] mx-auto px-8 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
+          {/* Left — PDF viewer wrapped in card chrome */}
+          <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
+            <Invoice
+              invoiceId={id}
+              downloadURL={withBasePath(
+                `${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
+              )}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <h5 className="text-sm font-medium mb-0">
-              {isUnpaid ? `${i18n.t('Due date:')}` : `${i18n.t('Paid on:')}`}
-            </h5>
-            <p className="text-sm">
-              {formatDate(isUnpaid ? dueDate || '' : invoiceDate || '')}
-            </p>
+
+          {/* Right — payment card */}
+          <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
+            <Total
+              invoice={invoice}
+              invoiceType={invoiceType}
+              isUnpaid={isUnpaid}
+              config={config}
+              workspaceURI={workspaceURI}
+              token={token}
+              onPaymentUpdate={handlePaymentUpdate}
+            />
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-12 gap-4 mb-6 rounded-lg">
-        <div className="col-span-12 lg:col-span-9">
-          <Invoice
-            invoiceId={id}
-            downloadURL={withBasePath(
-              `${workspaceURI}/${SUBAPP_CODES.invoices}/api/invoice/${id}${token ? `?token=${token}` : ''}`,
-            )}
-          />
-        </div>
+    </div>
+  );
+}
 
-        <div className="col-span-12 lg:col-span-3">
-          <Total
-            invoice={invoice}
-            invoiceType={invoiceType}
-            isUnpaid={isUnpaid}
-            config={config}
-            workspaceURI={workspaceURI}
-            token={token}
-            onPaymentUpdate={handlePaymentUpdate}
-          />
+// ---- Local building blocks ---- //
+
+function Hero({
+  eyebrow,
+  title,
+  statusKey,
+  statusLabel,
+  tone,
+  meta,
+  backHref,
+  actions,
+}: {
+  eyebrow: string;
+  title: string;
+  statusKey: StatusKey;
+  statusLabel: string;
+  tone: 'mint' | 'overdue' | 'royal';
+  meta: React.ReactNode;
+  backHref?: string;
+  actions?: React.ReactNode;
+}) {
+  const gradient =
+    tone === 'mint'
+      ? 'bg-gradient-to-br from-mint-50 to-ink-25'
+      : tone === 'overdue'
+        ? 'bg-gradient-to-br from-status-overdue-bg to-ink-25'
+        : 'bg-gradient-to-br from-royal-pale to-ink-25';
+  const eyebrowColor =
+    tone === 'mint'
+      ? 'text-mint-700'
+      : tone === 'overdue'
+        ? 'text-status-overdue-fg'
+        : 'text-royal';
+
+  return (
+    <div
+      className={cn(
+        'border-b border-ink-100 px-8 pt-6 pb-10 shrink-0',
+        gradient,
+      )}>
+      <div className="max-w-[1280px] mx-auto">
+        {backHref && (
+          <Link
+            href={backHref}
+            className="inline-flex items-center gap-1.5 text-[13px] text-ink-500 hover:text-ink-700 mb-6">
+            <MdArrowBack className="text-sm" /> {i18n.t('Back')}
+          </Link>
+        )}
+
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2.5 mb-2 flex-wrap">
+              <span
+                className={cn(
+                  'text-xs font-semibold uppercase tracking-[0.06em]',
+                  eyebrowColor,
+                )}>
+                {eyebrow}
+              </span>
+              <StatusPill status={statusKey}>{statusLabel}</StatusPill>
+            </div>
+            <h1 className="text-[44px] font-bold leading-none tracking-[-0.03em] text-ink-900 tabular-nums">
+              {title}
+            </h1>
+            <div className="mt-3 text-sm text-ink-600">{meta}</div>
+          </div>
+
+          {actions && <div className="flex gap-2 flex-wrap">{actions}</div>}
         </div>
       </div>
-    </Container>
+    </div>
   );
 }

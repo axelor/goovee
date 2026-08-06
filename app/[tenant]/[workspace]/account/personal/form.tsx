@@ -381,33 +381,38 @@ export default function Personal({
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-2">
-          <div className="space-y-10">
-            <div className="space-y-4">
-              <Title text={i18n.t('Profile Settings')} />
-              <div className="space-y-4">
-                <FormLabel>{i18n.t('Picture')}</FormLabel>
-                <div className="flex items-center justify-between">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="space-y-8">
+            <div className="space-y-5">
+              <div className="flex items-center gap-5">
+                <Avatar className="size-[72px] rounded-2xl">
+                  <AvatarImage
+                    src={getPartnerImageURL(picture, tenant, {
+                      noimage: true,
+                      noimageSrc: '/images/profile.png',
+                    })}
+                    alt={fullName}
+                    size={72}
+                  />
+                  <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-2">
                   <div>
-                    <Avatar className="size-20">
-                      <AvatarImage
-                        src={getPartnerImageURL(picture, tenant, {
-                          noimage: true,
-                          noimageSrc: '/images/profile.png',
-                        })}
-                        alt={fullName}
-                        size={80}
-                      />
-                      <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
-                    </Avatar>
+                    <p className="text-sm font-bold text-ink-900">
+                      {i18n.t('Profile picture')}
+                    </p>
+                    <p className="text-xs text-ink-500">
+                      {i18n.t('PNG or JPG, 256×256 px min.')}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
                     <Button
-                      variant="outline-success"
+                      variant="royal"
+                      size="sm"
                       onClick={openFileUpload}
                       type="button"
                       disabled={updatingPicture}>
-                      <MdFileUpload className="size-6" />
+                      <MdFileUpload className="size-4" />
                       {i18n.t('Upload a picture')}
                     </Button>
                     <input
@@ -419,10 +424,11 @@ export default function Personal({
                     />
                     <Button
                       variant="outline-destructive"
+                      size="sm"
                       onClick={openConfirmation}
                       type="button"
                       disabled={updatingPicture}>
-                      <MdDeleteOutline className="size-6" />
+                      <MdDeleteOutline className="size-4" />
                       {i18n.t('Delete')}
                     </Button>
                   </div>
@@ -500,7 +506,7 @@ export default function Personal({
 
                 {!editEmail ? (
                   <Button
-                    variant="outline-success"
+                    variant="royal-outline"
                     className="w-fit"
                     type="button"
                     onClick={handleEmailEdit}>
@@ -535,7 +541,7 @@ export default function Personal({
 
                     <div className="flex items-center gap-2">
                       <Button
-                        variant="outline-success"
+                        variant="royal-outline"
                         type="button"
                         disabled={!email || !isExpired || !isValidEmail}
                         onClick={handleGenerateOTP}>
@@ -563,7 +569,7 @@ export default function Personal({
                 </div>
               )}
               {isCompany && (
-                <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="companyName"
@@ -615,7 +621,7 @@ export default function Personal({
                       </FormItem>
                     )}
                   />
-                </>
+                </div>
               )}
               <FormField
                 control={form.control}
@@ -794,7 +800,7 @@ export default function Personal({
               </div>
             </div>
             <div className="space-y-4 text-end">
-              <Button variant="success">{i18n.t('Save Settings')}</Button>
+              <Button variant="royal">{i18n.t('Save Settings')}</Button>
             </div>
           </div>
         </form>
