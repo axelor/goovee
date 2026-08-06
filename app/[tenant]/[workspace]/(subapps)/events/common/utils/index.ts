@@ -172,11 +172,26 @@ export function isEventPrivate(event: {
 }
 export function hasRegistrationEnded(event: {
   registrationDeadlineDateTime: Date | string | null;
+  eventStartDateTime: Date | string | null;
+  eventEndDateTime: Date | string | null;
 }): boolean {
-  if (event.registrationDeadlineDateTime) {
-    const endDate = new Date(event.registrationDeadlineDateTime);
-    const now = Date.now();
-    return now > endDate.getTime();
+  const {registrationDeadlineDateTime, eventStartDateTime, eventEndDateTime} =
+    event;
+
+  if (registrationDeadlineDateTime) {
+    return Date.now() > new Date(registrationDeadlineDateTime).getTime();
   }
-  return false;
+
+  /* Without a deadline, registration runs until the event is over: until the end
+   * date, or the whole starting day when there is no end date. The day boundary
+   * is taken in UTC so the browser and the server agree on it. An event with no
+   * dates at all never closes. */
+  const eventEnd = Math.max(
+    eventEndDateTime ? new Date(eventEndDateTime).getTime() : 0,
+    eventStartDateTime
+      ? new Date(eventStartDateTime).setUTCHours(23, 59, 59, 999)
+      : 0,
+  );
+
+  return eventEnd > 0 && Date.now() > eventEnd;
 }

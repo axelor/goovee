@@ -533,7 +533,7 @@ async function NextEventSpotlight({
             size="sm"
             className="whitespace-nowrap gap-1.5">
             <Link href={detailHref}>
-              Voir le détail
+              {await t('View details')}
               <MdArrowForward className="text-sm" />
             </Link>
           </Button>
