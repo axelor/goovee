@@ -1,0 +1,6 @@
+{
+  "title": "Close event registration once the event has ended when no registration deadline is set",
+  "type": "fix",
+  "description": "Registration used to close only when an event carried an explicit registration deadline, so events with an empty deadline kept offering the register button and accepting registrations long after they had ended. Registration now closes at the deadline when one is set, and otherwise once the event is over, counting the starting day in full for an event that has no end date. Events with no dates at all stay open.",
+  "scope": ["events"]
+}
