@@ -1,3 +1,4 @@
+import type {Metadata} from 'next';
 import {redirect} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -10,6 +11,17 @@ import {DEFAULT_TENANT, SEARCH_PARAMS} from '@/constants';
 import {TenancyType, manager} from '@/tenant';
 import {isSameOrigin} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
+
+import {
+  generateAuthMetadata,
+  resolveAuthWorkspaceName,
+} from '../common/workspace';
+
+export async function generateMetadata(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  return generateAuthMetadata(props.searchParams);
+}
 
 export default async function Page(props: {
   searchParams: Promise<{[key: string]: string}>;
@@ -72,6 +84,7 @@ export default async function Page(props: {
       canRegister={canRegister}
       showGoogleOauth={showGoogleOauth}
       showKeycloakOauth={showKeycloakOauth}
+      workspaceName={await resolveAuthWorkspaceName(props.searchParams)}
     />
   );
 }

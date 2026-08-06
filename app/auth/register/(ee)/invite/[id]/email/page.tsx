@@ -1,3 +1,4 @@
+import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -10,6 +11,14 @@ import {manager} from '@/tenant';
 import Form from './form';
 import {findInviteById} from '../../../../common/orm/register';
 import Subscribe from '../subscribe';
+
+import {generateAuthMetadata} from '../../../../../common/workspace';
+
+export async function generateMetadata(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  return generateAuthMetadata(props.searchParams);
+}
 
 export default async function Page(props: {
   params: Promise<{

@@ -12,14 +12,16 @@ import {AuthShell, authButtonClass} from '../common/ui/auth-shell';
 
 export default function Navigation({
   showGoogleOauth,
+  workspaceName,
 }: {
   showGoogleOauth?: boolean;
+  workspaceName: string | null;
 }) {
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
 
   return (
-    <AuthShell>
+    <AuthShell workspaceName={workspaceName}>
       <div className="mb-7">
         <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink-900">
           {i18n.t('Sign Up')}

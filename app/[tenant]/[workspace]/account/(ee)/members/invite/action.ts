@@ -19,7 +19,7 @@ import {
 } from '@/orm/partner';
 import {findWorkspace} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
-import {SEARCH_PARAMS} from '@/constants';
+import {APP_TITLE, SEARCH_PARAMS} from '@/constants';
 import {getPartnerId} from '@/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 
@@ -246,7 +246,7 @@ export async function sendInvites(input: SendInvites) {
 
           await mailService?.notify({
             to: email,
-            subject: template?.subject || 'Greetings from Goovee',
+            subject: template?.subject || `Greetings from ${APP_TITLE}`,
             html: replacePlaceholders({
               content: template?.content,
               values: {

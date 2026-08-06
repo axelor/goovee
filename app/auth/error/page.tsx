@@ -1,3 +1,4 @@
+import type {Metadata} from 'next';
 import {AlertCircle, ArrowLeft} from 'lucide-react';
 
 import {Button} from '@/ui/components/button';
@@ -9,6 +10,14 @@ import {
   CardTitle,
 } from '@/ui/components/card';
 import {Link} from '@/ui/components/link';
+
+import {generateAuthMetadata} from '../common/workspace';
+
+export async function generateMetadata(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  return generateAuthMetadata(props.searchParams);
+}
 
 export default async function Page(props: {
   searchParams: Promise<{error: string; workspaceURI: string}>;
