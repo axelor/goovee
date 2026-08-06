@@ -21,7 +21,7 @@ import {
   TooltipTrigger,
   TooltipArrow,
 } from '@/ui/components/tooltip';
-import {SUBAPP_CODES, SUBAPP_PAGE, CHAT_TYPE} from '@/constants';
+import {APP_TITLE, SUBAPP_CODES, SUBAPP_PAGE, CHAT_TYPE} from '@/constants';
 import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
 import {useEnvironment} from '@/lib/core/environment';
@@ -86,7 +86,7 @@ export function Sidebar({
   const currentWorkspace =
     workspaces?.find(w => String(w.id) === String(workspaceID)) ??
     workspaces?.find(w => toWorkspaceURI(w.url ?? '') === workspaceURI);
-  const workspaceName: string = currentWorkspace?.name || 'Goovee';
+  const workspaceName: string = currentWorkspace?.name || APP_TITLE;
 
   const isHomeActive = pathname === workspaceURI;
   const isAccountActive = pathname?.startsWith(`${workspaceURI}/account`);

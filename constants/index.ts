@@ -1,8 +1,12 @@
 /**
  * APP
  */
-export const APP_TEMPLATE_TITLE = 'Goovee';
-export const DEFAULT_APP_TEMPLATE_TITLE = 'Portal | Goovee';
+/** Brand name, shown wherever no workspace name is available. */
+export const APP_TITLE = 'Axelor';
+/** Metadata title template — `%s` is the page title, i.e. the workspace name. */
+export const APP_TITLE_TEMPLATE = '%s';
+/** Title used when a page sets none: root, auth screens, error pages. */
+export const DEFAULT_APP_TITLE = `Portal | ${APP_TITLE}`;
 export const APP_DESCRIPTION = 'Next generation portal by Axelor';
 
 /**

@@ -1,0 +1,6 @@
+{
+  "title": "Show the workspace name instead of the hardcoded Goovee brand",
+  "type": "fix",
+  "description": "The portal displayed the literal string \"Goovee\" in the browser tab, on the login screen and in the mails it sends. The tab title in particular was a defect: the root metadata declared a title template of \"Goovee\" instead of \"%s\", and a Next.js template without a placeholder overwrites the child title, so the workspace name already computed by the workspace layout never reached the tab. The tab and the login screen now carry the workspace name, the auth pages resolving it as a guest from the workspaceURI and tenant search params. Notification mails interpolate the workspace name and their signature block goes through i18n. Everything left without a workspace context — the sidebar fallback, GET /api/info, and the OTP, invite and reset-password fallback templates used when no AOS template is configured — falls back to the Axelor brand.",
+  "scope": ["core"]
+}

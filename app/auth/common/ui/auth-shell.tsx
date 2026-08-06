@@ -6,12 +6,15 @@ import {MdOutlineVisibility, MdOutlineVisibilityOff} from 'react-icons/md';
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
+import {APP_TITLE} from '@/constants';
 
 /** Royal-charter CTA button class shared across the auth screens. */
 export const authButtonClass =
   'inline-flex w-full items-center justify-center gap-2 rounded-[11px] bg-royal px-4 py-3.5 text-[15px] font-bold text-white shadow-[0_1px_2px_rgba(13,30,75,0.15),0_6px_16px_rgba(13,30,75,0.18)] transition-colors hover:bg-royal-dark disabled:cursor-not-allowed disabled:opacity-60';
 
-function BrandPanel() {
+/** Falls back to the brand on the bare `/auth/*` entry points, which carry no
+ * workspace. */
+function BrandPanel({workspaceName}: {workspaceName: string | null}) {
   return (
     <div className="relative hidden lg:flex flex-1 flex-col justify-between overflow-hidden bg-gradient-to-br from-royal-dark via-royal to-[#2f74d6] p-12 xl:p-14 text-white">
       {/* texture */}
@@ -34,7 +37,7 @@ function BrandPanel() {
         </div>
         <div>
           <div className="text-[17px] font-extrabold tracking-[-0.01em]">
-            {i18n.t('Goovee')}
+            {workspaceName || APP_TITLE}
           </div>
           <div className="text-[11.5px] text-white/70">
             {i18n.t('Client portal')}
@@ -55,16 +58,22 @@ function BrandPanel() {
       </div>
 
       <div className="relative text-[12px] text-white/60">
-        {i18n.t('Powered by Goovee')}
+        {`${i18n.t('Powered by')} ${APP_TITLE}`}
       </div>
     </div>
   );
 }
 
-export function AuthShell({children}: {children: React.ReactNode}) {
+export function AuthShell({
+  workspaceName,
+  children,
+}: {
+  workspaceName: string | null;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-screen w-full bg-white">
-      <BrandPanel />
+      <BrandPanel workspaceName={workspaceName} />
       <div className="flex w-full items-center justify-center p-6 sm:p-10 lg:w-[46%] lg:shrink-0 lg:px-14 xl:px-20">
         <div className="w-full max-w-[440px]">{children}</div>
       </div>

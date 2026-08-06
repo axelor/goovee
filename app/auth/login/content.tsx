@@ -29,10 +29,12 @@ export default function Content({
   canRegister,
   showGoogleOauth = true,
   showKeycloakOauth = true,
+  workspaceName,
 }: {
   canRegister?: boolean;
   showGoogleOauth?: boolean;
   showKeycloakOauth?: boolean;
+  workspaceName: string | null;
 }) {
   const [values, setValues] = useState({
     email: '',
@@ -152,7 +154,7 @@ export default function Content({
   const showSso = showGoogleOauth || showKeycloakOauth;
 
   return (
-    <AuthShell>
+    <AuthShell workspaceName={workspaceName}>
       <div className="mb-7">
         <h2 className="text-[26px] font-extrabold tracking-[-0.02em] text-ink-900">
           {i18n.t('Log In')}

@@ -32,7 +32,11 @@ const formSchema = z.object({
   email: z.email().min(1, 'Email is required'),
 });
 
-export default function Content() {
+export default function Content({
+  workspaceName,
+}: {
+  workspaceName: string | null;
+}) {
   const searchParams = useSearchParams();
   const searchQuery = new URLSearchParams(searchParams).toString();
   const tenantId = searchParams.get(SEARCH_PARAMS.TENANT_ID);
@@ -71,7 +75,7 @@ export default function Content() {
   };
 
   return (
-    <AuthShell>
+    <AuthShell workspaceName={workspaceName}>
       <Link
         href={`/auth/login?${searchQuery}`}
         className="mb-6 inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-500 transition-colors hover:text-royal">

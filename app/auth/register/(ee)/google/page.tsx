@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -9,6 +10,14 @@ import {manager} from '@/tenant';
 // ---- LOCAL IMPORTS ---- //
 import {extractSearchParams} from '../../common/utils';
 import Form from './form';
+
+import {generateAuthMetadata} from '../../../common/workspace';
+
+export async function generateMetadata(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  return generateAuthMetadata(props.searchParams);
+}
 
 export default async function Page(props: {
   searchParams: Promise<{

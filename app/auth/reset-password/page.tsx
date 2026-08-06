@@ -1,8 +1,22 @@
+import type {Metadata} from 'next';
 import {getSession} from '@/lib/core/auth';
 import Content from './content';
 import {t} from '@/locale/server';
 
-export default async function Page() {
+import {
+  generateAuthMetadata,
+  resolveAuthWorkspaceName,
+} from '../common/workspace';
+
+export async function generateMetadata(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  return generateAuthMetadata(props.searchParams);
+}
+
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await getSession();
   if (session?.user) {
     return (
@@ -18,5 +32,9 @@ export default async function Page() {
       </div>
     );
   }
-  return <Content />;
+  return (
+    <Content
+      workspaceName={await resolveAuthWorkspaceName(props.searchParams)}
+    />
+  );
 }

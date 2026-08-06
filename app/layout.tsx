@@ -19,8 +19,9 @@ import Theme from './theme';
 import Locale from './locale';
 import {
   APP_DESCRIPTION,
-  APP_TEMPLATE_TITLE,
-  DEFAULT_APP_TEMPLATE_TITLE,
+  APP_TITLE,
+  APP_TITLE_TEMPLATE,
+  DEFAULT_APP_TITLE,
 } from '@/constants';
 import {SerwistProvider} from '@/pwa/serwist';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -48,35 +49,35 @@ const fontMono = FontMono({
 });
 
 export const metadata: Metadata = {
-  applicationName: DEFAULT_APP_TEMPLATE_TITLE,
+  applicationName: DEFAULT_APP_TITLE,
   title: {
-    template: APP_TEMPLATE_TITLE,
-    default: DEFAULT_APP_TEMPLATE_TITLE,
+    template: APP_TITLE_TEMPLATE,
+    default: DEFAULT_APP_TITLE,
   },
   description: APP_DESCRIPTION,
   manifest: withBasePath('/manifest'),
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: APP_TEMPLATE_TITLE,
+    title: APP_TITLE,
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: 'website',
-    siteName: DEFAULT_APP_TEMPLATE_TITLE,
+    siteName: DEFAULT_APP_TITLE,
     title: {
-      template: APP_TEMPLATE_TITLE,
-      default: DEFAULT_APP_TEMPLATE_TITLE,
+      template: APP_TITLE_TEMPLATE,
+      default: DEFAULT_APP_TITLE,
     },
     description: APP_DESCRIPTION,
   },
   twitter: {
     card: 'summary',
     title: {
-      template: APP_TEMPLATE_TITLE,
-      default: DEFAULT_APP_TEMPLATE_TITLE,
+      template: APP_TITLE_TEMPLATE,
+      default: DEFAULT_APP_TITLE,
     },
     description: APP_DESCRIPTION,
   },

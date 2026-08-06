@@ -297,7 +297,7 @@ export default function SignUp({
   const termsText = workspace?.config?.termsOfUseAcceptanceText;
 
   return (
-    <AuthShell>
+    <AuthShell workspaceName={workspace?.name ?? null}>
       <Link
         href={`/auth/register?${searchQuery}`}
         className="mb-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink-500 transition-colors hover:text-royal">
