@@ -2,11 +2,12 @@
 
 import {useCallback, useMemo, useState} from 'react';
 import {useRouter} from 'next/navigation';
-import {MdAdd} from 'react-icons/md';
+import {MdAdd, MdArrowForward} from 'react-icons/md';
 import type {UseFormReturn} from 'react-hook-form';
 
 // ---- CORE IMPORTS ---- //
-import {Card, CardContent, CardHeader, CardTitle} from '@/ui/components/card';
+import {Link} from '@/ui/components/link';
+import {cn} from '@/utils/css';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {i18n} from '@/locale';
 import {
@@ -407,39 +408,45 @@ export const RegistrationForm = ({
     }
   };
 
+  const eventDetailHref = `${workspaceURI}/${SUBAPP_CODES.events}/${slug}`;
+
   return (
-    <Card className="w-full rounded-2xl border-none shadow-none">
-      <CardHeader className="p-4 flex flex-col gap-4 space-y-0">
-        <CardTitle>
-          <span className="text-xl font-semibold">{eventTitle}</span>
-        </CardTitle>
+    <div className="flex flex-col gap-[18px]">
+      {/* Event header card */}
+      <section className="bg-white rounded-2xl border border-ink-100 shadow-xs p-[22px] flex flex-col gap-3">
+        <h2 className="m-0 text-xl font-extrabold tracking-[-0.015em] text-ink-900">
+          {eventTitle}
+        </h2>
         <EventDateCard
           startDate={eventStartDateTime}
           endDate={eventEndDateTime}
           eventAllDay={eventAllDay}
         />
-        <BadgeList items={eventCategorySet ?? []} />
+        {eventCategorySet?.length ? (
+          <BadgeList items={eventCategorySet ?? []} />
+        ) : null}
         {defaultPrice ? (
-          <div className="my-6 border p-4 rounded-lg text-sm text-slate-500 dark:text-slate-400">
-            <div className="flex flex-col gap-2 font-semibold">
-              <p className="text-xl text-black">
-                {i18n.t('Price (incl. tax)')}:{' '}
-                <span className="text-success">{formattedDefaultPriceAti}</span>
-              </p>
-              <p className="text-sm text-black">
-                {i18n.t('Price (excl. tax)')}:{' '}
-                <span className="text-success">{formattedDefaultPrice}</span>
-              </p>
-            </div>
+          <div className="mt-1 rounded-xl border border-ink-100 bg-ink-25 px-4 py-3.5 flex flex-wrap items-baseline gap-x-6 gap-y-1">
+            <span className="text-[13px] font-semibold text-ink-600">
+              {i18n.t('Price (incl. tax)')}
+            </span>
+            <span className="text-lg font-extrabold text-royal-dark">
+              {formattedDefaultPriceAti}
+            </span>
+            <span className="text-[12.5px] text-ink-500">
+              {i18n.t('Price (excl. tax)')} {formattedDefaultPrice}
+            </span>
           </div>
         ) : null}
         {eventAllowMultipleRegistrations && (
-          <h3 className="text-lg font-semibold leading-6 tracking-tight">
+          <h3 className="mt-1 text-sm font-bold text-ink-900">
             {i18n.t('Participant')} #1
           </h3>
         )}
-      </CardHeader>
-      <CardContent className="px-4 pb-4 space-y-6">
+      </section>
+
+      {/* Form card */}
+      <section className="bg-white rounded-2xl border border-ink-100 shadow-xs p-[22px]">
         <FormView
           fields={
             [
@@ -471,7 +478,6 @@ export const RegistrationForm = ({
               },
             ] as Field[]
           }
-          submitTitle={i18n.t('Register')}
           superRefineCheck={(val: Record<string, unknown>, ctx) => {
             requiredFacilitiesCustomFields.forEach(field => {
               if (field.requiredIf?.(val) && !val?.[field.name]) {
@@ -517,10 +523,48 @@ export const RegistrationForm = ({
                   />
                 ),
               }
-            : {onSubmit})}
+            : {
+                /* Replaces FormView's default full-width button with the mint CTA
+                 * + Cancel of the redesign, reusing FormView's own submit wiring
+                 * (handleSubmit(onSubmit), disabled on invalid/submitting). */
+                submitButton: ({
+                  form,
+                }: {
+                  form: UseFormReturn<Record<string, unknown>>;
+                }) => {
+                  const disabled =
+                    form.formState.isSubmitting ||
+                    !form.formState.isValid ||
+                    Object.keys(form.formState.errors || {}).length > 0;
+                  return (
+                    <div className="flex justify-end gap-2.5 pt-2">
+                      <Link
+                        href={eventDetailHref}
+                        className="inline-flex items-center rounded-[10px] border border-ink-150 bg-white px-5 py-3 text-sm font-semibold text-ink-700 hover:bg-ink-25">
+                        {i18n.t('Cancel')}
+                      </Link>
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => form.handleSubmit(onSubmit)()}
+                        className={cn(
+                          'inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-sm font-bold text-white transition-colors',
+                          disabled
+                            ? 'bg-ink-200 cursor-not-allowed'
+                            : 'bg-mint-500 hover:bg-mint-600 shadow-[0_1px_2px_rgba(46,163,107,0.3),0_6px_14px_rgba(46,163,107,0.18)]',
+                        )}>
+                        {form.formState.isSubmitting
+                          ? i18n.t('Submitting…')
+                          : i18n.t('Confirm registration')}
+                        <MdArrowForward className="text-sm" />
+                      </button>
+                    </div>
+                  );
+                },
+              })}
         />
-      </CardContent>
-    </Card>
+      </section>
+    </div>
   );
 };
 
