@@ -1,6 +1,0 @@
-{
-  "title": "Re-skin the event registration screen to the redesign charter",
-  "type": "change",
-  "description": "Applied the redesign charter to the registration screen chrome (rounded section cards, event header with a styled price block, and a mint confirm CTA with a cancel link) without regressing custom registration fields, subscriptions or the payment flow.",
-  "scope": ["events"]
-}

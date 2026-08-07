@@ -1,6 +1,0 @@
-{
-  "title": "Redesign the conversation comments",
-  "type": "change",
-  "description": "Comment threads gained a new conversation display variant with a sticky input, provider/contact styling, and a skeleton loading state, alongside redesigned comment list items.",
-  "scope": ["chat"]
-}
