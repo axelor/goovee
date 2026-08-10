@@ -374,6 +374,11 @@ class UploadManager {
       this.tasks.forEach(abortOne);
     }
     this.publish();
+
+    /* Stopping a file frees its slot. A request that was in flight re-fills it
+     * on its way out, but one stopped between two parts has no such moment, and
+     * whatever is queued would wait for an unrelated file to finish. */
+    this.pump();
   };
 
   remove = (id: string) => {
