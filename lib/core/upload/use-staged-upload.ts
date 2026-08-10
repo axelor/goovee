@@ -191,7 +191,6 @@ class UploadManager {
   private nextId = 0;
   private tenant: string;
   private concurrency: number;
-  private disposed = false;
 
   private listeners = new Set<() => void>();
   private snapshot: StagedUploadItem[] = EMPTY;
@@ -274,11 +273,12 @@ class UploadManager {
    * merely stop it. Leaving them would hold their storage until they expired,
    * for uploads no one could pick up again.
    *
-   * Stopping goes through `abort()` first so a file caught between two parts is
-   * settled rather than left waiting on an answer that will never come.
+   * Stopping goes through `abort()` first, which is what actually holds the
+   * scheduler: it settles a file caught between two parts rather than leaving
+   * it waiting on an answer that will never come, and the statuses it leaves
+   * behind are what stop the driver and keep anything queued from starting.
    */
   dispose = () => {
-    this.disposed = true;
     this.cancelProgress();
     this.abort();
 
@@ -405,7 +405,6 @@ class UploadManager {
   // ---- scheduler ----
 
   private pump() {
-    if (this.disposed) return;
     let running = 0;
     for (const task of this.tasks.values()) {
       if (task.status === 'uploading') running++;
@@ -551,7 +550,7 @@ class UploadManager {
     try {
       if (task.fileId && !(await this.resync(task))) return;
 
-      while (task.status === 'uploading' && !this.disposed) {
+      while (task.status === 'uploading') {
         const chunk = task.file.slice(
           task.offset,
           task.offset + UPLOAD_CHUNK_SIZE,
