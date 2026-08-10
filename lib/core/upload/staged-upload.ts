@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
@@ -8,7 +7,7 @@ import {
   COMMENT_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE,
 } from '@/lib/core/comments/constants';
-import {getStoragePath} from '@/storage/index';
+import {getStoragePath, resolveStoragePath} from '@/storage/index';
 import type {ID} from '@/types';
 import {
   DEFAULT_RECORD_RETENTION_HOURS,
@@ -265,11 +264,16 @@ export async function reapExpiredUploads({
   let failed = 0;
   for (const row of abandoned) {
     try {
-      const filePath = row.metaFile?.filePath;
+      const recordedPath = row.metaFile?.filePath;
+      const filePath =
+        recordedPath && resolveStoragePath(getStoragePath(), recordedPath);
+
       if (filePath) {
-        await fs.promises.rm(path.resolve(getStoragePath(), filePath), {
-          force: true,
-        });
+        await fs.promises.rm(filePath, {force: true});
+      } else if (recordedPath) {
+        console.error(
+          `Staged upload ${row.id} records a path outside the storage directory; leaving the file untouched.`,
+        );
       }
 
       /*

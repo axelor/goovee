@@ -5,6 +5,7 @@ import type {ReadableOptions} from 'stream';
 
 // ---- CORE IMPORTS ---- //
 import {filterPrivate} from '@/orm/filter';
+import {resolveStoragePath} from '@/storage/index';
 import type {Client} from '@/goovee/.generated/client';
 import type {ID, User} from '@/types';
 
@@ -37,11 +38,19 @@ export async function findFile({
       },
     });
 
-    if (!record) {
+    if (!record?.filePath) {
       return null;
     }
 
-    filePath = `${storage}/${record?.filePath}`;
+    filePath = resolveStoragePath(storage, record.filePath);
+
+    if (!filePath) {
+      console.error(
+        `Meta file ${id} records a path outside the storage directory.`,
+      );
+      return null;
+    }
+
     fileName = record.fileName!;
     fileType = record.fileType!;
   } else {
@@ -56,11 +65,19 @@ export async function findFile({
       },
     });
 
-    if (!record?.metaFile) {
+    if (!record?.metaFile?.filePath) {
       return null;
     }
 
-    filePath = `${storage}/${record.metaFile.filePath}`;
+    filePath = resolveStoragePath(storage, record.metaFile.filePath);
+
+    if (!filePath) {
+      console.error(
+        `DMS file ${id} records a path outside the storage directory.`,
+      );
+      return null;
+    }
+
     fileName = record.metaFile.fileName!;
     fileType = record.metaFile.fileType!;
   }
@@ -118,8 +135,17 @@ export async function findLatestDMSFileByName({
       } as any,
     });
 
-    if (!record?.metaFile) return null;
-    const filePath = `${storage}/${record.metaFile.filePath}`;
+    if (!record?.metaFile?.filePath) return null;
+
+    const filePath = resolveStoragePath(storage, record.metaFile.filePath);
+
+    if (!filePath) {
+      console.error(
+        `DMS file ${record.id} records a path outside the storage directory.`,
+      );
+      return null;
+    }
+
     const fileName = record.metaFile.fileName!;
     const fileType = record.metaFile.fileType!;
 

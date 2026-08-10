@@ -1,0 +1,6 @@
+{
+  "title": "Confine file downloads to the storage directory",
+  "type": "security",
+  "description": "The location of an uploaded file is recorded relative to the tenant storage directory, and the absolute location was rebuilt from it without checking that the result stayed inside that directory. A record whose location pointed outside storage had that file served as a normal attachment to any user authorised for the record. The location is now verified before a file is read, and a record that fails the check is answered as a missing file; the abandoned-upload cleanup applies the same check before deleting.",
+  "scope": ["core"]
+}
