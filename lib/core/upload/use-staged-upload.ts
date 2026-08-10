@@ -267,15 +267,27 @@ class UploadManager {
   };
 
   /**
-   * Abort everything under way and stop the scheduler; for unmount. Aborting
-   * goes through the same path as `abort()` so a file caught between two parts
-   * is stopped and settled rather than left waiting on an answer that will
-   * never come.
+   * Stop everything under way and give it up; for unmount.
+   *
+   * Unmounting takes the file ids and offsets with it, so nothing here can ever
+   * be resumed — which makes this the moment to release each upload rather than
+   * merely stop it. Leaving them would hold their storage until they expired,
+   * for uploads no one could pick up again.
+   *
+   * Stopping goes through `abort()` first so a file caught between two parts is
+   * settled rather than left waiting on an answer that will never come.
    */
   dispose = () => {
     this.disposed = true;
     this.cancelProgress();
     this.abort();
+
+    /* A file that finished belongs to whatever the consumer staged it for: it
+     * is redeemed at submit, or reclaimed by the expiry sweep if the form is
+     * never sent. Either way it is not this to give up. */
+    this.tasks.forEach(task => {
+      if (task.status !== 'success') this.release(task);
+    });
   };
 
   // ---- public API ----
@@ -722,8 +734,8 @@ class UploadManager {
  * A single scheduler starts `queued` tasks up to `concurrency` in flight across
  * every file the hook holds, filling a freed slot as each finishes. Concurrency
  * is across files: the parts of one file go up in order. Failures are
- * non-terminal: the file is retained so `retry(id)` can resume it. In-flight
- * uploads are aborted on unmount.
+ * non-terminal: the file is retained so `retry(id)` can resume it. Unmounting
+ * releases whatever is still under way, since nothing survives it to resume.
  *
  * `progressThrottleMs > 0` (default 200) uses a fixed throttle; `0` coalesces to
  * one snapshot per animation frame.
@@ -746,7 +758,7 @@ export function useStagedUpload({
     manager.configure(tenant, concurrency);
   }, [manager, tenant, concurrency]);
 
-  // abort in-flight uploads and stop the scheduler when the consumer unmounts
+  // release whatever is still under way when the consumer unmounts
   useEffect(() => () => manager.dispose(), [manager]);
 
   const uploads = useSyncExternalStore(
