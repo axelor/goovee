@@ -165,6 +165,8 @@ retry, and abort.
 - **Recovery** — a `409` is re-seeked to and a `404` restarts the file, both
   drawing on one allowance of `MAX_UPLOAD_RECOVERIES` per attempt.
 - **Abort** leaves the upload resumable; **remove** and **reset** release it.
+  Unmounting releases whatever has not finished — nothing survives it to resume
+  from — and leaves a finished file to be redeemed or swept.
 
 ## Lifecycle
 
