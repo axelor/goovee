@@ -1,7 +1,7 @@
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import {Readable} from 'stream';
-import {pipeline} from 'stream/promises';
 import type {ReadableStream as WebReadableStream} from 'stream/web';
 
 // ---- CORE IMPORTS ---- //
@@ -18,6 +18,13 @@ export enum MetaFileStoreType {
   LOCAL = 1,
 }
 
+/*
+ * How much of the original file name a part file's name may carry. The rest of
+ * the name is a fixed 51-character prefix, so this keeps the whole thing well
+ * inside the 255 bytes filesystems commonly allow.
+ */
+const MAX_PART_NAME_LENGTH = 120;
+
 export interface UploadedFile {
   id: string;
   fileName: string;
@@ -25,70 +32,182 @@ export interface UploadedFile {
   sizeText: string;
 }
 
-export interface WrittenFile {
-  /** Relative on-disk name under the storage dir. */
-  filePath: string;
-  /** Actual bytes written — the authoritative size, not the client's claim. */
-  size: number;
-}
-
-/** Thrown internally when the streaming cap is exceeded; never escapes this module. */
-class CapExceededError extends Error {}
+/** Marks a file that is still being uploaded, and is not yet anyone's data. */
+const PART_SUFFIX = '.part';
 
 /**
- * Stream a web `ReadableStream` to storage under a collision-safe name, capping
- * at `maxBytes`. The body is piped chunk-by-chunk straight to disk — it is never
- * fully buffered in memory. Returns the relative path + actual byte count, or
- * `null` if the cap is exceeded (the partial file is removed first).
+ * Pick the on-disk name a chunked upload will append into, relative to the
+ * storage directory. Nothing is written — the file appears on the first chunk.
  *
- * The caller owns the written file's lifecycle: on any later failure (validation,
- * row creation) it must remove the blob.
+ * The name carries a random component as well as a timestamp. A session stays
+ * open across many requests, so two uploads of the same file name must not be
+ * able to pick the same path and write over one another.
  */
-export async function writeToStorage(
-  stream: ReadableStream<Uint8Array>,
-  {fileName, maxBytes}: {fileName: string; maxBytes: number},
-): Promise<WrittenFile | null> {
+export function derivePartPath(fileName: string): string {
   /*
    * Sanitize the on-disk name: strip any directory component (path-traversal
-   * guard — the name comes from a client header) and reduce to safe characters.
-   * The original `fileName` is still stored on meta_file for display.
+   * guard — the name comes from a client header), reduce to safe characters,
+   * and bound the length so the generated prefix cannot push the whole name
+   * past the filesystem's limit. The original `fileName` is still stored on
+   * meta_file for display.
    */
-  const safeName = path.basename(fileName).replace(/[^\w.-]+/g, '_') || 'file';
-  const timestampFilename = `${Date.now()}-${safeName}`;
-  const absolute = path.resolve(getStoragePath(), timestampFilename);
+  const safeName = (
+    path.basename(fileName).replace(/[^\w.-]+/g, '_') || 'file'
+  ).slice(-MAX_PART_NAME_LENGTH);
 
-  let size = 0;
-  try {
-    /*
-     * Pipe the request body through a counting passthrough into the write
-     * stream. `pipeline` handles backpressure and destroys every stream if any
-     * stage throws — so a cap breach tears the whole chain down cleanly.
-     */
-    await pipeline(
-      Readable.fromWeb(stream as unknown as WebReadableStream),
-      async function* (source) {
-        for await (const chunk of source) {
-          size += chunk.length;
-          if (size > maxBytes) throw new CapExceededError();
-          yield chunk;
-        }
-      },
-      fs.createWriteStream(absolute),
-    );
-  } catch (error) {
-    await fs.promises.rm(absolute, {force: true}).catch(() => {});
-    if (error instanceof CapExceededError) return null;
-    throw error;
-  }
+  return `${Date.now()}-${crypto.randomUUID()}-${safeName}${PART_SUFFIX}`;
+}
 
-  return {filePath: timestampFilename, size};
+/** The name a part file takes once it is finished. */
+function promotedName(partPath: string): string {
+  return partPath.endsWith(PART_SUFFIX)
+    ? partPath.slice(0, -PART_SUFFIX.length)
+    : partPath;
 }
 
 /**
- * Create the `meta_file` row for a blob already written by `writeToStorage`.
+ * Promote a finished part file to the name its `meta_file` will point at, and
+ * return that name. The rename is within the storage directory: atomic, and it
+ * moves no bytes.
+ *
+ * This is what keeps two callers from completing the same upload — the second
+ * finds nothing to rename. It does **not** protect the finished file from an
+ * append that is already running: a file handle follows the file through a
+ * rename, so a writer that opened the part beforehand goes on writing into the
+ * promoted one. Only the caller sending a single part at a time prevents that.
+ */
+export async function promotePart(partPath: string): Promise<string> {
+  const filePath = promotedName(partPath);
+  const storage = getStoragePath();
+
+  await fs.promises.rename(
+    path.resolve(storage, partPath),
+    path.resolve(storage, filePath),
+  );
+
+  return filePath;
+}
+
+/**
+ * Outcome of appending one chunk to a part file.
+ *
+ * `short` means the file holds fewer bytes than the caller believed were
+ * committed, and reports how many are actually there. The append is refused and
+ * the caller resumes from that count.
+ */
+export type PartAppend =
+  | {status: 'ok'; offset: number}
+  | {status: 'short'; offset: number}
+  | {status: 'too-large'};
+
+/**
+ * Append a chunk to a part file, starting at `offset`, and report the new offset.
+ *
+ * The file is truncated to `offset` first, discarding whatever a torn write left
+ * past the committed count. That truncation only ever shrinks — a file shorter
+ * than `offset` is reported as `short`, never padded out to meet it.
+ *
+ * Bytes go to disk as they arrive off the network and are flushed before the new
+ * offset is returned, so a reported offset always describes durable bytes.
+ */
+export async function appendToPart({
+  partPath,
+  stream,
+  offset,
+  maxBytes,
+}: {
+  partPath: string;
+  stream: ReadableStream<Uint8Array>;
+  offset: number;
+  maxBytes: number;
+}): Promise<PartAppend> {
+  const absolute = path.resolve(getStoragePath(), partPath);
+
+  /* A part that is absent holds nothing, which is the same situation as one
+   * that is short — both are answered with what is actually durable. */
+  const stats = await fs.promises.stat(absolute).catch(() => null);
+  const durable = stats ? stats.size : 0;
+
+  if (durable < offset) {
+    return {status: 'short', offset: durable};
+  }
+
+  const handle = await fs.promises.open(absolute, stats ? 'r+' : 'w');
+
+  let position = offset;
+  try {
+    await handle.truncate(offset);
+
+    for await (const piece of Readable.fromWeb(
+      stream as unknown as WebReadableStream,
+    )) {
+      if (position + piece.length > maxBytes) {
+        await handle.truncate(offset);
+        return {status: 'too-large'};
+      }
+
+      /*
+       * A write can report fewer bytes than it was given, so the piece is
+       * written until it is all down rather than once. Moving on after a short
+       * write would drop the rest of the piece and lay the next one over the
+       * gap, leaving a file whose byte count looks right and whose contents are
+       * not. A write that reports no progress at all cannot be retried usefully
+       * and is left to the caller.
+       */
+      let placed = 0;
+      while (placed < piece.length) {
+        const {bytesWritten} = await handle.write(
+          piece,
+          placed,
+          piece.length - placed,
+          position,
+        );
+        if (bytesWritten === 0) {
+          throw new Error(
+            `Wrote no bytes to ${partPath} at offset ${position}`,
+          );
+        }
+        placed += bytesWritten;
+        position += bytesWritten;
+      }
+    }
+
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+
+  return {status: 'ok', offset: position};
+}
+
+/**
+ * Remove a part file. A part that is already gone is not an error; one that
+ * could not be removed is, so callers do not record storage as reclaimed when
+ * it was not.
+ */
+export async function removePart(partPath: string): Promise<void> {
+  await fs.promises.rm(path.resolve(getStoragePath(), partPath), {force: true});
+}
+
+/**
+ * Remove everything a session may have left on disk: the part file, and the
+ * name it is renamed to on completion.
+ *
+ * A session records only the part name. Completing renames the file before the
+ * record can say so, so a session interrupted at that moment leaves a finished
+ * file under a name nothing refers to. Clearing up after such a session means
+ * looking for both.
+ */
+export async function removeSessionFiles(partPath: string): Promise<void> {
+  await removePart(partPath);
+  await removePart(promotedName(partPath));
+}
+
+/**
+ * Create the `meta_file` row for a blob already assembled on disk.
  *
  * Pass a transaction client (`txClient`) to keep the row creation inside the
- * caller's transaction. `size` is the byte count returned by `writeToStorage`.
+ * caller's transaction. `size` is the byte count the file was received with.
  */
 export async function createMetaFile(
   {

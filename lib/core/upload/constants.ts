@@ -7,6 +7,21 @@
 /** Hours → milliseconds. */
 export const HOUR_MS = 60 * 60 * 1000;
 
+/*
+ * Bytes sent per request while uploading a file. Published guidance places
+ * 1–2 MB in the band for mobile and unstable links, which is the case resumable
+ * uploads exist for.
+ */
+export const UPLOAD_CHUNK_SIZE = 2 * 1024 * 1024; // 2 MB
+
+/*
+ * How many times one attempt at a file may recover in place before it is failed
+ * — a session that has gone and is started again, or an offset the server
+ * rejects and the client re-seeks to. Retrying a failed upload starts with a
+ * fresh allowance.
+ */
+export const MAX_UPLOAD_RECOVERIES = 5;
+
 /** Default time-to-live for a staged-but-unredeemed upload. */
 export const DEFAULT_TTL_MS = 24 * HOUR_MS; // 24h
 
