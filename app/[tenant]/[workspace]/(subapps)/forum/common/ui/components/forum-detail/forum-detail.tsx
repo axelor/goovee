@@ -465,7 +465,7 @@ export function ForumDetail({
   const {
     uploads,
     upload,
-    retry,
+    resume,
     remove: removeUpload,
     isUploading,
   } = useStagedUpload({tenant});
@@ -960,7 +960,7 @@ export function ForumDetail({
                             );
                             const isFailed =
                               uploadItem?.status === 'error' ||
-                              uploadItem?.status === 'aborted';
+                              uploadItem?.status === 'paused';
                             const isPending =
                               uploadItem?.status === 'queued' ||
                               uploadItem?.status === 'uploading';
@@ -992,7 +992,7 @@ export function ForumDetail({
                                 {isFailed && (
                                   <button
                                     type="button"
-                                    onClick={() => retry(f.uploadId)}
+                                    onClick={() => resume(f.uploadId)}
                                     aria-label={i18n.t('Retry')}
                                     title={i18n.t('Retry')}
                                     className="relative shrink-0 grid place-items-center size-4 rounded-full text-destructive hover:bg-destructive/10 transition-colors">

@@ -79,7 +79,7 @@ export default function ResourceForm({
   const {
     uploads,
     upload: stage,
-    retry,
+    resume,
     remove: removeUpload,
     reset: resetUploads,
     isUploading,
@@ -233,7 +233,7 @@ export default function ResourceForm({
               );
               const isFailed =
                 uploadItem?.status === 'error' ||
-                uploadItem?.status === 'aborted';
+                uploadItem?.status === 'paused';
               return (
                 <div
                   key={field.id}
@@ -261,7 +261,7 @@ export default function ResourceForm({
                           <MdRefresh
                             title={i18n.t('Retry')}
                             className="size-5 cursor-pointer shrink-0"
-                            onClick={() => retry(field.uploadId)}
+                            onClick={() => resume(field.uploadId)}
                           />
                         </div>
                       )}

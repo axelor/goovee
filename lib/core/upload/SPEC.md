@@ -96,7 +96,7 @@ X-File-Id: <id>
 ```
 
 Frees an abandoned upload's storage immediately. An optimisation only; the reap
-sweep reclaims it either way. Not sent when an upload is merely aborted, since
+sweep reclaims it either way. Not sent when an upload is merely paused, since
 that upload remains resumable.
 
 ### Redeem
@@ -155,16 +155,16 @@ Two layers, since the declared length is client input:
 ## Client
 
 `useStagedUpload` drives the protocol from the browser: per-file progress,
-bounded concurrency across files (parts within a file go in order), resume on
-retry, and abort.
+bounded concurrency across files (parts within a file go in order), pause and
+resume.
 
 - **Chunk size** — `UPLOAD_CHUNK_SIZE`, 2 MB. Published guidance places 1–2 MB in
   the band for mobile and unstable links.
 - **Failure** — a failed part fails the file. The entry is left in `error` with
-  its upload intact; `retry(id)` resumes from the server's offset.
+  its upload intact; `resume(id)` continues from the server's offset.
 - **Recovery** — a `409` is re-seeked to and a `404` restarts the file, both
   drawing on one allowance of `MAX_UPLOAD_RECOVERIES` per attempt.
-- **Abort** leaves the upload resumable; **remove** and **reset** release it.
+- **Pause** leaves the upload resumable; **remove** and **reset** give it up.
   Unmounting releases whatever has not finished — nothing survives it to resume
   from — and leaves a finished file to be redeemed or swept.
 
