@@ -2,6 +2,7 @@ import {useEffect, useState, useSyncExternalStore} from 'react';
 import {throttle} from 'lodash-es';
 
 // ---- CORE IMPORTS ---- //
+import {i18n} from '@/locale';
 import {withBasePath} from '@/lib/core/path/base-path';
 import {MAX_UPLOAD_RECOVERIES, UPLOAD_CHUNK_SIZE} from './constants';
 
@@ -29,11 +30,22 @@ export interface StagedUploadItem {
   status: StagedUploadStatus;
   /** Set once the file is staged; redeemed server-side at submit. */
   token?: string;
+  /** Why the upload failed, already translated. Set whenever status is `error`. */
   error?: string;
 }
 
 interface StageOptions {
   purpose: string;
+  /**
+   * Largest file the purpose accepts, in bytes. A file over it is refused here
+   * rather than uploaded and rejected, so nothing is sent that cannot land.
+   *
+   * The cap belongs to the feature, not to this mechanism, so it is passed in
+   * with each call — the purpose registry that the route enforces lives on the
+   * server and is not this side's to read. Omitted, no cap is applied and the
+   * route remains the only check.
+   */
+  maxBytes?: number;
 }
 
 export interface UseStagedUpload {
@@ -81,7 +93,14 @@ export interface UseStagedUpload {
   reset: () => void;
   /** Tokens of the successfully staged files, in upload order. */
   tokens: string[];
-  isUploading: boolean;
+  /**
+   * Whether every file held is staged and ready to be redeemed — the signal a
+   * form gates its submit on. True when nothing is held at all.
+   *
+   * Paused and failed files count as not staged, deliberately: both would be
+   * dropped in silence by a submit that only waited for the transfers to stop.
+   */
+  isStaged: boolean;
 }
 
 /*
@@ -155,6 +174,11 @@ function toChunkBody(text: string): ChunkBody {
 
 /** Raised when the caller aborted a request, to separate it from a real failure. */
 class AbortedError extends Error {}
+
+/** Whether a file is beyond what its call said the purpose would accept. */
+function exceedsCap(file: File, options: StageOptions): boolean {
+  return options.maxBytes != null && file.size > options.maxBytes;
+}
 
 /** Whole-percent progress, guarding the empty-file case. */
 function percentOf(done: number, total: number): number {
@@ -301,16 +325,24 @@ class UploadManager {
       const id = `u${this.nextId++}`;
       ids.push(id);
       return new Promise<StagedUpload | null>(resolve => {
+        /* Refused before it is ever queued, so an oversized file costs no
+         * request at all. The scheduler only ever picks up `queued` work, which
+         * is what keeps it out. */
+        const tooLarge = exceedsCap(file, options);
+
         this.tasks.set(id, {
           id,
           fileName: file.name,
           file,
           options,
-          status: 'queued',
+          status: tooLarge ? 'error' : 'queued',
+          error: tooLarge ? i18n.t('File is too large') : undefined,
           progress: 0,
           offset: 0,
-          settle: resolve,
+          settle: tooLarge ? undefined : resolve,
         });
+
+        if (tooLarge) resolve(null);
       });
     });
 
@@ -328,6 +360,11 @@ class UploadManager {
     const task = this.tasks.get(id);
     // only a failed or paused file has anything to continue from
     if (!task || (task.status !== 'error' && task.status !== 'paused')) {
+      return Promise.resolve(undefined);
+    }
+    /* Nothing makes an oversized file smaller, so retrying one is refused here
+     * too and it keeps the message explaining why. */
+    if (exceedsCap(task.file, task.options)) {
       return Promise.resolve(undefined);
     }
     /* Progress reflects what the server already holds rather than restarting at
@@ -550,7 +587,7 @@ class UploadManager {
     const recover = () => {
       recoveries++;
       if (recoveries <= MAX_UPLOAD_RECOVERIES) return true;
-      this.fail(task, 'Upload could not be staged');
+      this.fail(task, i18n.t('Upload could not be staged'));
       return false;
     };
 
@@ -613,14 +650,14 @@ class UploadManager {
           return this.fail(
             task,
             response.status === 413
-              ? 'File is too large'
-              : 'Upload could not be staged',
+              ? i18n.t('File is too large')
+              : i18n.t('Upload could not be staged'),
           );
         }
 
         if (opening) {
           if (!response.fileId) {
-            return this.fail(task, 'Invalid server response');
+            return this.fail(task, i18n.t('Invalid server response'));
           }
           task.fileId = response.fileId;
         }
@@ -630,7 +667,7 @@ class UploadManager {
         /* Termination rests on the offset moving. A success that leaves it where
          * it was would otherwise send the same part forever. */
         if (advanced <= task.offset && !response.body.token) {
-          return this.fail(task, 'Upload could not be staged');
+          return this.fail(task, i18n.t('Upload could not be staged'));
         }
 
         task.offset = advanced;
@@ -654,7 +691,7 @@ class UploadManager {
     } catch (error) {
       // an abort has already recorded its own terminal state
       if (error instanceof AbortedError) return;
-      this.fail(task, 'Upload failed');
+      this.fail(task, i18n.t('Upload failed'));
     }
   }
 
@@ -677,7 +714,7 @@ class UploadManager {
       });
     } catch (error) {
       if (error instanceof AbortedError) return false;
-      this.fail(task, 'Upload failed');
+      this.fail(task, i18n.t('Upload failed'));
       return false;
     }
 
@@ -688,7 +725,7 @@ class UploadManager {
     }
 
     if (state.status >= 400) {
-      this.fail(task, 'Upload failed');
+      this.fail(task, i18n.t('Upload failed'));
       return false;
     }
 
@@ -775,9 +812,7 @@ export function useStagedUpload({
   const tokens = uploads.flatMap(item =>
     item.status === 'success' && item.token ? [item.token] : [],
   );
-  const isUploading = uploads.some(
-    item => item.status === 'uploading' || item.status === 'queued',
-  );
+  const isStaged = uploads.every(item => item.status === 'success');
 
   return {
     uploads,
@@ -787,6 +822,6 @@ export function useStagedUpload({
     remove: manager.remove,
     reset: manager.reset,
     tokens,
-    isUploading,
+    isStaged,
   };
 }

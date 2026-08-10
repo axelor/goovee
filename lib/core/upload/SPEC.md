@@ -1,54 +1,132 @@
 # Staged Upload
 
 > Infrastructure, not an end-user feature. Lets a file be uploaded **before** the
-> record that will own it exists. Consumed by features that register a **purpose**
-> (e.g. `marketplace:bundle`).
+> record that will own it exists.
 
-## What it does
+A **claim-check** mechanism. A file is staged against a declared **purpose** and
+answered with an opaque, single-use **token** — never a `meta_file` id. At submit
+the consumer **redeems** the token and the server links the file to the record it
+has just created. A staged file that is never redeemed is reclaimed on its own.
 
-A **claim-check** pattern: stage a file and get back an opaque, single-use
-**token** (never the `meta_file` id); at form submit the consumer **redeems** the
-token and the server links the file to the new record, so a client never hands
-over a file id to trust. Files that are staged but never submitted are
-**abandoned**; a background reaper reclaims their storage, then a prune pass
-removes the leftover record after a retention window.
+The file travels in **parts** against one server-side **upload**. No single
+request carries a whole file, and an interrupted transfer resumes from the bytes
+the server confirms it holds. A file that fits in one part costs one request.
 
-The file travels in **parts**, against one server-side **session**. No single
-request carries a whole file, and a transfer interrupted part-way **resumes**
-from the bytes the server confirmed. A file that fits in one part costs one
-request.
+Everything is scoped to a **tenant**, and within it to the **user** who staged
+the file. Purpose is checked where it decides an outcome — opening an upload and
+redeeming a token — rather than on every request against an upload the caller
+already owns.
 
-Everything is scoped to a **tenant** (its own DB and storage), and within it to
-the **user** who staged the file and the declared **purpose**.
+---
 
-## Endpoints
+## Registering a purpose
 
-One address per purpose, with the request method saying what to do. All require
-authentication. An upload is only ever visible to the user who opened it.
+A feature that stages files registers one entry in `UPLOAD_PURPOSES`, named
+`<app>:<kind>`:
 
-Header names follow the platform's own upload service (`X-File-*`). The upload
-being worked on rides in `X-File-Id` rather than in the URL, so it stays out of
-access logs.
+| Field      | Required | Meaning                                                        |
+| ---------- | -------- | -------------------------------------------------------------- |
+| `maxBytes` | yes      | Largest file this purpose accepts.                             |
+| `ttlMs`    | no       | How long a staged file survives unredeemed. Defaults to 24h.   |
+| `file`     | no       | Zod schema run against the assembled file — mime, magic bytes. |
+
+Do not put a size rule in the `file` schema; `maxBytes` covers it and is applied
+far earlier. Set `ttlMs` to the shortest window the feature can live with: it
+bounds how long an abandoned file occupies storage.
+
+An unregistered purpose is refused. Purposes are permanent once shipped — a
+staged file names its purpose, and renaming one strands every upload in flight.
+
+## Staging from the browser
+
+Use `useStagedUpload({tenant})`. Nothing else should speak the protocol directly.
+
+```ts
+const {uploads, upload, pause, resume, remove, reset, isStaged} =
+  useStagedUpload({tenant});
+
+const {ids, done} = upload(files, {purpose, maxBytes});
+```
+
+- `ids` is returned immediately, one per input file and aligned with it. Bind
+  each to the form row it belongs to; it is the handle for `pause`, `resume` and
+  `remove`. Look an entry up with `uploads.find(item => item.id === ids[index])`.
+- `done` resolves with the files that succeeded, in input order. It never
+  rejects, and it omits anything paused or failed — so treat a short array as
+  ordinary, not as an error.
+- `maxBytes` is the purpose's cap, passed as a backstop: the hook refuses an
+  oversized file without making a request. Reject oversized files at the picker
+  too, where the file and its limit can be named — the hook's refusal only
+  leaves a failed row, and removing it is the only way out.
+
+Consumers must:
+
+- **Gate submit on `isStaged`.** It is true only when every file held has been
+  staged. Gating on anything narrower lets a paused or failed file through, and
+  submit will drop it in silence.
+- **Render `item.error` when a file fails.** It is already translated and it is
+  the only thing that tells the user what went wrong.
+- **Offer pause, resume and remove** wherever a file can be uploading. A file
+  that cannot be resumed or removed is a dead end.
+- **Call `remove(id)`** when the user takes a file off the form, so its storage
+  is freed rather than left to expire.
+
+Consumers must not construct requests, hold `meta_file` ids, or treat a token as
+anything but opaque.
+
+## Redeeming at submit
+
+```ts
+const fileId = await redeemUpload({token, purpose, owner, client});
+```
+
+Call it inside the same transaction that creates the owning record, so a failure
+leaves neither the record nor a spent claim behind. It re-checks owner, purpose
+and freshness, marks the claim consumed, and returns the `meta_file` id to link.
+
+A token is single-use. Redeeming twice fails the second time.
+
+Redeem answers ownership of the **file**. The consumer still checks the user's
+right to the **record** it is attaching that file to — this mechanism knows
+nothing about the target entity.
+
+---
+
+## Protocol
+
+For a client that is not the browser hook. One address per purpose; the method
+says what to do. Every request is authenticated, and an upload is visible only to
+the user who opened it — the purpose in the path selects the policy when opening,
+and is not re-checked on the requests that follow. Header names follow the
+platform's own upload service.
+
+Two answers are common to every request below and are not repeated in each. A
+request without a session answers `401`, and so does one whose `X-File-Id` is not
+a well-formed id — a malformed header is indistinguishable from an upload that is
+not yours. A part that could not be stored answers `500`, and may be sent again.
 
 ### Open
 
 ```
 POST   /api/tenant/{tenant}/upload/stage/{purpose}
 X-File-Name: <percent-encoded name>
-X-File-Type: <the file's mime type>
+X-File-Type: <mime type>
 X-File-Size: <total bytes>
 Content-Type: application/octet-stream
 [body: the first part, optional]
 
 201 → X-File-Id, X-File-Offset · {fileId, offset}
-200 → the completion response below   (the body carried the whole file)
+200 → the completion response below, if the body carried the whole file
+400 → X-File-Size missing, unparseable, or zero
+404 → no such purpose
+413 → larger than the purpose accepts
 ```
 
-`X-File-Size` is required and checked against the purpose's `maxBytes` before any
-bytes are read. A body may be sent with this request; when it carries the whole
-file the upload is opened, filled and completed in one round trip.
+`X-File-Size` is required and is checked before any bytes are read. An empty file
+is refused — there is nothing to stage. Send the whole file as the body when it
+is small enough: the upload is opened, filled and completed in one round trip.
 
-### Resume
+### Ask where to resume
 
 ```
 HEAD   /api/tenant/{tenant}/upload/stage/{purpose}
@@ -58,19 +136,18 @@ X-File-Id: <id>
 404 → no such live upload
 ```
 
-The server's offset is authoritative.
-
 ### Append
 
 ```
 PATCH  /api/tenant/{tenant}/upload/stage/{purpose}
 X-File-Id: <id>
-X-File-Offset: <the caller's offset>
+X-File-Offset: <where this part starts>
 Content-Type: application/octet-stream
 [body: the part]
 
 204 → X-File-Offset (new)
-409 → X-File-Offset (authoritative), the offset did not match
+400 → X-File-Offset missing or unparseable, or no body sent
+409 → X-File-Offset (authoritative) — the offset did not match
 413 → more bytes than the file declared; the upload is released
 404 → no such live upload
 ```
@@ -78,15 +155,16 @@ Content-Type: application/octet-stream
 ### Complete
 
 Implicit, on the part that brings the offset up to `X-File-Size`. The assembled
-file is validated, given a name of its own, and recorded as a `meta_file`:
+file is validated and recorded, and the token is returned:
 
 ```
 200 → X-File-Id, X-File-Offset · {token, fileName, sizeText}
 ```
 
-Completing is idempotent — repeating the final part returns the same token.
+Repeating the final part returns the same token, so a client that never saw the
+answer may simply ask again.
 
-### Release
+### Give up
 
 ```
 DELETE /api/tenant/{tenant}/upload/stage/{purpose}
@@ -95,80 +173,62 @@ X-File-Id: <id>
 204
 ```
 
-Frees an abandoned upload's storage immediately. An optimisation only; the reap
-sweep reclaims it either way. Not sent when an upload is merely paused, since
-that upload remains resumable.
+Send this when the user abandons a file. It is an optimisation — expiry reclaims
+the upload either way — so never depend on it having been sent. Do not send it
+for a merely paused upload, which is still resumable.
 
-### Redeem
+### Rules a client must follow
 
-`redeemUpload({token, purpose, owner, client})`, called by the consumer in its own
-transaction. Re-checks owner, purpose and freshness, marks the claim consumed, and
-returns the `meta_file` id to link. The consumer keeps its own ownership checks on
-the target entity.
+- **One part in flight per upload.** Sending several at once corrupts that
+  client's own file. Parts within a file go in order; different files may go in
+  parallel.
+- **The server's offset wins.** On `409`, seek to the offset it reports rather
+  than resending. Never assume a local offset survived an interruption — ask with
+  `HEAD`.
+- **The server may hold less than you last saw.** Take the offset it reports and
+  continue from there.
+- **On `404`, the upload is gone.** Open a new one and start the file again.
+- **Bound your recovery.** Re-seeking and restarting are for genuine
+  interruptions; a client that loops on them forever will never surface a real
+  failure to the user.
 
-## Expiry
+---
 
-Set once, when the upload opens, from the purpose's `ttlMs` (default 24h). Never
-moved. The allowance covers uploading the file **and** redeeming it; past the
-deadline the upload is abandoned whether or not every byte arrived.
+## Size
 
-An upload inside its window is never reaped, and may be resumed at any point up
-to the deadline.
+Three checks, because the declared length is client input:
 
-## Parts and offsets
+1. The client refuses a file over the `maxBytes` it was given, before any
+   request. A convenience, not a control.
+2. `X-File-Size` against the purpose's `maxBytes`, before a byte is read.
+3. Every part against the bytes actually received.
 
-- The recorded offset is authoritative. A part's bytes are flushed before its
-  offset is recorded.
-- A part file is truncated to the recorded offset before anything is appended.
-  Truncation only ever shrinks: a part file holding fewer bytes than recorded is
-  answered with what is durable, and the recorded offset is corrected down to
-  match.
-- The offset is recorded conditionally — on the offset the part started from, and
-  on the upload still being live. A part whose record no longer accepts it has
-  its bytes discarded.
-- A file being uploaded and a finished file are different names on disk.
-  Completing renames the part, which is what serialises two callers completing
-  the same upload: the second finds nothing to rename.
-- **One part in flight per upload.** This is the only thing protecting a
-  finished file from a straggling append. The rename does not protect it: a file
-  handle follows the file, so a request that opened the part before the rename
-  goes on writing into the promoted one, and can leave it truncated or rewritten
-  while its `meta_file` records the size it had at completion. Sending several
-  parts at once is a protocol violation, and its effect is confined to that
-  caller's own file.
-- Storage is given up in the record before it is deleted from disk, so nothing
-  deletes a file another caller has taken over. A delete that then fails leaks
-  the file, and says so in the log.
-
-## Size enforcement
-
-Two layers, since the declared length is client input:
-
-1. `X-File-Size` against the purpose's `maxBytes` when the upload opens.
-2. Every part against the bytes actually received.
+Only the last two are enforcement. A client that skips the first is still
+refused.
 
 ## Validation
 
-`policy.file` runs at completion, against the whole assembled file via
-`fs.openAsBlob`. A rejection releases the upload and answers `400`.
+A purpose's `file` schema runs once, at completion, against the whole assembled
+file. A rejection answers `400` and gives the upload up, so the bytes are gone
+and there is nothing left to resume from.
 
-## Client
+A rejected file will be rejected again on every attempt, so a client that offers
+a retry should not offer one here. The browser hook does not yet tell this case
+apart from a transient failure: it reports the generic failure message and its
+retry re-sends the whole file to the same refusal.
 
-`useStagedUpload` drives the protocol from the browser: per-file progress,
-bounded concurrency across files (parts within a file go in order), pause and
-resume.
+## Expiry
 
-- **Chunk size** — `UPLOAD_CHUNK_SIZE`, 2 MB. Published guidance places 1–2 MB in
-  the band for mobile and unstable links.
-- **Failure** — a failed part fails the file. The entry is left in `error` with
-  its upload intact; `resume(id)` continues from the server's offset.
-- **Recovery** — a `409` is re-seeked to and a `404` restarts the file, both
-  drawing on one allowance of `MAX_UPLOAD_RECOVERIES` per attempt.
-- **Pause** leaves the upload resumable; **remove** and **reset** give it up.
-  Unmounting releases whatever has not finished — nothing survives it to resume
-  from — and leaves a finished file to be redeemed or swept.
+An upload's deadline is set when it opens, from the purpose's `ttlMs`, and never
+moves. The allowance covers transferring the file **and** redeeming it. Past the
+deadline the upload is abandoned whether or not every byte arrived.
 
-## Lifecycle
+Inside its window an upload is never reclaimed and may be resumed at any point.
+
+## What the system guarantees
+
+Expiry is the only guarantee that storage is reclaimed. It never depends on a
+client having given anything up.
 
 ```
                        open
@@ -199,7 +259,9 @@ redeem │              │ TTL   ┌──────────────�
      staged_upload record deleted
 ```
 
-## What each cleanup pass touches
+Two sweeps run per tenant, independently: **reap** reclaims storage once an
+upload has expired, and **prune** deletes the leftover record after a retention
+window.
 
 | Record state                         | Redeemable? | Reap                                          | Prune                  |
 | ------------------------------------ | ----------- | --------------------------------------------- | ---------------------- |
@@ -212,19 +274,9 @@ redeem │              │ TTL   ┌──────────────�
 | Consumed, **within** retention       | spent       | —                                             | —                      |
 | Consumed, **past** retention         | spent       | —                                             | **deletes the record** |
 
-An incomplete session owns its part file; a complete one's blob belongs to the
-`meta_file` and is reclaimed through that. A session records only the part name,
-so clearing one up looks for the promoted name too — a session interrupted
-between the rename and the record of it leaves a finished file nothing else
-refers to.
-
-Reap keeps the record, marked `reapedAt`, for traceability, and works row by row
-(batched by `REAP_BATCH_LIMIT`) so one failure does not abort the sweep. A
-consumed record's `meta_file` is live and is never touched. Prune deletes the
-record only, in a single bulk delete.
-
-Reap is the only guarantee that storage is reclaimed; it depends on expiry alone,
-never on a client having released anything.
+A redeemed file belongs to the record that redeemed it, and no sweep ever touches
+it again. Reaping keeps the record, marked `reapedAt`, so a vanished file can be
+accounted for; pruning is what finally removes it.
 
 ## Configuration
 
@@ -233,31 +285,25 @@ never on a client having released anything.
 | `UPLOAD_RECORD_RETENTION_HOURS` | 168 (7d)      | How long a terminal (consumed or reaped) record is kept. |
 | `DATA_STORAGE`                  | `cwd/storage` | Blob storage root.                                       |
 
-`UPLOAD_RECORD_RETENTION_HOURS` is read in **hours** (fractional allowed, e.g.
-`0.01` for testing); unset, non-positive, or invalid falls back to the default.
+`UPLOAD_RECORD_RETENTION_HOURS` is read in hours, fractional allowed; unset,
+non-positive or invalid falls back to the default.
 
-Per-purpose settings — `maxBytes`, `ttlMs`, and an optional `file` schema — live
-in the `UPLOAD_PURPOSES` registry. Reap and prune cadences are fixed constants
-(hourly and daily) and bound only the lag between expiry and deletion.
-
-Reap and prune run as two independent passes from `instrumentation.ts`, per
-tenant, after a short startup delay.
+Everything else is fixed: per-purpose settings live in the registry, and the
+sweep cadences bound only the lag between expiry and deletion.
 
 ## Limitations
 
-- **Single instance only** — a session's part file lives on the disk of the
-  instance that received it, and the reaper has no cross-instance lock.
-  Horizontal scaling needs shared storage or session-pinned routing, plus a
-  Postgres advisory lock around each sweep.
-- **One global storage root** — blobs for all tenants share `DATA_STORAGE`.
-- **A failed delete leaks** — both the release path and the reap sweep give the
-  storage up in the record before removing it from disk, so an `unlink` that
-  fails leaves a file no later sweep will look for. It is logged; nothing
-  retries it.
-- **No cap on open uploads** — a record is created from headers alone,
-  before any bytes arrive. Each is bounded by its TTL and swept like any other,
-  but nothing limits how many one user holds at once.
+- **Single instance only** — a part file lives on the disk of the instance that
+  received it, and the sweeps take no cross-instance lock. Scaling out needs
+  shared storage or upload-pinned routing, plus an advisory lock per sweep.
+- **One storage root for all tenants.**
+- **A failed delete leaks.** Storage is given up in the record before it is
+  removed from disk, so an `unlink` that fails leaves a file no later sweep looks
+  for. It is logged; nothing retries it.
+- **No cap on open uploads.** A record is created from headers alone, before any
+  bytes arrive. Each is bounded by its TTL, but nothing limits how many one user
+  holds at once.
 - **Redeem failures are indistinguishable** — not-found, wrong-owner, expired and
-  already-consumed all surface as "Upload not redeemable".
+  already-consumed all surface the same way.
 
 _Living spec — update it alongside functional changes._
