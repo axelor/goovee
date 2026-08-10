@@ -91,7 +91,7 @@ export function CommentInput({
   const {
     uploads,
     upload,
-    retry,
+    resume,
     remove: removeUpload,
     reset: resetUploads,
     isUploading,
@@ -256,7 +256,7 @@ export function CommentInput({
               );
               const isFailed =
                 uploadItem?.status === 'error' ||
-                uploadItem?.status === 'aborted';
+                uploadItem?.status === 'paused';
               return (
                 <div
                   key={field.id}
@@ -280,7 +280,7 @@ export function CommentInput({
                         <MdRefresh
                           title={i18n.t('Retry')}
                           className="size-5 cursor-pointer shrink-0"
-                          onClick={() => retry(field.uploadId)}
+                          onClick={() => resume(field.uploadId)}
                         />
                       </div>
                     )}
