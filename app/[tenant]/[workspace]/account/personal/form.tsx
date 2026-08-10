@@ -5,7 +5,7 @@ import {usePathname, useRouter} from 'next/navigation';
 import {z} from 'zod';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {MdFileUpload, MdDeleteOutline} from 'react-icons/md';
+import {MdDeleteOutline, MdFileUpload} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
@@ -13,6 +13,7 @@ import {Avatar, AvatarImage, AvatarFallback} from '@/ui/components/avatar';
 import {Button} from '@/ui/components/button';
 import {Checkbox} from '@/ui/components/checkbox';
 import {Input} from '@/ui/components/input';
+import {ProgressRing} from '@/ui/components';
 import {
   Form,
   FormControl,
@@ -47,7 +48,11 @@ import {
 } from '@/ui/components/select';
 
 // ---- LOCAL IMPORTS ---- //
-import {Title} from '../common/ui/components';
+import {
+  PictureUploadAction,
+  PictureUploadCancel,
+  Title,
+} from '../common/ui/components';
 import {update, updateProfileImage, generateOTPForUpdate} from './action';
 import {
   RoleLabel,
@@ -163,12 +168,20 @@ export default function Personal({
   const pathname = usePathname();
   const {toast} = useToast();
   const {tenant, workspaceURL, workspaceURI} = useWorkspace();
-  const {upload} = useStagedUpload({tenant});
+  const {
+    uploads,
+    upload,
+    pause,
+    resume,
+    remove: removeUpload,
+  } = useStagedUpload({tenant});
   const signOut = useSignOut();
   const [confirmation, setConfirmation] = useState<any>(false);
-  const [picture, setPicture] = useState<any>(pictureProp);
+  const [picture, setPicture] = useState<string | undefined>(pictureProp);
   const [updatingPicture, setUpdatingPicture] = useState(false);
-  const pictureInputRef = useRef<any>(undefined);
+  const [pictureUploadId, setPictureUploadId] = useState<string | null>(null);
+  const pictureInputRef = useRef<HTMLInputElement | null>(null);
+  const pictureUpload = uploads.find(item => item.id === pictureUploadId);
   const router = useRouter();
 
   const {timeRemaining, isExpired, reset} = useCountDown(0);
@@ -277,6 +290,12 @@ export default function Personal({
 
   const handleDeletePicture = async () => {
     closeConfirmation();
+
+    /* Deleting the picture settles what it should be, so an upload left parked
+     * is given up rather than kept resumable — resuming it would put back the
+     * picture that was just removed. */
+    handleCancelPicture();
+
     setUpdatingPicture(true);
     try {
       const result = await updateProfileImage({token: null});
@@ -288,7 +307,7 @@ export default function Personal({
           title: i18n.t('Picture deleted successfully.'),
           variant: 'success',
         });
-        setPicture(null);
+        setPicture(undefined);
       }
     } catch (e) {
       toast({
@@ -307,6 +326,11 @@ export default function Personal({
 
     if (!file) return;
 
+    /* Clear the input straight away, so picking the same file again — after a
+     * rejection or a failure — still counts as a pick rather than as no change
+     * at all. The File itself is already in hand and outlives the reset. */
+    event.target.value = '';
+
     if (!file.type.startsWith('image/')) {
       toast({
         title: i18n.t('Only images are allowed.'),
@@ -320,31 +344,28 @@ export default function Personal({
       return;
     }
 
+    /* Picking again gives up on whatever the last attempt left parked, so a
+     * paused or failed upload cannot go on holding server-side storage with
+     * nothing on screen still pointing at it. */
+    if (pictureUploadId) removeUpload(pictureUploadId);
+
     setUpdatingPicture(true);
     try {
-      const {done} = upload(file, {purpose: PARTNER_PICTURE_PURPOSE});
+      const {ids, done} = upload(file, {
+        purpose: PARTNER_PICTURE_PURPOSE,
+        maxBytes: PARTNER_PICTURE_MAX_FILE_SIZE,
+      });
+      setPictureUploadId(ids[0] ?? null);
       const [staged] = await done;
 
-      if (!staged) {
-        toast({
-          title: i18n.t('Error updating profile picture. Try again.'),
-          variant: 'destructive',
-        });
-        return;
-      }
+      /* Nothing staged means the picture was cancelled, paused or failed. Only
+       * the first is finished with — the other two keep their entry, and the
+       * ring over the avatar carries the state and the way to carry on. */
+      if (!staged) return;
 
-      const result = await updateProfileImage({token: staged.token});
-
-      if ('error' in result) {
-        toast({title: result.message, variant: 'destructive'});
-      } else {
-        toast({
-          title: i18n.t('Picture updated successfully.'),
-          variant: 'success',
-        });
-        setPicture(result.data?.id);
-      }
-    } catch (e) {
+      setPictureUploadId(null);
+      await applyStagedPicture(staged.token);
+    } catch (error) {
       toast({
         title: i18n.t('An unexpected error occurred'),
         variant: 'destructive',
@@ -352,6 +373,48 @@ export default function Personal({
     } finally {
       setUpdatingPicture(false);
     }
+  };
+
+  const applyStagedPicture = async (token: string) => {
+    const result = await updateProfileImage({token});
+
+    if ('error' in result) {
+      toast({title: result.message, variant: 'destructive'});
+    } else {
+      toast({
+        title: i18n.t('Picture updated successfully.'),
+        variant: 'success',
+      });
+      setPicture(result.data?.id);
+    }
+  };
+
+  /** Carry on a picture that was paused or that failed part-way. */
+  const handleResumePicture = async () => {
+    if (!pictureUploadId || updatingPicture) return;
+
+    setUpdatingPicture(true);
+    try {
+      const staged = await resume(pictureUploadId);
+      if (!staged) return;
+
+      setPictureUploadId(null);
+      await applyStagedPicture(staged.token);
+    } catch (error) {
+      toast({
+        title: i18n.t('An unexpected error occurred'),
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingPicture(false);
+    }
+  };
+
+  const handleCancelPicture = () => {
+    if (!pictureUploadId) return;
+
+    removeUpload(pictureUploadId);
+    setPictureUploadId(null);
   };
 
   const isValidEmail = useMemo(() => {
@@ -385,17 +448,41 @@ export default function Personal({
           <div className="space-y-8">
             <div className="space-y-5">
               <div className="flex items-center gap-5">
-                <Avatar className="size-[72px] rounded-2xl">
-                  <AvatarImage
-                    src={getPartnerImageURL(picture, tenant, {
-                      noimage: true,
-                      noimageSrc: '/images/profile.png',
-                    })}
-                    alt={fullName}
-                    size={72}
-                  />
-                  <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
-                </Avatar>
+                <div className="relative size-[72px] shrink-0">
+                  <Avatar className="size-[72px] rounded-2xl">
+                    <AvatarImage
+                      src={getPartnerImageURL(picture, tenant, {
+                        noimage: true,
+                        noimageSrc: '/images/profile.png',
+                      })}
+                      alt={fullName}
+                      size={72}
+                    />
+                    <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
+                  </Avatar>
+                  {pictureUpload && pictureUpload.status !== 'success' && (
+                    <div className="absolute inset-0 grid place-items-center rounded-2xl bg-ink-900/50">
+                      <ProgressRing
+                        value={pictureUpload.progress}
+                        tone={
+                          pictureUpload.status === 'error'
+                            ? 'error'
+                            : pictureUpload.status === 'paused'
+                              ? 'paused'
+                              : 'active'
+                        }
+                        size={52}
+                        label={i18n.t('Uploading profile picture')}>
+                        <PictureUploadAction
+                          status={pictureUpload.status}
+                          onPause={() => pause(pictureUpload.id)}
+                          onResume={handleResumePicture}
+                        />
+                      </ProgressRing>
+                      <PictureUploadCancel onCancel={handleCancelPicture} />
+                    </div>
+                  )}
+                </div>
                 <div className="flex flex-col gap-2">
                   <div>
                     <p className="text-sm font-bold text-ink-900">
@@ -404,6 +491,16 @@ export default function Personal({
                     <p className="text-xs text-ink-500">
                       {i18n.t('PNG or JPG, 256×256 px min.')}
                     </p>
+                    {pictureUpload?.status === 'paused' && (
+                      <p className="text-xs text-status-pending-fg">
+                        {i18n.t('Upload paused')}
+                      </p>
+                    )}
+                    {pictureUpload?.status === 'error' && (
+                      <p className="text-xs text-destructive">
+                        {pictureUpload.error}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button

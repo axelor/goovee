@@ -6,7 +6,7 @@ import {ErrorCode, useDropzone, type FileRejection} from 'react-dropzone';
 import {useForm, useFieldArray} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {MdDelete, MdRefresh} from 'react-icons/md';
+import {MdDelete, MdPause, MdPlayArrow, MdRefresh} from 'react-icons/md';
 
 // ---- CORE IMPORTS ---- //
 import {Button} from '@/ui/components/button';
@@ -19,12 +19,13 @@ import {
   FormMessage,
 } from '@/ui/components/form';
 import {Input} from '@/ui/components/input';
-import {Progress} from '@/ui/components/progress';
+import {ProgressFill} from '@/ui/components';
 import {Textarea} from '@/ui/components/textarea';
 import {useToast} from '@/ui/hooks/use-toast';
 import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {cn} from '@/utils/css';
 import {getFileSizeText} from '@/utils/files';
 
 // ---- LOCAL IMPORTS ---- //
@@ -79,10 +80,11 @@ export default function ResourceForm({
   const {
     uploads,
     upload: stage,
+    pause,
     resume,
     remove: removeUpload,
     reset: resetUploads,
-    isUploading,
+    isStaged,
   } = useStagedUpload({tenant});
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -158,7 +160,10 @@ export default function ResourceForm({
       });
     }
     files.forEach(file => {
-      const {ids} = stage(file, {purpose: RESOURCE_DMS_UPLOAD_PURPOSE});
+      const {ids} = stage(file, {
+        purpose: RESOURCE_DMS_UPLOAD_PURPOSE,
+        maxBytes: MAX_FILE_SIZE,
+      });
       append({
         title: '',
         description: '',
@@ -231,48 +236,98 @@ export default function ResourceForm({
               const uploadItem = uploads.find(
                 item => item.id === field.uploadId,
               );
-              const isFailed =
-                uploadItem?.status === 'error' ||
-                uploadItem?.status === 'paused';
+              const isActive =
+                uploadItem?.status === 'queued' ||
+                uploadItem?.status === 'uploading';
+              const isPaused = uploadItem?.status === 'paused';
+              const isFailed = uploadItem?.status === 'error';
+              const fileSummary = (
+                <>
+                  <p className="font-semibold truncate">
+                    {index + 1}. {field.fileName}
+                  </p>
+                  <p className="text-xs text-ink-500 truncate">
+                    {getFileSizeText(field.size)}
+                  </p>
+                </>
+              );
               return (
                 <div
                   key={field.id}
                   className="p-2 border rounded-lg flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex flex-col gap-1 flex-1">
-                      <p className="font-semibold line-clamp-1">
-                        {index + 1} {field.fileName} -{' '}
-                        {getFileSizeText(field.size)}
-                      </p>
-                      {(uploadItem?.status === 'queued' ||
-                        uploadItem?.status === 'uploading') && (
-                        <Progress
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      {isActive || isPaused || isFailed ? (
+                        <ProgressFill
                           value={uploadItem.progress}
-                          className="h-1.5"
-                        />
+                          tone={
+                            isFailed ? 'error' : isPaused ? 'paused' : 'active'
+                          }
+                          label={i18n.t('Uploading {0}', field.fileName)}
+                          showValue
+                          className="rounded-md px-2 py-1">
+                          {fileSummary}
+                        </ProgressFill>
+                      ) : (
+                        <div className="px-2 py-1 min-w-0">{fileSummary}</div>
                       )}
-                      {isFailed && (
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm text-destructive line-clamp-1">
-                            {uploadItem.error
-                              ? i18n.t(uploadItem.error)
-                              : i18n.t('Upload failed')}
-                          </p>
-                          <MdRefresh
-                            title={i18n.t('Retry')}
-                            className="size-5 cursor-pointer shrink-0"
-                            onClick={() => resume(field.uploadId)}
-                          />
-                        </div>
+                      {(isFailed || isPaused) && (
+                        <p
+                          className={cn(
+                            'text-xs line-clamp-2 px-2',
+                            isFailed
+                              ? 'text-destructive'
+                              : 'text-status-pending-fg',
+                          )}>
+                          {isPaused
+                            ? i18n.t('Upload paused')
+                            : uploadItem.error}
+                        </p>
                       )}
                     </div>
-                    <MdDelete
-                      className="h-6 w-6 text-destructive cursor-pointer shrink-0"
-                      onClick={() => {
-                        removeUpload(field.uploadId);
-                        remove(index);
-                      }}
-                    />
+                    <div className="flex items-center gap-1 shrink-0">
+                      {isActive && (
+                        <button
+                          type="button"
+                          onClick={() => pause(field.uploadId)}
+                          aria-label={i18n.t('Pause')}
+                          title={i18n.t('Pause')}
+                          className="text-ink-500">
+                          <MdPause className="size-5" />
+                        </button>
+                      )}
+                      {isPaused && (
+                        <button
+                          type="button"
+                          onClick={() => resume(field.uploadId)}
+                          aria-label={i18n.t('Resume')}
+                          title={i18n.t('Resume')}
+                          className="text-status-pending-fg">
+                          <MdPlayArrow className="size-5" />
+                        </button>
+                      )}
+                      {isFailed && (
+                        <button
+                          type="button"
+                          onClick={() => resume(field.uploadId)}
+                          aria-label={i18n.t('Retry')}
+                          title={i18n.t('Retry')}
+                          className="text-destructive">
+                          <MdRefresh className="size-5" />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          removeUpload(field.uploadId);
+                          remove(index);
+                        }}
+                        aria-label={i18n.t('Remove')}
+                        title={i18n.t('Remove')}
+                        className="text-destructive">
+                        <MdDelete className="h-6 w-6" />
+                      </button>
+                    </div>
                   </div>
                   <FormField
                     control={form.control}
@@ -312,7 +367,7 @@ export default function ResourceForm({
           type="submit"
           variant="success"
           className="w-full"
-          disabled={isUploading || form.formState.isSubmitting}>
+          disabled={!isStaged || form.formState.isSubmitting}>
           {i18n.t('Add new resource')}
         </Button>
         {form?.formState?.errors?.values && (
