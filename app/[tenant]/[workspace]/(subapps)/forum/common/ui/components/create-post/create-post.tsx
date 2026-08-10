@@ -106,7 +106,7 @@ export const CreatePost = ({
   const {
     uploads,
     upload,
-    retry,
+    resume,
     remove: removeUpload,
     reset: resetUploads,
     isUploading,
@@ -254,7 +254,7 @@ export const CreatePost = ({
     if (item.status === 'queued' || item.status === 'uploading') {
       return <Progress value={item.progress} className="h-1.5" />;
     }
-    if (item.status === 'error' || item.status === 'aborted') {
+    if (item.status === 'error' || item.status === 'paused') {
       return (
         <div className="flex items-center gap-2">
           <p className="text-sm text-destructive line-clamp-1">
@@ -263,7 +263,7 @@ export const CreatePost = ({
           <MdRefresh
             title={i18n.t('Retry')}
             className="size-5 cursor-pointer shrink-0"
-            onClick={() => uploadId && retry(uploadId)}
+            onClick={() => uploadId && resume(uploadId)}
           />
         </div>
       );

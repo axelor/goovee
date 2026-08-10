@@ -17,11 +17,11 @@ export type StagedUploadStatus =
   | 'uploading'
   | 'success'
   | 'error'
-  | 'aborted';
+  | 'paused';
 
 /** Live state for one file being staged. */
 export interface StagedUploadItem {
-  /** Client-side id, used to track/retry/abort/remove this entry. */
+  /** Client-side id, used to track/resume/pause/remove this entry. */
   id: string;
   fileName: string;
   /** Upload progress, 0–100. */
@@ -44,40 +44,40 @@ export interface UseStagedUpload {
    * upload starts, with two channels:
    * - `ids` — one per input file, input-aligned (`ids[i]` ↔ `files[i]`), never
    *   filtered. The stable handle for binding/grouping and for
-   *   `abort`/`retry`/`remove`; look an entry up with
+   *   `pause`/`resume`/`remove`; look an entry up with
    *   `uploads.find(u => u.id === ids[i])`.
    * - `done` — resolves (never rejects) with the tokens that succeeded by the
-   *   time this call settled, in input order; failed/aborted items are omitted.
-   *   Each item's authoritative, still-evolving status (errors, aborts, later
-   *   retries) lives in `uploads`, keyed by the returned ids.
+   *   time this call settled, in input order; failed and paused items are omitted.
+   *   Each item's authoritative, still-evolving status (failures, pauses, and
+   *   whatever happens after) lives in `uploads`, keyed by the returned ids.
    *
    * At most `concurrency` uploads run at once across every file the hook holds —
-   * all `upload()` calls and retries share one pool, so extras sit in `queued`.
+   * every `upload()` call shares one pool, so extras sit in `queued`.
    */
   upload: (
     files: File | File[],
     options: StageOptions,
   ) => {ids: string[]; done: Promise<StagedUpload[]>};
   /**
-   * Re-send a failed or aborted item under the same id, reusing the original
-   * file and options. It rejoins the shared queue and waits for a free slot.
-   * No-op if the id is unknown, succeeded, in flight, or already queued.
+   * Carry on with a failed or paused file under the same id. It rejoins the
+   * shared queue and waits for a free slot. No-op if the id is unknown,
+   * succeeded, in flight, or already queued.
    *
-   * The upload resumes: the server is asked how much it already holds and only
-   * the remainder is sent, so nothing already transferred goes twice. An
-   * attempt that failed before it ever learned its file id is the exception —
-   * that upload is started again, and the abandoned one is left to expire.
+   * Nothing is sent twice: the server is asked how much it already holds and
+   * only the remainder goes up. A file that failed before it ever learned its
+   * id is the exception — it starts again, and the abandoned upload is left to
+   * expire.
    */
-  retry: (id: string) => Promise<StagedUpload | undefined>;
+  resume: (id: string) => Promise<StagedUpload | undefined>;
   /**
-   * Abort one in-flight upload by id, or all when called with no id. The
-   * server-side upload is left in place, so `retry` can pick the file up from
-   * where it stopped.
+   * Stop one file by id, or all of them when called with no id. What the server
+   * holds is left in place, so `resume` picks the file up where it stopped —
+   * for as long as the page lives, since nothing survives a reload.
    */
-  abort: (id?: string) => void;
-  /** Abort (if in-flight), release the server-side upload, and drop the entry. */
+  pause: (id?: string) => void;
+  /** Stop a file, give up what the server holds, and drop the entry. */
   remove: (id: string) => void;
-  /** Abort everything and clear all state. */
+  /** Give up everything and clear all state. */
   reset: () => void;
   /** Tokens of the successfully staged files, in upload order. */
   tokens: string[];
@@ -88,9 +88,9 @@ export interface UseStagedUpload {
  * Internal record for one file. The manager keeps a single `Map<id, Task>`; the
  * rendered snapshot and the schedule are derived from it. `xhr` is set only while
  * a chunk is in flight; `settle` resolves the promise that `upload().done` /
- * `retry()` await, and is cleared once called.
+ * `resume()` await, and is cleared once called.
  *
- * `fileId` and `offset` survive a failure on purpose: a retry resumes the same
+ * `fileId` and `offset` survive a failure on purpose: resuming continues the same
  * server-side upload from the bytes it already holds instead of starting the
  * file again.
  */
@@ -182,7 +182,7 @@ const EMPTY: StagedUploadItem[] = [];
  * mutable state and exposes a `subscribe`/`getSnapshot` pair for
  * `useSyncExternalStore`. Status is the only scheduling signal: `running` is the
  * count of `uploading` tasks and the next work is the first `queued` task in
- * insertion order, so abort/remove just flip status with nothing else to keep in
+ * insertion order, so pause/remove just flip status with nothing else to keep in
  * sync. The cached `snapshot` is recomputed only on change, which keeps
  * `getSnapshot` referentially stable (required by `useSyncExternalStore`).
  */
@@ -273,14 +273,14 @@ class UploadManager {
    * merely stop it. Leaving them would hold their storage until they expired,
    * for uploads no one could pick up again.
    *
-   * Stopping goes through `abort()` first, which is what actually holds the
+   * Stopping goes through `pause()` first, which is what actually holds the
    * scheduler: it settles a file caught between two parts rather than leaving
    * it waiting on an answer that will never come, and the statuses it leaves
    * behind are what stop the driver and keep anything queued from starting.
    */
   dispose = () => {
     this.cancelProgress();
-    this.abort();
+    this.pause();
 
     /* A file that finished belongs to whatever the consumer staged it for: it
      * is redeemed at submit, or reclaimed by the expiry sweep if the form is
@@ -324,14 +324,14 @@ class UploadManager {
     return {ids, done};
   };
 
-  retry = (id: string) => {
+  resume = (id: string) => {
     const task = this.tasks.get(id);
-    // only a failed or aborted task can be re-queued
-    if (!task || (task.status !== 'error' && task.status !== 'aborted')) {
+    // only a failed or paused file has anything to continue from
+    if (!task || (task.status !== 'error' && task.status !== 'paused')) {
       return Promise.resolve(undefined);
     }
     /* Progress reflects what the server already holds rather than restarting at
-     * zero — a retry resumes the session, it does not re-send the file. */
+     * zero — resuming continues the upload, it does not re-send the file. */
     task.status = 'queued';
     task.progress = percentOf(task.offset, task.file.size);
     task.error = undefined;
@@ -343,35 +343,39 @@ class UploadManager {
     return result.then(staged => staged ?? undefined);
   };
 
-  abort = (id?: string) => {
-    const abortOne = (task: Task) => {
-      if (task.status !== 'uploading' && task.status !== 'queued') return;
+  /*
+   * Stop a file where it stands, leaving everything the server holds intact.
+   * Whether it is then resumable is the caller's business: this only ends the
+   * transfer and settles whoever was waiting on it.
+   *
+   * A request genuinely in flight is torn down, and its `abort` event marks the
+   * task and settles it. Between one part and the next there is nothing to tear
+   * down — aborting a finished request raises no event — so the status set here
+   * is what stops the driver, which tests it before sending anything more.
+   */
+  private stopTask = (task: Task) => {
+    if (task.status !== 'uploading' && task.status !== 'queued') return;
 
-      /*
-       * A request that is genuinely in flight is torn down, and its `abort`
-       * event marks the task, settles it and re-pumps. Between one part and the
-       * next there is nothing to tear down — aborting a finished request raises
-       * no event — so the driver is stopped by its status instead, which is
-       * what its loop checks before sending anything more.
-       */
-      const inFlight =
-        task.xhr != null && task.xhr.readyState !== XMLHttpRequest.DONE;
+    const inFlight =
+      task.xhr != null && task.xhr.readyState !== XMLHttpRequest.DONE;
 
-      task.status = 'aborted';
+    task.status = 'paused';
 
-      if (inFlight) {
-        task.xhr?.abort();
-        return;
-      }
+    if (inFlight) {
+      task.xhr?.abort();
+      return;
+    }
 
-      task.settle?.(null);
-      task.settle = undefined;
-    };
+    task.settle?.(null);
+    task.settle = undefined;
+  };
+
+  pause = (id?: string) => {
     if (id) {
       const task = this.tasks.get(id);
-      if (task) abortOne(task);
+      if (task) this.stopTask(task);
     } else {
-      this.tasks.forEach(abortOne);
+      this.tasks.forEach(this.stopTask);
     }
     this.publish();
 
@@ -384,24 +388,22 @@ class UploadManager {
   remove = (id: string) => {
     const task = this.tasks.get(id);
     if (!task) return;
-    task.xhr?.abort(); // if uploading
-    /* The file is being dropped, not paused, so its session is released too —
-     * unlike abort(), which leaves the session in place to be resumed. */
+
+    /* Dropped rather than paused, so what the server holds goes too — unlike
+     * pause(), which leaves it in place to be resumed. */
+    this.stopTask(task);
     this.release(task);
-    task.settle?.(null); // settle any pending awaiter
-    task.settle = undefined;
+
     this.tasks.delete(id);
     this.publish();
-    this.pump(); // a removed in-flight upload frees a slot
+    this.pump(); // a dropped in-flight upload frees a slot
   };
 
   reset = () => {
     this.cancelProgress();
     this.tasks.forEach(task => {
-      task.xhr?.abort();
+      this.stopTask(task);
       this.release(task);
-      task.settle?.(null);
-      task.settle = undefined;
     });
     this.tasks.clear();
     this.publish();
@@ -508,7 +510,7 @@ class UploadManager {
       xhr.addEventListener('error', () => reject(new Error('Upload failed')));
 
       xhr.addEventListener('abort', () => {
-        task.status = 'aborted';
+        task.status = 'paused';
         this.publish();
         this.finish(task, null);
         reject(new AbortedError());
@@ -698,17 +700,16 @@ class UploadManager {
     return true;
   }
 
-  /* Tell the server to drop a session the user walked away from, so its storage
+  /*
+   * Tell the server to drop an upload the user walked away from, so its storage
    * is freed at once. Best-effort only — the server reclaims an abandoned
-   * session on expiry whether or not this ever arrives. */
+   * upload on expiry whether or not this ever arrives.
+   *
+   * Stop the task first: a released upload cannot be resumed, and clearing its
+   * id under a running driver would have that driver open a second upload and
+   * send the whole file again.
+   */
   private release(task: Task) {
-    /* Whatever the caller does with the entry afterwards, the driver must not
-     * keep going against a session that is being thrown away — it would open a
-     * fresh one and upload the file the user just discarded. */
-    if (task.status === 'uploading' || task.status === 'queued') {
-      task.status = 'aborted';
-    }
-
     if (!task.fileId) return;
     const fileId = task.fileId;
     task.fileId = undefined;
@@ -738,7 +739,7 @@ class UploadManager {
  * A single scheduler starts `queued` tasks up to `concurrency` in flight across
  * every file the hook holds, filling a freed slot as each finishes. Concurrency
  * is across files: the parts of one file go up in order. Failures are
- * non-terminal: the file is retained so `retry(id)` can resume it. Unmounting
+ * non-terminal: the file is retained so `resume(id)` can continue it. Unmounting
  * releases whatever is still under way, since nothing survives it to resume.
  *
  * `progressThrottleMs > 0` (default 200) uses a fixed throttle; `0` coalesces to
@@ -781,8 +782,8 @@ export function useStagedUpload({
   return {
     uploads,
     upload: manager.upload,
-    retry: manager.retry,
-    abort: manager.abort,
+    resume: manager.resume,
+    pause: manager.pause,
     remove: manager.remove,
     reset: manager.reset,
     tokens,
