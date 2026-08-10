@@ -1,0 +1,6 @@
+{
+  "title": "Upload files in resumable parts",
+  "type": "change",
+  "description": "A file was transferred to the server in a single request, which had to finish within the server's five-minute request timeout; a transfer that ran past it was cut off and every byte already sent was discarded, and an interrupted upload had to start again from the beginning. Files are now sent in parts, so no single request approaches the timeout whatever the size of the file, and an interrupted upload resumes from the last part the server confirmed instead of restarting. A file small enough to be sent as one part still costs a single request. Removing a file while it is still uploading now frees the space it had taken straight away, rather than leaving it until the cleanup sweep.",
+  "scope": ["core"]
+}
