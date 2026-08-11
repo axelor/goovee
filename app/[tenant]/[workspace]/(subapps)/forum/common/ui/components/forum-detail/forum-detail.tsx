@@ -1,6 +1,7 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
+import Image from 'next/image';
 import {Link} from '@/ui/components/link';
 import {
   MdArrowBack,
@@ -87,10 +88,11 @@ function Avatar({
       className="rounded-full overflow-hidden bg-gradient-to-br from-royal to-royal-dark grid place-items-center text-white font-bold shrink-0"
       style={{width: size, height: size, fontSize: size * 0.36}}>
       {url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={url}
           alt={name || ''}
+          width={size}
+          height={size}
           className="w-full h-full object-cover"
         />
       ) : (

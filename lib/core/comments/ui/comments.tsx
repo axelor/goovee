@@ -1,6 +1,7 @@
 'use client';
 
 import {authClient} from '@/lib/auth-client';
+import Image from 'next/image';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {
   MdAdd,
@@ -198,10 +199,11 @@ export function Comments(props: CommentsProps) {
       <div className="sticky bottom-4 flex items-start gap-3 rounded-2xl border border-ink-100 bg-white p-4 shadow-md transition-shadow focus-within:border-royal focus-within:shadow-[0_0_0_3px_rgba(21,84,181,0.12)]">
         <div className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-peach-avatar text-[11px] font-bold text-white">
           {session?.user?.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={session.user.image}
               alt=""
+              width={36}
+              height={36}
               className="h-full w-full object-cover"
             />
           ) : (

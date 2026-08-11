@@ -1,0 +1,6 @@
+{
+  "title": "Serve avatars and post images at the size they are shown",
+  "type": "fix",
+  "description": "Profile pictures and forum post images were downloaded at their stored resolution, so a photo uploaded at full camera resolution was fetched whole to fill a small circle in a list. They are now resized to the size they are drawn at, converted to a modern format and cached. The forum image viewer also keeps one size while stepping between pictures instead of resizing around each one.",
+  "scope": ["core", "forum", "news"]
+}
