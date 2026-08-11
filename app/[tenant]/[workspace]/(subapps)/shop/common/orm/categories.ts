@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
+import {cache} from 'react';
 import {filterPrivate} from '@/orm/filter';
-import type {Cloned} from '@/types/util';
 import type {Client} from '@/goovee/.generated/client';
 import type {User, Category} from '@/types';
 import type {Workspace} from '@/orm/workspace';
@@ -35,23 +35,18 @@ function transform($categories: RawCategory[]): Category[] {
   return Object.values(categoriesMap);
 }
 
-export async function findCategories({
-  workspace,
-  client,
-  user,
-  archived,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  archived?: boolean;
-}) {
-  if (!(workspace && client)) return [];
+async function loadCategories(
+  workspaceId: Workspace['id'],
+  user: User | undefined,
+  client: Client,
+  archived?: boolean,
+) {
+  if (!(workspaceId && client)) return [];
 
   const categories = await client.aOSProductCategory.find({
     where: {
       portalWorkspace: {
-        id: workspace.id,
+        id: workspaceId,
       },
       AND: [
         filterPrivate({user}),
@@ -71,49 +66,10 @@ export async function findCategories({
   return transform(categories);
 }
 
-export async function findFeaturedCategories({
-  workspace,
-  client,
-  user,
-  archived,
-}: {
-  workspace: Workspace | Cloned<Workspace>;
-  client: Client;
-  user?: User;
-  archived?: boolean;
-}) {
-  if (!(workspace && client)) return [];
-
-  const categories = await client.aOSProductCategory.find({
-    where: {
-      portalWorkspace: {
-        id: workspace.id,
-      },
-      isFeatured: true,
-      AND: [
-        filterPrivate({user}),
-        archived
-          ? {archived: true}
-          : {OR: [{archived: false}, {archived: null}]},
-      ],
-    },
-    select: {
-      name: true,
-      parentProductCategory: {id: true},
-      productList: {
-        where: {
-          homepage: true,
-        },
-        orderBy: {
-          featured: 'DESC',
-        },
-        select: {
-          id: true,
-        },
-      },
-      slug: true,
-    },
-  });
-
-  return categories;
-}
+/* Request-scoped memoization: several pages call findCategories more than
+   once per request (render plus generateMetadata) for the same workspace
+   category tree. cache() collapses those repeat calls to one DB read.
+   Keying on workspaceId (a primitive) rather than the workspace object
+   ensures the cache hits even when call sites hold differently-cloned
+   workspace references. */
+export const findCategories = cache(loadCategories);

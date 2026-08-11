@@ -157,7 +157,7 @@ export function TicketRelatedLinkForm({
         </div>
         <Button
           size="sm"
-          variant="success"
+          variant="royal"
           className="ms-auto"
           disabled={loading || isSubmitting || form.formState.isSubmitting}>
           {i18n.t('Create Link')}
@@ -245,7 +245,7 @@ export function TicketChildLinkForm({
         </div>
         <Button
           size="sm"
-          variant="success"
+          variant="royal"
           className="ms-auto"
           disabled={loading || form.formState.isSubmitting || isSubmitting}>
           {i18n.t('Create Link')}
@@ -337,7 +337,7 @@ export function TicketParentLinkForm({
         </div>
         <Button
           size="sm"
-          variant="success"
+          variant="royal"
           className="ms-auto"
           disabled={loading || form.formState.isSubmitting || isSubmitting}>
           {i18n.t('Create Link')}

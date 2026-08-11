@@ -1,0 +1,5 @@
+/* The workspace's mobile bar keeps its subapp slot hidden until a subapp puts
+   something in it. */
+.container {
+  display: block !important;
+}

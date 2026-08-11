@@ -12,7 +12,7 @@ export enum Authorization {
 export type InviteAppsConfig = {
   [key: string]: {
     code: string;
-    access?: string;
+    access?: 'yes' | 'no';
     authorization?: Authorization;
     id?: string;
   };

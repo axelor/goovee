@@ -22,7 +22,6 @@ import {
   isCommentEnabled,
 } from '@/comments';
 import {ModelMap, SUBAPP_CODES} from '@/constants';
-import {withBasePath} from '@/lib/core/path/base-path';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
 import {getTicketingConfig} from '../orm/config';
@@ -1076,9 +1075,7 @@ export const createComment: CreateComment = async props => {
       .replace(/\s+/g, ' ')
       .trim();
 
-    const ticketUrl = withBasePath(
-      `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`,
-    );
+    const ticketUrl = `${workspaceURI}/${SUBAPP_CODES.ticketing}/projects/${ticket.project?.id}/tickets/${ticket.id}`;
     const userName = user.simpleFullName || user.name || '';
 
     const contacts = uniqueById(

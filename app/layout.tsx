@@ -4,7 +4,10 @@
  * in app/[tenant]/layout.tsx. */
 export const dynamic = 'force-dynamic';
 
-import {Poppins as FontSans} from 'next/font/google';
+import {
+  Plus_Jakarta_Sans as FontSans,
+  JetBrains_Mono as FontMono,
+} from 'next/font/google';
 import type {Metadata} from 'next';
 
 // ---- CORE IMPORTS ---- //
@@ -15,8 +18,9 @@ import {Toaster} from '@/ui/components/toaster';
 import Locale from './locale';
 import {
   APP_DESCRIPTION,
-  APP_TEMPLATE_TITLE,
-  DEFAULT_APP_TEMPLATE_TITLE,
+  APP_TITLE,
+  APP_TITLE_TEMPLATE,
+  DEFAULT_APP_TITLE,
 } from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 import './globals.css';
@@ -28,41 +32,50 @@ import 'swiper/css/thumbs';
 
 const fontSans = FontSans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800'],
   style: ['normal'],
   variable: '--font-sans',
+  display: 'swap',
+});
+
+const fontMono = FontMono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  style: ['normal'],
+  variable: '--font-mono',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  applicationName: DEFAULT_APP_TEMPLATE_TITLE,
+  applicationName: DEFAULT_APP_TITLE,
   title: {
-    template: APP_TEMPLATE_TITLE,
-    default: DEFAULT_APP_TEMPLATE_TITLE,
+    template: APP_TITLE_TEMPLATE,
+    default: DEFAULT_APP_TITLE,
   },
   description: APP_DESCRIPTION,
   manifest: withBasePath('/manifest.webmanifest'),
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: APP_TEMPLATE_TITLE,
+    title: APP_TITLE,
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: 'website',
-    siteName: DEFAULT_APP_TEMPLATE_TITLE,
+    siteName: DEFAULT_APP_TITLE,
     title: {
-      template: APP_TEMPLATE_TITLE,
-      default: DEFAULT_APP_TEMPLATE_TITLE,
+      template: APP_TITLE_TEMPLATE,
+      default: DEFAULT_APP_TITLE,
     },
     description: APP_DESCRIPTION,
   },
   twitter: {
     card: 'summary',
     title: {
-      template: APP_TEMPLATE_TITLE,
-      default: DEFAULT_APP_TEMPLATE_TITLE,
+      template: APP_TITLE_TEMPLATE,
+      default: DEFAULT_APP_TITLE,
     },
     description: APP_DESCRIPTION,
   },
@@ -82,7 +95,8 @@ export default function RootLayout({
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className={fontSans.className}>
+      <body
+        className={`${fontSans.variable} ${fontMono.variable} ${fontSans.className}`}>
         <Locale>{children}</Locale>
         <Toaster />
         <LegacyServiceWorkerCleanup />

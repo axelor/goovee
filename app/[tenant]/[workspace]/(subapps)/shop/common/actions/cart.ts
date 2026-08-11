@@ -51,11 +51,7 @@ export async function findProduct({
   );
   if (!workspaceConfig) return null;
 
-  const categories = await findCategories({
-    workspace: access.workspace,
-    client,
-    user,
-  });
+  const categories = await findCategories(access.workspace.id, user, client);
 
   const categoryids = categories.map(c => getcategoryids(c)).flat();
 

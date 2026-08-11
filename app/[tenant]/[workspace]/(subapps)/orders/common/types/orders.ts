@@ -7,22 +7,12 @@ import {Cloned} from '@/types/util';
 import {ORDER} from '@/subapps/orders/common/constants/orders';
 import {findOrder, findOrders} from '../orm/orders';
 
-export type TaxLine = {
-  name: string | null;
-  value: string | number;
-};
-
 export type OrderAddress = {
-  id?: ID;
-  zip?: string | null;
-  addressl4?: string | null;
-  addressl6?: string | null;
-  country?: {name: string | null} | null;
-  fullName?: string | null;
-  formattedFullName?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  companyName?: string | null;
+  id: ID;
+  formattedFullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  companyName: string | null;
 };
 
 export type OrderType = (typeof ORDER)[keyof typeof ORDER];
@@ -59,9 +49,3 @@ export type Order = Cloned<
 export type DetailOrder = Cloned<
   NonNullable<Awaited<ReturnType<typeof findOrder>>>
 >;
-
-export type SaleOrder = NonNullable<DetailOrder['saleOrderLineList']>[number];
-
-export type Invoice = DetailOrder['invoices'][number];
-
-export type CustomerDelivery = DetailOrder['customerDeliveries'][number];

@@ -29,6 +29,15 @@
     },
     {"name": "postDateT", "type": "DateTime", "column": "post_datet"},
     {
+      "name": "bestReply",
+      "type": "ManyToOne",
+      "target": "AOSMailMessage"
+    },
+    {
+      "name": "statusSelect",
+      "type": "String"
+    },
+    {
       "name": "archived",
       "type": "Boolean"
     }

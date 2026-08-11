@@ -52,7 +52,6 @@ export function Form(props: {
       userId={userId}
       parentId={parentId}
       onSuccess={handleSuccess}
-      className="mt-10"
     />
   );
 }

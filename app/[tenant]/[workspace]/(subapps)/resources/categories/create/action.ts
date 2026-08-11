@@ -11,6 +11,8 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
+import {toWorkspaceURI} from '@/utils/workspace';
+import {getPublicEnvironment} from '@/environment';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
@@ -51,7 +53,7 @@ export async function create(formData: FormData, workspaceURL: string) {
   }
 
   const {user} = access;
-  const {client} = access.tenant;
+  const {client, config} = access.tenant;
 
   const parent = await fetchFile({
     id: parentId,
@@ -126,7 +128,9 @@ export async function create(formData: FormData, workspaceURL: string) {
       })
       .then(clone);
 
-    revalidatePath(`${workspaceURL}/${SUBAPP_CODES.resources}`);
+    revalidatePath(
+      `${toWorkspaceURI(workspaceURL, getPublicEnvironment(config).GOOVEE_PUBLIC_HOST)}/${SUBAPP_CODES.resources}`,
+    );
 
     return {
       success: true,

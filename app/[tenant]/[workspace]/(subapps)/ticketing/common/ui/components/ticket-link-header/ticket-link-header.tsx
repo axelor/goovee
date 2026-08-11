@@ -50,23 +50,23 @@ export function TicketLinkHeader({
   return (
     <>
       <div className="flex">
-        <h4 className="text-xl font-semibold">{title}</h4>
+        <h4 className="text-lg font-bold text-ink-900">{title}</h4>
         <div className="flex gap-2 ms-auto">
           {!showAlert && alertContentRenderer && (
             <Button
               size="sm"
               type="button"
-              variant="success"
+              variant="royal-outline"
               onClick={openAlert}>
-              <MdLink className="size-6 lg:me-1" />
+              <MdLink className="size-5 lg:me-1" />
               <span className="hidden lg:inline">{i18n.t('Link')}</span>
             </Button>
           )}
           {dialogContentRenderer && (
             <Dialog open={showDialog} onOpenChange={setShowDialog}>
               <DialogTrigger asChild>
-                <Button size="sm" type="button" variant="success">
-                  <MdAdd className="size-6 lg:me-1" />
+                <Button size="sm" type="button" variant="royal">
+                  <MdAdd className="size-5 lg:me-1" />
                   <span className="hidden lg:inline">{i18n.t('New')}</span>
                 </Button>
               </DialogTrigger>

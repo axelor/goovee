@@ -10,6 +10,7 @@ import {
   replacePlaceholders,
 } from '@/orm/email-template';
 import type {Client} from '@/goovee/.generated/client';
+import {APP_TITLE} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
 import {create} from '../orm';
@@ -31,7 +32,7 @@ const otpTemplate = ({
   otp: string;
   subject?: string;
 }) => ({
-  subject: 'Goovee OTP',
+  subject: `${APP_TITLE} OTP`,
   to: email,
   html: otpTemplateHTML({otp}),
 });
@@ -40,7 +41,7 @@ const otpTemplateHTML = ({otp}: {otp: string}) => `
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Goovee OTP</title>
+        <title>${APP_TITLE} OTP</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -81,12 +82,12 @@ const otpTemplateHTML = ({otp}: {otp: string}) => `
     <body>
         <div class="container">
             <div class="header">
-                <h1>OTP for Goovee</h1>
+                <h1>OTP for ${APP_TITLE}</h1>
             </div>
-            <p>Your OTP for goovee is : <strong>${otp}</strong></p>
+            <p>Your OTP for ${APP_TITLE} is : <strong>${otp}</strong></p>
             <p>Please don't share your OTP with anyone. OTP is valid for 10 minutes</p>
             <div class="footer">
-                <p>Best regards,<br>The Goovee Team</p>
+                <p>Best regards,<br>The ${APP_TITLE} Team</p>
             </div>
         </div>
     </body>
@@ -131,7 +132,7 @@ export async function generateOTP({
 
           await mailService?.notify({
             to: email,
-            subject: template?.subject || 'Greetings from Goovee',
+            subject: template?.subject || `Greetings from ${APP_TITLE}`,
             html: replacePlaceholders({
               content: template?.content,
               values: {

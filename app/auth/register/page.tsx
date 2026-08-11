@@ -1,3 +1,4 @@
+import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -8,6 +9,14 @@ import {manager} from '@/tenant';
 import Navigation from './navigation';
 import {extractSearchParams, isExistingUser} from './common/utils';
 import {UserExists} from './common/ui/components';
+
+import {generateAuthMetadata} from '../common/workspace';
+
+export async function generateMetadata(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  return generateAuthMetadata(props.searchParams);
+}
 
 export default async function Page(props: {
   searchParams: Promise<{
@@ -45,5 +54,10 @@ export default async function Page(props: {
 
   const showGoogleOauth = Boolean(tenant.config.oauth?.google);
 
-  return <Navigation showGoogleOauth={showGoogleOauth} />;
+  return (
+    <Navigation
+      showGoogleOauth={showGoogleOauth}
+      workspaceName={workspace.name}
+    />
+  );
 }

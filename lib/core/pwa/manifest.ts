@@ -1,11 +1,7 @@
 import type {MetadataRoute} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {
-  APP_DESCRIPTION,
-  APP_TEMPLATE_TITLE,
-  DEFAULT_APP_TEMPLATE_TITLE,
-} from '@/constants';
+import {APP_DESCRIPTION, APP_TITLE, DEFAULT_APP_TITLE} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 /* Builds the web app manifest anchored at `scope` (already base-path-prefixed):
@@ -17,8 +13,8 @@ import {withBasePath} from '@/lib/core/path/base-path';
 export function buildManifest(scope: string): MetadataRoute.Manifest {
   return {
     id: scope,
-    name: DEFAULT_APP_TEMPLATE_TITLE,
-    short_name: APP_TEMPLATE_TITLE,
+    name: DEFAULT_APP_TITLE,
+    short_name: APP_TITLE,
     description: APP_DESCRIPTION,
     start_url: scope,
     scope,

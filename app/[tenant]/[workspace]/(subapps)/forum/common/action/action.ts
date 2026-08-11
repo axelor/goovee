@@ -9,7 +9,7 @@ import {revalidatePath} from 'next/cache';
 import {t, getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {clone} from '@/utils';
-import {ModelMap, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
+import {ModelMap, SUBAPP_CODES} from '@/constants';
 import {getForumConfig} from '@/subapps/forum/common/orm/config';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessMessage} from '@/lib/core/access/denial';
@@ -28,41 +28,47 @@ import {
 import {addComment, findComments} from '@/comments/orm';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 //----LOCAL IMPORTS -----//
 import {
+  findCommentCounts,
   findGroupById,
+  findGroups,
   findGroupsByMembers,
   findMemberGroupById,
   findPosts,
 } from '@/subapps/forum/common/orm/forum';
+import {
+  getReactionSummaries,
+  findUserReactions,
+  findReactionTargetPost,
+  filterVisibleReactionTargets,
+  isCommentOfPost,
+} from '@/subapps/forum/common/orm/reaction';
 import {
   FORUM_POST_ATTACHMENT_PURPOSE,
   NOTIFICATION_VALUES,
 } from '@/subapps/forum/common/constants';
 import {sendEmailNotifications} from '@/subapps/forum/common/utils/mail';
 import {ContentType, MemberGroup} from '@/subapps/forum/common/types/forum';
-import {getArchivedFilter} from '@/subapps/forum/common/utils';
 import {
-  PinGroupSchema,
   ExitGroupSchema,
   JoinGroupSchema,
-  AddGroupNotificationSchema,
+  SaveGroupNotificationsSchema,
   GetSubscribersByGroupSchema,
-  FindMediaSchema,
   AddPostSchema,
   FetchPostsSchema,
-  FetchGroupsByMembersSchema,
-  type PinGroupInput,
+  ToggleReactionSchema,
+  FindSearchPostsSchema,
+  ReactionSummarySchema,
+  SetBestReplySchema,
+  SetPostStatusSchema,
   type ExitGroupInput,
   type JoinGroupInput,
-  type AddGroupNotificationInput,
+  type SaveGroupNotificationsInput,
   type GetSubscribersByGroupInput,
-  type FindMediaInput,
   type AddPostInput,
   type FetchPostsInput,
-  type FetchGroupsByMembersInput,
   type PostAttachmentInput,
 } from '@/subapps/forum/common/validators';
 
@@ -93,92 +99,6 @@ async function redeemAttachments({
   }
 
   return redeemed;
-}
-
-export async function pinGroup({
-  isPin,
-  id,
-  groupID,
-  workspaceURL,
-  workspaceURI,
-}: PinGroupInput) {
-  const parsed = PinGroupSchema.safeParse({
-    isPin,
-    id,
-    groupID,
-    workspaceURL,
-    workspaceURI,
-  });
-  if (!parsed.success) {
-    return {error: true, message: z.prettifyError(parsed.error)};
-  }
-
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
-  const access = await ensureAccess({
-    code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
-    allowGuest: false,
-  });
-  if (!access.ok) {
-    return {error: true, message: await accessMessage(access.reason)};
-  }
-
-  const {user, workspace} = access;
-  const {client} = access.tenant;
-
-  const memberGroup = await findMemberGroupById({
-    id,
-    groupID,
-    workspaceID: workspace.id,
-    client,
-    user,
-  });
-
-  if (!memberGroup) {
-    return {
-      error: true,
-      message: await t('Member group not found.'),
-    };
-  }
-
-  try {
-    const result = await client.aOSPortalForumGroupMember
-      .update({
-        data: {
-          id: memberGroup.id,
-          version: memberGroup.version,
-          forumGroup: {
-            select: {
-              id: memberGroup?.forumGroup?.id,
-            },
-          },
-          isPin,
-        },
-        select: {id: true},
-      })
-      .then(clone);
-
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
-    return {
-      success: true,
-      data: result,
-    };
-  } catch (error) {
-    console.error('error >>>', error);
-    return {
-      error: true,
-      message: await t('Some error occurred'),
-    };
-  }
 }
 
 export async function exitGroup({
@@ -335,31 +255,20 @@ export async function joinGroup({
   }
 }
 
-export async function addGroupNotification({
-  id,
-  groupID,
-  notificationType,
-  workspaceURL,
-  workspaceURI,
-}: AddGroupNotificationInput) {
-  const parsed = AddGroupNotificationSchema.safeParse({
-    id,
-    groupID,
-    notificationType,
-    workspaceURL,
-    workspaceURI,
-  });
+export async function saveGroupNotifications(
+  input: SaveGroupNotificationsInput,
+): Promise<
+  {success: true} | {error: true; message: string; failedIds?: string[]}
+> {
+  const parsed = SaveGroupNotificationsSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
+  const {prefs, workspaceURL, workspaceURI} = parsed.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
-
   if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
+    return {error: true, message: await t('TenantId is required')};
   }
 
   const access = await ensureAccess({
@@ -375,42 +284,49 @@ export async function addGroupNotification({
   const {user, workspace} = access;
   const {client} = access.tenant;
 
-  const memberGroup = await findMemberGroupById({
-    id,
-    groupID,
-    workspaceID: workspace.id,
-    client,
-    user,
-  });
+  // Each membership is re-read before writing: that lookup is scoped to the
+  // caller, so it is what prevents writing another user's preferences.
+  const failedIds: string[] = [];
+  for (const {id, groupID, notificationType} of prefs) {
+    const memberGroup = await findMemberGroupById({
+      id,
+      groupID,
+      workspaceID: workspace.id,
+      client,
+      user,
+    });
 
-  if (!memberGroup) {
-    return {
-      error: true,
-      message: await t('Member not part of the group'),
-    };
-  }
+    if (!memberGroup) {
+      failedIds.push(String(id));
+      continue;
+    }
 
-  try {
-    const response = await client.aOSPortalForumGroupMember
-      .update({
+    try {
+      await client.aOSPortalForumGroupMember.update({
         data: {
           id: memberGroup.id,
           version: memberGroup.version,
           notificationSelect: notificationType,
         },
         select: {id: true},
-      })
-      .then(clone);
+      });
+    } catch (error) {
+      console.error('error >>>', error);
+      failedIds.push(String(id));
+    }
+  }
 
-    revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
-    return {success: true, data: response};
-  } catch (error) {
-    console.error('error >>>', error);
+  revalidatePath(`${workspaceURI}/${SUBAPP_CODES.forum}`);
+
+  if (failedIds.length) {
     return {
       error: true,
-      message: await t('Some error occurred'),
+      message: await t('Some settings could not be saved'),
+      failedIds,
     };
   }
+
+  return {success: true};
 }
 
 export async function addPost(input: AddPostInput) {
@@ -516,7 +432,7 @@ export async function addPost(input: AddPostInput) {
     });
 
     if (!('error' in subscribers)) {
-      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${group.id}?searchid=${post.id}#post-${post.id}`;
+      const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
 
       const notificationRecievers = subscribers.filter(
         sub => sub.member?.id !== user.id, // exclude the post author
@@ -580,64 +496,6 @@ export async function addPost(input: AddPostInput) {
   }
 }
 
-export async function findMedia({
-  id,
-  workspaceURL,
-  archived = false,
-}: FindMediaInput) {
-  const parsed = FindMediaSchema.safeParse({id, workspaceURL, archived});
-  if (!parsed.success) {
-    return {error: true, message: z.prettifyError(parsed.error)};
-  }
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
-  }
-
-  const access = await ensureAccess({
-    code: SUBAPP_CODES.forum,
-    url: workspaceURL,
-    tenantId,
-    allowGuest: true,
-  });
-  if (!access.ok) {
-    return {error: true, message: await accessMessage(access.reason)};
-  }
-
-  const {user} = access;
-  const {client} = access.tenant;
-
-  return await client.aOSPortalForumPost
-    .find({
-      where: {
-        ...(id
-          ? {
-              forumGroup: {
-                id,
-                AND: [filterPrivate({user}), getArchivedFilter({archived})],
-              },
-            }
-          : {}),
-      },
-      select: {
-        attachmentList: {
-          select: {
-            title: true,
-            metaFile: {
-              fileName: true,
-              fileType: true,
-            },
-          },
-        },
-      },
-    })
-    .then(clone);
-}
-
 export async function fetchPosts(input: FetchPostsInput) {
   const parsed = FetchPostsSchema.safeParse(input);
   if (!parsed.success) {
@@ -674,7 +532,7 @@ export async function fetchPosts(input: FetchPostsInput) {
   const {user, workspace} = access;
   const {client} = access.tenant;
 
-  return await findPosts({
+  const {posts, pageInfo} = await findPosts({
     sort,
     limit,
     page,
@@ -685,41 +543,92 @@ export async function fetchPosts(input: FetchPostsInput) {
     groupIDs,
     memberGroupIDs,
   }).then(clone);
+
+  /* The page enriches the first page with reply counts and reaction scores
+   * after findPosts; do the same here so infinite-scroll pages render
+   * identical cards (otherwise loaded posts show 0 replies / 0 votes).
+   * Reply counts are skipped when the workspace has comments turned off,
+   * matching the first page, which does not render them either. */
+  const config = await getForumConfig(access.workspace.config.id, client);
+  const commentsEnabled = config
+    ? isCommentEnabled({subapp: SUBAPP_CODES.forum, config})
+    : false;
+
+  const postIds = posts.map(p => p.id);
+  const [replyCounts, reactions] = await Promise.all([
+    commentsEnabled
+      ? findCommentCounts({postIds, client})
+      : Promise.resolve<Record<string, number>>({}),
+    getReactionSummaries({client, postIds, partnerId: user?.id}),
+  ]);
+
+  const scoreByPost: Record<string, number> = {};
+  for (const [id, summary] of Object.entries(reactions.post)) {
+    scoreByPost[id] = summary.score;
+  }
+
+  const postsWithCounts = posts.map(p => ({
+    ...p,
+    replyCount: replyCounts[String(p.id)] ?? 0,
+  }));
+
+  return {posts: postsWithCounts, scoreByPost, pageInfo};
 }
 
-export async function fetchGroupsByMembers(input: FetchGroupsByMembersInput) {
-  const parsed = FetchGroupsByMembersSchema.safeParse(input);
+export async function findSearchPosts(input: {
+  workspaceURL: string;
+  search?: string;
+}) {
+  const parsed = FindSearchPostsSchema.safeParse(input);
   if (!parsed.success) {
     return {error: true, message: z.prettifyError(parsed.error)};
   }
-  const {id, searchKey, orderBy, workspaceURL} = parsed.data;
+  const {workspaceURL, search} = parsed.data;
 
   const tenantId = (await headers()).get(TENANT_HEADER);
   if (!tenantId) {
-    return {
-      error: true,
-      message: await t('TenantId is required'),
-    };
+    return {error: true, message: await t('TenantId is required')};
   }
 
   const access = await ensureAccess({
     code: SUBAPP_CODES.forum,
     url: workspaceURL,
     tenantId,
-    allowGuest: false,
+    allowGuest: true,
   });
   if (!access.ok) {
     return {error: true, message: await accessMessage(access.reason)};
   }
 
-  return await findGroupsByMembers({
-    id,
-    searchKey,
-    orderBy,
-    workspaceID: access.workspace.id,
-    client: access.tenant.client,
-    user: access.user,
-  });
+  const {user, workspace} = access;
+  const {client} = access.tenant;
+
+  const groups = await findGroups({workspaceURL, client, user}).then(clone);
+  const groupIDs = groups.map(g => g.id);
+
+  const memberGroups = user?.id
+    ? await findGroupsByMembers({
+        id: user.id,
+        workspaceID: workspace.id!,
+        client,
+        user,
+      })
+    : [];
+  const memberGroupIDs = memberGroups
+    .map(g => g?.forumGroup?.id)
+    .filter((id): id is string => id != null);
+
+  const {posts = []} = await findPosts({
+    workspaceID: workspace.id!,
+    groupIDs,
+    memberGroupIDs,
+    client,
+    user,
+    search,
+    limit: 50,
+  }).then(clone);
+
+  return posts;
 }
 
 export const createComment: CreateComment = async props => {
@@ -820,7 +729,7 @@ export const createComment: CreateComment = async props => {
         });
 
         if (!('error' in subscribers)) {
-          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`;
+          const postLink = `${workspaceURL}/${SUBAPP_CODES.forum}/post/${post.id}`;
 
           const notificationRecievers = subscribers.filter(
             sub => sub.member?.id !== user.id, // exclude the commenter
@@ -850,9 +759,7 @@ export const createComment: CreateComment = async props => {
                       user.simpleFullName || user.name || '',
                     ),
                     body: comment.note ?? '',
-                    url: withBasePath(
-                      `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
-                    ),
+                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
                     tag: NotificationTag.forumReply(parentComment.id),
                   },
                   getReplacementTitle: count =>
@@ -908,9 +815,7 @@ export const createComment: CreateComment = async props => {
                         user.simpleFullName || user.name || '',
                       ),
                       body: comment.note ?? '',
-                      url: withBasePath(
-                        `${workspaceURI}/${SUBAPP_CODES.forum}/${SUBAPP_PAGE.group}/${post.forumGroup.id}?searchid=${post.id}#post-${post.id}`,
-                      ),
+                      url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
                       tag: NotificationTag.forumPostComment(post.id),
                     },
                     getReplacementTitle: count =>
@@ -1026,7 +931,7 @@ export const fetchComments: FetchComments = async props => {
   }
 };
 
-export const getSubscribersByGroup = async ({
+const getSubscribersByGroup = async ({
   groupID,
   workspaceURL,
 }: GetSubscribersByGroupInput) => {
@@ -1086,3 +991,272 @@ export const getSubscribersByGroup = async ({
     };
   }
 };
+
+// ============================================================
+// Forum reactions (up/down votes) + best answer / resolved status
+// ============================================================
+
+async function resolveForumContext(workspaceURL: string) {
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId)
+    return {error: true as const, message: await t('TenantId is required')};
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: false,
+  });
+  if (!access.ok) {
+    return {error: true as const, message: await accessMessage(access.reason)};
+  }
+
+  return {
+    error: false as const,
+    client: access.tenant.client,
+    user: access.user,
+    workspace: access.workspace,
+  };
+}
+
+export async function reactionSummary(input: {
+  workspaceURL?: string;
+  postIds?: Array<string | number>;
+  commentIds?: Array<string | number>;
+}) {
+  const empty = {post: {}, comment: {}};
+
+  const parsed = ReactionSummarySchema.safeParse(input);
+  if (!parsed.success) return empty;
+  const {workspaceURL, postIds, commentIds} = parsed.data;
+
+  const tenantId = (await headers()).get(TENANT_HEADER);
+  if (!tenantId) return empty;
+
+  const access = await ensureAccess({
+    code: SUBAPP_CODES.forum,
+    url: workspaceURL,
+    tenantId,
+    allowGuest: true,
+  });
+  if (!access.ok) return empty;
+
+  // Only aggregate ids whose (parent) post is reachable in this workspace, so
+  // counts can't be read for arbitrary posts/comments across the tenant.
+  const scoped = await filterVisibleReactionTargets({
+    client: access.tenant.client,
+    postIds,
+    commentIds,
+    workspaceId: access.workspace.id,
+    user: access.user,
+  });
+
+  return getReactionSummaries({
+    client: access.tenant.client,
+    postIds: scoped.postIds,
+    commentIds: scoped.commentIds,
+    partnerId: access.user?.id,
+  });
+}
+
+export async function toggleReaction(input: {
+  workspaceURL: string;
+  target: 'post' | 'comment';
+  id: string;
+  value: 'like' | 'dislike';
+}) {
+  const parsed = ToggleReactionSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true as const, message: z.prettifyError(parsed.error)};
+  }
+  const {workspaceURL, target, id, value} = parsed.data;
+
+  const ctx = await resolveForumContext(workspaceURL);
+  if (ctx.error) return ctx;
+  const {client, user, workspace} = ctx;
+
+  // Scope the target to this workspace and to a group the user may see, so a
+  // reaction can't be written to posts/comments elsewhere in the tenant.
+  const targetPost = await findReactionTargetPost({
+    client,
+    target,
+    id,
+    workspaceId: workspace.id,
+    user,
+  });
+  if (!targetPost) {
+    return {error: true as const, message: await t('Invalid target')};
+  }
+
+  const existingRows = await findUserReactions({
+    client,
+    target,
+    id,
+    partnerId: user.id,
+  });
+  const existing = existingRows[0] ?? null;
+
+  try {
+    // Self-heal any duplicate rows a past double-fire may have left, so the
+    // score can't stay inflated and no orphan reaction survives.
+    for (const dup of existingRows.slice(1)) {
+      await client.aOSPortalForumReaction.delete({
+        id: dup.id,
+        version: dup.version,
+      });
+    }
+
+    if (!existing) {
+      await client.aOSPortalForumReaction.create({
+        data: {
+          reactionSelect: value,
+          author: {select: {id: user.id}},
+          ...(target === 'post'
+            ? {post: {select: {id}}}
+            : {reactionComment: {select: {id}}}),
+        },
+        select: {reactionSelect: true},
+      });
+    } else if (existing.reactionSelect === value) {
+      await client.aOSPortalForumReaction.delete({
+        id: existing.id,
+        version: existing.version,
+      });
+    } else {
+      await client.aOSPortalForumReaction.update({
+        data: {
+          id: existing.id,
+          version: existing.version,
+          reactionSelect: value,
+        },
+        select: {reactionSelect: true},
+      });
+    }
+  } catch (err) {
+    return {error: true as const, message: await t('Something went wrong')};
+  }
+
+  const summaries = await getReactionSummaries({
+    client,
+    postIds: target === 'post' ? [id] : [],
+    commentIds: target === 'comment' ? [id] : [],
+    partnerId: user.id,
+  });
+  const summary =
+    target === 'post'
+      ? summaries.post[String(id)]
+      : summaries.comment[String(id)];
+
+  return {success: true as const, summary};
+}
+
+export async function setBestReply(input: {
+  workspaceURL: string;
+  postId: string;
+  commentId: string | null;
+}) {
+  const parsed = SetBestReplySchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true as const, message: z.prettifyError(parsed.error)};
+  }
+  const {workspaceURL, postId, commentId} = parsed.data;
+
+  const ctx = await resolveForumContext(workspaceURL);
+  if (ctx.error) return ctx;
+  const {client, user, workspace} = ctx;
+
+  const post = await client.aOSPortalForumPost.findOne({
+    where: {
+      id: postId,
+      forumGroup: {
+        workspace: {id: workspace.id},
+        AND: [filterPrivate({user})],
+      },
+    },
+    select: {
+      author: {id: true},
+      bestReply: {id: true},
+    },
+  });
+  if (!post) return {error: true as const, message: await t('Bad request')};
+
+  // Only the post author may curate the best answer.
+  if (String(post.author?.id) !== String(user.id)) {
+    return {error: true as const, message: await t('Unauthorized')};
+  }
+
+  // The chosen reply must actually be a comment of this post.
+  if (commentId && !(await isCommentOfPost({client, commentId, postId}))) {
+    return {error: true as const, message: await t('Invalid target')};
+  }
+
+  // Toggle off when re-selecting the current best answer or clearing.
+  const unset = !commentId || String(post.bestReply?.id) === String(commentId);
+
+  try {
+    await client.aOSPortalForumPost.update({
+      data: {
+        id: postId,
+        version: post.version,
+        bestReply: !unset && commentId ? {select: {id: commentId}} : null,
+      },
+      select: {id: true},
+    });
+  } catch (err) {
+    return {error: true as const, message: await t('Something went wrong')};
+  }
+
+  return {
+    success: true as const,
+    bestReplyId: unset ? null : commentId,
+  };
+}
+
+export async function setPostStatus(input: {
+  workspaceURL: string;
+  postId: string;
+  resolved: boolean;
+}) {
+  const parsed = SetPostStatusSchema.safeParse(input);
+  if (!parsed.success) {
+    return {error: true as const, message: z.prettifyError(parsed.error)};
+  }
+  const {workspaceURL, postId, resolved} = parsed.data;
+
+  const ctx = await resolveForumContext(workspaceURL);
+  if (ctx.error) return ctx;
+  const {client, user, workspace} = ctx;
+
+  const post = await client.aOSPortalForumPost.findOne({
+    where: {
+      id: postId,
+      forumGroup: {
+        workspace: {id: workspace.id},
+        AND: [filterPrivate({user})],
+      },
+    },
+    select: {author: {id: true}},
+  });
+  if (!post) return {error: true as const, message: await t('Bad request')};
+
+  // Only the post author may resolve/reopen the discussion.
+  if (String(post.author?.id) !== String(user.id)) {
+    return {error: true as const, message: await t('Unauthorized')};
+  }
+
+  const status = resolved ? 'resolved' : 'open';
+  try {
+    await client.aOSPortalForumPost.update({
+      data: {
+        id: postId,
+        version: post.version,
+        statusSelect: status,
+      },
+      select: {statusSelect: true},
+    });
+  } catch (err) {
+    return {error: true as const, message: await t('Something went wrong')};
+  }
+
+  return {success: true as const, status};
+}

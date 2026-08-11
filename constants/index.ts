@@ -1,8 +1,12 @@
 /**
  * APP
  */
-export const APP_TEMPLATE_TITLE = 'Goovee';
-export const DEFAULT_APP_TEMPLATE_TITLE = 'Portal | Goovee';
+/** Brand name, shown wherever no workspace name is available. */
+export const APP_TITLE = 'Axelor';
+/** Metadata title template — `%s` is the page title, i.e. the workspace name. */
+export const APP_TITLE_TEMPLATE = '%s';
+/** Title used when a page sets none: root, auth screens, error pages. */
+export const DEFAULT_APP_TITLE = `Portal | ${APP_TITLE}`;
 export const APP_DESCRIPTION = 'Next generation portal by Axelor';
 
 /**
@@ -129,15 +133,6 @@ export const DATE_FORMATS = {
 /**
  * BANNER
  */
-
-export const BANNER_TITLES = {
-  resources: 'app-resources',
-  news: 'app-news',
-  events: 'app-events',
-  forum: 'app-forum',
-};
-export const BANNER_DESCRIPTION =
-  'Mi eget leo viverra cras pharetra enim viverra. Ac at non pretium etiam viverra. Ac at non pretium etiam';
 
 export const IMAGE_URL = '/images/hero-bg.svg';
 

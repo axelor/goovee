@@ -12,6 +12,8 @@ export const MobileCategoryMenu = ({
   onItemClick,
   slugKey,
   url,
+  header,
+  footer,
 }: {
   category: Category[];
   parent: Category | null;
@@ -19,6 +21,11 @@ export const MobileCategoryMenu = ({
   onItemClick: any;
   slugKey?: string | null;
   url?: string | null;
+  /* Extra controls shown around the list. Each level covers the one before
+     it, and the deeper levels are rendered without them, so these only ever
+     appear on the top-level menu. */
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
 }) => {
   const [activeCategories, setActiveCategories] = useState<Category[]>([]);
   const [activeParent, setActiveParent] = useState<Category | null>(null);
@@ -49,6 +56,7 @@ export const MobileCategoryMenu = ({
               </p>
             </div>
           )}
+          {header}
           {category?.map(item => {
             const urlPath = slugKey
               ? url
@@ -81,6 +89,7 @@ export const MobileCategoryMenu = ({
               </div>
             );
           })}
+          {footer}
         </div>
       </div>
 

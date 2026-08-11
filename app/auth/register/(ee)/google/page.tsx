@@ -1,15 +1,24 @@
 export const dynamic = 'force-dynamic';
 
+import type {Metadata} from 'next';
 import {notFound} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
-import {Environment} from '@/environment';
+import {Environment, getPublicEnvironment} from '@/environment';
 import {findWorkspaceForRegistration} from '@/orm/workspace';
 import {manager} from '@/tenant';
 
 // ---- LOCAL IMPORTS ---- //
 import {extractSearchParams} from '../../common/utils';
 import Form from './form';
+
+import {generateAuthMetadata} from '../../../common/workspace';
+
+export async function generateMetadata(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  return generateAuthMetadata(props.searchParams);
+}
 
 export default async function Page(props: {
   searchParams: Promise<{
@@ -42,7 +51,7 @@ export default async function Page(props: {
   /* Outside the [tenant] segment: provide the tenant's browser variables (the
    * host Form reads) here, sourced from the resolved tenant config. */
   return (
-    <Environment value={tenant.config.publicEnv}>
+    <Environment value={getPublicEnvironment(tenant.config)}>
       <Form
         workspace={workspace}
         googleProviderId={

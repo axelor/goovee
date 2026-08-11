@@ -9,7 +9,7 @@ import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
 import {SEARCH_PARAMS, SUBAPP_CODES, DEFAULT_LIMIT} from '@/constants';
 import {getWhereClauseForEntity} from '@/utils/filters';
-import {TableSkeleton} from '@/ui/components/table';
+import {SplitViewListSkeleton} from '@/ui/components/record-skeleton';
 import {PartnerKey} from '@/types';
 
 // ---- LOCAL IMPORTS ---- //
@@ -29,7 +29,7 @@ async function Invoices({
   };
   searchParams: {[key: string]: string | undefined};
 }) {
-  const {limit, page, type} = searchParams;
+  const {limit, page, type, search} = searchParams;
   const invoiceType = type ?? INVOICE.UNPAID;
 
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
@@ -68,16 +68,21 @@ async function Invoices({
 
   const {role, isContactAdmin} = access.subapp;
 
-  const invoicesWhereClause = getWhereClauseForEntity({
-    user,
-    role,
-    isContactAdmin,
-    partnerKey: PartnerKey.PARTNER,
-  });
+  const searchTerm = search?.trim();
+
+  const where = {
+    ...getWhereClauseForEntity({
+      user,
+      role,
+      isContactAdmin,
+      partnerKey: PartnerKey.PARTNER,
+    }),
+    ...(searchTerm ? {invoiceId: {like: `%${searchTerm}%`}} : {}),
+  };
 
   const result = await findInvoices({
     params: {
-      where: invoicesWhereClause,
+      where,
       page,
       limit: limit ? Number(limit) : DEFAULT_LIMIT,
     },
@@ -112,7 +117,7 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   return (
-    <Suspense fallback={<TableSkeleton />}>
+    <Suspense fallback={<SplitViewListSkeleton />}>
       <Invoices params={params} searchParams={searchParams} />
     </Suspense>
   );

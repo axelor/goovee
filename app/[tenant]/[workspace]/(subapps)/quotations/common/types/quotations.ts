@@ -9,21 +9,8 @@ export type Quotation = {
   saleOrderSeq: string | null;
   statusSelect: number | string;
   externalReference: string | null;
-};
-
-export type ColumnProps = {
-  key: string;
-  label: string;
-};
-export type QuotationsTableProps = {
-  columns: ColumnProps[];
-  quotations: Quotation[];
-  onClick: (id: string | number) => void;
-};
-
-export type CardViewProps = {
-  quotations: Quotation[];
-  onClick: (id: string | number) => void;
+  displayInTaxTotal?: string | null;
+  endOfValidityDate?: string | null;
 };
 
 export type Product = {
@@ -32,7 +19,7 @@ export type Product = {
   qty: string | number;
   exTaxTotal: string;
   discountAmount: string | number;
-  priceDiscounted: string;
+  priceDiscounted: string | null;
   inTaxTotal: string;
   unit: {
     name: string;
@@ -77,18 +64,10 @@ export type QuotationDetail = {
   };
   deliveryAddress: {
     id: ID;
-    addressl4: string;
-    addressl6: string;
-    zip: string;
-    country: {
-      id: ID;
-      name: string;
-    };
-    fullName?: string;
-    formattedFullName?: string;
-    firstName?: string;
-    lastName?: string;
-    companyName?: string;
+    formattedFullName: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    companyName: string | null;
   };
   endOfValidityDate: string | null | undefined;
   exTaxTotal: string;
@@ -98,71 +77,15 @@ export type QuotationDetail = {
   displayInTaxTotal: string;
   mainInvoicingAddress: {
     id: ID;
-    addressl4: string;
-    addressl6: string;
-    zip: string;
-    country: {
-      id: ID;
-      name: string;
-    };
-    fullName?: string;
-    formattedFullName?: string;
-    firstName?: string;
-    lastName?: string;
-    companyName?: string;
+    formattedFullName: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    companyName: string | null;
   };
   saleOrderLineList: Product[];
   saleOrderSeq: string | number;
   statusSelect: string | number;
   totalDiscount: number | string;
-};
-
-export type TotalProps = {
-  inTaxTotal: string;
-  exTaxTotal: number | string;
-  totalDiscount: number | string;
-  statusSelect: string | number;
-  hideDiscount: boolean;
-};
-
-export type InfoProps = {
-  endOfValidityDate: string | null | undefined;
-  statusSelect: string | number;
-};
-
-export type ContactProps = {
-  clientPartner?: {
-    fullName: string;
-    id: ID;
-  };
-  company?: {
-    id: ID;
-    name: string;
-  };
-  mainInvoicingAddress: {
-    id: ID;
-    addressl4: string;
-    addressl6: string;
-    zip: string;
-    country: {
-      id: ID;
-      name: string;
-    };
-    firstName?: string;
-    lastName?: string;
-    companyName?: string;
-  };
-  deliveryAddress: {
-    id: ID;
-    addressl4: string;
-    addressl6: string;
-    zip: string;
-    country: {
-      id: ID;
-      name: string;
-    };
-    firstName?: string;
-    lastName?: string;
-    companyName?: string;
-  };
+  createdOn?: string | null;
+  externalReference?: string | null;
 };

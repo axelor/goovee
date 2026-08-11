@@ -27,14 +27,12 @@ import {clone, scale} from '@/utils';
 import {markPaymentAsProcessed} from '@/payment/common/orm';
 import type {PaymentContext} from '@/lib/core/payment/common/type';
 import {getPaymentModeId} from '@/utils/payment';
-import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
 import {validateRegistration} from '@/subapps/events/common/actions/validation';
 import {
   FetchContactsSchema,
   FetchEventSchema,
-  GetAllEventsSchema,
   IsValidParticipantSchema,
   RegisterInput,
   RegisterSchema,
@@ -43,11 +41,9 @@ import {
 import {
   findEvent,
   findEventConfig,
-  findEvents,
   type FullEvent,
 } from '@/subapps/events/common/orm/event';
-import type {PageInfo} from '@/types';
-import type {ListEvent, Registration} from '@/subapps/events/common/types';
+import type {Registration} from '@/subapps/events/common/types';
 
 import {findContacts, type Contact} from '@/subapps/events/common/orm/partner';
 import {registerParticipants} from '@/subapps/events/common/orm/registration';
@@ -66,73 +62,6 @@ import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {createInvoice} from '@/subapps/events/common/service';
-
-export async function getAllEvents(props: {
-  limit?: number;
-  page?: number;
-  categories?: string[];
-  search?: string;
-  day?: string | number;
-  month?: number;
-  year?: number;
-  dates?: Date[];
-  workspaceURL: string;
-  onlyRegisteredEvent?: boolean;
-}): ActionResponse<{events: Cloned<ListEvent>[]; pageInfo: PageInfo}> {
-  const parsed = GetAllEventsSchema.safeParse(props);
-  if (!parsed.success)
-    return {error: true, message: z.prettifyError(parsed.error)};
-  const {
-    limit,
-    page,
-    categories,
-    search,
-    day,
-    month,
-    year,
-    dates,
-    workspaceURL,
-    onlyRegisteredEvent = false,
-  } = parsed.data;
-  const tenantId = (await headers()).get(TENANT_HEADER);
-
-  if (!tenantId) {
-    return error(await t('Tenant ID is missing!'));
-  }
-
-  const access = await ensureAccess({
-    code: SUBAPP_CODES.events,
-    url: workspaceURL,
-    tenantId,
-    allowGuest: true,
-  });
-  if (!access.ok) {
-    return {error: true, message: await accessMessage(access.reason)};
-  }
-  const {user} = access;
-  const {client} = access.tenant;
-
-  try {
-    const {events, pageInfo} = await findEvents({
-      limit,
-      page,
-      categoryids: categories,
-      day,
-      search,
-      month,
-      year,
-      selectedDates: dates,
-      workspaceURL,
-      client,
-      user,
-      onlyRegisteredEvent,
-    }).then(clone);
-    return {success: true as const, data: {events, pageInfo}};
-  } catch (err) {
-    console.error(err);
-    return error(await t('Something went wrong'));
-  }
-}
 
 export async function register(
   props: RegisterInput,
@@ -495,9 +424,7 @@ export const createComment: CreateComment = async props => {
 
     if (parentComment?.partner?.id && parentComment.partner.id !== user.id) {
       const userName = user.simpleFullName || user.name || '';
-      const eventUrl = withBasePath(
-        `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`,
-      );
+      const eventUrl = `${workspaceURI}/${SUBAPP_CODES.events}/${event.slug}`;
       const tr = getTranslation.bind(null, {
         locale: parentComment.partner.localization?.code || DEFAULT_LOCALE,
         tenant: tenantId,

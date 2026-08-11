@@ -1,6 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {ORDER_BY} from '@/constants';
-import type {User} from '@/types';
+import type {ID, User} from '@/types';
 import {filterPrivate} from '@/orm/filter';
 import {and} from '@/utils/orm';
 import type {AOSPortalEventCategory} from '@/goovee/.generated/models';
@@ -43,6 +43,35 @@ export async function findEventCategories({
   });
 
   return eventCategories;
+}
+
+/* Resolves the ids of the categories a user may see in a workspace (optionally
+   narrowed to the requested categoryids). Callers pass these ids to a plain
+   `eventCategorySet: {id: {in}}` filter, avoiding a nested privacy join on the
+   event query (which caused a join explosion). */
+export async function findAccessibleEventCategoryIds({
+  workspaceURL,
+  categoryids,
+  privateFilter,
+  client,
+}: {
+  workspaceURL: string;
+  categoryids?: ID[];
+  privateFilter: ReturnType<typeof filterPrivate>;
+  client: Client;
+}): Promise<ID[]> {
+  if (!workspaceURL) return [];
+
+  const categories = await client.aOSPortalEventCategory.find({
+    where: and<AOSPortalEventCategory>([
+      {workspace: {url: workspaceURL}},
+      categoryids?.length && {id: {in: categoryids}},
+      privateFilter,
+    ]),
+    select: {id: true},
+  });
+
+  return categories.map(c => c.id);
 }
 
 export async function findEventCategory({
