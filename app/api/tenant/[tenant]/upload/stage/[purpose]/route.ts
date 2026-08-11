@@ -266,9 +266,22 @@ async function appendAndAnswer(
     return new NextResponse('Not found', {status: 404});
   }
   if (appended.status === 'conflict') {
+    /* The id rides along because the request that opened the upload can be
+     * answered this way — its body stopped part-way and what arrived was kept.
+     * Without it the caller would not know an upload exists to carry on with. */
     return NextResponse.json(
-      {error: 'Offset mismatch', offset: appended.offset},
-      {status: 409, headers: {'X-File-Offset': String(appended.offset)}},
+      {
+        error: 'Offset mismatch',
+        fileId: caller.sessionId,
+        offset: appended.offset,
+      },
+      {
+        status: 409,
+        headers: {
+          'X-File-Id': caller.sessionId,
+          'X-File-Offset': String(appended.offset),
+        },
+      },
     );
   }
   if (appended.status === 'too-large') {
