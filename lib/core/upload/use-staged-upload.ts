@@ -367,10 +367,13 @@ class UploadManager {
     if (exceedsCap(task.file, task.options)) {
       return Promise.resolve(undefined);
     }
-    /* Progress reflects what the server already holds rather than restarting at
-     * zero — resuming continues the upload, it does not re-send the file. */
     task.status = 'queued';
-    task.progress = percentOf(task.offset, task.file.size);
+
+    /* The bar keeps its last reading: it already counts the bytes that were on
+     * the wire, the server keeps what reached it, and the server's own count
+     * arrives a moment later. Only a file with no upload behind it starts
+     * over. */
+    if (!task.fileId) task.progress = 0;
     task.error = undefined;
     const result = new Promise<StagedUpload | null>(resolve => {
       task.settle = resolve;
@@ -438,10 +441,16 @@ class UploadManager {
 
   reset = () => {
     this.cancelProgress();
+
+    /* A file that finished is not this to give up, exactly as on unmount: it
+     * has either just been redeemed by the form being cleared, or it is left to
+     * the expiry sweep. Giving it up here would ask the server to release an
+     * upload that has already become someone's attachment. */
     this.tasks.forEach(task => {
       this.stopTask(task);
-      this.release(task);
+      if (task.status !== 'success') this.release(task);
     });
+
     this.tasks.clear();
     this.publish();
   };
@@ -569,10 +578,10 @@ class UploadManager {
   /*
    * Drive one file to completion, a chunk at a time.
    *
-   * The first request opens the session and carries the first chunk, so a file
-   * that fits in one chunk costs a single round trip. Every later chunk is
-   * appended at the offset the server confirmed — never at a locally assumed
-   * one, so a resumed upload cannot leave a gap or overlap.
+   * The first request opens the upload, and carries the first chunk only when
+   * the whole file fits in one. Every chunk after that is appended at the
+   * offset the server confirmed — never at a locally assumed one, so a resumed
+   * upload cannot leave a gap or overlap.
    */
   private async runTask(task: Task) {
     const url = this.uploadUrl(task.options.purpose);
@@ -595,11 +604,19 @@ class UploadManager {
       if (task.fileId && !(await this.resync(task))) return;
 
       while (task.status === 'uploading') {
+        const opening = !task.fileId;
+
+        /*
+         * A file too large for one part is opened with no body, so its id — and
+         * with it the ability to resume — exists before a single byte is sent.
+         * One that fits in a single part travels with the request that opens
+         * it, so a small attachment still costs one round trip.
+         */
+        const openEmpty = opening && task.file.size > UPLOAD_CHUNK_SIZE;
         const chunk = task.file.slice(
           task.offset,
           task.offset + UPLOAD_CHUNK_SIZE,
         );
-        const opening = !task.fileId;
 
         const response = opening
           ? await this.send(task, {
@@ -611,7 +628,7 @@ class UploadManager {
                 'X-File-Type': task.file.type || 'application/octet-stream',
                 'X-File-Size': String(task.file.size),
               },
-              body: chunk,
+              body: openEmpty ? undefined : chunk,
             })
           : await this.send(task, {
               method: 'PATCH',
@@ -624,10 +641,29 @@ class UploadManager {
               body: chunk,
             });
 
+        /* The id is taken from whatever answer carries it, before the status
+         * is read: an opening request can be answered with a conflict, and
+         * taking the id only from a success would have this open a second
+         * upload and send the rest of the file into it from the start. */
+        if (response.fileId) {
+          task.fileId = response.fileId;
+        }
+
         /* The server rejected our offset and told us the real one — re-seek and
          * carry on rather than failing the file. */
         if (response.status === 409 && response.offset != null) {
-          if (!recover()) return;
+          /*
+           * An offset that moves forward by a worthwhile amount is progress,
+           * not a disagreement — the part landed in part, or this client had
+           * fallen behind — and does not spend the allowance.
+           *
+           * A trickle does spend it. A link that cuts every part after a few
+           * kilobytes would otherwise re-send the file many times over, one
+           * salvaged sliver at a time, and never surface a failure.
+           */
+          const progressed =
+            response.offset - task.offset >= UPLOAD_CHUNK_SIZE / 4;
+          if (!progressed && !recover()) return;
           task.offset = response.offset;
           task.progress = percentOf(task.offset, task.file.size);
           this.publish();
@@ -640,6 +676,7 @@ class UploadManager {
           if (!recover()) return;
           task.fileId = undefined;
           task.offset = 0;
+          task.progress = 0;
           continue;
         }
 
@@ -655,11 +692,15 @@ class UploadManager {
           );
         }
 
-        if (opening) {
-          if (!response.fileId) {
-            return this.fail(task, i18n.t('Invalid server response'));
-          }
-          task.fileId = response.fileId;
+        if (opening && !task.fileId) {
+          return this.fail(task, i18n.t('Invalid server response'));
+        }
+
+        /* Opening with no body carried no bytes, so there is nothing to advance
+         * — the next turn of the loop sends the first part. */
+        if (openEmpty) {
+          this.publish();
+          continue;
         }
 
         const advanced = response.offset ?? task.offset + chunk.size;
@@ -721,6 +762,7 @@ class UploadManager {
     if (state.status === 404) {
       task.fileId = undefined;
       task.offset = 0;
+      task.progress = 0;
       return true;
     }
 

@@ -117,14 +117,26 @@ Content-Type: application/octet-stream
 
 201 → X-File-Id, X-File-Offset · {fileId, offset}
 200 → the completion response below, if the body carried the whole file
+409 → X-File-Id, X-File-Offset — the body stopped part-way; the upload exists
+      and holds what arrived
 400 → X-File-Size missing, unparseable, or zero
 404 → no such purpose
 413 → larger than the purpose accepts
 ```
 
+Take `X-File-Id` from whichever answer carries it, before looking at the status.
+An opening request can be answered `409`, and a client that reads the id only
+from a success would open a second upload and send the rest of the file into it
+as though from the start.
+
 `X-File-Size` is required and is checked before any bytes are read. An empty file
-is refused — there is nothing to stage. Send the whole file as the body when it
-is small enough: the upload is opened, filled and completed in one round trip.
+is refused — there is nothing to stage.
+
+A body may be sent with this request, and when it carries the whole file the
+upload is opened, filled and completed in one round trip. Send one only for a
+file that fits in a single part — a body is still one part, and the same size
+and proxy limits apply to it as to any append. Open a larger file with no body
+and send every part as an append.
 
 ### Ask where to resume
 
@@ -147,7 +159,8 @@ Content-Type: application/octet-stream
 
 204 → X-File-Offset (new)
 400 → X-File-Offset missing or unparseable, or no body sent
-409 → X-File-Offset (authoritative) — the offset did not match
+409 → X-File-Id, X-File-Offset (authoritative) — either the offset did not
+      match, or the body stopped part-way and what arrived was kept
 413 → more bytes than the file declared; the upload is released
 404 → no such live upload
 ```
@@ -179,14 +192,19 @@ for a merely paused upload, which is still resumable.
 
 ### Rules a client must follow
 
-- **One part in flight per upload.** Sending several at once corrupts that
-  client's own file. Parts within a file go in order; different files may go in
-  parallel.
+- **One part in flight per upload.** Parts within a file go in order; different
+  files may go in parallel. Send a second part before the first has finished
+  arriving and it is made to wait — but that serialisation is per process, so on
+  more than one instance the two would interleave and corrupt the file. It is
+  the client's rule to keep, not the server's to guarantee.
 - **The server's offset wins.** On `409`, seek to the offset it reports rather
   than resending. Never assume a local offset survived an interruption — ask with
   `HEAD`.
-- **The server may hold less than you last saw.** Take the offset it reports and
-  continue from there.
+- **A `409` may report an offset ahead of yours.** A part that stopped arriving
+  part-way still had what arrived committed, so the answer is where to carry on
+  from, not a disagreement to retry.
+- **The server may also hold less than you last saw.** Either way, take the
+  offset it reports and continue from there.
 - **On `404`, the upload is gone.** Open a new one and start the file again.
 - **Bound your recovery.** Re-seeking and restarting are for genuine
   interruptions; a client that loops on them forever will never surface a real
@@ -294,8 +312,10 @@ sweep cadences bound only the lag between expiry and deletion.
 ## Limitations
 
 - **Single instance only** — a part file lives on the disk of the instance that
-  received it, and the sweeps take no cross-instance lock. Scaling out needs
-  shared storage or upload-pinned routing, plus an advisory lock per sweep.
+  received it, the sweeps take no cross-instance lock, and the queue that stops
+  two appends to one upload from interleaving is an in-process map. Scaling out
+  needs shared storage or upload-pinned routing, an advisory lock per sweep, and
+  a shared lock per upload.
 - **One storage root for all tenants.**
 - **A failed delete leaks.** Storage is given up in the record before it is
   removed from disk, so an `unlink` that fails leaves a file no later sweep looks
