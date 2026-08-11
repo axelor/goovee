@@ -1,5 +1,3 @@
-'server only';
-
 import fs from 'fs';
 import path from 'path';
 import {experimental_taintUniqueValue} from 'react';

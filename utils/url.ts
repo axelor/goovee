@@ -1,4 +1,4 @@
-import {type Tenant} from '@/tenant';
+import type {Tenant} from '@/tenant';
 import {Maybe} from '@/types/util';
 import {
   compressToEncodedURIComponent,
