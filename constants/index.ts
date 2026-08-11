@@ -169,13 +169,16 @@ export const NAVIGATION = {
  * SEARCH PARAMS
  */
 
+/* `as const` so a computed key like `[SEARCH_PARAMS.TENANT_ID]:` keeps its
+ * literal name and is type-checked against the target property instead of
+ * widening to an index signature that accepts anything. */
 export const SEARCH_PARAMS = {
   TENANT_ID: 'tenant',
   USER_TYPE: 'type',
   COMPANY_NAME: 'companyName',
   IDENTIFICATION_NUMBER: 'identificationNumber',
   EMAIL: 'email',
-};
+} as const;
 
 export const REPORT = 'Report';
 export const NOT_INTERESTED = 'Not interested';

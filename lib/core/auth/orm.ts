@@ -27,7 +27,7 @@ import {revalidatePath} from 'next/cache';
 import {getTranslation} from '../locale/server';
 import {UserType} from './types';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {toWorkspaceURI} from '@/utils/workspace';
+import {toWorkspaceURI} from '@/utils/workspace-url';
 import {type Tenant, type TenantConfig} from '../tenant';
 import type {Partner} from '@/types';
 import type {Workspace} from '@/orm/workspace';

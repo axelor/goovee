@@ -28,9 +28,10 @@ export interface TenantConfigProvider {
   list(): Promise<string[]>;
 }
 
-/* Document shapes. A tenant entry is a full TenantConfig with publicEnv
- * optional (defaults to {}); nothing else is filled in — there is no env
- * fallback, so every value a tenant uses must be present in its entry. */
+/* Document shapes. A tenant entry is a full TenantConfig; publicEnv is optional
+ * on the way in only so a missing one is reported as a validation error rather
+ * than a type error. Nothing is filled in — there is no env fallback, so every
+ * value a tenant uses must be present in its entry. */
 type TenantConfigInput = Omit<TenantConfig, 'publicEnv'> & {
   publicEnv?: PublicEnv;
 };
@@ -84,6 +85,15 @@ function normalizeTenantConfig(
 
   validatePublicEnvKeys(`Tenant "${id}"`, input.publicEnv);
 
+  /* The host is what workspace URLs are stored against and what every absolute
+   * link is built from, so a tenant without one resolves no workspace at all.
+   * Guaranteeing it for a configured tenant lets the pages that resolve one
+   * rely on it, rather than discovering an undefined host at request time. A
+   * tenant-less context (the auth pages) still has to handle its absence. */
+  if (!input.publicEnv?.GOOVEE_PUBLIC_HOST) {
+    throw new Error(`Tenant "${id}": publicEnv.GOOVEE_PUBLIC_HOST is required`);
+  }
+
   /* Bake the per-tenant storage root once, mirroring AOP's
    * FileSystemStore.getRootPath(): a tenant on a shared multi-tenant AOS keeps
    * its files under <data.upload.dir>/<aosTenantId>, while a dedicated instance
@@ -98,8 +108,8 @@ function normalizeTenantConfig(
       : input.aos.storage;
 
   /* No env merge — the entry is the config, verbatim (aside from the storage
-   * root derived above). publicEnv is the only field allowed to be omitted (an
-   * empty browser-variable set). */
+   * root derived above). The publicEnv default only satisfies the return type;
+   * the validation above has already rejected an entry without one. */
   return {
     ...input,
     aos: {...input.aos, storage},

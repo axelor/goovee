@@ -32,7 +32,7 @@ export default async function Page(props: {
   const loginURL = getLoginURL({
     callbackurl: workspaceURI,
     workspaceURI,
-    [SEARCH_PARAMS.TENANT_ID]: tenant,
+    [SEARCH_PARAMS.TENANT_ID]: tenantId,
   });
 
   if (!workspaceURL) {

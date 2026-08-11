@@ -48,6 +48,9 @@ function publicEnvFromEnv(): PublicEnv {
       publicEnv[key] = value;
     }
   }
+  /* Required per tenant, so always emit it — a blank to fill in is reviewable,
+   * whereas an omitted key just fails at boot with nothing to point at. */
+  publicEnv.GOOVEE_PUBLIC_HOST = process.env.GOOVEE_PUBLIC_HOST ?? '';
   return publicEnv;
 }
 

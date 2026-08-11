@@ -1,26 +1,22 @@
-import {getBasePath} from '@/lib/core/path/base-path';
+import 'server-only';
+
+import {getTenantConfigSync} from '@/tenant/config-provider';
+import {getPublicEnvironment} from '@/environment/utils';
+import {getPortalRoot} from './workspace-url';
 
 /**
- * Absolute root the app is served from: the public host joined with the
- * deployment base path, without a trailing slash
- * (e.g. `https://example.com/portal`, or just `https://example.com`).
+ * Resolves the route params of a workspace page into the paths its callers need:
+ * `workspaceURI` for routing and `workspaceURL` for looking the workspace up by
+ * its stored absolute URL.
  *
- * Workspace URLs are stored in this form, so this is the prefix to strip from
- * (or prepend to) a stored `workspace.url`.
+ * Server-only: the host is a per-tenant browser variable, read from the tenant's
+ * own configuration. The pure URL helpers live in `@/utils/workspace-url`, which
+ * client components can import.
+ *
+ * An unknown tenant has no config and therefore no host, so `workspaceURL` comes
+ * back without one and matches no stored workspace — the caller's own workspace
+ * lookup then denies access rather than granting it.
  */
-export function getPortalRoot(host?: string) {
-  return `${host ?? ''}${getBasePath()}`;
-}
-
-/**
- * Converts a stored absolute `workspace.url`
- * (`{host}{basePath}/{tenant}/{workspace}`) into a router-relative path
- * (`/{tenant}/{workspace}`).
- */
-export function toWorkspaceURI(workspaceURL: string, host?: string) {
-  return workspaceURL.replace(getPortalRoot(host), '') || '/';
-}
-
 export function workspacePathname(params: {
   tenant: string;
   workspace: string;
@@ -32,8 +28,12 @@ export function workspacePathname(params: {
 } {
   const {tenant, workspace} = params;
 
+  const host = getPublicEnvironment(
+    getTenantConfigSync(tenant),
+  ).GOOVEE_PUBLIC_HOST;
+
   const workspaceURI = `/${tenant}/${workspace}`;
-  const workspaceURL = `${getPortalRoot(process.env.GOOVEE_PUBLIC_HOST)}${workspaceURI}`;
+  const workspaceURL = `${getPortalRoot(host)}${workspaceURI}`;
 
   return {
     tenant,

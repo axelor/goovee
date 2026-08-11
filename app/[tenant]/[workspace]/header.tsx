@@ -43,7 +43,7 @@ import {SUBAPP_CODES, CHAT_TYPE} from '@/constants';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {toWorkspaceURI} from '@/utils/workspace';
+import {toWorkspaceURI} from '@/utils/workspace-url';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
 

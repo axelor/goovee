@@ -5,7 +5,7 @@ import {SUBAPP_CODES} from '@/constants';
 import {getTranslation} from '@/locale/server';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import type {Client} from '@/goovee/.generated/client';
-import {toWorkspaceURI} from '@/utils/workspace';
+import {toWorkspaceURI} from '@/utils/workspace-url';
 import {getPublicEnvironment} from '@/environment';
 import {tenantConfigProvider} from '@/tenant/config-provider';
 

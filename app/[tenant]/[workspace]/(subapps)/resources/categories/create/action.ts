@@ -11,7 +11,7 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
-import {toWorkspaceURI} from '@/utils/workspace';
+import {toWorkspaceURI} from '@/utils/workspace-url';
 import {getPublicEnvironment} from '@/environment';
 
 // ---- LOCAL IMPORTS ---- //

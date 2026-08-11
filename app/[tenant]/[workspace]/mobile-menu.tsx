@@ -22,7 +22,7 @@ import {useNavigationVisibility} from '@/ui/hooks';
 import Cart from '@/app/[tenant]/[workspace]/cart';
 import {useEnvironment} from '@/lib/core/environment';
 import {Notification} from './notification';
-import {toWorkspaceURI} from '@/utils/workspace';
+import {toWorkspaceURI} from '@/utils/workspace-url';
 import {Link} from '@/ui/components/link';
 import {authClient} from '@/lib/auth-client';
 import type {Subapp, Workspace} from '@/orm/workspace';

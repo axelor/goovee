@@ -276,6 +276,7 @@
         "publicEnv": {
           "type": "object",
           "description": "Browser-exposed variables for this tenant (declared in full; not inherited from the environment).",
+          "required": ["GOOVEE_PUBLIC_HOST"],
           "additionalProperties": false,
           "properties": {
             "GOOVEE_PUBLIC_HOST": {"type": "string"},

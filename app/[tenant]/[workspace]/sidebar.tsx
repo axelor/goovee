@@ -25,7 +25,7 @@ import {APP_TITLE, SUBAPP_CODES, SUBAPP_PAGE, CHAT_TYPE} from '@/constants';
 import {i18n} from '@/locale';
 import {useWorkspace} from './workspace-context';
 import {useEnvironment} from '@/lib/core/environment';
-import {toWorkspaceURI} from '@/utils/workspace';
+import {toWorkspaceURI} from '@/utils/workspace-url';
 import {Link} from '@/ui/components/link';
 import type {Subapp} from '@/orm/workspace';
 import type {ShellConfig} from './orm/config';

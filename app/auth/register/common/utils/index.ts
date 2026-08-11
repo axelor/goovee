@@ -4,7 +4,7 @@ import {getPublicEnvironment} from '@/environment';
 import {getTenantConfigSync} from '@/tenant/config-provider';
 import {findWorkspaces} from '@/orm/workspace';
 import {clone} from '@/utils';
-import {getPortalRoot} from '@/utils/workspace';
+import {getPortalRoot} from '@/utils/workspace-url';
 
 export function extractSearchParams({
   searchParams,
