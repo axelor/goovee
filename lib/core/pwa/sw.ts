@@ -42,12 +42,28 @@ const serwist = new Serwist({
 });
 
 const channel = new BroadcastChannel(PUSH_CHANNEL);
-const scopeBasePath = normalizePathPrefix(
-  new URL(self.registration.scope).pathname,
+
+/* The deployment base path, taken from this worker's own script URL: the worker
+ * is served as `<basePath>/sw.js`, so dropping the filename leaves the base path
+ * whatever scope it was registered at.
+ *
+ * It deliberately comes from neither of the two tempting alternatives. Not
+ * `process.env.NEXT_PUBLIC_BASE_PATH`: `serwist build` bundles this file with
+ * esbuild rather than Next, so nothing substitutes `process`, and reading it in a
+ * worker throws at evaluation — which fails the install and leaves an already
+ * installed worker pinned to its old version. Not `registration.scope` either:
+ * that may carry the tenant (`<basePath>/<tenant>/`), and every path below is
+ * addressed from the deployment root instead — the icons are origin-level assets
+ * and the read endpoints are `/api/tenant/<id>/…`, so a scope prefix would insert
+ * the tenant where it does not belong, or a second time. A server-supplied url
+ * already names its own tenant, and an absolute one is passed through untouched
+ * by withPathPrefix's SKIP_PATH_PREFIX guard. */
+const basePath = normalizePathPrefix(
+  new URL(self.location.href).pathname.replace(/\/[^/]*$/, ''),
 );
 
-function withScopeBasePath(path: string) {
-  return withPathPrefix(scopeBasePath, path);
+function withDeploymentBasePath(path: string) {
+  return withPathPrefix(basePath, path);
 }
 
 self.addEventListener('push', event => {
@@ -57,8 +73,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'Notification';
   const options: NotificationOptions & {renotify?: boolean} = {
     body: data.body,
-    icon: data.icon ?? withScopeBasePath('/pwa/icons/icon-192x192.png'),
-    badge: data.badge ?? withScopeBasePath('/pwa/icons/icon-72x72.png'),
+    icon: data.icon ?? withDeploymentBasePath('/pwa/icons/icon-192x192.png'),
+    badge: data.badge ?? withDeploymentBasePath('/pwa/icons/icon-72x72.png'),
     dir: data.dir,
     lang: data.lang,
     requireInteraction: data.requireInteraction,
@@ -93,7 +109,7 @@ self.addEventListener('notificationclick', event => {
     const tag = event.notification.tag;
     if (tenantId) {
       try {
-        const readUrl = withScopeBasePath(
+        const readUrl = withDeploymentBasePath(
           tag
             ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
             : `/api/tenant/${tenantId}/push/notifications/read/${notification?.id}`,
@@ -107,7 +123,7 @@ self.addEventListener('notificationclick', event => {
     }
 
     if (self.clients.openWindow) {
-      return self.clients.openWindow(withScopeBasePath(url || '/'));
+      return self.clients.openWindow(withDeploymentBasePath(url || '/'));
     }
   };
 
