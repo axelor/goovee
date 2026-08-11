@@ -7,6 +7,7 @@ import {
   NotificationAppCodeSchema,
 } from '@/utils/validators';
 import {uploadTokenSchema} from '@/lib/core/upload/validators';
+import {Authorization, Role} from '../types';
 
 /* -------- Profile picture -------- */
 /* `token` redeems a staged upload (image pre-uploaded on pick); a null/absent
@@ -86,8 +87,11 @@ const AddressObjectSchema = z.object({
   streetName: z.string().min(1),
   zip: z.string().min(1),
   townName: z.string().min(1),
-  lastName: z.string().optional(),
-  companyName: z.string().optional(),
+  /* nullish, not optional: clearing one of these has to reach the database as
+   * null, because an undefined field is left at its stored value. */
+  firstName: z.string().nullish(),
+  lastName: z.string().nullish(),
+  companyName: z.string().nullish(),
   fullName: z.string().optional(),
   formattedFullName: z.string().optional(),
   city: z
@@ -103,7 +107,6 @@ const AddressObjectSchema = z.object({
   addressl4: z.string().optional(),
   addressl5: z.string().optional(),
   addressl6: z.string().optional(),
-  firstName: z.string().optional(),
   countrySubDivision: z.string().optional(),
   department: z.string().optional(),
 });
@@ -205,3 +208,34 @@ export const UpdateMemberAuthenticationSchema = WorkspaceBaseSchema.extend({
 export type UpdateMemberAuthentication = z.infer<
   typeof UpdateMemberAuthenticationSchema
 >;
+
+/* -------- Invites -------- */
+/* No id: the app is selected by its code and sendInvites supplies the id from
+ * the workspace's available apps, so anything a caller sends is dropped here. */
+const InviteAppConfigSchema = z.object({
+  code: z.string().min(1),
+  access: z.enum(['yes', 'no']).optional(),
+  authorization: z.enum(Authorization).optional(),
+});
+
+/* The form collects recipients as one comma-separated field, so the addresses
+ * are split and checked here rather than trusted downstream. Each one costs
+ * several sequential queries when the invite is created, hence the ceiling.
+ * Only user and admin can be handed out by an invite; owner is not invitable. */
+const MAX_INVITES_PER_REQUEST = 50;
+
+export const SendInvitesSchema = WorkspaceBaseSchema.extend({
+  emails: z
+    .string()
+    .transform(value =>
+      value
+        .split(',')
+        .map(email => email.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.email()).min(1).max(MAX_INVITES_PER_REQUEST)),
+  role: z.enum([Role.user, Role.admin]),
+  apps: z.record(z.string().min(1), InviteAppConfigSchema),
+});
+
+export type SendInvites = z.input<typeof SendInvitesSchema>;

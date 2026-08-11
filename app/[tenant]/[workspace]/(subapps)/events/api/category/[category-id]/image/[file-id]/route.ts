@@ -9,7 +9,7 @@ import {workspacePathname} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {findEventCategory} from '@/app/[tenant]/[workspace]/(subapps)/events/common/orm/event-category';
-import {type Category} from '@/app/[tenant]/[workspace]/(subapps)/events/common/ui/components/events';
+import {type Category} from '@/subapps/events/common/types';
 
 export async function GET(
   request: NextRequest,

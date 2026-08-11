@@ -22,6 +22,7 @@ Goovee is a modern web portal built with Next.js for clients and partners, provi
 | Goovee Version | Compatible Axelor-Portal |
 | -------------- | ------------------------ |
 | **v2.0.x**     | 9.0.4+                   |
+| **v2.1.x**     | 9.0.13+, 9.1.2+          |
 
 > Goovee 1.x compatibility is maintained on the `1.x-wip` branch.
 

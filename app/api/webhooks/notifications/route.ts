@@ -17,6 +17,7 @@ import {
   type NotificationAppCode,
 } from '@/utils/validators';
 import {User} from '@/types';
+import {APP_TITLE} from '@/constants';
 
 type App = NonNullable<Awaited<ReturnType<typeof findAppByCode>>>;
 
@@ -83,19 +84,22 @@ async function notificationTemplate({
   tenantId,
   app,
   entity,
+  sender,
 }: {
   user: User;
   tenantId: string;
   app: App;
   entity: any;
+  sender: string;
 }) {
   return `<!DOCTYPE html>
     <html>
     <head>
         <title>${await getTranslation(
           {locale: user.locale, tenant: tenantId},
-          '{0} - Notifications from Goovee',
+          '{0} - Notifications from {1}',
           app.name || '',
+          sender,
         )}</title>
         <style>
             body {
@@ -135,7 +139,8 @@ async function notificationTemplate({
             <div class="header">
                 <h1>${await getTranslation(
                   {locale: user.locale, tenant: tenantId},
-                  `You have received new notification from Goovee {0}`,
+                  `You have received new notification from {0} {1}`,
+                  sender,
                   app.name || '',
                 )}
                 </h1>
@@ -144,7 +149,14 @@ async function notificationTemplate({
               ${entity?.route}
             </a>
             <div class="footer">
-                <p>Best regards,<br>The Goovee Team</p>
+                <p>${await getTranslation(
+                  {locale: user.locale, tenant: tenantId},
+                  'Best regards,',
+                )}<br>${await getTranslation(
+                  {locale: user.locale, tenant: tenantId},
+                  'The {0} Team',
+                  sender,
+                )}</p>
             </div>
         </div>
     </body>
@@ -158,17 +170,20 @@ async function sendMail({
   mail,
   app,
   entity,
+  sender,
 }: {
   user: User;
   tenantId: string;
   mail?: Mail | null;
   entity: {id: string; route: string};
   app: App;
+  sender: string;
 }) {
   const mailService = NotificationManager.getService(NotificationType.mail);
 
   const html =
-    mail?.body || (await notificationTemplate({user, tenantId, app, entity}));
+    mail?.body ||
+    (await notificationTemplate({user, tenantId, app, entity, sender}));
 
   await mailService?.notify({
     to: user.email,
@@ -176,8 +191,9 @@ async function sendMail({
       mail?.subject ||
       (await getTranslation(
         {locale: user.locale, tenant: tenantId},
-        '{0} - Notifications from Goovee',
+        '{0} - Notifications from {1}',
         app.name || '',
+        sender,
       )),
     html: sanitizeHtml(html),
   });
@@ -215,8 +231,9 @@ async function sendSystemNotification({
         mail?.subject ||
         (await getTranslation(
           {locale: user.locale, tenant: tenantId},
-          '{0} - Notifications from Goovee',
+          '{0} - Notifications from {1}',
           app.name || '',
+          workspace.name || APP_TITLE,
         )),
       url: entity.route,
       tag: app.name
@@ -257,7 +274,14 @@ async function sendNotifications(data: {
     await processBatch(subscribers, async ({user, entity}) => {
       try {
         await Promise.all([
-          sendMail({user, tenantId, mail, entity, app}),
+          sendMail({
+            user,
+            tenantId,
+            mail,
+            entity,
+            app,
+            sender: workspace.name || APP_TITLE,
+          }),
           sendSystemNotification({
             user,
             tenantId,

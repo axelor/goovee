@@ -9,51 +9,31 @@ import {clone} from '@/utils';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {Card} from '@/ui/components/card';
 import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {t} from '@/lib/core/locale/server';
 import type {User} from '@/types';
 import type {Workspace} from '@/orm/workspace';
 import type {Client} from '@/goovee/.generated/client';
 
 // ---- LOCAL IMPORTS ---- //
-import {
-  EVENT_TAB_ITEMS,
-  EVENT_TYPE,
-  LIMIT,
-} from '@/subapps/events/common/constants';
+import {EVENT_TYPE} from '@/subapps/events/common/constants';
 import {findEvents} from '@/subapps/events/common/orm/event';
 import {findEventCategories} from '@/subapps/events/common/orm/event-category';
-import type {PageInfo} from '@/types';
-import type {ListEvent, Category} from '@/subapps/events/common/types';
 import {
-  EventCalendar,
-  EventCardSkeleton,
-  EventCategoryList,
-  EventCategorySkeleton,
-  EventCollapsible,
-  EventTabs,
-  EventTabsContent,
+  MagazineHub,
+  type MagazineHubLabels,
 } from '@/subapps/events/common/ui/components';
-import Hero from './hero';
+import {searchEvents} from '@/subapps/events/search/action';
+
+const MAGAZINE_LIMIT = 13; // 1 featured + 12 in the grid (max)
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<{type?: string; category?: string; page?: string}>;
 }) {
   const params = await props.params;
   const searchParams = await props.searchParams;
-  const page = [searchParams?.page].flat()[0] || 1;
-  const categoryIds = searchParams?.category
-    ? Array.isArray(searchParams.category)
-      ? searchParams.category
-      : [searchParams.category]
-    : [];
-  const date = [searchParams?.date].flat()[0];
-  const type = [searchParams?.type].flat()[0] || EVENT_TYPE.ACTIVE;
 
-  if (!EVENT_TAB_ITEMS.some(item => item.label === type)) {
-    return notFound();
-  }
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
   const access = await ensureAccess({
@@ -91,103 +71,187 @@ export default async function Page(props: {
   const workspace = clone(access.workspace);
 
   return (
-    <main className="w-full">
-      <Hero config={clone(config)} />
-      <div className="py-6 container mx-auto grid grid-cols-1 lg:grid-cols-[24rem_1fr] gap-4 lg:gap-6 mb-16">
-        <Card className="p-4 border-none shadow-none flex flex-col gap-2 md:flex-row lg:flex-col h-fit rounded-2xl">
-          <EventCalendar
-            dateOfEvent={date ?? ''}
-            workspace={workspace}
-            tabs={EVENT_TAB_ITEMS}
-          />
-          <EventCollapsible>
-            <Suspense fallback={<EventCategorySkeleton />}>
-              <Categories
-                user={user}
-                client={client}
-                workspace={workspace}
-                categoryIds={categoryIds}
-              />
-            </Suspense>
-          </EventCollapsible>
-        </Card>
-        <EventTabs eventType={type} tabs={EVENT_TAB_ITEMS}>
-          <Suspense fallback={<EventCardSkeleton />}>
-            <EventList
-              user={user}
-              workspace={workspace}
-              client={client}
-              type={type}
-              page={page}
-              date={date ?? ''}
-              categoryIds={categoryIds}
-            />
-          </Suspense>
-        </EventTabs>
-      </div>
+    <main className="bg-ink-25 w-full flex-1 min-h-0 flex flex-col">
+      <Suspense fallback={<MagazineSkeleton />}>
+        <Magazine
+          workspace={workspace}
+          user={user}
+          client={client}
+          workspaceURI={workspaceURI}
+          workspaceURL={workspaceURL}
+          type={searchParams?.type === 'past' ? 'past' : 'active'}
+          category={searchParams?.category || null}
+          page={Number(searchParams?.page) || 1}
+        />
+      </Suspense>
     </main>
   );
 }
 
-async function Categories({
+async function Magazine({
   workspace,
   user,
   client,
-  categoryIds,
-}: {
-  user?: User;
-  client: Client;
-  workspace: Workspace | Cloned<Workspace>;
-  categoryIds: string[];
-}) {
-  const categories: Cloned<Category>[] = await findEventCategories({
-    workspaceURL: workspace.url,
-    client,
-    user,
-  }).then(clone);
-
-  return (
-    <EventCategoryList
-      categories={categories}
-      selectedCategories={categoryIds}
-    />
-  );
-}
-
-async function EventList({
-  user,
-  workspace,
-  client,
+  workspaceURI,
+  workspaceURL,
   type,
+  category,
   page,
-  date,
-  categoryIds,
 }: {
-  date: string;
-  categoryIds: string[];
-  page: string | number;
-  user?: User;
   workspace: Workspace | Cloned<Workspace>;
+  user?: User;
   client: Client;
-  type: string;
+  workspaceURI: string;
+  workspaceURL: string;
+  type: 'active' | 'past';
+  category: string | null;
+  page: number;
 }) {
-  const {events, pageInfo}: {events: Cloned<ListEvent>[]; pageInfo: PageInfo} =
-    await findEvents({
-      limit: LIMIT,
-      page: page,
-      categoryids: categoryIds,
-      day: new Date(date).getDate() || undefined,
-      month: new Date(date).getMonth() + 1 || undefined,
-      year: new Date(date).getFullYear() || undefined,
-      eventType: type,
+  const isPast = type === 'past';
+  const categoryids = category ? [category] : [];
+
+  // Server-driven: fetch the current tab's page (with category filter), plus a
+  // count-only query for the other tab so both tab badges stay accurate over
+  // the full dataset (not just the first page).
+  const [currentResult, otherResult, categories] = await Promise.all([
+    findEvents({
+      limit: MAGAZINE_LIMIT,
+      page,
+      categoryids,
+      eventType: isPast ? EVENT_TYPE.PAST : EVENT_TYPE.ACTIVE,
       workspaceURL: workspace.url,
       client,
       user,
       orderBy: {
-        eventStartDateTime:
-          type === EVENT_TYPE.ACTIVE ? ORDER_BY.ASC : ORDER_BY.DESC,
+        eventStartDateTime: isPast ? ORDER_BY.DESC : ORDER_BY.ASC,
       },
-    }).then(clone);
+    }).then(clone),
+    findEvents({
+      limit: 1,
+      page: 1,
+      categoryids,
+      eventType: isPast ? EVENT_TYPE.ACTIVE : EVENT_TYPE.PAST,
+      workspaceURL: workspace.url,
+      client,
+      user,
+      orderBy: {eventStartDateTime: ORDER_BY.ASC},
+    }).then(clone),
+    findEventCategories({workspaceURL: workspace.url, client, user}).then(
+      clone,
+    ),
+  ]);
 
-  return <EventTabsContent pageInfo={pageInfo} events={events} />;
+  const events = currentResult?.events ?? [];
+  const pageInfo = currentResult?.pageInfo;
+  const currentCount = Number(pageInfo?.count ?? 0);
+  const otherCount = Number(otherResult?.pageInfo?.count ?? 0);
+  const activeTotal = isPast ? otherCount : currentCount;
+  const pastTotal = isPast ? currentCount : otherCount;
+
+  const [
+    title,
+    upcomingDates,
+    upcomingDate,
+    pastCount,
+    registerNow,
+    daysLabel,
+    upcomingHeading,
+    emptyActive,
+    emptyPast,
+    seeLabel,
+    freeLabel,
+    agendaView,
+    filtersLabel,
+    activeTab,
+    pastTab,
+    featuredBadge,
+    replayBadge,
+    registeredBadge,
+    pastCta,
+    replayHeading,
+    categoryLabel,
+    clearAllLabel,
+  ] = await Promise.all([
+    t('Events & training'),
+    t('upcoming dates'),
+    t('upcoming date'),
+    t('past'),
+    t('Register now'),
+    t('days'),
+    t('Upcoming'),
+    t('No upcoming events'),
+    t('No past events'),
+    t('See'),
+    t('Free'),
+    t('Agenda view'),
+    t('Filters'),
+    t('Active events'),
+    t('Past events'),
+    t('Featured'),
+    t('Replay available'),
+    t('Registered'),
+    t('View details'),
+    t('Other replays'),
+    t('Category'),
+    t('Clear all'),
+  ]);
+
+  const labels: MagazineHubLabels = {
+    title,
+    upcomingDates,
+    upcomingDate,
+    pastCount,
+    registerNow,
+    daysLabel,
+    upcomingHeading,
+    emptyActive,
+    emptyPast,
+    seeLabel,
+    freeLabel,
+    agendaView,
+    filtersLabel,
+    activeTab,
+    pastTab,
+    featuredBadge,
+    replayBadge,
+    registeredBadge,
+    pastCta,
+    replayHeading,
+    categoryLabel,
+    clearAllLabel,
+  };
+
+  return (
+    <MagazineHub
+      events={events}
+      pageInfo={pageInfo}
+      currentType={type}
+      currentCategory={category}
+      activeCount={activeTotal}
+      pastCount={pastTotal}
+      categories={categories ?? []}
+      workspaceURI={workspaceURI}
+      workspaceURL={workspaceURL}
+      labels={labels}
+      searchAction={searchEvents}
+    />
+  );
+}
+
+function MagazineSkeleton() {
+  return (
+    <div className="py-8 container mx-auto max-w-[1280px]">
+      <div className="h-9 w-72 bg-ink-100 rounded mb-2 animate-pulse" />
+      <div className="h-4 w-96 bg-ink-100 rounded mb-6 animate-pulse" />
+      <div className="h-[380px] bg-ink-100 rounded-[20px] animate-pulse" />
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[18px]">
+        {[0, 1, 2, 3, 4, 5].map(i => (
+          <div
+            key={i}
+            className="h-[380px] bg-ink-100 rounded-2xl animate-pulse"
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

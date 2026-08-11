@@ -19,7 +19,7 @@ import {
 } from '@/orm/partner';
 import {findWorkspace} from '@/orm/workspace';
 import NotificationManager, {NotificationType} from '@/notification';
-import {SEARCH_PARAMS} from '@/constants';
+import {APP_TITLE, SEARCH_PARAMS} from '@/constants';
 import {getPartnerId} from '@/utils';
 import {withBasePath} from '@/lib/core/path/base-path';
 
@@ -32,8 +32,12 @@ import {
   findInviteById,
   deleteInviteById,
 } from '../../../common/orm/invites';
-import {InviteAppsConfig, Role} from '../../../common/types';
+import {InviteAppsConfig} from '../../../common/types';
 import {findAvailableSubapps} from '../../../common/orm/members';
+import {
+  SendInvitesSchema,
+  type SendInvites,
+} from '../../../common/utils/validators';
 import {isValidMailConfig, replacePlaceholders} from '@/orm/email-template';
 
 function error(message: string) {
@@ -109,31 +113,20 @@ export async function deleteInvite({
   }
 }
 
-export async function sendInvites({
-  workspaceURL,
-  workspaceURI,
-  emails,
-  role,
-  apps,
-}: {
-  workspaceURL: string;
-  workspaceURI: string;
-  emails: string;
-  role: Role;
-  apps: InviteAppsConfig;
-}) {
-  if (!(emails && workspaceURL && apps)) {
-    return error(await t('Bad request'));
+export async function sendInvites(input: SendInvites) {
+  const validation = SendInvitesSchema.safeParse(input);
+
+  if (!validation.success) {
+    return error(z.prettifyError(validation.error));
   }
 
-  const emailAddresses = emails
-    .split(',')
-    ?.map(email => email?.trim())
-    .filter(Boolean);
-
-  if (!emailAddresses) {
-    return error(await t('Bad request'));
-  }
+  const {
+    workspaceURL,
+    workspaceURI,
+    emails: emailAddresses,
+    role,
+    apps,
+  } = validation.data;
 
   const session = await getSession();
   const user = session?.user;
@@ -253,7 +246,7 @@ export async function sendInvites({
 
           await mailService?.notify({
             to: email,
-            subject: template?.subject || 'Greetings from Goovee',
+            subject: template?.subject || `Greetings from ${APP_TITLE}`,
             html: replacePlaceholders({
               content: template?.content,
               values: {

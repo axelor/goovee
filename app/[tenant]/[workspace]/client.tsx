@@ -25,7 +25,7 @@ export function ClientRedirection(props: {url: string}) {
 
 export function DateDisplay({
   date,
-  dateFormat = 'MMMM D YYYY,',
+  dateFormat = 'LL,',
   timeFormat = ' h:mm a',
 }: {
   date: string | Date | null;

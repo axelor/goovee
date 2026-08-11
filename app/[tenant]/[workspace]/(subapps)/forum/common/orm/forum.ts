@@ -253,6 +253,7 @@ export async function findPosts({
           },
         },
         author: {
+          id: true,
           simpleFullName: true,
           picture: {
             fileName: true,
@@ -262,6 +263,8 @@ export async function findPosts({
             sizeText: true,
           },
         },
+        bestReply: {id: true},
+        statusSelect: true,
         createdOn: true,
       },
     })
@@ -284,6 +287,45 @@ export async function findPosts({
   });
 
   return {posts, pageInfo};
+}
+
+/**
+ * Total post count across the given groups, mirroring findPosts' visibility
+ * scoping (workspace + private + archived). Used for the community
+ * "Discussions" stat, which must stay a true total independent of the feed's
+ * group filter.
+ */
+export async function countPosts({
+  workspaceID,
+  groupIDs = [],
+  client,
+  user,
+  archived = false,
+}: {
+  workspaceID: Workspace['id'];
+  groupIDs?: ID[];
+  client: Client;
+  user?: User;
+  archived?: boolean;
+}): Promise<number> {
+  if (!workspaceID) return 0;
+
+  const archivedFilter = getArchivedFilter({archived});
+
+  const count = await client.aOSPortalForumPost
+    .count({
+      where: {
+        AND: [archivedFilter],
+        forumGroup: {
+          workspace: {id: workspaceID},
+          ...(groupIDs.length ? {id: {in: groupIDs}} : {}),
+          AND: [filterPrivate({user}), archivedFilter],
+        },
+      },
+    })
+    .catch(() => 0);
+
+  return Number(count) || 0;
 }
 
 export async function findPostsByGroupId({
@@ -350,7 +392,6 @@ export async function findGroupById(
     },
     select: {
       name: true,
-      description: true,
       image: {
         fileName: true,
       },
@@ -385,9 +426,17 @@ export async function findMemberGroupById({
   if (!(id || groupID)) {
     return null;
   }
+
+  // A membership can only be operated on by its owner. Without this scope the
+  // caller could pass another user's group-member id and pin/leave/reconfigure
+  // their membership.
+  if (!user?.id) {
+    return null;
+  }
   const group = await client.aOSPortalForumGroupMember.findOne({
     where: {
       id,
+      member: {id: user.id},
       forumGroup: {
         workspace: {
           id: workspaceID,
@@ -496,4 +545,76 @@ export async function findRecentlyActivePosts({
   );
 
   return posts as RecentlyActivePost[];
+}
+
+/**
+ * Reply (comment) counts per post. Comments are mail_message rows related to
+ * ForumPost (top-level, non-empty note) — same definition used elsewhere.
+ * Returns a map keyed by post id.
+ */
+export async function findCommentCounts({
+  postIds,
+  client,
+}: {
+  postIds: Array<string | number>;
+  client: Client;
+}): Promise<Record<string, number>> {
+  if (!postIds?.length) return {};
+
+  const placeholders = postIds.map((_, i) => `$${i + 1}`).join(', ');
+
+  const rows = (await client
+    .$raw(
+      `
+      SELECT m.related_id AS "postId", COUNT(*)::int AS "count"
+      FROM mail_message m
+      WHERE m.related_model = 'com.axelor.apps.portal.db.ForumPost'
+        AND m.related_id IN (${placeholders})
+        AND m.parent_mail_message IS NULL
+        AND (m.public_body IS NOT NULL OR m.is_public_note = TRUE)
+        AND m.archived IS NOT TRUE
+      GROUP BY m.related_id
+      `,
+      ...postIds.map(id => Number(id)),
+    )
+    .catch(() => [])) as Array<{postId: string | number; count: number}>;
+
+  const map: Record<string, number> = {};
+  (rows || []).forEach(r => {
+    map[String(r.postId)] = Number(r.count) || 0;
+  });
+  return map;
+}
+
+/**
+ * Real member + post counts for a forum group (used in the discussion-detail
+ * sidebar group card).
+ */
+export async function findGroupMeta({
+  groupId,
+  client,
+}: {
+  groupId?: ID;
+  client: Client;
+}): Promise<{memberCount: number; postCount: number}> {
+  if (!groupId) return {memberCount: 0, postCount: 0};
+
+  const [memberCount, postCount] = await Promise.all([
+    client.aOSPortalForumGroupMember
+      .count({where: {forumGroup: {id: groupId}}})
+      .catch(() => 0),
+    client.aOSPortalForumPost
+      .count({
+        where: {
+          forumGroup: {id: groupId},
+          ...getArchivedFilter({archived: false}),
+        },
+      })
+      .catch(() => 0),
+  ]);
+
+  return {
+    memberCount: Number(memberCount) || 0,
+    postCount: Number(postCount) || 0,
+  };
 }

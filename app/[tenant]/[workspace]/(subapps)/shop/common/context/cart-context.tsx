@@ -121,10 +121,11 @@ export async function shopCartInit(
  * shop-specific shape and mutators (quantity, notes, addresses).
  */
 export function useCart() {
-  const {value: cart, setValue} = useCartSlice<ShopCart>(
-    SUBAPP_CODES.shop,
-    defaultCart(),
-  );
+  const {
+    value: cart,
+    loaded,
+    setValue,
+  } = useCartSlice<ShopCart>(SUBAPP_CODES.shop, defaultCart());
 
   const getProductQuantity = useCallback(
     async (productId: Product['id']) =>
@@ -250,6 +251,11 @@ export function useCart() {
      * richer enriched/checkout cart shapes, so the boundary stays `any`; the
      * mutators above remain strongly typed against ShopCart. */
     cart: cart as any,
+    /* False until the stored cart has been read. Consumers must gate on this
+     * rather than on `cart` being empty: an empty cart and a not-yet-loaded one
+     * look identical, and treating the second as the first shows the
+     * empty-cart state where a loading state belongs. */
+    loaded,
     addItem,
     getProductQuantity,
     updateQuantity,

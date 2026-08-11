@@ -1,6 +1,6 @@
 'use client';
 
-import {createContext, useCallback, useContext, useMemo} from 'react';
+import {createContext, useCallback, useContext, useMemo, useRef} from 'react';
 
 // ---- LOCAL IMPORTS ---- //
 import type {CartSummary} from './storage';
@@ -35,15 +35,20 @@ export function useCartStore(): CartStoreValue {
 export function useCartSlice<T>(code: string, fallback: T) {
   const {slices, update} = useCartStore();
   const slice = slices[code];
-  const value = (slice?.value as T | undefined) ?? fallback;
+  /* Callers build the seed inline, so it is captured on the first render and
+   * reused. Handing back a fresh object while the slice is still loading would
+   * give the cart a new identity every render, and any consumer effect keyed on
+   * the cart would re-run — and re-render — without settling. */
+  const seedRef = useRef(fallback);
+  const seed = seedRef.current;
+
+  const value = (slice?.value as T | undefined) ?? seed;
   const loaded = slice?.loaded ?? false;
 
   const setValue = useCallback(
     (updater: (prev: T) => T) =>
-      update(code, prev => updater((prev as T | null) ?? fallback)),
-    // `fallback` is the empty-state seed only; callers pass a fresh literal.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [update, code],
+      update(code, prev => updater((prev as T | null) ?? seed)),
+    [update, code, seed],
   );
 
   return {value, loaded, setValue};

@@ -5,7 +5,7 @@
 
 import { readFileSync, readdirSync } from "fs";
 import { join, extname } from "path";
-import { parse, Lang } from "@ast-grep/napi";
+import ts from "typescript";
 
 const args = process.argv.slice(2);
 
@@ -40,14 +40,44 @@ function* walkTs(dir) {
   }
 }
 
-const patterns = [
-  { pattern: "i18n.t($ARG)", metavar: "ARG" },
-  { pattern: "i18n.t($ARG, $$$REST)", metavar: "ARG" },
-  { pattern: "t($ARG)", metavar: "ARG" },
-  { pattern: "t($ARG, $$$REST)", metavar: "ARG" },
-  { pattern: "getTranslation($OPT, $ARG)", metavar: "ARG" },
-  { pattern: "getTranslation($OPT, $ARG, $$$REST)", metavar: "ARG" },
-];
+/* Which argument carries the translation key, per translator function. */
+const keyArgumentIndex = {
+  t: 0,
+  "i18n.t": 0,
+  getTranslation: 1,
+};
+
+function calleeName(expression) {
+  if (ts.isIdentifier(expression)) {
+    return expression.text;
+  }
+
+  if (
+    ts.isPropertyAccessExpression(expression) &&
+    ts.isIdentifier(expression.expression) &&
+    ts.isIdentifier(expression.name)
+  ) {
+    return `${expression.expression.text}.${expression.name.text}`;
+  }
+
+  return undefined;
+}
+
+/* The key a call passes at runtime, or undefined when the argument is not a
+ * static string. Both node kinds expose `text` already decoded, so a `\'`
+ * written inside a single-quoted literal is compared as the apostrophe the
+ * locale file stores; comparing raw source text would carry the backslash and
+ * never match. A template literal with no substitutions is as much a key as a
+ * quoted string. */
+function staticKey(argument) {
+  if (!argument) return undefined;
+
+  if (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) {
+    return argument.text;
+  }
+
+  return undefined;
+}
 
 const foundKeys = new Set();
 
@@ -59,22 +89,35 @@ for (const file of walkTs(searchDir)) {
     continue;
   }
 
-  const lang = extname(file) === ".tsx" ? Lang.Tsx : Lang.TypeScript;
-  const root = parse(lang, source);
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    false,
+    extname(file) === ".tsx" ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
 
-  for (const { pattern, metavar } of patterns) {
-    for (const match of root.root().findAll(pattern)) {
-      const argNode = match.getMatch(metavar);
-      if (!argNode) continue;
-      const text = argNode.text();
-      if (
-        (text.startsWith('"') && text.endsWith('"')) ||
-        (text.startsWith("'") && text.endsWith("'"))
-      ) {
-        foundKeys.add(text.slice(1, -1));
+  const visit = (node) => {
+    if (ts.isCallExpression(node)) {
+      const name = calleeName(node.expression);
+      /* hasOwn so an inherited name like "constructor" cannot reach the lookup. */
+      const index =
+        name !== undefined && Object.hasOwn(keyArgumentIndex, name)
+          ? keyArgumentIndex[name]
+          : undefined;
+
+      if (index !== undefined) {
+        const key = staticKey(node.arguments[index]);
+        if (key !== undefined) {
+          foundKeys.add(key);
+        }
       }
     }
-  }
+
+    ts.forEachChild(node, visit);
+  };
+
+  ts.forEachChild(sourceFile, visit);
 }
 
 const missing = [...foundKeys].sort().filter((k) => k && !translationKeys.has(k));

@@ -60,13 +60,58 @@ export interface Product extends Model {
   displaySalePrice: string;
   displayCostPrice: string;
   allowCustomNote?: boolean;
-  productAttrs: string;
   outOfStockConfig?: {
     canBuy: boolean;
     noMoreStockSelect: number;
     outOfStock: boolean;
     showMessage: boolean;
   };
+  portalCategorySet?: Array<{
+    id: ID;
+    name?: string | null;
+    slug?: string | null;
+  }>;
+  productCategory?: {
+    id: ID;
+    name?: string | null;
+    slug?: string | null;
+  } | null;
+  picture?: {id: string} | null;
+  portalImageList?: Array<{picture?: {id: string} | null}> | null;
+}
+
+export interface PortalAddress {
+  id?: string | number | null;
+  version?: number;
+  addressl2?: string | null;
+  addressl3?: string | null;
+  addressl4?: string | null;
+  addressl6?: string | null;
+  zip?: string | null;
+  townName?: string | null;
+  streetName?: string | null;
+  companyName?: string | null;
+  department?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  fullName?: string | null;
+  formattedFullName?: string | null;
+  country?: {
+    id: string | number;
+    name?: string | null;
+    version?: number;
+  } | null;
+}
+
+export interface PartnerAddress {
+  id: string | number;
+  version?: number;
+  isInvoicingAddr?: boolean | null;
+  isDeliveryAddr?: boolean | null;
+  isDefaultAddr?: boolean | null;
+  isDefaultDelivery?: boolean | null;
+  isDefaultInvoicing?: boolean | null;
+  address?: PortalAddress | null;
 }
 
 export interface Currency extends Model {
@@ -111,20 +156,15 @@ export interface Address extends Model {
   townName?: string;
   zip?: string;
   streetName?: string;
-  firstName?: string;
-  lastName?: string;
-  companyName?: string;
+  /* null is how these reach the database when the user clears them; undefined
+   * would leave the stored value in place. */
+  firstName?: string | null;
+  lastName?: string | null;
+  companyName?: string | null;
   fullName?: string;
   formattedFullName?: string;
   countrySubDivision?: string;
   department?: string;
-}
-
-export interface PartnerAddress extends Model {
-  isDeliveryAddr: boolean;
-  isInvoicingAddr: boolean;
-  isDefaultAddr: boolean;
-  address: Address;
 }
 
 export interface Company extends Model {
@@ -163,12 +203,6 @@ export type ComputedProduct = {
   };
   currency: Currency;
   errorMessage?: string;
-};
-
-export type MetaFile = {
-  id: ID;
-  fileName: string;
-  fileType?: string;
 };
 
 export type Category = {

@@ -1,14 +1,6 @@
 // ---- CORE IMPORTS ---- //
 import {PageInfo} from '@/types';
 
-export interface Category {
-  id: number;
-  name: string;
-  parentCategory?: Category;
-  childCategory: Category[];
-  slug: string;
-}
-
 export type NewsImage = {
   id: string;
   fileName?: string | null;

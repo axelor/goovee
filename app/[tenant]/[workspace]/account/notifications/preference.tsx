@@ -3,17 +3,22 @@
 // ---- CORE IMPORTS ---- //
 import {Separator} from '@/ui/components/separator';
 import {useWorkspace} from '../../workspace-context';
-import {Checkbox} from '@/ui/components/checkbox';
 import {useToast} from '@/ui/hooks';
 import type {NotificationAppCode} from '@/utils/validators';
 
 // ---- LOCAL IMPORTS ---- //
+import {AccountToggle} from '../common/ui/components';
+
+// ---- LOCAL IMPORTS ---- //
 import {updatePreference} from './action';
 import type {PreferenceResponse} from '@/orm/notification';
-import {CheckedState} from '@radix-ui/react-checkbox';
 import type {UpdateNotificationPreference} from '../common/utils/validators';
 import {i18n} from '@/lib/core/locale';
-import {useState} from 'react';
+import {startTransition, useOptimistic} from 'react';
+
+type PreferenceUpdate =
+  | {type: 'root'; activateNotification: boolean}
+  | {type: 'subscription'; id: string; activateNotification: boolean};
 
 export function Preference({
   preference,
@@ -29,77 +34,136 @@ export function Preference({
   const {tenant, workspaceURI, workspaceURL} = useWorkspace();
   const {toast} = useToast();
 
+  /* The switches read from this rather than straight from the prop, so a click
+   * moves them immediately and the next click sees the new position. The server
+   * revalidates on success, which replaces the optimistic value; on failure
+   * nothing revalidates and React restores the stored one. */
+  const [shown, applyUpdate] = useOptimistic(
+    preference,
+    (state, update: PreferenceUpdate): PreferenceResponse | null => {
+      if (update.type === 'root') {
+        /* Until the first save there is no stored preference to spread, and
+         * turning an app on is exactly when that happens — so stand one up
+         * rather than ignore the click. */
+        return state
+          ? {...state, activateNotification: update.activateNotification}
+          : {
+              id: '',
+              version: 0,
+              activateNotification: update.activateNotification,
+              code,
+              subscriptions: [],
+            };
+      }
+
+      if (!state) return state;
+
+      return {
+        ...state,
+        subscriptions: state.subscriptions?.map(subscription =>
+          subscription.id === update.id
+            ? {
+                ...subscription,
+                activateNotification: update.activateNotification,
+              }
+            : subscription,
+        ),
+      };
+    },
+  );
+
   const changePreference =
     (root?: boolean) =>
-    async (activateNotification: CheckedState, subscriptionId?: string) => {
-      if (activateNotification === 'indeterminate') return;
-      const data: UpdateNotificationPreference['data'] | undefined = root
-        ? {activateNotification}
+    (activateNotification: boolean, subscriptionId?: string) => {
+      /* Built together so the switch's new position and the value sent to the
+       * server can never describe different things. */
+      const change:
+        | {data: UpdateNotificationPreference['data']; update: PreferenceUpdate}
+        | undefined = root
+        ? {
+            data: {activateNotification},
+            update: {type: 'root', activateNotification},
+          }
         : subscriptionId
           ? {
-              activateNotification,
-              record: {
+              data: {
+                activateNotification,
+                record: {id: subscriptionId, activateNotification},
+              },
+              update: {
+                type: 'subscription',
                 id: subscriptionId,
                 activateNotification,
               },
             }
           : undefined;
 
-      if (!data) return;
+      if (!change) return;
 
-      try {
-        const result = await updatePreference({
-          workspaceURL,
-          workspaceURI,
-          tenant,
-          code,
-          data,
-        });
-        if ('error' in result) {
+      /* The optimistic move has to be dispatched inside the transition that
+       * awaits the action, otherwise React discards it as soon as the click
+       * handler returns. */
+      startTransition(async () => {
+        applyUpdate(change.update);
+
+        try {
+          const result = await updatePreference({
+            workspaceURL,
+            workspaceURI,
+            tenant,
+            code,
+            data: change.data,
+          });
+          if ('error' in result) {
+            toast({
+              title: result.message,
+              variant: 'destructive',
+            });
+          }
+        } catch (err) {
           toast({
-            title: result.message,
+            title:
+              err instanceof Error
+                ? err.message
+                : i18n.t('Something went wrong'),
             variant: 'destructive',
           });
         }
-      } catch (err) {
-        toast({
-          title:
-            err instanceof Error ? err.message : i18n.t('Something went wrong'),
-          variant: 'destructive',
-        });
-      }
+      });
     };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 items-center gap-2 p-1">
-        <h5 className="font-medium">{title}</h5>
-        <Checkbox
-          defaultChecked={preference?.activateNotification || false}
-          name="activateNotification"
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-4 py-1">
+        <h5 className="text-sm font-semibold text-ink-900 mb-0">{title}</h5>
+        <AccountToggle
+          aria-label={title}
+          checked={shown?.activateNotification || false}
           onCheckedChange={changePreference(true)}
-          variant="success"
         />
       </div>
-      {!hideSubscription && preference?.activateNotification && (
-        <div className="space-y-2">
-          {preference?.subscriptions?.map((subscription, i: number) => (
-            <div
-              className="grid grid-cols-2 items-center gap-2 p-1"
-              key={subscription?.id}>
-              <p className="text-sm">{subscription?.name}</p>
-              <Checkbox
-                defaultChecked={subscription.activateNotification}
-                name="activateNotification"
-                onCheckedChange={e =>
-                  changePreference(false)(e, subscription.id)
-                }
-                variant="success"
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      {!hideSubscription &&
+        shown?.activateNotification &&
+        shown.subscriptions?.length > 0 && (
+          <div className="space-y-1 border-l-2 border-royal-border pl-4 ml-1">
+            {shown?.subscriptions?.map(subscription => (
+              <div
+                className="flex items-center justify-between gap-4 py-1"
+                key={subscription?.id}>
+                <p className="text-sm text-ink-700 mb-0">
+                  {subscription?.name}
+                </p>
+                <AccountToggle
+                  aria-label={subscription?.name ?? undefined}
+                  checked={subscription.activateNotification}
+                  onCheckedChange={e =>
+                    changePreference(false)(e, subscription.id)
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        )}
       <Separator />
     </div>
   );

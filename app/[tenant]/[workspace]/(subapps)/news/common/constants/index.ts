@@ -1,27 +1,12 @@
-export const DEFAULT_LIMIT = 16;
 export const DEFAULT_PAGE = 1;
-export const HOMEPAGE_NEWS_LIMIT = 12;
 export const DEFAULT_NEWS_ASIDE_LIMIT = 5;
 
 export const HEADER_NEWS_LIMIT = 3;
-export const ASIDE_NEWS_LIMIT = 4;
-export const FOOTER_NEWS_LIMIT = 5;
-export const NEWS_FEED_LIMIT = 4;
-
-// Button Labels
-export const SUBSCRIBE = 'SUBSCRIBE';
-export const SEND = 'SEND';
-
-// Input
-// Placeholder
-export const SEARCH_HERE = 'Search here';
+export const SEARCH_NEWS_LIMIT = 10;
 
 // Grid/List Titles
-export const FEATURED_NEWS = 'Featured News';
-export const LATEST_NEWS = 'Latest News';
 export const RELATED_NEWS = 'Related News';
 export const RECOMMENDED_NEWS = 'Recommended news';
-export const CATEGORIES = 'Categories';
 export const RELATED_FILES = 'Related files';
 
 // Others
@@ -54,7 +39,3 @@ export const SOCIAL_ICONS = [
   },
 ];
 export const NEWS = 'News';
-export const COMMENTS = 'Comments';
-export const POSTED_ON = 'Posted on';
-export const PUBLISHED_ON = 'Published on';
-export const WRITE_YOUR_COMMENT = 'Write your comment';

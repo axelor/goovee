@@ -1,3 +1,5 @@
+import {APP_TITLE} from '@/constants';
+
 export const inviteTemplate = ({
   email,
   link,
@@ -7,7 +9,7 @@ export const inviteTemplate = ({
   link: string;
   subject?: string;
 }) => ({
-  subject: [`You're Invited to Join Goovee!`, subject].join(' | '),
+  subject: [`You're Invited to Join ${APP_TITLE}!`, subject].join(' | '),
   to: email,
   html: inviteTemplateHTML({link}),
 });
@@ -16,7 +18,7 @@ export const inviteTemplateHTML = ({link}: {link: string}) => `
 <!DOCTYPE html>
 <html>
 <head>
-    <title>You're Invited to Join Goovee!</title>
+    <title>You're Invited to Join ${APP_TITLE}!</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,17 +59,17 @@ export const inviteTemplateHTML = ({link}: {link: string}) => `
 <body>
     <div class="container">
         <div class="header">
-            <h1>You're Invited to Join Goovee!</h1>
+            <h1>You're Invited to Join ${APP_TITLE}!</h1>
         </div>
-        <p>We’re thrilled to invite you to join <strong>Goovee</strong>!</p>
+        <p>We’re thrilled to invite you to join <strong>${APP_TITLE}</strong>!</p>
         <p>Click the button below to register and become a part of our growing community:</p>
         <div>
-            <a href="${link}" class="button">Register on Goovee Now</a>
+            <a href="${link}" class="button">Register on ${APP_TITLE} Now</a>
         </div>
         <p>It’s quick, easy, and completely free to sign up.</p>
         <p>We look forward to welcoming you!</p>
         <div class="footer">
-            <p>Best regards,<br>The Goovee Team</p>
+            <p>Best regards,<br>The ${APP_TITLE} Team</p>
         </div>
     </div>
 </body>

@@ -5,82 +5,60 @@ import {filterPrivate} from '@/orm/filter';
 import type {Client} from '@/goovee/.generated/client';
 import {ORDER_BY} from '@/constants';
 
-// ---- LOCAL IMPORTS ---- //
-import {COLORS, ICONS} from '@/subapps/resources/common/constants';
-
-type FetchFoldersParams = {
-  where?: {
-    isHomepage?: boolean;
-    AND?: object[];
-  };
-  take?: number;
-};
-
-export async function fetchFolders({
+export async function fetchPinnedFoldersWithMeta({
   workspaceURL,
   client,
-  params,
   user,
-  archived,
 }: {
-  params?: FetchFoldersParams;
-  client: Client;
   workspaceURL: string;
+  client: Client;
   user?: User;
-  archived?: boolean;
 }) {
   if (!workspaceURL) return [];
 
   const folders = await client.aOSDMSFile.find({
     where: {
       isDirectory: true,
-      workspaceSet: {
-        url: workspaceURL,
-      },
-      ...(params?.where || {}),
-      AND: [
-        filterPrivate({user}),
-        archived
-          ? {archived: true}
-          : {OR: [{archived: false}, {archived: null}]},
-        ...(params?.where?.AND || []),
-      ],
+      isHomepage: true,
+      workspaceSet: {url: workspaceURL},
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
     },
     select: {
       fileName: true,
-      parent: {id: true},
+      parent: {id: true, fileName: true},
       contentType: true,
       description: true,
       colorSelect: true,
       logoSelect: true,
+      updatedOn: true,
     },
-    orderBy: {
-      updatedOn: ORDER_BY.DESC,
-    },
-    take: params?.take,
+    orderBy: {updatedOn: ORDER_BY.DESC},
+    take: 12,
   });
 
-  return folders;
-}
+  // For each folder, count its children files (cheap: one extra query per folder)
+  const result = await Promise.all(
+    folders.map(async folder => {
+      const itemCount = await client.aOSDMSFile.find({
+        where: {
+          isDirectory: {ne: true},
+          parent: {id: folder.id},
+          // A file's workspace membership is independent of its parent folder,
+          // so scope the count to this workspace or it can tally files from
+          // another one that happen to hang under the same folder.
+          workspaceSet: {url: workspaceURL},
+          AND: [
+            filterPrivate({user}),
+            {OR: [{archived: false}, {archived: null}]},
+          ],
+        },
+        select: {id: true},
+      });
+      return {...folder, itemCount: itemCount.length};
+    }),
+  );
 
-export async function fetchLatestFolders({
-  workspaceURL,
-  client,
-  user,
-}: {
-  workspaceURL: string;
-  client: Client;
-  user?: User;
-}) {
-  return fetchFolders({
-    workspaceURL,
-    client,
-    user,
-    params: {
-      where: {isHomepage: true},
-      take: 10,
-    },
-  });
+  return result;
 }
 
 export async function fetchFiles({
@@ -88,12 +66,16 @@ export async function fetchFiles({
   user,
   client,
   archived,
+  workspaceURL,
 }: {
   id: string;
   user?: User;
   client: Client;
   archived?: boolean;
+  workspaceURL: string;
 }) {
+  if (!workspaceURL) return [];
+
   const files = await client.aOSDMSFile.find({
     where: {
       isDirectory: {
@@ -101,6 +83,12 @@ export async function fetchFiles({
       },
       parent: {
         id,
+      },
+      // Sibling files are scoped by parent, but a file's workspace membership is
+      // independent of its parent, so gate on the workspace too — otherwise a
+      // file from another workspace under the same folder would be listed.
+      workspaceSet: {
+        url: workspaceURL,
       },
       AND: [
         filterPrivate({user}),
@@ -125,6 +113,48 @@ export async function fetchFiles({
       },
     },
   });
+
+  return files;
+}
+
+export async function searchFiles({
+  search,
+  workspaceURL,
+  user,
+  client,
+  take = 20,
+}: {
+  search: string;
+  workspaceURL: string;
+  user?: User;
+  client: Client;
+  take?: number;
+}) {
+  const q = search?.trim();
+  if (!workspaceURL || !q) return [];
+
+  const files = await client.aOSDMSFile
+    .find({
+      where: {
+        isDirectory: {ne: true},
+        fileName: {like: `%${q}%`},
+        workspaceSet: {
+          url: workspaceURL,
+        },
+        AND: [
+          filterPrivate({user}),
+          {OR: [{archived: false}, {archived: null}]},
+        ],
+      },
+      select: {
+        fileName: true,
+        parent: {id: true, fileName: true},
+        metaFile: {fileType: true},
+      },
+      orderBy: {updatedOn: ORDER_BY.DESC},
+      take,
+    })
+    .then(clone);
 
   return files;
 }
@@ -234,18 +264,50 @@ export async function fetchFile({
       partnerCategorySet: {select: {id: true}},
       isDirectory: true,
       description: true,
+      parent: {
+        id: true,
+        fileName: true,
+        colorSelect: true,
+        parent: {id: true, fileName: true},
+      },
     },
   });
 
   return file;
 }
 
-export async function fetchColors() {
-  return COLORS;
-}
+export async function fetchFolderWithParent({
+  id,
+  workspaceURL,
+  user,
+  client,
+}: {
+  id: string;
+  workspaceURL: string;
+  user?: User;
+  client: Client;
+}) {
+  if (!workspaceURL) return null;
 
-export async function fetchIcons() {
-  return ICONS;
+  const folder = await client.aOSDMSFile.findOne({
+    where: {
+      id,
+      isDirectory: true,
+      workspaceSet: {url: workspaceURL},
+      AND: [filterPrivate({user}), {OR: [{archived: false}, {archived: null}]}],
+    },
+    select: {
+      fileName: true,
+      description: true,
+      colorSelect: true,
+      logoSelect: true,
+      updatedOn: true,
+      permissionSelect: true,
+      parent: {fileName: true, id: true},
+    },
+  });
+
+  return folder;
 }
 
 export async function fetchExplorerCategories({

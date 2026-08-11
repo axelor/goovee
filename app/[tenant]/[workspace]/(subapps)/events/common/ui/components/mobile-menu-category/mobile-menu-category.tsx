@@ -84,7 +84,7 @@ export function MobileCategories({
   }) => {
     if (level !== 0) {
       router.push(
-        `${workspaceURI}/${SUBAPP_CODES.events}/${EVENTS.MY_REGISTRATIONS}/${item.url}`,
+        `${workspaceURI}/${SUBAPP_CODES.events}/${EVENTS.MY_REGISTRATIONS}?filter=${item.url}`,
       );
       setOpen(false);
     }

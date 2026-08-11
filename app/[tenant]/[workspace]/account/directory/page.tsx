@@ -1,11 +1,14 @@
-import {getSession} from '@/auth';
 import {notFound} from 'next/navigation';
-import {workspacePathname} from '@/utils/workspace';
-import Form from './form';
+
+// ---- CORE IMPORTS ---- //
+import {getSession} from '@/auth';
 import {findGooveeUserByEmail, isAdminContact} from '@/orm/partner';
 import {findWorkspace} from '@/orm/workspace';
-import {t} from '@/lib/core/locale/server';
+import {workspacePathname} from '@/utils/workspace';
 import {manager} from '@/lib/core/tenant';
+
+// ---- LOCAL IMPORTS ---- //
+import Form from './form';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
@@ -48,12 +51,10 @@ export default async function Page(props: {
   );
 
   return (
-    <div className="bg-white p-2 lg:p-0 lg:bg-inherit">
-      <Form
-        partner={partner}
-        isPartner={isPartnerUser}
-        isAdminContact={isAdminContactUser}
-      />
-    </div>
+    <Form
+      partner={partner}
+      isPartner={isPartnerUser}
+      isAdminContact={isAdminContactUser}
+    />
   );
 }

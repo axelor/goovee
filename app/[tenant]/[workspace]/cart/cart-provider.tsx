@@ -25,14 +25,29 @@ import {
  */
 export default function CartProvider({children}: {children: ReactNode}) {
   const {workspaceURL} = useWorkspace();
-  const {data: session} = authClient.useSession();
+  const {data: session, isPending: sessionPending} = authClient.useSession();
   const userId = session?.user?.id;
 
   const [slices, setSlices] = useState<Record<string, CartSlice>>({});
   /* Latest values for synchronous read-modify-write inside `update`. */
   const valuesRef = useRef<Record<string, unknown>>({});
+  /* Latches once the session has settled. It only ever goes forward: while
+   * there is no session `isPending` returns to true on every refetch — which
+   * better-auth does on each window focus — and a guest refocusing a tab must
+   * not send every cart back to unread. */
+  const [sessionSettled, setSessionSettled] = useState(false);
 
   useEffect(() => {
+    if (!sessionPending) setSessionSettled(true);
+  }, [sessionPending]);
+
+  useEffect(() => {
+    /* Nothing loads until the session is known. Each cart is keyed by user, so
+     * starting earlier would read the guest key, publish it as loaded, and then
+     * throw it away and read again once the session arrived — which shows a
+     * signed-in visitor an empty cart in between. */
+    if (!sessionSettled) return;
+
     let cancelled = false;
     valuesRef.current = {};
     setSlices({});
@@ -64,7 +79,7 @@ export default function CartProvider({children}: {children: ReactNode}) {
     return () => {
       cancelled = true;
     };
-  }, [workspaceURL, userId]);
+  }, [workspaceURL, userId, sessionSettled]);
 
   const update = useCallback(
     async (code: string, updater: (prev: unknown) => unknown) => {
