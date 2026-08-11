@@ -1,6 +1,7 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import Image from 'next/image';
 import {
   MdChevronLeft,
   MdChevronRight,
@@ -14,11 +15,13 @@ import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
 import {Dialog, DialogClose, DialogContent, DialogTitle} from '@/ui/components';
 
-type Image = {id: string; url: string; name?: string | null};
+type Attachment = {id: string; url: string; name?: string | null};
 
-export function AttachmentViewer({images}: {images: Image[]}) {
+export function AttachmentViewer({images}: {images: Attachment[]}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const isOpen = openIndex !== null;
+
+  const close = useCallback(() => setOpenIndex(null), []);
 
   const go = useCallback(
     (delta: number) => {
@@ -53,11 +56,12 @@ export function AttachmentViewer({images}: {images: Image[]}) {
             onClick={() => setOpenIndex(i)}
             aria-label={i18n.t('View image')}
             className="group relative block overflow-hidden rounded-[10px] border border-ink-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-royal">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={img.url}
               alt={img.name ?? ''}
-              loading="lazy"
+              width={320}
+              height={128}
+              sizes="(max-width: 639px) 50vw, 320px"
               className="w-full h-32 object-cover"
             />
             <span className="absolute inset-0 grid place-items-center bg-black/0 group-hover:bg-black/40 transition-colors">
@@ -70,20 +74,32 @@ export function AttachmentViewer({images}: {images: Image[]}) {
       <Dialog open={isOpen} onOpenChange={o => !o && setOpenIndex(null)}>
         <DialogContent
           hideClose
-          className="max-w-4xl w-fit p-3 bg-black/90 border-none">
+          className="max-w-4xl p-3 bg-black/90 border-none">
           <DialogTitle className="sr-only">
             {current?.name || i18n.t('Image')}
           </DialogTitle>
+          {/*
+           * The picture sits in a frame of its own size rather than one that
+           * follows it: that gives it a box to be fetched against, and holds the
+           * viewer still while stepping between pictures. `object-contain` keeps
+           * each picture's proportions inside the frame, so the frame is padded
+           * out around anything that is not its shape. Clicking that padding
+           * closes the viewer, as clicking beside the picture did when the frame
+           * still followed it.
+           */}
           {current && (
-            <div className="relative flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+            <div className="relative h-[80dvh]" onClick={close}>
+              <Image
+                fill
                 src={current.url}
                 alt={current.name ?? ''}
-                className="max-h-[80vh] max-w-full w-auto object-contain rounded-md"
+                sizes="(max-width: 896px) 100vw, 872px"
+                className="object-contain"
               />
               {/* Download + close, styled for the dark backdrop */}
-              <div className="absolute top-2 right-2 flex items-center gap-2">
+              <div
+                className="absolute top-2 right-2 flex items-center gap-2"
+                onClick={event => event.stopPropagation()}>
                 <a
                   href={current.url}
                   download={current.name ?? ''}
@@ -125,7 +141,10 @@ function NavButton({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={event => {
+        event.stopPropagation();
+        onClick();
+      }}
       aria-label={i18n.t(side === 'left' ? 'Previous image' : 'Next image')}
       className={cn(
         'absolute top-1/2 -translate-y-1/2 grid place-items-center size-9 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors',

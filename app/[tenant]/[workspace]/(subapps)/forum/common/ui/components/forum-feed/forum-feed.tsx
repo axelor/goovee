@@ -1,6 +1,7 @@
 'use client';
 
 import {useState} from 'react';
+import Image from 'next/image';
 import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
 import {
@@ -207,10 +208,11 @@ export function ForumFeed({
                 <div className="mt-3 flex items-center gap-2.5 text-[12px] text-ink-500">
                   <span className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-br from-ink-300 to-ink-500 grid place-items-center text-white text-[10px] font-bold shrink-0">
                     {avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={avatar}
                         alt={author || ''}
+                        width={24}
+                        height={24}
                         className="w-full h-full object-cover"
                       />
                     ) : (
