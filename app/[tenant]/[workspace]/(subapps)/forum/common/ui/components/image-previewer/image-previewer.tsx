@@ -83,9 +83,9 @@ export const ImagePreviewer: React.FC<ImagePreviewerProps> = ({
             )}
 
             {/* Fills the tile, and raised, so the overlay is centred on the
-                image and the count badge on the third tile cannot cover it.
-                Only present when there is something to draw, so an empty layer
-                never sits over the picture. */}
+                image and the count badge on the last one cannot cover it. Only
+                present when there is something to draw, so an empty layer never
+                sits over the picture. */}
             {overlay && <div className="absolute inset-0 z-10">{overlay}</div>}
           </div>
         );

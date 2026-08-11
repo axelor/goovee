@@ -133,7 +133,8 @@ export const CreatePost = ({
   /*
    * Stage files picked since the last edit (those without an `uploadId`) and
    * free the staged uploads of any that were removed. Oversized files are
-   * rejected at pick time with a toast — the server cap is the backstop.
+   * rejected here with a toast naming the file, so the caps behind it never
+   * have to answer for one.
    */
   const reconcile = <T extends {file: File; uploadId?: string}>(
     prev: T[],

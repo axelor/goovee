@@ -188,8 +188,8 @@ function toBytes(value: string | null | undefined): number {
 
 /**
  * Open a session for a file that is about to be uploaded. Nothing is written to
- * disk here — the part file appears with the first chunk, so a failed insert
- * cannot leave an unreferenced blob behind.
+ * disk here — the part file appears with the first request that carries a body,
+ * so a failed insert cannot leave an unreferenced blob behind.
  *
  * The redeem token is minted now but deliberately *not* returned: the client
  * only receives it once the file is complete and has passed validation, so a
@@ -268,6 +268,90 @@ export async function findSession({
 }
 
 /**
+ * Work out what became of an upload whose commit was refused, and answer the
+ * caller for it.
+ *
+ * The guard only refuses when the upload is no longer the one that was appended
+ * to, so the bytes just written belong to nobody until it is known which.
+ */
+async function reconcileLostAppend({
+  sessionId,
+  owner,
+  client,
+  partPath,
+}: {
+  sessionId: string;
+  owner: ID;
+  client: Client;
+  partPath: string;
+}): Promise<AppendOutcome> {
+  const current = await client.stagedUpload.findOne({
+    where: {sessionId, owner: {id: owner}},
+    select: {
+      uploadOffset: true,
+      partPath: true,
+      reapedAt: true,
+      metaFile: {id: true},
+    },
+  });
+
+  /* Completed while this append was running. If this append opened the part
+   * after the rename it created a new file under that name, which belongs to
+   * nothing; if it opened before, its writes went into the finished file and
+   * there is nothing here to undo. Best effort either way — the record is
+   * whole, and a failure to tidy up is only a leak. */
+  if (current?.metaFile) {
+    await removePart(partPath).catch(error => {
+      console.error('Stage upload part cleanup failed:', error);
+    });
+    return {status: 'complete'};
+  }
+
+  // still filling, another append simply got there first
+  if (current?.partPath && !current.reapedAt) {
+    return {status: 'conflict', offset: toBytes(current.uploadOffset)};
+  }
+
+  /* Released or reaped meanwhile, so these bytes belong to nothing. The sweep
+   * skips a released row, so the part is removed here or not at all — but a
+   * failure to remove it must not turn a gone session into a server fault,
+   * since the caller's answer is the same either way. */
+  await removePart(partPath).catch(error => {
+    console.error('Stage upload part cleanup failed:', error);
+  });
+  return {status: 'not-found'};
+}
+
+/*
+ * Appends to one upload run one at a time.
+ *
+ * Two appends to the same part file would interleave their writes with each
+ * other's truncation, leaving a file whose byte count looks right and whose
+ * contents are not. A caller sending one part at a time never waits here; one
+ * that resumes before its abandoned part finished arriving does.
+ *
+ * An entry lives only while something is queued behind it, so the map does not
+ * grow with every upload the process has ever served.
+ */
+const appendQueue = new Map<string, Promise<unknown>>();
+
+function queueAppend<T>(sessionId: string, run: () => Promise<T>): Promise<T> {
+  const previous = appendQueue.get(sessionId) ?? Promise.resolve();
+
+  /* `previous` is a tracked promise, which never rejects, so a failed append
+   * cannot hold up the ones behind it. */
+  const settled = previous.then(run);
+  const tracked = settled.catch(() => undefined);
+
+  appendQueue.set(sessionId, tracked);
+  void tracked.then(() => {
+    if (appendQueue.get(sessionId) === tracked) appendQueue.delete(sessionId);
+  });
+
+  return settled;
+}
+
+/**
  * Append one chunk at `offset` and report the new offset.
  *
  * The supplied offset must equal the committed one. Accepting a mismatch would
@@ -275,11 +359,23 @@ export async function findSession({
  * counted, or push the file past its cap, so a mismatch is refused and answered
  * with the authoritative offset to resume from.
  *
- * A client is expected to keep one chunk in flight per session; sending several
- * concurrently is a protocol violation whose effect is confined to that
- * caller's own file.
+ * A part that stops arriving part-way is not lost: whatever landed is made
+ * durable and committed, and the answer carries the offset to carry on from.
+ *
+ * A client is expected to keep one chunk in flight per session. One that does
+ * not is made to wait rather than allowed to corrupt its own file.
  */
-export async function appendChunk({
+export function appendChunk(args: {
+  sessionId: string;
+  owner: ID;
+  offset: number;
+  stream: ReadableStream<Uint8Array>;
+  client: Client;
+}): Promise<AppendOutcome> {
+  return queueAppend(args.sessionId, () => appendOneChunk(args));
+}
+
+async function appendOneChunk({
   sessionId,
   owner,
   offset,
@@ -360,6 +456,45 @@ export async function appendChunk({
     return {status: 'conflict', offset: written.offset};
   }
 
+  /*
+   * The part stopped arriving part-way, but what arrived is durable. It is
+   * committed under the same guard as a whole part, and the caller is answered
+   * with the offset to carry on from rather than being failed — a paused upload
+   * then loses only the bytes that were still on the wire.
+   */
+  if (written.status === 'torn') {
+    const salvaged = await client.stagedUpload.updateAll({
+      where: {
+        sessionId,
+        uploadOffset: {eq: String(committed)},
+        metaFile: {id: {eq: null}},
+        consumedAt: {eq: null},
+        reapedAt: {eq: null},
+      },
+      set: {uploadOffset: String(written.offset)},
+    });
+
+    /* Refused because the upload moved on meanwhile — completed, released or
+     * reaped while this body drained. Reconciled exactly as an intact part is,
+     * so a part file this append re-created under a name that has since been
+     * promoted away is not left behind. */
+    if (!Number(salvaged))
+      return reconcileLostAppend({
+        sessionId,
+        owner,
+        client,
+        partPath: row.partPath,
+      });
+
+    /* The tear happened after the last byte, so the file is whole and finishes
+     * exactly as an intact final part would. */
+    if (written.offset === length) {
+      return {status: 'ok', offset: written.offset, complete: true};
+    }
+
+    return {status: 'conflict', offset: written.offset};
+  }
+
   /* The commit is conditional on the upload still being the one that was
    * appended to: the same offset, not completed, and neither released nor
    * reaped meanwhile. */
@@ -375,41 +510,12 @@ export async function appendChunk({
   });
 
   if (!Number(committedRows)) {
-    const current = await client.stagedUpload.findOne({
-      where: {sessionId, owner: {id: owner}},
-      select: {
-        uploadOffset: true,
-        partPath: true,
-        reapedAt: true,
-        metaFile: {id: true},
-      },
+    return reconcileLostAppend({
+      sessionId,
+      owner,
+      client,
+      partPath: row.partPath,
     });
-
-    /* Completed while this append was running. If this append opened the part
-     * after the rename it created a new file under that name, which belongs to
-     * nothing; if it opened before, its writes went into the finished file and
-     * there is nothing here to undo. Best effort either way — the record is
-     * whole, and a failure to tidy up is only a leak. */
-    if (current?.metaFile) {
-      await removePart(row.partPath).catch(error => {
-        console.error('Stage upload part cleanup failed:', error);
-      });
-      return {status: 'complete'};
-    }
-
-    // still filling, another append simply got there first
-    if (current?.partPath && !current.reapedAt) {
-      return {status: 'conflict', offset: toBytes(current.uploadOffset)};
-    }
-
-    /* Released or reaped meanwhile, so these bytes belong to nothing. The sweep
-     * skips a released row, so the part is removed here or not at all — but a
-     * failure to remove it must not turn a gone session into a server fault,
-     * since the caller's answer is the same either way. */
-    await removePart(row.partPath).catch(error => {
-      console.error('Stage upload part cleanup failed:', error);
-    });
-    return {status: 'not-found'};
   }
 
   return {

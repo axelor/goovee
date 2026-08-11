@@ -27,8 +27,26 @@ export interface UploadedFile {
 const PART_SUFFIX = '.part';
 
 /**
+ * Whether a transfer ended because the other end went away, rather than because
+ * anything here failed. A pause, a closed tab and a dropped connection all
+ * surface this way, and none of them is a fault worth reporting.
+ */
+function isDisconnect(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+
+  const code = (error as NodeJS.ErrnoException).code;
+  return (
+    error.name === 'AbortError' ||
+    code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+    code === 'ECONNRESET' ||
+    code === 'ECONNABORTED'
+  );
+}
+
+/**
  * Pick the on-disk name a chunked upload will append into, relative to the
- * storage directory. Nothing is written — the file appears on the first chunk.
+ * storage directory. Nothing is written here — the file appears with the first
+ * request that carries a body, empty or not.
  *
  * The name carries a random component as well as a timestamp. A session stays
  * open across many requests, so two uploads of the same file name must not be
@@ -65,7 +83,9 @@ function promotedName(partPath: string): string {
  * finds nothing to rename. It does **not** protect the finished file from an
  * append that is already running: a file handle follows the file through a
  * rename, so a writer that opened the part beforehand goes on writing into the
- * promoted one. Only the caller sending a single part at a time prevents that.
+ * promoted one. Appends are serialised against each other, but not against
+ * this, so completing while one is still arriving remains the caller's to
+ * avoid.
  */
 export async function promotePart(partPath: string): Promise<string> {
   const filePath = promotedName(partPath);
@@ -85,9 +105,15 @@ export async function promotePart(partPath: string): Promise<string> {
  * `short` means the file holds fewer bytes than the caller believed were
  * committed, and reports how many are actually there. The append is refused and
  * the caller resumes from that count.
+ *
+ * `torn` means the part stopped arriving part-way — the caller paused, the
+ * connection dropped, a proxy gave up. Whatever did arrive is durable and its
+ * count is reported, so the upload carries on from there instead of losing the
+ * whole part.
  */
 export type PartAppend =
   | {status: 'ok'; offset: number}
+  | {status: 'torn'; offset: number}
   | {status: 'short'; offset: number}
   | {status: 'too-large'};
 
@@ -126,46 +152,72 @@ export async function appendToPart({
   const handle = await fs.promises.open(absolute, stats ? 'r+' : 'w');
 
   let position = offset;
+  let interrupted: unknown = null;
+
   try {
     await handle.truncate(offset);
 
-    for await (const piece of Readable.fromWeb(
-      stream as unknown as WebReadableStream,
-    )) {
-      if (position + piece.length > maxBytes) {
-        await handle.truncate(offset);
-        return {status: 'too-large'};
-      }
-
-      /*
-       * A write can report fewer bytes than it was given, so the piece is
-       * written until it is all down rather than once. Moving on after a short
-       * write would drop the rest of the piece and lay the next one over the
-       * gap, leaving a file whose byte count looks right and whose contents are
-       * not. A write that reports no progress at all cannot be retried usefully
-       * and is left to the caller.
-       */
-      let placed = 0;
-      while (placed < piece.length) {
-        const {bytesWritten} = await handle.write(
-          piece,
-          placed,
-          piece.length - placed,
-          position,
-        );
-        if (bytesWritten === 0) {
-          throw new Error(
-            `Wrote no bytes to ${partPath} at offset ${position}`,
-          );
+    /*
+     * Only the transfer itself is guarded. Whatever stopped it — the caller
+     * pausing, the connection dropping, the disk refusing a write — the bytes
+     * already reported as written are the most that can be claimed, and they
+     * are flushed below. A flush that then fails propagates, so bytes that
+     * could not be made durable are never counted as received.
+     */
+    try {
+      for await (const piece of Readable.fromWeb(
+        stream as unknown as WebReadableStream,
+      )) {
+        if (position + piece.length > maxBytes) {
+          await handle.truncate(offset);
+          return {status: 'too-large'};
         }
-        placed += bytesWritten;
-        position += bytesWritten;
+
+        /*
+         * A write can report fewer bytes than it was given, so the piece is
+         * written until it is all down rather than once. Moving on after a
+         * short write would drop the rest of the piece and lay the next one
+         * over the gap, leaving a file whose byte count looks right and whose
+         * contents are not. A write that reports no progress at all cannot be
+         * retried usefully, so it ends the transfer where it stands.
+         */
+        let placed = 0;
+        while (placed < piece.length) {
+          const {bytesWritten} = await handle.write(
+            piece,
+            placed,
+            piece.length - placed,
+            position,
+          );
+          if (bytesWritten === 0) {
+            throw new Error(
+              `Wrote no bytes to ${partPath} at offset ${position}`,
+            );
+          }
+          placed += bytesWritten;
+          position += bytesWritten;
+        }
       }
+    } catch (error: unknown) {
+      interrupted = error;
     }
 
     await handle.sync();
   } finally {
     await handle.close();
+  }
+
+  if (interrupted) {
+    /* A caller pausing or navigating away arrives here by the same door as a
+     * disk fault, and is the ordinary case — only the rest is worth a line, or
+     * routine use would bury the faults that matter. */
+    if (!isDisconnect(interrupted)) {
+      console.error(
+        `Stage upload part ${partPath} stopped at ${position}:`,
+        interrupted,
+      );
+    }
+    return {status: 'torn', offset: position};
   }
 
   return {status: 'ok', offset: position};
