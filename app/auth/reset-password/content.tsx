@@ -50,10 +50,15 @@ export default function Content({
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!tenantId) {
+      toast({title: i18n.t('TenantId is required'), variant: 'destructive'});
+      return;
+    }
+
     try {
       const res = await authClient.credentials.resetPassword.request({
         email: values.email,
-        tenantId: tenantId!,
+        tenantId,
         searchQuery,
       });
       if (!res.error && res.data?.data?.url) {

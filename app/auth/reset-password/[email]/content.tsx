@@ -169,6 +169,11 @@ export default function Page(props: {
   const strength = useMemo(() => passwordStrength(pwd || ''), [pwd]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!tenantId) {
+      toast({title: i18n.t('TenantId is required'), variant: 'destructive'});
+      return;
+    }
+
     const {password, confirmPassword, otp} = values;
 
     try {
@@ -177,7 +182,7 @@ export default function Page(props: {
         password,
         confirmPassword,
         otp,
-        tenantId: tenantId!,
+        tenantId,
       });
 
       if (!res.error) {
@@ -203,10 +208,15 @@ export default function Page(props: {
 
   const onResend = async () => {
     if (seconds > 0) return;
+    if (!tenantId) {
+      toast({title: i18n.t('TenantId is required'), variant: 'destructive'});
+      return;
+    }
+
     try {
       const res = await authClient.credentials.resetPassword.request({
         email,
-        tenantId: tenantId!,
+        tenantId,
         searchQuery,
       });
       if (!res.error) {
