@@ -12,10 +12,6 @@ const newsConfigSelect = {
   isShowPublicationAuthor: true,
   isShowPublicationDate: true,
   isShowPublicationTime: true,
-  newsHeroBgImage: {id: true},
-  newsHeroDescription: true,
-  newsHeroOverlayColorSelect: true,
-  newsHeroTitle: true,
   socialMediaSelect: true,
   ...commentConfigSelect,
 } as const satisfies SelectOptions<AOSPortalAppConfig>;

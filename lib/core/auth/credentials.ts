@@ -19,7 +19,7 @@ import {
 import {getAuthConfig} from './config';
 import {manager} from '@/tenant';
 import {withMattermostSync} from '@/lib/core/mattermost';
-import {RESET_PASSWORD} from '@/constants';
+import {APP_TITLE, RESET_PASSWORD} from '@/constants';
 import {findInviteById} from '@/app/auth/register/common/orm/register';
 import {registerByInvite} from '@/lib/core/auth/orm';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -55,7 +55,7 @@ const resetPasswordEmailHTML = ({
       <!DOCTYPE html>
       <html>
       <head>
-          <title>Goovee Password Reset</title>
+          <title>${APP_TITLE} Password Reset</title>
           <style>
               body {
                   font-family: Arial, sans-serif;
@@ -96,7 +96,7 @@ const resetPasswordEmailHTML = ({
       <body>
           <div class="container">
               <div class="header">
-                  <h1>Goovee Password Reset</h1>
+                  <h1>${APP_TITLE} Password Reset</h1>
               </div>
               <p>Dear User, We've received a request to reset the password for your account associated with ${email}. If you requested this change, please follow the instructions below:</p>
               <p>To reset your password, click the link : <a href='${link}' target='_blank'>${link}</a></p>
@@ -104,7 +104,7 @@ const resetPasswordEmailHTML = ({
               <p>This link will expire in 10 minutes, so be sure to reset your password before then.</p>
               <p>If you did not request this change or believe this is a mistake, please ignore this email. Your account remains secure, and no changes will be made.</p>
               <div class="footer">
-                  <p>Best regards,<br>The Goovee Team</p>
+                  <p>Best regards,<br>The ${APP_TITLE} Team</p>
               </div>
           </div>
       </body>
@@ -584,7 +584,7 @@ const credentials = {
 
               if (result?.otp) {
                 await mailService?.notify({
-                  subject: 'Goovee Password Reset',
+                  subject: `${APP_TITLE} Password Reset`,
                   to: email,
                   html: resetPasswordEmailHTML({email, otp: result.otp, link}),
                 });

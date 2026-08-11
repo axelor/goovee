@@ -2,7 +2,7 @@ import {padStart} from 'lodash-es';
 import {i18n} from '@/locale/i18n';
 import {dayjs, l10n} from '@/locale/l10n';
 import {DEFAULT_SCALE} from '@/locale/contants';
-import {addCurrency} from '@/locale/utils';
+import {addCurrency, transformLocale} from '@/locale/utils';
 
 /**
  * Numbers
@@ -163,6 +163,28 @@ export function formatDateTime(
   return standardized ? dayjs(standardized).format(format) : '';
 }
 
+export function formatDateRange(from: Date | string, to: Date | string) {
+  const start = standardizeDate(from);
+  const end = standardizeDate(to);
+
+  /* standardizeDate passes a Date through without validating it, and formatRange
+   * throws on an invalid one where the dayjs formatters render a string. */
+  if (!start || !end) return '';
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '';
+
+  /* Intl collapses whatever the two ends share — "March 12 – 14, 2026" in
+   * English, "12–14 mars 2026" in French — which no single dayjs pattern can
+   * express. Both ends resolve in the runtime timezone, as formatDate does.
+   * An empty locale would make the constructor throw, hence the fallback. */
+  const locale = transformLocale(l10n.getLocale());
+
+  return new Intl.DateTimeFormat(locale || undefined, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).formatRange(start, end);
+}
+
 export function formatDuration(
   value?: string | number,
   {big, seconds}: Pick<DateTimeFormatOpts, 'big' | 'seconds'> = {},
@@ -246,6 +268,7 @@ export const formatters = {
   formatDate,
   formatTime,
   formatDateTime,
+  formatDateRange,
   formatDuration,
   formatRelativeTime,
   standardizeDate,

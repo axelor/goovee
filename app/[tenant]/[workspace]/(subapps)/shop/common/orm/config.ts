@@ -18,14 +18,6 @@ const shopConfigSelect = {
   byMostExpensive: true,
   byNewest: true,
   byZToA: true,
-  carouselList: {
-    select: {
-      title: true,
-      subTitle: true,
-      href: true,
-      image: {id: true},
-    },
-  },
   company: {id: true},
   confirmOrder: true,
   defaultStockLocation: {id: true},

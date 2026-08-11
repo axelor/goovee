@@ -1,26 +1,21 @@
-import {Suspense} from 'react';
 import {notFound, redirect, unauthorized} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
+import {clone} from '@/utils';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {workspacePathname} from '@/utils/workspace';
 import {getLoginURL} from '@/utils/url';
 import {getCurrentPath} from '@/utils/current-path';
-import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
+import {ORDER_BY, SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 
 // ---- LOCAL IMPORTS ---- //
-import {
-  ForumNotificationSkeleton,
-  NotificationHeader,
-} from '@/subapps/forum/common/ui/components';
-import {MembersNoticationsWrapper} from './wrapper';
-import GroupAction from './groupAction';
+import type {MemberGroup} from '@/subapps/forum/common/types/forum';
+import {findGroupsByMembers} from '@/subapps/forum/common/orm/forum';
+import {ForumNotifSettings} from '@/subapps/forum/common/ui/components';
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string}>;
-  searchParams: Promise<{[key: string]: string | undefined}>;
 }) {
-  const searchParams = await props.searchParams;
   const params = await props.params;
   const {workspaceURL, workspaceURI, tenant} = workspacePathname(params);
 
@@ -51,23 +46,15 @@ export default async function Page(props: {
   }
 
   const {user} = access;
+  const {client} = access.tenant;
 
-  const group = searchParams?.group as string;
-  const sortBy = searchParams?.sortBy?.toUpperCase() as string;
+  const groups = (await findGroupsByMembers({
+    id: user.id,
+    orderBy: {forumGroup: {name: ORDER_BY.ASC}},
+    workspaceID: access.workspace.id,
+    client,
+    user,
+  }).then(clone)) as MemberGroup[];
 
-  return (
-    <div>
-      <GroupAction />
-      <NotificationHeader>
-        <Suspense fallback={<ForumNotificationSkeleton />}>
-          <MembersNoticationsWrapper
-            userId={user.id}
-            group={group}
-            sortBy={sortBy}
-            workspaceURL={workspaceURL}
-          />
-        </Suspense>
-      </NotificationHeader>
-    </div>
-  );
+  return <ForumNotifSettings groups={groups} />;
 }

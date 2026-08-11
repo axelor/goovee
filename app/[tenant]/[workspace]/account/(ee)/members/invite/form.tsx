@@ -40,7 +40,7 @@ const formSchema = z.object({
     z.string(),
     z.object({
       code: z.string(),
-      access: z.string(),
+      access: z.enum(['yes', 'no']),
       authorization: z
         .enum([Authorization.restricted, Authorization.total])
         .optional(),

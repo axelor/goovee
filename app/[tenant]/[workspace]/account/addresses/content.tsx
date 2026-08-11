@@ -3,16 +3,35 @@
 import {useRouter} from 'next/navigation';
 import {useEffect, useState, useTransition} from 'react';
 
+import {IconType} from 'react-icons';
+import {MdAdd, MdCheck, MdLocalShipping, MdReceiptLong} from 'react-icons/md';
+
 // ---- CORE IMPORTS ---- //
-import {Button, Separator} from '@/ui/components';
+import {
+  Button,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  formatAddressLine,
+} from '@/ui/components';
 import {i18n} from '@/locale';
+import type {PartnerAddress, PortalAddress} from '@/types';
 import {ADDRESS_TYPE, SUBAPP_CODES, SUBAPP_PAGE} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useToast} from '@/ui/hooks';
 import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
+import {cn} from '@/utils/css';
 
 // ---- LOCAL IMPORTS ---- //
-import {AddressesList} from '@/app/[tenant]/[workspace]/account/addresses/common/ui/components';
+import {
+  AddressEditModal,
+  type SavedAddress,
+} from '@/app/[tenant]/[workspace]/account/addresses/common/ui/components';
 import {
   confirmAddresses,
   deleteAddress,
@@ -29,8 +48,9 @@ interface ContentProps {
       id: string;
     } | null;
   };
-  invoicingAddresses: any;
-  deliveryAddresses: any;
+  invoicingAddresses: PartnerAddress[];
+  deliveryAddresses: PartnerAddress[];
+  countries?: Array<{id: string; name: string; version?: number}>;
   fromQuotation?: boolean;
   fromCheckout?: boolean;
   callbackURL?: string;
@@ -40,49 +60,45 @@ function Content({
   quotation,
   invoicingAddresses,
   deliveryAddresses,
+  countries = [],
   fromQuotation,
   fromCheckout,
   callbackURL,
 }: ContentProps) {
   const [initiating, setInitiating] = useState(true);
-  const [selectedAddresses, setSelectedAddresses] = useState({
+  const [selectedAddresses, setSelectedAddresses] = useState<{
+    invoicing: PortalAddress | null;
+    delivery: PortalAddress | null;
+  }>({
     invoicing: null,
     delivery: null,
   });
+  const [addressModal, setAddressModal] = useState<{
+    kind: 'invoicing' | 'shipping';
+    address?: PartnerAddress;
+  } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
   const {workspaceURI, workspaceURL} = useWorkspace();
   const router = useRouter();
   const {toast} = useToast();
-  const {cart, updateAddress} = useCart();
+  const {cart, loaded: cartLoaded, updateAddress} = useCart();
 
   const isSubAppActive = fromQuotation || fromCheckout;
 
-  const queryParams: any = {};
-
-  if (fromQuotation) {
-    queryParams.quotation = quotation.id;
-  } else if (fromCheckout) {
-    queryParams.checkout = true;
-  }
-
-  if (callbackURL) {
-    queryParams.callbackURL = callbackURL;
-  }
-
-  const queryString = new URLSearchParams(queryParams).toString();
-
   const handleCreate = (type: ADDRESS_TYPE) => {
-    router.push(
-      `${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}/${type}/${SUBAPP_PAGE.create}${queryString ? `?${queryString}` : ''}`,
-    );
+    setAddressModal({
+      kind: type === ADDRESS_TYPE.invoicing ? 'invoicing' : 'shipping',
+    });
   };
 
-  const handleEdit = (type: ADDRESS_TYPE, id: string | number) => {
-    router.push(
-      `${workspaceURI}/${SUBAPP_PAGE.account}/${SUBAPP_PAGE.addresses}/${type}/${SUBAPP_PAGE.edit}/${id}${queryString ? `?${queryString}` : ''}`,
-    );
+  const handleEdit = (type: ADDRESS_TYPE, record: PartnerAddress) => {
+    setAddressModal({
+      kind: type === ADDRESS_TYPE.invoicing ? 'invoicing' : 'shipping',
+      address: record,
+    });
   };
 
   const handleDefault = async (
@@ -124,11 +140,37 @@ function Content({
     }
   };
 
-  const handleAddressSelection = (type: ADDRESS_TYPE, partnerAddress: any) => {
+  const handleAddressSelection = (
+    type: ADDRESS_TYPE,
+    partnerAddress: PartnerAddress,
+  ) => {
     if (fromCheckout) {
       updateAddress({addressType: type, address: partnerAddress?.id});
     }
     setSelectedAddresses(prev => ({...prev, [type]: partnerAddress.address}));
+  };
+
+  const handleSaved = (created: SavedAddress | null) => {
+    /* A new address becomes the checkout selection by reaching the cart, the
+     * same way picking an existing card does. It is claimed for the section it
+     * was created from when it can be used there, and for the other one
+     * otherwise — an address restricted to a single use is not listed in the
+     * other section at all. */
+    if (fromCheckout && created) {
+      const claimForDelivery =
+        addressModal?.kind === 'shipping'
+          ? created.isDeliveryAddr
+          : !created.isInvoicingAddr;
+
+      updateAddress({
+        addressType: claimForDelivery
+          ? ADDRESS_TYPE.delivery
+          : ADDRESS_TYPE.invoicing,
+        address: created.id,
+      });
+    }
+
+    router.refresh();
   };
 
   const handleQuotationConfirm = () => {
@@ -153,8 +195,14 @@ function Content({
           subAppCode: SUBAPP_CODES.quotations,
           record: {
             id: quotationId,
-            deliveryAddress: deliveryAddress,
-            mainInvoicingAddress: invoicingAddress,
+            deliveryAddress: deliveryAddress as {
+              id: string;
+              formattedFullName: string;
+            },
+            mainInvoicingAddress: invoicingAddress as {
+              id: string;
+              formattedFullName: string;
+            },
           },
         });
 
@@ -192,7 +240,13 @@ function Content({
   };
 
   useEffect(() => {
-    let invoicingAddress: any, deliveryAddress: any;
+    /* Only the checkout path seeds itself from the cart, so only it has to wait
+     * for the stored cart to be read. Acting on an unread cart would settle on
+     * "no address chosen" and drop out of the initiating state too early. */
+    if (fromCheckout && !cartLoaded) return;
+
+    let invoicingAddress: PortalAddress | null = null,
+      deliveryAddress: PortalAddress | null = null;
 
     if (fromQuotation) {
       invoicingAddress = quotation?.invoicingAddress || null;
@@ -207,7 +261,7 @@ function Content({
       delivery: deliveryAddress,
     });
     setInitiating(false);
-  }, [fromCheckout, fromQuotation, cart, quotation]);
+  }, [fromCheckout, fromQuotation, cartLoaded, cart, quotation]);
 
   useEffect(() => {
     router.refresh();
@@ -218,65 +272,283 @@ function Content({
   }
 
   return (
-    <>
-      <div className="bg-white p-4 rounded-lg flex flex-col gap-4">
-        {isSubAppActive && (
-          <>
-            <h4 className="text-xl font-medium mb-0">
-              {i18n.t('Choose your address')}
-            </h4>
-            <Separator className="my-2" />
-          </>
-        )}
+    <div className="flex flex-col gap-4">
+      {isSubAppActive && (
+        <h4 className="text-lg font-bold text-ink-900 mb-0">
+          {i18n.t('Choose your address')}
+        </h4>
+      )}
 
-        <div className="border border-gray-400 p-4 rounded-lg flex flex-col gap-4">
-          <div className="flex flex-col gap-4">
-            <div className="font-semibold text-xl">
-              {i18n.t('Invoicing address')}
-            </div>
-            <AddressesList
-              isFromQuotation={fromQuotation}
-              currentAddress={selectedAddresses.invoicing}
-              addresses={invoicingAddresses}
-              type={ADDRESS_TYPE.invoicing}
-              onCreate={handleCreate}
-              onEdit={handleEdit}
-              onSelect={isSubAppActive ? handleAddressSelection : undefined}
-              onDelete={handleDelete}
-              onDefault={handleDefault}
-            />
-          </div>
-
-          <Separator className="my-2" />
-
-          <div className="flex flex-col gap-4">
-            <div className="font-semibold text-xl">
-              {i18n.t('Delivery address')}
-            </div>
-            <AddressesList
-              isFromQuotation={fromQuotation}
-              currentAddress={selectedAddresses.delivery}
-              addresses={deliveryAddresses}
-              type={ADDRESS_TYPE.delivery}
-              onCreate={handleCreate}
-              onEdit={handleEdit}
-              onSelect={isSubAppActive ? handleAddressSelection : undefined}
-              onDelete={handleDelete}
-              onDefault={handleDefault}
-            />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <SelectableAddressSection
+          icon={MdReceiptLong}
+          title={i18n.t('Invoicing address')}
+          type={ADDRESS_TYPE.invoicing}
+          addresses={invoicingAddresses}
+          currentAddress={selectedAddresses.invoicing}
+          isFromQuotation={fromQuotation}
+          selectable={isSubAppActive}
+          onSelect={handleAddressSelection}
+          onEdit={handleEdit}
+          onDelete={setPendingDelete}
+          onDefault={handleDefault}
+          onAdd={handleCreate}
+        />
+        <SelectableAddressSection
+          icon={MdLocalShipping}
+          title={i18n.t('Delivery address')}
+          type={ADDRESS_TYPE.delivery}
+          addresses={deliveryAddresses}
+          currentAddress={selectedAddresses.delivery}
+          isFromQuotation={fromQuotation}
+          selectable={isSubAppActive}
+          onSelect={handleAddressSelection}
+          onEdit={handleEdit}
+          onDelete={setPendingDelete}
+          onDefault={handleDefault}
+          onAdd={handleCreate}
+        />
       </div>
+
       {isSubAppActive && (
         <Button
-          variant="success"
+          variant="royal"
           className="w-full py-1.5"
           onClick={handleConfirm}
           disabled={isPending}>
           {isPending ? i18n.t('Processing...') : i18n.t('Confirm address')}
         </Button>
       )}
-    </>
+
+      {addressModal && (
+        <AddressEditModal
+          open
+          kind={addressModal.kind}
+          address={addressModal.address ?? null}
+          countries={countries}
+          onClose={() => setAddressModal(null)}
+          onSaved={handleSaved}
+        />
+      )}
+
+      <AlertDialog
+        open={pendingDelete !== null}
+        onOpenChange={value => !value && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {i18n.t('Delete this address?')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('This action cannot be undone.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{i18n.t('Cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (pendingDelete) handleDelete(pendingDelete);
+                setPendingDelete(null);
+              }}>
+              {i18n.t('Delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+function getLabel(address: PortalAddress | null | undefined): string {
+  return (
+    address?.addressl2 ||
+    address?.department ||
+    address?.companyName ||
+    [address?.firstName, address?.lastName].filter(Boolean).join(' ') ||
+    i18n.t('Address')
+  );
+}
+
+function getContact(
+  address: PortalAddress | null | undefined,
+  label: string,
+): string {
+  const contact =
+    address?.companyName ||
+    [address?.firstName, address?.lastName].filter(Boolean).join(' ') ||
+    '';
+  return contact && contact !== label ? contact : '';
+}
+
+function SelectableAddressSection({
+  icon: Icon,
+  title,
+  type,
+  addresses,
+  currentAddress,
+  isFromQuotation,
+  selectable,
+  onSelect,
+  onEdit,
+  onDelete,
+  onDefault,
+  onAdd,
+}: {
+  icon: IconType;
+  title: string;
+  type: ADDRESS_TYPE;
+  addresses: PartnerAddress[];
+  currentAddress?: PortalAddress | null;
+  isFromQuotation?: boolean;
+  selectable?: boolean;
+  onSelect: (type: ADDRESS_TYPE, partnerAddress: PartnerAddress) => void;
+  onEdit: (type: ADDRESS_TYPE, record: PartnerAddress) => void;
+  onDelete: (id: string) => void;
+  onDefault: (type: ADDRESS_TYPE, id: string, isDefault: boolean) => void;
+  onAdd: (type: ADDRESS_TYPE) => void;
+}) {
+  const isInvoicing = type === ADDRESS_TYPE.invoicing;
+
+  return (
+    <div className="bg-white border border-ink-100 rounded-xl shadow-xs p-5">
+      <div className="flex items-center gap-2.5 mb-4">
+        <span className="w-8 h-8 rounded-lg bg-royal-pale text-royal grid place-items-center">
+          <Icon className="size-4" />
+        </span>
+        <h3 className="text-base font-bold text-ink-900 mb-0">{title}</h3>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3">
+        {(addresses ?? []).map(record => {
+          const {id, address, isDefaultAddr} = record;
+          const selected = isFromQuotation
+            ? currentAddress?.id === address?.id
+            : currentAddress?.id === id;
+          const isDefault = Boolean(isDefaultAddr);
+          const label = getLabel(address);
+          const contact = getContact(address, label);
+
+          return (
+            <div
+              key={String(id ?? address?.id)}
+              role={selectable ? 'button' : undefined}
+              tabIndex={selectable ? 0 : undefined}
+              onClick={
+                selectable ? () => onSelect(type, {id, address}) : undefined
+              }
+              onKeyDown={
+                selectable
+                  ? e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelect(type, {id, address});
+                      }
+                    }
+                  : undefined
+              }
+              className={cn(
+                'relative flex flex-col rounded-[14px] p-[18px] transition-all',
+                selectable && 'cursor-pointer',
+                selected
+                  ? 'border-[1.5px] border-royal shadow-[0_0_0_3px_rgba(21,84,181,0.08)]'
+                  : 'border border-ink-100 hover:border-ink-200',
+              )}>
+              <div className="flex items-start justify-between gap-2.5 mb-2">
+                <span className="text-[14.5px] font-bold text-ink-900">
+                  {label}
+                </span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {isDefault && (
+                    <Tag mint={isInvoicing} label={i18n.t('Default')} />
+                  )}
+                  {selected && (
+                    <span className="w-5 h-5 rounded-full bg-royal text-white grid place-items-center">
+                      <MdCheck className="size-3" />
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-[13px] text-ink-700 leading-relaxed">
+                {formatAddressLine(address?.formattedFullName)}
+              </div>
+              {contact && (
+                <div className="text-xs text-ink-500 mt-1.5">{contact}</div>
+              )}
+
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-ink-100">
+                {!isDefault && (
+                  <button
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onDefault(type, String(id), true);
+                    }}
+                    className="text-[12.5px] font-bold text-royal">
+                    {i18n.t('Set as default')}
+                  </button>
+                )}
+                <div className="flex-1" />
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation();
+                    onEdit(type, record);
+                  }}
+                  className="text-[12.5px] font-semibold text-ink-600 hover:text-ink-900">
+                  {i18n.t('Edit')}
+                </button>
+                <button
+                  type="button"
+                  disabled={isDefault}
+                  onClick={e => {
+                    e.stopPropagation();
+                    onDelete(String(id));
+                  }}
+                  title={
+                    isDefault
+                      ? i18n.t('Default address — reassign before deleting')
+                      : i18n.t('Delete')
+                  }
+                  className={cn(
+                    'text-[12.5px] font-semibold',
+                    isDefault
+                      ? 'text-ink-300 cursor-not-allowed'
+                      : 'text-destructive',
+                  )}>
+                  {i18n.t('Delete')}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={() => onAdd(type)}
+          className="flex flex-col items-center justify-center gap-2 min-h-[110px] rounded-[14px] border border-dashed border-ink-200 p-[18px] text-[13px] font-semibold text-ink-500 transition-colors hover:border-royal hover:bg-ink-25">
+          <span className="w-9 h-9 rounded-full bg-royal-pale text-royal grid place-items-center">
+            <MdAdd className="size-4" />
+          </span>
+          {isInvoicing
+            ? i18n.t('New invoicing address')
+            : i18n.t('New delivery address')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Tag({label, mint}: {label: string; mint?: boolean}) {
+  return (
+    <span
+      className={cn(
+        'shrink-0 text-[10.5px] font-bold px-2 py-0.5 rounded-full',
+        mint ? 'bg-mint-50 text-mint-700' : 'bg-royal-pale text-royal-dark',
+      )}>
+      {label}
+    </span>
   );
 }
 

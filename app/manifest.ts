@@ -1,17 +1,13 @@
 import type {MetadataRoute} from 'next';
 
 // ---- CORE IMPORTS ---- //
-import {
-  APP_DESCRIPTION,
-  APP_TEMPLATE_TITLE,
-  DEFAULT_APP_TEMPLATE_TITLE,
-} from '@/constants';
+import {APP_DESCRIPTION, APP_TITLE, DEFAULT_APP_TITLE} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: DEFAULT_APP_TEMPLATE_TITLE,
-    short_name: APP_TEMPLATE_TITLE,
+    name: DEFAULT_APP_TITLE,
+    short_name: APP_TITLE,
     description: APP_DESCRIPTION,
     id: withBasePath('/'),
     start_url: withBasePath('/'),

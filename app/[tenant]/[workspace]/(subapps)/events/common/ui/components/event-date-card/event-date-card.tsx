@@ -9,7 +9,7 @@ import {i18n} from '@/locale';
 import {formatDateTime} from '@/locale/formatters';
 
 // ---- LOCAL IMPORTS ---- //
-import {EventDateCardProps} from '@/subapps/events/common/ui/components';
+import type {EventDateCardProps} from './types';
 
 export const EventDateCard = ({
   startDate,
@@ -22,16 +22,16 @@ export const EventDateCard = ({
   useEffect(() => {
     if (startDate) {
       const startDateTime = formatDateTime(startDate, {
-        dateFormat: 'MMMM D YYYY -',
-        timeFormat: 'h:mmA',
+        dateFormat: 'LL -',
+        timeFormat: 'HH:mm',
       });
       setStartDateTime(startDateTime);
     }
 
     if (endDate && !eventAllDay) {
       const endDateTime = formatDateTime(endDate!, {
-        dateFormat: 'MMMM D YYYY -',
-        timeFormat: 'h:mmA',
+        dateFormat: 'LL -',
+        timeFormat: 'HH:mm',
       });
       setEndDateTime(endDateTime);
     }

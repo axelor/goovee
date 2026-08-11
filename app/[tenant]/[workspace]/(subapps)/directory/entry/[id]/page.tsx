@@ -65,38 +65,43 @@ export default async function Page(props: {
   if (!entry) notFound();
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <Link
-        href={`${workspaceURI}/${SUBAPP_CODES.directory}`}
-        className="mb-4 inline-flex items-center gap-2 text-primary hover:underline">
-        <IoArrowBackOutline className="h-5 w-5" />
-        {await t('Back to Directory')}
-      </Link>
-      <div className="bg-card shadow-lg rounded-lg overflow-hidden">
-        <Details entryDetail={entry} tenant={tenant} />
-        <div className="p-4 sm:p-6 lg:p-8">
-          <Map
-            className="h-96 w-full rounded-md"
-            entries={[clone(entry)]}
-            config={config}
-          />
-        </div>
-      </div>
-
-      {entry.mainPartnerContacts && entry.mainPartnerContacts?.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl mb-6">
-            {await t(
-              entry.mainPartnerContacts.length > 1 ? 'Contacts' : 'Contact',
-            )}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {entry.mainPartnerContacts.map(contact => (
-              <Contact key={contact.id} tenant={tenant} contact={contact} />
-            ))}
+    <div className="bg-ink-25 min-h-full">
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <Link
+          href={`${workspaceURI}/${SUBAPP_CODES.directory}`}
+          className="mb-4 inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700">
+          <IoArrowBackOutline className="h-4 w-4" />
+          {await t('Back to Directory')}
+        </Link>
+        <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
+          <Details entryDetail={entry} tenant={tenant} />
+          <div className="px-4 sm:px-6 lg:px-8 pb-6">
+            <Map
+              className="h-96 w-full rounded-lg"
+              entries={[clone(entry)]}
+              config={config}
+            />
           </div>
         </div>
-      )}
+
+        {entry.mainPartnerContacts && entry.mainPartnerContacts?.length > 0 && (
+          <div className="mt-8">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400 mb-1">
+              {await t('Reach out')}
+            </p>
+            <h2 className="text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl mb-6">
+              {await t(
+                entry.mainPartnerContacts.length > 1 ? 'Contacts' : 'Contact',
+              )}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {entry.mainPartnerContacts.map(contact => (
+                <Contact key={contact.id} tenant={tenant} contact={contact} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -126,7 +131,7 @@ async function Details({
           <Image
             width={192}
             height={192}
-            className="rounded-lg object-cover w-36 h-36 sm:w-48 sm:h-48"
+            className="rounded-xl object-contain w-36 h-36 sm:w-48 sm:h-48 bg-ink-50 p-3"
             src={getPartnerImageURL(picture?.id, tenant, {
               noimage: true,
               noimageSrc: NO_IMAGE_URL,
@@ -135,11 +140,11 @@ async function Details({
           />
         </div>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+          <h1 className="text-3xl font-bold text-ink-900 sm:text-4xl tracking-[-0.01em] leading-tight">
             {portalCompanyName}
           </h1>
           {mainAddress?.formattedFullName && (
-            <p className="mt-2 text-lg text-muted-foreground">
+            <p className="mt-2 text-sm text-ink-500">
               {mainAddress.formattedFullName}
             </p>
           )}
@@ -264,10 +269,10 @@ async function Contact({
     .join(' ');
 
   return (
-    <div className="bg-card rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-xl border border-ink-100 shadow-xs overflow-hidden">
       <div className="p-5">
         <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
+          <Avatar className="h-16 w-16 bg-royal-pale rounded-xl">
             <AvatarImage
               className="object-cover"
               src={getPartnerImageURL(picture?.id, tenant, {noimage: true})}
@@ -276,9 +281,11 @@ async function Contact({
             />
           </Avatar>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-foreground">{displayName}</h3>
+            <h3 className="text-base font-bold text-ink-900 leading-tight">
+              {displayName}
+            </h3>
             {jobTitleFunction?.name && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-ink-500 mt-1">
                 {await tattr(jobTitleFunction.name)}
               </p>
             )}

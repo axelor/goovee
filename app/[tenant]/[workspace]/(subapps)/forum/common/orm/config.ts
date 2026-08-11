@@ -7,10 +7,6 @@ import type {Payload, SelectOptions} from '@goovee/orm';
 import {commentConfigSelect} from '@/orm/workspace';
 
 const forumConfigSelect = {
-  forumHeroBgImage: {id: true},
-  forumHeroDescription: true,
-  forumHeroOverlayColorSelect: true,
-  forumHeroTitle: true,
   ...commentConfigSelect,
 } as const satisfies SelectOptions<AOSPortalAppConfig>;
 

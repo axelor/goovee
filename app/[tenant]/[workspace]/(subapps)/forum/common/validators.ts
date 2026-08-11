@@ -3,11 +3,13 @@ import {z} from 'zod';
 // ---- CORE IMPORTS ---- //
 import {IdSchema, WorkspaceURLSchema} from '@/utils/validators';
 import {uploadTokenSchema} from '@/lib/core/upload/validators';
-import {ORDER_BY} from '@/constants';
 import {SORT_TYPE} from '@/comments';
 
 // ---- LOCAL IMPORTS ---- //
-import {MAX_FORUM_ATTACHMENTS} from '@/subapps/forum/common/constants';
+import {
+  MAX_FORUM_ATTACHMENTS,
+  NOTIFICATION_VALUES,
+} from '@/subapps/forum/common/constants';
 
 const WorkspaceURISchema = z.string().min(1);
 
@@ -19,15 +21,6 @@ export const PostAttachmentSchema = z.object({
   title: z.string(),
 });
 export type PostAttachmentInput = z.infer<typeof PostAttachmentSchema>;
-
-export const PinGroupSchema = z.object({
-  isPin: z.boolean(),
-  id: IdSchema,
-  groupID: IdSchema,
-  workspaceURL: WorkspaceURLSchema,
-  workspaceURI: WorkspaceURISchema,
-});
-export type PinGroupInput = z.infer<typeof PinGroupSchema>;
 
 export const ExitGroupSchema = z.object({
   id: IdSchema,
@@ -45,15 +38,30 @@ export const JoinGroupSchema = z.object({
 });
 export type JoinGroupInput = z.infer<typeof JoinGroupSchema>;
 
-export const AddGroupNotificationSchema = z.object({
-  id: IdSchema,
-  groupID: IdSchema,
-  notificationType: z.string().min(1),
+/* The 4 known notification levels, unlike the free-form string the previous
+ * per-row action accepted. */
+export const NotificationValueSchema = z.enum([
+  NOTIFICATION_VALUES.ALL,
+  NOTIFICATION_VALUES.ALL_ON_MY_POST,
+  NOTIFICATION_VALUES.NEW_COMMENTS_ON_MY_POST,
+  NOTIFICATION_VALUES.NONE,
+]);
+
+export const SaveGroupNotificationsSchema = z.object({
+  prefs: z
+    .array(
+      z.object({
+        id: IdSchema,
+        groupID: IdSchema,
+        notificationType: NotificationValueSchema,
+      }),
+    )
+    .min(1),
   workspaceURL: WorkspaceURLSchema,
   workspaceURI: WorkspaceURISchema,
 });
-export type AddGroupNotificationInput = z.infer<
-  typeof AddGroupNotificationSchema
+export type SaveGroupNotificationsInput = z.infer<
+  typeof SaveGroupNotificationsSchema
 >;
 
 export const GetSubscribersByGroupSchema = z.object({
@@ -63,13 +71,6 @@ export const GetSubscribersByGroupSchema = z.object({
 export type GetSubscribersByGroupInput = z.infer<
   typeof GetSubscribersByGroupSchema
 >;
-
-export const FindMediaSchema = z.object({
-  id: IdSchema,
-  workspaceURL: WorkspaceURLSchema,
-  archived: z.boolean().optional(),
-});
-export type FindMediaInput = z.infer<typeof FindMediaSchema>;
 
 export const AddPostSchema = z.object({
   group: z.object({id: IdSchema}),
@@ -107,30 +108,33 @@ export const FetchPostsSchema = z.object({
 });
 export type FetchPostsInput = z.input<typeof FetchPostsSchema>;
 
-/* Whitelist the only orderBy shape the UI sends — order forum-group rows by
- * name ascending/descending — instead of forwarding an arbitrary object into
- * the ORM `.find()`. Unknown directions normalize to undefined (unordered);
- * unknown keys are stripped by the object schema. */
-const OrderDirectionSchema = z
-  .string()
-  .nullish()
-  .transform(v => {
-    const upper = v?.toUpperCase();
-    return upper === ORDER_BY.ASC || upper === ORDER_BY.DESC
-      ? (upper as typeof ORDER_BY.ASC | typeof ORDER_BY.DESC)
-      : undefined;
-  });
-
-export const FetchGroupsByMembersSchema = z.object({
+export const ToggleReactionSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  target: z.enum(['post', 'comment']),
   id: IdSchema,
-  searchKey: z.string().optional(),
-  orderBy: z
-    .object({
-      forumGroup: z.object({name: OrderDirectionSchema}),
-    })
-    .optional(),
-  workspaceURL: z.string(),
+  value: z.enum(['like', 'dislike']),
 });
-export type FetchGroupsByMembersInput = z.input<
-  typeof FetchGroupsByMembersSchema
->;
+export type ToggleReaction = z.infer<typeof ToggleReactionSchema>;
+
+export const FindSearchPostsSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  search: z.string().trim().optional(),
+});
+
+export const ReactionSummarySchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  postIds: z.array(IdSchema).optional().default([]),
+  commentIds: z.array(IdSchema).optional().default([]),
+});
+
+export const SetBestReplySchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  postId: IdSchema,
+  commentId: IdSchema.nullable(),
+});
+
+export const SetPostStatusSchema = z.object({
+  workspaceURL: WorkspaceURLSchema,
+  postId: IdSchema,
+  resolved: z.boolean(),
+});

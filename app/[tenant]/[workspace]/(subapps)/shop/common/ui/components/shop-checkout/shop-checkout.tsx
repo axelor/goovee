@@ -1,0 +1,583 @@
+'use client';
+
+import {useEffect, useMemo, useRef, useState} from 'react';
+import Image from 'next/image';
+import {Link} from '@/ui/components/link';
+import {AddressLines} from '@/ui/components';
+import {MdAdd, MdArrowBack, MdCheck, MdPlace} from 'react-icons/md';
+
+import {SUBAPP_CODES, ADDRESS_TYPE} from '@/constants';
+import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
+import {useCart} from '@/app/[tenant]/[workspace]/(subapps)/shop/common/context/cart-context';
+import {i18n} from '@/locale';
+import {getProductImageURL} from '@/utils/files';
+import {cn} from '@/utils/css';
+import {computeTotal} from '@/utils/cart';
+import {calculateAdvanceAmount} from '@/utils/payment';
+import {formatNumber} from '@/lib/core/locale/formatters';
+import type {Cloned} from '@/types/util';
+import type {CartItem, ComputedProduct, PartnerAddress} from '@/types';
+import type {Subapp} from '@/orm/workspace';
+import type {EnrichedCartItem} from '@/subapps/shop/common/types';
+
+type ResolvedCartItem = EnrichedCartItem & {computedProduct: ComputedProduct};
+
+import {
+  fetchDeliveryAddresses,
+  fetchInvoicingAddresses,
+  findDefaultDelivery,
+  findDefaultInvoicing,
+} from '@/subapps/shop/common/actions/address';
+import type {ShopConfig} from '@/subapps/shop/common/orm/config';
+import {ShopPayments} from '../shop-payments';
+import {
+  getCategoryGradient,
+  getCategoryHue,
+} from '@/subapps/shop/common/utils/category-style';
+import {PriceWarning} from '@/subapps/shop/common/ui/components/price-warning';
+import {findProduct} from '@/subapps/shop/common/actions/cart';
+
+export interface ShopCheckoutLabels {
+  backToCart: string;
+  step1: string;
+  step2: string;
+  step3: string;
+  pageTitle: string;
+  addressCardTitle: string;
+  addressDefaultBadge: string;
+  addressNewAction: string;
+  addressNoneTitle: string;
+  addressLoading: string;
+  shippingCardTitle: string;
+  shippingRegular: string;
+  shippingRegularSubtitle: string;
+  shippingFast: string;
+  shippingFastSubtitle: string;
+  paymentCardTitle: string;
+  summaryTitle: string;
+  qtyPrefix: string;
+  subtotalHtLabel: string;
+  vatLabel: string;
+  shippingLabel: string;
+  totalLabel: string;
+  secureNotice: string;
+  emptyCartTitle: string;
+  loading: string;
+}
+
+export function ShopCheckout({
+  config,
+  orderSubapp,
+  labels,
+}: {
+  config: ShopConfig | Cloned<ShopConfig>;
+  orderSubapp?: Subapp | null;
+  labels: ShopCheckoutLabels;
+}) {
+  const {workspaceURI, workspaceURL, tenant} = useWorkspace();
+  const {cart, loaded: cartLoaded} = useCart();
+  const [computedProducts, setComputedProducts] = useState<ComputedProduct[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+  /* Mirrors what has been resolved. The check below reads it instead of the
+   * state so this effect never depends on a value it also writes, which would
+   * make it re-trigger itself on every pass. */
+  const resolvedRef = useRef<ComputedProduct[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      /* Hold the loading state until the stored cart has been read — an unread
+       * cart is indistinguishable from an empty one. Re-armed rather than just
+       * skipped, because switching workspace puts an already-loaded cart back
+       * into the unread state. */
+      if (!cartLoaded) {
+        if (!cancelled) setLoading(true);
+        return;
+      }
+      const items = cart.items ?? [];
+      if (!items.length) {
+        if (!cancelled) {
+          resolvedRef.current = [];
+          setComputedProducts([]);
+          setLoading(false);
+        }
+        return;
+      }
+      /* Picking an address writes to the cart, so without this the summary
+       * would re-price every line each time one is chosen. */
+      const alreadyResolved = new Set(
+        resolvedRef.current.map(computed => String(computed?.product?.id)),
+      );
+      if (
+        items.every((cartItem: CartItem) =>
+          alreadyResolved.has(String(cartItem.product)),
+        )
+      ) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      try {
+        const results = await Promise.all(
+          items.map((i: CartItem) =>
+            findProduct({id: String(i.product), workspaceURL}),
+          ),
+        );
+        if (!cancelled) {
+          const resolved = results.filter((p): p is ComputedProduct =>
+            Boolean(p),
+          );
+          resolvedRef.current = resolved;
+          setComputedProducts(resolved);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [cart, cartLoaded, workspaceURL]);
+
+  const items = useMemo<ResolvedCartItem[]>(() => {
+    return ((cart?.items ?? []) as CartItem[])
+      .map(i => ({
+        ...i,
+        computedProduct: computedProducts.find(
+          cp => Number(cp?.product?.id) === Number(i.product),
+        ),
+      }))
+      .filter((i): i is ResolvedCartItem => i.computedProduct != null);
+  }, [cart?.items, computedProducts]);
+
+  // Total through the shared pricing layer so the displayed amount matches what
+  // the server actually charges (currency scale, WT/ATI mode, advance payment).
+  const totals = useMemo(
+    () => computeTotal({cart: {items}, config}),
+    [items, config],
+  );
+  const total = Number(totals.total) || 0;
+  const totalScale = totals.scale.currency;
+  const totalSymbol = totals.currency.symbol;
+  const displayTotal = formatNumber(total, {
+    scale: totalScale,
+    currency: totalSymbol,
+    type: 'DECIMAL',
+  });
+
+  const advanceAmount = config?.payInAdvance
+    ? calculateAdvanceAmount({
+        amount: total,
+        percentage:
+          config.advancePaymentPercentage != null
+            ? Number(config.advancePaymentPercentage)
+            : undefined,
+        payInAdvance: config.payInAdvance,
+      })
+    : null;
+  const displayAdvance =
+    advanceAmount != null && advanceAmount !== total
+      ? formatNumber(advanceAmount, {
+          scale: totalScale,
+          currency: totalSymbol,
+          type: 'DECIMAL',
+        })
+      : null;
+
+  const currency =
+    items[0]?.computedProduct?.product?.saleCurrency?.symbol ?? '€';
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(undefined, {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+      .format(n)
+      .concat(' ', currency);
+
+  const cartHref = `${workspaceURI}/${SUBAPP_CODES.shop}/cart`;
+  const confirmOrder = !!config?.confirmOrder;
+  // Workspaces configured to hide prices must not surface any amount, even
+  // inside the checkout summary (parity with the pre-redesign gate).
+  const displayPrices = Boolean(config?.displayPrices);
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-ink-25">
+      <div className="px-6 md:px-8 py-6 pb-14 max-w-[1100px] mx-auto">
+        <Link
+          href={cartHref}
+          className="inline-flex items-center gap-1.5 mb-4 text-[13px] text-ink-500 hover:text-ink-700 transition-colors">
+          <MdArrowBack className="text-sm" />
+          {labels.backToCart}
+        </Link>
+
+        {/* Stepper */}
+        <div className="flex items-center gap-1.5 mb-[26px] flex-wrap">
+          <StepPill state="done" label={labels.step1} />
+          <ChevronSep />
+          <StepPill state="active" label={labels.step2} />
+          <ChevronSep />
+          <StepPill state="idle" label={labels.step3} />
+        </div>
+
+        <h1 className="m-0 mb-[22px] text-[28px] font-extrabold text-ink-900 tracking-[-0.025em]">
+          {labels.pageTitle}
+        </h1>
+
+        {loading ? (
+          <div className="bg-white border border-ink-100 rounded-2xl px-6 py-14 text-center shadow-xs">
+            <p className="text-[13px] text-ink-500">{labels.loading}…</p>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="bg-white border border-ink-100 rounded-2xl px-6 py-14 text-center shadow-xs">
+            <p className="text-base font-bold text-ink-900">
+              {labels.emptyCartTitle}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+            {/* Left: cards */}
+            <div className="flex flex-col gap-[18px]">
+              <SectionCard title={labels.addressCardTitle}>
+                <CheckoutAddressPicker
+                  type={ADDRESS_TYPE.delivery}
+                  workspaceURI={workspaceURI}
+                  defaultBadgeLabel={labels.addressDefaultBadge}
+                  newActionLabel={labels.addressNewAction}
+                  noneTitle={labels.addressNoneTitle}
+                  loadingLabel={labels.addressLoading}
+                />
+              </SectionCard>
+
+              <SectionCard title={i18n.t('Billing address')}>
+                <CheckoutAddressPicker
+                  type={ADDRESS_TYPE.invoicing}
+                  workspaceURI={workspaceURI}
+                  defaultBadgeLabel={labels.addressDefaultBadge}
+                  newActionLabel={labels.addressNewAction}
+                  noneTitle={labels.addressNoneTitle}
+                  loadingLabel={labels.addressLoading}
+                />
+              </SectionCard>
+            </div>
+
+            {/* Right sticky summary */}
+            <aside className="lg:sticky lg:top-5">
+              <div className="bg-white border border-ink-100 rounded-2xl overflow-hidden shadow-xs">
+                <div className="px-[22px] pt-[18px] pb-3.5 border-b border-ink-100">
+                  <h3 className="m-0 text-base font-bold text-ink-900">
+                    {labels.summaryTitle}
+                  </h3>
+                </div>
+                <ul className="flex flex-col gap-3 px-[22px] py-3.5 border-b border-ink-100">
+                  {items.map((item: ResolvedCartItem) => (
+                    <SummaryRow
+                      key={item.computedProduct.product.id}
+                      item={item}
+                      tenant={String(tenant)}
+                      qtyPrefix={labels.qtyPrefix}
+                      fmt={fmt}
+                      displayPrices={displayPrices}
+                    />
+                  ))}
+                </ul>
+                <div className="p-[22px]">
+                  {displayPrices && (
+                    <>
+                      <div className="flex justify-between items-baseline pt-1">
+                        <span className="text-sm font-bold text-ink-900">
+                          {labels.totalLabel}
+                        </span>
+                        <span className="text-[22px] font-extrabold text-ink-900 tabular-nums tracking-[-0.02em]">
+                          {displayTotal}
+                        </span>
+                      </div>
+                      {displayAdvance && (
+                        <div className="mt-2 pt-2 border-t border-ink-100">
+                          <TotalsRow
+                            label={i18n.t('Advance Amount Due')}
+                            value={displayAdvance}
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {/* Payment sits right under the amount. */}
+                  {confirmOrder && (
+                    <div className="mt-4">
+                      <ShopPayments config={config} orderSubapp={orderSubapp} />
+                    </div>
+                  )}
+                  <p className="m-0 mt-3.5 text-[11.5px] text-ink-500 text-center leading-[1.5]">
+                    {labels.secureNotice}
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StepPill({
+  state,
+  label,
+}: {
+  state: 'done' | 'active' | 'idle';
+  label: string;
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-bold',
+        state === 'active' && 'bg-royal text-white',
+        state === 'done' && 'bg-mint-50 text-mint-700',
+        state === 'idle' && 'bg-ink-50 text-ink-600',
+      )}>
+      {state === 'done' && <MdCheck className="text-sm" />}
+      {label}
+    </span>
+  );
+}
+
+function ChevronSep() {
+  return <span className="text-ink-300">→</span>;
+}
+
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="bg-white border border-ink-100 rounded-2xl p-[22px] shadow-xs">
+      <h3 className="m-0 mb-4 text-base font-bold text-ink-900 tracking-[-0.015em]">
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
+function SummaryRow({
+  item,
+  tenant,
+  qtyPrefix,
+  fmt,
+  displayPrices,
+}: {
+  item: ResolvedCartItem;
+  tenant: string;
+  qtyPrefix: string;
+  fmt: (n: number) => string;
+  displayPrices?: boolean;
+}) {
+  const product = item.computedProduct.product;
+  const portalCat = product?.portalCategorySet?.[0];
+  const productCat = product?.productCategory;
+  const cat = portalCat ?? productCat ?? null;
+  const catName = cat?.name ?? null;
+  const hue = getCategoryHue(catName);
+
+  const imageId = product?.thumbnailImage?.id || product?.images?.[0];
+  const imageURL = imageId ? getProductImageURL(imageId, tenant) : null;
+
+  const unitNum = Number(item.computedProduct?.price?.primary ?? 0);
+  const qty = Number(item.quantity ?? 0);
+  const lineTotal = Number.isFinite(unitNum) ? unitNum * qty : 0;
+
+  return (
+    <li className="flex items-center gap-3">
+      <div
+        className="w-11 h-11 rounded-lg grid place-items-center shrink-0 overflow-hidden relative"
+        style={imageURL ? undefined : {background: getCategoryGradient(hue)}}>
+        {imageURL ? (
+          <Image
+            src={imageURL}
+            alt={i18n.tattr(product.name)}
+            fill
+            className="object-cover"
+            sizes="44px"
+          />
+        ) : null}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[12.5px] font-semibold text-ink-900 truncate">
+          {i18n.tattr(product.name)}
+        </div>
+        <div className="text-[11px] text-ink-500">
+          {qtyPrefix} {qty}
+        </div>
+        {displayPrices && (
+          <PriceWarning
+            errorMessage={item.computedProduct.errorMessage}
+            className="text-[10.5px]"
+          />
+        )}
+      </div>
+      {displayPrices && (
+        <span className="text-[13px] font-bold text-ink-900 tabular-nums">
+          {fmt(lineTotal)}
+        </span>
+      )}
+    </li>
+  );
+}
+
+function TotalsRow({label, value}: {label: string; value: string | number}) {
+  return (
+    <div className="flex justify-between items-baseline py-1 text-[13.5px]">
+      <span className="text-ink-500">{label}</span>
+      <span className="font-semibold tabular-nums text-ink-900">{value}</span>
+    </div>
+  );
+}
+
+function CheckoutAddressPicker({
+  type,
+  workspaceURI,
+  defaultBadgeLabel,
+  newActionLabel,
+  noneTitle,
+  loadingLabel,
+}: {
+  type: ADDRESS_TYPE;
+  workspaceURI: string;
+  defaultBadgeLabel: string;
+  newActionLabel: string;
+  noneTitle: string;
+  loadingLabel: string;
+}) {
+  const {cart, loaded: cartLoaded, updateAddress} = useCart();
+  const {workspaceURL} = useWorkspace();
+  const [addresses, setAddresses] = useState<PartnerAddress[]>([]);
+  const [defaultAddress, setDefaultAddress] = useState<PartnerAddress | null>(
+    null,
+  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const isInvoicing = type === ADDRESS_TYPE.invoicing;
+
+  // Load the addresses for this address type once.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [list, def] = await Promise.all([
+          isInvoicing
+            ? fetchInvoicingAddresses({workspaceURL})
+            : fetchDeliveryAddresses({workspaceURL}),
+          isInvoicing
+            ? findDefaultInvoicing({workspaceURL})
+            : findDefaultDelivery({workspaceURL}),
+        ]);
+        if (cancelled) return;
+        setAddresses((list as PartnerAddress[] | null) ?? []);
+        setDefaultAddress((def as PartnerAddress | null) ?? null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const cartId =
+    (isInvoicing ? cart?.invoicingAddress : cart?.deliveryAddress) ?? null;
+
+  // Seed the cart's address only once both the addresses and the cart itself
+  // have loaded, and never overwrite an address the cart already holds.
+  // Reading the cart at mount time (empty deps) meant that returning from a
+  // Stripe redirect — cart still hydrating — clobbered the chosen delivery
+  // address with the default.
+  useEffect(() => {
+    if (loading || !cartLoaded) return;
+    if (cartId) {
+      setSelectedId(String(cartId));
+      return;
+    }
+    const initial = defaultAddress || addresses[0] || null;
+    if (initial?.id) {
+      setSelectedId(String(initial.id));
+      updateAddress({addressType: type, address: initial.id});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, cartLoaded, cartId, addresses, defaultAddress]);
+
+  const selected =
+    addresses.find(a => String(a.id) === selectedId) ?? addresses[0] ?? null;
+
+  // "Change address" opens the standard address-selection page in checkout
+  // mode; on confirm it updates the cart and returns here via callbackURL.
+  const changeAddressHref = `${workspaceURI}/account/addresses?checkout=true&callbackURL=${encodeURIComponent(
+    `${workspaceURI}/${SUBAPP_CODES.shop}/cart/checkout`,
+  )}`;
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-ink-150 px-4 py-3.5 text-[13px] text-ink-500">
+        {loadingLabel}…
+      </div>
+    );
+  }
+
+  if (addresses.length === 0 || !selected) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2.5 rounded-xl border border-ink-150 px-4 py-3.5 text-[13px] text-ink-700">
+          <MdPlace className="text-base text-royal shrink-0" />
+          {noneTitle}
+        </div>
+        <Link
+          href={changeAddressHref}
+          className="self-start inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-royal-dark border border-royal-border text-[12.5px] font-semibold hover:bg-royal-pale transition-colors">
+          <MdAdd className="text-base" />
+          {newActionLabel}
+        </Link>
+      </div>
+    );
+  }
+
+  const isDefault = !!(
+    selected.isDefaultDelivery || selected.isDefaultInvoicing
+  );
+
+  // Only the selected (default) address is shown; changing it happens on the
+  // dedicated selection page.
+  return (
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-start gap-3.5 px-4 py-3.5 rounded-xl border-[1.5px] border-royal bg-royal-pale/60">
+        <span className="grid place-items-center w-8 h-8 mt-0.5 rounded-lg bg-white border border-ink-100 text-royal shrink-0">
+          <MdPlace className="text-base" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <AddressLines
+            formattedFullName={selected.address?.formattedFullName}
+            lineClassName="truncate"
+          />
+        </div>
+        {isDefault && (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-royal-dark border border-royal-border text-[10.5px] font-bold uppercase tracking-[0.04em] shrink-0 mt-1">
+            {defaultBadgeLabel}
+          </span>
+        )}
+      </div>
+      <Link
+        href={changeAddressHref}
+        className="self-start inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white text-royal-dark border border-royal-border text-[12.5px] font-semibold hover:bg-royal-pale transition-colors">
+        <MdPlace className="text-base" />
+        {i18n.t('Change address')}
+      </Link>
+    </div>
+  );
+}

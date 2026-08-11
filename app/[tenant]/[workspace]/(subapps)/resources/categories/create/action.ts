@@ -11,6 +11,7 @@ import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {t} from '@/locale/server';
 import {TENANT_HEADER} from '@/proxy';
 import {clone} from '@/utils';
+import {toWorkspaceURI} from '@/utils/workspace';
 
 // ---- LOCAL IMPORTS ---- //
 import {fetchFile} from '@/subapps/resources/common/orm/dms';
@@ -126,7 +127,9 @@ export async function create(formData: FormData, workspaceURL: string) {
       })
       .then(clone);
 
-    revalidatePath(`${workspaceURL}/${SUBAPP_CODES.resources}`);
+    revalidatePath(
+      `${toWorkspaceURI(workspaceURL, process.env.GOOVEE_PUBLIC_HOST)}/${SUBAPP_CODES.resources}`,
+    );
 
     return {
       success: true,

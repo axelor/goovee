@@ -77,6 +77,10 @@
       "name": "endOfValidityDate"
     },
     {
+      "type": "DateTime",
+      "name": "confirmationDateTime"
+    },
+    {
       "type": "ManyToOne",
       "name": "contactPartner",
       "target": "AOSPartner"

@@ -1,5 +1,4 @@
 import {
-  Badge,
   PopoverContentResponsive,
   PopoverResponsive,
   PopoverTriggerResponsive,
@@ -32,21 +31,18 @@ export function Filter({filter, title, contentRenderer}: FilterProps) {
       <PopoverResponsive open={open} onOpenChange={setOpen} isSmall={small}>
         <PopoverTriggerResponsive asChild>
           <Button
-            variant={filterCount ? 'success' : 'outline'}
-            className={cn('flex justify-between', {
-              ['w-[400px]']: !small,
+            variant={filterCount ? 'royal' : 'ink-outline'}
+            className={cn('flex justify-between gap-2 w-[400px] h-11', {
               ['w-full']: small,
             })}>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <FaFilter className="size-4" />
               <span>{title}</span>
             </div>
             {filterCount > 0 && (
-              <Badge
-                className="ms-auto ps-[0.45rem] pe-2"
-                variant="success-inverse">
+              <span className="ms-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white text-royal text-[11px] font-bold tabular-nums">
                 {filterCount}
-              </Badge>
+              </span>
             )}
           </Button>
         </PopoverTriggerResponsive>
