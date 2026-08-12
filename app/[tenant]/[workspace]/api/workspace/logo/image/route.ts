@@ -51,5 +51,5 @@ export async function GET(
     return new NextResponse('File not found', {status: 404});
   }
 
-  return streamFile(file);
+  return streamFile({...file, request});
 }
