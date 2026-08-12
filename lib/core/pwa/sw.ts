@@ -3,7 +3,12 @@
 /// <reference lib="webworker" />
 import {defaultCache} from '@serwist/next/worker';
 import type {PrecacheEntry, SerwistGlobalConfig} from 'serwist';
-import {Serwist, StaleWhileRevalidate} from 'serwist';
+import {
+  ExpirationPlugin,
+  NetworkFirst,
+  Serwist,
+  StaleWhileRevalidate,
+} from 'serwist';
 import type {NotificationPayload} from './types';
 import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
 import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/utils';
@@ -35,6 +40,27 @@ const serwist = new Serwist({
       matcher: /\/api\/tenant\/[^/]+\/locales\//,
       handler: new StaleWhileRevalidate({
         cacheName: 'locale-translations',
+      }),
+    },
+    /* Displayed images, which are served by the routes that hold the files and
+     * so are addressed as `…?w=…` rather than by a path a file extension can be
+     * read from. Without a rule of their own they fall into the buckets meant
+     * for API responses and pages, and a single gallery evicts everything those
+     * hold. Must be listed before defaultCache for the same reason as above.
+     *
+     * Fetched from the network first, and only fetched from the cache when there
+     * is no network. These images are shown to whoever may see them, which is
+     * decided per request; serving one from the cache first would answer from a
+     * copy kept after that decision was last made. The route revalidates with an
+     * ETag, so a repeat view is a bodyless response rather than a transfer. */
+    {
+      matcher: ({request, url}) =>
+        request.destination === 'image' && url.searchParams.has('w'),
+      handler: new NetworkFirst({
+        cacheName: 'display-images',
+        plugins: [
+          new ExpirationPlugin({maxEntries: 128, maxAgeSeconds: 24 * 60 * 60}),
+        ],
       }),
     },
     ...defaultCache,
