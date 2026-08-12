@@ -1,0 +1,6 @@
+{
+  "title": "Serve images through a custom image loader",
+  "type": "change",
+  "description": "Images are resized as they are served, in place of a separate optimisation step. An image that has already been seen is confirmed as unchanged rather than being sent again.",
+  "scope": ["core"]
+}

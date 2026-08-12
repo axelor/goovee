@@ -9,6 +9,10 @@ export async function register() {
   const {startStagedUploadReaper} = await import('@/lib/core/upload/startup');
   startStagedUploadReaper();
 
+  // Report whether images can be resized. Never throws, never blocks startup.
+  const {checkImageResizing} = await import('@/lib/core/image/startup');
+  void checkImageResizing();
+
   // Run after register() returns so it doesn't block server startup.
   // In multi-tenant mode, MultiTenantManager fetches tenant config via HTTP
   // on itself (/api/tenant/:id/config), which fails if called before the

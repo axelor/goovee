@@ -134,7 +134,7 @@
     "server-only": "^0.0.1",
     "serwist": "^9.5.7",
     "shadcn-ui": "^0.8.0",
-    "sharp": "^0.31.3",
+    "sharp": "^0.35.3",
     "sheet": "^0.2.0",
     "stripe": "^16.12.0",
     "swiper": "^11.1.14",
@@ -183,7 +183,7 @@
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.9.0"
   },
   "sideEffects": [
     "./ui/form/index.ts"
@@ -194,16 +194,14 @@
       "@types/react": "19.2.14",
       "@types/react-dom": "19.2.3",
       "react": "19.2.5",
-      "react-dom": "19.2.5"
+      "react-dom": "19.2.5",
+      "sharp": "^0.35.3"
     },
     "peerDependencyRules": {
       "allowAny": [
         "react",
         "react-dom"
       ]
-    },
-    "patchedDependencies": {
-      "next@16.2.4": "patches/next@16.2.4.patch"
     }
   }
 }

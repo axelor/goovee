@@ -65,5 +65,6 @@ export async function GET(
     fileName,
     filePath,
     fileType,
+    request,
   });
 }
