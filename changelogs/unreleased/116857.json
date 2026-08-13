@@ -1,6 +1,6 @@
 {
-  "title": "Share one mail connection pool across the whole portal",
+  "title": "Deliver notifications to every recipient of a large audience",
   "type": "fix",
-  "description": "Every mail opened its own connection pool and nothing closed it, so a notification sent to two hundred subscribers held two hundred connections at once — past what most mail servers accept from one address, and the refused part of a large fan-out never arrived. The portal now shares one pool, sized by the new optional MAIL_MAX_CONNECTIONS (default 10, and Microsoft 365 mailboxes need 3). Whether mail can be reached is now reported when the server starts.",
+  "description": "A notification sent to a large audience reached only part of it. Mail servers refuse more than a handful of simultaneous connections from one sender, and the portal opened a separate one for every message, so the rest were rejected and lost. Every recipient now receives them. The new optional MAIL_MAX_CONNECTIONS sets how many the portal may open; the default is ten, and some mail servers accept as few as three. A message that fails temporarily is retried for several minutes, so mail that was lost now arrives late; one that cannot be delivered is reported with its recipient. Whether mail can be reached is reported at startup.",
   "scope": ["core"]
 }

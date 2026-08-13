@@ -6,7 +6,10 @@ import {z} from 'zod';
 import {manager} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import {findSubscribers} from '@/orm/notification';
-import NotificationManager, {NotificationType} from '@/notification';
+import NotificationManager, {
+  NotificationType,
+  type MailNotificationData,
+} from '@/notification';
 import {getTranslation} from '@/locale/server';
 import {notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
@@ -57,8 +60,7 @@ function response(data: any, status: number) {
   return NextResponse.json(data, {status});
 }
 
-/* Matches the shared mail pool's default connection count
- * (`lib/core/notification/mail.ts`), so a batch does not queue behind itself. */
+// Bounds the system notifications written at once.
 const BATCH_SIZE = 10;
 
 async function processBatch<T>(
@@ -166,7 +168,7 @@ async function notificationTemplate({
     `;
 }
 
-async function sendMail({
+async function buildNotificationMail({
   user,
   tenantId,
   mail,
@@ -180,14 +182,12 @@ async function sendMail({
   entity: {id: string; route: string};
   app: App;
   sender: string;
-}) {
-  const mailService = NotificationManager.getService(NotificationType.mail);
-
+}): Promise<MailNotificationData> {
   const html =
     mail?.body ||
     (await notificationTemplate({user, tenantId, app, entity, sender}));
 
-  await mailService?.notify({
+  return {
     to: user.email,
     subject:
       mail?.subject ||
@@ -198,7 +198,7 @@ async function sendMail({
         sender,
       )),
     html: sanitizeHtml(html),
-  });
+  };
 }
 
 async function sendSystemNotification({
@@ -273,18 +273,18 @@ async function sendNotifications(data: {
       client,
     });
 
-    await processBatch(subscribers, async ({user, entity}) => {
-      try {
-        await Promise.all([
-          sendMail({
-            user,
-            tenantId,
-            mail,
-            entity,
-            app,
-            sender: workspace.name || APP_TITLE,
-          }),
-          sendSystemNotification({
+    const mailService = NotificationManager.getService(NotificationType.mail);
+    const sender = workspace.name || APP_TITLE;
+
+    /* notifyAll bounds its own concurrency and reports its own failures; system
+     * notifications hit the database, so they keep a batch. */
+    await Promise.all([
+      mailService?.notifyAll(subscribers, ({user, entity}) =>
+        buildNotificationMail({user, tenantId, mail, entity, app, sender}),
+      ),
+      processBatch(subscribers, async ({user, entity}) => {
+        try {
+          await sendSystemNotification({
             user,
             tenantId,
             mail,
@@ -292,16 +292,16 @@ async function sendNotifications(data: {
             app,
             workspace,
             client,
-          }),
-        ]);
-      } catch (err) {
-        console.error(
-          '[NOTIFICATIONS] Failed to notify subscriber',
-          user.email,
-          err,
-        );
-      }
-    });
+          });
+        } catch (err) {
+          console.error(
+            '[NOTIFICATIONS] Failed to send a system notification to',
+            user.email,
+            err,
+          );
+        }
+      }),
+    ]);
   } catch (err) {
     console.error(
       '[NOTIFICATIONS] Failed to process webhook notifications',
