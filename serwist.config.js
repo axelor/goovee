@@ -33,5 +33,10 @@ module.exports = serwist.withNextConfig(nextConfig => ({
     `${nextConfig.distDir}/server/app/ignored.html`,
     'public/website/**/*',
     'public/locales/**/*',
+    /* The PDF reader's own files. Its character maps alone are a couple of
+     * hundred, all but one or two of which a given installation never opens, so
+     * they are fetched and kept when a document needs them instead of being
+     * downloaded up front with the application. */
+    'public/pdfjs/**/*',
   ],
 }));
