@@ -20,13 +20,10 @@ export enum NotificationType {
 }
 
 export class NotificationManager {
-  static getService(
-    type: NotificationType,
-    options?: SMTPPool | SMTPPool.Options | string,
-  ): NotificationService | null {
+  static getService(type: NotificationType): NotificationService | null {
     switch (type) {
       case NotificationType.mail:
-        return MailNotificationService.create(options);
+        return MailNotificationService.create();
       default:
         return null;
     }

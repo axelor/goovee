@@ -1,0 +1,6 @@
+{
+  "title": "Share one mail connection pool across the whole portal",
+  "type": "fix",
+  "description": "Every mail opened its own connection pool and nothing closed it, so a notification sent to two hundred subscribers held two hundred connections at once — past what most mail servers accept from one address, and the refused part of a large fan-out never arrived. The portal now shares one pool, sized by the new optional MAIL_MAX_CONNECTIONS (default 10, and Microsoft 365 mailboxes need 3). Whether mail can be reached is now reported when the server starts.",
+  "scope": ["core"]
+}
