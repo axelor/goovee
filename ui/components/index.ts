@@ -209,7 +209,6 @@ export {Icon} from './icon';
 export {BadgeList} from './badge-list';
 export {TableList, SortableHeader, ExpandableTableRows} from './table-list';
 export {DropdownSelector} from './dropdown-selector';
-export {DocViewer} from './doc-viewer';
 export {AutosizeTextarea} from './textarea-auto-size';
 export {MobileCategoryMenu} from './mobile-category-menu';
 export {AccordionMenu} from './accordion-menu';
