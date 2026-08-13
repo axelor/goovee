@@ -4,6 +4,7 @@
 import {defaultCache} from '@serwist/next/worker';
 import type {PrecacheEntry, SerwistGlobalConfig} from 'serwist';
 import {
+  CacheFirst,
   ExpirationPlugin,
   NetworkFirst,
   Serwist,
@@ -24,6 +25,32 @@ declare global {
 }
 
 declare const self: ServiceWorkerGlobalScope;
+
+const scopeBasePath = normalizePathPrefix(
+  new URL(self.registration.scope).pathname,
+);
+
+function withScopeBasePath(path: string) {
+  return withPathPrefix(scopeBasePath, path);
+}
+
+/*
+ * Where the PDF reader's own files are served from: the application's own root,
+ * then `pdfjs`, then the version they belong to.
+ *
+ * Both parts are checked. A tenant is named by the first part of an address and
+ * a workspace by the second, so either may be called `pdfjs`, and their pages
+ * and documents must not be mistaken for static files — those are answered from
+ * a held copy without checking that whoever asks may still see them.
+ */
+const PDF_READER_PATH = withScopeBasePath('/pdfjs/');
+const PDF_READER_VERSION = /^\d+\.\d+\.\d+\//;
+
+function isPDFReaderAsset(url: URL): boolean {
+  if (url.origin !== self.location.origin) return false;
+  if (!url.pathname.startsWith(PDF_READER_PATH)) return false;
+  return PDF_READER_VERSION.test(url.pathname.slice(PDF_READER_PATH.length));
+}
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -63,18 +90,31 @@ const serwist = new Serwist({
         ],
       }),
     },
+    /* The PDF reader's own files. They are left out of the set downloaded with
+     * the application because there are close to two hundred of them and a
+     * given installation opens one or two, so they are kept as they are needed
+     * instead. Answered from the cache without asking first, which is safe
+     * because the address carries the reader's version: an upgrade asks for
+     * different addresses rather than expecting different bytes at the same
+     * one. Held generously enough that the worker cannot be pushed out by a
+     * document that pulls in many character maps. */
+    {
+      matcher: ({url}) => isPDFReaderAsset(url),
+      handler: new CacheFirst({
+        cacheName: 'pdf-reader',
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 256,
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
     ...defaultCache,
   ],
 });
 
 const channel = new BroadcastChannel(PUSH_CHANNEL);
-const scopeBasePath = normalizePathPrefix(
-  new URL(self.registration.scope).pathname,
-);
-
-function withScopeBasePath(path: string) {
-  return withPathPrefix(scopeBasePath, path);
-}
 
 self.addEventListener('push', event => {
   const data: NotificationPayload | undefined = event.data?.json();

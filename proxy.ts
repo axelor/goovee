@@ -17,9 +17,13 @@ export const config = {
      * 2. /_next (Next.js internals)
      * 3. /_static (inside /public)
      * 4. all root files inside /public (e.g. /favicon.ico)
-     * 5. all files inside /public/images website locales and pwa
+     * 5. all files inside /public/images website locales pwa and pdfjs
+     *
+     * Anything left out of this list is read as a tenant name, so a directory
+     * of static files added under /public has to be named here too or it
+     * resolves to a tenant that does not exist.
      */
-    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|images/|website/|pwa/|locales/).*)',
+    '/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|images/|website/|pwa/|locales/|pdfjs/).*)',
   ],
 };
 

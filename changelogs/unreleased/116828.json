@@ -1,0 +1,6 @@
+{
+  "title": "Open documents without waiting for the whole file",
+  "type": "feature",
+  "description": "Documents are streamed, so one appears from its first page while the rest is still arriving. An interrupted transfer resumes where it stopped, and a document that has not changed is confirmed as unchanged rather than sent again. A name containing a space, a comma or an accent is no longer altered when the file is saved, and more kinds of file can be read in the browser instead of only downloaded: .txt, .md, .xml and .csv, video, and images such as .webp, .gif, .bmp and .tiff.",
+  "scope": ["core", "resources"]
+}
