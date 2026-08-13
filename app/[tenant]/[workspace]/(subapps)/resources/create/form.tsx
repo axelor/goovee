@@ -26,7 +26,7 @@ import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import {i18n} from '@/locale';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {cn} from '@/utils/css';
-import {getFileSizeText} from '@/utils/files';
+import {getFileNameWithoutExtension, getFileSizeText} from '@/utils/files';
 
 // ---- LOCAL IMPORTS ---- //
 import {upload} from './action';
@@ -165,7 +165,7 @@ export default function ResourceForm({
         maxBytes: MAX_FILE_SIZE,
       });
       append({
-        title: '',
+        title: getFileNameWithoutExtension(file.name),
         description: '',
         uploadId: ids[0],
         fileName: file.name,
