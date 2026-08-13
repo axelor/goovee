@@ -29,7 +29,7 @@ import type {
 } from '@/ui/components/textarea-auto-size';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {getFileSizeText} from '@/utils/files';
+import {getFileNameWithoutExtension, getFileSizeText} from '@/utils/files';
 
 import type {CommentData, CreateProps} from '../../types';
 import {
@@ -157,7 +157,7 @@ export function CommentInput({
         maxBytes: MAX_FILE_SIZE,
       });
       append({
-        title: '',
+        title: getFileNameWithoutExtension(file.name),
         description: '',
         uploadId: ids[0],
         fileName: file.name,
