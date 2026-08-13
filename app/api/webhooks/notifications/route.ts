@@ -57,6 +57,8 @@ function response(data: any, status: number) {
   return NextResponse.json(data, {status});
 }
 
+/* Matches the shared mail pool's default connection count
+ * (`lib/core/notification/mail.ts`), so a batch does not queue behind itself. */
 const BATCH_SIZE = 10;
 
 async function processBatch<T>(

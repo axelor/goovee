@@ -13,6 +13,10 @@ export async function register() {
   const {checkImageResizing} = await import('@/lib/core/image/startup');
   void checkImageResizing();
 
+  // Report whether mail can be delivered. Never throws, never blocks startup.
+  const {checkMailTransport} = await import('@/lib/core/notification/startup');
+  void checkMailTransport();
+
   // Run after register() returns so it doesn't block server startup.
   // In multi-tenant mode, MultiTenantManager fetches tenant config via HTTP
   // on itself (/api/tenant/:id/config), which fails if called before the
