@@ -1,17 +1,10 @@
 // ---- LOCAL IMPORTS ---- //
-import {getTransporter} from './mail';
+import {getMaxConnections, getTransporter} from './mail';
 
 /**
- * Report at startup whether mail can be delivered.
- *
- * Mail failures are invisible from inside the portal: every way the settings can
- * be wrong looks the same from here, and the portal carries on while password
- * resets, one-time codes and notifications never arrive. So it is stated once, at
- * boot. The check opens a connection and authenticates, then quits it, using a
- * throwaway connection rather than one of the pool's.
- *
- * Failing does not stop the server — a portal that cannot send mail still serves
- * every page.
+ * Report at startup whether mail can be delivered — nothing else in the portal
+ * surfaces a bad mail configuration. `verify()` opens its own connection and
+ * authenticates, then quits it, so it does not consume one of the pool's.
  */
 export async function checkMailTransport(): Promise<void> {
   const host = process.env.MAIL_HOST;
@@ -20,17 +13,17 @@ export async function checkMailTransport(): Promise<void> {
   try {
     const transporter = getTransporter();
 
-    /* Asking for the transport is what decides whether mail is configured, and
-     * that decision reports itself. */
+    // getTransporter() already logged this.
     if (!transporter) {
       return;
     }
 
     await transporter.verify();
 
-    const maxConnections = (
-      transporter as unknown as {options: {maxConnections?: number}}
-    ).options.maxConnections;
+    /* Read from the same place the pool was sized from. Reaching into the
+     * transport's own options would mean holding a typed handle on an object that
+     * also carries the password. */
+    const maxConnections = getMaxConnections();
 
     console.log(
       `[MAIL][STARTUP] mail server accepted a connection — ${host}:${port} reachable and credentials accepted; ` +
