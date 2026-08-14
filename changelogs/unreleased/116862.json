@@ -1,6 +1,0 @@
-{
-  "title": "Prefill the attachment name with the original file name",
-  "type": "change",
-  "description": "Forms that ask for a name alongside an upload started that field empty, so the name had to be typed by hand even though the original file name was almost always the one wanted. Picking a file now fills the name with the original file name, without its extension, and the field stays editable so a different name can still be typed. Leaving the prefilled value alone stores the file under its original name. This applies to the resources form and to the comment box used by ticketing, quotations, news and events.",
-  "scope": ["core", "resources"]
-}
