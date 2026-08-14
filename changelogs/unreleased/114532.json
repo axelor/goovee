@@ -1,0 +1,6 @@
+{
+  "title": "Use the message body from AOS in notification emails",
+  "type": "fix",
+  "description": "A notification email always used the portal's own template, even when the linked message in AOS had its own content set. That content is now used as the email body. The subject was already taken from the message and is unchanged.",
+  "scope": ["core"]
+}

@@ -184,7 +184,7 @@ async function buildNotificationMail({
   sender: string;
 }): Promise<MailNotificationData> {
   const html =
-    mail?.body ||
+    mail?.content ||
     (await notificationTemplate({user, tenantId, app, entity, sender}));
 
   return {
@@ -255,10 +255,7 @@ async function sendNotifications(data: {
   };
   code: NotificationAppCode;
   recordId: string;
-  mail?: {
-    subject?: string | null;
-    body?: string | null;
-  } | null;
+  mail?: Mail | null;
   client: Client;
   app: App;
 }) {
@@ -320,7 +317,7 @@ function isValidTimestamp(timestamp: number) {
 
 const MailSchema = z.object({
   subject: z.string().nullish(),
-  body: z.string().nullish(),
+  content: z.string().nullish(),
 });
 
 type Mail = z.infer<typeof MailSchema>;
