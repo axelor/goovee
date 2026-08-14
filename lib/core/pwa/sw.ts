@@ -3,7 +3,13 @@
 /// <reference lib="webworker" />
 import {defaultCache} from '@serwist/next/worker';
 import type {PrecacheEntry, SerwistGlobalConfig} from 'serwist';
-import {Serwist, StaleWhileRevalidate} from 'serwist';
+import {
+  CacheFirst,
+  ExpirationPlugin,
+  NetworkFirst,
+  Serwist,
+  StaleWhileRevalidate,
+} from 'serwist';
 import type {NotificationPayload} from './types';
 import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
 import {normalizePathPrefix, withPathPrefix} from '@/lib/core/path/utils';
@@ -19,6 +25,32 @@ declare global {
 }
 
 declare const self: ServiceWorkerGlobalScope;
+
+const scopeBasePath = normalizePathPrefix(
+  new URL(self.registration.scope).pathname,
+);
+
+function withScopeBasePath(path: string) {
+  return withPathPrefix(scopeBasePath, path);
+}
+
+/*
+ * Where the PDF reader's own files are served from: the application's own root,
+ * then `pdfjs`, then the version they belong to.
+ *
+ * Both parts are checked. A tenant is named by the first part of an address and
+ * a workspace by the second, so either may be called `pdfjs`, and their pages
+ * and documents must not be mistaken for static files — those are answered from
+ * a held copy without checking that whoever asks may still see them.
+ */
+const PDF_READER_PATH = withScopeBasePath('/pdfjs/');
+const PDF_READER_VERSION = /^\d+\.\d+\.\d+\//;
+
+function isPDFReaderAsset(url: URL): boolean {
+  if (url.origin !== self.location.origin) return false;
+  if (!url.pathname.startsWith(PDF_READER_PATH)) return false;
+  return PDF_READER_VERSION.test(url.pathname.slice(PDF_READER_PATH.length));
+}
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -37,22 +69,66 @@ const serwist = new Serwist({
         cacheName: 'locale-translations',
       }),
     },
+    /* Displayed images, which are served by the routes that hold the files and
+     * so are addressed as `…?w=…` rather than by a path a file extension can be
+     * read from. Without a rule of their own they fall into the buckets meant
+     * for API responses and pages, and a single gallery evicts everything those
+     * hold. Must be listed before defaultCache for the same reason as above.
+     *
+     * Fetched from the network first, and only fetched from the cache when there
+     * is no network. These images are shown to whoever may see them, which is
+     * decided per request; serving one from the cache first would answer from a
+     * copy kept after that decision was last made. The route revalidates with an
+     * ETag, so a repeat view is a bodyless response rather than a transfer. */
+    {
+      matcher: ({request, url}) =>
+        request.destination === 'image' && url.searchParams.has('w'),
+      handler: new NetworkFirst({
+        cacheName: 'display-images',
+        plugins: [
+          new ExpirationPlugin({maxEntries: 128, maxAgeSeconds: 24 * 60 * 60}),
+        ],
+      }),
+    },
+    /* The PDF reader's own files. They are left out of the set downloaded with
+     * the application because there are close to two hundred of them and a
+     * given installation opens one or two, so they are kept as they are needed
+     * instead. Answered from the cache without asking first, which is safe
+     * because the address carries the reader's version: an upgrade asks for
+     * different addresses rather than expecting different bytes at the same
+     * one. Held generously enough that the worker cannot be pushed out by a
+     * document that pulls in many character maps. */
+    {
+      matcher: ({url}) => isPDFReaderAsset(url),
+      handler: new CacheFirst({
+        cacheName: 'pdf-reader',
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 256,
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
     ...defaultCache,
   ],
 });
 
 const channel = new BroadcastChannel(PUSH_CHANNEL);
-const scopeBasePath = normalizePathPrefix(
-  new URL(self.registration.scope).pathname,
-);
-
-function withScopeBasePath(path: string) {
-  return withPathPrefix(scopeBasePath, path);
-}
 
 self.addEventListener('push', event => {
   const data: NotificationPayload | undefined = event.data?.json();
   if (!data) return;
+
+  /* body, url and tag arrive at the top level only, so they are not paid for
+   * twice against the payload limit. Put them back before anything downstream
+   * treats this as a whole notification record. */
+  const record = data.notification && {
+    ...data.notification,
+    body: data.body ?? null,
+    url: data.url ?? null,
+    tag: data.tag ?? null,
+  };
 
   const title = data.title || 'Notification';
   const options: NotificationOptions & {renotify?: boolean} = {
@@ -70,7 +146,7 @@ self.addEventListener('push', event => {
     renotify: Boolean(data.tag),
     data: {
       url: data.url || '/',
-      notification: data.notification,
+      notification: record,
       tenantId: data.tenantId,
       workspaceURL: data.workspaceURL,
     },
@@ -81,7 +157,7 @@ self.addEventListener('push', event => {
   // Forward the new notification to all tabs so they can update state without a refetch
   channel.postMessage({
     type: MSG_TYPE.NEW,
-    notification: data.notification,
+    notification: record,
   });
 });
 
@@ -91,14 +167,18 @@ self.addEventListener('notificationclick', event => {
   const handleClick = async () => {
     const {url, notification, tenantId} = event.notification.data;
     const tag = event.notification.tag;
-    if (tenantId) {
+    /* Without a tag or an id there is nothing to mark — the record it belongs to
+     * was never stored. Interpolating a missing id would ask the server to read
+     * a notification called "undefined". */
+    const readPath = tag
+      ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
+      : notification?.id
+        ? `/api/tenant/${tenantId}/push/notifications/read/${notification.id}`
+        : null;
+
+    if (tenantId && readPath) {
       try {
-        const readUrl = withScopeBasePath(
-          tag
-            ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
-            : `/api/tenant/${tenantId}/push/notifications/read/${notification?.id}`,
-        );
-        await fetch(readUrl, {method: 'POST'});
+        await fetch(withScopeBasePath(readPath), {method: 'POST'});
         // Notify all tabs to remove this notification from their unread state
         channel.postMessage({type: MSG_TYPE.READ, notification, tag});
       } catch (err) {

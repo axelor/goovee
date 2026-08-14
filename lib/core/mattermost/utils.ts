@@ -1,4 +1,4 @@
-import {experimental_taintUniqueValue} from 'react';
+import {taintSecret} from '@/lib/core/security/taint';
 import {type TenantConfig} from '@/tenant';
 
 /**
@@ -11,13 +11,10 @@ export function getHost(): string {
 export function getAdminToken(): string {
   const token = process.env.MATTERMOST_TOKEN || '';
 
-  if (token) {
-    experimental_taintUniqueValue(
-      'Mattermost token is a server secret. Do not pass to Client Components.',
-      process,
-      token,
-    );
-  }
+  taintSecret(
+    'Mattermost token is a server secret. Do not pass to Client Components.',
+    token,
+  );
 
   return token;
 }

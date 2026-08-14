@@ -2,14 +2,20 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {forwardRef, ReactNode, useRef, useState} from 'react';
 import {ErrorCode, useDropzone, type FileRejection} from 'react-dropzone';
 import {useFieldArray, useForm} from 'react-hook-form';
-import {MdAttachFile, MdDelete, MdRefresh} from 'react-icons/md';
+import {
+  MdAttachFile,
+  MdDelete,
+  MdPause,
+  MdPlayArrow,
+  MdRefresh,
+} from 'react-icons/md';
 import {z} from 'zod';
 
 // ---- CORE IMPORTS ---- //
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
 import {i18n} from '@/locale';
-import {AutosizeTextarea, Button, Input} from '@/ui/components';
+import {AutosizeTextarea, Button, Input, ProgressFill} from '@/ui/components';
 import {
   Form,
   FormControl,
@@ -17,14 +23,13 @@ import {
   FormItem,
   FormMessage,
 } from '@/ui/components/form';
-import {Progress} from '@/ui/components/progress';
 import type {
   AutosizeTextAreaProps,
   AutosizeTextAreaRef,
 } from '@/ui/components/textarea-auto-size';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
-import {getFileSizeText} from '@/utils/files';
+import {getFileNameWithoutExtension, getFileSizeText} from '@/utils/files';
 
 import type {CommentData, CreateProps} from '../../types';
 import {
@@ -91,10 +96,11 @@ export function CommentInput({
   const {
     uploads,
     upload,
-    retry,
+    pause,
+    resume,
     remove: removeUpload,
     reset: resetUploads,
-    isUploading,
+    isStaged,
   } = useStagedUpload({tenant});
 
   const form = useForm<z.infer<typeof commentFormSchema>>({
@@ -146,9 +152,12 @@ export function CommentInput({
       });
     }
     accepted.forEach(file => {
-      const {ids} = upload(file, {purpose: COMMENT_ATTACHMENT_PURPOSE});
+      const {ids} = upload(file, {
+        purpose: COMMENT_ATTACHMENT_PURPOSE,
+        maxBytes: MAX_FILE_SIZE,
+      });
       append({
-        title: '',
+        title: getFileNameWithoutExtension(file.name),
         description: '',
         uploadId: ids[0],
         fileName: file.name,
@@ -229,7 +238,7 @@ export function CommentInput({
                           type="submit"
                           className="px-5 py-1.5 h-9 text-sm font-semibold"
                           variant="royal"
-                          disabled={isSubmitting || disabled || isUploading}>
+                          disabled={isSubmitting || disabled || !isStaged}>
                           {i18n.t('Send')}
                         </Button>
                       </div>
@@ -254,35 +263,50 @@ export function CommentInput({
               const uploadItem = uploads.find(
                 item => item.id === field.uploadId,
               );
-              const isFailed =
-                uploadItem?.status === 'error' ||
-                uploadItem?.status === 'aborted';
+              const isActive =
+                uploadItem?.status === 'queued' ||
+                uploadItem?.status === 'uploading';
+              const isPaused = uploadItem?.status === 'paused';
+              const isFailed = uploadItem?.status === 'error';
+              const fileSummary = (
+                <>
+                  <p className="font-semibold truncate">
+                    {index + 1}. {field.fileName}
+                  </p>
+                  <p className="text-xs text-ink-500 truncate">
+                    {getFileSizeText(field.size)}
+                  </p>
+                </>
+              );
               return (
                 <div
                   key={field.id}
-                  className="p-2 border rounded-lg grid grid-cols-[20%_1fr_2fr_auto] items-center gap-2">
-                  <div className="flex flex-col gap-1">
-                    <p className="font-semibold line-clamp-1">
-                      {index + 1} {field.fileName} -{' '}
-                      {getFileSizeText(field.size)}
-                    </p>
-                    {(uploadItem?.status === 'queued' ||
-                      uploadItem?.status === 'uploading') && (
-                      <Progress value={uploadItem.progress} className="h-1.5" />
+                  className="p-2 border rounded-lg grid grid-cols-[1fr_1fr_1.5fr_auto] items-center gap-2">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    {isActive || isPaused || isFailed ? (
+                      <ProgressFill
+                        value={uploadItem.progress}
+                        tone={
+                          isFailed ? 'error' : isPaused ? 'paused' : 'active'
+                        }
+                        label={i18n.t('Uploading {0}', field.fileName)}
+                        showValue
+                        className="rounded-md px-2 py-1">
+                        {fileSummary}
+                      </ProgressFill>
+                    ) : (
+                      <div className="px-2 py-1 min-w-0">{fileSummary}</div>
                     )}
-                    {isFailed && (
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-destructive line-clamp-1">
-                          {uploadItem.error
-                            ? i18n.t(uploadItem.error)
-                            : i18n.t('Upload failed')}
-                        </p>
-                        <MdRefresh
-                          title={i18n.t('Retry')}
-                          className="size-5 cursor-pointer shrink-0"
-                          onClick={() => retry(field.uploadId)}
-                        />
-                      </div>
+                    {(isFailed || isPaused) && (
+                      <p
+                        className={cn(
+                          'text-xs line-clamp-2 px-2',
+                          isFailed
+                            ? 'text-destructive'
+                            : 'text-status-pending-fg',
+                        )}>
+                        {isPaused ? i18n.t('Upload paused') : uploadItem.error}
+                      </p>
                     )}
                   </div>
                   <FormField
@@ -314,13 +338,49 @@ export function CommentInput({
                       </FormItem>
                     )}
                   />
-                  <MdDelete
-                    className="h-6 w-6 text-destructive cursor-pointer shrink-0"
-                    onClick={() => {
-                      removeUpload(field.uploadId);
-                      remove(index);
-                    }}
-                  />
+                  <div className="flex items-center gap-1 shrink-0">
+                    {isActive && (
+                      <button
+                        type="button"
+                        onClick={() => pause(field.uploadId)}
+                        aria-label={i18n.t('Pause')}
+                        title={i18n.t('Pause')}
+                        className="text-ink-500">
+                        <MdPause className="size-5" />
+                      </button>
+                    )}
+                    {isPaused && (
+                      <button
+                        type="button"
+                        onClick={() => resume(field.uploadId)}
+                        aria-label={i18n.t('Resume')}
+                        title={i18n.t('Resume')}
+                        className="text-status-pending-fg">
+                        <MdPlayArrow className="size-5" />
+                      </button>
+                    )}
+                    {isFailed && (
+                      <button
+                        type="button"
+                        onClick={() => resume(field.uploadId)}
+                        aria-label={i18n.t('Retry')}
+                        title={i18n.t('Retry')}
+                        className="text-destructive">
+                        <MdRefresh className="size-5" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        removeUpload(field.uploadId);
+                        remove(index);
+                      }}
+                      aria-label={i18n.t('Remove')}
+                      title={i18n.t('Remove')}
+                      className="text-destructive">
+                      <MdDelete className="h-6 w-6" />
+                    </button>
+                  </div>
                 </div>
               );
             })}

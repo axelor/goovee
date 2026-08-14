@@ -1,6 +1,7 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
+import Image from 'next/image';
 import {Link} from '@/ui/components/link';
 import {
   MdArrowBack,
@@ -15,6 +16,8 @@ import {
   MdKeyboardArrowDown,
   MdAttachFile,
   MdClose,
+  MdPause,
+  MdPlayArrow,
   MdRefresh,
 } from 'react-icons/md';
 
@@ -24,7 +27,7 @@ import {cn} from '@/utils/css';
 import {formatRelativeTime} from '@/locale/formatters';
 import {getPartnerImageURL, getFileSizeText} from '@/utils/files';
 import {withBasePath} from '@/lib/core/path/base-path';
-import {RichTextViewer} from '@/ui/components';
+import {ProgressFill, RichTextViewer} from '@/ui/components';
 import {SUBAPP_CODES} from '@/constants';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {useComments} from '@/comments/hooks';
@@ -87,10 +90,11 @@ function Avatar({
       className="rounded-full overflow-hidden bg-gradient-to-br from-royal to-royal-dark grid place-items-center text-white font-bold shrink-0"
       style={{width: size, height: size, fontSize: size * 0.36}}>
       {url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={url}
           alt={name || ''}
+          width={size}
+          height={size}
           className="w-full h-full object-cover"
         />
       ) : (
@@ -463,9 +467,10 @@ export function ForumDetail({
   const {
     uploads,
     upload,
-    retry,
+    pause,
+    resume,
     remove: removeUpload,
-    isUploading,
+    isStaged,
   } = useStagedUpload({tenant});
   const [draft, setDraft] = useState('');
   const [files, setFiles] = useState<{file: File; uploadId: string}[]>([]);
@@ -631,13 +636,25 @@ export function ForumDetail({
     });
     if (withinLimit.length) {
       const staged = withinLimit.map(file => {
-        const {ids} = upload(file, {purpose: COMMENT_ATTACHMENT_PURPOSE});
+        const {ids} = upload(file, {
+          purpose: COMMENT_ATTACHMENT_PURPOSE,
+          maxBytes: MAX_FILE_SIZE,
+        });
         return {file, uploadId: ids[0]};
       });
       setFiles(prev => [...prev, ...staged]);
     }
     e.target.value = '';
   };
+
+  /* A chip has no room for a reason, so an attachment that stopped is named
+   * once more below the composer, where its message fits. */
+  const stalledAttachments = files.flatMap(entry => {
+    const item = uploads.find(upload => upload.id === entry.uploadId);
+    return item && (item.status === 'error' || item.status === 'paused')
+      ? [{fileName: entry.file.name, item}]
+      : [];
+  });
 
   const removeFile = (index: number) => {
     const target = files[index];
@@ -682,7 +699,7 @@ export function ForumDetail({
   const canSubmit =
     canWriteComment &&
     !creating &&
-    !isUploading &&
+    isStaged &&
     (!!draft.trim() || !!files.length);
 
   return (
@@ -956,44 +973,52 @@ export function ForumDetail({
                             const uploadItem = uploads.find(
                               item => item.id === f.uploadId,
                             );
-                            const isFailed =
-                              uploadItem?.status === 'error' ||
-                              uploadItem?.status === 'aborted';
-                            const isPending =
+                            const isActive =
                               uploadItem?.status === 'queued' ||
                               uploadItem?.status === 'uploading';
-                            return (
-                              <span
-                                key={i}
-                                className={`relative inline-flex items-center gap-1 max-w-[180px] overflow-hidden pl-2.5 pr-1 py-1 rounded-full border text-[11.5px] ${
-                                  isFailed
-                                    ? 'bg-destructive-light border-destructive/30 text-destructive'
-                                    : 'bg-ink-25 border-ink-150 text-ink-700'
-                                }`}>
-                                {isPending && (
+                            const isPaused = uploadItem?.status === 'paused';
+                            const isFailed = uploadItem?.status === 'error';
+                            const chipContent = (
+                              <div className="flex items-center gap-1 min-w-0">
+                                <span className="truncate">{f.file.name}</span>
+                                {(isActive || isPaused) && (
                                   <span
-                                    aria-hidden
-                                    className="pointer-events-none absolute inset-y-0 left-0 bg-success/20 transition-[width] duration-200 ease-out"
-                                    style={{
-                                      width: `${uploadItem?.progress ?? 0}%`,
-                                    }}
-                                  />
-                                )}
-                                <span className="relative truncate">
-                                  {f.file.name}
-                                </span>
-                                {isPending && (
-                                  <span className="relative shrink-0 tabular-nums text-success-dark">
-                                    {uploadItem?.progress ?? 0}%
+                                    className={cn(
+                                      'shrink-0 tabular-nums',
+                                      isPaused
+                                        ? 'text-status-pending-fg'
+                                        : 'text-mint-700',
+                                    )}>
+                                    {uploadItem.progress}%
                                   </span>
+                                )}
+                                {isActive && (
+                                  <button
+                                    type="button"
+                                    onClick={() => pause(f.uploadId)}
+                                    aria-label={i18n.t('Pause')}
+                                    title={i18n.t('Pause')}
+                                    className="shrink-0 grid place-items-center size-4 rounded-full text-ink-500 hover:bg-ink-150 transition-colors">
+                                    <MdPause className="size-3" />
+                                  </button>
+                                )}
+                                {isPaused && (
+                                  <button
+                                    type="button"
+                                    onClick={() => resume(f.uploadId)}
+                                    aria-label={i18n.t('Resume')}
+                                    title={i18n.t('Resume')}
+                                    className="shrink-0 grid place-items-center size-4 rounded-full text-status-pending-fg hover:bg-status-pending-bg transition-colors">
+                                    <MdPlayArrow className="size-3" />
+                                  </button>
                                 )}
                                 {isFailed && (
                                   <button
                                     type="button"
-                                    onClick={() => retry(f.uploadId)}
+                                    onClick={() => resume(f.uploadId)}
                                     aria-label={i18n.t('Retry')}
                                     title={i18n.t('Retry')}
-                                    className="relative shrink-0 grid place-items-center size-4 rounded-full text-destructive hover:bg-destructive/10 transition-colors">
+                                    className="shrink-0 grid place-items-center size-4 rounded-full text-destructive hover:bg-destructive-light transition-colors">
                                     <MdRefresh className="size-3" />
                                   </button>
                                 )}
@@ -1001,10 +1026,40 @@ export function ForumDetail({
                                   type="button"
                                   onClick={() => removeFile(i)}
                                   aria-label={i18n.t('Remove')}
-                                  className="relative shrink-0 grid place-items-center size-4 rounded-full text-ink-500 hover:bg-ink-150 hover:text-ink-800 transition-colors">
+                                  title={i18n.t('Remove')}
+                                  className="shrink-0 grid place-items-center size-4 rounded-full text-ink-500 hover:bg-ink-150 hover:text-ink-800 transition-colors">
                                   <MdClose className="size-3" />
                                 </button>
-                              </span>
+                              </div>
+                            );
+                            const chipClassName = cn(
+                              'max-w-[180px] pl-2.5 pr-1 py-1 rounded-full border text-[11.5px] bg-ink-25',
+                              isFailed
+                                ? 'border-destructive/30 text-destructive'
+                                : isPaused
+                                  ? 'border-status-pending-dot/40 text-status-pending-fg'
+                                  : 'border-ink-150 text-ink-700',
+                            );
+
+                            return isActive || isPaused || isFailed ? (
+                              <ProgressFill
+                                key={i}
+                                value={uploadItem.progress}
+                                tone={
+                                  isFailed
+                                    ? 'error'
+                                    : isPaused
+                                      ? 'paused'
+                                      : 'active'
+                                }
+                                label={i18n.t('Uploading {0}', f.file.name)}
+                                className={chipClassName}>
+                                {chipContent}
+                              </ProgressFill>
+                            ) : (
+                              <div key={i} className={chipClassName}>
+                                {chipContent}
+                              </div>
                             );
                           })}
                         </div>
@@ -1017,6 +1072,26 @@ export function ForumDetail({
                           <MdArrowForward className="size-3.5" />
                         </button>
                       </div>
+                      {!!stalledAttachments.length && (
+                        <div className="mt-2 flex flex-col gap-1">
+                          {stalledAttachments.map(({fileName, item}) => (
+                            <p
+                              key={item.id}
+                              className={cn(
+                                'text-[11.5px]',
+                                item.status === 'paused'
+                                  ? 'text-status-pending-fg'
+                                  : 'text-destructive',
+                              )}>
+                              <span className="font-semibold">{fileName}</span>
+                              {' — '}
+                              {item.status === 'paused'
+                                ? i18n.t('Upload paused')
+                                : item.error}
+                            </p>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

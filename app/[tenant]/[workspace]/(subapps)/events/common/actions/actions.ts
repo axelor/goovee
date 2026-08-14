@@ -59,7 +59,7 @@ import {
   isAlreadyRegistered,
 } from '@/subapps/events/common/utils/registration';
 import {getPaymentInfo} from '@/subapps/events/common/utils/validate';
-import {notifyUser} from '@/pwa/utils';
+import {notifyAll, notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {createInvoice} from '@/subapps/events/common/service';
 
@@ -212,14 +212,15 @@ export async function register(
     );
   }
 
-  for (const participant of userParticipants ?? []) {
-    const contact = participant.contact!;
-    const tr = getTranslation.bind(null, {
-      locale: contact.localization?.code || DEFAULT_LOCALE,
-      tenant: tenantId,
-    });
-    after(async () => {
-      await notifyUser({
+  after(() =>
+    notifyAll(userParticipants ?? [], async participant => {
+      const contact = participant.contact!;
+      const tr = getTranslation.bind(null, {
+        locale: contact.localization?.code || DEFAULT_LOCALE,
+        tenant: tenantId,
+      });
+
+      return {
         userId: contact.id,
         tenantId,
         workspaceURL,
@@ -230,9 +231,9 @@ export async function register(
           url: `${workspaceURL}/${SUBAPP_CODES.events}/${registration.event!.slug}`,
           tag: NotificationTag.event(registration.event!.id),
         },
-      });
-    });
-  }
+      };
+    }),
+  );
 
   after(() =>
     generateRegistrationMailAction({

@@ -23,6 +23,19 @@ export type NotificationDTO = {
   createdOn: Date | null;
 };
 
+/**
+ * What travels inside a push payload: only the fields the top level does not
+ * already carry. The service worker merges the two back into a NotificationDTO
+ * before handing it to open tabs.
+ */
+export type NotificationRecord = Omit<NotificationDTO, 'body' | 'url' | 'tag'>;
+
+export type PushDeliveryReport = {
+  sent: number;
+  expired: number;
+  failed: number;
+};
+
 export type NotificationPayload = {
   title: string;
   body?: string;
@@ -36,5 +49,5 @@ export type NotificationPayload = {
   silent?: boolean | null;
   tenantId?: string;
   workspaceURL?: string;
-  notification?: NotificationDTO;
+  notification?: NotificationRecord;
 };

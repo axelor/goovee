@@ -6,9 +6,12 @@ import {z} from 'zod';
 import {manager} from '@/tenant';
 import type {Client} from '@/goovee/.generated/client';
 import {findSubscribers} from '@/orm/notification';
-import NotificationManager, {NotificationType} from '@/notification';
+import NotificationManager, {
+  NotificationType,
+  type MailNotificationData,
+} from '@/notification';
 import {getTranslation} from '@/locale/server';
-import {notifyUser} from '@/pwa/utils';
+import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
   TenantIdSchema,
@@ -55,28 +58,6 @@ function isValidSignature(
 
 function response(data: any, status: number) {
   return NextResponse.json(data, {status});
-}
-
-const BATCH_SIZE = 10;
-
-async function processBatch<T>(
-  data: T[],
-  action: (data: NoInfer<T>) => Promise<void>,
-  batchSize: number = BATCH_SIZE,
-): Promise<void> {
-  const chunks = chunkArray(data, batchSize);
-
-  for (const chunk of chunks) {
-    await Promise.allSettled(chunk.map(data => action(data)));
-  }
-}
-
-function chunkArray<T>(array: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
 }
 
 async function notificationTemplate({
@@ -164,7 +145,7 @@ async function notificationTemplate({
     `;
 }
 
-async function sendMail({
+async function buildNotificationMail({
   user,
   tenantId,
   mail,
@@ -178,14 +159,12 @@ async function sendMail({
   entity: {id: string; route: string};
   app: App;
   sender: string;
-}) {
-  const mailService = NotificationManager.getService(NotificationType.mail);
-
+}): Promise<MailNotificationData> {
   const html =
-    mail?.body ||
+    mail?.content ||
     (await notificationTemplate({user, tenantId, app, entity, sender}));
 
-  await mailService?.notify({
+  return {
     to: user.email,
     subject:
       mail?.subject ||
@@ -196,10 +175,10 @@ async function sendMail({
         sender,
       )),
     html: sanitizeHtml(html),
-  });
+  };
 }
 
-async function sendSystemNotification({
+async function buildSystemNotification({
   user,
   tenantId,
   mail,
@@ -220,8 +199,8 @@ async function sendSystemNotification({
     url: string;
   };
   client: Client;
-}) {
-  await notifyUser({
+}): Promise<NotifyUserArgs> {
+  return {
     userId: user.id,
     tenantId,
     workspaceURL: workspace.url,
@@ -240,7 +219,7 @@ async function sendSystemNotification({
         ? NotificationTag.system(app.name, workspace.id)
         : undefined,
     },
-  });
+  };
 }
 
 async function sendNotifications(data: {
@@ -253,10 +232,7 @@ async function sendNotifications(data: {
   };
   code: NotificationAppCode;
   recordId: string;
-  mail?: {
-    subject?: string | null;
-    body?: string | null;
-  } | null;
+  mail?: Mail | null;
   client: Client;
   app: App;
 }) {
@@ -271,35 +247,26 @@ async function sendNotifications(data: {
       client,
     });
 
-    await processBatch(subscribers, async ({user, entity}) => {
-      try {
-        await Promise.all([
-          sendMail({
-            user,
-            tenantId,
-            mail,
-            entity,
-            app,
-            sender: workspace.name || APP_TITLE,
-          }),
-          sendSystemNotification({
-            user,
-            tenantId,
-            mail,
-            entity,
-            app,
-            workspace,
-            client,
-          }),
-        ]);
-      } catch (err) {
-        console.error(
-          '[NOTIFICATIONS] Failed to notify subscriber',
-          user.email,
-          err,
-        );
-      }
-    });
+    const mailService = NotificationManager.getService(NotificationType.mail);
+    const sender = workspace.name || APP_TITLE;
+
+    /* Both bound their own concurrency and report their own failures. */
+    await Promise.all([
+      mailService?.notifyAll(subscribers, ({user, entity}) =>
+        buildNotificationMail({user, tenantId, mail, entity, app, sender}),
+      ),
+      notifyAll(subscribers, ({user, entity}) =>
+        buildSystemNotification({
+          user,
+          tenantId,
+          mail,
+          entity,
+          app,
+          workspace,
+          client,
+        }),
+      ),
+    ]);
   } catch (err) {
     console.error(
       '[NOTIFICATIONS] Failed to process webhook notifications',
@@ -318,7 +285,7 @@ function isValidTimestamp(timestamp: number) {
 
 const MailSchema = z.object({
   subject: z.string().nullish(),
-  body: z.string().nullish(),
+  content: z.string().nullish(),
 });
 
 type Mail = z.infer<typeof MailSchema>;
