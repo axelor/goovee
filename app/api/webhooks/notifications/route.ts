@@ -11,7 +11,7 @@ import NotificationManager, {
   type MailNotificationData,
 } from '@/notification';
 import {getTranslation} from '@/locale/server';
-import {notifyUser} from '@/pwa/utils';
+import {notifyAll, type NotifyUserArgs} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import {
   TenantIdSchema,
@@ -58,29 +58,6 @@ function isValidSignature(
 
 function response(data: any, status: number) {
   return NextResponse.json(data, {status});
-}
-
-// Bounds the system notifications written at once.
-const BATCH_SIZE = 10;
-
-async function processBatch<T>(
-  data: T[],
-  action: (data: NoInfer<T>) => Promise<void>,
-  batchSize: number = BATCH_SIZE,
-): Promise<void> {
-  const chunks = chunkArray(data, batchSize);
-
-  for (const chunk of chunks) {
-    await Promise.allSettled(chunk.map(data => action(data)));
-  }
-}
-
-function chunkArray<T>(array: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
 }
 
 async function notificationTemplate({
@@ -201,7 +178,7 @@ async function buildNotificationMail({
   };
 }
 
-async function sendSystemNotification({
+async function buildSystemNotification({
   user,
   tenantId,
   mail,
@@ -222,8 +199,8 @@ async function sendSystemNotification({
     url: string;
   };
   client: Client;
-}) {
-  await notifyUser({
+}): Promise<NotifyUserArgs> {
+  return {
     userId: user.id,
     tenantId,
     workspaceURL: workspace.url,
@@ -242,7 +219,7 @@ async function sendSystemNotification({
         ? NotificationTag.system(app.name, workspace.id)
         : undefined,
     },
-  });
+  };
 }
 
 async function sendNotifications(data: {
@@ -273,31 +250,22 @@ async function sendNotifications(data: {
     const mailService = NotificationManager.getService(NotificationType.mail);
     const sender = workspace.name || APP_TITLE;
 
-    /* notifyAll bounds its own concurrency and reports its own failures; system
-     * notifications hit the database, so they keep a batch. */
+    /* Both bound their own concurrency and report their own failures. */
     await Promise.all([
       mailService?.notifyAll(subscribers, ({user, entity}) =>
         buildNotificationMail({user, tenantId, mail, entity, app, sender}),
       ),
-      processBatch(subscribers, async ({user, entity}) => {
-        try {
-          await sendSystemNotification({
-            user,
-            tenantId,
-            mail,
-            entity,
-            app,
-            workspace,
-            client,
-          });
-        } catch (err) {
-          console.error(
-            '[NOTIFICATIONS] Failed to send a system notification to',
-            user.email,
-            err,
-          );
-        }
-      }),
+      notifyAll(subscribers, ({user, entity}) =>
+        buildSystemNotification({
+          user,
+          tenantId,
+          mail,
+          entity,
+          app,
+          workspace,
+          client,
+        }),
+      ),
     ]);
   } catch (err) {
     console.error(

@@ -17,6 +17,10 @@ export async function register() {
   const {checkMailTransport} = await import('@/lib/core/notification/startup');
   void checkMailTransport();
 
+  // Report whether push notifications can be sent.
+  const {checkPushConfig} = await import('@/lib/core/pwa/startup');
+  checkPushConfig();
+
   // Run after register() returns so it doesn't block server startup.
   // In multi-tenant mode, MultiTenantManager fetches tenant config via HTTP
   // on itself (/api/tenant/:id/config), which fails if called before the
