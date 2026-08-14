@@ -120,6 +120,16 @@ self.addEventListener('push', event => {
   const data: NotificationPayload | undefined = event.data?.json();
   if (!data) return;
 
+  /* body, url and tag arrive at the top level only, so they are not paid for
+   * twice against the payload limit. Put them back before anything downstream
+   * treats this as a whole notification record. */
+  const record = data.notification && {
+    ...data.notification,
+    body: data.body ?? null,
+    url: data.url ?? null,
+    tag: data.tag ?? null,
+  };
+
   const title = data.title || 'Notification';
   const options: NotificationOptions & {renotify?: boolean} = {
     body: data.body,
@@ -136,7 +146,7 @@ self.addEventListener('push', event => {
     renotify: Boolean(data.tag),
     data: {
       url: data.url || '/',
-      notification: data.notification,
+      notification: record,
       tenantId: data.tenantId,
       workspaceURL: data.workspaceURL,
     },
@@ -147,7 +157,7 @@ self.addEventListener('push', event => {
   // Forward the new notification to all tabs so they can update state without a refetch
   channel.postMessage({
     type: MSG_TYPE.NEW,
-    notification: data.notification,
+    notification: record,
   });
 });
 
@@ -157,14 +167,18 @@ self.addEventListener('notificationclick', event => {
   const handleClick = async () => {
     const {url, notification, tenantId} = event.notification.data;
     const tag = event.notification.tag;
-    if (tenantId) {
+    /* Without a tag or an id there is nothing to mark — the record it belongs to
+     * was never stored. Interpolating a missing id would ask the server to read
+     * a notification called "undefined". */
+    const readPath = tag
+      ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
+      : notification?.id
+        ? `/api/tenant/${tenantId}/push/notifications/read/${notification.id}`
+        : null;
+
+    if (tenantId && readPath) {
       try {
-        const readUrl = withScopeBasePath(
-          tag
-            ? `/api/tenant/${tenantId}/push/notifications/read/tag/${encodeURIComponent(tag)}`
-            : `/api/tenant/${tenantId}/push/notifications/read/${notification?.id}`,
-        );
-        await fetch(readUrl, {method: 'POST'});
+        await fetch(withScopeBasePath(readPath), {method: 'POST'});
         // Notify all tabs to remove this notification from their unread state
         channel.postMessage({type: MSG_TYPE.READ, notification, tag});
       } catch (err) {

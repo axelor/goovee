@@ -1,4 +1,5 @@
 import {randomUUID} from 'node:crypto';
+import {DeliverySlots} from '@/lib/core/concurrency/delivery-slots';
 import {taintSecret} from '@/lib/core/security/taint';
 import nodemailer, {type Transporter} from 'nodemailer';
 import type SMTPPool from 'nodemailer/lib/smtp-pool';
@@ -135,67 +136,8 @@ function createMessageId(from: string | undefined): string {
   return `<${randomUUID()}@${domain}>`;
 }
 
-/* A backlog is normal and drains on its own, so this is not a limit — it is the
- * point at which one is worth saying out loud. Nothing else observes the queue, and
- * a mail server that cannot keep up shows up as memory rather than as an error. */
-const BACKLOG_WARNING_THRESHOLD = 1_000;
-
-// Stands in for a waiter already handed its slot; never called.
-const NOOP = () => {};
-
-/* Bounds how many messages are built and in flight at once, so memory follows the
- * slot count rather than the recipient count. Sized to the pool — more only queues
- * inside nodemailer. */
-class DeliverySlots {
-  private available: number;
-  private waiting: Array<() => void> = [];
-  /* A fan-out parks one waiter per recipient, so this queue is as long as the
-   * recipient list — an index keeps release O(1) at that length. */
-  private next = 0;
-  private reportedBacklog = false;
-
-  constructor(limit: number) {
-    this.available = limit;
-  }
-
-  async acquire(): Promise<void> {
-    if (this.available > 0) {
-      this.available--;
-      return;
-    }
-
-    const queued = this.waiting.length - this.next + 1;
-
-    if (!this.reportedBacklog && queued >= BACKLOG_WARNING_THRESHOLD) {
-      this.reportedBacklog = true;
-      console.warn(
-        `[MAIL] ${queued} messages are waiting to send — the mail server is not keeping up`,
-      );
-    }
-
-    await new Promise<void>(resolve => this.waiting.push(resolve));
-  }
-
-  /* Hands the slot to the next waiter rather than returning it, so a queued
-   * message cannot be passed over. */
-  release(): void {
-    if (this.next < this.waiting.length) {
-      const waiter = this.waiting[this.next];
-      this.waiting[this.next] = NOOP;
-      this.next++;
-
-      if (this.next === this.waiting.length) {
-        this.waiting = [];
-        this.next = 0;
-        this.reportedBacklog = false;
-      }
-
-      waiter();
-      return;
-    }
-
-    this.available++;
-  }
+function describeMailBacklog(queued: number): string {
+  return `[MAIL] ${queued} messages are waiting to send — the mail server is not keeping up`;
 }
 
 let reportedBadConnectionSetting = false;
@@ -227,7 +169,13 @@ export function getMaxConnections(): number {
 
 function getDeliverySlots(): DeliverySlots {
   if (!global.__mailDeliverySlots) {
-    global.__mailDeliverySlots = new DeliverySlots(getMaxConnections());
+    /* Sized to the pool. The pooled transport queues anything beyond
+     * `maxConnections` itself, so a larger count would not send more — it would
+     * only build more messages up front and hold them there. */
+    global.__mailDeliverySlots = new DeliverySlots(
+      getMaxConnections(),
+      describeMailBacklog,
+    );
   }
 
   return global.__mailDeliverySlots;
