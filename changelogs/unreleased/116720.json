@@ -1,6 +1,0 @@
-{
-  "title": "Upload files in resumable parts",
-  "type": "change",
-  "description": "Files are sent in parts rather than in one request, so a large file no longer fails part-way and an interrupted upload resumes from where it stopped instead of starting again. Each file shows its own progress and can be paused, resumed, retried or removed, and a form cannot be sent until its attachments have finished uploading.",
-  "scope": ["core"]
-}

@@ -1,6 +1,0 @@
-{
-  "title": "Keep the translation cache keyed on the resolved tenant",
-  "type": "fix",
-  "description": "The translation bundle cache was keyed on the tenant identifier taken straight from the URL, which no route validates. Every distinct value minted its own cache entry holding the same translations, so a hundred requests carrying made-up identifiers evicted the bundles of the real tenants and forced them to be rebuilt from the database. The cache is now keyed on the tenant the identifier actually resolves to, so identifiers that resolve to nothing all share a single entry and unknown values can no longer push real tenants out of the cache. Translation lookups behave as before: an unknown tenant still serves the general translations only.",
-  "scope": ["core"]
-}
