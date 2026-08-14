@@ -4,6 +4,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {SUBAPP_CODES} from '@/constants';
 import {ensureAccess} from '@/lib/core/access/ensure-access';
 import {accessStatus} from '@/lib/core/access/denial';
+import {resolveStoragePath} from '@/storage/index';
 import {streamFile} from '@/utils/download';
 import {workspacePathname} from '@/utils/workspace';
 
@@ -41,14 +42,22 @@ export async function GET(
     user: access.user,
   });
 
-  if (!file?.metaFile?.id) {
+  if (!file?.metaFile?.id || !file.metaFile.filePath) {
     return new NextResponse('File not found', {status: 404});
   }
   if (!storage) {
     return new NextResponse('Bad config', {status: 500});
   }
 
-  const filePath = `${storage}/${file.metaFile.filePath}`;
+  const filePath = resolveStoragePath(storage, file.metaFile.filePath);
+
+  if (!filePath) {
+    console.error(
+      `Meta file ${file.metaFile.id} records a path outside the storage directory.`,
+    );
+    return new NextResponse('File not found', {status: 404});
+  }
+
   const fileName = file.metaFile.fileName!;
   const fileType = file.metaFile.fileType!;
 
@@ -56,5 +65,6 @@ export async function GET(
     fileName,
     filePath,
     fileType,
+    request,
   });
 }

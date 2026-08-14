@@ -3,9 +3,10 @@
   "version": "1.10.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development serwist build && next dev",
-    "dev:serwist": "concurrently -p none 'serwist build --watch' 'next dev'",
-    "build": "next build --no-mangling && serwist build",
+    "pdfjs:assets": "node scripts/copy-pdfjs-assets.mjs",
+    "dev": "pnpm pdfjs:assets && cross-env NODE_ENV=development serwist build && next dev",
+    "dev:serwist": "pnpm pdfjs:assets && concurrently -p none 'serwist build --watch' 'next dev'",
+    "build": "pnpm pdfjs:assets && next build --no-mangling && serwist build",
     "start": "next start",
     "lint": "eslint .",
     "type-check": "pnpm exec tsc --noEmit",
@@ -33,7 +34,6 @@
     "release": "node scripts/release.js"
   },
   "dependencies": {
-    "@cyntler/react-doc-viewer": "^1.17.1",
     "@excalidraw/excalidraw": "^0.18.1",
     "@goovee/orm": "^0.0.7",
     "@hookform/resolvers": "^5.2.2",
@@ -126,6 +126,7 @@
     "react-hook-form": "^7.73.1",
     "react-icons": "^5.6.0",
     "react-intersection-observer": "^9.13.1",
+    "react-pdf": "^10.4.1",
     "react-scroll": "^1.9.3",
     "react-select": "^5.10.2",
     "sanitize-html": "^2.17.3",
@@ -134,7 +135,7 @@
     "server-only": "^0.0.1",
     "serwist": "^9.5.7",
     "shadcn-ui": "^0.8.0",
-    "sharp": "^0.31.3",
+    "sharp": "^0.35.3",
     "sheet": "^0.2.0",
     "stripe": "^16.12.0",
     "swiper": "^11.1.14",
@@ -183,7 +184,7 @@
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.9.0"
   },
   "sideEffects": [
     "./ui/form/index.ts"
@@ -194,16 +195,14 @@
       "@types/react": "19.2.14",
       "@types/react-dom": "19.2.3",
       "react": "19.2.5",
-      "react-dom": "19.2.5"
+      "react-dom": "19.2.5",
+      "sharp": "^0.35.3"
     },
     "peerDependencyRules": {
       "allowAny": [
         "react",
         "react-dom"
       ]
-    },
-    "patchedDependencies": {
-      "next@16.2.4": "patches/next@16.2.4.patch"
     }
   }
 }

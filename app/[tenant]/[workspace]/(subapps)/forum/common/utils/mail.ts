@@ -55,42 +55,35 @@ export const sendEmailNotifications = async ({
 
     const mailService = NotificationManager.getService(NotificationType.mail);
     if (!mailService) {
-      console.error('Mail service is not available.');
+      console.error('[MAIL] Mail service is not available.');
       return;
     }
 
-    for (const subscriber of filteredSubscribers) {
-      try {
-        if (!subscriber.member?.emailAddress?.address) {
-          continue;
-        }
+    const recipients = filteredSubscribers.flatMap(subscriber => {
+      const address = subscriber.member?.emailAddress?.address;
 
-        const emailContent = mailTemplate({
-          type,
-          title,
-          author,
-          group,
-          contentSnippet: content?.slice(0, 100) + '...' || '',
-          link,
-          user: subscriber.member?.simpleFullName || '',
-        });
+      return address
+        ? [{address, name: subscriber.member?.simpleFullName || ''}]
+        : [];
+    });
 
-        await mailService.notify({
-          to: subscriber.member.emailAddress.address,
-          subject: `New ${type}: ${title}`,
-          html: emailContent,
-        });
-      } catch (error) {
-        console.error(
-          `Failed to send email to ${subscriber.member?.emailAddress?.address || 'Unknown Email'}:`,
-          error,
-        );
-      }
-    }
+    await mailService.notifyAll(recipients, async recipient => ({
+      to: recipient.address,
+      subject: `New ${type}: ${title}`,
+      html: mailTemplate({
+        type,
+        title,
+        author,
+        group,
+        contentSnippet: content?.slice(0, 100) + '...' || '',
+        link,
+        user: recipient.name,
+      }),
+    }));
 
     return {success: true};
   } catch (error) {
-    console.error('Error sending notifications:', error);
+    console.error('[MAIL] Error sending notifications:', error);
     return;
   }
 };

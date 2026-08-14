@@ -2,7 +2,9 @@ import {useEffect, useState, useSyncExternalStore} from 'react';
 import {throttle} from 'lodash-es';
 
 // ---- CORE IMPORTS ---- //
+import {i18n} from '@/locale';
 import {withBasePath} from '@/lib/core/path/base-path';
+import {MAX_UPLOAD_RECOVERIES, UPLOAD_CHUNK_SIZE} from './constants';
 
 /** Server response from the stage route — the opaque token, never a meta_file id. */
 export interface StagedUpload {
@@ -16,11 +18,11 @@ export type StagedUploadStatus =
   | 'uploading'
   | 'success'
   | 'error'
-  | 'aborted';
+  | 'paused';
 
 /** Live state for one file being staged. */
 export interface StagedUploadItem {
-  /** Client-side id, used to track/retry/abort/remove this entry. */
+  /** Client-side id, used to track/resume/pause/remove this entry. */
   id: string;
   fileName: string;
   /** Upload progress, 0–100. */
@@ -28,11 +30,22 @@ export interface StagedUploadItem {
   status: StagedUploadStatus;
   /** Set once the file is staged; redeemed server-side at submit. */
   token?: string;
+  /** Why the upload failed, already translated. Set whenever status is `error`. */
   error?: string;
 }
 
 interface StageOptions {
   purpose: string;
+  /**
+   * Largest file the purpose accepts, in bytes. A file over it is refused here
+   * rather than uploaded and rejected, so nothing is sent that cannot land.
+   *
+   * The cap belongs to the feature, not to this mechanism, so it is passed in
+   * with each call — the purpose registry that the route enforces lives on the
+   * server and is not this side's to read. Omitted, no cap is applied and the
+   * route remains the only check.
+   */
+  maxBytes?: number;
 }
 
 export interface UseStagedUpload {
@@ -43,44 +56,62 @@ export interface UseStagedUpload {
    * upload starts, with two channels:
    * - `ids` — one per input file, input-aligned (`ids[i]` ↔ `files[i]`), never
    *   filtered. The stable handle for binding/grouping and for
-   *   `abort`/`retry`/`remove`; look an entry up with
+   *   `pause`/`resume`/`remove`; look an entry up with
    *   `uploads.find(u => u.id === ids[i])`.
    * - `done` — resolves (never rejects) with the tokens that succeeded by the
-   *   time this call settled, in input order; failed/aborted items are omitted.
-   *   Each item's authoritative, still-evolving status (errors, aborts, later
-   *   retries) lives in `uploads`, keyed by the returned ids.
+   *   time this call settled, in input order; failed and paused items are omitted.
+   *   Each item's authoritative, still-evolving status (failures, pauses, and
+   *   whatever happens after) lives in `uploads`, keyed by the returned ids.
    *
    * At most `concurrency` uploads run at once across every file the hook holds —
-   * all `upload()` calls and retries share one pool, so extras sit in `queued`.
+   * every `upload()` call shares one pool, so extras sit in `queued`.
    */
   upload: (
     files: File | File[],
     options: StageOptions,
   ) => {ids: string[]; done: Promise<StagedUpload[]>};
   /**
-   * Re-send a failed or aborted item under the same id, reusing the original
-   * file and options. It rejoins the shared queue and waits for a free slot.
-   * No-op if the id is unknown, succeeded, in flight, or already queued. A retry
-   * may leave an orphan claim server-side if a previous attempt actually reached
-   * the server — bounded by the claim TTL + reaper.
+   * Carry on with a failed or paused file under the same id. It rejoins the
+   * shared queue and waits for a free slot. No-op if the id is unknown,
+   * succeeded, in flight, or already queued.
+   *
+   * Nothing is sent twice: the server is asked how much it already holds and
+   * only the remainder goes up. A file that failed before it ever learned its
+   * id is the exception — it starts again, and the abandoned upload is left to
+   * expire.
    */
-  retry: (id: string) => Promise<StagedUpload | undefined>;
-  /** Abort one in-flight upload by id, or all when called with no id. */
-  abort: (id?: string) => void;
-  /** Abort (if in-flight) and drop one entry from `uploads`. */
+  resume: (id: string) => Promise<StagedUpload | undefined>;
+  /**
+   * Stop one file by id, or all of them when called with no id. What the server
+   * holds is left in place, so `resume` picks the file up where it stopped —
+   * for as long as the page lives, since nothing survives a reload.
+   */
+  pause: (id?: string) => void;
+  /** Stop a file, give up what the server holds, and drop the entry. */
   remove: (id: string) => void;
-  /** Abort everything and clear all state. */
+  /** Give up everything and clear all state. */
   reset: () => void;
   /** Tokens of the successfully staged files, in upload order. */
   tokens: string[];
-  isUploading: boolean;
+  /**
+   * Whether every file held is staged and ready to be redeemed — the signal a
+   * form gates its submit on. True when nothing is held at all.
+   *
+   * Paused and failed files count as not staged, deliberately: both would be
+   * dropped in silence by a submit that only waited for the transfers to stop.
+   */
+  isStaged: boolean;
 }
 
 /*
  * Internal record for one file. The manager keeps a single `Map<id, Task>`; the
  * rendered snapshot and the schedule are derived from it. `xhr` is set only while
- * uploading; `settle` resolves the promise that `upload().done` / `retry()`
- * await, and is cleared once called.
+ * a chunk is in flight; `settle` resolves the promise that `upload().done` /
+ * `resume()` await, and is cleared once called.
+ *
+ * `fileId` and `offset` survive a failure on purpose: resuming continues the same
+ * server-side upload from the bytes it already holds instead of starting the
+ * file again.
  */
 interface Task {
   id: string;
@@ -92,7 +123,67 @@ interface Task {
   token?: string;
   error?: string;
   xhr?: XMLHttpRequest;
+  fileId?: string;
+  offset: number;
   settle?: (result: StagedUpload | null) => void;
+}
+
+/** The fields a chunk response may carry. All optional — it is server text. */
+interface ChunkBody {
+  fileId?: string;
+  token?: string;
+  fileName?: string;
+  sizeText?: string;
+  offset?: number;
+}
+
+/** What one chunk request came back with. */
+interface ChunkResponse {
+  status: number;
+  fileId: string | null;
+  offset: number | null;
+  body: ChunkBody;
+}
+
+/**
+ * Narrow a response body to the fields this client uses. The text is whatever
+ * the network handed back, so each field is taken only when it has the expected
+ * type and dropped otherwise.
+ */
+function toChunkBody(text: string): ChunkBody {
+  if (!text) return {};
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return {};
+  }
+
+  if (typeof parsed !== 'object' || parsed === null) return {};
+  const fields = parsed as Record<string, unknown>;
+
+  return {
+    fileId: typeof fields.fileId === 'string' ? fields.fileId : undefined,
+    token: typeof fields.token === 'string' ? fields.token : undefined,
+    fileName: typeof fields.fileName === 'string' ? fields.fileName : undefined,
+    sizeText: typeof fields.sizeText === 'string' ? fields.sizeText : undefined,
+    offset: typeof fields.offset === 'number' ? fields.offset : undefined,
+  };
+}
+
+/** Raised when the caller aborted a request, to separate it from a real failure. */
+class AbortedError extends Error {}
+
+/** Whether a file is beyond what its call said the purpose would accept. */
+function exceedsCap(file: File, options: StageOptions): boolean {
+  return options.maxBytes != null && file.size > options.maxBytes;
+}
+
+/** Whole-percent progress, guarding the empty-file case. */
+function percentOf(done: number, total: number): number {
+  if (total <= 0) return 0;
+  return Math.min(100, Math.round((done / total) * 100));
 }
 
 /** Project a task down to the public, renderable shape. */
@@ -115,7 +206,7 @@ const EMPTY: StagedUploadItem[] = [];
  * mutable state and exposes a `subscribe`/`getSnapshot` pair for
  * `useSyncExternalStore`. Status is the only scheduling signal: `running` is the
  * count of `uploading` tasks and the next work is the first `queued` task in
- * insertion order, so abort/remove just flip status with nothing else to keep in
+ * insertion order, so pause/remove just flip status with nothing else to keep in
  * sync. The cached `snapshot` is recomputed only on change, which keeps
  * `getSnapshot` referentially stable (required by `useSyncExternalStore`).
  */
@@ -124,7 +215,6 @@ class UploadManager {
   private nextId = 0;
   private tenant: string;
   private concurrency: number;
-  private disposed = false;
 
   private listeners = new Set<() => void>();
   private snapshot: StagedUploadItem[] = EMPTY;
@@ -199,11 +289,29 @@ class UploadManager {
     this.pump(); // a raised cap may free a slot
   };
 
-  /** Abort in-flight uploads and stop the scheduler; for unmount. */
+  /**
+   * Stop everything under way and give it up; for unmount.
+   *
+   * Unmounting takes the file ids and offsets with it, so nothing here can ever
+   * be resumed — which makes this the moment to release each upload rather than
+   * merely stop it. Leaving them would hold their storage until they expired,
+   * for uploads no one could pick up again.
+   *
+   * Stopping goes through `pause()` first, which is what actually holds the
+   * scheduler: it settles a file caught between two parts rather than leaving
+   * it waiting on an answer that will never come, and the statuses it leaves
+   * behind are what stop the driver and keep anything queued from starting.
+   */
   dispose = () => {
-    this.disposed = true;
     this.cancelProgress();
-    this.tasks.forEach(task => task.xhr?.abort());
+    this.pause();
+
+    /* A file that finished belongs to whatever the consumer staged it for: it
+     * is redeemed at submit, or reclaimed by the expiry sweep if the form is
+     * never sent. Either way it is not this to give up. */
+    this.tasks.forEach(task => {
+      if (task.status !== 'success') this.release(task);
+    });
   };
 
   // ---- public API ----
@@ -217,15 +325,24 @@ class UploadManager {
       const id = `u${this.nextId++}`;
       ids.push(id);
       return new Promise<StagedUpload | null>(resolve => {
+        /* Refused before it is ever queued, so an oversized file costs no
+         * request at all. The scheduler only ever picks up `queued` work, which
+         * is what keeps it out. */
+        const tooLarge = exceedsCap(file, options);
+
         this.tasks.set(id, {
           id,
           fileName: file.name,
           file,
           options,
-          status: 'queued',
+          status: tooLarge ? 'error' : 'queued',
+          error: tooLarge ? i18n.t('File is too large') : undefined,
           progress: 0,
-          settle: resolve,
+          offset: 0,
+          settle: tooLarge ? undefined : resolve,
         });
+
+        if (tooLarge) resolve(null);
       });
     });
 
@@ -239,14 +356,24 @@ class UploadManager {
     return {ids, done};
   };
 
-  retry = (id: string) => {
+  resume = (id: string) => {
     const task = this.tasks.get(id);
-    // only a failed or aborted task can be re-queued
-    if (!task || (task.status !== 'error' && task.status !== 'aborted')) {
+    // only a failed or paused file has anything to continue from
+    if (!task || (task.status !== 'error' && task.status !== 'paused')) {
+      return Promise.resolve(undefined);
+    }
+    /* Nothing makes an oversized file smaller, so retrying one is refused here
+     * too and it keeps the message explaining why. */
+    if (exceedsCap(task.file, task.options)) {
       return Promise.resolve(undefined);
     }
     task.status = 'queued';
-    task.progress = 0;
+
+    /* The bar keeps its last reading: it already counts the bytes that were on
+     * the wire, the server keeps what reached it, and the server's own count
+     * arrives a moment later. Only a file with no upload behind it starts
+     * over. */
+    if (!task.fileId) task.progress = 0;
     task.error = undefined;
     const result = new Promise<StagedUpload | null>(resolve => {
       task.settle = resolve;
@@ -256,44 +383,74 @@ class UploadManager {
     return result.then(staged => staged ?? undefined);
   };
 
-  abort = (id?: string) => {
-    const abortOne = (task: Task) => {
-      if (task.status === 'uploading') {
-        // the xhr 'abort' event marks it aborted, settles, and re-pumps
-        task.xhr?.abort();
-      } else if (task.status === 'queued') {
-        task.status = 'aborted';
-        task.settle?.(null);
-        task.settle = undefined;
-      }
-    };
+  /*
+   * Stop a file where it stands, leaving everything the server holds intact.
+   * Whether it is then resumable is the caller's business: this only ends the
+   * transfer and settles whoever was waiting on it.
+   *
+   * A request genuinely in flight is torn down, and its `abort` event marks the
+   * task and settles it. Between one part and the next there is nothing to tear
+   * down — aborting a finished request raises no event — so the status set here
+   * is what stops the driver, which tests it before sending anything more.
+   */
+  private stopTask = (task: Task) => {
+    if (task.status !== 'uploading' && task.status !== 'queued') return;
+
+    const inFlight =
+      task.xhr != null && task.xhr.readyState !== XMLHttpRequest.DONE;
+
+    task.status = 'paused';
+
+    if (inFlight) {
+      task.xhr?.abort();
+      return;
+    }
+
+    task.settle?.(null);
+    task.settle = undefined;
+  };
+
+  pause = (id?: string) => {
     if (id) {
       const task = this.tasks.get(id);
-      if (task) abortOne(task);
+      if (task) this.stopTask(task);
     } else {
-      this.tasks.forEach(abortOne);
+      this.tasks.forEach(this.stopTask);
     }
     this.publish();
+
+    /* Stopping a file frees its slot. A request that was in flight re-fills it
+     * on its way out, but one stopped between two parts has no such moment, and
+     * whatever is queued would wait for an unrelated file to finish. */
+    this.pump();
   };
 
   remove = (id: string) => {
     const task = this.tasks.get(id);
     if (!task) return;
-    task.xhr?.abort(); // if uploading
-    task.settle?.(null); // settle any pending awaiter
-    task.settle = undefined;
+
+    /* Dropped rather than paused, so what the server holds goes too — unlike
+     * pause(), which leaves it in place to be resumed. */
+    this.stopTask(task);
+    this.release(task);
+
     this.tasks.delete(id);
     this.publish();
-    this.pump(); // a removed in-flight upload frees a slot
+    this.pump(); // a dropped in-flight upload frees a slot
   };
 
   reset = () => {
     this.cancelProgress();
+
+    /* A file that finished is not this to give up, exactly as on unmount: it
+     * has either just been redeemed by the form being cleared, or it is left to
+     * the expiry sweep. Giving it up here would ask the server to release an
+     * upload that has already become someone's attachment. */
     this.tasks.forEach(task => {
-      task.xhr?.abort();
-      task.settle?.(null);
-      task.settle = undefined;
+      this.stopTask(task);
+      if (task.status !== 'success') this.release(task);
     });
+
     this.tasks.clear();
     this.publish();
   };
@@ -301,7 +458,6 @@ class UploadManager {
   // ---- scheduler ----
 
   private pump() {
-    if (this.disposed) return;
     let running = 0;
     for (const task of this.tasks.values()) {
       if (task.status === 'uploading') running++;
@@ -319,85 +475,331 @@ class UploadManager {
     task.error = undefined;
     this.publish();
 
-    const xhr = new XMLHttpRequest();
-    task.xhr = xhr;
+    void this.runTask(task);
+  }
 
-    const finish = (result: StagedUpload | null) => {
-      task.xhr = undefined;
-      task.settle?.(result);
-      task.settle = undefined;
-      /* Defer so a synchronous failure (below) can't re-enter pump() from inside
-       * the current pump loop; async terminal events already run on their own
-       * turn, so the microtask is harmless there. */
-      queueMicrotask(() => this.pump());
-    };
+  private finish(task: Task, result: StagedUpload | null) {
+    task.xhr = undefined;
+    task.settle?.(result);
+    task.settle = undefined;
+    /* Defer so a synchronous failure can't re-enter pump() from inside the
+     * current pump loop; async terminal events already run on their own turn,
+     * so the microtask is harmless there. */
+    queueMicrotask(() => this.pump());
+  }
 
-    const fail = (message: string) => {
-      task.status = 'error';
-      task.error = message;
-      this.publish();
-      finish(null);
-    };
+  private fail(task: Task, message: string) {
+    task.status = 'error';
+    task.error = message;
+    this.publish();
+    this.finish(task, null);
+  }
 
-    xhr.upload.addEventListener('progress', event => {
-      if (event.lengthComputable) {
-        task.progress = Math.round((event.loaded / event.total) * 100);
-        this.scheduleProgress();
-      }
-    });
+  /* One address per purpose; the upload being worked on rides in a header. */
+  private uploadUrl(purpose: string) {
+    return withBasePath(
+      `/api/tenant/${this.tenant}/upload/stage/${encodeURIComponent(purpose)}`,
+    );
+  }
 
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const data = JSON.parse(xhr.responseText) as StagedUpload;
-          task.progress = 100;
-          task.status = 'success';
-          task.token = data.token;
-          this.publish();
-          finish(data);
-        } catch {
-          fail('Invalid server response');
+  /*
+   * One request of the upload. Resolves with the status, the server's offset and
+   * the parsed body (when there is one); rejects on transport failure, and with
+   * an `AbortedError` when the caller aborted, which the driver treats as a stop
+   * rather than an error. `XMLHttpRequest` is used throughout because the Fetch
+   * API cannot report upload progress.
+   */
+  private send(
+    task: Task,
+    {
+      method,
+      url,
+      headers,
+      body,
+    }: {
+      method: string;
+      url: string;
+      headers: Record<string, string>;
+      body?: Blob;
+    },
+  ): Promise<ChunkResponse> {
+    return new Promise<ChunkResponse>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      task.xhr = xhr;
+
+      /* Progress covers the whole file, not this chunk: what the server has
+       * already committed plus what is on the wire right now. */
+      xhr.upload.addEventListener('progress', event => {
+        if (event.lengthComputable) {
+          task.progress = percentOf(task.offset + event.loaded, task.file.size);
+          this.scheduleProgress();
         }
-      } else {
-        fail('Upload could not be staged');
+      });
+
+      xhr.addEventListener('load', () => {
+        const parsed = toChunkBody(xhr.responseText);
+
+        /* The headers are the server's own account of the upload, and are set on
+         * every answer; the body repeats them only where it has one. */
+        const header = xhr.getResponseHeader('X-File-Offset');
+        const reported = header == null ? null : Number(header);
+        const offset =
+          reported != null && Number.isFinite(reported)
+            ? reported
+            : (parsed.offset ?? null);
+        const fileId =
+          xhr.getResponseHeader('X-File-Id') ?? parsed.fileId ?? null;
+
+        resolve({status: xhr.status, fileId, offset, body: parsed});
+      });
+
+      xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+
+      xhr.addEventListener('abort', () => {
+        task.status = 'paused';
+        this.publish();
+        this.finish(task, null);
+        reject(new AbortedError());
+      });
+
+      try {
+        xhr.open(method, url);
+        for (const [name, value] of Object.entries(headers)) {
+          xhr.setRequestHeader(name, value);
+        }
+        xhr.send(body);
+      } catch {
+        // open/setRequestHeader/send can throw synchronously
+        reject(new Error('Upload failed'));
       }
     });
+  }
 
-    xhr.addEventListener('error', () => fail('Upload failed'));
+  /*
+   * Drive one file to completion, a chunk at a time.
+   *
+   * The first request opens the upload, and carries the first chunk only when
+   * the whole file fits in one. Every chunk after that is appended at the
+   * offset the server confirmed — never at a locally assumed one, so a resumed
+   * upload cannot leave a gap or overlap.
+   */
+  private async runTask(task: Task) {
+    const url = this.uploadUrl(task.options.purpose);
 
-    xhr.addEventListener('abort', () => {
-      task.status = 'aborted';
-      this.publish();
-      finish(null);
-    });
+    /*
+     * Recovering in place — restarting a session the server has forgotten, or
+     * re-seeking to an offset it rejected — is bounded for the whole file. A
+     * server that keeps giving the same answer then fails the upload instead of
+     * holding it in a loop that neither finishes nor stops.
+     */
+    let recoveries = 0;
+    const recover = () => {
+      recoveries++;
+      if (recoveries <= MAX_UPLOAD_RECOVERIES) return true;
+      this.fail(task, i18n.t('Upload could not be staged'));
+      return false;
+    };
 
     try {
-      // purpose is a path segment; encode it so values like `marketplace:bundle` round-trip
-      const purposeSegment = encodeURIComponent(task.options.purpose);
-      xhr.open(
-        'POST',
-        withBasePath(
-          `/api/tenant/${this.tenant}/upload/stage/${purposeSegment}`,
-        ),
-      );
-      /*
-       * Send the file as the raw request body so the server streams it straight
-       * to disk; the name rides in a header (encoded so unicode round-trips) and
-       * the type is the Content-Type.
-       */
-      xhr.setRequestHeader(
-        'Content-Type',
-        task.file.type || 'application/octet-stream',
-      );
-      xhr.setRequestHeader(
-        'X-Upload-Filename',
-        encodeURIComponent(task.file.name),
-      );
-      xhr.send(task.file);
+      if (task.fileId && !(await this.resync(task))) return;
+
+      while (task.status === 'uploading') {
+        const opening = !task.fileId;
+
+        /*
+         * A file too large for one part is opened with no body, so its id — and
+         * with it the ability to resume — exists before a single byte is sent.
+         * One that fits in a single part travels with the request that opens
+         * it, so a small attachment still costs one round trip.
+         */
+        const openEmpty = opening && task.file.size > UPLOAD_CHUNK_SIZE;
+        const chunk = task.file.slice(
+          task.offset,
+          task.offset + UPLOAD_CHUNK_SIZE,
+        );
+
+        const response = opening
+          ? await this.send(task, {
+              method: 'POST',
+              url,
+              headers: {
+                'Content-Type': 'application/octet-stream',
+                'X-File-Name': encodeURIComponent(task.file.name),
+                'X-File-Type': task.file.type || 'application/octet-stream',
+                'X-File-Size': String(task.file.size),
+              },
+              body: openEmpty ? undefined : chunk,
+            })
+          : await this.send(task, {
+              method: 'PATCH',
+              url,
+              headers: {
+                'Content-Type': 'application/octet-stream',
+                'X-File-Id': task.fileId!,
+                'X-File-Offset': String(task.offset),
+              },
+              body: chunk,
+            });
+
+        /* The id is taken from whatever answer carries it, before the status
+         * is read: an opening request can be answered with a conflict, and
+         * taking the id only from a success would have this open a second
+         * upload and send the rest of the file into it from the start. */
+        if (response.fileId) {
+          task.fileId = response.fileId;
+        }
+
+        /* The server rejected our offset and told us the real one — re-seek and
+         * carry on rather than failing the file. */
+        if (response.status === 409 && response.offset != null) {
+          /*
+           * An offset that moves forward by a worthwhile amount is progress,
+           * not a disagreement — the part landed in part, or this client had
+           * fallen behind — and does not spend the allowance.
+           *
+           * A trickle does spend it. A link that cuts every part after a few
+           * kilobytes would otherwise re-send the file many times over, one
+           * salvaged sliver at a time, and never surface a failure.
+           */
+          const progressed =
+            response.offset - task.offset >= UPLOAD_CHUNK_SIZE / 4;
+          if (!progressed && !recover()) return;
+          task.offset = response.offset;
+          task.progress = percentOf(task.offset, task.file.size);
+          this.publish();
+          continue;
+        }
+
+        /* The session is gone (expired or reclaimed), so there is nothing to
+         * resume; the file starts again from the beginning. */
+        if (response.status === 404 && !opening) {
+          if (!recover()) return;
+          task.fileId = undefined;
+          task.offset = 0;
+          task.progress = 0;
+          continue;
+        }
+
+        /* Only a 2xx counts as the part having landed. A blocked or failed
+         * request can surface as status 0, which is not an error code but is
+         * certainly not the server having accepted the bytes. */
+        if (response.status < 200 || response.status >= 300) {
+          return this.fail(
+            task,
+            response.status === 413
+              ? i18n.t('File is too large')
+              : i18n.t('Upload could not be staged'),
+          );
+        }
+
+        if (opening && !task.fileId) {
+          return this.fail(task, i18n.t('Invalid server response'));
+        }
+
+        /* Opening with no body carried no bytes, so there is nothing to advance
+         * — the next turn of the loop sends the first part. */
+        if (openEmpty) {
+          this.publish();
+          continue;
+        }
+
+        const advanced = response.offset ?? task.offset + chunk.size;
+
+        /* Termination rests on the offset moving. A success that leaves it where
+         * it was would otherwise send the same part forever. */
+        if (advanced <= task.offset && !response.body.token) {
+          return this.fail(task, i18n.t('Upload could not be staged'));
+        }
+
+        task.offset = advanced;
+        task.progress = percentOf(task.offset, task.file.size);
+
+        if (response.body.token) {
+          task.progress = 100;
+          task.status = 'success';
+          task.token = response.body.token;
+          this.publish();
+          this.finish(task, {
+            token: response.body.token,
+            fileName: response.body.fileName ?? task.fileName,
+            sizeText: response.body.sizeText ?? '',
+          });
+          return;
+        }
+
+        this.publish();
+      }
+    } catch (error) {
+      // an abort has already recorded its own terminal state
+      if (error instanceof AbortedError) return;
+      this.fail(task, i18n.t('Upload failed'));
+    }
+  }
+
+  /*
+   * Align the task with what the server holds. Answers false when the caller
+   * should stop — either the task is finished with, or it has been failed.
+   *
+   * A session the server no longer knows about is dropped rather than failed,
+   * so the file simply starts again.
+   */
+  private async resync(task: Task): Promise<boolean> {
+    if (!task.fileId) return true;
+
+    let state: ChunkResponse;
+    try {
+      state = await this.send(task, {
+        method: 'HEAD',
+        url: this.uploadUrl(task.options.purpose),
+        headers: {'X-File-Id': task.fileId},
+      });
+    } catch (error) {
+      if (error instanceof AbortedError) return false;
+      this.fail(task, i18n.t('Upload failed'));
+      return false;
+    }
+
+    if (state.status === 404) {
+      task.fileId = undefined;
+      task.offset = 0;
+      task.progress = 0;
+      return true;
+    }
+
+    if (state.status >= 400) {
+      this.fail(task, i18n.t('Upload failed'));
+      return false;
+    }
+
+    if (state.offset != null) {
+      task.offset = state.offset;
+      task.progress = percentOf(task.offset, task.file.size);
+    }
+
+    return true;
+  }
+
+  /*
+   * Tell the server to drop an upload the user walked away from, so its storage
+   * is freed at once. Best-effort only — the server reclaims an abandoned
+   * upload on expiry whether or not this ever arrives.
+   *
+   * Stop the task first: a released upload cannot be resumed, and clearing its
+   * id under a running driver would have that driver open a second upload and
+   * send the whole file again.
+   */
+  private release(task: Task) {
+    if (!task.fileId) return;
+    const fileId = task.fileId;
+    task.fileId = undefined;
+    task.offset = 0;
+    const xhr = new XMLHttpRequest();
+    try {
+      xhr.open('DELETE', this.uploadUrl(task.options.purpose));
+      xhr.setRequestHeader('X-File-Id', fileId);
+      xhr.send();
     } catch {
-      // open/setRequestHeader/send can throw synchronously; route to the terminal
-      // path so the task never sticks in 'uploading' and its awaiter settles
-      fail('Upload failed');
+      // nothing to do: the expiry sweep is the guarantee, not this call
     }
   }
 }
@@ -409,10 +811,15 @@ class UploadManager {
  * its snapshot via `useSyncExternalStore`. Uses `XMLHttpRequest` because the
  * Fetch API cannot report upload progress.
  *
+ * Each file is sent in parts against one server-side session, so no request has
+ * to carry a whole file and an interrupted transfer resumes from the bytes the
+ * server confirmed. A file that fits in a single part still costs one request.
+ *
  * A single scheduler starts `queued` tasks up to `concurrency` in flight across
- * every file the hook holds, filling a freed slot as each finishes. Failures are
- * non-terminal: the file is retained so `retry(id)` can re-queue it. In-flight
- * uploads are aborted on unmount.
+ * every file the hook holds, filling a freed slot as each finishes. Concurrency
+ * is across files: the parts of one file go up in order. Failures are
+ * non-terminal: the file is retained so `resume(id)` can continue it. Unmounting
+ * releases whatever is still under way, since nothing survives it to resume.
  *
  * `progressThrottleMs > 0` (default 200) uses a fixed throttle; `0` coalesces to
  * one snapshot per animation frame.
@@ -435,7 +842,7 @@ export function useStagedUpload({
     manager.configure(tenant, concurrency);
   }, [manager, tenant, concurrency]);
 
-  // abort in-flight uploads and stop the scheduler when the consumer unmounts
+  // release whatever is still under way when the consumer unmounts
   useEffect(() => () => manager.dispose(), [manager]);
 
   const uploads = useSyncExternalStore(
@@ -447,18 +854,16 @@ export function useStagedUpload({
   const tokens = uploads.flatMap(item =>
     item.status === 'success' && item.token ? [item.token] : [],
   );
-  const isUploading = uploads.some(
-    item => item.status === 'uploading' || item.status === 'queued',
-  );
+  const isStaged = uploads.every(item => item.status === 'success');
 
   return {
     uploads,
     upload: manager.upload,
-    retry: manager.retry,
-    abort: manager.abort,
+    resume: manager.resume,
+    pause: manager.pause,
     remove: manager.remove,
     reset: manager.reset,
     tokens,
-    isUploading,
+    isStaged,
   };
 }

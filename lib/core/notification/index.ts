@@ -13,6 +13,15 @@ export interface MailNotificationData {
 
 export interface NotificationService {
   notify(data: MailNotificationData): Promise<SMTPPool.SentMessageInfo>;
+
+  /* Sends one mail per item, sharing the connection pool and retrying each
+   * independently. `toMessage` is called per attempt, so a fan-out holds only
+   * its items while it waits. Never rejects — every item comes back, carrying
+   * `error` if it could not be delivered. */
+  notifyAll<T>(
+    items: T[],
+    toMessage: (item: T) => Promise<MailNotificationData>,
+  ): Promise<Array<{item: T; error?: unknown}>>;
 }
 
 export enum NotificationType {
@@ -20,13 +29,10 @@ export enum NotificationType {
 }
 
 export class NotificationManager {
-  static getService(
-    type: NotificationType,
-    options?: SMTPPool | SMTPPool.Options | string,
-  ): NotificationService | null {
+  static getService(type: NotificationType): NotificationService | null {
     switch (type) {
       case NotificationType.mail:
-        return MailNotificationService.create(options);
+        return MailNotificationService.create();
       default:
         return null;
     }

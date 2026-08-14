@@ -87,14 +87,15 @@ export function NewsArticleHero({
                 <span className="inline-flex items-center gap-2">
                   <span className="w-8 h-8 rounded-full grid place-items-center text-white text-[11px] font-bold bg-gradient-to-br from-ink-300 to-ink-500 overflow-hidden">
                     {article.author?.picture?.id ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={getPartnerImageURL(
                           article.author.picture.id,
                           tenant,
                           {noimage: true},
                         )}
-                        alt={article.author.simpleFullName}
+                        alt={article.author.simpleFullName ?? ''}
+                        width={32}
+                        height={32}
                         className="w-full h-full object-cover"
                       />
                     ) : (

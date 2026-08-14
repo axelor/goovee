@@ -16,6 +16,21 @@ export function getFileSizeText(fileSize: number) {
   return fileSize + ' B';
 }
 
+/*
+ * The file name without its extension, used to prefill the name field of an
+ * upload form. The extension is dropped because the server re-appends the
+ * stored file's extension when it renames the file, so keeping it here would
+ * produce names like `report.pdf.pdf`.
+ *
+ * Mirrors Node's `path.extname`, which is what the server renames with: a
+ * leading dot is part of the name rather than an extension, so `.gitignore`
+ * is returned unchanged.
+ */
+export function getFileNameWithoutExtension(fileName: string) {
+  const lastDot = fileName.lastIndexOf('.');
+  return lastDot > 0 ? fileName.slice(0, lastDot) : fileName;
+}
+
 export function download(record: any, href?: string) {
   if (!record) return null;
 
