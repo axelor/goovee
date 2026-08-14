@@ -1,6 +1,7 @@
 'use client';
 
 import {useState, useTransition} from 'react';
+import Image from 'next/image';
 import {Link} from '@/ui/components/link';
 import {useRouter} from 'next/navigation';
 import {
@@ -260,10 +261,11 @@ export function ForumGroup({
                       <span className="inline-flex items-center gap-1.5">
                         <span className="w-[22px] h-[22px] rounded-full overflow-hidden bg-gradient-to-br from-ink-300 to-ink-500 grid place-items-center text-white text-[9px] font-bold shrink-0">
                           {avatar ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <Image
                               src={avatar}
                               alt={author || ''}
+                              width={22}
+                              height={22}
                               className="w-full h-full object-cover"
                             />
                           ) : (

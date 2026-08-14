@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import {experimental_taintUniqueValue} from 'react';
 
+import {DEFAULT_TENANT} from '@/constants';
+import {
+  getMaxConnections,
+  mailAccountKey,
+} from '@/lib/core/notification/mail-account';
+import {taintSecret} from '@/lib/core/security/taint';
 import {
   PUBLIC_ENV_KEYS,
   type GlobalConfig,
@@ -10,16 +15,9 @@ import {
   type TenantConfig,
 } from './types';
 
-/* The taint API only exists in React's `react-server` build that Next.js
- * loads in Server Components / Route Handlers. CLI scripts (seeders,
- * one-shot tasks) resolve the regular `react` build where it's `undefined`,
- * so calling it would crash. There's no Client Component leak surface in
- * a script anyway — skip when the function isn't there. */
-function taint(message: string, value: string) {
-  if (typeof experimental_taintUniqueValue === 'function') {
-    experimental_taintUniqueValue(message, process, value);
-  }
-}
+/* Which entries of the document are servable is decided here, since the tenant
+ * manager is built from what this module reads. */
+export const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
 
 export interface TenantConfigProvider {
   get(id: string): Promise<TenantConfig | null>;
@@ -37,7 +35,27 @@ type TenantConfigInput = Omit<TenantConfig, 'publicEnv'> & {
 type GlobalConfigInput = {
   betterAuthSecret?: string;
   betterAuthUrl?: string;
+  pushMaxConnections?: number;
+  imageCacheMaxBytes?: number;
 };
+
+/**
+ * A positive whole number, or nothing.
+ *
+ * Reported by name at load rather than corrected at the point of use: a setting
+ * silently replaced by a default is how a deployment ends up believing it set
+ * three and running at ten, and reporting it here names every offender once
+ * instead of only whichever one is exercised first.
+ */
+function validateCount(context: string, value: number | undefined) {
+  if (value === undefined) return;
+
+  if (!Number.isInteger(value) || value < 1) {
+    throw new Error(
+      `${context} must be a whole number of at least 1, got ${JSON.stringify(value)}`,
+    );
+  }
+}
 
 function validatePublicEnvKeys(
   context: string,
@@ -92,6 +110,11 @@ function normalizeTenantConfig(
     throw new Error(`Tenant "${id}": publicEnv.GOOVEE_PUBLIC_HOST is required`);
   }
 
+  validateCount(
+    `Tenant "${id}": mail.maxConnections`,
+    input.mail?.maxConnections,
+  );
+
   /* Bake the per-tenant storage root once, mirroring AOP's
    * FileSystemStore.getRootPath(): a tenant on a shared multi-tenant AOS keeps
    * its files under <data.upload.dir>/<aosTenantId>, while a dedicated instance
@@ -142,14 +165,93 @@ function validateHubPispCertIsolation(tenants: Record<string, TenantConfig>) {
   }
 }
 
+/* Cross-tenant invariant. Uploads are recorded as a path relative to the tenant's
+ * storage root, so two tenants resolving to the same root share one namespace:
+ * each would resolve the other's recorded paths, and the retention sweep would
+ * delete from a directory holding another tenant's blobs. The roots compared here
+ * are the resolved ones — a tenant on a shared AOS already has its aosTenantId
+ * subdirectory baked in — so tenants sharing one AOS legitimately pass. */
+function validateStorageIsolation(tenants: Record<string, TenantConfig>) {
+  const roots: Array<[string, string]> = []; // [tenant id, resolved storage root]
+
+  for (const [id, config] of Object.entries(tenants)) {
+    const storage = path.resolve(config.aos.storage);
+
+    for (const [owner, existing] of roots) {
+      /* Containment, not just equality: a tenant that keeps the base path (no
+       * aosTenantId) while another sits in a subdirectory of it would otherwise
+       * pass, and the outer tenant's root then contains the inner one's — its
+       * recorded paths resolve into the inner tenant's files and its retention
+       * sweep deletes from them. */
+      const nested =
+        storage === existing ||
+        storage.startsWith(existing + path.sep) ||
+        existing.startsWith(storage + path.sep);
+
+      if (nested) {
+        throw new Error(
+          `Tenants "${owner}" ("${existing}") and "${id}" ("${storage}") share ` +
+            `a storage root — one contains the other. Give each tenant a ` +
+            `directory of its own, or set aos.aosTenantId on every tenant that ` +
+            `shares one AOS instance.`,
+        );
+      }
+    }
+
+    roots.push([id, storage]);
+  }
+}
+
+/* Cross-tenant invariant. Tenants sharing one mail account share one connection
+ * pool, so they must agree on how many connections that account allows: the pool
+ * is built by whichever tenant sends first, and a disagreement would make the
+ * ceiling depend on send order — intermittently exceeding the limit the lower
+ * value was set to respect. */
+function validateMailCeilings(tenants: Record<string, TenantConfig>) {
+  const byAccount = new Map<string, {id: string; maxConnections: number}>();
+
+  for (const [id, config] of Object.entries(tenants)) {
+    const mail = config.mail;
+    if (!mail?.host) continue;
+
+    const account = mailAccountKey(mail);
+    const existing = byAccount.get(account);
+
+    /* Compared as they are applied, not as they are written: leaving the setting
+     * out means the default, so a tenant that omits it agrees with one that
+     * spells that same number out. Refusing those would make an operator edit a
+     * file to state what the two configurations already mean. */
+    const maxConnections = getMaxConnections(mail);
+
+    if (existing && existing.maxConnections !== maxConnections) {
+      throw new Error(
+        `Tenants "${existing.id}" and "${id}" share the mail account ` +
+          `"${mail.user}" on ${mail.host} but allow it a different number of ` +
+          `connections (${existing.maxConnections} and ${maxConnections}). ` +
+          `They share one connection pool, so the ceiling must match — set ` +
+          `mail.maxConnections to the same value for both.`,
+      );
+    }
+
+    if (!existing) {
+      byAccount.set(account, {id, maxConnections});
+    }
+  }
+}
+
 function normalizeGlobalConfig(input: GlobalConfigInput): GlobalConfig {
   if (!input?.betterAuthSecret) {
     throw new Error('"$global".betterAuthSecret is required');
   }
 
+  validateCount('"$global".pushMaxConnections', input.pushMaxConnections);
+  validateCount('"$global".imageCacheMaxBytes', input.imageCacheMaxBytes);
+
   return {
     betterAuthSecret: input.betterAuthSecret,
     betterAuthUrl: input.betterAuthUrl,
+    pushMaxConnections: input.pushMaxConnections,
+    imageCacheMaxBytes: input.imageCacheMaxBytes,
   };
 }
 
@@ -172,18 +274,20 @@ function taintTenantConfig(config: TenantConfig) {
     ['Keycloak client secret', config.oauth?.keycloak?.clientSecret],
   ];
 
+  /* Marking happens here, once, as the document is read — before any secret can
+   * be handed out. `taintSecret` skips a value it has already marked, so this is
+   * the single point that needs to run and a stray call anywhere else is a no-op
+   * rather than a leak of retained registrations. */
   for (const [name, value] of secrets) {
-    if (value) {
-      taint(
-        `${name} is a server secret. Do not pass to Client Components.`,
-        value,
-      );
-    }
+    taintSecret(
+      `${name} is a server secret. Do not pass to Client Components.`,
+      value,
+    );
   }
 }
 
 function taintGlobalConfig(global: GlobalConfig) {
-  taint(
+  taintSecret(
     'Better Auth secret is a server secret. Do not pass to Client Components.',
     global.betterAuthSecret,
   );
@@ -274,17 +378,52 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
       throw new Error('Tenant configuration has no tenant entries');
     }
 
+    /* With multi-tenancy off only the default entry is ever served, whatever
+     * else the document holds. Said at load because the alternative is silence:
+     * the server would start, report no mail and no push because there is
+     * nothing it considers servable, and only then fail every request. */
+    if (!isMultiTenancy && !tenants[DEFAULT_TENANT]) {
+      throw new Error(
+        `Tenant configuration has no "${DEFAULT_TENANT}" entry, which is the only one served ` +
+          `while multi-tenancy is off. Rename the entry to serve, or set MULTI_TENANCY=true ` +
+          `to serve every entry in the document.`,
+      );
+    }
+
     validateHubPispCertIsolation(tenants);
+    validateStorageIsolation(tenants);
+    validateMailCeilings(tenants);
 
     return {global, tenants};
   }
 
+  /**
+   * Null for an id that is not served, which with multi-tenancy off is every id
+   * but the default: the manager hands back the default tenant's client for any
+   * of them, so resolving one here would pair another tenant's configuration —
+   * its signing keys, its browser variables — with the default tenant's data.
+   *
+   * Every other accessor is built on this one so that all of them refuse alike.
+   */
   getSync(id: string): TenantConfig | null {
+    if (!isMultiTenancy && id !== DEFAULT_TENANT) {
+      return null;
+    }
+
     return this.load().tenants[id] ?? null;
   }
 
+  /* What is listed is what can be served. A document holding entries that are
+   * not would otherwise have sign-in providers registered under names no login
+   * can reach, and the startup reports describing mail and push for them. */
   listConfigsSync(): Array<[string, TenantConfig]> {
-    return Object.entries(this.load().tenants);
+    if (isMultiTenancy) {
+      return Object.entries(this.load().tenants);
+    }
+
+    const config = this.getSync(DEFAULT_TENANT);
+
+    return config ? [[DEFAULT_TENANT, config]] : [];
   }
 
   getGlobalSync(): GlobalConfig {
@@ -296,7 +435,7 @@ class DocumentTenantConfigProvider implements TenantConfigProvider {
   }
 
   async list(): Promise<string[]> {
-    return Object.keys(this.load().tenants);
+    return this.listConfigsSync().map(([id]) => id);
   }
 }
 
@@ -304,9 +443,11 @@ const provider = new DocumentTenantConfigProvider();
 
 export const tenantConfigProvider: TenantConfigProvider = provider;
 
-/* Synchronous access for module-init consumers (the better-auth instance reads
+/**
+ * Synchronous access for module-init consumers (the better-auth instance reads
  * the "$global" secret and the per-tenant OAuth entries at construction). A
- * future async registry provider would need init-time prefetching instead. */
+ * future async registry provider would need init-time prefetching instead.
+ */
 export function listTenantConfigsSync(): Array<[string, TenantConfig]> {
   return provider.listConfigsSync();
 }

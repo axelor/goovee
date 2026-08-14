@@ -227,7 +227,7 @@ const options = {
 } satisfies BetterAuthOptions;
 
 /* Deployment-wide auth settings come from the document's "$global" section
- * (the provider loads synchronously and taints the secret at load). */
+ * (the provider loads synchronously and marks the secret at load). */
 const globalConfig = getGlobalConfigSync();
 
 export const auth = betterAuth({

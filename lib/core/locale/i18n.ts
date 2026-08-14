@@ -17,44 +17,52 @@ export const i18n = (() => {
       return {};
     }
 
-    if (tenant) {
-      try {
-        const result = await rest
-          .get(
-            `${host ?? ''}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`,
-          )
-          .then(result => result?.data || {})
-          .catch(() => ({}));
+    const fetchLocale = async (locale: string) =>
+      rest
+        .get(withBasePath(`/locales/${locale}.json`))
+        .then(r => (r?.status === 200 && r?.data ? r.data : {}))
+        .catch(() => ({}));
 
-        translations = {
-          ...result,
-        };
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      const fetchLocale = async (locale: string) =>
-        rest
-          .get(withBasePath(`/locales/${locale}.json`))
-          .then(r => (r?.status === 200 && r?.data ? r.data : {}))
-          .catch(() => ({}));
-
+    if (!tenant) {
       const lang = findLocaleLanguage(locale);
 
-      await Promise.all([
-        ...(lang !== locale ? [fetchLocale(lang)] : []),
+      const [langTranslations, localeTranslations] = await Promise.all([
+        lang !== locale ? fetchLocale(lang) : {},
         fetchLocale(locale),
-      ])
-        .then(([langTranslations, localeTranslations]) => {
-          translations = {
-            ...translations,
-            ...langTranslations,
-            ...localeTranslations,
-          };
-        })
-        .catch(err => {
-          console.error(err);
-        });
+      ]);
+
+      translations = {
+        ...translations,
+        ...langTranslations,
+        ...localeTranslations,
+      };
+
+      return;
+    }
+
+    try {
+      const response = await rest.get(
+        `${host ?? ''}${withBasePath(`/api/tenant/${tenant}/locales/${locale}`)}`,
+      );
+
+      translations = {...(response?.data || {})};
+    } catch (err) {
+      console.error(err);
+
+      /* A refused bundle still carries the wording it fell back to — the same
+       * wording the page was rendered from. Working out a replacement here would
+       * mean re-deriving which locale files the server read, and a wrong guess
+       * renders a different language from the one being hydrated. */
+      const served = axios.isAxiosError(err) ? err.response?.data : undefined;
+
+      /* Nothing was served at all — the request never arrived. Only the locale's
+       * own file is read, which is what the server reads by default; whether to
+       * read the base language too is a per-tenant setting not known here, and
+       * assuming it would translate strings the server left alone. */
+      translations =
+        served && typeof served === 'object'
+          ? {...served}
+          : {...(await fetchLocale(locale))};
     }
   }
 

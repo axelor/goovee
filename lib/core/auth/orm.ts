@@ -26,7 +26,7 @@ import {findWorkspaceByURL} from '@/orm/workspace';
 import {revalidatePath} from 'next/cache';
 import {getTranslation} from '../locale/server';
 import {UserType} from './types';
-import {withBasePath} from '@/lib/core/path/base-path';
+import {getPortalRoot} from '@/utils/workspace-url';
 import {toWorkspaceURI} from '@/utils/workspace-url';
 import {type Tenant, type TenantConfig} from '../tenant';
 import type {Partner} from '@/types';
@@ -643,7 +643,14 @@ export async function registerByKeycloak({
   client: Client;
 }): Promise<void> {
   const config = getTenantConfigSync(tenantId);
-  const workspaceURL = `${getPublicEnvironment(config).GOOVEE_PUBLIC_HOST}${withBasePath(workspaceURI)}`;
+
+  /* Built through `getPortalRoot` rather than by interpolating the host, which
+   * is absent for a tenant that is not served. This url is persisted and later
+   * matched against a stored workspace, so a missing host has to leave it
+   * relative rather than write the word "undefined" into it. */
+  const workspaceURL = `${getPortalRoot(
+    getPublicEnvironment(config).GOOVEE_PUBLIC_HOST,
+  )}${workspaceURI}`;
   const localization = await findRegistrationLocalization({
     locale,
     client,

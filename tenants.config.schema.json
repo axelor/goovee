@@ -32,6 +32,16 @@
         "betterAuthUrl": {
           "type": "string",
           "description": "Better Auth base URL (the BETTER_AUTH_URL equivalent)."
+        },
+        "pushMaxConnections": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Push deliveries in flight at once, and sockets held per push service. One agent serves the whole process, so this bounds the deployment. Defaults to 10."
+        },
+        "imageCacheMaxBytes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Bytes the resized-image cache may occupy. One cache directory serves every tenant, so the budget is the deployment's."
         }
       }
     },
@@ -72,8 +82,12 @@
               "type": "object",
               "description": "AOS credentials: apiKey (AOS 9+, generated in AOS under Preferences → API Keys) or username/password basic auth. apiKey wins when both are set.",
               "anyOf": [
-                {"required": ["apiKey"]},
-                {"required": ["username", "password"]}
+                {
+                  "required": ["apiKey"]
+                },
+                {
+                  "required": ["username", "password"]
+                }
               ],
               "additionalProperties": false,
               "properties": {
@@ -104,8 +118,12 @@
               "required": ["clientId", "clientSecret"],
               "additionalProperties": false,
               "properties": {
-                "clientId": {"type": "string"},
-                "clientSecret": {"type": "string"},
+                "clientId": {
+                  "type": "string"
+                },
+                "clientSecret": {
+                  "type": "string"
+                },
                 "live": {
                   "type": "boolean",
                   "description": "true for live payments; defaults to sandbox."
@@ -117,7 +135,9 @@
               "required": ["clientSecret"],
               "additionalProperties": false,
               "properties": {
-                "clientSecret": {"type": "string"},
+                "clientSecret": {
+                  "type": "string"
+                },
                 "webhookSecret": {
                   "type": "string",
                   "description": "Stripe webhook signing secret for this tenant's webhook endpoint."
@@ -129,16 +149,28 @@
               "required": ["site", "rang", "identifiant", "secret", "paybox"],
               "additionalProperties": false,
               "properties": {
-                "site": {"type": "string"},
-                "rang": {"type": "string"},
-                "identifiant": {"type": "string"},
-                "secret": {"type": "string"},
+                "site": {
+                  "type": "string"
+                },
+                "rang": {
+                  "type": "string"
+                },
+                "identifiant": {
+                  "type": "string"
+                },
+                "secret": {
+                  "type": "string"
+                },
                 "paybox": {
                   "type": "string",
                   "description": "Paybox payment page base URL."
                 },
-                "backup1": {"type": "string"},
-                "backup2": {"type": "string"}
+                "backup1": {
+                  "type": "string"
+                },
+                "backup2": {
+                  "type": "string"
+                }
               }
             },
             "up2pay": {
@@ -146,10 +178,18 @@
               "required": ["site", "rang", "identifiant", "secret", "paybox"],
               "additionalProperties": false,
               "properties": {
-                "site": {"type": "string"},
-                "rang": {"type": "string"},
-                "identifiant": {"type": "string"},
-                "secret": {"type": "string"},
+                "site": {
+                  "type": "string"
+                },
+                "rang": {
+                  "type": "string"
+                },
+                "identifiant": {
+                  "type": "string"
+                },
+                "secret": {
+                  "type": "string"
+                },
                 "paybox": {
                   "type": "string",
                   "description": "Up2Pay payment page base URL."
@@ -175,14 +215,30 @@
               ],
               "additionalProperties": false,
               "properties": {
-                "tokenUrl": {"type": "string"},
-                "apiUrl": {"type": "string"},
-                "clientId": {"type": "string"},
-                "clientSecret": {"type": "string"},
-                "certFingerprint": {"type": "string"},
-                "beneficiaryName": {"type": "string"},
-                "iban": {"type": "string"},
-                "bic": {"type": "string"},
+                "tokenUrl": {
+                  "type": "string"
+                },
+                "apiUrl": {
+                  "type": "string"
+                },
+                "clientId": {
+                  "type": "string"
+                },
+                "clientSecret": {
+                  "type": "string"
+                },
+                "certFingerprint": {
+                  "type": "string"
+                },
+                "beneficiaryName": {
+                  "type": "string"
+                },
+                "iban": {
+                  "type": "string"
+                },
+                "bic": {
+                  "type": "string"
+                },
                 "certsDir": {
                   "type": "string",
                   "description": "Required. Directory holding this tenant's mTLS client.crt and private-key.pem. Must be distinct per HUB PISP tenant — the certificate is the tenant's bank identity, so there is no shared default. Uniqueness is enforced at config load, not by this schema."
@@ -197,14 +253,29 @@
           "required": ["host", "port", "user", "password"],
           "additionalProperties": false,
           "properties": {
-            "host": {"type": "string"},
-            "port": {"type": "number"},
-            "secure": {"type": "boolean"},
-            "user": {"type": "string"},
-            "password": {"type": "string"},
+            "host": {
+              "type": "string"
+            },
+            "port": {
+              "type": "number"
+            },
+            "secure": {
+              "type": "boolean"
+            },
+            "user": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            },
             "email": {
               "type": "string",
               "description": "From address; defaults to user."
+            },
+            "maxConnections": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Connections this tenant's mail account may hold open at once. A mail server limits concurrency per sender, so the ceiling belongs to the account — a Microsoft 365 mailbox allows three. Tenants sharing a mailbox share one pool and one ceiling, so they must agree on this value or the configuration is refused at startup. Defaults to 10."
             }
           }
         },
@@ -233,8 +304,12 @@
               "required": ["clientId", "clientSecret"],
               "additionalProperties": false,
               "properties": {
-                "clientId": {"type": "string"},
-                "clientSecret": {"type": "string"}
+                "clientId": {
+                  "type": "string"
+                },
+                "clientSecret": {
+                  "type": "string"
+                }
               }
             },
             "keycloak": {
@@ -242,8 +317,12 @@
               "required": ["clientId", "clientSecret", "issuer"],
               "additionalProperties": false,
               "properties": {
-                "clientId": {"type": "string"},
-                "clientSecret": {"type": "string"},
+                "clientId": {
+                  "type": "string"
+                },
+                "clientSecret": {
+                  "type": "string"
+                },
                 "issuer": {
                   "type": "string",
                   "description": "Keycloak realm issuer URL. Each tenant uses its own realm."
@@ -254,11 +333,13 @@
         },
         "webPush": {
           "type": "object",
-          "description": "Web-push signing identity; the public key lives in publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY. A browser holds one push subscription per service-worker registration, so per-tenant key pairs only take effect once tenants run on their own domains.",
+          "description": "Web-push signing identity; the public key lives in publicEnv.GOOVEE_PUBLIC_VAPID_PUBLIC_KEY. The service worker registers per tenant (scope /<tenant>/), so each tenant holds its own push subscription and its own key pair takes effect even on a shared origin.",
           "required": ["privateKey", "subject"],
           "additionalProperties": false,
           "properties": {
-            "privateKey": {"type": "string"},
+            "privateKey": {
+              "type": "string"
+            },
             "subject": {
               "type": "string",
               "description": "mailto: address or https: URL identifying the sender to push services."
@@ -279,16 +360,36 @@
           "required": ["GOOVEE_PUBLIC_HOST"],
           "additionalProperties": false,
           "properties": {
-            "GOOVEE_PUBLIC_HOST": {"type": "string"},
-            "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": {"type": "string"},
-            "GOOVEE_PUBLIC_LINKEDIN_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_TWITTER_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_INSTAGRAM_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_WHATSAPP_URL": {"type": "string"},
-            "GOOVEE_PUBLIC_MATTERMOST_HOST": {"type": "string"},
-            "GOOVEE_PUBLIC_VAPID_PUBLIC_KEY": {"type": "string"},
-            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL": {"type": "string"},
-            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE": {"type": "string"}
+            "GOOVEE_PUBLIC_HOST": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_PAYPAL_CLIENT_ID": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_LINKEDIN_URL": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_TWITTER_URL": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_INSTAGRAM_URL": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_WHATSAPP_URL": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_MATTERMOST_HOST": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_VAPID_PUBLIC_KEY": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_LABEL": {
+              "type": "string"
+            },
+            "GOOVEE_PUBLIC_KEYCLOAK_OAUTH_BUTTON_IMAGE": {
+              "type": "string"
+            }
           }
         }
       }

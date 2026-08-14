@@ -26,7 +26,7 @@ import {
   isCommentEnabled,
 } from '@/comments';
 import {addComment, findComments} from '@/comments/orm';
-import {notifyUser} from '@/pwa/utils';
+import {notifyAll, notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 
 //----LOCAL IMPORTS -----//
@@ -438,35 +438,35 @@ export async function addPost(input: AddPostInput) {
         sub => sub.member?.id !== user.id, // exclude the post author
       );
 
-      for (const reciever of subscribers) {
-        const member = reciever.member;
-        if (
-          member?.id &&
-          member.id !== user.id // exclude the post author
-        ) {
+      const postRecipients = subscribers.filter(
+        reciever => reciever.member?.id && reciever.member.id !== user.id, // exclude the post author
+      );
+
+      after(() =>
+        notifyAll(postRecipients, async reciever => {
+          const member = reciever.member!;
           const tr = getTranslation.bind(null, {
             locale: member.localization?.code || DEFAULT_LOCALE,
             tenant: tenantId,
           });
-          after(async () => {
-            await notifyUser({
-              userId: member.id,
-              tenantId,
-              workspaceURL,
-              client,
-              payload: {
-                title: await tr(
-                  '{0} created a new post',
-                  user.simpleFullName || user.name || '',
-                ),
-                body: post?.title ?? '',
-                url: postLink,
-                tag: NotificationTag.forumNewPost(post.id),
-              },
-            });
-          });
-        }
-      }
+
+          return {
+            userId: member.id,
+            tenantId,
+            workspaceURL,
+            client,
+            payload: {
+              title: await tr(
+                '{0} created a new post',
+                user.simpleFullName || user.name || '',
+              ),
+              body: post?.title ?? '',
+              url: postLink,
+              tag: NotificationTag.forumNewPost(post.id),
+            },
+          };
+        }),
+      );
 
       if (post?.author && post?.forumGroup) {
         after(() =>
@@ -797,37 +797,41 @@ export const createComment: CreateComment = async props => {
               }
             }
           } else {
-            for (const reciever of notificationRecievers) {
-              if (reciever.member?.id) {
+            const commentRecipients = notificationRecievers.filter(
+              reciever => reciever.member?.id,
+            );
+
+            after(() =>
+              notifyAll(commentRecipients, async reciever => {
+                const member = reciever.member!;
                 const tr = getTranslation.bind(null, {
-                  locale: reciever.member.localization?.code || DEFAULT_LOCALE,
+                  locale: member.localization?.code || DEFAULT_LOCALE,
                   tenant: tenantId,
                 });
-                after(async () => {
-                  await notifyUser({
-                    userId: reciever.member!.id,
-                    tenantId,
-                    workspaceURL,
-                    client,
-                    payload: {
-                      title: await tr(
-                        '{0} added a comment',
-                        user.simpleFullName || user.name || '',
-                      ),
-                      body: comment.note ?? '',
-                      url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
-                      tag: NotificationTag.forumPostComment(post.id),
-                    },
-                    getReplacementTitle: count =>
-                      tr(
-                        'You have {0} new comments on "{1}"',
-                        String(count),
-                        post.title ?? '',
-                      ),
-                  });
-                });
-              }
-            }
+
+                return {
+                  userId: member.id,
+                  tenantId,
+                  workspaceURL,
+                  client,
+                  payload: {
+                    title: await tr(
+                      '{0} added a comment',
+                      user.simpleFullName || user.name || '',
+                    ),
+                    body: comment.note ?? '',
+                    url: `${workspaceURI}/${SUBAPP_CODES.forum}/post/${post.id}`,
+                    tag: NotificationTag.forumPostComment(post.id),
+                  },
+                  getReplacementTitle: (count: number) =>
+                    tr(
+                      'You have {0} new comments on "{1}"',
+                      String(count),
+                      post.title ?? '',
+                    ),
+                };
+              }),
+            );
 
             after(() =>
               sendEmailNotifications({

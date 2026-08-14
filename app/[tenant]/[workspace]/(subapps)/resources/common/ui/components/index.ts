@@ -6,3 +6,5 @@ export {DocsFolderView} from './docs-folder-view';
 export type {DocsFolderViewLabels} from './docs-folder-view';
 export {DocsViewerShell} from './docs-viewer-shell';
 export type {DocsViewerShellLabels} from './docs-viewer-shell';
+export {findFileViewer, ViewerMessage} from './file-viewers';
+export type {FileViewer} from './file-viewers';

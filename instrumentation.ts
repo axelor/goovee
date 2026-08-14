@@ -7,6 +7,18 @@ export async function register() {
   const {startStagedUploadReaper} = await import('@/lib/core/upload/startup');
   startStagedUploadReaper();
 
+  // Report whether images can be resized. Never throws, never blocks startup.
+  const {checkImageResizing} = await import('@/lib/core/image/startup');
+  void checkImageResizing();
+
+  // Report whether mail can be delivered. Never throws, never blocks startup.
+  const {checkMailTransport} = await import('@/lib/core/notification/startup');
+  void checkMailTransport();
+
+  // Report whether push notifications can be sent.
+  const {checkPushConfig} = await import('@/lib/core/pwa/startup');
+  checkPushConfig();
+
   /* Run after register() returns so it doesn't block server startup. The
    * database may not be reachable yet when this fires, so each tenant is
    * retried with backoff — and one failing tenant must not abort resumption

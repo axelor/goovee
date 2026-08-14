@@ -126,10 +126,11 @@ function ProfilePill({
           aria-label={i18n.t('User menu')}>
           <span className="w-7 h-7 rounded-full grid place-items-center bg-peach-avatar text-white font-bold text-[11px] overflow-hidden">
             {user?.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={user.image}
                 alt=""
+                width={28}
+                height={28}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (

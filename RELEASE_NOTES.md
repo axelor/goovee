@@ -1,175 +1,130 @@
-# 2.1.0 (2026-08-07)
+# 2.1.1 (2026-08-14)
+
+## Features
+
+### Core Platform
+
+- Open documents without waiting for the whole file – #116828
+  <details>
+    <summary>Details</summary>
+
+  Documents are streamed, so one appears from its first page while the rest is still arriving. An interrupted transfer resumes where it stopped, and a document that has not changed is confirmed as unchanged rather than sent again. A name containing a space, a comma or an accent is no longer altered when the file is saved, and more kinds of file can be read in the browser instead of only downloaded: .txt, .md, .xml and .csv, video, and images such as .webp, .gif, .bmp and .tiff.
+  </details>
+
+### Documents
+
+- Open documents without waiting for the whole file – #116828
+  <details>
+    <summary>Details</summary>
+
+  Documents are streamed, so one appears from its first page while the rest is still arriving. An interrupted transfer resumes where it stopped, and a document that has not changed is confirmed as unchanged rather than sent again. A name containing a space, a comma or an accent is no longer altered when the file is saved, and more kinds of file can be read in the browser instead of only downloaded: .txt, .md, .xml and .csv, video, and images such as .webp, .gif, .bmp and .tiff.
+  </details>
 
 ## Fixes
 
 ### Core Platform
 
-- Show the workspace name instead of the hardcoded Goovee brand – #116645
+- Deliver notifications to every recipient of a large audience – #116857
   <details>
     <summary>Details</summary>
 
-  The portal displayed the literal string "Goovee" in the browser tab, on the login screen and in the mails it sends. The tab title in particular was a defect: the root metadata declared a title template of "Goovee" instead of "%s", and a Next.js template without a placeholder overwrites the child title, so the workspace name already computed by the workspace layout never reached the tab. The tab and the login screen now carry the workspace name, the auth pages resolving it as a guest from the workspaceURI and tenant search params. Notification mails interpolate the workspace name and their signature block goes through i18n. Everything left without a workspace context — the sidebar fallback, GET /api/info, and the OTP, invite and reset-password fallback templates used when no AOS template is configured — falls back to the Axelor brand.
+  A notification sent to a large audience reached only part of it. Mail servers refuse more than a handful of simultaneous connections from one sender, and the portal opened a separate one for every message, so the rest were rejected and lost. Every recipient now receives them. The new optional MAIL_MAX_CONNECTIONS sets how many the portal may open; the default is ten, and some mail servers accept as few as three. A message that fails temporarily is retried for several minutes, so mail that was lost now arrives late; one that cannot be delivered is reported with its recipient. Whether mail can be reached is reported at startup.
   </details>
 
-### Events
-
-- Close event registration once the event has ended when no registration deadline is set – #116630
+- Deliver push notifications that were previously dropped – #116883
   <details>
     <summary>Details</summary>
 
-  Registration used to close only when an event carried an explicit registration deadline, so events with an empty deadline kept offering the register button and accepting registrations long after they had ended. Registration now closes at the deadline when one is set, and otherwise once the event is over, counting the starting day in full for an event that has no end date. Events with no dates at all stay open.
+  A notification with a long text was refused by the push service and lost; it is now shortened and delivered. One that failed for a temporary reason — the service rate-limiting the sender, or being briefly unavailable — is retried instead of discarded, and a service that accepts a connection then stops answering no longer holds the send open. When notifying a large audience, a device that is slow to answer no longer delays anyone else's notification from appearing in the portal. A device coming online after several notifications about the same subject now raises only the latest rather than each one. Whether push notifications can be sent is reported at startup, and the new optional PUSH_MAX_CONNECTIONS sets how many are delivered at once; the default is ten.
   </details>
 
-## Changes
-
-### Chat
-
-- Redesign the conversation comments – #115864
+- Keep memory steady as server secrets are used – #116884
   <details>
     <summary>Details</summary>
 
-  Comment threads gained a new conversation display variant with a sticky input, provider/contact styling, and a skeleton loading state, alongside redesigned comment list items.
+  Server memory grew a little every time a secret was used — each notification sent, payment authorised, webhook received, and chat token read — and was never released, so a long-running portal used steadily more of it. Memory use no longer grows with the work handled. Separately, switching on Google or Keycloak sign-in without setting its secret stopped the portal serving any request; it now runs, with that provider unusable until the secret is set.
   </details>
 
-### Core Platform
-
-- Redesign the data layer (schema, ORM & shared types) – #115859
+- Keep the translation cache keyed on the resolved tenant – #114494
   <details>
     <summary>Details</summary>
 
-  Added schema, ORM helpers and shared type fields (forum reactions, address book defaults, partner and product data) supporting the redesigned sub-app screens.
+  The translation bundle cache was keyed on the tenant identifier taken straight from the URL, which no route validates. Every distinct value minted its own cache entry holding the same translations, so a hundred requests carrying made-up identifiers evicted the bundles of the real tenants and forced them to be rebuilt from the database. The cache is now keyed on the tenant the identifier actually resolves to, so identifiers that resolve to nothing all share a single entry and unknown values can no longer push real tenants out of the cache. Translation lookups behave as before: an unknown tenant still serves the general translations only.
   </details>
 
-- Redesign the design system foundation – #115857
+- Serve avatars and post images at the size they are shown – #116763
   <details>
     <summary>Details</summary>
 
-  Added the new design tokens, fonts and shared UI primitives (status pill, status timeline, record skeletons) plus the FR/EN translation keys underpinning the portal UI redesign.
+  Profile pictures and forum post images were downloaded at their stored resolution, so a photo uploaded at full camera resolution was fetched whole to fill a small circle in a list. They are now resized to the size they are drawn at, converted to a modern format and cached. The forum image viewer also keeps one size while stepping between pictures instead of resizing around each one.
   </details>
 
-- Redesign the notifications page – #115863
+- Use the message body from AOS in notification emails – #114532
   <details>
     <summary>Details</summary>
 
-  Unread notifications are now grouped by period (Today, Previous 7 days, Older) and shown with typed icons and colors per notification kind.
-  </details>
-
-- Redesign the workspace chrome – #115860
-  <details>
-    <summary>Details</summary>
-
-  The header, sidebar, homepage and root layout have been redesigned with the new design system, including a profile menu, a gradient hero banner and reworked content cards.
-  </details>
-
-### Directory
-
-- Redesign the directory sub-app – #115875
-  <details>
-    <summary>Details</summary>
-
-  The directory listing and entry detail pages have been restyled with the new design system, including reworked card surfaces, filter bar and contact cards.
-  </details>
-
-### Events
-
-- Re-skin the event registration screen to the redesign charter – #116638
-  <details>
-    <summary>Details</summary>
-
-  Applied the redesign charter to the registration screen chrome (rounded section cards, event header with a styled price block, and a mint confirm CTA with a cancel link) without regressing custom registration fields, subscriptions or the payment flow.
-  </details>
-
-- Redesign the events sub-app – #115870
-  <details>
-    <summary>Details</summary>
-
-  The events hub, calendar, event detail and registrations views have been redesigned with the new design system, including a new magazine-style homepage and an agenda calendar view.
+  A notification email always used the portal's own template, even when the linked message in AOS had its own content set. That content is now used as the email body. The subject was already taken from the message and is unchanged.
   </details>
 
 ### Forum
 
-- Redesign the forum sub-app – #115867
+- Serve avatars and post images at the size they are shown – #116763
   <details>
     <summary>Details</summary>
 
-  The forum feed, group and post detail views have been redesigned with the new design system, and post reactions (voting) have been added to thread detail.
-  </details>
-
-### Invoices
-
-- Redesign the invoices sub-app – #115873
-  <details>
-    <summary>Details</summary>
-
-  The invoices list and invoice detail views have been redesigned with the new design system, including a master-detail list layout, a paid/unpaid/partial/overdue status pill and a reworked payment total panel.
+  Profile pictures and forum post images were downloaded at their stored resolution, so a photo uploaded at full camera resolution was fetched whole to fill a small circle in a list. They are now resized to the size they are drawn at, converted to a modern format and cached. The forum image viewer also keeps one size while stepping between pictures instead of resizing around each one.
   </details>
 
 ### News
 
-- Redesign the news sub-app – #115869
+- Serve avatars and post images at the size they are shown – #116763
   <details>
     <summary>Details</summary>
 
-  The news homepage, category and article views have been redesigned with the new design system, consolidating the editorial feed and article detail into new components.
+  Profile pictures and forum post images were downloaded at their stored resolution, so a photo uploaded at full camera resolution was fetched whole to fill a small circle in a list. They are now resized to the size they are drawn at, converted to a modern format and cached. The forum image viewer also keeps one size while stepping between pictures instead of resizing around each one.
   </details>
 
-### Orders
+## Changes
 
-- Redesign the orders sub-app – #115872
+### Core Platform
+
+- Prefill the attachment name with the original file name – #116862
   <details>
     <summary>Details</summary>
 
-  The orders list and order detail views have been redesigned with the new design system, including a master-detail list layout, a status timeline and a reworked information layout.
+  Forms that ask for a name alongside an upload started that field empty, so the name had to be typed by hand even though the original file name was almost always the one wanted. Picking a file now fills the name with the original file name, without its extension, and the field stays editable so a different name can still be typed. Leaving the prefilled value alone stores the file under its original name. This applies to the resources form and to the comment box used by ticketing, quotations, news and events.
   </details>
 
-### Quotations
-
-- Redesign the quotations sub-app – #115874
+- Serve images through a custom image loader – #116777
   <details>
     <summary>Details</summary>
 
-  The quotations list and quotation detail views have been redesigned with the new design system, including a master-detail list layout and a status timeline covering the draft-to-order journey.
+  Images are resized as they are served, in place of a separate optimisation step. An image that has already been seen is confirmed as unchanged rather than being sent again.
+  </details>
+
+- Upload files in resumable parts – #116720
+  <details>
+    <summary>Details</summary>
+
+  Files are sent in parts rather than in one request, so a large file no longer fails part-way and an interrupted upload resumes from where it stopped instead of starting again. Each file shows its own progress and can be paused, resumed, retried or removed, and a form cannot be sent until its attachments have finished uploading.
   </details>
 
 ### Documents
 
-- Redesign the resources sub-app – #115868
+- Prefill the attachment name with the original file name – #116862
   <details>
     <summary>Details</summary>
 
-  The resources sub-app has been redesigned as a documentation-style file browser, with a folder sidebar, home and folder grid/list views, and a dedicated document viewer.
+  Forms that ask for a name alongside an upload started that field empty, so the name had to be typed by hand even though the original file name was almost always the one wanted. Picking a file now fills the name with the original file name, without its extension, and the field stays editable so a different name can still be typed. Leaving the prefilled value alone stores the file under its original name. This applies to the resources form and to the comment box used by ticketing, quotations, news and events.
   </details>
 
-### E-Shop
+## Security
 
-- Redesign the shop sub-app – #115866
+### Core Platform
+
+- Confine file downloads to the storage directory – #114500
   <details>
     <summary>Details</summary>
 
-  The shop catalog, product detail, cart and checkout views have been redesigned with the new design system, consolidating catalog browsing, product presentation and the checkout flow into dedicated components.
-  </details>
-
-### Helpdesk
-
-- Redesign the ticketing sub-app – #115871
-  <details>
-    <summary>Details</summary>
-
-  The ticketing list, ticket detail and ticket creation views have been redesigned with the new design system, including a compact header, a dedicated status sidebar and token-based status pills.
-  </details>
-
-### User Accounts
-
-- Redesign the account sub-app – #115861
-  <details>
-    <summary>Details</summary>
-
-  The account area now uses a grouped navigation rail, a redesigned address book with an edit modal, and a table-based members management screen with an invite modal.
-  </details>
-
-- Redesign the auth screens – #115862
-  <details>
-    <summary>Details</summary>
-
-  Login, signup and password reset now share a new split-screen auth shell with redesigned form fields, replacing the previous legacy layout.
+  The location of an uploaded file is recorded relative to the tenant storage directory, and the absolute location was rebuilt from it without checking that the result stayed inside that directory. A record whose location pointed outside storage had that file served as a normal attachment to any user authorised for the record. The location is now verified before a file is read, and a record that fails the check is answered as a missing file; the abandoned-upload cleanup applies the same check before deleting.
   </details>

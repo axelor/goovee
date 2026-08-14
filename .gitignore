@@ -48,6 +48,9 @@ portal/
 # Serwist
 public/sw*
 
+# copied from the installed pdf reader by scripts/copy-pdfjs-assets.mjs
+public/pdfjs
+
 # generated css for templates
 app/\[tenant]/\[workspace]/\(subapps)/website/common/assets/css
 

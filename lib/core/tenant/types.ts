@@ -98,6 +98,11 @@ export type TenantConfig = {
     user: string;
     password: string;
     email?: string;
+    /* Connections this tenant's mail account may hold open at once. A mail
+     * server limits concurrency per sender, so the ceiling belongs to the
+     * account rather than to the deployment — a Microsoft 365 mailbox allows
+     * three. Tenants sharing one mailbox share one pool and one ceiling. */
+    maxConnections?: number;
   };
   /* The Mattermost host is browser-facing — override it per tenant via
    * publicEnv.GOOVEE_PUBLIC_MATTERMOST_HOST instead. */
@@ -143,4 +148,11 @@ export type TenantClient = GooveeClient;
 export type GlobalConfig = {
   betterAuthSecret: string;
   betterAuthUrl?: string;
+  /* Push deliveries in flight at once, and sockets held per push service. One
+   * agent and one set of slots serve the whole process, so this bounds the
+   * deployment rather than any tenant. */
+  pushMaxConnections?: number;
+  /* Bytes the resized-image cache may occupy. One cache directory beside the
+   * build serves every tenant, so the budget is the deployment's. */
+  imageCacheMaxBytes?: number;
 };

@@ -11,7 +11,7 @@ import React, {
 import {useEnvironment} from '@/lib/core/environment';
 import {NotificationDTO} from './types';
 import {authClient} from '@/lib/auth-client';
-import {PUSH_CHANNEL, MSG_TYPE} from './sw-constants';
+import {pushChannelName, MSG_TYPE} from './sw-constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 interface PushContextType {
@@ -234,7 +234,7 @@ export function PushProvider({
     }
 
     // Listen for messages from the Service Worker (e.g. to refresh count when push arrives)
-    broadcastChannel.current = new BroadcastChannel(PUSH_CHANNEL);
+    broadcastChannel.current = new BroadcastChannel(pushChannelName(tenant));
     broadcastChannel.current.onmessage = event => {
       if (event.data?.type === MSG_TYPE.NEW && event.data.notification) {
         setUnreadNotifications(prev =>
@@ -256,7 +256,10 @@ export function PushProvider({
       broadcastChannel.current?.close();
       broadcastChannel.current = null;
     };
-  }, [refreshPushNotifications]);
+    /* `tenant` names the channel, so a change has to tear the old one down and
+     * open the new one — otherwise the panel would keep listening to the tenant
+     * it was first mounted for. */
+  }, [refreshPushNotifications, tenant]);
 
   // Safety cleanup: If we have a subscription but no user, unsubscribe
   useEffect(() => {

@@ -4,7 +4,7 @@ import {DEFAULT_TENANT} from '@/constants';
 import {createClient} from '@/goovee/.generated/client';
 import {ensureStorageDir} from '@/storage/index';
 import {LRUCache} from './lru';
-import {tenantConfigProvider} from './config-provider';
+import {isMultiTenancy, tenantConfigProvider} from './config-provider';
 import type {Tenant, TenantConfig} from './types';
 
 const CACHE_CAPACITY = 20;
@@ -85,8 +85,13 @@ export class SingleTenantManager implements TenantManager {
     return this.getTenant().then(tenant => tenant?.client);
   }
 
+  /* Only the default tenant is reachable in this mode — `getTenant` ignores the
+   * id it is given and always returns it. Listing the document's other entries
+   * would have every caller that iterates tenants (the upload sweeps, the
+   * payment resumption) do the same work repeatedly against this one, and would
+   * let a sign-in name a tenant that is not the one it would be served. */
   async listTenantIds() {
-    return tenantConfigProvider.list();
+    return [DEFAULT_TENANT];
   }
 }
 
@@ -156,7 +161,7 @@ export class MultiTenantManager implements TenantManager {
   }
 }
 
-export const isMultiTenancy = process.env.MULTI_TENANCY === 'true';
+export {isMultiTenancy};
 
 export const manager: TenantManager = isMultiTenancy
   ? new MultiTenantManager()

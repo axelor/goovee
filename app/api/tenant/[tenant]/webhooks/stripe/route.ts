@@ -1,4 +1,4 @@
-import {experimental_taintUniqueValue} from 'react';
+import {taintSecret} from '@/lib/core/security/taint';
 import {NextResponse, after} from 'next/server';
 import {headers} from 'next/headers';
 import Stripe from 'stripe';
@@ -75,13 +75,10 @@ export async function POST(
 
   const webhookSecret = getStripeWebhookSecret(tenantConfig);
 
-  if (webhookSecret) {
-    experimental_taintUniqueValue(
-      'Stripe webhook secret is a server secret. Do not pass to Client Components.',
-      process,
-      webhookSecret,
-    );
-  }
+  taintSecret(
+    'Stripe webhook secret is a server secret. Do not pass to Client Components.',
+    webhookSecret,
+  );
 
   let event: Stripe.Event;
 

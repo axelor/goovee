@@ -54,7 +54,7 @@ import {handleError} from './helpers';
 import type {ActionConfig, MutateProps} from './types';
 import {getMailRecipients} from '../orm/mail';
 import {sendCommentMail} from '../utils/mail';
-import {notifyUser} from '@/pwa/utils';
+import {notifyAll, notifyUser} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import sanitize from 'sanitize-html';
 
@@ -1117,13 +1117,14 @@ export const createComment: CreateComment = async props => {
         });
       }
     } else {
-      for (const contact of contacts) {
-        const tr = getTranslation.bind(null, {
-          locale: contact.localization?.code || DEFAULT_LOCALE,
-          tenant: tenantId,
-        });
-        after(async () => {
-          await notifyUser({
+      after(() =>
+        notifyAll(contacts, async contact => {
+          const tr = getTranslation.bind(null, {
+            locale: contact.localization?.code || DEFAULT_LOCALE,
+            tenant: tenantId,
+          });
+
+          return {
             userId: contact.id,
             tenantId,
             workspaceURL,
@@ -1138,15 +1139,15 @@ export const createComment: CreateComment = async props => {
               url: `${ticketUrl}#comment-${comment.id}`,
               tag: NotificationTag.ticketComment(ticket.id),
             },
-            getReplacementTitle: count =>
+            getReplacementTitle: (count: number) =>
               tr(
                 'You have {0} new comments on "{1}"',
                 String(count),
                 String(ticket.name),
               ),
-          });
-        });
-      }
+          };
+        }),
+      );
     }
 
     after(async () => {

@@ -2,7 +2,9 @@
   "$schema": "./tenants.config.schema.json",
   "$global": {
     "betterAuthSecret": "<better-auth-secret>",
-    "betterAuthUrl": "https://portal.example.com"
+    "betterAuthUrl": "https://portal.example.com",
+    "pushMaxConnections": 10,
+    "imageCacheMaxBytes": 2147483648
   },
   "acme": {
     "db": {
@@ -43,7 +45,8 @@
       "port": 587,
       "user": "noreply@acme.example.com",
       "password": "<smtp-password>",
-      "email": "noreply@acme.example.com"
+      "email": "noreply@acme.example.com",
+      "maxConnections": 3
     },
     "oauth": {
       "google": {

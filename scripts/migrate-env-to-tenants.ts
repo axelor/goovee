@@ -40,6 +40,17 @@ function loadEnv(dev: boolean) {
   }
 }
 
+/* A count setting carried over verbatim. Left out when absent or unusable rather
+ * than corrected here — the provider validates it by name at load, so a typo is
+ * reported against the document the operator is about to review. */
+function count(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+
+  const parsed = Number(value);
+
+  return Number.isInteger(parsed) && parsed >= 1 ? parsed : undefined;
+}
+
 function publicEnvFromEnv(): PublicEnv {
   const publicEnv: PublicEnv = {};
   for (const key of PUBLIC_ENV_KEYS) {
@@ -150,6 +161,7 @@ function mailFromEnv(): TenantConfig['mail'] {
     user: process.env.MAIL_USER,
     password: process.env.MAIL_PASSWORD,
     email: process.env.MAIL_EMAIL || undefined,
+    maxConnections: count(process.env.MAIL_MAX_CONNECTIONS),
   };
 }
 
@@ -212,6 +224,8 @@ function buildGlobal(): GlobalConfig {
   return {
     betterAuthSecret: process.env.BETTER_AUTH_SECRET ?? '',
     betterAuthUrl: process.env.BETTER_AUTH_URL || undefined,
+    pushMaxConnections: count(process.env.PUSH_MAX_CONNECTIONS),
+    imageCacheMaxBytes: count(process.env.IMAGE_CACHE_MAX_BYTES),
   };
 }
 
