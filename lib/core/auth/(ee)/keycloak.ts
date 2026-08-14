@@ -1,15 +1,12 @@
-import {experimental_taintUniqueValue} from 'react';
+import {taintSecret} from '@/lib/core/security/taint';
 import {genericOAuth, keycloak as config} from 'better-auth/plugins';
 
 const clientSecret = process.env.KEYCLOAK_SECRET as string;
 
-if (process.env.SHOW_KEYCLOAK_OAUTH === 'true') {
-  experimental_taintUniqueValue(
-    'Keycloak Client Secret is an authentication secret. Do not pass to Client Components.',
-    process,
-    clientSecret,
-  );
-}
+taintSecret(
+  'Keycloak Client Secret is an authentication secret. Do not pass to Client Components.',
+  clientSecret,
+);
 
 const keycloak =
   process.env.SHOW_KEYCLOAK_OAUTH === 'true'

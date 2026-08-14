@@ -1,4 +1,4 @@
-import {experimental_taintUniqueValue} from 'react';
+import {taintSecret} from '@/lib/core/security/taint';
 import crypto from 'crypto';
 import fs from 'fs';
 import https from 'https';
@@ -91,9 +91,8 @@ export async function getPispAccessToken(): Promise<string> {
     throw new Error('HUB PISP credentials are not configured');
   }
 
-  experimental_taintUniqueValue(
+  taintSecret(
     'Hub PISP client secret is a server secret. Do not pass to Client Components.',
-    process,
     clientSecret,
   );
 
