@@ -1,0 +1,6 @@
+{
+  "title": "Keep memory steady as server secrets are used",
+  "type": "fix",
+  "description": "Server memory grew a little every time a secret was used — each notification sent, payment authorised, webhook received, and chat token read — and was never released, so a long-running portal used steadily more of it. Memory use no longer grows with the work handled. Separately, switching on Google or Keycloak sign-in without setting its secret stopped the portal serving any request; it now runs, with that provider unusable until the secret is set.",
+  "scope": ["core"]
+}
