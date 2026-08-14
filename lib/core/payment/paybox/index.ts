@@ -1,4 +1,4 @@
-import {experimental_taintUniqueValue} from 'react';
+import {taintSecret} from '@/lib/core/security/taint';
 import {DEFAULT_CURRENCY_CODE} from '@/constants';
 import {encodeFilter as encode} from '@/utils/url';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -51,13 +51,10 @@ export function getPaymentURL({
 
   const secret = process.env.PBX_SECRET!;
 
-  if (secret) {
-    experimental_taintUniqueValue(
-      'Paybox secret key is a server secret. Do not pass to Client Components.',
-      process,
-      secret,
-    );
-  }
+  taintSecret(
+    'Paybox secret key is a server secret. Do not pass to Client Components.',
+    secret,
+  );
 
   const hmac = createHMAC(join(payload, false), secret);
 

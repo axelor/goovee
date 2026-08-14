@@ -1,21 +1,10 @@
 import {randomUUID} from 'node:crypto';
-import {experimental_taintUniqueValue} from 'react';
+import {taintSecret} from '@/lib/core/security/taint';
 import nodemailer, {type Transporter} from 'nodemailer';
 import type SMTPPool from 'nodemailer/lib/smtp-pool';
 import type Mail from 'nodemailer/lib/mailer';
 
 import {NotificationService, type MailNotificationData} from '.';
-
-/* `experimental_taintUniqueValue` ships only in the React runtime Next.js loads for
- * Server Components — not the route-handler layer, not the plain `react` a CLI
- * script resolves — and those are the layers with no Client Component to leak into.
- * The whole mechanism rests on `experimental.taint` in `next.config.mjs`: clearing
- * that flag makes this a silent no-op everywhere. */
-function taint(message: string, value: string) {
-  if (typeof experimental_taintUniqueValue === 'function') {
-    experimental_taintUniqueValue(message, process, value);
-  }
-}
 
 /* `maxRequeues` is a real pooled-transport option that is missing from
  * `@types/nodemailer`. Required rather than optional, so it cannot be dropped. */
@@ -209,11 +198,6 @@ class DeliverySlots {
   }
 }
 
-/* React registers a finalization cell per taint call, keyed on `process`, which is
- * never collected — so taint the password once per module instance, no more. Each
- * bundler layer has its own React, and so its own registry. */
-let passwordTainted = false;
-
 let reportedBadConnectionSetting = false;
 
 /* Reports a value it cannot use, once. Falling back silently is how a deployment
@@ -307,16 +291,10 @@ export function getTransporter(): Transporter | null {
     global.__mailTransporter = createTransporter();
   }
 
-  const mailPassword = process.env.MAIL_PASSWORD;
-
-  if (global.__mailTransporter && mailPassword && !passwordTainted) {
-    passwordTainted = true;
-
-    taint(
-      'Mail password is a server secret. Do not pass to Client Components.',
-      mailPassword,
-    );
-  }
+  taintSecret(
+    'Mail password is a server secret. Do not pass to Client Components.',
+    process.env.MAIL_PASSWORD,
+  );
 
   return global.__mailTransporter;
 }
