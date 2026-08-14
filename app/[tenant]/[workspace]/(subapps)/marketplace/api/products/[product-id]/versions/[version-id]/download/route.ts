@@ -12,7 +12,7 @@ import {workspacePathname} from '@/utils/workspace';
 import {NextRequest, NextResponse, after} from 'next/server';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   props: {
     params: Promise<{
       tenant: string;
@@ -62,34 +62,53 @@ export async function GET(
     return new NextResponse('File not found', {status: 404});
   }
 
+  const response = await streamFile({...file, request});
+
+  /* One install is one whole file handed over. A response here can also be a
+   * revalidation (304), one range out of many (206), or the framework's HEAD
+   * derived from this handler — none of which is a new download. Counting every
+   * response would credit a paused-and-resumed download twice and a segmented
+   * downloader once per connection, and this route now advertises
+   * `accept-ranges`, so clients are invited to segment.
+   *
+   * What was served decides this, not what the request asked for. A partial is
+   * only ever answered to an inbound range, so excluding anything but 200
+   * already excludes every partial — while a range the server declines to
+   * honour (for instance a stale `if-range` after the bundle changed under an
+   * interrupted download) sends the whole file as a 200, and that is a real
+   * download to count. HEAD needs the method tested separately, since it
+   * answers 200 with no body at all. */
+  const isWholeTransfer = request.method === 'GET' && response.status === 200;
+
   /* Telemetry: write the download record and bump installCount after the
    * response is flushed so it never blocks the stream. Both happen inside
    * a transaction — if the download insert fails, the increment rolls back
    * with it. The bump goes through raw SQL so it (a) is an atomic Postgres
    * `+= 1` (no read-modify-write race) and (b) does NOT touch the row's
    * optimistic-lock `version` column, so concurrent product edits aren't
-   * forced to retry. Every hit counts; no filtering. Failures are swallowed
-   * since this is best-effort. */
-  after(async () => {
-    try {
-      await client.$transaction(async txClient => {
-        await createDownloadRecord({
-          client: txClient,
+   * forced to retry. Failures are swallowed since this is best-effort. */
+  if (isWholeTransfer) {
+    after(async () => {
+      try {
+        await client.$transaction(async txClient => {
+          await createDownloadRecord({
+            client: txClient,
+            productId,
+            versionId,
+            partnerId: access.user?.id,
+          });
+          await incrementInstallCount({client: txClient, productId});
+        });
+      } catch (e) {
+        console.error('marketplace: failed to record install', {
           productId,
           versionId,
-          partnerId: access.user?.id,
+          userId: access.user?.id ?? null,
+          error: e,
         });
-        await incrementInstallCount({client: txClient, productId});
-      });
-    } catch (e) {
-      console.error('marketplace: failed to record install', {
-        productId,
-        versionId,
-        userId: access.user?.id ?? null,
-        error: e,
-      });
-    }
-  });
+      }
+    });
+  }
 
-  return streamFile(file);
+  return response;
 }

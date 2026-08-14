@@ -24,6 +24,8 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Copied verbatim from the installed PDF reader, not ours to change.
+    'public/pdfjs/**',
   ]),
 ]);
 

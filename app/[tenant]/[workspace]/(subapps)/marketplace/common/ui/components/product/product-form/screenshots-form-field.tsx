@@ -7,11 +7,20 @@ import {
   FormItem,
   FormLabel,
 } from '@/ui/components/form';
-import {Progress} from '@/ui/components/progress/progress';
+import {ProgressFill} from '@/ui/components';
 import {useToast} from '@/ui/hooks';
 import {cn} from '@/utils/css';
 import {getFileSizeText} from '@/utils/files';
-import {ChevronLeft, ChevronRight, Plus, Star, X} from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+  Plus,
+  RotateCcw,
+  Star,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
 import {useMemo, useRef, useState} from 'react';
 import {useFormContext, useWatch} from 'react-hook-form';
@@ -27,13 +36,14 @@ import {
   type ProductImage,
 } from './validator';
 
-/** A screenshot still uploading (or failed) — rendered after the committed
- *  tiles, with progress, until its token commits to the form. */
+/** A screenshot that has not committed yet — transferring, paused or failed.
+ *  Rendered after the committed tiles, with its progress, until its token
+ *  commits to the form. */
 type InFlightTile = {
   id: string;
   fileName: string;
   progress: number;
-  status: 'queued' | 'uploading' | 'error';
+  status: 'queued' | 'uploading' | 'error' | 'paused';
   src: string | null;
 };
 
@@ -47,8 +57,12 @@ type ScreenshotsFieldProps = {
   inFlight: InFlightTile[];
   onReorder: (from: number, to: number) => void;
   onRemove: (index: number) => void;
-  /** Abort + drop an in-flight (or failed) upload. */
+  /** Give up an unfinished upload and drop its tile. */
   onCancelUpload: (id: string) => void;
+  /** Stop a transfer, keeping what the server holds so it can carry on. */
+  onPauseUpload: (id: string) => void;
+  /** Carry on a paused or failed transfer, sending only what is missing. */
+  onResumeUpload: (id: string) => void;
   onAddFiles: (files: FileList | null) => void;
   /** How many more images (committed + in-flight) the user can still add. */
   remaining: number;
@@ -71,6 +85,8 @@ function ScreenshotsField({
   onReorder,
   onRemove,
   onCancelUpload,
+  onPauseUpload,
+  onResumeUpload,
   onAddFiles,
   remaining,
 }: ScreenshotsFieldProps) {
@@ -200,21 +216,75 @@ function ScreenshotsField({
               className="h-full w-full object-cover opacity-50"
             />
           )}
-          <button
-            type="button"
-            aria-label={i18n.t('Cancel upload')}
-            onClick={() => onCancelUpload(tile.id)}
-            className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
-            <X size={12} />
-          </button>
-          <div className="absolute inset-x-0 bottom-0 p-1.5">
-            {tile.status === 'error' ? (
-              <span className="block truncate rounded bg-destructive/90 px-1.5 py-0.5 text-[10px] font-medium text-background">
-                {i18n.t('Upload failed')}
-              </span>
-            ) : (
-              <Progress value={tile.progress} className="h-1.5" />
+          <div className="absolute right-1 top-1 flex items-center gap-1">
+            {(tile.status === 'queued' || tile.status === 'uploading') && (
+              <button
+                type="button"
+                aria-label={i18n.t('Pause')}
+                title={i18n.t('Pause')}
+                onClick={() => onPauseUpload(tile.id)}
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+                <Pause size={12} />
+              </button>
             )}
+            {(tile.status === 'paused' || tile.status === 'error') && (
+              <button
+                type="button"
+                aria-label={
+                  tile.status === 'paused' ? i18n.t('Resume') : i18n.t('Retry')
+                }
+                title={
+                  tile.status === 'paused' ? i18n.t('Resume') : i18n.t('Retry')
+                }
+                onClick={() => onResumeUpload(tile.id)}
+                className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+                {tile.status === 'paused' ? (
+                  <Play size={12} />
+                ) : (
+                  <RotateCcw size={12} />
+                )}
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label={i18n.t('Remove')}
+              title={i18n.t('Remove')}
+              onClick={() => onCancelUpload(tile.id)}
+              className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/80 text-background hover:bg-foreground">
+              <X size={12} />
+            </button>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 p-1.5">
+            <ProgressFill
+              value={tile.progress}
+              tone={
+                tile.status === 'error'
+                  ? 'error'
+                  : tile.status === 'paused'
+                    ? 'paused'
+                    : 'active'
+              }
+              label={i18n.t('Uploading {0}', tile.fileName)}
+              /* The tones are light tints and the strip sits over a thumbnail,
+                 so it needs its own light ground — otherwise the label reads
+                 against the image wherever the fill has not reached yet. */
+              className="rounded bg-background px-1.5 py-0.5">
+              <span
+                className={cn(
+                  'block truncate text-[10px] font-medium',
+                  tile.status === 'error'
+                    ? 'text-destructive'
+                    : tile.status === 'paused'
+                      ? 'text-status-pending-fg'
+                      : 'text-foreground',
+                )}>
+                {tile.status === 'error'
+                  ? i18n.t('Upload failed')
+                  : tile.status === 'paused'
+                    ? i18n.t('Upload paused')
+                    : `${tile.progress}%`}
+              </span>
+            </ProgressFill>
           </div>
         </div>
       ))}
@@ -284,14 +354,15 @@ export function ScreenshotsFormField({
     return previewByToken.current.get(image.token) ?? null;
   };
 
-  /* Uploads not yet committed to the form (queued / in-flight / failed).
-   * Succeeded uploads are dropped from the hook the moment their token lands in
-   * `images`, so they never appear here. */
+  /* Uploads not yet committed to the form — queued, transferring, paused or
+   * failed. Succeeded uploads are dropped from the hook the moment their token
+   * lands in `images`, so they never appear here. */
   const inFlight: InFlightTile[] = screenshotUpload.uploads
     .filter(
       item =>
         item.status === 'queued' ||
         item.status === 'uploading' ||
+        item.status === 'paused' ||
         item.status === 'error',
     )
     .map(item => ({
@@ -334,6 +405,28 @@ export function ScreenshotsFormField({
     screenshotUpload.remove(id);
   };
 
+  const onPauseUpload = (id: string) => screenshotUpload.pause(id);
+
+  /* Carries on from what the server already holds. The preview and the commit
+   * are keyed on the same item id as the first attempt, so a resumed upload
+   * lands in `images` exactly as it would have. */
+  const onResumeUpload = (id: string) => {
+    screenshotUpload.resume(id).then(result => {
+      if (!result) return;
+      const objectUrl = previewByItem.current.get(id) ?? null;
+      previewByItem.current.delete(id);
+      if (objectUrl) previewByToken.current.set(result.token, objectUrl);
+      const current = getValues('images');
+      const alreadyIn = current.some(
+        image => image.kind === 'new' && image.token === result.token,
+      );
+      if (!alreadyIn) {
+        commit([...current, {kind: 'new', token: result.token}]);
+      }
+      screenshotUpload.remove(id);
+    });
+  };
+
   const onAddFiles = (files: FileList | null) => {
     if (!files) return;
     const picked = Array.from(files);
@@ -355,6 +448,9 @@ export function ScreenshotsFormField({
       const objectUrl = URL.createObjectURL(file);
       const {ids, done} = screenshotUpload.upload([file], {
         purpose: 'marketplace:screenshot',
+        /* Refuse an oversized image here rather than send it and have the route
+         * reject it. The purpose registry on the server stays the real check. */
+        maxBytes: MAX_IMAGE_SIZE,
       });
       const itemId = ids[0];
       previewByItem.current.set(itemId, objectUrl);
@@ -417,6 +513,8 @@ export function ScreenshotsFormField({
               onReorder={onReorder}
               onRemove={onRemove}
               onCancelUpload={onCancelUpload}
+              onPauseUpload={onPauseUpload}
+              onResumeUpload={onResumeUpload}
               onAddFiles={onAddFiles}
               remaining={MAX_IMAGES - images.length - inFlight.length}
             />

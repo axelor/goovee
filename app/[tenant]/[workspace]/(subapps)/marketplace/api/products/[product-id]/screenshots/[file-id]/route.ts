@@ -15,7 +15,7 @@ import {getProductScreenshot} from '../../../../../common/orm';
  * owned by a base AOSProduct, which marketplace pictures are not.
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   props: {
     params: Promise<{
       tenant: string;
@@ -67,5 +67,5 @@ export async function GET(
     return new NextResponse('File not found', {status: 404});
   }
 
-  return streamFile(file);
+  return streamFile({...file, request});
 }

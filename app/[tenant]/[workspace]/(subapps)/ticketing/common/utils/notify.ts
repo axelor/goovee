@@ -5,7 +5,7 @@ import {ModelMap, SUBAPP_CODES} from '@/constants';
 import type {Client} from '@/goovee/.generated/client';
 import {DEFAULT_LOCALE} from '@/lib/core/locale';
 import {getTranslation} from '@/lib/core/locale/server';
-import {notifyUser} from '@/pwa/utils';
+import {notifyAll} from '@/pwa/utils';
 import {NotificationTag} from '@/pwa/tags';
 import type {ID} from '@/types';
 
@@ -73,70 +73,65 @@ export async function notifyTicketChange({
     console.error(e);
   }
 
-  const notifyResults = await Promise.allSettled(
-    contacts.map(async contact => {
-      const tr = getTranslation.bind(null, {
-        locale: contact.localization?.code || DEFAULT_LOCALE,
-        tenant: tenantId,
-      });
-      await notifyUser({
-        userId: contact.id,
-        tenantId,
-        client,
-        workspaceURL,
-        payload: {
-          title:
-            type === 'create'
-              ? await tr('{0} created a new ticket', user.simpleFullName ?? '')
-              : await tr('{0} updated a ticket', user.simpleFullName ?? ''),
-          body:
-            type === 'create'
-              ? await tr(
-                  '{0} created a new ticket: {1}',
-                  user.simpleFullName ?? '',
-                  ticket.name,
-                )
-              : await tr(
-                  '{0} updated a ticket: {1}',
-                  user.simpleFullName ?? '',
-                  ticket.name,
-                ),
-          url: ticketLink,
-          tag: NotificationTag.ticketUpdate(ticket.id),
-        },
-      });
-    }),
-  );
+  const notifyDevices = notifyAll(contacts, async contact => {
+    const tr = getTranslation.bind(null, {
+      locale: contact.localization?.code || DEFAULT_LOCALE,
+      tenant: tenantId,
+    });
 
-  notifyResults.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      console.error(
-        `Failed to notify contact ${contacts[index].id}:`,
-        result.reason,
-      );
-    }
-  });
-
-  try {
-    const reciepients = await getMailRecipients({
-      contacts,
+    return {
+      userId: contact.id,
+      tenantId,
       client,
       workspaceURL,
-    });
-    if (reciepients.length) {
-      await sendTrackMail({
-        author: user.simpleFullName || '',
-        type,
-        tracks,
-        projectName: ticket.project?.name || '',
-        ticketName: ticket.name,
-        ticketLink,
-        reciepients,
-        tenant: tenantId,
+      payload: {
+        title:
+          type === 'create'
+            ? await tr('{0} created a new ticket', user.simpleFullName ?? '')
+            : await tr('{0} updated a ticket', user.simpleFullName ?? ''),
+        body:
+          type === 'create'
+            ? await tr(
+                '{0} created a new ticket: {1}',
+                user.simpleFullName ?? '',
+                ticket.name,
+              )
+            : await tr(
+                '{0} updated a ticket: {1}',
+                user.simpleFullName ?? '',
+                ticket.name,
+              ),
+        url: ticketLink,
+        tag: NotificationTag.ticketUpdate(ticket.id),
+      },
+    };
+  });
+
+  const sendTracking = async () => {
+    try {
+      const reciepients = await getMailRecipients({
+        contacts,
+        client,
+        workspaceURL,
       });
+      if (reciepients.length) {
+        await sendTrackMail({
+          author: user.simpleFullName || '',
+          type,
+          tracks,
+          projectName: ticket.project?.name || '',
+          ticketName: ticket.name,
+          ticketLink,
+          reciepients,
+          tenant: tenantId,
+        });
+      }
+    } catch (e) {
+      console.error('Error sending tracking email: ');
+      console.error(e);
     }
-  } catch (e) {
-    console.error('Error sending tracking email: ');
-    console.error(e);
-  }
+  };
+
+  // Independent of each other, so neither waits on the other's fan-out.
+  await Promise.all([notifyDevices, sendTracking()]);
 }

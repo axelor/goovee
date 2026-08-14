@@ -1,6 +1,7 @@
 'use client';
 
 import {useState} from 'react';
+import Image from 'next/image';
 import {usePathname, useRouter} from 'next/navigation';
 
 // ---- CORE IMPORTS ---- //
@@ -216,10 +217,11 @@ export function Sidebar({
             'overflow-hidden',
           )}>
           {user?.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={user.image}
               alt=""
+              width={32}
+              height={32}
               className="w-full h-full rounded-full object-cover"
             />
           ) : (

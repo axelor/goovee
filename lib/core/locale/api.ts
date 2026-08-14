@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import {createHash} from 'crypto';
 
-import {manager} from '@/tenant';
+import {manager, type Tenant, type TenantClient} from '@/tenant';
 import {LRUCache} from '@/tenant/lru';
 import {DEFAULT_LOCALE} from '@/locale/contants';
 import {findLocaleLanguage} from '@/locale/utils';
@@ -74,17 +74,15 @@ async function findGeneralTranslations(locale: string): Promise<Translations> {
 
 async function findTenantTranslations(
   locale: string,
-  tenantId: string,
+  client: TenantClient,
 ): Promise<Translations> {
-  if (!(locale && tenantId)) {
+  if (!locale) {
     return {};
   }
 
   const find = async (language: string): Promise<Translations> => {
     try {
-      const tenant = await manager.getTenant(tenantId);
-      if (!tenant) return {};
-      const rows = await tenant.client.aOSMetaTranslation.find({
+      const rows = await client.aOSMetaTranslation.find({
         where: {language},
         select: {key: true, value: true},
       });
@@ -121,11 +119,11 @@ function computeHash(translations: Translations): string {
 
 async function loadTranslationBundle(
   locale: string,
-  tenantId?: string,
+  tenant?: Tenant,
 ): Promise<TranslationBundle> {
   const [generalTranslations, tenantTranslations] = await Promise.all([
     findGeneralTranslations(locale),
-    tenantId ? findTenantTranslations(locale, tenantId) : {},
+    tenant ? findTenantTranslations(locale, tenant.client) : {},
   ]);
 
   const translations = {...generalTranslations, ...tenantTranslations};
@@ -133,7 +131,18 @@ async function loadTranslationBundle(
   return {translations, hash: computeHash(translations)};
 }
 
-export function findTranslations(
+/* The tenant id comes from the URL and no route validates it, so failing to
+ * resolve one is an ordinary outcome rather than a fault worth reporting. It
+ * is treated as no tenant at all, which yields the general-only bundle. */
+async function resolveTenant(tenantId: string): Promise<Tenant | undefined> {
+  try {
+    return await manager.getTenant(tenantId);
+  } catch {
+    return undefined;
+  }
+}
+
+export async function findTranslations(
   locale: string = DEFAULT_LOCALE,
   tenantId?: string,
 ): Promise<TranslationBundle> {
@@ -141,14 +150,19 @@ export function findTranslations(
     locale = DEFAULT_LOCALE;
   }
 
-  const cacheKey = `${tenantId ?? ''}:${locale}`;
+  const tenant = tenantId ? await resolveTenant(tenantId) : undefined;
+
+  /* The requested id is free input, so the key uses the id the tenant
+   * actually resolved to. Ids resolving to nothing then share one
+   * general-only entry rather than each taking a slot of their own. */
+  const cacheKey = `${tenant?.id ?? ''}:${locale}`;
 
   const cached = bundleCache.get(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const bundle = loadTranslationBundle(locale, tenantId);
+  const bundle = loadTranslationBundle(locale, tenant);
   bundleCache.put(cacheKey, bundle);
   bundle.catch(() => bundleCache.delete(cacheKey));
 

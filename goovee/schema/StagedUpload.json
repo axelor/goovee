@@ -11,6 +11,11 @@
     },
     {
       "type": "String",
+      "name": "sessionId",
+      "unique": true
+    },
+    {
+      "type": "String",
       "name": "purpose",
       "required": true
     },
@@ -24,6 +29,26 @@
       "type": "ManyToOne",
       "name": "metaFile",
       "target": "AOSMetaFile"
+    },
+    {
+      "type": "String",
+      "name": "fileName"
+    },
+    {
+      "type": "String",
+      "name": "fileType"
+    },
+    {
+      "type": "String",
+      "name": "partPath"
+    },
+    {
+      "type": "BigInt",
+      "name": "uploadLength"
+    },
+    {
+      "type": "BigInt",
+      "name": "uploadOffset"
     },
     {
       "type": "DateTime",

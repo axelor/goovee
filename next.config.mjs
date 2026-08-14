@@ -10,11 +10,25 @@ const basePath = normalizeBasePath(process.env.NEXT_PUBLIC_BASE_PATH);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  /*
+   * Images are addressed by our own loader and served by the routes that already
+   * hold them, so access is checked on every request. Naming a loader also turns
+   * off the framework's optimisation endpoint, whose cache is keyed on the
+   * address and size alone and is therefore shared across users.
+   */
   images: {
-    localPatterns: [
-      {
-        pathname: '/**',
-      },
+    loader: 'custom',
+    loaderFile: './lib/core/image/loader.ts',
+  },
+  /*
+   * The imaging library loads its shared library at run time rather than
+   * importing it, so the standalone build has no way to see that it is needed
+   * and leaves it behind. Without it the server starts and only fails when it
+   * first resizes an image, so it is named here explicitly.
+   */
+  outputFileTracingIncludes: {
+    '**': [
+      './node_modules/.pnpm/@img+sharp-libvips-linux*/node_modules/@img/*/lib/*.so*',
     ],
   },
   typescript: {

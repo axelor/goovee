@@ -1,15 +1,12 @@
-import {experimental_taintUniqueValue} from 'react';
+import {taintSecret} from '@/lib/core/security/taint';
 import type {GoogleOptions} from 'better-auth/types';
 
 const clientSecret = process.env.GOOGLE_CLIENT_SECRET as string;
 
-if (process.env.SHOW_GOOGLE_OAUTH === 'true') {
-  experimental_taintUniqueValue(
-    'Google Client Secret is an authentication secret. Do not pass to Client Components.',
-    process,
-    clientSecret,
-  );
-}
+taintSecret(
+  'Google Client Secret is an authentication secret. Do not pass to Client Components.',
+  clientSecret,
+);
 
 const google = {
   enabled: process.env.SHOW_GOOGLE_OAUTH === 'true',

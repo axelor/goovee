@@ -172,7 +172,7 @@ export const generateRegistrationMailAction = async ({
 }) => {
   if (![eventId, participants?.length, workspace.url].every(Boolean)) {
     console.error(
-      'Missing required parameters: eventId, participants, or workspace.',
+      '[MAIL] Missing required parameters: eventId, participants, or workspace.',
     );
     return;
   }
@@ -189,42 +189,33 @@ export const generateRegistrationMailAction = async ({
   });
 
   if (!event) {
-    console.error(`Event with ID ${eventId} not found.`);
+    console.error(`[MAIL] Event with ID ${eventId} not found.`);
     return;
   }
 
   const mailService = NotificationManager.getService(NotificationType.mail);
   if (!mailService) {
-    console.error('Mail service is not available.');
+    console.error('[MAIL] Mail service is not available.');
     return;
   }
 
   const subject = `🎉 You're Registered for "${event.eventTitle}"!`;
   const ics = generateIcs(event, participants);
 
-  const mailPromises = participants.map(async participant => {
-    const emailContent = await mailTemplate({event, participant});
-    return mailService.notify({
-      to: participant.emailAddress,
-      subject,
-      html: emailContent,
-      icalEvent: {
-        method: 'REQUEST',
+  await mailService.notifyAll(participants, async participant => ({
+    to: participant.emailAddress,
+    subject,
+    html: await mailTemplate({event, participant}),
+    icalEvent: {
+      method: 'REQUEST',
+      content: ics,
+    },
+    attachments: [
+      {
+        filename: 'invite.ics',
         content: ics,
+        contentType: 'text/calendar; method=REQUEST',
       },
-      attachments: [
-        {
-          filename: 'invite.ics',
-          content: ics,
-          contentType: 'text/calendar; method=REQUEST',
-        },
-      ],
-    });
-  });
-
-  try {
-    await Promise.all(mailPromises);
-  } catch (error) {
-    console.error('Error sending registration emails:', error);
-  }
+    ],
+  }));
 };
