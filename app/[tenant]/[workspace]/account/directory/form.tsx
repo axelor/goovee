@@ -22,7 +22,7 @@ import {IconType} from 'react-icons';
 import {NO_IMAGE_URL} from '@/constants';
 import {i18n} from '@/locale';
 import {Partner} from '@/orm/partner';
-import {RichTextEditor} from '@/ui/components';
+import {ProgressRing, RichTextEditor} from '@/ui/components';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,7 +50,12 @@ import {
   PARTNER_PICTURE_MAX_FILE_SIZE,
 } from '../common/constants';
 import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
-import {AccountToggle, SectionHeader} from '../common/ui/components';
+import {
+  AccountToggle,
+  PictureUploadAction,
+  PictureUploadCancel,
+  SectionHeader,
+} from '../common/ui/components';
 
 export default function Form({
   partner,
@@ -64,7 +69,13 @@ export default function Form({
   const {toast} = useToast();
   const router = useRouter();
   const {workspaceURL, tenant} = useWorkspace();
-  const {upload} = useStagedUpload({tenant});
+  const {
+    uploads,
+    upload,
+    pause,
+    resume,
+    remove: removeUpload,
+  } = useStagedUpload({tenant});
   const mainPartner = partner.mainPartner;
   const companyDataSource = isAdminContact
     ? mainPartner
@@ -77,6 +88,8 @@ export default function Form({
   );
   const pictureInputRef = useRef<HTMLInputElement | null>(null);
   const [updatingPicture, setUpdatingPicture] = useState(false);
+  const [pictureUploadId, setPictureUploadId] = useState<string | null>(null);
+  const pictureUpload = uploads.find(item => item.id === pictureUploadId);
   const [confirmation, setConfirmation] = useState<any>(false);
 
   const form = useForm<DirectorySettingsFormValues>({
@@ -193,6 +206,12 @@ export default function Form({
 
   const handleDeletePicture = async () => {
     closeConfirmation();
+
+    /* Deleting the logo settles what it should be, so an upload left parked is
+     * given up rather than kept resumable — resuming it would put back the logo
+     * that was just removed. */
+    handleCancelPicture();
+
     try {
       setUpdatingPicture(true);
       const {error, message} = await updateCompanyProfileImage({
@@ -225,6 +244,11 @@ export default function Form({
     const file = event?.target?.files?.[0];
     if (!file) return;
 
+    /* Clear the input straight away, so picking the same file again — after a
+     * rejection or a failure — still counts as a pick rather than as no change
+     * at all. The File itself is already in hand and outlives the reset. */
+    event.target.value = '';
+
     if (!file.type.startsWith('image/')) {
       toast({
         title: i18n.t('Only images are allowed.'),
@@ -238,34 +262,28 @@ export default function Form({
       return;
     }
 
+    /* Picking again gives up on whatever the last attempt left parked, so a
+     * paused or failed upload cannot go on holding server-side storage with
+     * nothing on screen still pointing at it. */
+    if (pictureUploadId) removeUpload(pictureUploadId);
+
     try {
       setUpdatingPicture(true);
-      const {done} = upload(file, {purpose: PARTNER_PICTURE_PURPOSE});
+      const {ids, done} = upload(file, {
+        purpose: PARTNER_PICTURE_PURPOSE,
+        maxBytes: PARTNER_PICTURE_MAX_FILE_SIZE,
+      });
+      setPictureUploadId(ids[0] ?? null);
       const [staged] = await done;
 
-      if (!staged) {
-        toast({
-          title: i18n.t('Error updating profile picture. Try again.'),
-          variant: 'destructive',
-        });
-        return;
-      }
+      /* Nothing staged means the logo was cancelled, paused or failed. Only the
+       * first is finished with — the other two keep their entry, and the ring
+       * over the logo carries the state and the way to carry on. */
+      if (!staged) return;
 
-      const {error, message, data} = await updateCompanyProfileImage({
-        token: staged.token,
-        workspaceURL,
-      });
-
-      if (error) {
-        toast({title: message, variant: 'destructive'});
-      } else {
-        toast({
-          title: i18n.t('Picture updated successfully.'),
-          variant: 'success',
-        });
-        setPicture(data?.id ?? undefined);
-      }
-    } catch (e) {
+      setPictureUploadId(null);
+      await applyStagedPicture(staged.token);
+    } catch (error) {
       toast({
         title: i18n.t('An unexpected error occurred'),
         variant: 'destructive',
@@ -273,6 +291,51 @@ export default function Form({
     } finally {
       setUpdatingPicture(false);
     }
+  };
+
+  const applyStagedPicture = async (token: string) => {
+    const {error, message, data} = await updateCompanyProfileImage({
+      token,
+      workspaceURL,
+    });
+
+    if (error) {
+      toast({title: message, variant: 'destructive'});
+    } else {
+      toast({
+        title: i18n.t('Picture updated successfully.'),
+        variant: 'success',
+      });
+      setPicture(data?.id ?? undefined);
+    }
+  };
+
+  /** Carry on a logo that was paused or that failed part-way. */
+  const handleResumePicture = async () => {
+    if (!pictureUploadId || updatingPicture) return;
+
+    try {
+      setUpdatingPicture(true);
+      const staged = await resume(pictureUploadId);
+      if (!staged) return;
+
+      setPictureUploadId(null);
+      await applyStagedPicture(staged.token);
+    } catch (error) {
+      toast({
+        title: i18n.t('An unexpected error occurred'),
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingPicture(false);
+    }
+  };
+
+  const handleCancelPicture = () => {
+    if (!pictureUploadId) return;
+
+    removeUpload(pictureUploadId);
+    setPictureUploadId(null);
   };
 
   const logoSrc = getPartnerImageURL(picture, tenant, {
@@ -337,13 +400,37 @@ export default function Form({
                 )}>
                 {isAdminContact && (
                   <div className="bg-white border border-ink-100 rounded-[14px] shadow-xs p-[18px] flex items-center gap-4">
-                    <Image
-                      width={64}
-                      height={64}
-                      className="rounded-xl object-cover w-16 h-16 bg-ink-50"
-                      src={logoSrc}
-                      alt={companyName}
-                    />
+                    <div className="relative size-16 shrink-0">
+                      <Image
+                        width={64}
+                        height={64}
+                        className="rounded-xl object-cover w-16 h-16 bg-ink-50"
+                        src={logoSrc}
+                        alt={companyName}
+                      />
+                      {pictureUpload && pictureUpload.status !== 'success' && (
+                        <div className="absolute inset-0 grid place-items-center rounded-xl bg-ink-900/50">
+                          <ProgressRing
+                            value={pictureUpload.progress}
+                            tone={
+                              pictureUpload.status === 'error'
+                                ? 'error'
+                                : pictureUpload.status === 'paused'
+                                  ? 'paused'
+                                  : 'active'
+                            }
+                            size={48}
+                            label={i18n.t('Uploading company logo')}>
+                            <PictureUploadAction
+                              status={pictureUpload.status}
+                              onPause={() => pause(pictureUpload.id)}
+                              onResume={handleResumePicture}
+                            />
+                          </ProgressRing>
+                          <PictureUploadCancel onCancel={handleCancelPicture} />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-col gap-2">
                       <div>
                         <p className="text-sm font-bold text-ink-900 mb-0">
@@ -352,6 +439,16 @@ export default function Form({
                         <p className="text-xs text-ink-500 mb-0">
                           {i18n.t('PNG or JPG, 256×256 px min.')}
                         </p>
+                        {pictureUpload?.status === 'paused' && (
+                          <p className="text-xs text-status-pending-fg mb-0">
+                            {i18n.t('Upload paused')}
+                          </p>
+                        )}
+                        {pictureUpload?.status === 'error' && (
+                          <p className="text-xs text-destructive mb-0">
+                            {pictureUpload.error}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <Button

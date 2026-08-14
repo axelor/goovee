@@ -1,18 +1,27 @@
 import {i18n} from '@/locale';
 import {Button} from '@/ui/components/button';
-import {Progress} from '@/ui/components/progress/progress';
+import {ProgressFill} from '@/ui/components';
 import {cn} from '@/utils/css';
 import {getFileSizeText} from '@/utils/files';
-import {CheckCircle2, FileArchive, Upload, X} from 'lucide-react';
+import {
+  CheckCircle2,
+  FileArchive,
+  Pause,
+  Play,
+  RotateCcw,
+  Upload,
+  X,
+} from 'lucide-react';
 import {useRef, useState} from 'react';
 
-/** A bundle being staged this session — progress while uploading, then the
- *  terminal state. Drives the dropzone's current-file display. */
+/** A bundle being staged this session — progress while transferring, then the
+ *  state it stopped in. Drives the dropzone's current-file display. */
 export type StagedBundle = {
   fileName: string;
-  /** 0–100 while uploading. */
+  /** 0–100, and where the fill stops once it is paused or has failed. */
   progress: number;
-  status: 'queued' | 'uploading' | 'success' | 'error';
+  status: 'queued' | 'uploading' | 'success' | 'error' | 'paused';
+  /** Why it failed, already translated. Set whenever status is `error`. */
   error?: string;
 };
 
@@ -29,9 +38,14 @@ type BundleDropzoneProps = {
   onFile: (file: File) => void;
   /** Called with a ready-to-display message when a drop/pick is rejected. */
   onError: (message: string) => void;
-  /** Drop the staged bundle (aborting it if still uploading) and revert to the
+  /** Drop the staged bundle (giving up what the server holds) and revert to the
    *  existing / empty state. */
   onClear?: () => void;
+  /** Stop the transfer, keeping what the server already holds so it can carry
+   *  on from there. Omit to leave the control out. */
+  onPause?: () => void;
+  /** Carry on a paused or failed transfer, sending only what is missing. */
+  onResume?: () => void;
 };
 
 /**
@@ -49,6 +63,8 @@ export function BundleDropzone({
   onFile,
   onError,
   onClear,
+  onPause,
+  onResume,
 }: BundleDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   /* Depth counter: dragenter/dragleave also fire when crossing child element
@@ -96,6 +112,8 @@ export function BundleDropzone({
 
   const isUploading =
     staged?.status === 'queued' || staged?.status === 'uploading';
+  const isPaused = staged?.status === 'paused';
+  const isFailed = staged?.status === 'error';
 
   return (
     <div
@@ -103,6 +121,10 @@ export function BundleDropzone({
       tabIndex={0}
       onClick={browse}
       onKeyDown={e => {
+        /* Only the zone itself opens the picker. The controls nested inside it
+           are activated by the same keys, and without this their activation is
+           cancelled here and the picker opens instead. */
+        if (e.target !== e.currentTarget) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           browse();
@@ -136,16 +158,21 @@ export function BundleDropzone({
       <div className="min-w-0 flex-1">
         {staged ? (
           <>
-            <p className="truncate text-sm text-foreground">
-              {staged.fileName}
-            </p>
-            {isUploading && (
-              <div className="mt-1.5 flex items-center gap-2">
-                <Progress value={staged.progress} className="h-1.5 flex-1" />
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {staged.progress}%
-                </span>
-              </div>
+            {isUploading || isPaused || isFailed ? (
+              <ProgressFill
+                value={staged.progress}
+                tone={isFailed ? 'error' : isPaused ? 'paused' : 'active'}
+                label={i18n.t('Uploading {0}', staged.fileName)}
+                showValue
+                className="rounded-md px-2 py-1">
+                <p className="truncate text-sm text-foreground">
+                  {staged.fileName}
+                </p>
+              </ProgressFill>
+            ) : (
+              <p className="truncate text-sm text-foreground">
+                {staged.fileName}
+              </p>
             )}
             {staged.status === 'success' && (
               <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
@@ -153,9 +180,13 @@ export function BundleDropzone({
                 {i18n.t('Ready to save')}
               </p>
             )}
-            {staged.status === 'error' && (
-              <p className="mt-0.5 text-xs text-destructive">
-                {staged.error ?? i18n.t('Upload failed. Try again.')}
+            {(isPaused || isFailed) && (
+              <p
+                className={cn(
+                  'mt-0.5 line-clamp-2 text-xs',
+                  isFailed ? 'text-destructive' : 'text-status-pending-fg',
+                )}>
+                {isPaused ? i18n.t('Upload paused') : staged.error}
               </p>
             )}
           </>
@@ -192,6 +223,41 @@ export function BundleDropzone({
         className="hidden"
         onChange={handlePick}
       />
+      {isUploading && onPause && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label={i18n.t('Pause')}
+          title={i18n.t('Pause')}
+          onClick={e => {
+            e.stopPropagation();
+            onPause();
+          }}>
+          <Pause className="mr-1 h-4 w-4" />
+          {i18n.t('Pause')}
+        </Button>
+      )}
+      {(isPaused || isFailed) && onResume && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label={isPaused ? i18n.t('Resume') : i18n.t('Retry')}
+          title={isPaused ? i18n.t('Resume') : i18n.t('Retry')}
+          className={isFailed ? 'text-destructive' : 'text-status-pending-fg'}
+          onClick={e => {
+            e.stopPropagation();
+            onResume();
+          }}>
+          {isPaused ? (
+            <Play className="mr-1 h-4 w-4" />
+          ) : (
+            <RotateCcw className="mr-1 h-4 w-4" />
+          )}
+          {isPaused ? i18n.t('Resume') : i18n.t('Retry')}
+        </Button>
+      )}
       {staged && onClear && (
         <Button
           type="button"

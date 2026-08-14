@@ -13,15 +13,13 @@ import {SEARCH_PARAMS, SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
 
 // ---- LOCAL IMPORTS ---- //
-import HTMLViewer from './html-viewer';
-import ImageViewer from './image-viewer';
-import PDFViewer from './pdf-viewer';
 import {NEW_FILE_CUTOFF_MS} from '@/subapps/resources/common/constants';
 import {
   DocsViewerShell,
+  ViewerMessage,
+  findFileViewer,
   type DocsViewerShellLabels,
 } from '@/subapps/resources/common/ui/components';
-import type {DmsFile} from '@/subapps/resources/common/types';
 
 function computeIsNew(
   createdOn: string | Date | null | undefined,
@@ -32,16 +30,6 @@ function computeIsNew(
   if (Number.isNaN(ts)) return false;
   return Date.now() - ts < cutoffMs;
 }
-
-const viewer: Record<string, React.JSXElementConstructor<{record: DmsFile}>> = {
-  'application/pdf': PDFViewer,
-  'image/jpeg': ImageViewer,
-  'image/jpg': ImageViewer,
-  'image/png': ImageViewer,
-  'image/vnd.microsoft.icon': ImageViewer,
-  'text/html': HTMLViewer,
-  html: HTMLViewer,
-};
 
 export default async function Page(props: {
   params: Promise<{tenant: string; workspace: string; id: string}>;
@@ -95,15 +83,7 @@ export default async function Page(props: {
 
   const labels = await buildLabels();
 
-  let Viewer = viewer[file?.metaFile?.fileType || file?.contentType || ''];
-  if (!Viewer) {
-    // eslint-disable-next-line react/display-name
-    Viewer = async () => (
-      <div className="p-8 text-center text-sm text-ink-500">
-        {await t('No viewer available for this file type.')}
-      </div>
-    );
-  }
+  const Viewer = findFileViewer(file?.metaFile?.fileType || file?.contentType);
 
   const backHref = parentId
     ? `${workspaceURI}/${SUBAPP_CODES.resources}/folder/${parentId}`
@@ -129,7 +109,13 @@ export default async function Page(props: {
       siblings={siblings ?? []}
       isNew={isNew}
       labels={labels}>
-      <Viewer record={file} />
+      {Viewer ? (
+        <Viewer record={file} />
+      ) : (
+        <ViewerMessage>
+          {await t('This kind of file can only be downloaded.')}
+        </ViewerMessage>
+      )}
     </DocsViewerShell>
   );
 }

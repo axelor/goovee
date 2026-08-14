@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 // ---- CORE IMPORTS ---- //
 import {SUBAPP_CODES} from '@/constants';
 import {withBasePath} from '@/lib/core/path/base-path';
@@ -37,11 +39,12 @@ export function PostImages({
         <div
           key={a.metaFile.id}
           className="relative overflow-hidden rounded-[10px] border border-ink-100">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={url(a.metaFile.id)}
             alt={a.metaFile.fileName ?? ''}
-            loading="lazy"
+            width={320}
+            height={112}
+            sizes="(max-width: 768px) 33vw, 320px"
             className="w-full h-28 object-cover"
           />
           {i === MAX_THUMBS - 1 && extra > 0 && (

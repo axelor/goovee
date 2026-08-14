@@ -209,7 +209,6 @@ export {Icon} from './icon';
 export {BadgeList} from './badge-list';
 export {TableList, SortableHeader, ExpandableTableRows} from './table-list';
 export {DropdownSelector} from './dropdown-selector';
-export {DocViewer} from './doc-viewer';
 export {AutosizeTextarea} from './textarea-auto-size';
 export {MobileCategoryMenu} from './mobile-category-menu';
 export {AccordionMenu} from './accordion-menu';
@@ -217,6 +216,10 @@ export {Spinner} from './spinner';
 export {Link} from './link';
 export {StatusPill} from './status-pill';
 export type {StatusKey, StatusPillProps} from './status-pill/status-pill';
+export {ProgressFill} from './progress-fill';
+export type {ProgressFillProps, ProgressTone} from './progress-fill';
+export {ProgressRing} from './progress-ring';
+export type {ProgressRingProps} from './progress-ring';
 export {StatusTimeline} from './status-timeline';
 export type {
   TimelineStep,

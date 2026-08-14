@@ -133,7 +133,7 @@ export async function GET(
     return new NextResponse('File not found', {status: 404});
   }
 
-  return streamFile(file);
+  return streamFile({...file, request: req});
 }
 
 //TODO: To be 100% sure that it's a meta file, we should check model definition

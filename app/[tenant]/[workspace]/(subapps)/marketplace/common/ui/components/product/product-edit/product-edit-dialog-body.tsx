@@ -202,12 +202,16 @@ function DialogForm({
 
         {/* One combined save for the whole dialog. */}
         <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t border-border bg-background px-6 py-4">
-          {model.uploadsBusy ? (
+          {model.uploadsInFlight ? (
             <span className="mr-auto text-sm text-muted-foreground">
               {i18n.t('Uploads in progress…')}
             </span>
+          ) : model.uploadsPaused ? (
+            <span className="mr-auto text-sm text-status-pending-fg">
+              {i18n.t('Resume or remove the paused uploads to save.')}
+            </span>
           ) : (
-            model.uploadsHaveError && (
+            model.uploadsFailed && (
               <span className="mr-auto text-sm text-destructive">
                 {i18n.t('Fix failed uploads to save.')}
               </span>
@@ -223,12 +227,7 @@ function DialogForm({
           <Button
             type="button"
             onClick={model.save}
-            disabled={
-              model.pending ||
-              !isDirty ||
-              model.uploadsBusy ||
-              model.uploadsHaveError
-            }>
+            disabled={model.pending || !isDirty || !model.uploadsStaged}>
             {model.pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {i18n.t('Save')}
           </Button>

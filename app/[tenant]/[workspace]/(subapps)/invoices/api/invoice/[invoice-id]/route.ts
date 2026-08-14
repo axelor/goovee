@@ -109,5 +109,5 @@ export async function GET(
     return new NextResponse('Unsupported file type', {status: 415});
   }
 
-  return streamFile(file);
+  return streamFile({...file, request});
 }

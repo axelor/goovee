@@ -9,6 +9,8 @@ import {
   MdOutlineForum,
   MdOutlineImage,
   MdOutlineUploadFile,
+  MdPause,
+  MdPlayArrow,
   MdRefresh,
 } from 'react-icons/md';
 import {useRouter} from 'next/navigation';
@@ -16,10 +18,18 @@ import {useRouter} from 'next/navigation';
 // ---- CORE IMPORTS ---- //
 import {i18n} from '@/locale';
 import {cn} from '@/utils/css';
-import {FileIcon, RichTextEditor} from '@/ui/components';
-import {Progress} from '@/ui/components/progress';
+import {
+  FileIcon,
+  ProgressFill,
+  ProgressRing,
+  RichTextEditor,
+  type ProgressTone,
+} from '@/ui/components';
 import {useToast} from '@/ui/hooks/use-toast';
-import {useStagedUpload} from '@/lib/core/upload/use-staged-upload';
+import {
+  useStagedUpload,
+  type StagedUploadStatus,
+} from '@/lib/core/upload/use-staged-upload';
 import {useWorkspace} from '@/app/[tenant]/[workspace]/workspace-context';
 import {getFileSizeText} from '@/utils/files';
 
@@ -28,6 +38,7 @@ import {
   FORUM_POST_ATTACHMENT_PURPOSE,
   MAX_FILE_SIZE,
   MAX_FORUM_ATTACHMENTS,
+  MAX_IMAGES_BEFORE_OVERLAY,
   PUBLISHING,
 } from '@/subapps/forum/common/constants';
 import {
@@ -106,10 +117,11 @@ export const CreatePost = ({
   const {
     uploads,
     upload,
-    retry,
+    pause,
+    resume,
     remove: removeUpload,
     reset: resetUploads,
-    isUploading,
+    isStaged,
   } = useStagedUpload({tenant});
 
   const chosenGroup = groups?.find(g => String(g.id) === String(groupId));
@@ -121,7 +133,8 @@ export const CreatePost = ({
   /*
    * Stage files picked since the last edit (those without an `uploadId`) and
    * free the staged uploads of any that were removed. Oversized files are
-   * rejected at pick time with a toast — the server cap is the backstop.
+   * rejected here with a toast naming the file, so the caps behind it never
+   * have to answer for one.
    */
   const reconcile = <T extends {file: File; uploadId?: string}>(
     prev: T[],
@@ -154,7 +167,10 @@ export const CreatePost = ({
         });
         return [];
       }
-      const {ids} = upload(item.file, {purpose: FORUM_POST_ATTACHMENT_PURPOSE});
+      const {ids} = upload(item.file, {
+        purpose: FORUM_POST_ATTACHMENT_PURPOSE,
+        maxBytes: MAX_FILE_SIZE,
+      });
       return [{...item, uploadId: ids[0]}];
     });
 
@@ -248,27 +264,95 @@ export const CreatePost = ({
     }
   };
 
-  const renderUploadStatus = (uploadId?: string) => {
-    const item = uploads.find(upload => upload.id === uploadId);
-    if (!item) return null;
+  const uploadOf = (uploadId?: string) =>
+    uploads.find(upload => upload.id === uploadId);
+
+  const toneOf = (status: StagedUploadStatus): ProgressTone =>
+    status === 'error' ? 'error' : status === 'paused' ? 'paused' : 'active';
+
+  /*
+   * Pause, resume and retry for one attachment. Progress is drawn elsewhere —
+   * on the thumbnail for an image, behind the name for a document — so these
+   * are the only controls the attachment needs beside its name.
+   */
+  const renderUploadActions = (uploadId?: string) => {
+    const item = uploadOf(uploadId);
+    if (!item || !uploadId) return null;
+
     if (item.status === 'queued' || item.status === 'uploading') {
-      return <Progress value={item.progress} className="h-1.5" />;
-    }
-    if (item.status === 'error' || item.status === 'aborted') {
       return (
-        <div className="flex items-center gap-2">
-          <p className="text-sm text-destructive line-clamp-1">
-            {item.error ? i18n.t(item.error) : i18n.t('Upload failed')}
-          </p>
-          <MdRefresh
-            title={i18n.t('Retry')}
-            className="size-5 cursor-pointer shrink-0"
-            onClick={() => uploadId && retry(uploadId)}
-          />
-        </div>
+        <button
+          type="button"
+          onClick={() => pause(uploadId)}
+          aria-label={i18n.t('Pause')}
+          title={i18n.t('Pause')}
+          className="shrink-0 text-ink-500">
+          <MdPause className="size-5" />
+        </button>
+      );
+    }
+    if (item.status === 'paused') {
+      return (
+        <button
+          type="button"
+          onClick={() => resume(uploadId)}
+          aria-label={i18n.t('Resume')}
+          title={i18n.t('Resume')}
+          className="shrink-0 text-status-pending-fg">
+          <MdPlayArrow className="size-5" />
+        </button>
+      );
+    }
+    if (item.status === 'error') {
+      return (
+        <button
+          type="button"
+          onClick={() => resume(uploadId)}
+          aria-label={i18n.t('Retry')}
+          title={i18n.t('Retry')}
+          className="shrink-0 text-destructive">
+          <MdRefresh className="size-5" />
+        </button>
       );
     }
     return null;
+  };
+
+  /* Why an upload stopped — the one thing neither a ring nor a fill can say. */
+  const renderUploadIssue = (uploadId?: string) => {
+    const item = uploadOf(uploadId);
+    if (!item || (item.status !== 'error' && item.status !== 'paused')) {
+      return null;
+    }
+
+    const isPaused = item.status === 'paused';
+    return (
+      <p
+        className={cn(
+          'line-clamp-2 text-xs',
+          isPaused ? 'text-status-pending-fg' : 'text-destructive',
+        )}>
+        {isPaused ? i18n.t('Upload paused') : item.error}
+      </p>
+    );
+  };
+
+  /* Drawn over the thumbnail, so an image stays visible while it uploads. */
+  const renderImageProgress = (index: number) => {
+    const image = images[index];
+    const item = uploadOf(image?.uploadId);
+    if (!item || item.status === 'success') return null;
+
+    return (
+      <div className="absolute inset-0 grid place-items-center rounded-lg bg-ink-900/40">
+        <ProgressRing
+          value={item.progress}
+          tone={toneOf(item.status)}
+          size={56}
+          label={i18n.t('Uploading {0}', image.file.name)}
+        />
+      </div>
+    );
   };
 
   return (
@@ -432,21 +516,56 @@ export const CreatePost = ({
                 className="self-end text-ink-500 hover:text-royal">
                 <MdOutlineEdit className="size-5" />
               </button>
-              <ImagePreviewer images={images} />
-              {images.map(image => (
-                <div key={image.uploadId} className="flex flex-col gap-1">
+              <ImagePreviewer
+                images={images}
+                renderOverlay={renderImageProgress}
+              />
+              {images.map((image, index) => {
+                const item = uploadOf(image.uploadId);
+                /* Only the first few images get a thumbnail, and with it a
+                 * ring. The rest carry their progress on their own row, so no
+                 * image is left without any. */
+                const needsRow =
+                  !!item &&
+                  item.status !== 'success' &&
+                  index >= MAX_IMAGES_BEFORE_OVERLAY;
+                const imageRow = (
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm line-clamp-1">
                       {image.file.name} - {getFileSizeText(image.file.size)}
                     </p>
-                    <MdClose
-                      className="size-5 shrink-0 cursor-pointer text-destructive"
-                      onClick={() => removeImage(image.uploadId)}
-                    />
+                    <div className="flex shrink-0 items-center gap-2">
+                      {renderUploadActions(image.uploadId)}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(image.uploadId)}
+                        aria-label={i18n.t('Remove')}
+                        title={i18n.t('Remove')}
+                        className="shrink-0 text-destructive">
+                        <MdClose className="size-5" />
+                      </button>
+                    </div>
                   </div>
-                  {renderUploadStatus(image.uploadId)}
-                </div>
-              ))}
+                );
+
+                return (
+                  <div key={image.uploadId} className="flex flex-col gap-1">
+                    {needsRow ? (
+                      <ProgressFill
+                        value={item.progress}
+                        tone={toneOf(item.status)}
+                        label={i18n.t('Uploading {0}', image.file.name)}
+                        showValue
+                        className="rounded-md px-2 py-1">
+                        {imageRow}
+                      </ProgressFill>
+                    ) : (
+                      imageRow
+                    )}
+                    {renderUploadIssue(image.uploadId)}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -458,9 +577,11 @@ export const CreatePost = ({
                 className="self-end text-ink-500 hover:text-royal">
                 <MdOutlineEdit className="size-5" />
               </button>
-              {documents.map(doc => (
-                <div key={doc.uploadId} className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2 rounded-md border border-ink-150 p-2">
+              {documents.map(doc => {
+                const item = uploadOf(doc.uploadId);
+                const inProgress = !!item && item.status !== 'success';
+                const documentRow = (
+                  <div className="flex min-w-0 items-center gap-2">
                     <FileIcon
                       fileType={doc.file.type}
                       className="size-6 shrink-0"
@@ -469,14 +590,38 @@ export const CreatePost = ({
                       {doc.title || doc.file.name} -{' '}
                       {getFileSizeText(doc.file.size)}
                     </p>
-                    <MdClose
-                      className="size-5 shrink-0 cursor-pointer text-destructive"
+                    {renderUploadActions(doc.uploadId)}
+                    <button
+                      type="button"
                       onClick={() => removeDocument(doc.uploadId)}
-                    />
+                      aria-label={i18n.t('Remove')}
+                      title={i18n.t('Remove')}
+                      className="shrink-0 text-destructive">
+                      <MdClose className="size-5" />
+                    </button>
                   </div>
-                  {renderUploadStatus(doc.uploadId)}
-                </div>
-              ))}
+                );
+
+                return (
+                  <div key={doc.uploadId} className="flex flex-col gap-1">
+                    {inProgress ? (
+                      <ProgressFill
+                        value={item.progress}
+                        tone={toneOf(item.status)}
+                        label={i18n.t('Uploading {0}', doc.file.name)}
+                        showValue
+                        className="rounded-md border border-ink-150 p-2">
+                        {documentRow}
+                      </ProgressFill>
+                    ) : (
+                      <div className="rounded-md border border-ink-150 p-2">
+                        {documentRow}
+                      </div>
+                    )}
+                    {renderUploadIssue(doc.uploadId)}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -493,7 +638,7 @@ export const CreatePost = ({
         <button
           type="button"
           onClick={handlePost}
-          disabled={!valid || loading || isUploading}
+          disabled={!valid || loading || !isStaged}
           className="inline-flex items-center gap-2 rounded-[10px] bg-royal px-[22px] py-2.5 text-sm font-bold text-white shadow-[0_1px_2px_rgba(13,30,75,0.15),0_6px_14px_rgba(13,30,75,0.18)] transition-colors hover:bg-royal-dark disabled:cursor-not-allowed disabled:bg-ink-200 disabled:shadow-none">
           <MdAutoAwesome className="size-4" />
           {loading ? i18n.t(PUBLISHING) : i18n.t('Publish the discussion')}

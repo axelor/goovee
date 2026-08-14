@@ -140,7 +140,8 @@ export function useProductEditForm({
   /* Staged uploads live here — the editor session — not in the leaf fields, so
    * an in-flight screenshot/bundle upload survives version navigation and the
    * dialog's product-collapse (both unmount the leaves, which would otherwise
-   * abort the upload). Only opaque tokens land in the form; bytes never do. */
+   * give up the upload). Only opaque tokens land in the form; bytes never
+   * do. */
   const {tenant} = useWorkspace();
   const screenshotUpload = useStagedUpload({tenant});
   const bundleUpload = useStagedUpload({tenant});
@@ -155,11 +156,19 @@ export function useProductEditForm({
   const previewByItem = useRef<Map<string, string>>(new Map());
 
   /* Aggregate upload state — drives the Save button's disabled state and the
-   * submit guard. */
-  const uploadsBusy = screenshotUpload.isUploading || bundleUpload.isUploading;
-  const uploadsHaveError =
-    screenshotUpload.uploads.some(item => item.status === 'error') ||
-    bundleUpload.uploads.some(item => item.status === 'error');
+   * submit guard.
+   *
+   * `isStaged` is the whole gate: it is false while anything is still
+   * transferring AND while anything sits paused or failed, so a save can no
+   * longer drop a file that never finished. The three flags below only decide
+   * which message explains it. */
+  const uploadsStaged = screenshotUpload.isStaged && bundleUpload.isStaged;
+  const uploadItems = [...screenshotUpload.uploads, ...bundleUpload.uploads];
+  const uploadsInFlight = uploadItems.some(
+    item => item.status === 'queued' || item.status === 'uploading',
+  );
+  const uploadsPaused = uploadItems.some(item => item.status === 'paused');
+  const uploadsFailed = uploadItems.some(item => item.status === 'error');
 
   /* Revoke every screenshot object URL when the editor session unmounts. The
    * maps outlive individual field mounts (the dialog collapse), so the leaf
@@ -361,10 +370,10 @@ export function useProductEditForm({
 
   const discardCurrentNew = useCallback(() => {
     if (!isNew) return;
-    /* Drop this row's staged bundle too. Otherwise an in-flight or failed
-     * upload lingers in the hook after the row is gone — a failed one would
-     * keep `uploadsHaveError` true (Save stuck disabled) with no UI left to
-     * clear it. */
+    /* Drop this row's staged bundle too. Otherwise an unfinished upload lingers
+     * in the hook after the row is gone — a paused or failed one would hold
+     * `uploadsStaged` false (Save stuck disabled) with no UI left to clear
+     * it. */
     const itemId = bundleItemByRow.current.get(currentRowKey);
     if (itemId) bundleUpload.remove(itemId);
     bundleItemByRow.current.delete(currentRowKey);
@@ -392,19 +401,16 @@ export function useProductEditForm({
       /* Tokens commit to the form only once their upload succeeds, so in-flight
        * or failed uploads are absent from `values` — guard here too (not just by
        * disabling Save) against a programmatic submit slipping through. */
-      if (uploadsBusy) {
+      if (!uploadsStaged) {
         toast({
           variant: 'destructive',
-          title: i18n.t('Please wait for uploads to finish.'),
-        });
-        return;
-      }
-      if (uploadsHaveError) {
-        toast({
-          variant: 'destructive',
-          title: i18n.t(
-            'Some uploads failed. Remove or retry them, then save.',
-          ),
+          title: uploadsInFlight
+            ? i18n.t('Please wait for uploads to finish.')
+            : uploadsPaused
+              ? i18n.t('Resume or remove the paused uploads, then save.')
+              : i18n.t(
+                  'Some uploads failed. Resume or remove them, then save.',
+                ),
         });
         return;
       }
@@ -547,8 +553,10 @@ export function useProductEditForm({
     },
     bundleUpload,
     bundleItemByRow,
-    uploadsBusy,
-    uploadsHaveError,
+    uploadsStaged,
+    uploadsInFlight,
+    uploadsPaused,
+    uploadsFailed,
   };
 }
 

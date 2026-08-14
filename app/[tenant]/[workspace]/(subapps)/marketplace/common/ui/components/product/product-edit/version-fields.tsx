@@ -44,15 +44,6 @@ type VersionFieldsProps = {
   productId: string;
 };
 
-/** Map a live upload item's status to the dropzone's narrower set (an aborted
- *  item is dropped from the hook on cancel, so it shouldn't surface — treat any
- *  stray one as a failure). */
-function toStagedStatus(
-  status: UseStagedUpload['uploads'][number]['status'],
-): StagedBundle['status'] {
-  return status === 'aborted' ? 'error' : status;
-}
-
 /**
  * Version input fields for the combined editor, bound to one row of the form's
  * version array via `namePrefix`. The status control and cursor nav live around
@@ -107,14 +98,14 @@ export function VersionFields({
     ? {
         fileName: item.fileName,
         progress: item.progress,
-        status: toStagedStatus(item.status),
+        status: item.status,
         error: item.error,
       }
     : undefined;
 
   const handleBundleFile = (file: File) => {
-    /* Re-pick supersedes any prior attempt for this row: abort/drop it and
-     * clear the staged token before staging the new file. */
+    /* Re-pick supersedes any prior attempt for this row: give it up and clear
+     * the staged token before staging the new file. */
     const prior = bundleItemByRow.current.get(rowKey);
     if (prior) bundleUpload.remove(prior);
     setValue(path('bundleToken'), undefined, {
@@ -123,12 +114,15 @@ export function VersionFields({
     });
     const {ids, done} = bundleUpload.upload([file], {
       purpose: 'marketplace:bundle',
+      /* Refuse an oversized bundle here rather than send it and have the route
+       * reject it. The purpose registry on the server stays the real check. */
+      maxBytes: MAX_BUNDLE_SIZE,
     });
     // ids are available synchronously, so the row's id is recorded before any
     // navigation could remount this component.
     bundleItemByRow.current.set(rowKey, ids[0]);
     done.then(([result]) => {
-      if (!result) return; // failed/aborted — the dropzone shows the error
+      if (!result) return; // failed or paused — the dropzone offers the resume
       setValue(path('bundleToken'), result.token, {
         shouldValidate: true,
         shouldDirty: true,
@@ -143,6 +137,23 @@ export function VersionFields({
     setValue(path('bundleToken'), undefined, {
       shouldValidate: true,
       shouldDirty: true,
+    });
+  };
+
+  const handleBundlePause = () => {
+    if (itemId) bundleUpload.pause(itemId);
+  };
+
+  /* Carries on from what the server already holds. The token only lands on the
+   * form if this attempt is the one that finishes, same as the first. */
+  const handleBundleResume = () => {
+    if (!itemId) return;
+    bundleUpload.resume(itemId).then(result => {
+      if (!result) return;
+      setValue(path('bundleToken'), result.token, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     });
   };
 
@@ -264,6 +275,8 @@ export function VersionFields({
                   toast({variant: 'destructive', title: message})
                 }
                 onClear={handleBundleClear}
+                onPause={handleBundlePause}
+                onResume={handleBundleResume}
               />
             </FormControl>
             <FormMessageSpace />
