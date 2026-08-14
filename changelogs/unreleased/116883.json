@@ -1,0 +1,6 @@
+{
+  "title": "Deliver push notifications that were previously dropped",
+  "type": "fix",
+  "description": "A notification with a long text was refused by the push service and lost; it is now shortened and delivered. One that failed for a temporary reason — the service rate-limiting the sender, or being briefly unavailable — is retried instead of discarded, and a service that accepts a connection then stops answering no longer holds the send open. When notifying a large audience, a device that is slow to answer no longer delays anyone else's notification from appearing in the portal. A device coming online after several notifications about the same subject now raises only the latest rather than each one. Whether push notifications can be sent is reported at startup, and the new optional PUSH_MAX_CONNECTIONS sets how many are delivered at once; the default is ten.",
+  "scope": ["core"]
+}
