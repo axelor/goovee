@@ -624,7 +624,7 @@ purchaser (and the publisher) still downloads from My Purchases, but a **free**
 product — having no purchase entitlement — stops being downloadable to buyers.
 Only [archiving](#54-archived-records) cuts off download for a paid purchaser too.
 
-### 5.5 Review moderation states
+### 5.6 Review moderation states
 
 | State       | Comment shown to other buyers | Comment shown to its author | Counts toward rating |
 | ----------- | ----------------------------- | --------------------------- | -------------------- |
