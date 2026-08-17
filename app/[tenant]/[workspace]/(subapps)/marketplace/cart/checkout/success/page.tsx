@@ -27,10 +27,15 @@ export default async function CheckoutSuccessPage(props: {
   params: Promise<{tenant: string; workspace: string}>;
   searchParams: Promise<{orderId?: string}>;
 }) {
-  const params = await props.params;
-  const {orderId} = checkoutSuccessSearchParamsSchema.parse(
-    await props.searchParams,
-  );
+  const [params, rawSearchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+
+  const searchParamsResult =
+    checkoutSuccessSearchParamsSchema.safeParse(rawSearchParams);
+  if (!searchParamsResult.success) notFound();
+  const {orderId} = searchParamsResult.data;
   if (!orderId) notFound();
   const {
     workspaceURL,
