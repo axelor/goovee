@@ -176,6 +176,12 @@ export function YourReviewCard({
     });
   };
 
+  /* Read from the server state, not the optimistic one: editing a review never
+   * changes its moderation status, so a pending save must not appear to lift the
+   * moderation. */
+  const isHidden =
+    initial?.moderationStatusSelect === REVIEW_MODERATION_STATUS.HIDDEN;
+
   return (
     <>
       <div className={cn(REVIEW_CARD_SHELL, 'space-y-3')}>
@@ -234,18 +240,29 @@ export function YourReviewCard({
             </Button>
           </div>
         </div>
-        {initial?.moderationStatusSelect === REVIEW_MODERATION_STATUS.HIDDEN ? (
+        {/* Moderation only adds this notice — the author keeps reading their own
+            comment below it either way. Other buyers see the rating alone; that
+            is decided server-side in the reviews list, so a hidden comment never
+            reaches them. */}
+        {isHidden && (
           <div className="rounded-md border border-border bg-muted p-3 text-sm">
             <p className="font-medium text-foreground">
               {i18n.t('Hidden by a moderator')}
             </p>
           </div>
-        ) : (
-          displayReview.reviewComment && (
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {displayReview.reviewComment}
-            </p>
-          )
+        )}
+        {displayReview.reviewComment && (
+          /* Ruled off while hidden, so it reads as withdrawn rather than
+             deleted. The colour carries no part of that signal: muted-foreground
+             on this ground is already the dimmest text the palette clears AA
+             with, so dimming it further would trade contrast for emphasis. */
+          <p
+            className={cn(
+              'text-muted-foreground text-sm leading-relaxed',
+              isHidden && 'border-l-2 border-border pl-3',
+            )}>
+            {displayReview.reviewComment}
+          </p>
         )}
       </div>
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
