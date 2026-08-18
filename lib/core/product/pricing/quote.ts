@@ -28,8 +28,8 @@ import type {
   PriceListRow,
   UnitConversionRow,
 } from '../orm';
-import {convertUnitPrice, roundSaleUnitPrice} from './tax';
-import {ONE, scaled, ZERO} from './util';
+import {convertUnitPrice} from './tax';
+import {ONE, resolveProductField, scaled, ZERO} from './util';
 import {getSaleUnitPrice} from './catalogue';
 import {getPriceListLine, getReplacedPriceAndDiscounts} from './discount';
 import {getLineTotal} from './line-total';
@@ -114,19 +114,34 @@ export function quoteProductPrice({
 }): Quote {
   const nb = nbDecimalForUnitPrice;
 
+  /* The PRODUCT's own basis is the one a line prices, discounts and stores in;
+   * the order's `inAti` only decides which stored side drives the totals. AOS
+   * reads the flag straight off the product for this
+   * (`SaleOrderLineProductServiceImpl` branches on `product.getInAti()`), so read
+   * it the same way — honouring the per-company override rows. */
+  const productInAti = Boolean(
+    resolveProductField(
+      product,
+      'inAti',
+      company?.id,
+      companySpecificProductFields,
+    ),
+  );
+
   const result = getSaleUnitPrice({
     product,
     company,
     fiscalPosition,
+    resultInAti: productInAti,
     toCurrency,
     conversionLines,
     companySpecificProductFields,
-    qty,
+    nbDecimalForUnitPrice: nb,
     ...(requestedUnit ? {requestedUnit, unitConversions} : {}),
   });
 
-  /* Invoice pairing: round the primary basis, derive the other from it. */
-  let {wt, ati} = roundSaleUnitPrice(result, inAti, nb);
+  /* Everything up to the derived basis happens in the product's basis. */
+  let primary = result.price;
 
   /* Resolve the buyer's discount the way the SO-line fill step does. INCLUDE
    * folds it into the unit price (price set); SEPARATE leaves the catalogue
@@ -145,7 +160,6 @@ export function quoteProductPrice({
           line => line.productCategory?.id === product.productCategory?.id,
         )
       : [];
-    const primary = inAti ? ati : wt;
     const line = getPriceListLine(productLines, categoryLines, qty, primary);
     const discounts = getReplacedPriceAndDiscounts(
       priceList,
@@ -156,14 +170,25 @@ export function quoteProductPrice({
     );
     discountTypeSelect = discounts.discountTypeSelect;
     discountAmount = discounts.discountAmount;
-    const newPrimary = scaled(discounts.price ?? primary, nb);
-    if (inAti) {
-      ati = newPrimary;
-      wt = convertUnitPrice(true, result.taxRate, newPrimary, nb);
-    } else {
-      wt = newPrimary;
-      ati = convertUnitPrice(false, result.taxRate, newPrimary, nb);
+    primary = scaled(discounts.price ?? primary, nb);
+
+    /* A residual FIXED discount is money in the product's basis, and the totals
+     * are computed in the order's — so re-express it when the two differ, as
+     * `SaleOrderLineDiscountServiceImpl.fillDiscount` does. A percentage is
+     * dimensionless and needs no conversion. */
+    if (
+      productInAti !== inAti &&
+      discountTypeSelect !== AMOUNT_TYPE.NONE &&
+      discountTypeSelect !== AMOUNT_TYPE.PERCENT
+    ) {
+      discountAmount = convertUnitPrice(
+        productInAti,
+        result.taxRate,
+        discountAmount,
+        nb,
+      );
     }
+
     /* A residual discount (SEPARATE) is the display label; a folded one
      * (INCLUDE) is already in `unitPrice`, so no badge. */
     if (discountTypeSelect !== AMOUNT_TYPE.NONE) {
@@ -173,6 +198,15 @@ export function quoteProductPrice({
       };
     }
   }
+
+  /* The other basis is derived from the product-basis price, after the discount
+   * — never rounded independently. */
+  const wt = productInAti
+    ? convertUnitPrice(true, result.taxRate, primary, nb)
+    : primary;
+  const ati = productInAti
+    ? primary
+    : convertUnitPrice(false, result.taxRate, primary, nb);
 
   const {exTaxTotal, inTaxTotal, priceDiscounted} = getLineTotal({
     wt,

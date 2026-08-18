@@ -43,6 +43,7 @@
 import type {BigDecimal} from '@goovee/orm';
 
 import type {ResolvedTaxLine} from './types';
+import {DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE} from './types';
 import type {
   ConversionLine,
   Currency,
@@ -52,6 +53,7 @@ import type {
 } from '../orm';
 import {PriceComputationError} from './errors';
 import {
+  INTERMEDIATE_SCALE,
   ONE,
   resolveProductField,
   scaled,
@@ -60,7 +62,7 @@ import {
   ZERO,
 } from './util';
 import {
-  computeWtAti,
+  convertUnitPrice,
   getSaleTaxLineSet,
   getTotalTaxRateInPercentage,
 } from './tax';
@@ -69,27 +71,25 @@ import {getExchangeRate, getUnitCoefficient} from './conversion';
 /** Level 2 — "price THESE VALUES" — mirroring
  *  `ProductPriceServiceImpl.getConvertedPrice`. Use this when the price belongs
  *  to something other than the product: in AOS that's a sale-order line or a
- *  price list; in the portal, a marketplace listing. Computes the WT/ATI pair
- *  from the supplied price and converts both into the target currency.
+ *  price list; in the portal, a marketplace listing.
+ *
+ *  Returns ONE amount, in the `resultInAti` basis, rounded to
+ *  `nbDecimalForUnitPrice` — the same single number AOS returns. When the source
+ *  and result bases differ the conversion runs at the intermediate scale first,
+ *  as AOS does, so only the final rounding is visible.
  *
  *  `sourceInAti` says which basis `price` is expressed in, and is OUR parameter,
  *  not AOS's — AOS re-reads the flag off the product and thereby assumes the
  *  supplied price uses the product's basis. Our callers own their basis, so it
  *  must be explicit.
  *
- *  Optionally prices in a unit other than `price`'s own. When `unit` is
- *  supplied, the per-unit WT/ATI are converted from `saleUnitId` to
- *  `requestedUnitId` AFTER currency conversion (the AOS order), then the line
- *  totals are computed as unit price × `qty`. Omit `unit` (and `qty` defaults to
- *  1) to price one item in the price's own unit.
- *
- *  `wt`/`ati` are the per-(requested-)unit price and `wtTotal`/`atiTotal` are
- *  those times `qty`. The unit-price rounding is the caller's, at whatever scale
- *  its context requires — but a real currency conversion has already rounded
- *  these to the target currency's decimals (see the conversion step below). */
+ *  Optionally prices in a unit other than `price`'s own: when `unit` is supplied
+ *  the amount is converted from `saleUnitId` to `requestedUnitId` AFTER currency
+ *  conversion (the AOS order). Omit `unit` to price in the price's own unit. */
 export function getConvertedPrice({
   price,
   sourceInAti,
+  resultInAti,
   taxLineSet,
   fromCurrency,
   toCurrency,
@@ -97,10 +97,12 @@ export function getConvertedPrice({
   today,
   unit,
   unitConversions,
-  qty = ONE,
+  nbDecimalForUnitPrice = DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
 }: {
   price: BigDecimal;
   sourceInAti: boolean;
+  /** Which basis to return the amount in. */
+  resultInAti: boolean;
   taxLineSet: readonly ResolvedTaxLine[];
   fromCurrency: Currency | null | undefined;
   toCurrency: Currency | null | undefined;
@@ -110,18 +112,16 @@ export function getConvertedPrice({
    *  `price` is expressed in). Omit to keep the price's own unit. */
   unit?: {requestedUnitId: string; saleUnitId: string} | null;
   unitConversions?: readonly UnitConversionRow[];
-  /** Quantity in the requested (or sale) unit; defaults to 1. */
-  qty?: BigDecimal;
-}): {
-  wt: BigDecimal;
-  ati: BigDecimal;
-  taxRate: BigDecimal;
-  qty: BigDecimal;
-  wtTotal: BigDecimal;
-  atiTotal: BigDecimal;
-} {
+  nbDecimalForUnitPrice?: number;
+}): BigDecimal {
   const taxRate = getTotalTaxRateInPercentage(taxLineSet);
-  let {wt, ati} = computeWtAti(price, sourceInAti, taxRate);
+
+  /* Basis conversion first, at the intermediate scale — AOS passes
+   * COMPUTATION_SCALING here precisely so this leg does not round the amount. */
+  let amount =
+    sourceInAti === resultInAti
+      ? price
+      : convertUnitPrice(sourceInAti, taxRate, price, INTERMEDIATE_SCALE);
 
   const fromCode = fromCurrency?.codeISO;
   const toCode = toCurrency?.codeISO;
@@ -132,8 +132,7 @@ export function getConvertedPrice({
     );
   }
   const rate = getExchangeRate(fromCode, toCode, today, conversionLines);
-  wt = wt.multiply(rate);
-  ati = ati.multiply(rate);
+  amount = amount.multiply(rate);
 
   /* Round the converted amount to the TARGET currency's own decimals, the way
    * AOS does inside the conversion itself
@@ -141,11 +140,9 @@ export function getConvertedPrice({
    * `amount.multiply(rate).setScale(endCurrency.numberOfDecimals)`), and only
    * when a real conversion happened (rate != 1, mirroring AOS's `!= ONE`
    * guard). Skipping this diverges for any currency whose decimals differ from
-   * the unit-price scale — e.g. JPY (0 decimals): 8960.25 vs 8960. The caller
-   * still applies the final unit-price rounding on top. */
+   * the unit-price scale — e.g. JPY (0 decimals): 8960.25 vs 8960. */
   if (rate.compareTo(ONE) !== 0 && toCurrency?.numberOfDecimals != null) {
-    wt = scaled(wt, toCurrency.numberOfDecimals);
-    ati = scaled(ati, toCurrency.numberOfDecimals);
+    amount = scaled(amount, toCurrency.numberOfDecimals);
   }
 
   /* Unit conversion, after currency, mirroring AOS `ProductRestServiceImpl`:
@@ -157,18 +154,10 @@ export function getConvertedPrice({
       unit.saleUnitId,
       unitConversions ?? [],
     );
-    wt = wt.multiply(coef);
-    ati = ati.multiply(coef);
+    amount = amount.multiply(coef);
   }
 
-  return {
-    wt,
-    ati,
-    taxRate,
-    qty,
-    wtTotal: wt.multiply(qty),
-    atiTotal: ati.multiply(qty),
-  };
+  return scaled(amount, nbDecimalForUnitPrice);
 }
 
 /** Level 1 — "price THIS PRODUCT for this company, in this currency" —
@@ -180,44 +169,47 @@ export function getConvertedPrice({
  *  `PriceComputationError`, exactly where AOS would throw. There is no fallback
  *  currency here — degradation policy belongs to the caller.
  *
- *  Pass `requestedUnit` to quote the price in a unit other than the product's
- *  sale unit (`salesUnit ?? unit`), and `qty` for the line total — see
- *  `getConvertedPrice`.
+ *  Pass `requestedUnit` to quote in a unit other than the product's sale unit
+ *  (`salesUnit ?? unit`) — see `getConvertedPrice`.
  *
- *  Echoes back the resolved `unitId` — the requested unit when one was given,
- *  otherwise the product's own sale unit (`salesUnit ?? unit`), which this
- *  function picks internally so the caller would not otherwise know it. Only the
- *  id: the core never sees a unit's display name. It is `null` only when no unit
- *  was requested AND the product carries no unit — requesting a unit with no
- *  source unit to convert from throws `UNIT_CONVERSION_NO_SOURCE_UNIT`. */
+ *  Returns the amount in the `resultInAti` basis, plus the two things this
+ *  function resolved internally and the caller could not otherwise know: the
+ *  total `taxRate` of the applicable taxes, and the `unitId` the amount is
+ *  expressed in — the requested unit when one was given, otherwise the product's
+ *  own sale unit. Only the id: the core never sees a unit's display name. It is
+ *  `null` only when no unit was requested AND the product carries no unit;
+ *  requesting one with no source unit to convert from throws
+ *  `UNIT_CONVERSION_NO_SOURCE_UNIT`. */
 export function getSaleUnitPrice({
   product,
   company,
   fiscalPosition,
+  resultInAti,
   toCurrency,
   conversionLines,
   companySpecificProductFields,
   requestedUnit,
   unitConversions,
-  qty = ONE,
+  nbDecimalForUnitPrice = DEFAULT_NB_DECIMAL_FOR_UNIT_PRICE,
 }: {
   product: PriceableProduct;
   company: {id: string; timezone?: string | null} | null;
   fiscalPosition: FiscalPositionInput | null | undefined;
+  /** Which basis to return the amount in. A sale-order line asks for the
+   *  product's own basis (`resolveProductField(product, 'inAti', …)`), which is
+   *  the one it stores; the quick-price endpoint asks for whichever the caller
+   *  wants. */
+  resultInAti: boolean;
   toCurrency: Currency;
   conversionLines: readonly ConversionLine[];
   companySpecificProductFields: readonly string[];
   /** Quote in this unit instead of the product's `salesUnit ?? unit`. */
   requestedUnit?: {id: string} | null;
   unitConversions?: readonly UnitConversionRow[];
-  qty?: BigDecimal;
+  nbDecimalForUnitPrice?: number;
 }): {
-  wt: BigDecimal;
-  ati: BigDecimal;
+  price: BigDecimal;
   taxRate: BigDecimal;
-  qty: BigDecimal;
-  wtTotal: BigDecimal;
-  atiTotal: BigDecimal;
   unitId: string | null;
 } {
   const companyId = company?.id;
@@ -266,9 +258,10 @@ export function getSaleUnitPrice({
   }
 
   return {
-    ...getConvertedPrice({
+    price: getConvertedPrice({
       price: toDecimalOrNull(salePrice) ?? ZERO,
       sourceInAti: Boolean(inAti),
+      resultInAti,
       taxLineSet,
       fromCurrency: saleCurrency,
       toCurrency,
@@ -276,8 +269,9 @@ export function getSaleUnitPrice({
       today,
       unit,
       unitConversions,
-      qty,
+      nbDecimalForUnitPrice,
     }),
+    taxRate: getTotalTaxRateInPercentage(taxLineSet),
     /* The unit the returned price is expressed in: the requested one, or the
      * product's own sale unit that we resolved above. */
     unitId: requestedUnit?.id ?? saleUnitId ?? null,
