@@ -436,12 +436,11 @@ export function useProductEditForm({
             newVersions,
             ...productBlock
           } = values;
-          const dirtyVersions = (dirtyFields.versions ?? []) as unknown[];
           const changedExisting = existingRows
             .map((row, index) => ({
               row,
               version: serverRowsRef.current[index]?.version,
-              dirty: Boolean(dirtyVersions[index]),
+              dirty: Boolean(dirtyFields.versions?.[index]),
             }))
             .filter(({dirty}) => dirty)
             .map(({row, version}) => ({...row, version}));
@@ -449,9 +448,9 @@ export function useProductEditForm({
             key =>
               key !== 'versions' && key !== 'newVersions' && key !== 'images',
           );
-          const imagesChanged = ((dirtyFields.images ?? []) as unknown[]).some(
-            Boolean,
-          );
+          /* `images` is written whole (`setValue('images', …)`), so its dirty
+           * state is one flag, not one per screenshot. */
+          const imagesChanged = Boolean(dirtyFields.images);
           const formData = packIntoFormData({
             id,
             ...(id == null || productChanged ? {product: productBlock} : {}),
@@ -467,7 +466,8 @@ export function useProductEditForm({
           }
           toast({variant: 'success', title: i18n.t('Saved')});
           onSaved();
-        } catch {
+        } catch (e) {
+          console.error(e);
           toast({
             variant: 'destructive',
             title: i18n.t('Failed to save. Please try again.'),
