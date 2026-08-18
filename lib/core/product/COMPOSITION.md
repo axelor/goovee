@@ -116,6 +116,7 @@ it cascades through several display currencies.
 
 ```ts
 import {
+  convertUnitPrice,
   getSaleTaxLineSet,
   getTotalTaxRateInPercentage,
   getConvertedPrice,
@@ -133,21 +134,46 @@ try {
   if (!(e instanceof PriceComputationError)) throw e;
   taxLineSet = []; // 0% — storefront policy, not the core's
 }
-// This catch does NOT cover a total rate of exactly -100%: that raises an uncoded
-// Error from the ATI->WT divide below. Guard `taxFactor(rate)` against zero as
-// well if the page must render on corrupt data.
+/* This catch does NOT cover a total rate of exactly -100%: that raises an uncoded
+ * Error from the ATI->WT divide below. Guard `taxFactor(rate)` against zero as
+ * well if the page must render on corrupt data. */
 
-// price the values you own — an ORM decimal column becomes a BigDecimal here
-const {wt, ati, taxRate} = getConvertedPrice({
+const taxRate = getTotalTaxRateInPercentage(taxLineSet);
+
+/* Price the values you own, in the basis you own. This returns ONE amount — the
+ * single number AOS returns — already rounded to `nbDecimalForUnitPrice`. An ORM
+ * decimal column becomes a BigDecimal here. */
+const primary = getConvertedPrice({
   price: toDecimalOrNull(listing.salePrice) ?? ZERO, // YOUR price
   sourceInAti: listing.inAti, // YOUR basis
+  resultInAti: listing.inAti, // give it back in that same basis
   taxLineSet,
   fromCurrency: listing.saleCurrency, // YOUR currency
   toCurrency, // display currency (your cascade decides which)
   conversionLines,
   today,
+  nbDecimalForUnitPrice,
 });
+
+// the other basis is DERIVED from the rounded one, never rounded on its own
+const wt = listing.inAti
+  ? convertUnitPrice(true, taxRate, primary, nbDecimalForUnitPrice)
+  : primary;
+const ati = listing.inAti
+  ? primary
+  : convertUnitPrice(false, taxRate, primary, nbDecimalForUnitPrice);
 ```
+
+Deriving the second basis rather than asking for it is the invoice's own rule, and
+it matters: two calls with `resultInAti` false and true round each basis
+independently, which is what AOS's quick-price endpoint does — and its pair can
+then contradict itself, its ATI not being its own WT re-expressed. That is one of
+two reasons the endpoint's figure and the invoiced one drift apart; the other is
+the basis round-trip inside `applyPriceList`, which — for a buyer request whose
+basis differs from the product's — can shift a cent even with no discount (see
+`apply-price-list.ts`). If you already hold both bases unrounded —
+from `computeWtAti` — `roundSaleUnitPrice` performs this same round-the-primary,
+derive-the-other step for you.
 
 The viewer→default→listing **currency cascade** and the broken-tax fallback are
 **app policy** — layer them around these calls; the core stays strict.
@@ -159,55 +185,117 @@ The viewer→default→listing **currency cascade** and the broken-tax fallback 
 Add a discount on top of Recipe 2 (a buyer price list, or a marketplace-wide
 promo). The engine is **buyer-agnostic** — only _how you get the list_ differs.
 
+This is `quoteProductPrice` hand-assembled: the same sequence, around a price the
+product doesn't own. It continues from Recipe 2 and uses its `primary` (the price
+in the listing's own basis) and `taxRate`; when no discount folds in, the pair
+derived at the end is Recipe 2's `wt` / `ati` again.
+
 ```ts
 import {
+  AMOUNT_TYPE,
+  convertUnitPrice,
   getDefaultPriceList,
   getPriceListLine,
   getReplacedPriceAndDiscounts,
   getLineTotal,
+  scaled,
+  ZERO,
+  type ResolvedDiscount,
 } from '@/product/pricing';
 import {findPartnerSalePriceLists, fetchPriceListLines} from '@/product/orm';
 import {BigDecimal} from '@goovee/orm';
 
 const qty = BigDecimal.valueOf('1'); // quantities are decimals too
 
-// --- get the applicable list ---
-// buyer route (per-partner, native):
+/* Get the applicable list. Buyer route (per-partner, native) below; for a general
+ * or promo list, fetch the ONE config-designated list yourself and pass it as
+ * `getDefaultPriceList([thatList], today)` — the app owns the overlap rules. */
 const priceList = getDefaultPriceList(
   await findPartnerSalePriceLists({client, mainPartnerId}),
   today,
 );
-// general / promo route (everyone): fetch ONE config-designated list yourself,
-// then: getDefaultPriceList([thatList], today)   // app owns overlap rules
+
+// no applicable list → no discount; the total below still needs these fields
+let discount: ResolvedDiscount = {
+  price: null,
+  discountTypeSelect: AMOUNT_TYPE.NONE,
+  discountAmount: ZERO,
+};
 
 if (priceList) {
   const lines = await fetchPriceListLines(client, priceList.id);
 
   // match this row's product/category (the price you discount is the OWNED one)
-  const productLines = lines.filter(l => l.product?.id === product.id);
+  const productLines = lines.filter(
+    listLine => listLine.product?.id === product.id,
+  );
   const categoryLines = product.productCategory?.id
-    ? lines.filter(l => l.productCategory?.id === product.productCategory?.id)
+    ? lines.filter(
+        listLine =>
+          listLine.productCategory?.id === product.productCategory?.id,
+      )
     : [];
-  const primary = inAti ? ati : wt;
+  /* Discount in the basis the PRICE is stored in — `primary` from Recipe 2, the
+   * listing's own. That is where an admin typed a fixed amount, and it is the basis
+   * a line stores; the order's `inAti` only decides which side drives the totals.
+   * `quoteProductPrice` reads the flag off the product for the same reason (AOS
+   * branches on `product.inAti`). */
   const line = getPriceListLine(productLines, categoryLines, qty, primary);
 
-  const d = getReplacedPriceAndDiscounts(
+  discount = getReplacedPriceAndDiscounts(
     priceList,
     line,
     primary,
     computeMethodDiscountSelect,
     nbDecimalForUnitPrice,
   );
-  // d.price !== null → folded into the unit price (INCLUDE / replace); show as the price
-  // else → d.discountTypeSelect/d.discountAmount is the SEPARATE discount to display
+  /* `discount.price` non-null → folded into the unit price (INCLUDE / replace), so
+   * show that as the price; otherwise `discountTypeSelect`/`discountAmount` is the
+   * separate discount to display.
+   *
+   * A FIXED fold comes back at the wide discount scale — same value, twenty
+   * decimals — so normalise it with `scaled(price, nbDecimalForUnitPrice)` before
+   * showing it, and the returned `priceDiscounted` too when the two bases coincide.
+   * The totals are rounded to the currency and never affected. */
+
+  /* A residual FIXED amount is money in the listing's basis while the totals are
+   * computed in the order's, so re-express it when the two differ — the step
+   * `SaleOrderLineDiscountServiceImpl.fillDiscount` performs. A percentage is
+   * dimensionless and needs none. */
+  if (
+    listing.inAti !== inAti &&
+    discount.discountTypeSelect === AMOUNT_TYPE.FIXED
+  ) {
+    discount = {
+      ...discount,
+      discountAmount: convertUnitPrice(
+        listing.inAti,
+        taxRate,
+        discount.discountAmount,
+        nbDecimalForUnitPrice,
+      ),
+    };
+  }
 }
+
+/* A folded price REPLACES the pair the total is computed from. It was resolved in
+ * the listing's basis, so it becomes that side and the other is derived from it —
+ * never rounded independently. Skip this and INCLUDE mode charges the undiscounted
+ * amount, because the residual discount is NONE by then. */
+const charged = discount.price ?? primary;
+const wtToCharge = listing.inAti
+  ? convertUnitPrice(true, taxRate, charged, nbDecimalForUnitPrice)
+  : charged;
+const atiToCharge = listing.inAti
+  ? charged
+  : convertUnitPrice(false, taxRate, charged, nbDecimalForUnitPrice);
 
 // the billable total (applies the residual discount, ×qty, rounds to currency)
 const {exTaxTotal, inTaxTotal, priceDiscounted} = getLineTotal({
-  wt,
-  ati,
-  discountTypeSelect: d.discountTypeSelect,
-  discountAmount: d.discountAmount,
+  wt: wtToCharge,
+  ati: atiToCharge,
+  discountTypeSelect: discount.discountTypeSelect,
+  discountAmount: discount.discountAmount,
   qty, // a BigDecimal, as above
   taxRate,
   inAti,

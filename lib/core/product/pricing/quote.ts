@@ -13,8 +13,7 @@
  *
  * Strict — it throws `PriceComputationError` like the rest of the core;
  * degradation (untaxed fallback, currency cascade) is the caller's job. A
- * storefront wraps this with its own lenient policy and product fetch; the
- * parity test wraps it to compare against AOS. */
+ * storefront wraps this with its own lenient policy and product fetch. */
 
 import type {BigDecimal} from '@goovee/orm';
 

@@ -257,8 +257,10 @@ export function convertUnitPrice(
  *  This deriving-from-the-rounded-primary is why the invoice can differ by a
  *  cent from an independent round of each basis: e.g. WT 360.8748 → 360.87,
  *  then ATI = 360.87 × 1.2 = 433.044 → 433.04 (an independent round of the
- *  514.80×rate ATI would give 433.05). Feed the unrounded `wt`/`ati`/`taxRate`
- *  from `getConvertedPrice`/`getSaleUnitPrice`; get back the invoice pair. */
+ *  514.80×rate ATI would give 433.05). Feed the unrounded pair from
+ *  `computeWtAti`; get back the invoice pair. A caller holding a single amount
+ *  already rounded to the unit-price scale wants `convertUnitPrice` for the other
+ *  basis instead — the same derivation, without re-rounding the primary. */
 export function roundSaleUnitPrice(
   {wt, ati, taxRate}: {wt: BigDecimal; ati: BigDecimal; taxRate: BigDecimal},
   primaryInAti: boolean,

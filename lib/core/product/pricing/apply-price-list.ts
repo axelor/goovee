@@ -57,8 +57,8 @@ import {
  *  order stores inTaxPrice 433.04 (it grosses up the ROUNDED WT, 360.87×1.2); a
  *  clean single-round conversion is 433.05 — three paths, three numbers. So a
  *  consumer that wants the INVOICED price must NOT use this; use
- *  `getConvertedPrice` (+ `getDiscountedPrice` for discounts). Endpoint parity
- *  itself is confirmed (`scripts/test-price`); the endpoint↔invoice gap is an
+ *  `getConvertedPrice` (+ `getDiscountedPrice` for discounts). This function
+ *  reproduces the endpoint faithfully; the endpoint↔invoice gap it exposes is an
  *  AOS bug worth reporting upstream. */
 export function applyPriceList<L extends PriceListLineRow>({
   price,

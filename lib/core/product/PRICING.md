@@ -48,8 +48,7 @@ total) and returns one object:
 - `priceDiscounted`, `exTaxTotal`, `inTaxTotal` — **charge `inTaxTotal`**.
 
 It is strict (throws like the rest of the core); a storefront wraps it with its
-own degradation policy and product fetch, the parity test wraps it to compare
-against AOS.
+own degradation policy and product fetch.
 
 ## Strictness
 
@@ -72,8 +71,8 @@ ATI-stored price, or an ATI-primary order over a WT-stored one.
 ## How a price is computed
 
 1. **Resolve the price values** (price, inATI, currency). A caller that owns its
-   price — an AOS sale-order line, or a marketplace listing — supplies the three
-   values directly; AOS's per-company product overrides don't apply to such a
+   price — an AOS sale-order line, or any record storing a price of its own —
+   supplies the three values directly; AOS's per-company product overrides don't apply to such a
    caller. When pricing a bare product instead, the per-company override rows
    are honoured exactly as AOS does (a company-flagged field is read from the
    company row as-is, with no fallback to the base product).
@@ -89,9 +88,10 @@ ATI-stored price, or an ATI-primary order over a WT-stored one.
 4. **Pick each tax rate**: use the active tax line, otherwise the tax line whose
    date window contains today (evaluated in the company's timezone). Summing the
    picked rates (each shared line counted once) gives the total tax rate.
-5. **Compute WT and ATI**:
-   - tax-inclusive — `WT = price / (1 + rate)`, `ATI = price`
-   - tax-exclusive — `WT = price`, `ATI = WT + WT * rate`
+5. **Express the price in the requested basis** — when the stored basis already
+   matches, nothing happens; otherwise `price / (1 + rate)` to go tax-inclusive →
+   tax-exclusive, or `price + price * rate` for the other direction. Only the
+   requested basis is computed.
 6. **Convert to the target currency** using the same currency-conversion lines
    AOS uses: for a source → target pair it first looks for a **direct** rate
    valid for today's date, else takes the **reverse** line and inverts the rate.
@@ -118,12 +118,12 @@ ATI-stored price, or an ATI-primary order over a WT-stored one.
    endpoint-style convenience for an app that wants per-requested-unit quoting;
    there is no invoiced number to validate it against, only the endpoint.
 
-Both levels return the per-unit `wt` and `ati`, the applied `taxRate` (a
-percentage), the `qty`, and the line totals `wtTotal` / `atiTotal` (`wt`/`ati` ×
-`qty`). Level 1 additionally echoes the resolved `unitId`. The **unit-price**
-rounding is left to the caller, at whatever scale its context requires — but a
-real currency conversion has already rounded the amounts to the target currency's
-decimals (step 6), so they are not raw.
+Both levels return ONE per-unit amount, in the basis `resultInAti` asks for,
+rounded to `nbDecimalForUnitPrice` — the single number AOS returns. Level 1 wraps
+it as `{price, taxRate, unitId}`, adding the total tax rate as a percentage and
+the unit the amount is expressed in. A caller that needs both bases derives the
+second from this one with `convertUnitPrice` rather than asking twice, so the pair
+stays consistent and matches the invoice; see `COMPOSITION.md` Recipe 2.
 
 ## Two levels
 
@@ -134,9 +134,12 @@ The module mirrors AOS's own two-level API:
   resolves the taxes, then delegates to level 2. Echoes back the resolved
   `unitId`.
 - **Level 2 — `getConvertedPrice`** — "price THESE VALUES": for callers that own
-  their price (a sale-order line, a price list, a marketplace listing). Takes the
+  their price (a sale-order line, a price list, a record that stores its own). Takes the
   tax basis (`sourceInAti`) explicitly rather than re-reading it off the product,
-  so a caller whose record froze the flag at create time stays correct.
+  so a caller whose record froze the flag at create time stays correct, and returns
+  ONE amount, in the basis `resultInAti` asks for — the same single number AOS
+  returns. A caller that needs both bases derives the second from this one rather
+  than calling twice; see `COMPOSITION.md` Recipe 2.
 
 ## Errors
 
@@ -170,8 +173,11 @@ _after_ a catalogue price exists, and not every consumer wants it:
 applies the price list as the next step (`getDefaultPriceList` →
 `getDiscountedPrice`). See that file's header for the discount rules, the
 compute-method modes (fold the discount into the price vs keep it separate), and
-the line-selection logic. Like the rest of the core it leaves final rounding to
-the caller.
+the line-selection logic. Scales differ by branch: a PERCENT fold is rounded at
+the unit-price scale, a FIXED fold is carried at the wide discount scale — fed the
+values the steps above produce, both already at unit-price precision, its extra
+decimals are zeros — and a residual discount amount is always rounded at the
+unit-price scale.
 
 The **billable line total** — what you actually charge — is `getLineTotal` in
 `line-total.ts`, a port of `SaleOrderLineComputeServiceImpl.computeValues`. It
@@ -231,11 +237,11 @@ replacement price sits above the price being replaced.
 
 ## Known simplifications vs AOS
 
-- **The final unit-price rounding** is left to the caller. What the two levels do
-  round internally, they round because AOS does: the exchange rate, and the
-  converted amount at the target currency's decimals (step 6).
-  `quoteProductPrice` is the exception — being the outer edge, it rounds
-  everything it returns.
+- **Rounding follows AOS's own points**: the exchange rate, the converted amount
+  at the target currency's decimals (step 6), and the returned unit price at
+  `nbDecimalForUnitPrice`. Nothing else is rounded on the way through, so a
+  caller adding its own `scaled()` on top of a returned amount rounds twice — and
+  a second rounding can move a cent.
 
 See the header comment in `catalogue.ts` (and each concern file) for the exact
 AOS services each step mirrors.
